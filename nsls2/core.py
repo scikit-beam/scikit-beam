@@ -46,7 +46,7 @@ class XR_data(object):
         """
         Access to the data object we are carrying around
         """
-        return _data
+        return self._data
 
     @data.setter
     def data(self, new_data):
@@ -90,7 +90,7 @@ class XR_data(object):
 
 class MD_dict(MutableMapping):
     """
-    A class to make dealing with the meta-data scheme for DateExchange easier
+    A class to make dealing with the meta-data scheme for DataExchange easier
 
     Examples
     --------
