@@ -14,7 +14,6 @@ import six
 from six import string_types
 from collections import namedtuple, MutableMapping
 
-
 md_value = namedtuple("md_value", ['value', 'units'])
 
 
@@ -190,3 +189,36 @@ class MD_dict(MutableMapping):
 
     def __iter__(self):
         return _iter_helper([], self._split, self._dict)
+
+
+SubtractionHint = Enum('SubtractionHint', 'pre post nearest')
+
+
+def img_subtraction(img_arr,
+                    is_reference_img,
+                    img_sub_hint=SubtractionHint.pre):
+    """
+    Function to subtract a series of measured images from
+    background/dark current/reference images
+
+    Parameters
+    ----------
+    img_arr : numpy.ndarray
+              Array of 2-D images
+
+    is_reference_img : 1-D boolean array
+                       true  : image is reference image
+                       false : image is measured image
+
+    img_sub_hint : SubtractionHint (enum)
+                   Flag to tell the img_subtraction method how to subtract
+                   the reference images from the measured images.
+
+    Returns
+    -------
+    img_corr : numpy.ndarray
+               len(img_corr) == len(img_arr) - len(is_reference_img == true)
+               img_corr is the array of measured images minus the reference
+               images, where the reference images were subtracted according
+               to the img_sub_hunt
+    """
