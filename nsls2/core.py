@@ -12,8 +12,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import six
 from six import string_types
-from collections import namedtuple, MutableMapping
-
+from collections import namedtuple, MutableMapping, Counter
 
 md_value = namedtuple("md_value", ['value', 'units'])
 
@@ -190,3 +189,60 @@ class MD_dict(MutableMapping):
 
     def __iter__(self):
         return _iter_helper([], self._split, self._dict)
+
+
+keys_core = {"voxel_size": "description of voxel_size",
+             "detector_center_x": "x-coordinate of the center of the image plate in pixels",
+             "detector_center_y": "y-coordinate of the center of the image plate in pixels",
+             }
+
+
+def img_subtraction_pre(img_arr, is_reference):
+    """
+    Function to subtract a series of measured images from
+    background/dark current/reference images.  The nearest reference
+    image in the reverse temporal direction is subtracted from each
+    measured image.
+
+    Parameters
+    ----------
+    img_arr : numpy.ndarray
+              Array of 2-D images
+
+    is_reference : 1-D boolean array
+                   true  : image is reference image
+                   false : image is measured image
+
+    Returns
+    -------
+    img_corr : numpy.ndarray
+               len(img_corr) == len(img_arr) - len(is_reference_img == true)
+               img_corr is the array of measured images minus the reference
+               images.
+
+    Raises
+    ------
+    Exception
+        Possible causes:
+            is_reference contains no true values
+            Raised when the first image in the array is not a reference image.
+
+    """
+
+    counts = Counter(is_reference)
+    if counts[1] == 0:
+        raise Exception("There are no reference images in is_reference")
+
+    if is_reference[0] is not True:
+        raise Exception("The first image is not a reference image")
+
+    img_corr = [None] * (len(img_arr) - counts[1])
+    img_corr_pos = 0
+    for img, ref in zip(img_arr, is_reference):
+        if ref:
+            cur_ref = img
+        else:
+            img_corr[img_corr_pos] = img - cur_ref
+            img_corr_pos += 1
+
+    return img_corr
