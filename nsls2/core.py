@@ -11,8 +11,10 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import six
+from six.moves import zip
 from six import string_types
-from collections import namedtuple, MutableMapping, Counter
+from collections import namedtuple, MutableMapping
+import numpy as np
 
 md_value = namedtuple("md_value", ['value', 'units'])
 
@@ -192,8 +194,10 @@ class MD_dict(MutableMapping):
 
 
 keys_core = {"voxel_size": "description of voxel_size",
-             "detector_center_x": "x-coordinate of the center of the image plate in pixels",
-             "detector_center_y": "y-coordinate of the center of the image plate in pixels",
+             "detector_center_x":
+                "x-coordinate of the center of the image plate in pixels",
+             "detector_center_y":
+                "y-coordinate of the center of the image plate in pixels",
              }
 
 
@@ -222,27 +226,36 @@ def img_subtraction_pre(img_arr, is_reference):
 
     Raises
     ------
-    Exception
+    ValueError
         Possible causes:
             is_reference contains no true values
             Raised when the first image in the array is not a reference image.
 
     """
-
-    counts = Counter(is_reference)
-    if counts[1] == 0:
-        raise Exception("There are no reference images in is_reference")
-
-    if is_reference[0] is not True:
-        raise Exception("The first image is not a reference image")
-
-    img_corr = [None] * (len(img_arr) - counts[1])
-    img_corr_pos = 0
-    for img, ref in zip(img_arr, is_reference):
+    # an array of 1, 0, 1,.. should work too
+    if not is_reference[0]:
+        # use ValueError because the user passed in invalid data
+        raise ValueError("The first image is not a reference image")
+    # grab the first image
+    ref_imge = img_arr[0]
+    # just sum the bool array to get count
+    ref_count = np.sum(is_reference)
+    # make an array of zeros of the correct type
+    corrected_image = np.zeros(
+        (len(img_arr) - ref_count, ) + img_arr.shape[1:],
+        dtype=img_arr.dtype)
+    # local loop counter
+    count = 0
+    # zip together (lazy like this is really izip), images and flags
+    for img, ref in zip(img_arr[1:], is_reference[1:]):
+        # if this is a ref image, save it and move on
         if ref:
-            cur_ref = img
-        else:
-            img_corr[img_corr_pos] = img - cur_ref
-            img_corr_pos += 1
+            ref_imge = img
+            continue
+        # else, do the subtraction
+        corrected_image[count] = img - ref_imge
+        # and increment the counter
+        count += 1
 
-    return img_corr
+    # return the output
+    return corrected_image
