@@ -192,8 +192,8 @@ class MD_dict(MutableMapping):
 
 
 keys_core = {"voxel_size": "description of voxel_size",
-             "detector_center_x": "obvious",
-             "detector_center_y": "obvious",
+             "detector_center_x": "x-coordinate of the center of the image plate in pixels",
+             "detector_center_y": "y-coordinate of the center of the image plate in pixels",
              }
 
 
