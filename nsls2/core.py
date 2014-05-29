@@ -270,13 +270,27 @@ def img_subtraction_pre(img_arr, is_reference):
     return corrected_image
 
 
-def detector_to_1d(img, detector_center):
+def detector2D_to_1D(img, detector_center):
     """
-    Convert the 2d image to a list of x y I coordinates where
+    Convert the 2D image to a list of x y I coordinates where
     x == x_img - detector_center[0] and
     y == y_img - detector_center[1]
     """
-    pass
+    # init the list
+    flat = [None] * (img.shape[0] * img.shape[1])
+    # local loop counter
+    counter = 0
+    # get the iterator in multi-index mode because detector image is 2d
+    it = np.nditer(img, flags=['multi_index'])
+    while not it.finished:
+        # convert to 1d list
+        flat[counter] = (it.multi_index[0] - detector_center[0],
+                         it.multi_index[1] - detector_center[1],
+                         it[0])
+        counter += 1  # increment counter
+
+    # return the output
+    return flat
 
 
 def radial_integration(img, detector_center, sample_to_detector_distance,
