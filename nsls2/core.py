@@ -200,7 +200,7 @@ keys_core = {
                 "3 element array defining the (x y z) dimensions of the voxel",
              "detector_center":
                 "2 element array defining the (x y) center of the detector in pixels (um)",
-             "sample_to_detector_distance":
+             "dist_sample":
                 "distance from the sample to the detector (mm)",
              "wavelength":
                 "wavelength of incident radiation (Angstroms)",
