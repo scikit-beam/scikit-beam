@@ -1,12 +1,7 @@
 import numpy as np
 
 
-def read_binary(filename,
-                nx,
-                ny,
-                nz,
-                dsize,
-                headersize):
+def read_binary(filename, nx, ny, nz, dsize, headersize):
     """
     docstring, woo!
 
@@ -35,8 +30,6 @@ def read_binary(filename,
     header: String
             header = file.read(headersize)
     """
-
-    print(str(filename))
 
     opened_file = open(filename, "rb")
 
