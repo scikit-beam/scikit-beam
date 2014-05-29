@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def read_binary(filename, nx, ny, nz, dsize, headersize):
+def read_binary(filename, nx, ny, nz, dsize, headersize, **kwargs):
     """
     docstring, woo!
 
@@ -19,6 +19,9 @@ def read_binary(filename, nx, ny, nz, dsize, headersize):
            The size of each element in the numpy array
     headersize: integer
                 The size of the file header in bytes
+    extras: dict
+            unnecessary keys that were passed to this function through
+            dictionary unpacking
 
     Returns
     -------

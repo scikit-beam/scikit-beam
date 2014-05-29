@@ -267,7 +267,7 @@ def img_subtraction_pre(img_arr, is_reference):
     return corrected_image
 
 
-def detector2D_to_1D(img, detector_center):
+def detector2D_to_1D(img, detector_center, **kwargs):
     """
     Convert the 2D image to a list of x y I coordinates where
     x == x_img - detector_center[0] and
@@ -281,6 +281,7 @@ def detector2D_to_1D(img, detector_center):
     it = np.nditer(img, flags=['multi_index'])
     while not it.finished:
         # convert to 1d list
+        elem = it[0]
         flat[counter] = (it.multi_index[0] - detector_center[0],
                          it.multi_index[1] - detector_center[1],
                          it[0])
