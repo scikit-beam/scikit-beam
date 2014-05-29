@@ -248,7 +248,7 @@ def img_subtraction_pre(img_arr, is_reference):
     ref_count = np.sum(is_reference)
     # make an array of zeros of the correct type
     corrected_image = np.zeros(
-        (len(img_arr) - ref_count, ) + img_arr.shape[1:],
+        (len(img_arr) - ref_count,) + img_arr.shape[1:],
         dtype=img_arr.dtype)
     # local loop counter
     count = 0
