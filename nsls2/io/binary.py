@@ -31,16 +31,22 @@ def read_binary(filename, nx, ny, nz, dsize, headersize):
             header = file.read(headersize)
     """
 
+    # open the file
     opened_file = open(filename, "rb")
 
     # read the file header
     header = opened_file.read(headersize)
 
+    # read the entire file in as 1D list
     data = np.fromfile(opened_file, dsize, -1)
 
+    # reshape the array to 3D
     if nz is not 1:
         data.resize(nx, ny, nz)
+    # unless the 3rd dimension is 1, in which case reshape the array to 2D
     elif ny is not 1:
         data.resize(nx, ny)
+    # unless the 2nd dimension is also 1, in which case leave the array as 1D
 
+    # return the array and the header
     return data, header
