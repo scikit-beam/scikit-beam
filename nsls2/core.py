@@ -201,7 +201,12 @@ keys_core = {"detector_center_x":
                 "2 element array defining the (x y) dimensions of the pixel",
              "voxel_size":
                 "3 element array defining the (x y z) dimensions of the voxel",
-
+             "detector_center":
+                "2 element array defining the (x y) center of the detector in pixels (um)",
+             "sample_to_detector_distance":
+                "distance from the sample to the detector (mm)",
+             "wavelength":
+                "wavelength of incident radiation (Angstroms)",
              }
 
 
@@ -263,3 +268,20 @@ def img_subtraction_pre(img_arr, is_reference):
 
     # return the output
     return corrected_image
+
+
+def detector_to_1d(img, detector_center):
+    """
+    Convert the 2d image to a list of x y I coordinates where
+    x == x_img - detector_center[0] and
+    y == y_img - detector_center[1]
+    """
+    pass
+
+
+def radial_integration(img, detector_center, sample_to_detector_distance,
+                       pixel_size, wavelength):
+    """
+    docstring!
+    """
+    pass
