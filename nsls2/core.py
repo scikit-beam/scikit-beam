@@ -193,10 +193,7 @@ class MD_dict(MutableMapping):
         return _iter_helper([], self._split, self._dict)
 
 
-keys_core = {"detector_center_x":
-                "x-coordinate of the center of the image plate in pixels",
-             "detector_center_y":
-                "y-coordinate of the center of the image plate in pixels",
+keys_core = {
              "pixel_size":
                 "2 element array defining the (x y) dimensions of the pixel",
              "voxel_size":
