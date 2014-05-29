@@ -272,23 +272,46 @@ def detector2D_to_1D(img, detector_center, **kwargs):
     Convert the 2D image to a list of x y I coordinates where
     x == x_img - detector_center[0] and
     y == y_img - detector_center[1]
-    """
-    # init the list
-    flat = [None] * (img.shape[0] * img.shape[1])
-    # local loop counter
-    counter = 0
-    # get the iterator in multi-index mode because detector image is 2d
-    it = np.nditer(img, flags=['multi_index'])
-    while not it.finished:
-        # convert to 1d list
-        elem = it[0]
-        flat[counter] = (it.multi_index[0] - detector_center[0],
-                         it.multi_index[1] - detector_center[1],
-                         it[0])
-        counter += 1  # increment counter
+    Parameters
+    ----------
+    img: ndarray
+         2D detector image
+    detector_center: 2 element array
+                     See keys_core
+    **kwargs: dict
+              Bucket for extra parameters in an unpacked dictionary
 
-    # return the output
-    return flat
+    Returns
+    -------
+    3 x N array of the pixel coordinates
+        Rows correspond to individual pixels
+        Columns are (x, y, I)
+    """
+
+    # create the array of x indices
+    arr_2d_x = np.zeros((img.shape[0], img.shape[1]), dtype=np.float)
+    for x in range(img.shape[0]):
+        arr_2d_x[x:x + 1] = x + 1
+
+    # create the array of y indices
+    arr_2d_y = np.zeros((img.shape[0], img.shape[1]), dtype=np.float)
+    for y in range(img.shape[1]):
+        arr_2d_y[:, y:y + 1] = y + 1
+
+    # subtract the detector from the x indices
+    arr_2d_x -= detector_center[0]
+
+    # subtract the detector center from the y indices
+    arr_2d_y -= detector_center[1]
+
+    # define a new N x 3 array
+    listed = np.zeros((3,) + (img.shape[0] * img.shape[1],))
+    listed[0] = arr_2d_x.flatten()
+    listed[1] = arr_2d_y.flatten()
+    listed[2] = img.flatten()
+
+    # return the transposed result such that listed[0] is one pixel
+    return listed.transpose()
 
 
 def radial_integration(img, detector_center, sample_to_detector_distance,
