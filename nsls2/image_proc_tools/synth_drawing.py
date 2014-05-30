@@ -179,3 +179,48 @@ def draw_cylinder (src_img, center_coord=None, radius=None, height=None, value=N
             slc = mask_vol[x,:,:]
             mask_vol[x,:,:] = draw_circle(slc, center_coord, radius, value, draw_exterior)
     return mask_vol
+
+#def draw_elipsoid (src_img, 
+                 #y_distort, 
+                 #x_distort, 
+                 #center_y=None, 
+                 #center_x=None, 
+                 #obj_area=None):
+    #a = x_distort
+    #b = y_distort
+    #y_dim, x_dim = src_img.shape
+    #if center_y == None:
+        #center_y = (y_dim / 2)
+    #if center_x == None:
+        #center_x = (x_dim / 2)
+    #if obj_area == None:
+        #obj_area = (x_dim * y_dim / 4)
+    #mask_2D = np.zeros ((y_dim, x_dim))
+    #Y, X = np.ogrid[0:y_dim, 0:x_dim]
+    #mask_2D = ((X-center_x)**2/a**2)+((Y-center_y)**2/b**2) > obj_area
+    #return mask_2D
+
+#def draw_cuboid (src_img, vert_len, horiz_len, center, value=None):
+    #y_offset = vert_len/2
+    #x_offset = horiz_len/2
+    #Y, X = src_img.shape
+    #y_cen, x_cen = center
+    #if value == None:
+        #value = 1
+    #if ((y_cen - offset) < 0 or 
+        #(x_cen - offset) < 0 or 
+        #(y_cen + offset) > Y or 
+        #(x_cen + offset) > X):
+        #raise ValueError ("Object extends beyond image boundaries. Adjust " + 
+                          #"axial length and/or object center so that entire " +
+                          #"object fits within the source object boundaries. " + 
+                          #"Source object boundaries are " + 
+                          #"[VERTICAL, HORIZONTAL]: [0:" + 
+                          #str(np.amax(Y)) + ", 0:" + str(np.amax(X)) + "]")
+    #output_img = src_img[(y_cen-y_offset):(y_cen+y_offset),
+                         #(x_cen-x_offset):(x_cen+x_offset)] = value
+    #return output_img
+
+#def draw_cube (src_img, axial_len, center, value=None):
+    #output_img = draw_rectangle(src_img, axial_len, axial_len, center, value)
+    #return output_img
