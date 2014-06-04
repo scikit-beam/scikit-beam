@@ -317,37 +317,45 @@ def detector2D_to_1D(img, detector_center, **kwargs):
 def bin_1D(x, y, nx, min_x=None, max_x=None):
     """
     Bin the values in y based on their x-coordinates
-    
+
     Parameters
     ----------
-    x : 1-D array-like
+    x : 1D array-like
         position
-    y : 1-D array-like
+    y : 1D array-like
         intensity
     nx : integer
          number of bins to use
-    min_x : number
-            starting bin, inclusive
-    max_x : number
-            final bin, inclusive
-    
+    min_x : float
+            Left edge of first bin
+    max_x : float
+            Right edge of last bin
+
     Returns
     -------
-    xyn : N x 3 array-like
-          xyn[0] : bins
-          xyn[1] : summed intensity in each bin
-          xyn[2] : number of counts per bin
+    edges : 1D array
+        edges of bins, length nx + 1
+
+    val : 1D array
+        sum of values in each bin, length nx
+
+    count : ID
+        The number of counts in each bin, length nx
     """
-    arr = np.zeros((nx, 3))
-    arr[0] = range(start=min_x, stop=max_x, step=nx)
-    for (pos, val) in zip(x, y):
-        if pos >= min_x and pos <= max_x:
-            bin = (pos - min_x) // nx
-            arr[bin][1] += val
-            arr[bin][2] += 1
-    
-    return arr
-    
+    # handle default values
+    if min_x is None:
+        min_x = np.min(x)
+    if max_x is None:
+        max_x = np.max(x)
+
+    # use a weighted histogram to get the bin sum
+    val, edges = np.histogram(x, range=(min_x, max_x), weights=y)
+    # use an un-weighted histogram to get the counts
+    count, _ = np.histogram(x, range=(min_x, max_x))
+    # return the three arrays
+    return edges, val, count
+
+
 def radial_integration(img, detector_center, sample_to_detector_distance,
                        pixel_size, wavelength):
     """
