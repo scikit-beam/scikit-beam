@@ -314,6 +314,40 @@ def detector2D_to_1D(img, detector_center, **kwargs):
     return listed.transpose()
 
 
+def bin_1D(x, y, nx, min_x=None, max_x=None):
+    """
+    Bin the values in y based on their x-coordinates
+    
+    Parameters
+    ----------
+    x : 1-D array-like
+        position
+    y : 1-D array-like
+        intensity
+    nx : integer
+         number of bins to use
+    min_x : number
+            starting bin, inclusive
+    max_x : number
+            final bin, inclusive
+    
+    Returns
+    -------
+    xyn : N x 3 array-like
+          xyn[0] : bins
+          xyn[1] : summed intensity in each bin
+          xyn[2] : number of counts per bin
+    """
+    arr = np.zeros((nx, 3))
+    arr[0] = range(start=min_x, stop=max_x, step=nx)
+    for (pos, val) in zip(x, y):
+        if pos >= min_x and pos <= max_x:
+            bin = (pos - min_x) // nx
+            arr[bin][1] += val
+            arr[bin][2] += 1
+    
+    return arr
+    
 def radial_integration(img, detector_center, sample_to_detector_distance,
                        pixel_size, wavelength):
     """
