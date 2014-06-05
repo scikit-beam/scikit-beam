@@ -17,7 +17,8 @@ the website.
 To make pushing/pulling from github as frictionless as possible, it
 is best to generate an ssh key pair which will allow see
 https://help.github.com/articles/generating-ssh-keys for a
-guide of how to generate and upload the keys to github.
+guide of how to generate and upload the keys to github.  If you are
+working on a computer on the controls network ssh will not work.
 
 
 The global behavior of `git` in controlled through `~/.gitconfig`
@@ -90,10 +91,13 @@ which should return ::
    * master
 
 In general, it is a bad idea to work directly on the *master* branch
-(for social, not technical reasons), so we will create a new branch to work on ::
+(for social, not technical reasons), so we will create a new branch to
+work on ::
 
    git branch new_feature
-
+where 'new_feature' is the name of your branch.  The branch name should
+be chosen to be descriptive of the type of work you plan to do.  For example
+'add_bin1D_function' or 'fix_bug_in_bin1D'.
 To see the results of this run ::
    git branch
 
@@ -113,10 +117,13 @@ Running ::
 
    git branch
 
-again will confirm that we have switched branches.  We are now ready
+again should print ::
+
+     master
+   * new_feature
+
+confirming that we have switched branches.  We are now ready
 to start working.
-
-
 
 
 .. note:: The process of creating and switching to a new branch can be
@@ -177,7 +184,8 @@ add files that should not be committed) run ::
 
 which will open a text editor and prompt you enter a message to go
 with your commit.  The message should start with a one-line summary of
-the change and then a few sentences describing the changes in more detail.  The commit message for this commit will be ::
+the change and then a few sentences describing the changes in more
+detail.  The commit message for this commit will be ::
 
    DOC : basic git usage
 
@@ -219,8 +227,10 @@ a single file ::
 
    git checkout -- file_name
 
-and to throw out *all* of your changes and reset your working
-directory to the last commit on your branch ::
+(the space between `--` and `file_name` is important) will reset the
+file to what it looks like on the current branch.  To throw out
+*all* of your changes and reset your working directory to the last
+commit on your branch ::
 
    git reset --hard current_branch
 
@@ -262,8 +272,8 @@ which should print something like: ::
     upstream        git@github.com:NSLS-II/pyRafters.git (push)
 
 
-which shows two remotes.  It is recommended to re-name ``origin`` ->
-your github username ::
+which shows two remotes (origin and upstream).  It is recommended to
+re-name ``origin`` -> your github username ::
 
 
    git remote rename origin gh_username
@@ -313,9 +323,9 @@ can **fetch** them and begin to work with them.
 
 .. _git-merging
 
-=======
+
 Merging
-=======
+^^^^^^^
 
 You merge two branches by changing to the branch you would like to merge *into* and running ::
 
@@ -326,11 +336,20 @@ it is called a 'fast-forward' merge and will always succeed.  If your
 local branch has commits that are not in `merge_source` the merge can
 generate conflicts which will need to resolved by hand.
 
+Pull
+^^^^
+
+The steps of **fetch** and **merge** can be done in one step via ::
+
+   git pull remote_name
+
+
+
 ===================
 Rebase on to master
 ===================
 
-TODO, see mpl or numpy doc or ask SO.
+TODO, see mpl or numpy doc or ask google/stackoverflow
 
 ====
 Help
