@@ -13,6 +13,7 @@ Contents:
 
    resource/api/index
    resource/dev_guide/index
+   resource/arch/index
 
 Indices and tables
 ==================
