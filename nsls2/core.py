@@ -272,6 +272,7 @@ def detector2D_to_1D(img, detector_center, **kwargs):
     Convert the 2D image to a list of x y I coordinates where
     x == x_img - detector_center[0] and
     y == y_img - detector_center[1]
+    
     Parameters
     ----------
     img: ndarray
@@ -283,35 +284,22 @@ def detector2D_to_1D(img, detector_center, **kwargs):
 
     Returns
     -------
-    3 x N array of the pixel coordinates
-        Rows correspond to individual pixels
-        Columns are (x, y, I)
+    X : numpy.ndarray
+        1 x N
+        x-coordinate of pixel
+    Y : numpy.ndarray
+        1 x N
+        y-coordinate of pixel
+    I : numpy.ndarray
+        1 x N
+        intensity of pixel
     """
-
-    # create the array of x indices
-    arr_2d_x = np.zeros((img.shape[0], img.shape[1]), dtype=np.float)
-    for x in range(img.shape[0]):
-        arr_2d_x[x:x + 1] = x + 1
-
-    # create the array of y indices
-    arr_2d_y = np.zeros((img.shape[0], img.shape[1]), dtype=np.float)
-    for y in range(img.shape[1]):
-        arr_2d_y[:, y:y + 1] = y + 1
-
-    # subtract the detector from the x indices
-    arr_2d_x -= detector_center[0]
-
-    # subtract the detector center from the y indices
-    arr_2d_y -= detector_center[1]
-
-    # define a new N x 3 array
-    listed = np.zeros((3,) + (img.shape[0] * img.shape[1],))
-    listed[0] = arr_2d_x.flatten()
-    listed[1] = arr_2d_y.flatten()
-    listed[2] = img.flatten()
-
-    # return the transposed result such that listed[0] is one pixel
-    return listed.transpose()
+    
+    # Caswell's incredible terse rewrite
+    X, Y = np.meshgrid(np.arange(img.shape[0]) - detector_center[0], np.arange(img.shape[1]) - detector_center[1])
+    
+    # return the x, y and z coordinates (as a tuple? or is this a list?)
+    return X.ravel(), Y.ravel(), img.ravel()
 
 
 def bin_1D(x, y, nx, min_x=None, max_x=None):
