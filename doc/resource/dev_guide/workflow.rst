@@ -10,17 +10,13 @@ External Workflow
    :scale: 50 %
    :alt: Flowchart: Interaction between beamline and development team
    
-   This is a visual description of the interaction between the beamline 
-   scientists/group leaders and the development team.  Each beamline/group
-   will have one point of contact within the development team.
+   This is a visual description of the interaction between the beamline scientists/group leaders and the development team.  Each beamline/group will have one point of contact within the development team.
    
 Responsibilities
 ----------------
 
 **Beamline Representative.** 
- 1. Clearly articulate all of the scientific problems that your beamline is trying to solve.
-   - If the Development Team does not know about your scientific needs, we cannot design
-      data analysis tools to solve those needs! 
+ 1. Clearly articulate all of the scientific problems that your beamline is trying to solve. If the Development Team does not know about your scientific needs, we cannot design data analysis tools to solve those needs! 
  2. Keep the **DevTeam Point of Contact** informed if new scientific problems arise.
  3. Ensure that the **DevTeam Point of Contact** understands your data analysis requirements. 
 
@@ -33,10 +29,10 @@ Responsibilities
     the analysis code and UI widgets.
  
 **DevTeam**
- 1. Translate the scientific problems obtained from the **Beamline Representative** into
-   use cases that drive the architecture.
- 2. Prioritize the use cases to provide as much functionality to as many beamlines as 
-   quickly as possible. 
+ 1. Translate the scientific problems obtained from the **Beamline Representative** into use cases that drive the architecture.
+ 2. Prioritize the use cases to provide as much functionality to as many beamlines as quickly as possible. 
+ 3. Convert the use cases into functions/classes that are consistent with the Architectural Decisions outlined in the architecture section (need to link to it, but arch_core.rst probably needs some re-working)
+ 4. Implement the functions/classes described in #3
    
 
 #################
