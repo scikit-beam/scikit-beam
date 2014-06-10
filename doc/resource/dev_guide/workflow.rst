@@ -1,9 +1,47 @@
 .. _workflow:
 
-########
-Workflow
-########
+Development Team Workflow
+#########################
 
+#################
+External Workflow
+#################
+.. figure:: /_static/img/PointOfContactFlow.png
+   :scale: 50 %
+   :alt: Flowchart: Interaction between beamline and development team
+   
+   This is a visual description of the interaction between the beamline 
+   scientists/group leaders and the development team.  Each beamline/group
+   will have one point of contact within the development team.
+   
+Responsibilities
+----------------
+
+**Beamline Representative.** 
+ 1. Clearly articulate all of the scientific problems that your beamline is trying to solve.
+   - If the Development Team does not know about your scientific needs, we cannot design
+      data analysis tools to solve those needs! 
+ 2. Keep the **DevTeam Point of Contact** informed if new scientific problems arise.
+ 3. Ensure that the **DevTeam Point of Contact** understands your data analysis requirements. 
+
+**DevTeam Point of Contact.**
+ 1. Understand the scientific problems that each beamline is trying to solve.
+ 2. Translate the language used by the DevTeam into the language used by the **Beamline Representative**. 
+ 3. Interact with the **Beamline Representative** on a regular basis. 
+ 4. Regularly demonstrate new features that are relevant to their beamline. 
+ 5. Ensure that the **Beamline Representative** understands the development prioritization of
+    the analysis code and UI widgets.
+ 
+**DevTeam**
+ 1. Translate the scientific problems obtained from the **Beamline Representative** into
+   use cases that drive the architecture.
+ 2. Prioritize the use cases to provide as much functionality to as many beamlines as 
+   quickly as possible. 
+   
+
+#################
+Internal Workflow
+#################
 The basic workflow is that you develop new code on feature branches in
 your local repository.  When you want your code merged into the main
 repository you push your work to ``github`` and create a "Pull Request" (PR).
