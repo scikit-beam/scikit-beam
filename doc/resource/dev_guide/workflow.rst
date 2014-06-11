@@ -3,9 +3,9 @@
 Development Team Workflow
 #########################
 
-#################
+
 External Workflow
-#################
+^^^^^^^^^^^^^^^^^
 .. figure:: /_static/img/PointOfContactFlow.png
    :scale: 50 %
    :alt: Flowchart: Interaction between beamline and development team
@@ -35,9 +35,9 @@ Responsibilities
  4. Implement the functions/classes described in #3
    
 
-#################
+
 Internal Workflow
-#################
+^^^^^^^^^^^^^^^^^
 The basic workflow is that you develop new code on feature branches in
 your local repository.  When you want your code merged into the main
 repository you push your work to ``github`` and create a "Pull Request" (PR).
