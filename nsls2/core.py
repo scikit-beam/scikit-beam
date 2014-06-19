@@ -272,7 +272,7 @@ def detector2D_to_1D(img, detector_center, **kwargs):
     Convert the 2D image to a list of x y I coordinates where
     x == x_img - detector_center[0] and
     y == y_img - detector_center[1]
-    
+
     Parameters
     ----------
     img: ndarray
@@ -294,15 +294,15 @@ def detector2D_to_1D(img, detector_center, **kwargs):
         1 x N
         intensity of pixel
     """
-    
+
     # Caswell's incredible terse rewrite
     X, Y = np.meshgrid(np.arange(img.shape[0]) - detector_center[0], np.arange(img.shape[1]) - detector_center[1])
-    
+
     # return the x, y and z coordinates (as a tuple? or is this a list?)
     return X.ravel(), Y.ravel(), img.ravel()
 
 
-def bin_1D(x, y, nx, min_x=None, max_x=None):
+def bin_1D(x, y, nx=None, min_x=None, max_x=None, bin_step=None):
     """
     Bin the values in y based on their x-coordinates
 
@@ -335,12 +335,18 @@ def bin_1D(x, y, nx, min_x=None, max_x=None):
         min_x = np.min(x)
     if max_x is None:
         max_x = np.max(x)
+    if bin_step is None:
+        bin_step = 1
+
+    print("min/max x: {0}, {1}".format(min_x, max_x))
 
     # use a weighted histogram to get the bin sum
-    val, edges = np.histogram(x, range=(min_x, max_x), weights=y)
+    bins = np.arange(min_x, max_x, bin_step)
+    val, edges = np.histogram(a=x, bins=bins, weights=y)
     # use an un-weighted histogram to get the counts
-    count, _ = np.histogram(x, range=(min_x, max_x))
+    count, _ = np.histogram(a=x, bins=bins)
     # return the three arrays
+    print("edges: {0}".format(edges))
     return edges, val, count
 
 
