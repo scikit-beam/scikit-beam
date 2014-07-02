@@ -3,7 +3,6 @@
 Development Team Workflow
 #########################
 
-
 External Workflow
 ^^^^^^^^^^^^^^^^^
 .. figure:: /_static/img/PointOfContactFlow.png
@@ -31,10 +30,9 @@ Responsibilities
 **DevTeam**
  1. Translate the scientific problems obtained from the **Beamline Representative** into use cases that drive the architecture.
  2. Prioritize the use cases to provide as much functionality to as many beamlines as quickly as possible. 
- 3. Convert the use cases into functions/classes that are consistent with the Architectural Decisions outlined in the architecture section (need to link to it, but arch_core.rst probably needs some re-working)
- 4. Implement the functions/classes described in #3
-   
-
+ 3. Convert the use cases into functions/classes that are consistent with the Architectural Decisions outlined in the architecture section (need to link to it, but arch_core.rst probably needs some re-working).
+ 4. Implement the functions/classes described in #3.
+ 5. Develop an Analysis Library that supports the Use Cases defined by the **DevTeam** and agreed upon by the **Beamline Representative**.
 
 Internal Workflow
 ^^^^^^^^^^^^^^^^^
