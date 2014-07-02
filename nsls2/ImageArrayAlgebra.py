@@ -24,7 +24,27 @@ def ImageDataSum(Image1, Image2):
     return ImageSum
 
 
-def DarkSubtraction(
+def DarkSubtraction(Image, DarkImage):
+    """ 
+    This module will subtract the dark image from the image
+    N x N array
+    Parameters: 
+    ------------
+    Image : N x N array)
+            image data
+    DarkImage : N x N array
+                Dark Image data
+    
+    Returns:
+    ---------
+    DarkSubImage : N x N array
+                   Dark current subtracted image data array 
+    
+    """
+    ImageMatrix = np.array(Image)
+    DarkMatrix = np.array(Image)
+    DarkSubImage = ImageMatrix - DarkMatrix
+    return DarkSubImage
 
 
 
