@@ -193,13 +193,26 @@ class MD_dict(MutableMapping):
         return _iter_helper([], self._split, self._dict)
 
 
+def _iter_helper(path_list, split, md_dict):
+    """
+    Recursively walk the tree and return the names of the leaves
+    """
+    for k, v in six.iteritems(md_dict):
+        if isinstance(v, md_value):
+            yield split.join(path_list + [k])
+        else:
+            for inner_v in _iter_helper(path_list + [k], split, v._dict):
+                yield inner_v
+
+
 keys_core = {
              "pixel_size":
                 "2 element array defining the (x y) dimensions of the pixel",
              "voxel_size":
                 "3 element array defining the (x y z) dimensions of the voxel",
              "detector_center":
-                "2 element array defining the (x y) center of the detector in pixels (um)",
+                ("2 element array defining the (x y) center of the "
+                  "detector in pixels (um)"),
              "dist_sample":
                 "distance from the sample to the detector (mm)",
              "wavelength":
@@ -296,7 +309,8 @@ def detector2D_to_1D(img, detector_center, **kwargs):
     """
 
     # Caswell's incredible terse rewrite
-    X, Y = np.meshgrid(np.arange(img.shape[0]) - detector_center[0], np.arange(img.shape[1]) - detector_center[1])
+    X, Y = np.meshgrid(np.arange(img.shape[0]) - detector_center[0],
+                        np.arange(img.shape[1]) - detector_center[1])
 
     # return the x, y and z coordinates (as a tuple? or is this a list?)
     return X.ravel(), Y.ravel(), img.ravel()
@@ -338,15 +352,12 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None, bin_step=None):
     if bin_step is None:
         bin_step = 1
 
-    print("min/max x: {0}, {1}".format(min_x, max_x))
-
     # use a weighted histogram to get the bin sum
     bins = np.arange(min_x, max_x, bin_step)
     val, edges = np.histogram(a=x, bins=bins, weights=y)
     # use an un-weighted histogram to get the counts
     count, _ = np.histogram(a=x, bins=bins)
     # return the three arrays
-    print("edges: {0}".format(edges))
     return edges, val, count
 
 
