@@ -10,6 +10,7 @@
 import os
 import numpy as np
 import fabio
+import Image
 
 
 def load_tif(file):
@@ -28,3 +29,22 @@ def load_tif(file):
     return image_data
 
 
+
+def write_tif(image, filname):
+    """
+    Save the image data as a .tif file
+    Parameters :
+    -------------
+    image : N x N array
+            image data
+    filename : string
+               filename to save the tiff file
+
+    Returns:
+    ---------
+    Saved tif file
+    """
+    im = Image.fromarray(image)
+    im.save(filename)
+    print " saved"
+    return
