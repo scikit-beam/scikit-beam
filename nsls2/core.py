@@ -272,9 +272,12 @@ def RR1Choice(image_data):
      
     Returns
     -------
-    rrm : Mean
-         rrt : Total Intensity
-              rrs : Standard Deviation
+    rrm : float
+        Mean
+    rrt : float
+        Total Intensity
+    rrs : float
+        Standard Deviation
     '''
     rrm = np.mean(image_data)
     rrt = np.sum(image_data)
