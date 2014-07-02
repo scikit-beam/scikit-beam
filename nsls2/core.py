@@ -281,5 +281,5 @@ def RR1Choice(image_data):
     '''
     rrm = np.mean(image_data)
     rrt = np.sum(image_data)
-    rrs = np.sum(image_data)
+    rrs = np.std(image_data)
     return rrm, rst, rrs
