@@ -262,22 +262,19 @@ def img_subtraction_pre(img_arr, is_reference):
 
 def RR1Choice(image_data):
     '''
-    This Modeule is for
+    This Module is for
     Statistics or Reduced Representation of 2D images
-    (Mean, Total Intensity, Standard Deviation )
     
     Parameters
     ----------
     image_data : ndarray
-    MxN array of data
+                 MxN array of data
      
     Returns
     -------
-    Reduced Representation Choices
-    --------------------------------
     rrm : Mean
-    rrt : Total Intensity
-    rrs : Standard Deviation
+         rrt : Total Intensity
+              rrs : Standard Deviation
     '''
     rrm = np.mean(image_data)
     rrt = np.sum(image_data)
