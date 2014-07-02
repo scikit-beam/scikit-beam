@@ -18,12 +18,10 @@ def load_tif(file):
     ----------
     file_name: string
                Complete path to the file to be loaded into memory
-    ----------------------------------------------------
     Returns
     -------
     output: NxN ndarray
-            Returns a numpy array of the originl
-            tiff file
+            Returns a numpy array of the tiff file
     """
     image = fabio.open(file)
     image_data = image.data
