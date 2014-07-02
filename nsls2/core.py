@@ -268,7 +268,7 @@ def RR1Choice(image_data):
     Parameters
     ----------
     image_data : ndarray
-                 MxN array of data
+        MxN array of data
      
     Returns
     -------
