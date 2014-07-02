@@ -193,11 +193,30 @@ class MD_dict(MutableMapping):
         return _iter_helper([], self._split, self._dict)
 
 
-keys_core = {"voxel_size": "description of voxel_size",
-             "detector_center_x":
-                "x-coordinate of the center of the image plate in pixels",
-             "detector_center_y":
-                "y-coordinate of the center of the image plate in pixels",
+def _iter_helper(path_list, split, md_dict):
+    """
+    Recursively walk the tree and return the names of the leaves
+    """
+    for k, v in six.iteritems(md_dict):
+        if isinstance(v, md_value):
+            yield split.join(path_list + [k])
+        else:
+            for inner_v in _iter_helper(path_list + [k], split, v._dict):
+                yield inner_v
+
+
+keys_core = {
+             "pixel_size":
+                "2 element array defining the (x y) dimensions of the pixel",
+             "voxel_size":
+                "3 element array defining the (x y z) dimensions of the voxel",
+             "detector_center":
+                ("2 element array defining the (x y) center of the "
+                  "detector in pixels (um)"),
+             "dist_sample":
+                "distance from the sample to the detector (mm)",
+             "wavelength":
+                "wavelength of incident radiation (Angstroms)",
              }
 
 
@@ -242,7 +261,7 @@ def img_subtraction_pre(img_arr, is_reference):
     ref_count = np.sum(is_reference)
     # make an array of zeros of the correct type
     corrected_image = np.zeros(
-        (len(img_arr) - ref_count, ) + img_arr.shape[1:],
+        (len(img_arr) - ref_count,) + img_arr.shape[1:],
         dtype=img_arr.dtype)
     # local loop counter
     count = 0
@@ -259,3 +278,92 @@ def img_subtraction_pre(img_arr, is_reference):
 
     # return the output
     return corrected_image
+
+
+def detector2D_to_1D(img, detector_center, **kwargs):
+    """
+    Convert the 2D image to a list of x y I coordinates where
+    x == x_img - detector_center[0] and
+    y == y_img - detector_center[1]
+
+    Parameters
+    ----------
+    img: ndarray
+         2D detector image
+    detector_center: 2 element array
+                     See keys_core
+    **kwargs: dict
+              Bucket for extra parameters in an unpacked dictionary
+
+    Returns
+    -------
+    X : numpy.ndarray
+        1 x N
+        x-coordinate of pixel
+    Y : numpy.ndarray
+        1 x N
+        y-coordinate of pixel
+    I : numpy.ndarray
+        1 x N
+        intensity of pixel
+    """
+
+    # Caswell's incredible terse rewrite
+    X, Y = np.meshgrid(np.arange(img.shape[0]) - detector_center[0],
+                        np.arange(img.shape[1]) - detector_center[1])
+
+    # return the x, y and z coordinates (as a tuple? or is this a list?)
+    return X.ravel(), Y.ravel(), img.ravel()
+
+
+def bin_1D(x, y, nx=None, min_x=None, max_x=None, bin_step=None):
+    """
+    Bin the values in y based on their x-coordinates
+
+    Parameters
+    ----------
+    x : 1D array-like
+        position
+    y : 1D array-like
+        intensity
+    nx : integer
+         number of bins to use
+    min_x : float
+            Left edge of first bin
+    max_x : float
+            Right edge of last bin
+
+    Returns
+    -------
+    edges : 1D array
+        edges of bins, length nx + 1
+
+    val : 1D array
+        sum of values in each bin, length nx
+
+    count : ID
+        The number of counts in each bin, length nx
+    """
+    # handle default values
+    if min_x is None:
+        min_x = np.min(x)
+    if max_x is None:
+        max_x = np.max(x)
+    if bin_step is None:
+        bin_step = 1
+
+    # use a weighted histogram to get the bin sum
+    bins = np.arange(min_x, max_x, bin_step)
+    val, edges = np.histogram(a=x, bins=bins, weights=y)
+    # use an un-weighted histogram to get the counts
+    count, _ = np.histogram(a=x, bins=bins)
+    # return the three arrays
+    return edges, val, count
+
+
+def radial_integration(img, detector_center, sample_to_detector_distance,
+                       pixel_size, wavelength):
+    """
+    docstring!
+    """
+    pass
