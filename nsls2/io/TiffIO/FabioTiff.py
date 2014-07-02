@@ -17,18 +17,16 @@ def load_tif(file):
     Parameters
     ----------
     file_name: string
-    Complete path to the file to be loaded into memory
+               Complete path to the file to be loaded into memory
     ----------------------------------------------------
     Returns
     -------
     output: NxN ndarray
-    Returns a numpy array of the originl
-    tiff file
+            Returns a numpy array of the originl
+            tiff file
     """
-    print('loading ' + file)
     image = fabio.open(file)
     image_data = image.data
-    print 'Volume loaded successfully'
     return image_data
 
 
