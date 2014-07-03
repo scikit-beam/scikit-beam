@@ -46,5 +46,4 @@ def write_tif(image, filname):
     """
     im = Image.fromarray(image)
     im.save(filename)
-    print " saved"
     return
