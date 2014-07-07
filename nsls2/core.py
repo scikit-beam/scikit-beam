@@ -316,7 +316,7 @@ def detector2D_to_1D(img, detector_center, **kwargs):
     return X.ravel(), Y.ravel(), img.ravel()
 
 
-def bin_1D(x, y, nx=None, min_x=None, max_x=None, bin_step=None):
+def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     """
     Bin the values in y based on their x-coordinates
 
@@ -349,16 +349,14 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None, bin_step=None):
         min_x = np.min(x)
     if max_x is None:
         max_x = np.max(x)
-    if bin_step is None:
-        bin_step = 1
 
     # use a weighted histogram to get the bin sum
-    bins = np.arange(min_x, max_x, bin_step)
-    val, edges = np.histogram(a=x, bins=bins, weights=y)
+    bins = np.linspace(min_x, max_x, nx+1, endpoint=True)
+    val, _ = np.histogram(a=x, bins=bins, weights=y)
     # use an un-weighted histogram to get the counts
     count, _ = np.histogram(a=x, bins=bins)
     # return the three arrays
-    return edges, val, count
+    return bins, val, count
 
 
 def radial_integration(img, detector_center, sample_to_detector_distance,
