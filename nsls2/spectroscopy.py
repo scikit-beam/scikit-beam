@@ -43,6 +43,7 @@ from six.moves import zip
 import numpy as np
 import logging
 logger = logging.getLogger(__name__)
+from scipy.integrate import simps
 
 
 def fit_quad_to_peak(x, y):
@@ -178,3 +179,79 @@ def find_larest_peak(X, Y, window=5):
                                         np.log(Y[roi]))
 
     return X0, np.exp(Y0), 1/np.sqrt(-2*w)
+
+
+def integrate_ROI(energy, counts, e_min, e_max):
+    """
+    Integrate region(s) of the spectrum.  If `e_min`
+    and `e_max` are arrays/lists they must be the same length
+    and the weight from each of the regions is summed.
+
+    This returns a single scalar value for the integration.
+
+    Currently this code integrates from the left edge
+    of the first bin fully contained in the range to
+    the right edge of the last bin partially contained
+    in the range.  This may produce bias and should be
+    addressed when this is an issue.
+
+    Parameters
+    ----------
+    counts : array
+        Counts in spectrum, any units
+
+    energy : array
+        The energy of the left (lower) edge of the energy bin,
+        must be monotonic.
+
+    e_min : float or array
+        The lower edge of the integration region
+
+    e_max : float or array
+        The upper edge of the integration region
+
+    Returns
+    -------
+    float
+        The integrated intensity in same units as `counts`
+    """
+    # make sure really are arrays
+    energy = np.asarray(energy)
+    counts = np.asarray(counts)
+
+    # make sure energy is sensible
+    if not np.all(np.diff(energy) > 0):
+        raise ValueError("Energy must be monotonically increasing")
+
+    # up-cast to 1d and make sure it is flat
+    e_min = np.atleast_1d(e_min).ravel()
+    e_max = np.atleast_1d(e_max).ravel()
+
+    # sanity checks on integration bounds
+    if len(e_min) != len(e_max):
+        raise ValueError("integration bounds must have same lengths")
+
+    if np.any(e_min >= e_max):
+        raise ValueError("lower integration bound must be less than "
+                         "upper integration bound ")
+
+    if np.any(e_min < energy[0]):
+        raise ValueError("lower integration values must be greater "
+                         "than the lowest energy in spectrum")
+
+    if np.any(e_max >= energy[-1]):
+        raise ValueError("lower integration values must be greater "
+                         "than the lowest energy in spectrum")
+
+    # find the bottom index of each integration bound
+    bottom_indx = energy.searchsorted(e_min)
+    # find the top index of each integration bound
+    top_indx = energy.searchsorted(e_max) + 1
+
+    # set up temporary variables
+    accum = 0
+    # integrate each region
+    for bot, top in zip(bottom_indx, top_indx):
+        accum += simps(counts[bot:top], energy[bot:top])
+
+    return accum
