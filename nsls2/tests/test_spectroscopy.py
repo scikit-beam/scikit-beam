@@ -4,8 +4,10 @@ from __future__ import (absolute_import, division, print_function,
 import six
 from matplotlib import pyplot as plt
 import numpy as np
+from nose.tools import assert_raises
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 
-from nsls2.spectroscopy import align_and_scale
+from nsls2.spectroscopy import align_and_scale, integrate_ROI
 
 
 def synthetic_data(E, E0, sigma, alpha, k, beta):
@@ -53,3 +55,34 @@ def test_align_and_scale_smoketest():
                                      2*np.pi * 6/50, 60))
     # call the function
     e_cor_list, c_cor_list = align_and_scale(e_list, c_list)
+
+
+def test_intagrate_ROI_errors():
+    E = np.arange(100)
+    C = np.ones_like(E)
+
+    # limits out of order
+    assert_raises(ValueError, integrate_ROI, E, C, 32, 2)
+    assert_raises(ValueError, integrate_ROI, E, C,
+                  [32, 1], [2, 10])
+    # bottom out of range
+    assert_raises(ValueError, integrate_ROI, E, C, -1, 2)
+    # top out of range
+    assert_raises(ValueError, integrate_ROI, E, C, 2, 110)
+    # different length limits
+    assert_raises(ValueError, integrate_ROI, E, C,
+                  [32, 1], [2, 10, 32],)
+    # energy not monotonic
+    assert_raises(ValueError, integrate_ROI, C, C, 2, 10)
+
+
+def test_intagrate_ROI_compute():
+    E = np.arange(100)
+    C = np.ones_like(E)
+    assert_array_almost_equal(integrate_ROI(E, C, 5.5, 6.5),
+                              1)
+    assert_array_almost_equal(integrate_ROI(E, C, 5.5, 11.5),
+                              6)
+
+    assert_array_almost_equal(integrate_ROI(E, C, [5.5, 17], [11.5, 23]),
+                              12)
