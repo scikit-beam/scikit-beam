@@ -25,9 +25,7 @@ def load_tif(file):
              Returns a numpy array of the tiff file
     """
     image = fabio.open(file)
-    image_data = image.data
-    return image_data
-
+    return image.data
 
 
 def write_tif(image, filname):
