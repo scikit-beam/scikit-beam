@@ -43,13 +43,14 @@ def read_amira (src_file):
         am_data == []
     except:
         am_data = []
-    while True:
-        am_data.append(f.readline())
-    return am_header, am_data
+    am_data = f.read()
+    #Strip out null characters from the string of binary values
+    data_strip = am_data.strip('\n')
+    flt_values = np.fromsstring(data_strip, '<f4')
+    #Resize the 1D array to the correct ndarray dimensions
+    flt_values.resize(Zdim, Ydim, Xdim)
+    return am_header, flt_values
 
-    file_header = 
-    file_breakdown = f.readlines()
-    header_end_line_num = file_breakdown.index('# Data section follows\n')
 
 def create_md_dict (header_list):
     for _ in range(len(header_list)):

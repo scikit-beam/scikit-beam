@@ -17,7 +17,7 @@ REVISION LOG: (FORMAT: "PROGRAMMER INITIALS: DATE -- RECORD")
     module for direct implementation in the PyLight software package. Class 
     conversion is the second step in adding/implementing new functions in the 
     web-based package.
- gci: 2/7/14 -- Updating file for pull request to GITHUB.
+ gci: 2/7/14 -- Updatnig file for pull request to GITHUB.
     1) Added new function: createIP_HDF5
     This function enables creating image processing specific HDF5 files
     based off of the outline specification documentation provided in: 
