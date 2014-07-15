@@ -135,3 +135,6 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
     qi[:,0:2] *= Q
 
     return qi
+
+
+
