@@ -57,7 +57,7 @@ def test_align_and_scale_smoketest():
     e_cor_list, c_cor_list = align_and_scale(e_list, c_list)
 
 
-def test_intagrate_ROI_errors():
+def test_integrate_ROI_errors():
     E = np.arange(100)
     C = np.ones_like(E)
 
@@ -76,7 +76,7 @@ def test_intagrate_ROI_errors():
     assert_raises(ValueError, integrate_ROI, C, C, 2, 10)
 
 
-def test_intagrate_ROI_compute():
+def test_integrate_ROI_compute():
     E = np.arange(100)
     C = np.ones_like(E)
     assert_array_almost_equal(integrate_ROI(E, C, 5.5, 6.5),
