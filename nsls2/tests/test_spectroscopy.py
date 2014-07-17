@@ -62,7 +62,10 @@ def test_integrate_ROI_errors():
     C = np.ones_like(E)
 
     # limits out of order
-    assert_raises(ValueError, integrate_ROI, E, C, 32, 2)
+    # NOTE: this will now get fixed in the code and will not raise exception.
+    #assert_raises(ValueError, integrate_ROI, E, C, 32, 2)
+    
+    #This still raises exception because all values are not swappable.
     assert_raises(ValueError, integrate_ROI, E, C,
                   [32, 1], [2, 10])
     # bottom out of range
@@ -72,8 +75,9 @@ def test_integrate_ROI_errors():
     # different length limits
     assert_raises(ValueError, integrate_ROI, E, C,
                   [32, 1], [2, 10, 32],)
-    # energy not monotonic
+    # independent variable (x_value_array) not increasing monotonically
     assert_raises(ValueError, integrate_ROI, C, C, 2, 10)
+
 
 
 def test_integrate_ROI_compute():
@@ -86,3 +90,12 @@ def test_integrate_ROI_compute():
 
     assert_array_almost_equal(integrate_ROI(E, C, [5.5, 17], [11.5, 23]),
                               12)
+    assert_array_almost_equal(integrate_ROI(E, C, [11.5, 23], [5.5, 17]),
+                              12)
+    E_rev = E[::-1]
+    C_rev = C[::-1]
+    assert_array_almost_equal(integrate_ROI(E_rev, C_rev, [5.5, 17], 
+                                            [11.5, 23]), 12)
+    assert_array_almost_equal(integrate_ROI(E_rev, C_rev, [11.5, 23], 
+                                            [5.5, 17]), 12)
+    
