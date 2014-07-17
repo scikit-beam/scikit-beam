@@ -202,7 +202,7 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
     frameMode = 2 : 'phi'      : Phi axis frame.
     frameMode = 3 : 'cart'     : Crystal cartesian frame.
     
-    """"
+    """
     
     ccdToQkwArgs = {}
     
@@ -261,7 +261,7 @@ def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
     gridStd : ndarray
         standard devaiation grid
         
-    gridOccu : int
+    gridOccu : ndarray
         occupation of the grid
         
     gridOut : int
@@ -316,11 +316,11 @@ def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
     # No. of values zero in the grid
     emptNb = (gridOccu == 0).sum()
     
-    if gridOut != 0:
-        print "---- Warning : There are %.2e points outside the grid" % gridOut
-        print " (%.2e bins in the grid)" % gridData.size
-    if emptNb:
-        print "---- Warning : There are %.2e values zero in the grid" % emptNb
+    #if gridOut != 0:
+    #print ("---- Warning : There are %.2e points outside the grid") % gridOut
+    #print (" (%.2e bins in the grid)") % gridData.size
+    #if emptNb:
+    #print ("---- Warning : There are %.2e values zero in the grid") % emptNb
     
     return gridData, gridOccu, gridStd, gridOut, emptNb, gridbins
 
