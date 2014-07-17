@@ -189,31 +189,56 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
     x_value_array = np.asarray(x_value_array)
     counts = np.asarray(counts)
     
-    # make sure values in x_value_array increase in value
-    if not np.all(np.diff(x_value_array) > 0):
-        x_value_array = x_value_array[::-1]
     
-    # make sure values in x_value_array are equally spaced
-    if not np.all((np.diff(x_value_array) / (x_value_array[1] - 
-                                             x_value_array[0])) == 1):
-        raise ValueError("Energy must be monotonically increasing")
+    #use np.sign() to obtain array which has evaluated sign changes in all diff 
+    #in input x_value array. Checks and tests are then run on the evaluated 
+    #sign change array.
+    eval_x_arr_sign = np.sign(np.diff(x_value_array))
+    
+    # check whether the sign of all diff measures are negative in the 
+    # x_value_array. If so make then the input array for both x_values and 
+    # count are reversed so that they are positive, and monotonically increase 
+    # in value
+    if np.all(eval_x_arr_sign < 0):
+        x_value_array = x_value_array[::-1]
+        counts = counts[::-1]
+        #sign array has to be re-evaluated since diff-sign has changed.
+        eval_x_arr_sign = np.sign(np.diff(x_value_array))
 
+    #check to make sure no outliers exist which violate the monotonically 
+    #increasing requirement, and if exceptions exist, then error points to the 
+    #location within the source array where the exception occurs.
+    if not np.all(eval_x_arr_sign > 0):
+        error_locations = np.where(eval_x_arr_sign <= 0)
+        raise ValueError("Independent variable must be monotonically "
+                         "increasing. Erroneous values found at array index "
+                         "locations: " + str(error_locations))
+    
     # up-cast to 1d and make sure it is flat
     x_min = np.atleast_1d(x_min).ravel()
     x_max = np.atleast_1d(x_max).ravel()
 
-    # sanity checks on integration bounds
+    # verify that the number of minimum and maximum boundary values are equal
     if len(x_min) != len(x_max):
         raise ValueError("integration bounds must have same lengths")
 
+    # verify that the specified minimum values are actually less than the sister
+    # maximum value
+    # A specific fix in case min integration boundaries and max integration 
+    # boundaries are reversed.
+    if np.all(x_min >= x_max):
+        x_max, x_min = x_min, x_max
+    # Raise error if a minimum value is actually greater than the sister 
+    # maximum value.
     if np.any(x_min >= x_max):
         raise ValueError("lower integration bound must be less than "
                          "upper integration bound ")
 
+    # check to make sure that all specified minimum and maximum values are 
+    # actually contained within the extents of the independent variable array
     if np.any(x_min <= x_value_array[0]):
         raise ValueError("lower integration boundary values must be greater"
                          "than, or equal to the lowest value in spectrum range")
-
     if np.any(x_max >= x_value_array[-1]):
         raise ValueError("upper integration boundary values must be less "
                          "than, or equal to the highest value in the spectrum "
@@ -222,8 +247,7 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
     # find the bottom index of each integration bound
     bottom_indx = x_value_array.searchsorted(x_min)
     # find the top index of each integration bound
-    # NOTE: Why does this expression include '+1'??
-    # Aren't the x_min and x_max values supplied in pairs? Why is there an additional offset?
+    # NOTE: +1 required for correct slicing for integration function
     top_indx = x_value_array.searchsorted(x_max) + 1
 
     # set up temporary variables
