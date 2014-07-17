@@ -123,7 +123,7 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
     """
         
     This will procees the given images (certain scan) of
-    the full set into receiprocal space (Q) (Qx, Qy, Qz, I)
+    the full set into receiprocal(Q) space, (Qx, Qy, Qz, I)
     
     Parameters :
     ------------
