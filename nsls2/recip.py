@@ -121,7 +121,6 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
 def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
                  detPixSizeY, detX0, detY0, detDis, waveLen, UBmat, istack):
     """
-        
     This will procees the given images (certain scan) of
     the full set into receiprocal(Q) space, (Qx, Qy, Qz, I)
     
@@ -157,12 +156,12 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
     UBmat : ndarray
         UB matrix (orientation matrix)
         
-    istack : ndarray
-        intensity array of the images
+    istack : Nx1 array
+    
         
     Returns :
     --------
-    totSet : ndarray
+    totSet : Nx3 array
         (Qx, Qy, Qz, I) - HKL values and the intensity
         
     Optional :
@@ -214,7 +213,6 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
 
 def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
     """
-        
     This function will process the set of
     (Qx, Qy, Qz, I) values and grid the data
         
@@ -222,6 +220,15 @@ def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
     -----------
     totSet : ndarray
         (Qx, Qy, Qz, I) - HKL values and the intensity
+        
+    Qmin : ndarray
+        minimum values of the cuboid [Qx, Qy, Qz]_min
+        
+    Qmax : ndarray
+        maximum values of the cuboid [Qx, Qy, Qz]_max
+        
+    dQN  : ndarray
+        No. of grid parts (bins)     [Nqx, Nqy, Nqz]
         
     Returns :
     ---------
@@ -245,14 +252,10 @@ def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
         
     Optional :
     ----------
-    Qmin : ndarray
-        minimum values of the cuboid [Qx, Qy, Qz]_min
-    Qmax : ndarray
-        maximum values of the cuboid [Qx, Qy, Qz]_max
-    dQN  : ndarray
-        No. of grid parts (bins)     [Nqx, Nqy, Nqz]
         
     """
+    
+    totSet[:, 3] = np.ravel(istack)
     
     if totSet is None:
         raise Exception("No set of (Qx, Qy, Qz, I). Cannot process grid.")
@@ -298,8 +301,9 @@ def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
 def get_grid_mesh(Qmin, Qmax, dQN):
     """
         
-    This function returns the X, Y and Z coordinates of the grid as 3d
-    arrays. (Return the grid vectors as a mesh.
+    This function returns the H, K and L of the grid as 3d
+    arrays. (Return the grid vectors as a mesh.)
+    
     Parameters :
     -----------
     Qmin : ndarray
