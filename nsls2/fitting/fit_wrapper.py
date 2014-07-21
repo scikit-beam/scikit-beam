@@ -3,23 +3,29 @@
 # BSD License
 # See LICENSE for full text
 
+
 import numpy as np
 import matplotlib.pyplot as plt
 #from scipy.optimize import curve_fit
 import scipy.optimize
 
 
-def target(x, y, **args):
+def test_func(p, x):
 
-    a = args["a"]
-    b = args["b"]
-    c = args["c"]
+    a, b, c = p
 
-    return a * np.exp(-b * x) + c -y
+    return a * np.exp(-b * x) + c
 
 
-def fit(x, y, fitting_engine=None, target_function=None, limit_dict=None, 
-        **param_dict):
+def residuals(p, y, x, weights):
+
+    y0 = test_func(p, x)
+    
+    return (y0 - y)*weights
+
+
+def fit(x, y, param_dict, target_function=None, fitting_engine=None, 
+        limit_dict=None, weights=None, **engine_dict):
     """
     Top-level function for fitting, magic and ponies
 
@@ -83,55 +89,68 @@ def fit(x, y, fitting_engine=None, target_function=None, limit_dict=None,
 
     # returns
 
-    maxiter = 100
     weights = np.ones(len(y))
-    
-    errfunc = target_function(x, y, **param_dict)
 
     p0 = []
-    for item in param_dict.items():
+    for item in param_dict.values():
+        print item
         p0.append(item)
-        
-    print p0
 
-    p1, cov, infodict, mesg, success = scipy.optimize.leastsq(errfunc, 
+    if engine_dict.has_key('maxiter'):
+        maxiter = engine_dict['maxiter']
+    else:
+        maxiter = 100
+
+
+
+    p1, cov, infodict, mesg, success = scipy.optimize.leastsq(target_function, 
                                                               p0, args=(y, x, weights),
-                                                              maxfev=maxiter, full_output = True)
+                                                              maxfev=maxiter,
+                                                              full_output = True)
 
-    
+    print success
 
-    return
+    return p1
 
 
 
 def test():
+    
+    p = [2.5, 1.3, 0.5]
     xdata = np.linspace(0, 4, 50)
-    ydata = xdata
+    ydata = test_func(p, xdata)
 
-    y = target(xdata, xdata, a=2.5, b=1.3, c=0.5)
+    #y = residuals(p, ydata, xdata)
 
-    ydata = y + 0.2 * np.random.normal(size=len(xdata))
+    ydata = ydata + 0.2 * np.random.normal(size=len(xdata))
 
     plt.plot(xdata, ydata)
     plt.show()
     
-    print ydata
+
+    w = np.ones(len(ydata))
+    #maxiter = 100
     
-    fit(xdata, ydata, target_function=target, a=2.5, b=1.3, c=0.5)
+    p0 = [2.5, 1.0, 0.1]
+    
+    engine_dict={'maxiter': 100}
+    
+    param_dict = {'a':2.5, 'b': 1.3, 'c':0.5}
+    
+    p1 = fit(xdata, ydata, param_dict, target_function=residuals, weights=w, maxiter=10)
+    
+    ynew = test_func(p1, xdata)
+    plt.plot(xdata, ydata, xdata, ynew)
+    plt.show()
+    
+    print residuals(p1, ydata, xdata, w)
     
     return
+    
 
 
 if __name__=="__main__":
     test()
-
-
-
-
-
-
-
-
 
 
 
