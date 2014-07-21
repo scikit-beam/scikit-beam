@@ -3,10 +3,23 @@
 # BSD License
 # See LICENSE for full text
 
+import numpy as np
+import matplotlib.pyplot as plt
+#from scipy.optimize import curve_fit
+import scipy.optimize
 
 
-def fit(x, y, param_dict, fitting_engine, target_function, limit_dict=None,
-        engine_dict=None):
+def target(x, y, **args):
+
+    a = args["a"]
+    b = args["b"]
+    c = args["c"]
+
+    return a * np.exp(-b * x) + c -y
+
+
+def fit(x, y, fitting_engine=None, target_function=None, limit_dict=None, 
+        **param_dict):
     """
     Top-level function for fitting, magic and ponies
 
@@ -70,6 +83,55 @@ def fit(x, y, param_dict, fitting_engine, target_function, limit_dict=None,
 
     # returns
 
-    pass
+    maxiter = 100
+    weights = np.ones(len(y))
+    
+    errfunc = target_function(x, y, **param_dict)
+
+    p0 = []
+    for item in param_dict.items():
+        p0.append(item)
+        
+    print p0
+
+    p1, cov, infodict, mesg, success = scipy.optimize.leastsq(errfunc, 
+                                                              p0, args=(y, x, weights),
+                                                              maxfev=maxiter, full_output = True)
+
+    
+
+    return
+
+
+
+def test():
+    xdata = np.linspace(0, 4, 50)
+    ydata = xdata
+
+    y = target(xdata, xdata, a=2.5, b=1.3, c=0.5)
+
+    ydata = y + 0.2 * np.random.normal(size=len(xdata))
+
+    plt.plot(xdata, ydata)
+    plt.show()
+    
+    print ydata
+    
+    fit(xdata, ydata, target_function=target, a=2.5, b=1.3, c=0.5)
+    
+    return
+
+
+if __name__=="__main__":
+    test()
+
+
+
+
+
+
+
+
+
 
 
