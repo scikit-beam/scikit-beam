@@ -8,4 +8,6 @@ setup(
     version='0',
     author='Brookhaven National Lab',
     packages=["nsls2"],
+    include_dirs = [np.get_include()],
+    ext_modules = [ext_modules]
     )
