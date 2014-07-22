@@ -16,7 +16,6 @@ import logging
 logger = logging.getLogger(__name__)
 import exceptions
 import time
-import gc
 import operator
 import ctrans
 
@@ -82,7 +81,6 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
     arr_2d_x *= pixel_size[0]
     arr_2d_y *= pixel_size[1]
 
-    print("Image shape: {0}".format(img.shape))
     # define a new 4 x N array
     qi = np.zeros((4,) + (img.shape[0] * img.shape[1],))
     # fill in the x coordinates
@@ -126,7 +124,7 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
     
     Parameters :
     ------------
-    settingAngles : array
+    settingAngles : Nx6 array
         six angles of the all the images
         
     detSizeX : int
@@ -142,10 +140,10 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
         detector pixel size in detector Y-direction (mm)
         
     detX0 : float
-        detector X-coordinate of center for reference
+        detector X-coordinate of center for reference (mm)
         
     detY0 : float
-        detector Y-coordinate of center for reference
+        detector Y-coordinate of center for reference (mm)
         
     detDis : float
         detector distance from sample (mm)
@@ -153,15 +151,16 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
     waveLen : float
         wavelength (Angstrom)
         
-    UBmat : ndarray
+    UBmat : 3x3 array
         UB matrix (orientation matrix)
         
-    istack : Nx1 array
+    istack : ndarray
+        intensity array of the images
     
         
     Returns :
     --------
-    totSet : Nx3 array
+    totSet : Nx4 array
         (Qx, Qy, Qz, I) - HKL values and the intensity
         
     Optional :
@@ -176,15 +175,11 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
     ccdToQkwArgs = {}
     
     totSet = None
-    gc.collect()
     # frameMode 4 : 'hkl'      : Reciproal lattice units frame.
     frameMode = 4
     
     if settingAngles is None:
         raise Exception(" No setting angles specified. ")
-    
-    # "---- Setting angle size :", settingAngles.shape
-    # "---- CCD Size :", (detSizeX, detSizeY)
     
     #  **** Converting to Q   **************
 
@@ -201,11 +196,9 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
                            wavelength=waveLen,
                            UBinv=np.matrix(UBmat).I,
                            **ccdToQkwArgs)
+
     # ending time for the process
     t2 = time.time()
-                           
-    #    "---- DONE (Processed in %f seconds)", %(t2 - t1)
-    #    "---- Setsize is %d", %totSet.shape[0]
     totSet[:, 3] = np.ravel(istack)
                            
     return totSet
@@ -218,7 +211,7 @@ def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
         
     Prameters :
     -----------
-    totSet : ndarray
+    totSet : Nx4 array
         (Qx, Qy, Qz, I) - HKL values and the intensity
         
     Qmin : ndarray
@@ -255,8 +248,6 @@ def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
         
     """
     
-    totSet[:, 3] = np.ravel(istack)
-    
     if totSet is None:
         raise Exception("No set of (Qx, Qy, Qz, I). Cannot process grid.")
     
@@ -282,7 +273,6 @@ def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
     # ending time for the griding
     t2 = time.time()
     
-    # "---- DONE (Processed in %f seconds)" % (t2 - t1)
     # No. of bins in the grid
     gridbins = gridData.size
 

@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import setuptools
-from distutils.core import setup
+from distutils.core import setup, Extension
+from setupext import ext_modules
 
 setup(
     name='NSLS2',
