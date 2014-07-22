@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 #from scipy.optimize import curve_fit
 import scipy.optimize
-
+from fitting_tool.fitting_algorithm import leastsqbound
 
 def test_func(p, x):
 
@@ -24,8 +24,8 @@ def residuals(p, y, x, weights):
     return (y0 - y)*weights
 
 
-def fit(x, y, param_dict, target_function=None, fitting_engine=None, 
-        limit_dict=None, weights=None, **engine_dict):
+def fit(x, y, param_dict, target_function=None, fitting_engine='leastsq', 
+        limit_dict=None, **engine_dict):
     """
     Top-level function for fitting, magic and ponies
 
@@ -41,16 +41,11 @@ def fit(x, y, param_dict, target_function=None, fitting_engine=None,
         Dictionary of parameters
 
     target_function : object
-        Function object that is used to compute and compare against
-        y = target_function(x, **param_dict)
-            x is the array of all of your data (the same parameter that was
-            passed in to this function)
+        Function object to compute residuals
+        residuals = target_function(parameters, x, y, weights)
 
     fitting_engine : function_name
-        Something that allows you to modify parameters to 'fit' the
-        target_function to the (x,y) data
-        fit_param_dict = function_name(x, y, target_function, param_dict,
-                                       constraint_dict, engine_dict)
+        i.e., leastsq
 
     Returns
     -------
@@ -70,7 +65,7 @@ def fit(x, y, param_dict, target_function=None, fitting_engine=None,
     Optional
     --------
     limit_dict : dict
-        Dictionary of limits for the param_dict.  Keys must be the same as the
+        Dictionary of limits for the param_dict. Keys must be the same as the
         param_dict
 
     engine_dict : dict
@@ -79,39 +74,73 @@ def fit(x, y, param_dict, target_function=None, fitting_engine=None,
 
     """
 
-    # calls the engine
 
-    # compute covariance
-
-    # compute correlation
-
-    # compute residuals
-
-    # returns
-
-    weights = np.ones(len(y))
-
-    p0 = []
+    plist = []
     for item in param_dict.values():
         print item
-        p0.append(item)
+        plist.append(item)
 
     if engine_dict.has_key('maxiter'):
         maxiter = engine_dict['maxiter']
     else:
         maxiter = 100
+        
+    if engine_dict.has_key('weights'):
+        weights = engine_dict['weights']
+    else:
+        weights = np.ones(len(y))
 
 
+    if fitting_engine == 'leastsq':
+        output = leastsq_engine(x, y, plist, target_function=target_function, 
+                                weights=weights, maxiter=maxiter)
+
+    if fitting_eninge == 'leqstsqbound':
+        lsb = leastsqbound()
+        output = lsb.leastsqbound(target_function, plist, bounds, args=(x,y,weights), full_output=True)
+        
+    
+    return output
+
+
+def leastsq_engine(x, y, parameters, target_function=None,
+                   weights=None, maxiter=100, full_output=True):
+    """
+    call scipy.optimize.leastsq function
+    please refer to document of scipy.optimize.leastsq for detailed information
+    call scipy.optimize.leastsq function
+    One may refer to document of scipy.optimize.leastsq for detailed information
+
+    Parameters
+    ----------
+    x : array-like
+        x-coordinates
+
+    y : array-like
+        y-coordinates
+
+    parameters : list
+        List of parameters
+
+    target_function : object
+        Function object to compute residuals
+        target_function(parameters, x, y, weights)
+    
+    Returns
+    -------
+    p1: list
+        the solution of fitted parameters
+    please refer to scipy.optimize.leastsq 
+    for detailed information of other returns
+    
+    """
 
     p1, cov, infodict, mesg, success = scipy.optimize.leastsq(target_function, 
-                                                              p0, args=(y, x, weights),
+                                                              parameters, args=(y, x, weights),
                                                               maxfev=maxiter,
-                                                              full_output = True)
-
-    print success
-
-    return p1
-
+                                                              full_output = full_output)
+    
+    return p1, cov, infodict, mesg, success
 
 
 def test():
@@ -137,13 +166,17 @@ def test():
     
     param_dict = {'a':2.5, 'b': 1.3, 'c':0.5}
     
-    p1 = fit(xdata, ydata, param_dict, target_function=residuals, weights=w, maxiter=10)
+    #['a', 'b', 'c']
+    
+    p1 = fit(xdata, ydata, param_dict, target_function=residuals, weights=w, maxiter=50)
     
     ynew = test_func(p1, xdata)
     plt.plot(xdata, ydata, xdata, ynew)
     plt.show()
     
-    print residuals(p1, ydata, xdata, w)
+    res = residuals(p1, ydata, xdata, w)
+    print np.sum(res)
+    
     
     return
     
