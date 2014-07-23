@@ -245,10 +245,10 @@ def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
         (Qx, Qy, Qz, I) - HKL values and the intensity
         
     Qmin : ndarray
-        minimum values of the cuboid [Qx, Qy, Qz]_min
+        minimum values of the voxel[Qx, Qy, Qz]_min
         
     Qmax : ndarray
-        maximum values of the cuboid [Qx, Qy, Qz]_max
+        maximum values of the voxel [Qx, Qy, Qz]_max
         
     dQN  : ndarray
         No. of grid parts (bins)     [Nqx, Nqy, Nqz]
@@ -327,10 +327,10 @@ def get_grid_mesh(Qmin, Qmax, dQN):
     Parameters :
     -----------
     Qmin : ndarray
-        minimum values of the cuboid [Qx, Qy, Qz]_min
+        minimum values of the voxel [Qx, Qy, Qz]_min
         
     Qmax : ndarray
-        maximum values of the cuboid [Qx, Qy, Qz]_max
+        maximum values of the voxel [Qx, Qy, Qz]_max
         
     dQN  : ndarray
         No. of grid parts (bins) [Nqx, Nqy, Nqz]
