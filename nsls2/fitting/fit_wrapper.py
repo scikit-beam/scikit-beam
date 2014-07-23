@@ -2,13 +2,18 @@
 # All rights reserved
 # BSD License
 # See LICENSE for full text
-
+# @author:  Li Li (lili@bnl.gov)
+# created on 07/10/2014
 
 import numpy as np
 import matplotlib.pyplot as plt
 #from scipy.optimize import curve_fit
 import scipy.optimize
+
+from parameters import Parameters
 from fitting_tool.fitting_algorithm import leastsqbound
+
+
 
 def test_func(p, x):
 
@@ -74,11 +79,17 @@ def fit(x, y, param_dict, target_function=None, fitting_engine='leastsq',
 
     """
 
-
-    plist = []
-    for item in param_dict.values():
-        print item
-        plist.append(item)
+    # store parameters and bounds as lists
+    p_list = []
+    b_list = []
+    param = param_dict.all()
+    for item in param.values():
+        print item.val
+        p_list.append(item.val)
+        bound = []
+        bound.append(item.min)
+        bound.append(item.max)
+        b_list.append(bound)
 
     if engine_dict.has_key('maxiter'):
         maxiter = engine_dict['maxiter']
@@ -92,18 +103,21 @@ def fit(x, y, param_dict, target_function=None, fitting_engine='leastsq',
 
 
     if fitting_engine == 'leastsq':
-        output = leastsq_engine(x, y, plist, target_function=target_function, 
-                                weights=weights, maxiter=maxiter)
-
-    if fitting_eninge == 'leqstsqbound':
-        lsb = leastsqbound()
-        output = lsb.leastsqbound(target_function, plist, bounds, args=(x,y,weights), full_output=True)
+        output = leastsq_engine(target_function, p_list, 
+                                args=(y, x, weights), maxiter=maxiter, full_output=True)
         
+    elif fitting_engine == 'leastsqbound':
+        lsb = leastsqbound()
+        output = lsb.leastsqbound(target_function, p_list, b_list, 
+                                  args=(y, x, weights), full_output=True)
+
+    else:
+        print "please select the fitting engine. "
     
     return output
 
 
-def leastsq_engine(x, y, parameters, target_function=None,
+def leastsq_engine(target_function, parameters, args=(),
                    weights=None, maxiter=100, full_output=True):
     """
     call scipy.optimize.leastsq function
@@ -133,14 +147,20 @@ def leastsq_engine(x, y, parameters, target_function=None,
     please refer to scipy.optimize.leastsq 
     for detailed information of other returns
     
+    Notes
+    -----
+    "leastsq" is a wrapper around MINPACK's lmdif and lmder algorithms.
+    Minimize M functions in N variables using Levenberg-Marquardt method.
+    
     """
 
     p1, cov, infodict, mesg, success = scipy.optimize.leastsq(target_function, 
-                                                              parameters, args=(y, x, weights),
+                                                              parameters, args=args,
                                                               maxfev=maxiter,
                                                               full_output = full_output)
     
     return p1, cov, infodict, mesg, success
+
 
 
 def test():
@@ -168,14 +188,42 @@ def test():
     
     #['a', 'b', 'c']
     
-    p1 = fit(xdata, ydata, param_dict, target_function=residuals, weights=w, maxiter=50)
+    #param_dict={}
+    #param_dict['a'] = Parameters()
+    #param_dict['a'].val = 2.5
     
-    ynew = test_func(p1, xdata)
+    #param_dict['b'] = Parameters()
+    #param_dict['b'].val = 1.3
+    
+    #param_dict['c'] = Parameters()
+    #param_dict['c'].val = 0.5
+    
+    para_dict = Parameters()
+    para_dict.add(name='a', val=2.5, min=2.0, max=3.0)
+    para_dict.add(name='b', val=1.3, min=1.0, max=1.8)
+    para_dict.add(name='c', val=0.5, min=None, max=None)
+    
+    print para_dict['a'].val
+    print para_dict['b'].val
+ 
+    all_data = para_dict.all()
+    
+ 
+    #for i in range[len(para_dict.all())]:
+    #    print para_dict
+    #print para_dict.all()
+ 
+    p1 = fit(xdata, ydata, para_dict, fitting_engine='leastsq', 
+             target_function=residuals, weights=w, maxiter=50)
+    
+    ynew = test_func(p1[0], xdata)
     plt.plot(xdata, ydata, xdata, ynew)
     plt.show()
     
-    res = residuals(p1, ydata, xdata, w)
-    print np.sum(res)
+    print "residuals: ", np.sum(p1[2]['fvec']**2)
+    
+    #res = residuals(p1[0], ydata, xdata, w)
+    #print np.sum(res)
     
     
     return
