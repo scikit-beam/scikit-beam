@@ -1,12 +1,12 @@
 /*
  
       This is the header file for ctranc.c file. 
-      The function process_to_q and process_grid
-      functions in the nsls2/recip.py call
-      ctranc.c routine.
+      process_to_q and process_grid functions in 
+      the nsls2/recip.py call  ctranc.c routine for
+      fast data analysis.
+ 
  
  */
-
 #ifndef __CTRANS_H
 #define __CTRANS_H
 
