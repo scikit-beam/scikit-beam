@@ -111,10 +111,10 @@ def draw_rectangle (src_img, vert_len, horiz_len, center, value=None):
     y_cen, x_cen = center
     if value == None:
         value = 1
-    if ((y_cen - offset) < 0 or 
-        (x_cen - offset) < 0 or 
-        (y_cen + offset) > Y or 
-        (x_cen + offset) > X):
+    if ((y_cen - y_offset) < 0 or 
+        (x_cen - x_offset) < 0 or 
+        (y_cen + y_offset) > Y or 
+        (x_cen + x_offset) > X):
         raise ValueError ("Object extends beyond image boundaries. Adjust " + 
                           "axial length and/or object center so that entire " +
                           "object fits within the source object boundaries. " + 
