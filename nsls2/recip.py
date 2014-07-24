@@ -33,8 +33,10 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 """
+    
 This module is for functions and classes specific to reciprocal space
 calculations.
+
 """
 
 from __future__ import (absolute_import, division, print_function,
@@ -58,41 +60,46 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
     Parameters
     ==========
     img : ndarray
-         2D detector image
+        2D detector image
     dist_sample : float
-                 see keys_core
-                 (mm)
+        see keys_core  (mm)
     detector_center : 2 element float array
-                     see keys_core
-                     (pixels)
+        see keys_core (pixels)
     pixel_size : 2 element float array
-                see keys_core
-                (mm)
+        see keys_core (mm)
     wavelength : float
-                see keys_core
-                (Angstroms)
+        see keys_core (Angstroms)
     ROI : 4 element int array
-           ROI defines a rectangular ROI for img
-           ROI[0] == x_min
-           ROI[1] == x_max
-           ROI[2] == y_min
-           ROI[3] == y_max
+        ROI defines a rectangular ROI for img
+        ROI[0] == x_min
+        ROI[1] == x_max
+        ROI[2] == y_min
+        ROI[3] == y_max
     **kwargs : dict
-              Bucket for extra parameters from an unpacked dictionary
+        Bucket for extra parameters from an unpacked dictionary
 
 
     Returns
     =======
+        Bucket for extra parameters from an unpacked dictionary
+    -------
     qi : 4 x N array of the coordinates in Q space (A^-1)
         Rows correspond to individual pixels
         Columns are (Qx, Qy, Qz, I)
         
     """
 
-    if ROI is not None and len(ROI) == 4:
-        # slice the image based on the desired ROI
-        img = img[ROI[0]:ROI[1], ROI[2]:ROI[3]]
-        
+    
+    if ROI is not None:
+        if len(ROI) == 4:
+            # slice the image based on the desired ROI
+            img = img[ROI[0]:ROI[1], ROI[2]:ROI[3]]
+        else:
+            raise ValueError(" ROI has to be 4 elment array : len(ROI) = 4")
+    else:
+        raise ValueError(" No ROI is specified ")
+    
+
     # create the array of x indices
     arr_2d_x = np.zeros((img.shape[0], img.shape[1]), dtype=np.float)
     for x in range(img.shape[0]):
@@ -152,8 +159,8 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
     This will procees the given images (certain scan) of
     the full set into receiprocal(Q) space, (Qx, Qy, Qz, I)
     
-    Parameters :
-    ------------
+    Parameters
+    ----------
     settingAngles : Nx6 array
         six angles of the all the images
         
@@ -188,30 +195,27 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
         intensity array of the images
     
         
-    Returns :
-    --------
+    Returns
+    -------
     totSet : Nx4 array
         (Qx, Qy, Qz, I) - HKL values and the intensity
         
-    Optional :
-    ----------
-    frameMode = 4 : 'hkl'      : Reciproal lattice units frame.
-    frameMode = 1 : 'theta'    : Theta axis frame.
-    frameMode = 2 : 'phi'      : Phi axis frame.
-    frameMode = 3 : 'cart'     : Crystal cartesian frame.
-    
     """
     
     ccdToQkwArgs = {}
     
     totSet = None
-    # frameMode 4 : 'hkl'      : Reciproal lattice units frame.
+    
+    # frameMode = 1 : 'theta'    : Theta axis frame.
+    # frameMode = 2 : 'phi'      : Phi axis frame.
+    # frameMode = 3 : 'cart'     : Crystal cartesian frame.
+    # frameMode = 4 : 'hkl'      : Reciproal lattice units frame.
     frameMode = 4
     
     if settingAngles is None:
         raise Exception(" No setting angles specified. ")
     
-    #  **** Converting to Q   **************
+    #  *********** Converting to Q   **************
 
     # starting time for the process
     t1 = time.time()
@@ -239,8 +243,8 @@ def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
     This function will process the set of
     (Qx, Qy, Qz, I) values and grid the data
         
-    Prameters :
-    -----------
+    Prameters
+    ---------
     totSet : Nx4 array
         (Qx, Qy, Qz, I) - HKL values and the intensity
         
@@ -251,10 +255,10 @@ def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
         maximum values of the voxel [Qx, Qy, Qz]_max
         
     dQN  : ndarray
-        No. of grid parts (bins)     [Nqx, Nqy, Nqz]
+        No. of grid parts (bins) [Nqx, Nqy, Nqz]
         
-    Returns :
-    ---------
+    Returns
+    -------
     gridData : ndarray
         intensity grid
         
@@ -273,8 +277,8 @@ def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
     gridbins : int
         No. of bins in the grid
         
-    Optional :
-    ----------
+    Optional
+    --------
         
     """
     
@@ -324,8 +328,8 @@ def get_grid_mesh(Qmin, Qmax, dQN):
     This function returns the H, K and L of the grid as 3d
     arrays. (Return the grid vectors as a mesh.)
     
-    Parameters :
-    -----------
+    Parameters
+    ----------
     Qmin : ndarray
         minimum values of the voxel [Qx, Qy, Qz]_min
         
@@ -335,8 +339,8 @@ def get_grid_mesh(Qmin, Qmax, dQN):
     dQN  : ndarray
         No. of grid parts (bins) [Nqx, Nqy, Nqz]
         
-    Returns :
-    --------
+    Returns
+    -------
     X : array
         X co-ordinate of the grid
         
@@ -347,8 +351,8 @@ def get_grid_mesh(Qmin, Qmax, dQN):
         Z co-ordinate of the grid
         
         
-    Example :
-    ---------
+    Example
+    -------
     These values can be used for obtaining the coordinates of each voxel.
     For instance, the position of the (0,0,0) voxel is given by
         
