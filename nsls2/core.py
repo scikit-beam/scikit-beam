@@ -215,24 +215,29 @@ keys_core = {
         "description" : ("2 element tuple defining the (x y) dimensions of the "
                          "pixel"),
         "type" : tuple,
-    },
+        "units" : "um",
+        },
     "voxel_size": {
         "description" : ("3 element tuple defining the (x y z) dimensions of the "
                          "voxel"),
         "type" : tuple,
+        "units" : "um",
         },
      "detector_center": {
         "description" : ("2 element tuple defining the (x y) center of the "
                          "detector in pixels (um)"),
         "type" : tuple,
+        "units" : "pixel",
         },
      "dist_sample": {
         "description" : "distance from the sample to the detector (mm)",
         "type" : float,
+        "units" : "mm",
         },
      "wavelength": {
         "description" : "wavelength of incident radiation (Angstroms)",
         "type" : float,
+        "units" : "angstrom",
         },
      }
 
