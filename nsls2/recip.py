@@ -63,7 +63,7 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
     if ROI is not None:
         if len(ROI) == 4:
             # slice the image based on the desired ROI
-            img = img[ROI[0]:ROI[1], ROI[2]:ROI[3]]
+            img = np.meshgrid(img[ROI[0]:ROI[1]], img[ROI[2]:ROI[3]], sprase=True)
         else:
             raise ValueError(" ROI has to be 4 elment array : len(ROI) = 4")
     else:
