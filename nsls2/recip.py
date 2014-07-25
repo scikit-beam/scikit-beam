@@ -183,7 +183,7 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
     frameMode = 4
     
     if settingAngles is None:
-        raise Exception(" No setting angles specified. ")
+        raise ValueError(" No setting angles specified. ")
     
     #  *********** Converting to Q   **************
 
