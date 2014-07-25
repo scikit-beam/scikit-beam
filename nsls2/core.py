@@ -19,6 +19,11 @@ import numpy as np
 md_value = namedtuple("md_value", ['value', 'units'])
 
 
+_defaults = {
+    "bins" : 100,
+}
+
+
 class XR_data(object):
     """
     A class for wrapping up and carrying around data + unrelated
@@ -344,14 +349,17 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     count : ID
         The number of counts in each bin, length nx
     """
+
     # handle default values
     if min_x is None:
         min_x = np.min(x)
     if max_x is None:
         max_x = np.max(x)
+    if nx is None:
+        nx = _defaults["bins"]
 
     # use a weighted histogram to get the bin sum
-    bins = np.linspace(min_x, max_x, nx+1, endpoint=True)
+    bins = np.linspace(start=min_x, stop=max_x, num=nx+1, endpoint=True)
     val, _ = np.histogram(a=x, bins=bins, weights=y)
     # use an un-weighted histogram to get the counts
     count, _ = np.histogram(a=x, bins=bins)
