@@ -332,11 +332,11 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     y : 1D array-like
         intensity
     nx : integer
-         number of bins to use
+        number of bins to use
     min_x : float
-            Left edge of first bin
+        Left edge of first bin
     max_x : float
-            Right edge of last bin
+        Right edge of last bin
 
     Returns
     -------
