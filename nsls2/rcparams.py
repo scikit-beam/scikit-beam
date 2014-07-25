@@ -15,7 +15,9 @@ from collections import MutableMapping, defaultdict
 
 class RCParamDict(MutableMapping):
     """
-    A class to make dealing storing RC params
+    A class to make dealing with storing RC params easier.  RC params is a hold-
+    over from the UNIX days where configuration files are 'rc' files.
+    See http://en.wikipedia.org/wiki/Configuration_file
 
     Examples
     --------
