@@ -38,12 +38,13 @@ def test_bin_1D_2():
     # make call
     edges, val, count = core.bin_1D(x=x, y=y, nx=nx, min_x=min_x, max_x=max_x)
     # check that values are as expected
+    nx = core._defaults["bins"]
     assert_array_almost_equal(edges,
                               np.linspace(0, 1, nx + 1, endpoint=True))
     assert_array_almost_equal(val,
                               np.sum(y.reshape(nx, -1), axis=1))
     assert_array_equal(count,
-                       np.ones(nx) * 10)
+                       np.ones(nx))
 
 
 def test_bin_1D_limits():
