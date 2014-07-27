@@ -211,18 +211,35 @@ def _iter_helper(path_list, split, md_dict):
 
 
 keys_core = {
-             "pixel_size":
-                "2 element array defining the (x y) dimensions of the pixel",
-             "voxel_size":
-                "3 element array defining the (x y z) dimensions of the voxel",
-             "detector_center":
-                ("2 element array defining the (x y) center of the "
-                  "detector in pixels (um)"),
-             "dist_sample":
-                "distance from the sample to the detector (mm)",
-             "wavelength":
-                "wavelength of incident radiation (Angstroms)",
-             }
+    "pixel_size": {
+        "description" : ("2 element tuple defining the (x y) dimensions of the "
+                         "pixel"),
+        "type" : tuple,
+        "units" : "um",
+        },
+    "voxel_size": {
+        "description" : ("3 element tuple defining the (x y z) dimensions of the "
+                         "voxel"),
+        "type" : tuple,
+        "units" : "um",
+        },
+     "detector_center": {
+        "description" : ("2 element tuple defining the (x y) center of the "
+                         "detector in pixels"),
+        "type" : tuple,
+        "units" : "pixel",
+        },
+     "dist_sample": {
+        "description" : "distance from the sample to the detector (mm)",
+        "type" : float,
+        "units" : "mm",
+        },
+     "wavelength": {
+        "description" : "wavelength of incident radiation (Angstroms)",
+        "type" : float,
+        "units" : "angstrom",
+        },
+     }
 
 
 def img_subtraction_pre(img_arr, is_reference):
@@ -235,18 +252,18 @@ def img_subtraction_pre(img_arr, is_reference):
     Parameters
     ----------
     img_arr : numpy.ndarray
-              Array of 2-D images
+        Array of 2-D images
 
     is_reference : 1-D boolean array
-                   true  : image is reference image
-                   false : image is measured image
+        true  : image is reference image
+        false : image is measured image
 
     Returns
     -------
     img_corr : numpy.ndarray
-               len(img_corr) == len(img_arr) - len(is_reference_img == true)
-               img_corr is the array of measured images minus the reference
-               images.
+        len(img_corr) == len(img_arr) - len(is_reference_img == true)
+        img_corr is the array of measured images minus the reference
+        images.
 
     Raises
     ------
@@ -294,11 +311,11 @@ def detector2D_to_1D(img, detector_center, **kwargs):
     Parameters
     ----------
     img: ndarray
-         2D detector image
+        2D detector image
     detector_center: 2 element array
-                     See keys_core
+        see keys_core["detector_center"]["description"]
     **kwargs: dict
-              Bucket for extra parameters in an unpacked dictionary
+        Bucket for extra parameters in an unpacked dictionary
 
     Returns
     -------
@@ -332,11 +349,11 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     y : 1D array-like
         intensity
     nx : integer
-         number of bins to use
+        number of bins to use
     min_x : float
-            Left edge of first bin
+        Left edge of first bin
     max_x : float
-            Right edge of last bin
+        Right edge of last bin
 
     Returns
     -------
