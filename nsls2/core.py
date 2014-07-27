@@ -225,7 +225,7 @@ keys_core = {
         },
      "detector_center": {
         "description" : ("2 element tuple defining the (x y) center of the "
-                         "detector in pixels (um)"),
+                         "detector in pixels"),
         "type" : tuple,
         "units" : "pixel",
         },
