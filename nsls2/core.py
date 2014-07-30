@@ -393,7 +393,7 @@ def radial_integration(img, detector_center, sample_to_detector_distance,
 
 
 def wedge_integration(src_data, geometry_object, theta_start,
-                      delta_theta, r_inner, delta_r):
+                      delta_theta, r_inner, delta_r, statistic):
     """
     Implementation of caking.
 
@@ -420,6 +420,10 @@ def wedge_integration(src_data, geometry_object, theta_start,
     delta_r : float
         The length of the wedge in the radial direction
         in pixel units. Must be non-negative
+    
+    statistic : function
+        Statistical function which takes 1-D ndarrays to a
+        single number.  i.e. np.mean
 
     Returns
     -------
@@ -457,4 +461,8 @@ def wedge_integration(src_data, geometry_object, theta_start,
     lower_r = "r_inner translated into a bin index"
     upper_r = "r_inner+delta_r translated into a bin index"
     final_cut = theta_cut[lower_r:upper_r]
-    return final_cut
+    ring_statistic = []
+    for ring in final_cut:
+        ring_statistic.append(statistic(ring))
+    stat_array = np.array(ring_statistic)
+    return stat_array
