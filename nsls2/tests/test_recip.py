@@ -1,6 +1,6 @@
 import numpy as np
 import nsls2.recip as recip
-
+from numpy.testing import assert_array_equal, assert_array_almost_equal
  
 def test_process_to_q():
 
@@ -23,22 +23,23 @@ def test_process_to_q():
 
     totSet = recip.process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX, detPixSizeY, detX0, detY0, detDis, waveLen, UBmat, istack)
     
-    print totSet print "\n\n Six Angles "
+    """print totSet print "\n\n Six Angles "
     print settingAngles
     print "\n\n Known HKL values  "
     print " HKL = [[-0.15471196  0.19673939 -0.11440936]]"
     print " HKL = [[ 0.10205953  0.45624416 -0.27200778]]"
     
     print " \n\n HKL Values "
-    print totSet
+    print totSet"""
    
 
 def test_process_grid():
-    size = 5
-    Qmax = array([1.0, 1.0, 1.0])
-    Qmin = array([-1.0, -1.0, -1.0])
-    dQN = array([size,size, size])
+    size = 4
     sigma = 0.1
+    Qmax = np.array([1.0, 1.0, 1.0])
+    Qmin = np.array([-1.0, -1.0, -1.0])
+    dQN = np.array([size,size, size])
+    
     grid = np.mgrid[0:dQN[0], 0:dQN[1], 0:dQN[2]]
     r = (Qmax - Qmin) / dQN
 
@@ -50,16 +51,15 @@ def test_process_grid():
     
     out = np.exp(-(X**2 + Y**2 + Z**2) / (2 * sigma**2))
 
-    out = array([np.ravel(X),
+    data = np.array([np.ravel(X),
                  np.ravel(Y),
                  np.ravel(Z),
                  np.ravel(out)])
-    data = out.T
+    data = data.T
 
     gridData, gridOccu, gridStd, gridOut, emptNb, gridbins = recip.process_grid(data,
-                                                array([-1.0, -1.0, -1.0]),
-                                                array([1.0, 1.0, 1.0]),
-                                                array([size, size, size]))
-    print "\n\n gridData "
-    print gridData
-    
+                                                Qmax, Qmin, dQN)
+                                                
+    gridDataback = np.ravel(gridData)
+    Databack =  np.ravel(out)
+    assert_array_almost_equal(gridDataback, Databack)
