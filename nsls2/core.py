@@ -392,7 +392,7 @@ def radial_integration(img, detector_center, sample_to_detector_distance,
     pass
 
 
-def wedge_integration(src_data, center, theta_start,
+def wedge_integration(src_data, geometry_object, theta_start,
                       delta_theta, r_inner, delta_r):
     """
     Implementation of caking.
@@ -402,8 +402,9 @@ def wedge_integration(src_data, center, theta_start,
     scr_data : ndarray
         The source-data to be integrated
 
-    center : ndarray
-        The center of the ring in pixels
+    geometry_object : Azimuthal integrator object
+        The object which holds all the detector 
+        information after calibration
 
     theta_start : float
         The angle of the start of the wedge from the
@@ -425,4 +426,35 @@ def wedge_integration(src_data, center, theta_start,
     float
         The integrated intensity under the wedge
     """
-    pass
+    """
+    Take the image bin into rings
+    Take the angle array bin into rings
+    Sort the binned image by the binned angles
+    Cut the binned image down to size acording to the angles
+    """
+    radi_array = geometry_object.rArray(src_data.shape)
+    angle_array = geometry_object.chiArray(src_data.shape)
+    #digitize magic on both, which produces a list of lists,
+    #the outer list is a list of bins for the radi, the inner,
+    #lists contain all the values of the pixels in those bins
+    binned_src_data = magic!!!
+    binned_angles = magic2!!!
+    bins = magic3!!
+    
+    sorted_src_data = []
+    for binned_data, binned_angle in zip(binnned_src_data, binned_angles):
+        sorted_src_data.append([x for (y,x) in sorted(zip(binned_angle,binned_data))])
+    #Now get the index for the sorted data so we can cut the data down in theta
+    bounds_list = []
+    for ring in angle_array:
+        index_within_bounds = np.where(theta_start+delta_theta>=ring>=theta_start)[0]
+        lower_index = index_within_bounds[0]
+        upper_index = index_within_bounds[-1]
+        bounds_list.append(tuple([lower_index, upper_index]))
+    theta_cut = []
+    for ring, bounds in zip(sorted_src_data, bounds_list):
+        theta_cut.append(ring[bounds[0]:[bounds[1]]])
+    lower_r = "r_inner translated into a bin index"
+    upper_r = "r_inner+delta_r translated into a bin index"
+    final_cut = theta_cut[lower_r:upper_r]
+    return final_cut
