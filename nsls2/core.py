@@ -441,9 +441,9 @@ def wedge_integration(src_data, geometry_object, theta_start,
     #digitize magic on both, which produces a list of lists,
     #the outer list is a list of bins for the radi, the inner,
     #lists contain all the values of the pixels in those bins
-    binned_src_data = magic!!!
-    binned_angles = magic2!!!
-    bins = magic3!!
+    binned_src_data = [[]] #magic!!!
+    binned_angles = [[]] #magic2!!!
+    bins = [] #magic3!!
     
     sorted_src_data = []
     for binned_data, binned_angle in zip(binnned_src_data, binned_angles):
