@@ -151,10 +151,9 @@ def find_larest_peak(X, Y, window=5):
 
 def integrate_ROI(x_value_array, counts, x_min, x_max):
     """
-    Integrate region(s) of the given spectrum.  If `x_min`
-    and `x_max` are arrays/lists they must be equal in length.
-    The values contained in the 'x_value_array' must have monotonic (equal)
-    spacing and be increasing from left to right.
+    Integrate region(s) of the given spectrum.  If `x_min` and `x_max` are 
+    arrays/lists they must be equal in length. The values contained in the 
+    'x_value_array' must be monotonically increasing from left to right. 
     The weight from each of the regions is summed.
 
     This returns a single scalar value for the integration.
@@ -168,11 +167,11 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
     Parameters
     ----------
     counts : array
-        Counts in spectrum, any units
+       Counts in spectrum, any units
 
     x_value_array : array
         The array of all x values corresponding to the left (lower) 
-        edge of each bin in the spectrum. Values must be monotonically spaced.
+        edge of each bin in the spectrum.
 
     x_min : float or array
         The lower edge of the integration region
@@ -196,64 +195,72 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
     eval_x_arr_sign = np.sign(np.diff(x_value_array))
     
     # check whether the sign of all diff measures are negative in the 
-    # x_value_array. If so make then the input array for both x_values and 
+    # x_value_array. If so, then the input array for both x_values and 
     # count are reversed so that they are positive, and monotonically increase 
     # in value
+    # added a print statement so that user is at least notified that this
+    # operation was required.
     if np.all(eval_x_arr_sign < 0):
         x_value_array = x_value_array[::-1]
         counts = counts[::-1]
+        print ("Input values for 'x_value_array' were found to be monotonically "
+                "decreasing. The 'x_value_array' and 'counts' arrays have been"
+                "reversed prior to integration.")
         #sign array has to be re-evaluated since diff-sign has changed.
         eval_x_arr_sign = np.sign(np.diff(x_value_array))
-
+    
     #check to make sure no outliers exist which violate the monotonically 
     #increasing requirement, and if exceptions exist, then error points to the 
     #location within the source array where the exception occurs.
     if not np.all(eval_x_arr_sign > 0):
         error_locations = np.where(eval_x_arr_sign <= 0)
         raise ValueError("Independent variable must be monotonically "
-                         "increasing. Erroneous values found at array index "
-                         "locations: " + str(error_locations))
-    
+                         "increasing. Erroneous values found at x-value "
+                         "array index locations: {0}".format(error_locations))
+     
     # up-cast to 1d and make sure it is flat
     x_min = np.atleast_1d(x_min).ravel()
     x_max = np.atleast_1d(x_max).ravel()
-
+    
     # verify that the number of minimum and maximum boundary values are equal
     if len(x_min) != len(x_max):
         raise ValueError("integration bounds must have same lengths")
-
+    
     # verify that the specified minimum values are actually less than the sister
-    # maximum value
-    # A specific fix in case min integration boundaries and max integration 
-    # boundaries are reversed.
-    if np.all(x_min >= x_max):
-        x_max, x_min = x_min, x_max
-    # Raise error if a minimum value is actually greater than the sister 
-    # maximum value.
+    # maximum value, and raise error if any minimum value is actually greater 
+    #than the sister maximum value.
     if np.any(x_min >= x_max):
-        raise ValueError("lower integration bound must be less than "
-                         "upper integration bound ")
-
+        raise ValueError("All lower integration bounds must be less than "
+                         "upper integration bounds.")
+    
     # check to make sure that all specified minimum and maximum values are 
     # actually contained within the extents of the independent variable array
-    if np.any(x_min <= x_value_array[0]):
-        raise ValueError("lower integration boundary values must be greater"
-                         "than, or equal to the lowest value in spectrum range")
-    if np.any(x_max >= x_value_array[-1]):
-        raise ValueError("upper integration boundary values must be less "
+    if np.any(x_min < x_value_array[0]):
+        error_locations = np.where(x_min < x_value_array[0])
+        raise ValueError("Specified lower integration boundary values "
+                         "are outside the spectrum range. All minimum "
+                         "integration boundaries must be greater than, or "
+                         "equal to the lowest value in spectrum range. The "
+                         "erroneous x_min array indices are: {0}".format(error_locations))
+    if np.any(x_max > x_value_array[-1]):
+        error_locations =  np.where(x_max > x_value_array[-1])
+        raise ValueError("Specified upper integration boundary values "
+                         "are outside the spectrum range. All maximum "
+                         "integration boundary values must be less "
                          "than, or equal to the highest value in the spectrum "
-                         "range")
-
+                         "range. The erroneous x_max array indices are: "
+                         "{0}".format(error_locations))
+    
     # find the bottom index of each integration bound
     bottom_indx = x_value_array.searchsorted(x_min)
     # find the top index of each integration bound
     # NOTE: +1 required for correct slicing for integration function
     top_indx = x_value_array.searchsorted(x_max) + 1
-
+    
     # set up temporary variables
     accum = 0
     # integrate each region
     for bot, top in zip(bottom_indx, top_indx):
         accum += simps(counts[bot:top], x_value_array[bot:top])
-
+    
     return accum
