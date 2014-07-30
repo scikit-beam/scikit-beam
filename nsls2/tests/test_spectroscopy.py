@@ -65,7 +65,7 @@ def test_integrate_ROI_errors():
     # NOTE: this will now get fixed in the code and will not raise exception.
     #assert_raises(ValueError, integrate_ROI, E, C, 32, 2)
     
-    #This still raises exception because all values are not swappable.
+    #Min boundary greater than max boundary.
     assert_raises(ValueError, integrate_ROI, E, C,
                   [32, 1], [2, 10])
     # bottom out of range
@@ -77,8 +77,10 @@ def test_integrate_ROI_errors():
                   [32, 1], [2, 10, 32],)
     # independent variable (x_value_array) not increasing monotonically
     assert_raises(ValueError, integrate_ROI, C, C, 2, 10)
-
-
+    # outliers present in x_value_array which violate monotonic reqirement
+    E[2] = 50
+    E[50] = 2
+    assert_raises(ValueError, integrate_ROI, E, C, 2, 60)
 
 def test_integrate_ROI_compute():
     E = np.arange(100)
@@ -87,15 +89,15 @@ def test_integrate_ROI_compute():
                               1)
     assert_array_almost_equal(integrate_ROI(E, C, 5.5, 11.5),
                               6)
-
     assert_array_almost_equal(integrate_ROI(E, C, [5.5, 17], [11.5, 23]),
                               12)
-    assert_array_almost_equal(integrate_ROI(E, C, [11.5, 23], [5.5, 17]),
-                              12)
+
+def test_integrate_ROI_reverse_input():
+    E = np.arange(100)
+    C = E[::-1]
     E_rev = E[::-1]
     C_rev = C[::-1]
-    assert_array_almost_equal(integrate_ROI(E_rev, C_rev, [5.5, 17], 
-                                            [11.5, 23]), 12)
-    assert_array_almost_equal(integrate_ROI(E_rev, C_rev, [11.5, 23], 
-                                            [5.5, 17]), 12)
-    
+    assert_array_almost_equal(
+            integrate_ROI(E_rev, C_rev, [5.5, 17], [11.5, 23]), 
+            integrate_ROI(E, C, [5.5, 17], [11.5, 23])
+            )
