@@ -393,7 +393,8 @@ def radial_integration(img, detector_center, sample_to_detector_distance,
 
 
 def wedge_integration(src_data, geometry_object, theta_start,
-                      delta_theta, r_inner, delta_r, statistic):
+                      delta_theta, r_inner, delta_r, statistic,
+                      resolution):
     """
     Implementation of caking.
 
@@ -423,12 +424,20 @@ def wedge_integration(src_data, geometry_object, theta_start,
     
     statistic : function
         Statistical function which takes 1-D ndarrays to a
-        single number.  i.e. np.mean
+        single number or str according to scipy.stats.binned_statistic
+        i.e. np.mean
+    
+    resoltuion : float
+        The resolution of the bins for the output
 
     Returns
     -------
-    float
+    ndarray:
+        The bins of the integrated intensity
+    
+    ndarray:
         The integrated intensity under the wedge
+    
     """
     """
     Take the image bin into rings
@@ -436,33 +445,22 @@ def wedge_integration(src_data, geometry_object, theta_start,
     Sort the binned image by the binned angles
     Cut the binned image down to size acording to the angles
     """
+    #compute the r and theta of each pixel
     radi_array = geometry_object.rArray(src_data.shape)
     angle_array = geometry_object.chiArray(src_data.shape)
-    #digitize magic on both, which produces a list of lists,
-    #the outer list is a list of bins for the radi, the inner,
-    #lists contain all the values of the pixels in those bins
-    binned_src_data = [[]] #magic!!!
-    binned_angles = [[]] #magic2!!!
-    bins = [] #magic3!!
-    
-    sorted_src_data = []
-    for binned_data, binned_angle in zip(binnned_src_data, binned_angles):
-        sorted_src_data.append([x for (y,x) in sorted(zip(binned_angle,binned_data))])
-    #Now get the index for the sorted data so we can cut the data down in theta
-    bounds_list = []
-    for ring in angle_array:
-        index_within_bounds = np.where(theta_start+delta_theta>=ring>=theta_start)[0]
-        lower_index = index_within_bounds[0]
-        upper_index = index_within_bounds[-1]
-        bounds_list.append(tuple([lower_index, upper_index]))
-    theta_cut = []
-    for ring, bounds in zip(sorted_src_data, bounds_list):
-        theta_cut.append(ring[bounds[0]:[bounds[1]]])
-    lower_r = "r_inner translated into a bin index"
-    upper_r = "r_inner+delta_r translated into a bin index"
-    final_cut = theta_cut[lower_r:upper_r]
-    ring_statistic = []
-    for ring in final_cut:
-        ring_statistic.append(statistic(ring))
-    stat_array = np.array(ring_statistic)
-    return stat_array
+    #generate flat array of pixles within the bounds
+    wedge = src_data[(r_inner+delta_r >= radi_array
+                    ) & (radi_array >= r_inner) & (
+                    theta_start+delta_theta >= angle_array) & (
+                    angle_array >= theta_start)
+    #generate flat array that discribes how the radi are
+    #transformed during the wedge process, this will be
+    #used later to generate the integrated information
+    radi_transform = radi_array[(r_inner+delta_r >= radi_array
+                    ) & (radi_array >= r_inner) & (
+                    theta_start+delta_theta >= angle_array) & (
+                    angle_array >= theta_start)
+    bins = np.arange(r_inner, r_inner+delta_r+resolution, resolution)
+    #from scipy.stats
+    stat_array = binned_statistic(radi_transform, wedge, statistic=statistic, bins=bins)[0]
+    return bins, stat_array
