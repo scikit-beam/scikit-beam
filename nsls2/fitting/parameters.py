@@ -47,9 +47,18 @@ class Parameters(object):
         return
     
     
+    #def __setattr__(self, name, value):
+    #    super(Parameters, self).__setattr__(name, value)
+       
+    
     def __getitem__(self, name):
         return self.p_dict[name]
     
     
     def all(self):
         return self.p_dict
+    
+    
+    
+    
+    
