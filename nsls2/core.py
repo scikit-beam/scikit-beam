@@ -392,7 +392,7 @@ def radial_integration(img, detector_center, sample_to_detector_distance,
     pass
 
 
-def wedge_integration(src_data, radi_array, angle_array, theta_start,
+def wedge_azimuthal_integration(src_data, radi_array, angle_array, theta_start,
                       delta_theta, r_inner, delta_r, statistic,
                       resolution):
     """
@@ -466,3 +466,56 @@ def wedge_integration(src_data, radi_array, angle_array, theta_start,
     # from scipy.stats
     stat_array = binned_statistic(radi_transform, wedge, statistic=statistic, bins=bins)[0]
     return bins, stat_array
+
+def wedge_total_integration(src_data, radi_array, angle_array, theta_start,
+                      delta_theta, r_inner, delta_r, statistic=np.mean):
+    """
+    Implementation of caking.
+
+    Parameters
+    ----------
+    src_data : ndarray
+        The source-data to be integrated
+
+    radi_array : ndarray
+        Array which is the same size as the src_data and
+        contains every pixel's position radially
+    
+    angle_array : ndarray
+        Array which is the same size as the src_data and
+        contains every pixel's position around the ring
+
+    theta_start : float
+        The angle of the start of the wedge from the
+        image y-axis in degrees
+
+    delta_theta : float
+        The angular width of the wedge in degrees.  Positive
+        angles go clockwise, negative go counter-clockwise.
+
+    r_inner : float
+        The inner radius in pixel units, Must be non-negative
+
+    delta_r : float
+        The length of the wedge in the radial direction
+        in pixel units. Must be non-negative
+    
+    statistic : function
+        Statistical function which takes 1-D ndarrays to a
+        single number or str according to scipy.stats.binned_statistic
+        i.e. np.mean
+    
+
+    Returns
+    -------
+    float:
+        The statistic applied to all the pixels in the ring
+    
+    """
+    # compute the r and theta of each pixel povided at start
+    # generate flat array of pixles within the bounds
+    wedge = src_data[(r_inner+delta_r >= radi_array
+                    ) & (radi_array >= r_inner) & (
+                    theta_start+delta_theta >= angle_array) & (
+                    angle_array >= theta_start)
+    return statistic(wedge)
