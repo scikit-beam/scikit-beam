@@ -449,20 +449,20 @@ def wedge_integration(src_data, radi_array, angle_array, theta_start,
     Sort the binned image by the binned angles
     Cut the binned image down to size acording to the angles
     """
-    #compute the r and theta of each pixel povided at start
-    #generate flat array of pixles within the bounds
+    # compute the r and theta of each pixel povided at start
+    # generate flat array of pixles within the bounds
     wedge = src_data[(r_inner+delta_r >= radi_array
                     ) & (radi_array >= r_inner) & (
                     theta_start+delta_theta >= angle_array) & (
                     angle_array >= theta_start)
-    #generate flat array that discribes how the radi are
-    #transformed during the wedge process, this will be
-    #used later to generate the integrated information
+    # generate flat array that discribes how the radi are
+    # transformed during the wedge process, this will be
+    # used later to generate the integrated information
     radi_transform = radi_array[(r_inner+delta_r >= radi_array
                     ) & (radi_array >= r_inner) & (
                     theta_start+delta_theta >= angle_array) & (
                     angle_array >= theta_start)
     bins = np.arange(r_inner, r_inner+delta_r+resolution, resolution)
-    #from scipy.stats
+    # from scipy.stats
     stat_array = binned_statistic(radi_transform, wedge, statistic=statistic, bins=bins)[0]
     return bins, stat_array
