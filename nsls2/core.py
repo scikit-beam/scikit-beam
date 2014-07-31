@@ -392,7 +392,7 @@ def radial_integration(img, detector_center, sample_to_detector_distance,
     pass
 
 
-def wedge_integration(src_data, geometry_object, theta_start,
+def wedge_integration(src_data, radi_array, angle_array, theta_start,
                       delta_theta, r_inner, delta_r, statistic,
                       resolution):
     """
@@ -400,12 +400,16 @@ def wedge_integration(src_data, geometry_object, theta_start,
 
     Parameters
     ----------
-    scr_data : ndarray
+    src_data : ndarray
         The source-data to be integrated
 
-    geometry_object : Azimuthal integrator object
-        The object which holds all the detector 
-        information after calibration
+    radi_array : ndarray
+        Array which is the same size as the src_data and
+        contains every pixel's position radially
+    
+    angle_array : ndarray
+        Array which is the same size as the src_data and
+        contains every pixel's position around the ring
 
     theta_start : float
         The angle of the start of the wedge from the
@@ -445,9 +449,7 @@ def wedge_integration(src_data, geometry_object, theta_start,
     Sort the binned image by the binned angles
     Cut the binned image down to size acording to the angles
     """
-    #compute the r and theta of each pixel
-    radi_array = geometry_object.rArray(src_data.shape)
-    angle_array = geometry_object.chiArray(src_data.shape)
+    #compute the r and theta of each pixel povided at start
     #generate flat array of pixles within the bounds
     wedge = src_data[(r_inner+delta_r >= radi_array
                     ) & (radi_array >= r_inner) & (
