@@ -9,3 +9,4 @@ Development Guide
 
   git_guide.rst
   workflow.rst
+  logging.rst
