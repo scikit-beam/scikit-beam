@@ -16,6 +16,9 @@ from six import string_types
 from collections import namedtuple, MutableMapping
 import numpy as np
 
+import logging
+logger = logging.getLogger(__name__)
+
 md_value = namedtuple("md_value", ['value', 'units'])
 
 
