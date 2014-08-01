@@ -12,10 +12,11 @@ code; it is rude to spam the user with debugging output.
 This is such a common need that the tools to solve it are built into
 the core python library in the :mod:`logging` module.
 
+ - `Demonstration <https://github.com/tacaswell/logger_demo>`_
  - `Basic tutorial <https://docs.python.org/2/howto/logging.html>`_
  - `Detailed reference <https://docs.python.org/2/library/logging.html>`_
  - `Cookbook <https://docs.python.org/2/howto/logging-cookbook.html>`_
- - `Demonstration <https://github.com/tacaswell/logger_demo>`_
+ 
 Rough Overview
 --------------
 
