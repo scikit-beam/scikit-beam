@@ -16,7 +16,7 @@ the core python library in the :mod:`logging` module.
  - `Basic tutorial <https://docs.python.org/2/howto/logging.html>`_
  - `Detailed reference <https://docs.python.org/2/library/logging.html>`_
  - `Cookbook <https://docs.python.org/2/howto/logging-cookbook.html>`_
- 
+
 Rough Overview
 --------------
 
@@ -112,7 +112,7 @@ Defining a Formatter
 ````````````````````
 
 The :class:`Formatters` are essentially string formatting.  For a full
-list of the data available see `this list
+list of the data available and the corresponding variable names, see `this list
 <https://docs.python.org/2/library/logging.html#logrecord-attributes>`_
 
 For example to show the time, the severity, and the message ::
