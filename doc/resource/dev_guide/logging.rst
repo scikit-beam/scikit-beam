@@ -26,13 +26,13 @@ messages with a severity level attached.  The log messages are then
 formatted (using a :class:`Formatter` object) and distributed by
 :class:`Handler` objects attached to the :class:`Logger`.  The
 messages are also passed up to any parent :class:`Logger` s.  Each
-:class:`Logger` and :class:`Handler`.  Each :class:`Handler` and
-:class:`Logger` objects have a severity threshold, messages below that
-threshold are ignored.  This enables easy run-time selection of the
+:class:`Handler` and :class:`Logger` objects have a severity threshold, messages
+below that threshold are ignored.  This enables easy run-time selection of the
 verbosity of the logging.
 
 
-There are five default levels of logging:
+There are five default levels of logging, listed in decreasing order of
+severity:
 
 +-------------------------+-----------------------------------------------+
 |Level                    |Description                                    |
@@ -59,8 +59,6 @@ There are five default levels of logging:
 |                         |                                               |
 +-------------------------+-----------------------------------------------+
 
-in decreasing order of severity.
-
 Nuts and Bolts
 --------------
 The loggers are hierarchical (by dotted name).  If a logger does not have
@@ -69,8 +67,9 @@ loggers will forward all of their accepted messages to their parents.
 
 Create a message
 ````````````````
-Each module in the library will have an object :code:`logger` attribute, thus
-creating a message is just a matter of ::
+A :code:`logger` is defined in each module of our libraries by :code:`logger =
+logging.getLogger(__name__)` where :code:`__name__` is the module name.
+Creating messages with the various severity levels is done by ::
 
     logger.debug("this is a debug message")
     logger.info("this is a info message")
@@ -99,10 +98,11 @@ In order to get the messages out a :class:`Handler` (with it's own
     form = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     logger.addHandler(h)
 
-This will attach a `StreamHandler`, which by default writes to stderr, to the logger.
+The above code demonstrates the mechanism by which a `StreamHandler` is
+attached to the logger.  `StreamHandler` writes to stderr by default.
 
 
-For detailed explanations of the available handlers see the documentation.
+`Detailed explanations of the available handlers <https://docs.python.org/2/howto/logging.html#useful-handlers>`_.
 
 
 
