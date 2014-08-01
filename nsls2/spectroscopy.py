@@ -11,6 +11,8 @@ from __future__ import (absolute_import, division, print_function,
 import six
 from six.moves import zip
 import numpy as np
+import logging
+logger = logging.getLogger(__name__)
 
 
 def fit_quad_to_peak(x, y):

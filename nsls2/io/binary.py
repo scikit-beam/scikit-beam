@@ -1,4 +1,10 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 import numpy as np
+
+import six
+import logging
+logger = logging.getLogger(__name__)
 
 
 def read_binary(filename, nx, ny, nz, dsize, headersize, **kwargs):

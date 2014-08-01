@@ -11,7 +11,8 @@ from __future__ import (absolute_import, division, print_function,
 import six
 
 from collections import MutableMapping, defaultdict
-
+import logging
+logger = logging.getLogger(__name__)
 
 class RCParamDict(MutableMapping):
     """
