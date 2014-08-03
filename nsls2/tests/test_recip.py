@@ -3,7 +3,6 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 import nsls2.recip as recip
 import numpy.testing as npt
-from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 
 def test_process_to_q():
@@ -11,8 +10,8 @@ def test_process_to_q():
     detPixSizeX, detPixSizeY, detSizeX, detSizeY = 0.0135*8, 0.0135*8, 256, 256
     detX0, detY0, detDis, detAng = 256/2.0, 256/2.0, 355.0, 0.0
     
-    energy = 640  # ( ev)
-    # HC_OVER_E to convert from E to Lambda
+    energy = 640  # (  in eV)
+    # HC_OVER_E to convert from Energy to wavelength (Lambda)
     hc_over_e = 12398.4
     waveLen = hc_over_e / energy  # (Angstrom )
      
@@ -31,16 +30,14 @@ def test_process_to_q():
                                 detDis, waveLen, UBmat, istack)
     
     #  Known HKL values for the given six angles)
-    HKL1 = np.matrix([[-0.15471196, 0.19673939,
-                                  -0.11440936]])
-    HKL2 = np.matrix([[0.10205953,  0.45624416,
-                                  -0.27200778]])
+    HKL1 = np.matrix([[-0.15471196, 0.19673939, -0.11440936]])
+    HKL2 = np.matrix([[0.10205953,  0.45624416, -0.27200778]])
     
     # New HKL values obtained from the process_to_q
                                     
     N_HKL1 = np.around(np.matrix([[totSet[32896, 0],
                     totSet[32896, 1], totSet[32896, 2]]]), decimals=8)
-    N_HKL2 = np.around(np.matrix([[totSet[98432,0],
+    N_HKL2 = np.around(np.matrix([[totSet[98432, 0],
                     totSet[98432, 1], totSet[98432, 2]]]), decimals=8)
     
     # check the values are as expected
