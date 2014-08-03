@@ -30,14 +30,14 @@ import os
 
 
 #Reference am files:
-f_path = '/home/giltis/Dropbox/BNL_Docs/Alt_File_Formats/am_cnvrt_compare/'
-fname_flt = 'Shew_C5_bio_abv.am' #Grayscale volume: float dtype
-fname_short = 'C2_dType_Short.am' #Grayscale volume: short dtype
-fname_test = 'APS_2C_Raw_Abv_CROP_tester.am' #Grayscale volume: float dtype
-fname_dbasin = 'C2_dBasin.am' #labelfield: ushort dtype
-fname_label = 'C2_LabelField.am' #labelfield: ushort dtype
-fname_label2 = 'Rad1_blw_GlsBd-Label.surf' #surface file. not sure we can read yet
-fname_binary = 'Shew_C8_bio_blw_GlsBd-Bnry.am' #binary data set: byte dtype
+#f_path = '/home/giltis/Dropbox/BNL_Docs/Alt_File_Formats/am_cnvrt_compare/'
+#fname_flt = 'Shew_C5_bio_abv.am' #Grayscale volume: float dtype
+#fname_short = 'C2_dType_Short.am' #Grayscale volume: short dtype
+#fname_test = 'APS_2C_Raw_Abv_CROP_tester.am' #Grayscale volume: float dtype
+#fname_dbasin = 'C2_dBasin.am' #labelfield: ushort dtype
+#fname_label = 'C2_LabelField.am' #labelfield: ushort dtype
+#fname_label2 = 'Rad1_blw_GlsBd-Label.surf' #surface file. not sure we can read yet
+#fname_binary = 'Shew_C8_bio_blw_GlsBd-Bnry.am' #binary data set: byte dtype
 #fname_list = [fname_flt, fname_short, fname__test, fname_dbasin, fname_label, fname_label2, fname_binary]
 #head_list = [head_flt, head_short, head_test, head_dbasin, head_label, head_label2, head_binary]
 #data_list = 
@@ -55,7 +55,7 @@ def _read_amira (src_file):
     ----------
     src_file : string
         The path and file name pointing to the AmiraMesh file to be loaded.
-        
+    
     
     Returns
     -------
@@ -67,8 +67,8 @@ def _read_amira (src_file):
         image processing function set.
     
     am_data : string
-        A compiled string containing all of the image array data, as was stored
-        in the AmiraMesh data file.  
+        A compiled string containing all of the image array data, that was stored
+        in the source AmiraMesh data file.  
     """
     
     am_header = []
@@ -83,6 +83,7 @@ def _read_amira (src_file):
     am_data = f.read()
     f.close()
     return am_header, am_data
+
 
 def _cnvrt_amira_data_2numpy (am_data, header_dict, flip_Z = True):
     """
@@ -110,16 +111,20 @@ def _cnvrt_amira_data_2numpy (am_data, header_dict, flip_Z = True):
         "_create_md_dict."
     
     flip_Z : bool
-        This option is included in the event that reversed orientation required 
-        by all of the initial test data sets is undesired. Setting this switch 
-        to "True" will flip the z-axis during processing, and a value of "False"
-        will keep the array is initially assigned during the array reshaping 
-        step.
+        This option is included because the .am data sets evaluated thus far
+        have opposite z-axis indexing than numpy arrays. This switch currently
+        defaults to "True" in order to ensure that z-axis indexing remains
+        consistent with data processed using Avizo.
+        Setting this switch to "True" will flip the z-axis during processing,
+        and a value of "False" will keep the array is initially assigned during 
+        the array reshaping step.
     
     Returns
     -------
     output : ndarray
-        Numpy array containing 
+        Numpy ndarray containing the image data converted from the AmiraMesh
+        file. This data array is ready for further processing using the NSLS-II
+        function library, or other operations able to operate on numpy arrays.
     """
     Zdim = header_dict['array_dims']['z_dim']
     Ydim = header_dict['array_dims']['y_dim']
@@ -138,7 +143,9 @@ def _cnvrt_amira_data_2numpy (am_data, header_dict, flip_Z = True):
                      'byte' : 'b'
                          }
     if header_dict['data_format'] == 'BINARY-LITTLE-ENDIAN':
-        flt_values = np.fromstring(data_strip, (am_format_dict[header_dict['data_format']] + am_dtype_dict[header_dict['data_type']])
+        flt_values = np.fromstring(data_strip, 
+                                   (am_format_dict[header_dict['data_format']] + 
+                                       am_dtype_dict[header_dict['data_type']]))
     #Resize the 1D array to the correct ndarray dimensions
     flt_values.resize(Zdim, Ydim, Xdim)
     if flip_Z == True:
@@ -149,16 +156,24 @@ def _cnvrt_amira_data_2numpy (am_data, header_dict, flip_Z = True):
 
 def _sort_amira_header (header_list):
     """
-    
+    This function takes the raw string list containing the AmiraMesh header
+    informationa and strips the string list of all "empty" characters,
+    including new line characters ('\n') and empty lines. The function also
+    splits each header line (which originally is stored as a single string)
+    into individual words, numbers or characters, using spaces between words as
+    the separating operator. The output of this function is used to generate
+    the metadata dictionary for the image data set.
+
     Parameters
     ----------
     header_list : list of strings
+        This is the header output from the function _read_amira()
     
     Returns
     -------
-    
-    
-    
+    header_list : list of strings
+        This header list has been stripped and sorted and is now ready for
+        populating the metadata dictionary for the image data set.
     """
     
     for row in range(len(header_list)):
@@ -171,40 +186,82 @@ def _sort_amira_header (header_list):
 
 def _create_md_dict (header_list):
     """
-    
+    This function takes the sorted header list as input and populates the
+    metadata dictionary containing all relevant header information pertinent to
+    the image data set originally stored in the AmiraMesh file.
+
+    Parameters
+    ----------
+    header_list : list of strings
+        This is the output from the _sort_amira_header function.
     
     """
-    
-        md_dict = {'software_src' : header_list[0][1],
+
+    md_dict = {'software_src' : header_list[0][1],
                'data_format' : header_list[0][2],
                'data_format_version' : header_list[0][3]
                 }
     for row in range(len(header_list)):
         try:
-            md_dict['array_dims'] = {'x_dim' : int(header_list[row][header_list[row].index('define') + 2]),
-                                     'y_dim' : int(header_list[row][header_list[row].index('define') + 3]),
-                                     'z_dim' : int(header_list[row][header_list[row].index('define') + 4])
+            md_dict['array_dims'] = {'x_dim' : int(header_list[row]
+                                                   [header_list[row]
+                                                       .index('define') + 2]),
+                                     'y_dim' : int(header_list[row]
+                                                   [header_list[row]
+                                                       .index('define') + 3]),
+                                     'z_dim' : int(header_list[row]
+                                                   [header_list[row]
+                                                       .index('define') + 4])
                                      }
         except:
         #    continue
             try:
-                md_dict['data_type'] = header_list[row][header_list[row].index('Content') + 2]
+                md_dict['data_type'] = header_list[row][header_list[row]
+                        .index('Content') + 2]
             except: 
             #    continue
                 try:
-                    md_dict['coord_type'] = header_list[row][header_list[row].index('CoordType') + 1]
+                    md_dict['coord_type'] = header_list[row][header_list[row]
+                            .index('CoordType') + 1]
                 except:
                     try:
-                        md_dict['bounding_box'] = {'x_min' : float(header_list[row][header_list[row].index('BoundingBox') + 1]),
-                                                   'x_max' : float(header_list[row][header_list[row].index('BoundingBox') + 2]),
-                                                   'y_min' : float(header_list[row][header_list[row].index('BoundingBox') + 3]),
-                                                   'y_max' : float(header_list[row][header_list[row].index('BoundingBox') + 4]),
-                                                   'z_min' : float(header_list[row][header_list[row].index('BoundingBox') + 5]),
-                                                   'z_max' : float(header_list[row][header_list[row].index('BoundingBox') + 6])
+                        md_dict['bounding_box'] = {'x_min' : 
+                                                    float(
+                                                        header_list[row][
+                                                            header_list[row]
+                                                            .index(
+                                                                'BoundingBox')
+                                                            + 1]),
+                                                   'x_max' : 
+                                                   float(header_list[row][
+                                                        header_list[row]
+                                                        .index('BoundingBox')
+                                                        + 2]),
+                                                   'y_min' : 
+                                                   float(header_list[row][
+                                                        header_list[row]
+                                                        .index('BoundingBox')
+                                                        + 3]),
+                                                   'y_max' : 
+                                                   float(header_list[row][
+                                                        header_list[row]
+                                                        .index('BoundingBox')
+                                                        + 4]),
+                                                   'z_min' : 
+                                                   float(header_list[row][
+                                                        header_list[row]
+                                                        .index('BoundingBox')
+                                                        + 5]),
+                                                   'z_max' : 
+                                                   float(header_list[row][
+                                                        header_list[row]
+                                                        .index('BoundingBox')
+                                                        + 6])
                                                    }
                     except:
                         try:
-                            md_dict['units'] = header_list[row][header_list[row].index('Units') + 2]
+                            md_dict['units'] = (header_list[row][
+                                header_list[row].index('Units') + 2])
                             md_dict['coordinates'] = header_list[row + 1][1]
                         except:
                             continue
@@ -221,7 +278,7 @@ def load_am_as_np(file_path):
     ----------
     file_path : string
         The path and file name of the AmiraMesh file to be loaded.
-        
+    
     Returns
     -------
     md_dict : dictionary
@@ -233,8 +290,8 @@ def load_am_as_np(file_path):
         in the resulting volume are set to be of float data type by default.
     """
     
-    header, data = __read_amira__(file_path)
-    header = __sort_amira_header__(header)
-    md_dict = __create_md_dict__(header)
-    np_array = __cnvrt_amira_data_2numpy__(data, md_dict)
+    header, data = _read_amira(file_path)
+    header = _sort_amira_header(header)
+    md_dict = _create_md_dict(header)
+    np_array = _cnvrt_amira_data_2numpy(data, md_dict)
     return md_dict, np_array

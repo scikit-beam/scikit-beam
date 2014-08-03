@@ -59,6 +59,12 @@ GCI: 3/11/14 -- 1) Added h5_obj_search() function which searches the specified
     type group and the associated base file name for data sets.
 GCI: 5/13/14 -- Added load function for netCDF files. Specifically for loading 
     data sets acquired at the APS Sector 13 beamline.
+GCI: 8/1/14 -- Updating documentation to detail required dependencies for HDF5
+    and netCDF file IO. Without these required dependencies these functions
+    will not work.
+    In addition to detailing the required dependencies, I'm adding code to
+    enable loading fileops.py even if the required dependencies for loading
+    tiff, netCDF or hdf5 files are not installed.
 """
 
 import numpy as np
@@ -113,6 +119,25 @@ def load_netCDF(file_name,
     This function loads the specified netCDF file format data set (e.g.*.volume 
     APS-Sector 13 GSECARS extension) file into a numpy array for further analysis.
     
+    Required Dependencies
+    ---------------------
+    netcdf4 : Python/numpy interface to the netCDF ver. 4 library
+        Package name: netcdf4-python
+        Install from: https://github.com/Unidata/netcdf4-python
+    numpy
+    Cython -- optional
+    HDF5 C library version 1.8.8 or higher
+        Install from:  ftp://ftp.hdfgroup.org/HDF5/current/src
+        Be sure to build with '--enable-hl --enable-shared'.
+    Libcurl, if you want OPeNDAP support.
+    HDF4, if you want to be able to read HDF4 "Scientific Dataset" (SD) files.
+    The netCDF-4 C library from ftp://ftp.unidata.ucar.edu/pub/netcdf. Version
+    4.1.1 or higher is required (4.2 or higher recommended). Be sure to build
+    with '--enable-netcdf-4 --enable-shared', and set CPPFLAGS="-I
+    $HDF5_DIR/include" and LDFLAGS="-L $HDF5_DIR/lib", where $HDF5_DIR is the
+    directory where HDF5 was installed. If you want OPeNDAP support, add
+    '--enable-dap'. If you want HDF4 SD support, add '--enable-hdf4' and add
+    the location of the HDF4 headers and library to CPPFLAGS and LDFLAGS.
     Parameters
     ----------
     file_name : string
