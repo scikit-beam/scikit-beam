@@ -9,6 +9,9 @@
 
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import os
 import sys
 import ConfigParser
@@ -79,7 +82,6 @@ for f in setup_files:
 
 
 if setupfile is not None:
-    print 'Reading config file %s' % setupfile
     config = ConfigParser.SafeConfigParser()
     config.read(setupfile)
     
