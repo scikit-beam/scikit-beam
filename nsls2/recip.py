@@ -134,6 +134,7 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
     settingAngles : Nx6 array
         six angles of the all the images
         delta, theta, chi, phi, mu, gamma
+        (2 detector rotations and 4 sample rotations)
         
     detSizeX : int
         detector no. of pixels (size) in detector X-direction
