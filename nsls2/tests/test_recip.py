@@ -1,6 +1,9 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 import numpy as np
 import nsls2.recip as recip
 import numpy.testing as npt
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 
 def test_process_to_q():
@@ -30,15 +33,16 @@ def test_process_to_q():
     #  Known HKL values for the given six angles)
     HKL1 = np.matrix([[-0.15471196, 0.19673939,
                                   -0.11440936]])
-    HKL2 = np.matrix([[0.10205953,  0.44624416,
+    HKL2 = np.matrix([[0.10205953,  0.45624416,
                                   -0.27200778]])
     
     # New HKL values obtained from the process_to_q
-    N_HKL1 = np.matrix([[totSet[0, 0], totSet[0, 1],
-                                    totSet[0, 2]]])
-    N_HKL2 = np.matrix([[totSet[-1, 0], totSet[-1, 1],
-                                    totSet[-1, 2]]])
-
+                                    
+    N_HKL1 = np.around(np.matrix([[totSet[32896, 0],
+                    totSet[32896, 1], totSet[32896, 2]]]), decimals=8)
+    N_HKL2 = np.around(np.matrix([[totSet[98432,0],
+                    totSet[98432, 1], totSet[98432, 2]]]), decimals=8)
+    
     # check the values are as expected
     npt.assert_array_equal(HKL1, N_HKL1)
     npt.assert_array_equal(HKL2, N_HKL2)
