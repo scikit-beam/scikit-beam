@@ -25,43 +25,45 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
                       wavelength, ROI=None, **kwargs):
     """
     Project the pixels on the 2D detector to the surface of a sphere.
-
+    
     Parameters
-    ----------
-    img: ndarray
+    ==========
+    img : ndarray
          2D detector image
-    dist_sample: float
+    dist_sample : float
                  see keys_core
                  (mm)
-    detector_center: 2 element float array
+    detector_center : 2 element float array
                      see keys_core
                      (pixels)
-    pixel_size: 2 element float array
+    pixel_size : 2 element float array
                 see keys_core
                 (mm)
-    wavelength: float
+    wavelength : float
                 see keys_core
                 (Angstroms)
-    ROI: 4 element int array
+    ROI : 4 element int array
            ROI defines a rectangular ROI for img
            ROI[0] == x_min
            ROI[1] == x_max
            ROI[2] == y_min
            ROI[3] == y_max
-    **kwargs: dict
+    **kwargs : dict
               Bucket for extra parameters from an unpacked dictionary
 
+
     Returns
-    -------
-    qi: 4 x N array of the coordinates in Q space (A^-1)
+    =======
+    qi : 4 x N array of the coordinates in Q space (A^-1)
         Rows correspond to individual pixels
         Columns are (Qx, Qy, Qz, I)
+        
     """
 
     if ROI is not None and len(ROI) == 4:
         # slice the image based on the desired ROI
-        img=img[ROI[0]:ROI[1], ROI[2]:ROI[3]]
-
+        img = img[ROI[0]:ROI[1], ROI[2]:ROI[3]]
+        
     # create the array of x indices
     arr_2d_x = np.zeros((img.shape[0], img.shape[1]), dtype=np.float)
     for x in range(img.shape[0]):
@@ -87,61 +89,74 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
     qi[0] = arr_2d_x.flatten()
     # fill in the y coordinates
     qi[1] = arr_2d_y.flatten()
-    # set the z coordinate for all pixels to the distance from the sample to the detector
+    # set the z coordinate for all pixels to
+    # the distance from the sample to the detector
     qi[2].fill(dist_sample)
     # fill in the intensity values of the pixels
     qi[3] = img.flatten()
     # convert to an N x 4 array
     qi = qi.transpose()
     # compute the unit vector of each pixel
-    qi[:,0:2] = qi[:,0:2]/np.linalg.norm(qi[:,0:2])
-    # convert the pixel positions from real space distances into the reciprocal space
+    qi[:, 0:2] = qi[:, 0:2]/np.linalg.norm(qi[:, 0:2])
+    # convert the pixel positions from real space distances
+    # into the reciprocal space
     # vector, Q
-    Q = 4 * np.pi / wavelength * np.sin(np.arctan(qi[:,0:2]))
-    # project the pixel coordinates onto the surface of a sphere of radius dist_sample
-    qi[:,0:2] *= dist_sample
-    # compute the vector from the center of the detector (i.e., the zero of reciprocal
-    # space) to each pixel
-    qi[:,2] -= dist_sample
-    # compute the unit vector for each pixels position relative to the center of the
-    # detector, but now on the surface of a sphere
-    qi[:,0:2] = qi[:,0:2]/np.linalg.norm(qi[:,0:2])
+    Q = 4 * np.pi / wavelength * np.sin(np.arctan(qi[:, 0:2]))
+    # project the pixel coordinates onto the surface of a sphere
+    # of radius dist_sample
+    qi[:, 0:2] *= dist_sample
+    # compute the vector from the center of the detector
+    # (i.e., the zero of reciprocal space) to each pixel
+    qi[:, 2] -= dist_sample
+    # compute the unit vector for each pixels position
+    # relative to the center of the detector,
+    #  but now on the surface of a sphere
+    qi[:, 0:2] = qi[:, 0:2]/np.linalg.norm(qi[:, 0:2])
     # convert to reciprocal space
-    qi[:,0:2] *= Q
-
+    qi[:, 0:2] *= Q
+    
     return qi
 
 
-def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX, detPixSizeY, detX0,
-                 detY0, detDis, waveLen, UBmat, istack):
+def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
+                 detPixSizeY, detX0, detY0, detDis, waveLen, UBmat, istack):
     """
         
-    This will procees given images (certain scan) of the full set into receiprocal space (Q)
-    (Qx, Qy, Qz, I)
-        
+    This will procees the given images (certain scan) of
+    the full set into receiprocal space (Q) (Qx, Qy, Qz, I)
+    
     Parameters :
     ------------
-        
     settingAngles : array
         six angles of the all the images
+        
     detSizeX : int
         detector no. of pixels (size) in detector X-direction
+        
     detSizeY : int
         detector no. of pixels (size) in detector Y-direction
+        
     detPixSizeX : float
         detector pixel size in detector X-direction (mm)
+        
     detPixSizeY : float
         detector pixel size in detector Y-direction (mm)
+        
     detX0 : float
         detector X-coordinate of center for reference
+        
     detY0 : float
         detector Y-coordinate of center for reference
+        
     detDis : float
         detector distance from sample (mm)
+        
     waveLen : float
         wavelength (Angstrom)
+        
     UBmat : ndarray
         UB matrix (orientation matrix)
+        
     istack : ndarray
         intensity array of the images
         
@@ -150,7 +165,7 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX, detPixSizeY, de
     totSet : ndarray
         (Qx, Qy, Qz, I) - HKL values and the intensity
         
-    Optional : 
+    Optional :
     ----------
     frameMode = 4 : 'hkl'      : Reciproal lattice units frame.
     frameMode = 1 : 'theta'    : Theta axis frame.
@@ -163,14 +178,13 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX, detPixSizeY, de
     
     totSet = None
     gc.collect()
-    
-    frameMode = 4 #  frameMode 4 : 'hkl'      : Reciproal lattice units frame.
+    # frameMode 4 : 'hkl'      : Reciproal lattice units frame.
+    frameMode = 4
     
     if settingAngles is None:
         raise Exception(" No setting angles specified. ")
     
-    
-    #"---- Setting angle size :", settingAngles.shape
+    # "---- Setting angle size :", settingAngles.shape
     # "---- CCD Size :", (detSizeX, detSizeY)
     
     #  **** Converting to Q   **************
@@ -179,21 +193,21 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX, detPixSizeY, de
     t1 = time.time()
 
     # ctrans - c routines for fast data anlysis
-    totSet = ctrans.ccdToQ(angles      = settingAngles * np.pi / 180.0,
-                           mode        = frameMode,
-                           ccd_size    = (detSizeX, detSizeY),
-                           ccd_pixsize = (detPixSizeX, detPixSizeY),
-                           ccd_cen     = (detX0, detY0),
-                           dist        = detDis,
-                           wavelength  = waveLen,
-                           UBinv       = np.matrix(UBmat).I,
+    totSet = ctrans.ccdToQ(angles=settingAngles * np.pi / 180.0,
+                           mode=frameMode,
+                           ccd_size=(detSizeX, detSizeY),
+                           ccd_pixsize=(detPixSizeX, detPixSizeY),
+                           ccd_cen=(detX0, detY0),
+                           dist=detDis,
+                           wavelength=waveLen,
+                           UBinv=np.matrix(UBmat).I,
                            **ccdToQkwArgs)
     # ending time for the process
     t2 = time.time()
                            
     #    "---- DONE (Processed in %f seconds)", %(t2 - t1)
     #    "---- Setsize is %d", %totSet.shape[0]
-    totSet[:,3] = np.ravel(istack)
+    totSet[:, 3] = np.ravel(istack)
                            
     return totSet
 
@@ -201,33 +215,36 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX, detPixSizeY, de
 def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
     """
         
-    This function will process the set of (Qx, Qy, Qz, I) values and grid the data
+    This function will process the set of
+    (Qx, Qy, Qz, I) values and grid the data
         
     Prameters :
     -----------
-        
     totSet : ndarray
         (Qx, Qy, Qz, I) - HKL values and the intensity
         
     Returns :
     ---------
-        
     gridData : ndarray
         intensity grid
-    gridStdErr : ndarray
+        
+    gridStd : ndarray
         standard devaiation grid
+        
     gridOccu : int
         occupation of the grid
+        
     gridOut : int
         No. of data point outside of the grid
-    emptNb = int
+        
+    emptNb : int
         No. of values zero in the grid
-    gridbins : int    
+        
+    gridbins : int
         No. of bins in the grid
         
     Optional :
     ----------
-    
     Qmin : ndarray
         minimum values of the cuboid [Qx, Qy, Qz]_min
     Qmax : ndarray
@@ -242,13 +259,14 @@ def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
     
     # prepare min, max,... from defaults if not set
     if Qmin is None:
-        Qmin = np.array([ totSet[:,0].min(), totSet[:,1].min(), totSet[:,2].min() ])
+        Qmin = np.array([totSet[:, 0].min(), totSet[:, 1].min(),
+                         totSet[:, 2].min()])
     if Qmax is None:
-        Qmax = np.array([ totSet[:,0].max(), totSet[:,1].max(), totSet[:,2].max() ])
+        Qmax = np.array([totSet[:, 0].max(), totSet[:, 1].max(),
+                         totSet[:, 2].max()])
     if dQN is None:
         dQN = [100, 100, 100]
-    
-    
+
     #            3D grid of the data set
     #             *** Gridding Data ****
     
@@ -256,48 +274,51 @@ def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
     t1 = time.time()
 
     # ctrans - c routines for fast data anlysis
-    gridData, gridOccu, gridStdErr, gridOut = ctrans.grid3d(totSet, Qmin, Qmax, dQN, norm = 1)
+    gridData, gridOccu, gridStd, gridOut = ctrans.grid3d(totSet, Qmin, Qmax, dQN, norm=1)
 
     # ending time for the griding
     t2 = time.time()
     
     # "---- DONE (Processed in %f seconds)" % (t2 - t1)
-    #No. of bins in the grid
+    # No. of bins in the grid
     gridbins = gridData.size
 
     # No. of values zero in the grid
     emptNb = (gridOccu == 0).sum()
     
     if gridOut != 0:
-        print "---- Warning : There are %.2e points outside the grid (%.2e bins in the grid)",
-                                             % (gridOut, gridData.size)
+        print "---- Warning : There are %.2e points outside the grid" % gridOut
+        print " (%.2e bins in the grid)" % gridData.size
     if emptNb:
         print "---- Warning : There are %.2e values zero in the grid" % emptNb
     
-    return gridData, gridOccu, gridStdErr, gridOut, emptNb, gridbins
+    return gridData, gridOccu, gridStd, gridOut, emptNb, gridbins
 
 
 def get_grid_mesh(Qmin, Qmax, dQN):
     """
         
     This function returns the X, Y and Z coordinates of the grid as 3d
-    arrays. (Return the grid vectors as a mesh.)
-        
+    arrays. (Return the grid vectors as a mesh.
     Parameters :
     -----------
     Qmin : ndarray
         minimum values of the cuboid [Qx, Qy, Qz]_min
+        
     Qmax : ndarray
         maximum values of the cuboid [Qx, Qy, Qz]_max
+        
     dQN  : ndarray
-        No. of grid parts (bins)     [Nqx, Nqy, Nqz]
+        No. of grid parts (bins) [Nqx, Nqy, Nqz]
         
     Returns :
     --------
     X : array
         X co-ordinate of the grid
+        
     Y : array
         Y co-ordinate of the grid
+        
     Z : array
         Z co-ordinate of the grid
         
