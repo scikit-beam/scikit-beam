@@ -14,6 +14,11 @@ import six
 import numpy as np
 import logging
 logger = logging.getLogger(__name__)
+import exceptions
+import time
+import gc
+import operator
+import ctrans
 
 
 def project_to_sphere(img, dist_sample, detector_center, pixel_size,
@@ -107,4 +112,212 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
     return qi
 
 
+def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX, detPixSizeY, detX0,
+                 detY0, detDis, waveLen, UBmat, istack):
+    """
+        
+    This will procees given images (certain scan) of the full set into receiprocal space (Q)
+    (Qx, Qy, Qz, I)
+        
+    Parameters :
+    ------------
+        
+    settingAngles : array
+        six angles of the all the images
+    detSizeX : int
+        detector no. of pixels (size) in detector X-direction
+    detSizeY : int
+        detector no. of pixels (size) in detector Y-direction
+    detPixSizeX : float
+        detector pixel size in detector X-direction (mm)
+    detPixSizeY : float
+        detector pixel size in detector Y-direction (mm)
+    detX0 : float
+        detector X-coordinate of center for reference
+    detY0 : float
+        detector Y-coordinate of center for reference
+    detDis : float
+        detector distance from sample (mm)
+    waveLen : float
+        wavelength (Angstrom)
+    UBmat : ndarray
+        UB matrix (orientation matrix)
+    istack : ndarray
+        intensity array of the images
+        
+    Returns :
+    --------
+    totSet : ndarray
+        (Qx, Qy, Qz, I) - HKL values and the intensity
+        
+    Optional : 
+    ----------
+    frameMode = 4 : 'hkl'      : Reciproal lattice units frame.
+    frameMode = 1 : 'theta'    : Theta axis frame.
+    frameMode = 2 : 'phi'      : Phi axis frame.
+    frameMode = 3 : 'cart'     : Crystal cartesian frame.
+    
+    """"
+    
+    ccdToQkwArgs = {}
+    
+    totSet = None
+    gc.collect()
+    
+    frameMode = 4 #  frameMode 4 : 'hkl'      : Reciproal lattice units frame.
+    
+    if settingAngles is None:
+        raise Exception(" No setting angles specified. ")
+    
+    
+    #"---- Setting angle size :", settingAngles.shape
+    # "---- CCD Size :", (detSizeX, detSizeY)
+    
+    #  **** Converting to Q   **************
 
+    # starting time for the process
+    t1 = time.time()
+
+    # ctrans - c routines for fast data anlysis
+    totSet = ctrans.ccdToQ(angles      = settingAngles * np.pi / 180.0,
+                           mode        = frameMode,
+                           ccd_size    = (detSizeX, detSizeY),
+                           ccd_pixsize = (detPixSizeX, detPixSizeY),
+                           ccd_cen     = (detX0, detY0),
+                           dist        = detDis,
+                           wavelength  = waveLen,
+                           UBinv       = np.matrix(UBmat).I,
+                           **ccdToQkwArgs)
+    # ending time for the process
+    t2 = time.time()
+                           
+    #    "---- DONE (Processed in %f seconds)", %(t2 - t1)
+    #    "---- Setsize is %d", %totSet.shape[0]
+    totSet[:,3] = np.ravel(istack)
+                           
+    return totSet
+
+
+def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
+    """
+        
+    This function will process the set of (Qx, Qy, Qz, I) values and grid the data
+        
+    Prameters :
+    -----------
+        
+    totSet : ndarray
+        (Qx, Qy, Qz, I) - HKL values and the intensity
+        
+    Returns :
+    ---------
+        
+    gridData : ndarray
+        intensity grid
+    gridStdErr : ndarray
+        standard devaiation grid
+    gridOccu : int
+        occupation of the grid
+    gridOut : int
+        No. of data point outside of the grid
+    emptNb = int
+        No. of values zero in the grid
+    gridbins : int    
+        No. of bins in the grid
+        
+    Optional :
+    ----------
+    
+    Qmin : ndarray
+        minimum values of the cuboid [Qx, Qy, Qz]_min
+    Qmax : ndarray
+        maximum values of the cuboid [Qx, Qy, Qz]_max
+    dQN  : ndarray
+        No. of grid parts (bins)     [Nqx, Nqy, Nqz]
+        
+    """
+    
+    if totSet is None:
+        raise Exception("No set of (Qx, Qy, Qz, I). Cannot process grid.")
+    
+    # prepare min, max,... from defaults if not set
+    if Qmin is None:
+        Qmin = np.array([ totSet[:,0].min(), totSet[:,1].min(), totSet[:,2].min() ])
+    if Qmax is None:
+        Qmax = np.array([ totSet[:,0].max(), totSet[:,1].max(), totSet[:,2].max() ])
+    if dQN is None:
+        dQN = [100, 100, 100]
+    
+    
+    #            3D grid of the data set
+    #             *** Gridding Data ****
+    
+    # staring time for griding
+    t1 = time.time()
+
+    # ctrans - c routines for fast data anlysis
+    gridData, gridOccu, gridStdErr, gridOut = ctrans.grid3d(totSet, Qmin, Qmax, dQN, norm = 1)
+
+    # ending time for the griding
+    t2 = time.time()
+    
+    # "---- DONE (Processed in %f seconds)" % (t2 - t1)
+    #No. of bins in the grid
+    gridbins = gridData.size
+
+    # No. of values zero in the grid
+    emptNb = (gridOccu == 0).sum()
+    
+    if gridOut != 0:
+        print "---- Warning : There are %.2e points outside the grid (%.2e bins in the grid)",
+                                             % (gridOut, gridData.size)
+    if emptNb:
+        print "---- Warning : There are %.2e values zero in the grid" % emptNb
+    
+    return gridData, gridOccu, gridStdErr, gridOut, emptNb, gridbins
+
+
+def get_grid_mesh(Qmin, Qmax, dQN):
+    """
+        
+    This function returns the X, Y and Z coordinates of the grid as 3d
+    arrays. (Return the grid vectors as a mesh.)
+        
+    Parameters :
+    -----------
+    Qmin : ndarray
+        minimum values of the cuboid [Qx, Qy, Qz]_min
+    Qmax : ndarray
+        maximum values of the cuboid [Qx, Qy, Qz]_max
+    dQN  : ndarray
+        No. of grid parts (bins)     [Nqx, Nqy, Nqz]
+        
+    Returns :
+    --------
+    X : array
+        X co-ordinate of the grid
+    Y : array
+        Y co-ordinate of the grid
+    Z : array
+        Z co-ordinate of the grid
+        
+        
+    Example :
+    ---------
+    These values can be used for obtaining the coordinates of each voxel.
+    For instance, the position of the (0,0,0) voxel is given by
+        
+        x = X[0,0,0]
+        y = Y[0,0,0]
+        z = Z[0,0,0]
+        
+    """
+    
+    grid = np.mgrid[0:dQN[0], 0:dQN[1], 0:dQN[2]]
+    r = (Qmax - Qmin) / dQN
+    
+    X = grid[0] * r[0] + Qmin[0]
+    Y = grid[1] * r[1] + Qmin[1]
+    Z = grid[2] * r[2] + Qmin[2]
+    
+    return X, Y, Z
