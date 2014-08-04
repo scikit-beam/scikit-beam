@@ -1,46 +1,16 @@
+# Module for the BNL image processing project
+# Developed at the NSLS-II, Brookhaven National Laboratory
+# Developed by Gabriel Iltis, Nov. 2013
+"""
+This function reads an AmiraMesh binary file and returns a set of two objects.
+First, a numpy array containing the image data set, and second, a metadata dictionary
+containing all header information both pertaining to the image data set, and required
+to write the image data set back in AmiraMesh file format.
+"""
+
 import numpy as np
 import os
 
-##def read_amira_header ():
-    #"""
-    #Standard Header Format: Avizo Binary file
-    #-----------------------------------------
-    #Line #      Contents
-    #------      --------
-    #0           # Avizo BINARY-LITTLE-ENDIAN 2.1
-    #1           '\n',
-    #2           '\n', 
-    #3            'define Lattice 426 426 121\n', 
-    #4           '\n', 
-    #5           'Parameters {\n',    
-    #6                        'Units {\n',
-    #7                               'Coordinates "m"\n',
-    #8                               '}\n',
-    #9                        'Colormap "labels.am",\n',
-    #10                       'Content "426x426x121 ushort, uniform coordinates",\n',
-    #11                       'BoundingBox 1417.5 5880 1407 5869.5 5649 6909,\n',
-    #12                       'CoordType "uniform"\n',
-    #13                       '}\n',
-    #14          '\n', 
-    #15          'Lattice { ushort Labels } @1(HxByteRLE,44262998)\n',
-    #16          '\n', 
-    #17          '# Data section follows\n'
-    #"""
-##    pass
-
-
-#Reference am files:
-#f_path = '/home/giltis/Dropbox/BNL_Docs/Alt_File_Formats/am_cnvrt_compare/'
-#fname_flt = 'Shew_C5_bio_abv.am' #Grayscale volume: float dtype
-#fname_short = 'C2_dType_Short.am' #Grayscale volume: short dtype
-#fname_test = 'APS_2C_Raw_Abv_CROP_tester.am' #Grayscale volume: float dtype
-#fname_dbasin = 'C2_dBasin.am' #labelfield: ushort dtype
-#fname_label = 'C2_LabelField.am' #labelfield: ushort dtype
-#fname_label2 = 'Rad1_blw_GlsBd-Label.surf' #surface file. not sure we can read yet
-#fname_binary = 'Shew_C8_bio_blw_GlsBd-Bnry.am' #binary data set: byte dtype
-#fname_list = [fname_flt, fname_short, fname__test, fname_dbasin, fname_label, fname_label2, fname_binary]
-#head_list = [head_flt, head_short, head_test, head_dbasin, head_label, head_label2, head_binary]
-#data_list = 
 def _read_amira (src_file):
     """
     This function reads all information contained within standard AmiraMesh
@@ -126,9 +96,9 @@ def _cnvrt_amira_data_2numpy (am_data, header_dict, flip_Z = True):
         file. This data array is ready for further processing using the NSLS-II
         function library, or other operations able to operate on numpy arrays.
     """
-    Zdim = header_dict['array_dims']['z_dim']
-    Ydim = header_dict['array_dims']['y_dim']
-    Xdim = header_dict['array_dims']['x_dim']
+    Zdim = header_dict['array_dimensions']['z_dimension']
+    Ydim = header_dict['array_dimensions']['y_dimension']
+    Xdim = header_dict['array_dimensions']['x_dimension']
     #Strip out null characters from the string of binary values
     data_strip = am_data.strip('\n')
     #Dictionary of the encoding types for AmiraMesh files
@@ -197,19 +167,19 @@ def _create_md_dict (header_list):
     
     """
 
-    md_dict = {'software_src' : header_list[0][1],
-               'data_format' : header_list[0][2],
-               'data_format_version' : header_list[0][3]
+    md_dict = {'software_src' : header_list[0][1], #Avizo specific
+               'data_format' : header_list[0][2], #Avizo specific
+               'data_format_version' : header_list[0][3] #Avizo specific
                 }
     for row in range(len(header_list)):
         try:
-            md_dict['array_dims'] = {'x_dim' : int(header_list[row]
+            md_dict['array_dimensions'] = {'x_dimension' : int(header_list[row]
                                                    [header_list[row]
                                                        .index('define') + 2]),
-                                     'y_dim' : int(header_list[row]
+                                     'y_dimension' : int(header_list[row]
                                                    [header_list[row]
                                                        .index('define') + 3]),
-                                     'z_dim' : int(header_list[row]
+                                     'z_dimension' : int(header_list[row]
                                                    [header_list[row]
                                                        .index('define') + 4])
                                      }
@@ -225,6 +195,8 @@ def _create_md_dict (header_list):
                             .index('CoordType') + 1]
                 except:
                     try:
+                        #TODO: add "voxel_size" computation, 
+                        #       and Check for anisotropy
                         md_dict['bounding_box'] = {'x_min' : 
                                                     float(
                                                         header_list[row][

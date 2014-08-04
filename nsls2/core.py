@@ -242,6 +242,59 @@ keys_core = {
         "type" : float,
         "units" : "angstrom",
         },
+     "array_dimensions" : {
+         "description" : "axial lengths of the array (Pixels)",
+         "x_dimension" : {
+             "description" : "x-axis array length as int",
+             "type" : int,
+             "units" : "pixels"
+             },
+         "y_dimension" : {
+             "description" : "y-axis array length as int",
+             "type" : int,
+             "units" : "pixels"
+             },
+         "z_dimension" : {
+             "description" : "z-axis array length as int",
+             "type" : int,
+             "units" : "pixels"
+             }
+         },
+     "bounding_box" : {
+         "description" : ("physical extents of the array: useful for " + 
+                          "volume alignment, transformation, merge and " + 
+                          "spatial comparison of multiple volumes"),
+         "x_min" : {
+             "description" : "",
+             "type" : float,
+             "units" : "um"
+             },
+         "x_max" : {
+             "description" : "",
+             "type" : float,
+             "units" : "um"
+             },
+         "y_min" : {
+             "description" : "",
+             "type" : float,
+             "units" : "um"
+             },
+         "y_max" : {
+             "description" : "",
+             "type" : float,
+             "units" : "um"
+             },
+         "z_min" : {
+             "description" : "",
+             "type" : float,
+             "units" : "um"
+             },
+         "z_max" : {
+             "description" : "",
+             "type" : float,
+             "units" : "um"
+             },
+         },
      }
 
 
