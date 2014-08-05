@@ -8,3 +8,7 @@ Contents:
    :maxdepth: 2
 
    core
+   image
+   recip
+   rcparams
+   spectroscopy
