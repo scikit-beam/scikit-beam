@@ -47,7 +47,14 @@ import logging
 logger = logging.getLogger(__name__)
 import time
 import operator
-import ctrans
+try:
+    import nsls2.ctrans as ctrans
+except:
+    try:
+        import ctrans
+    except:
+        pass
+
 
 
 def project_to_sphere(img, dist_sample, detector_center, pixel_size,
