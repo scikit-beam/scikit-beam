@@ -33,6 +33,7 @@ the following setup.py file: ::
         author='Brookhaven National Lab',
         packages=["nsls2"],
         )
+
     would need to be modified to:
 
     setup(
@@ -49,9 +50,10 @@ See :ref:`doc_doc` for documentation about writing and building
 the documentation.
 
 Continuing the example from above where a 'utils' source code package was added,
-a folder called :file:`/doc/resource/api/utils` should be added.  In that
-:file:`utils` folder, create a file named :file:`index.rst` with the
-contents: ::
+a folder called :file:`/doc/resource/api/utils` should be added.  Let's also
+presume that you've got :file:`fitting.py` in the :file:`/nsls2/utils/`.  In the
+documentation :file:`/doc/resource/api/utils` folder, create a file named
+:file:`index.rst` with the contents: ::
 
     UTILS API
     =========
@@ -61,10 +63,11 @@ contents: ::
     .. toctree::
        :maxdepth: 2
 
-       index
+       fitting
 
-This will tell :prog:`sphinx` to include the new package in the API
-documentation.
+Also, add the :file:`/doc/resource/api/utils/index.rst` to
+:file:`/doc/resource/api/index.rst`.  This will tell :prog:`sphinx` to include
+the new package in the API documentation.
 
 Now, let's create a module called :file:`fitting.py` in the :file:`utils`
 package.  When you add :file:`fitting.py` you need to add a corresponding file
