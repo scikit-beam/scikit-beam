@@ -45,7 +45,6 @@ import six
 import numpy as np
 import logging
 logger = logging.getLogger(__name__)
-import exceptions
 import time
 import operator
 import ctrans
