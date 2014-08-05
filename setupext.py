@@ -33,8 +33,9 @@ setup_files = ['setup.cfg.%s' % sys.platform, 'setup.cfg']
 def detectCPUs():
     # Linux, Unix and MacOS:
     if hasattr(os, "sysconf"):
-        if os.sysconf_names.has_key("SC_NPROCESSORS_ONLN"):
-            # Linux & Unix:
+        #if os.sysconf_names.has_key("SC_NPROCESSORS_ONLN"):
+        if key in dict_var:
+            #pass            # Linux & Unix:
             ncpus = os.sysconf("SC_NPROCESSORS_ONLN")
             if isinstance(ncpus, int) and ncpus > 0:
                 return ncpus
