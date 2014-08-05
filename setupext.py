@@ -11,7 +11,8 @@
 
 import os
 import sys
-import ConfigParser
+import six
+from six.moves import configparser
 import numpy as np
 import copy
 from distutils.core import setup, Extension
@@ -79,7 +80,7 @@ for f in setup_files:
 
 
 if setupfile is not None:
-    config = ConfigParser.SafeConfigParser()
+    config = configparser.Safeconfigparser()
     config.read(setupfile)
     
     try:
