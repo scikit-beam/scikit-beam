@@ -7,6 +7,8 @@ Development Guide
 .. toctree::
   :maxdepth: 2
 
-  git_guide.rst
-  workflow.rst
-  logging.rst
+  git_guide
+  workflow
+  doc_doc
+  adding_files
+  logging
