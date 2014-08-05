@@ -58,31 +58,37 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
     Project the pixels on the 2D detector to the surface of a sphere.
     
     Parameters
-    ==========
+    ----------
     img : ndarray
         2D detector image
+        
     dist_sample : float
         see keys_core  (mm)
+        
     detector_center : 2 element float array
         see keys_core (pixels)
+        
     pixel_size : 2 element float array
         see keys_core (mm)
+        
     wavelength : float
         see keys_core (Angstroms)
+        
     ROI : 4 element int array
         ROI defines a rectangular ROI for img
         ROI[0] == x_min
         ROI[1] == x_max
         ROI[2] == y_min
         ROI[3] == y_max
+        
     **kwargs : dict
         Bucket for extra parameters from an unpacked dictionary
 
 
     Returns
-    =======
-        Bucket for extra parameters from an unpacked dictionary
     -------
+    Bucket for extra parameters from an unpacked dictionary
+    
     qi : 4 x N array of the coordinates in Q space (A^-1)
         Rows correspond to individual pixels
         Columns are (Qx, Qy, Qz, I)
