@@ -80,7 +80,7 @@ for f in setup_files:
 
 
 if setupfile is not None:
-    config = configparser.Safeconfigparser()
+    config = configparser.SafeConfigParser()
     config.read(setupfile)
     
     try:
