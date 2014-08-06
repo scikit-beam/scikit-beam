@@ -101,7 +101,7 @@ def snip_method(spectrum,
 
     energy = np.arange(n_background, dtype=np.float)
     
-    if spectral_binning > 0:
+    if spectral_binning != None:
         energy = energy * spectral_binning
 
     energy = e_off + energy * e_lin + energy**2 * e_quad
@@ -113,7 +113,7 @@ def snip_method(spectrum,
     fwhm = std_fwhm * np.sqrt(tmp)
 
     #smooth the background
-    if spectral_binning > 0 :
+    if spectral_binning != None :
         s = scipy.signal.boxcar(con_val_bin)
     else :
         s = scipy.signal.boxcar(con_val_no_bin)
