@@ -46,12 +46,12 @@ import numpy as np
 
 def snip_method(spectrum, 
                 e_off, e_lin, e_quad, 
-                xmin=0, xmax=2048, epsilon = 2.96, 
-                width=0.5, decrease_factor = np.sqrt(2),
+                xmin=0, xmax=2048, epsilon=2.96, 
+                width=0.5, decrease_factor=np.sqrt(2),
                 spectral_binning=None, 
-                con_val_bin = 3, con_val_no_bin = 5,
-                iter_num_bin = 3, iter_num_no_bin = 5,
-                width_threshold = 0.5):
+                con_val_bin=3, con_val_no_bin=5,
+                iter_num_bin=3, iter_num_no_bin=5,
+                width_threshold=0.5):
     """
     use snip algorithm to obtain background
 
@@ -135,12 +135,12 @@ def snip_method(spectrum,
 
     #FIRST SNIPPING
 
-    if spectral_binning > 0:
-        no_iterations = iter_num_bin
+    if spectral_binning != None:
+        num_iterations = iter_num_bin
     else:
-        no_iterations = iter_num_no_bin
+        num_iterations = iter_num_no_bin
 
-    for j in range(no_iterations):
+    for j in range(num_iterations):
         lo_index = np.clip(index - window_p, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
         hi_index = np.clip(index + window_p, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
 
