@@ -167,8 +167,8 @@ def snip_method(spectrum,
 
     background = np.exp(np.exp(background) - 1) - 1
 
-    wo = np.where(np.isfinite(background) == False)
-    background[wo] = 0.
+    inf_ind = np.where(np.isfinite(background) == False)
+    background[inf_ind] = 0.0
 
     return background
 
