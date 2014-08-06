@@ -49,7 +49,10 @@ def snip_method(spectrum,
                 e_off, e_lin, e_quad, 
                 xmin=0, xmax=2048,
                 epsilon = 2.96, window_rf = np.sqrt(2),
-                spectral_binning=None, width=0.5):
+                con_val_bin = 3, con_val_no_bin = 5,
+                iter_bin = 3, iter_no_bin = 5,
+                spectral_binning=None, width=0.5,
+                width_threshold = 0.5):
     """
     use snip algorithm to obtain background
 
@@ -94,19 +97,17 @@ def snip_method(spectrum,
 
     energy = e_off + energy * e_lin + energy**2 * e_quad
     
-    temp_val = 2 * np.sqrt(2 * np.log(2))
-    tmp = (e_off / temp_val)**2 + energy * epsilon * e_lin
-
-    tmp[tmp < 0] = 0
-
     # transfer from std to fwhm
-    fwhm = 2.35 * np.sqrt(tmp)
+    std_fwhm = 2 * np.sqrt(2 * np.log(2))
+    tmp = (e_off / std_fwhm)**2 + energy * epsilon * e_lin
+    tmp[tmp < 0] = 0
+    fwhm = std_fwhm * np.sqrt(tmp)
 
     #smooth the background
     if spectral_binning > 0 :
-        s = scipy.signal.boxcar(3)
+        s = scipy.signal.boxcar(con_val_bin)
     else :
-        s = scipy.signal.boxcar(5)
+        s = scipy.signal.boxcar(con_val_no_bin)
     
     # For background remove, we only care about the central parts 
     # where there are peaks. On the boundary part, we don't care 
@@ -127,9 +128,9 @@ def snip_method(spectrum,
     #FIRST SNIPPING
 
     if spectral_binning > 0:
-        no_iterations = 3
+        no_iterations = iter_bin
     else:
-        no_iterations = 2
+        no_iterations = iter_no_bin
 
     for j in range(no_iterations):
         lo_index = np.clip(index - window_p, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
@@ -143,7 +144,7 @@ def snip_method(spectrum,
     current_width = window_p
     max_current_width = np.amax(current_width)
 
-    while max_current_width >= 0.5:
+    while max_current_width >= width_threshold:
         lo_index = np.clip(index - current_width, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
         hi_index = np.clip(index + current_width, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
 
@@ -155,7 +156,6 @@ def snip_method(spectrum,
         # decrease the width and repeat
         current_width = current_width / window_rf
         max_current_width = np.amax(current_width)
-        print (current_width)
 
     background = np.exp(np.exp(background) - 1) - 1
 
@@ -172,12 +172,12 @@ def test():
     test of background removal
     """
     data = np.loadtxt('../test_data.txt')
-    data = data[0:1250]
+    data = data[0:1200]
     x = np.arange(len(data))
 
     e_list = [0.1, 0.01, 0]
     xmin = 0
-    xmax = 1800
+    xmax = 1100
     bg = snip_method(data, 
                      e_list[0], e_list[1], e_list[2], 
                      xmin=xmin, xmax=xmax,
@@ -185,9 +185,15 @@ def test():
 
     #plt.plot(bg)
 
+    b1 = snip_method(data, 
+                     e_list[0], e_list[1], e_list[2], 
+                     xmin=xmin, xmax=xmax,
+                     iter_no_bin = 1,
+                     spectral_binning=0, width=0.5)
 
 
-    plt.semilogy(x, data, x, bg)
+
+    plt.semilogy(x, data, x, bg, x, b1)
     plt.show()
     return
 
