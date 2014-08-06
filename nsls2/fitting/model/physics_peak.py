@@ -139,7 +139,8 @@ def model_gauss_tail(A, sigma, dx, gamma):
 
 
 def elastic_peak(coherent_sct_energy, 
-                 fwhm_offset, fwhm_fanoprime, ev, A):
+                 fwhm_offset, fwhm_fanoprime, 
+                 A, ev, epsilon=2.96):
     """
     model elastic peak as a gaussian function
     
@@ -151,10 +152,14 @@ def elastic_peak(coherent_sct_energy,
         global parameter for peak width    
     fwhm_fanoprime : float
         global parameter for peak width
-    ev : array
-        energy value
     A : float:
         peak amplitude of gaussian peak
+    ev : array
+        energy value
+    epsilon : float
+        nergy to create a hole-electron pair
+        for Ge 2.96, for Si 3.61 at 300K
+        needs to double check this value
     
     Returns:
     --------
@@ -164,11 +169,8 @@ def elastic_peak(coherent_sct_energy,
         peak width
                      
     """
-    # energy to create a hole-electron pair
-    # for Ge 2.96, for Si 3.61 at 300K
-    # needs to double check this value
-    epsilon = 2.96
-    temp_val = 2 * np.sqrt( 2 * np.log( 2 ) )
+    
+    temp_val = 2 * np.sqrt(2 * np.log(2))
     sigma = np.sqrt( ( fwhm_offset / temp_val )**2  + \
                       coherent_sct_energy * epsilon*fwhm_fanoprime  )
     
@@ -185,7 +187,7 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
                  compton_angle, compton_fwhm_corr, compton_amplitude,
                  compton_f_step, compton_f_tail, compton_gamma,
                  compton_hi_f_tail, compton_hi_gamma,
-                 A, ev, matrix = False):
+                 A, ev, epsilon=2.96, matrix = False):
     """
     model compton peak
     
@@ -217,6 +219,10 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
        same peak amplitude for gaussian peak, gaussian step and gaussian tail functions
     ev : array
         energy value
+    epsilon : float
+        nergy to create a hole-electron pair
+        for Ge 2.96, for Si 3.61 at 300K
+        needs to double check this value
     matrix : bool
         to be updated
     
@@ -225,7 +231,7 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     counts : array
         compton peak
     sigma : float
-        std
+        standard deviation
     faktor : float
         weight factor of gaussian peak
     """
@@ -233,10 +239,6 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     compton_E = coherent_sct_energy / ( 1. + ( coherent_sct_energy / 511. ) * \
                                      ( 1. -np.cos( compton_angle * np.pi / 180. ) ) )
     
-    # energy to create a hole-electron pair
-    # for Ge 2.96, for Si 3.61 at 300K
-    # needs to double check this value
-    epsilon = 2.96
     temp_val = 2 * np.sqrt( 2 * np.log( 2 ) )
     sigma = np.sqrt( ( fwhm_offset / temp_val )**2 + compton_E * epsilon * fwhm_fanoprime  )
     
