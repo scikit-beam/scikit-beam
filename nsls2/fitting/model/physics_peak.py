@@ -67,7 +67,7 @@ def model_gauss_peak(A, sigma, dx):
     
     """
     
-    counts = A / ( sigma *np.sqrt(2.*np.pi)) * np.exp( -0.5* ((dx / sigma)**2) )
+    counts = A / (sigma * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((dx / sigma)**2))
 
     return counts
 
@@ -97,7 +97,7 @@ def model_gauss_step(A, sigma, dx, peak_E):
         gaussian step peak
     """
     
-    counts = A / 2. /  peak_E * scipy.special.erfc(dx/(np.sqrt(2)*sigma))
+    counts = A / 2. /  peak_E * scipy.special.erfc(dx / (np.sqrt(2) * sigma))
 
     return counts
 
@@ -126,13 +126,12 @@ def model_gauss_tail(A, sigma, dx, gamma):
         gaussian tail peak
     """
 
-    dx_neg = dx.copy()
-    wo_neg = (np.nonzero(dx_neg > 0.))[0]
-    if wo_neg.size > 0:
-        dx_neg[wo_neg] = 0.
-    temp_a = np.exp(dx_neg/ (gamma * sigma))
-    counts = A / 2. / gamma / sigma / np.exp(-0.5/(gamma**2)) *  \
-        temp_a * scipy.special.erfc( dx  /( np.sqrt(2)*sigma) + (1./(gamma*np.sqrt(2)) )  )
+    dx_neg = np.array(dx)
+    dx_neg[dx_neg > 0] = 0
+    
+    temp_a = np.exp(dx_neg / (gamma * sigma))
+    counts = A / (2 * gamma * sigma * np.exp(-0.5 / (gamma**2))) * \
+        temp_a * scipy.special.erfc(dx / (np.sqrt(2) * sigma) + (1 / (gamma*np.sqrt(2))))
 
     return counts
 
@@ -171,8 +170,8 @@ def elastic_peak(coherent_sct_energy,
     """
     
     temp_val = 2 * np.sqrt(2 * np.log(2))
-    sigma = np.sqrt( ( fwhm_offset / temp_val )**2  + \
-                      coherent_sct_energy * epsilon*fwhm_fanoprime  )
+    sigma = np.sqrt((fwhm_offset / temp_val)**2 + \
+                      coherent_sct_energy * epsilon * fwhm_fanoprime  )
     
     delta_energy = ev - coherent_sct_energy
 
@@ -236,11 +235,11 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
         weight factor of gaussian peak
     """
     
-    compton_E = coherent_sct_energy / ( 1. + ( coherent_sct_energy / 511. ) * \
-                                     ( 1. -np.cos( compton_angle * np.pi / 180. ) ) )
+    compton_E = coherent_sct_energy / (1 + (coherent_sct_energy / 511) * \
+                                     (1 - np.cos(compton_angle * np.pi / 180)))
     
-    temp_val = 2 * np.sqrt( 2 * np.log( 2 ) )
-    sigma = np.sqrt( ( fwhm_offset / temp_val )**2 + compton_E * epsilon * fwhm_fanoprime  )
+    temp_val = 2 * np.sqrt(2 * np.log(2))
+    sigma = np.sqrt((fwhm_offset / temp_val)**2 + compton_E * epsilon * fwhm_fanoprime)
     
     #local_sigma = sigma*p[14]
 
