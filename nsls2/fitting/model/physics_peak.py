@@ -37,10 +37,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
-"""
-basic fitting functions used for Fluorescence fitting
-"""
-
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
@@ -57,12 +53,18 @@ def model_gauss_peak(A, sigma, dx):
     
     Parameters:
     -----------
-        A: float
-              intensity of gaussian function
-        sigma: float
-               standard deviation
-        x: array
-           data in x coordinate, relative to center
+    A : float
+        intensity of gaussian function
+    sigma : float
+        standard deviation
+    x : array
+        data in x coordinate, relative to center
+        
+    Returns:
+    --------
+    counts : array
+        gaussian peak
+    
     """
     
     counts = A / ( sigma *np.sqrt(2.*np.pi)) * np.exp( -0.5* ((dx / sigma)**2) )
@@ -80,14 +82,19 @@ def model_gauss_step(A, sigma, dx, peak_E):
     
     Parameters:
     -----------
-    A: float
-       intensity or height
-    sigma: float
-           standard deviation
-    dx: array
+    A : float
+        intensity or height
+    sigma : float
+        standard deviation
+    dx : array
         data in x coordinate, x > 0
-    peak_E: ???
-        
+    peak_E : float
+        need to double check this value
+    
+    Returns:
+    --------
+    counts : array
+        gaussian step peak
     """
     
     counts = A / 2. /  peak_E * scipy.special.erfc(dx/(np.sqrt(2)*sigma))
@@ -104,14 +111,19 @@ def model_gauss_tail(A, sigma, dx, gamma):
     
     Parameters:
     -----------
-    A: float
+    A : float
         intensity or height
-    sigma: float
-            control peak width
-    dx: array
+    sigma : float
+        control peak width
+    dx : array
         data in x coordinate
-    gamma: float
-           normalization factor
+    gamma : float
+        normalization factor
+    
+    Returns:
+    --------
+    counts : array
+        gaussian tail peak
     """
 
     dx_neg = dx.copy()
@@ -126,29 +138,30 @@ def model_gauss_tail(A, sigma, dx, gamma):
 
 
 
-def elastic_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime, ev, A):
+def elastic_peak(coherent_sct_energy, 
+                 fwhm_offset, fwhm_fanoprime, ev, A):
     """
     model elastic peak as a gaussian function
     
     Parameters:
     -----------
-    coherent_sct_energy: float
-                         incident energy                         
-    fwhm_offset: float
-                 global parameter for peak width    
-    fwhm_fanoprime: float
-                    global parameter for peak width
-    ev: array
+    coherent_sct_energy : float
+        incident energy                         
+    fwhm_offset : float
+        global parameter for peak width    
+    fwhm_fanoprime : float
+        global parameter for peak width
+    ev : array
         energy value
-    A: float:
-       peak amplitude of gaussian peak
+    A : float:
+        peak amplitude of gaussian peak
     
     Returns:
     --------
-    value: array
-           elastic peak
-    sigma: float
-           peak width
+    value : array
+        elastic peak
+    sigma : float
+        peak width
                      
     """
     # energy to create a hole-electron pair
@@ -172,37 +185,51 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
                  compton_angle, compton_fwhm_corr, compton_amplitude,
                  compton_f_step, compton_f_tail, compton_gamma,
                  compton_hi_f_tail, compton_hi_gamma,
-                 ev, A, matrix = False):
+                 A, ev, matrix = False):
     """
     model compton peak
     
     Parameters:
     ----------
-    coherent_sct_energy: float
-                         incident energy                         
-    fwhm_offset: float
-                 global parameter for peak width    
-    fwhm_fanoprime: float
-                    global parameter for peak width
-    compton related parameters: float 
-    compton_angle, compton_fwhm_corr, compton_amplitude,
-    compton_f_step, compton_f_tail, compton_gamma,
-    compton_hi_f_tail, compton_hi_gamma,
-    
-    ev: array
+    coherent_sct_energy : float
+        incident energy                         
+    fwhm_offset : float
+        global parameter for peak width    
+    fwhm_fanoprime : float
+        global parameter for peak width
+    compton_angle : float
+        compton angle
+    compton_fwhm_corr : float 
+        correction factor on peak width
+    compton_amplitude : float
+        amplitude of compton peak
+    compton_f_step : float
+        weight factor of the gaussian step function
+    compton_f_tail : float
+        weight factor of gaussian tail on lower side
+    compton_gamma : float
+        normalization factor of gaussian tail on lower side
+    compton_hi_f_tail : float
+        weight factor of gaussian tail on higher side
+    compton_hi_gamma : float
+        normalization factor of gaussian tail on higher side
+    A : float
+       same peak amplitude for gaussian peak, gaussian step and gaussian tail functions
+    ev : array
         energy value
-    A: float
-       peak height
+    matrix : bool
+        to be updated
     
     Returns:
     --------
-    counts: array
-            compton peak
-    sigma: float
-           related to gaussian peak width
-    faktor: float
-            normalization factor
+    counts : array
+        compton peak
+    sigma : float
+        std
+    faktor : float
+        weight factor of gaussian peak
     """
+    
     compton_E = coherent_sct_energy / ( 1. + ( coherent_sct_energy / 511. ) * \
                                      ( 1. -np.cos( compton_angle * np.pi / 180. ) ) )
     
@@ -219,7 +246,7 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
 
     counts = np.zeros(len(ev))
 
-    faktor = 1. / (1. + compton_f_step + compton_f_tail + compton_hi_f_tail)
+    faktor = 1 / (1 + compton_f_step + compton_f_tail + compton_hi_f_tail)
     
     if matrix == False :
         faktor = faktor * (10.**compton_amplitude)
@@ -240,7 +267,7 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
 
     # compton peak, tail on the high side
     value = faktor * compton_hi_f_tail
-    value = value * model_gauss_tail(A, sigma, -1.*delta_energy, compton_hi_gamma)
+    value = value * model_gauss_tail(A, sigma, -1. * delta_energy, compton_hi_gamma)
     counts = counts + value
 
     return counts, sigma, faktor
