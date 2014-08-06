@@ -140,12 +140,6 @@ def snip_method(spectrum,
         wo = np.where(background > temp)
         background[wo] = temp[wo]
 
-
-    if spectral_binning > 0:
-        no_iterations = 7
-    else:
-        no_iterations = 12
-
     current_width = window_p
     max_current_width = np.amax(current_width)
 
@@ -165,7 +159,7 @@ def snip_method(spectrum,
         current_width = current_width / window_rf
         max_current_width = np.amax(current_width)
 
-    background = np.exp( np.exp(background)-1.)-1.
+    background = np.exp(np.exp(background) - 1) - 1
 
     wo = np.where(np.isfinite(background) == False)
     background[wo] = 0.
