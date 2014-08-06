@@ -138,7 +138,7 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
                  detPixSizeY, detX0, detY0, detDis, waveLen, UBmat):
     """
     This will procees the given images (certain scan) of
-    the full set into receiprocal(Q) space, (Qx, Qy, Qz, I)
+    the full set into receiprocal(Q) space, (Qx, Qy, Qz)
     
     Parameters
     ----------
@@ -174,14 +174,10 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
     UBmat : 3x3 array
         UB matrix (orientation matrix)
         
-    istack : ndarray
-        intensity array of the images
-    
-        
     Returns
     -------
-    totSet : Nx4 array
-        (Qx, Qy, Qz, I) - HKL values and the intensity
+    totSet : Nx3 array
+        (Qx, Qy, Qz) - HKL values
         
     """
     
@@ -223,12 +219,15 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
 def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
     """
     This function will process the set of
-    (Qx, Qy, Qz, I) values and grid the data
+    (Qx, Qy, Qz) values and the intensity (I), and grid the data
         
     Prameters
     ---------
-    totSet : Nx4 array
-        (Qx, Qy, Qz, I) - HKL values and the intensity
+    totSet : Nx3 array
+        (Qx, Qy, Qz) - HKL values
+        
+    istack : ndarray
+        intensity array of the images
         
     Qmin : ndarray
         minimum values of the voxel[Qx, Qy, Qz]_min
@@ -270,6 +269,7 @@ def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
     # getting the intensity value for each pixel
     istack = np.ravel(istack)
 
+    # creating (Qx, Qy, Qz, I) Nx4 array - HKL values and Intensity
     np.insert(totSet, 3, istack, axis=1)
 
     # prepare min, max,... from defaults if not set
