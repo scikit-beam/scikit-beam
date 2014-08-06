@@ -2,7 +2,6 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import six
-from matplotlib import pyplot as plt
 import numpy as np
 
 from nsls2.spectroscopy import align_and_scale

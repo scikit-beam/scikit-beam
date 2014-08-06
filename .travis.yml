@@ -17,7 +17,7 @@ install:
   - conda update conda --yes
   - source activate testenv
   - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes imaging; else pip install pillow; fi
-  - conda install --yes numpy scipy nose matplotlib
+  - conda install --yes numpy scipy nose six
   - python setup.py install
 
 
