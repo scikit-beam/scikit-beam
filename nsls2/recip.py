@@ -268,7 +268,7 @@ def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
     
     # getting the intensity value for each pixel
     # creating (Qx, Qy, Qz, I) Nx4 array - HKL values and Intensity
-    np.insert(totSet, 3, np.ravel(istack), axis=1)
+    totSet = np.insert(totSet, 3, np.ravel(istack), axis=1)
 
     # prepare min, max,... from defaults if not set
     if Qmin is None:
