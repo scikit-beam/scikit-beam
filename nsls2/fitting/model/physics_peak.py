@@ -171,7 +171,7 @@ def elastic_peak(coherent_sct_energy,
     
     temp_val = 2 * np.sqrt(2 * np.log(2))
     sigma = np.sqrt((fwhm_offset / temp_val)**2 + \
-                      coherent_sct_energy * epsilon * fwhm_fanoprime  )
+                      coherent_sct_energy * epsilon * fwhm_fanoprime)
     
     delta_energy = ev - coherent_sct_energy
 
@@ -186,7 +186,7 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
                  compton_angle, compton_fwhm_corr, compton_amplitude,
                  compton_f_step, compton_f_tail, compton_gamma,
                  compton_hi_f_tail, compton_hi_gamma,
-                 A, ev, epsilon=2.96, matrix = False):
+                 A, ev, epsilon=2.96, matrix=False):
     """
     model compton peak
     
