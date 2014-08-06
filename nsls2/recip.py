@@ -135,7 +135,7 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
 
 
 def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
-                 detPixSizeY, detX0, detY0, detDis, waveLen, UBmat, istack):
+                 detPixSizeY, detX0, detY0, detDis, waveLen, UBmat):
     """
     This will procees the given images (certain scan) of
     the full set into receiprocal(Q) space, (Qx, Qy, Qz, I)
@@ -216,12 +216,11 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
 
     # ending time for the process
     t2 = time.time()
-    totSet[:, 3] = np.ravel(istack)
                            
-    return totSet
+    return totSet[:,:3]
 
 
-def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
+def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
     """
     This function will process the set of
     (Qx, Qy, Qz, I) values and grid the data
@@ -266,8 +265,13 @@ def process_grid(totSet, Qmin=None, Qmax=None, dQN=None):
     """
     
     if totSet is None:
-        raise Exception("No set of (Qx, Qy, Qz, I). Cannot process grid.")
+        raise Exception("No set of (Qx, Qy, Qz). Cannot process grid.")
     
+    # getting the intensity value for each pixel
+    istack = np.ravel(istack)
+
+    np.insert(totSet, 3, istack, axis=1)
+
     # prepare min, max,... from defaults if not set
     if Qmin is None:
         Qmin = np.array([totSet[:, 0].min(), totSet[:, 1].min(),
