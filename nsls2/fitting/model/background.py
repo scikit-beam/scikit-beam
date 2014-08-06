@@ -47,18 +47,18 @@ import matplotlib.pyplot as plt
 
 def snip_method(spectrum, 
                 e_off, e_lin, e_quad, 
-                xmin=0, xmax=2048,
-                epsilon = 2.96, window_rf = np.sqrt(2),
+                xmin=0, xmax=2048, epsilon = 2.96, 
+                width=0.5, decrease_factor = np.sqrt(2),
+                spectral_binning=None, 
                 con_val_bin = 3, con_val_no_bin = 5,
-                iter_bin = 3, iter_no_bin = 5,
-                spectral_binning=None, width=0.5,
+                iter_num_bin = 3, iter_num_no_bin = 5,
                 width_threshold = 0.5):
     """
     use snip algorithm to obtain background
 
     Parameters:
     -----------
-    spectrum : 1D array
+    spectrum : array
         intensity spectrum
     e_off : float
         energy calibration, such as e_off + e_lin * energy + e_quad * energy^2
@@ -74,16 +74,26 @@ def snip_method(spectrum,
         energy to create a hole-electron pair 
         for Ge 2.96, for Si 3.61 at 300K
         needs to double check this value
-    window_rf : float
-        parameter to control window size when shifting the spectrum, default as sqrt(2)
-    spectral_binning: int
-        bin the data into different size
     width : int
-        step size to shift background            
+        window size to adjust how much to shift background   
+    decrease_factor : float
+        gradually decrease of window size, default as sqrt(2)
+    spectral_binning : int or bool
+        bin the data into different size 
+    con_val_bin : int
+        size of scipy.signal.boxcar to convolute spectrum, when spectral_binning != None
+    con_val_no_bin : int
+        size of scipy.signal.boxcar to convolute spectrum, when spectral_binning = None
+    iter_num_bin : int
+        initial iteration number, when spectral_binning != None
+    iter_num_no_bin : int
+        initial iteration number, when spectral_binning = None
+    width_threshold : float
+        stop point of the algorithm
 
     Returns:
     --------
-    background : 1D array
+    background : array
         output results with peak removed
     """
 
@@ -115,7 +125,6 @@ def snip_method(spectrum,
     # effects in general convolution.
     A = s.sum()
     background = scipy.signal.convolve(background,s,mode='same')/A
-    
 
     window_p = width * fwhm / e_lin
     if spectral_binning > 0:
@@ -128,9 +137,9 @@ def snip_method(spectrum,
     #FIRST SNIPPING
 
     if spectral_binning > 0:
-        no_iterations = iter_bin
+        no_iterations = iter_num_bin
     else:
-        no_iterations = iter_no_bin
+        no_iterations = iter_num_no_bin
 
     for j in range(no_iterations):
         lo_index = np.clip(index - window_p, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
@@ -154,7 +163,7 @@ def snip_method(spectrum,
         background[bg_index] = temp[bg_index]
 
         # decrease the width and repeat
-        current_width = current_width / window_rf
+        current_width = current_width / decrease_factor
         max_current_width = np.amax(current_width)
 
     background = np.exp(np.exp(background) - 1) - 1
@@ -176,21 +185,19 @@ def test():
     x = np.arange(len(data))
 
     e_list = [0.1, 0.01, 0]
-    xmin = 0
+    xmin = 50
     xmax = 1100
     bg = snip_method(data, 
                      e_list[0], e_list[1], e_list[2], 
                      xmin=xmin, xmax=xmax,
-                     spectral_binning=0, width=0.5)
-
-    #plt.plot(bg)
+                     spectral_binning=None, width=0.5)
+    
 
     b1 = snip_method(data, 
                      e_list[0], e_list[1], e_list[2], 
                      xmin=xmin, xmax=xmax,
-                     iter_no_bin = 1,
-                     spectral_binning=0, width=0.5)
-
+                     con_val_no_bin = 5, iter_num_no_bin = 5,
+                     spectral_binning = None, width=0.15)
 
 
     plt.semilogy(x, data, x, bg, x, b1)
