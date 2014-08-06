@@ -48,7 +48,7 @@ import matplotlib.pyplot as plt
 def snip_method(spectrum, 
                 e_off, e_lin, e_quad, 
                 xmin=0, xmax=2048,
-                epsilon = 2.96,
+                epsilon = 2.96, window_rf = np.sqrt(2),
                 spectral_binning=None, width=0.5):
     """
     use snip algorithm to obtain background
@@ -67,10 +67,12 @@ def snip_method(spectrum,
         smallest index to define the range
     xmax : float
         largest index to define the range
-    epsilon: float
+    epsilon : float
         energy to create a hole-electron pair 
         for Ge 2.96, for Si 3.61 at 300K
         needs to double check this value
+    window_rf : float
+        parameter to control window size when shifting the spectrum, default as sqrt(2)
     spectral_binning: int
         bin the data into different size
     width : int
@@ -112,10 +114,7 @@ def snip_method(spectrum,
     # effects in general convolution.
     A = s.sum()
     background = scipy.signal.convolve(background,s,mode='same')/A
-
-
-    # SNIP PARAMETERS
-    window_rf = np.sqrt(2)
+    
 
     window_p = width * fwhm / e_lin
     if spectral_binning > 0:
@@ -137,27 +136,26 @@ def snip_method(spectrum,
         hi_index = np.clip(index + window_p, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
 
         temp = (background[lo_index.astype(np.int)] + background[hi_index.astype(np.int)]) / 2.
-        wo = np.where(background > temp)
-        background[wo] = temp[wo]
+        
+        bg_index  = background > temp
+        background[bg_index] = temp[bg_index]
 
     current_width = window_p
     max_current_width = np.amax(current_width)
 
     while max_current_width >= 0.5:
-        lo_index = index - current_width
-        wo = np.where(lo_index < max((xmin, 0)))
-        lo_index[wo] = max((xmin, 0))
-        hi_index = index + current_width
-        wo = np.where(hi_index > min((xmax, n_background-1)))
-        hi_index[wo] = min((xmax, n_background-1))
+        lo_index = np.clip(index - current_width, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
+        hi_index = np.clip(index + current_width, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
 
         temp = (background[lo_index.astype(np.int)] + background[hi_index.astype(np.int)]) / 2.
-        wo = np.where(background > temp)
-        background[wo] = temp[wo]
+
+        bg_index  = background > temp
+        background[bg_index] = temp[bg_index]
 
         # decrease the width and repeat
         current_width = current_width / window_rf
         max_current_width = np.amax(current_width)
+        print (current_width)
 
     background = np.exp(np.exp(background) - 1) - 1
 
