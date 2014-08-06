@@ -22,12 +22,11 @@ def test_process_to_q():
     settingAngles = np.matrix([[40., 15., 30., 25., 10., 5.],
                               [90., 60., 0., 30., 10., 5.]])
     # delta=40, theta=15, chi = 90, phi = 30, mu = 10.0, gamma=5.0
-    
-    istack = 100*np.ones((settingAngles.shape[0], 256, 256))
+
 
     totSet = recip.process_to_q(settingAngles, detSizeX, detSizeY,
                                 detPixSizeX, detPixSizeY, detX0, detY0,
-                                detDis, waveLen, UBmat, istack)
+                                detDis, waveLen, UBmat)
     
     #  Known HKL values for the given six angles)
     HKL1 = np.matrix([[-0.15471196, 0.19673939, -0.11440936]])
@@ -65,11 +64,10 @@ def test_process_grid():
 
     data = np.array([np.ravel(X),
                      np.ravel(Y),
-                     np.ravel(Z),
-                     np.ravel(out)])
+                     np.ravel(Z)])
     data = data.T
 
-    gridData, gridOccu, gridStd, gridOut, emptNb, gridbins = recip.process_grid(data, Qmax, Qmin, dQN)
+    gridData, gridOccu, gridStd, gridOut, emptNb, gridbins = recip.process_grid(data, out, Qmax, Qmin, dQN)
     
     # Values that have to go to the gridder
     Databack = np.ravel(out)
