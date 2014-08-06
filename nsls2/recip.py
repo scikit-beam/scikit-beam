@@ -267,10 +267,8 @@ def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
         raise Exception("No set of (Qx, Qy, Qz). Cannot process grid.")
     
     # getting the intensity value for each pixel
-    istack = np.ravel(istack)
-
     # creating (Qx, Qy, Qz, I) Nx4 array - HKL values and Intensity
-    np.insert(totSet, 3, istack, axis=1)
+    np.insert(totSet, 3, np.ravel(istack), axis=1)
 
     # prepare min, max,... from defaults if not set
     if Qmin is None:
