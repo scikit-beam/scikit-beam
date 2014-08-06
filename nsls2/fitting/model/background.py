@@ -42,7 +42,6 @@ from __future__ import (absolute_import, division, print_function,
 
 import scipy.signal
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 def snip_method(spectrum, 
@@ -174,37 +173,4 @@ def snip_method(spectrum,
     return background
 
 
-
-
-def test():
-    """
-    test of background removal
-    """
-    data = np.loadtxt('../test_data.txt')
-    data = data[0:1200]
-    x = np.arange(len(data))
-
-    e_list = [0.1, 0.01, 0]
-    xmin = 50
-    xmax = 1100
-    bg = snip_method(data, 
-                     e_list[0], e_list[1], e_list[2], 
-                     xmin=xmin, xmax=xmax,
-                     spectral_binning=None, width=0.5)
-    
-
-    b1 = snip_method(data, 
-                     e_list[0], e_list[1], e_list[2], 
-                     xmin=xmin, xmax=xmax,
-                     con_val_no_bin = 5, iter_num_no_bin = 5,
-                     spectral_binning = None, width=0.15)
-
-
-    plt.semilogy(x, data, x, bg, x, b1)
-    plt.show()
-    return
-
-
-if __name__=="__main__":
-    test()
 
