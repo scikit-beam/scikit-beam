@@ -51,22 +51,22 @@ def detectCPUs():
 
 def parseExtensionSetup(name, config, default):
     default = copy.deepcopy(default)
-    
+
     try:
         default['include_dirs'] = config.get(name, "include_dirs").split(os.pathsep)
     except:
         pass
-    
+
     try:
         default['library_dirs'] = config.get(name, "library_dirs").split(os.pathsep)
     except:
         pass
-    
+
     try:
         default['libraries'] = config.get(name, "libraries").split(",")
     except:
         pass
-    
+
     return default
 
 
@@ -82,12 +82,12 @@ for f in setup_files:
 if setupfile is not None:
     config = configparser.SafeConfigParser()
     config.read(setupfile)
-    
+    print(config)
     try:
         options['build_ctrans'] = config.getboolean("ctrans", "build")
     except:
         pass
-    
+
     ctrans = parseExtensionSetup('ctrans', config, ext_default)
     threads = False
     try:
