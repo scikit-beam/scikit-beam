@@ -7,5 +7,5 @@ setup(
     name='NSLS2',
     version='0',
     author='Brookhaven National Lab',
-    packages=["nsls2"],
+    packages=["nsls2", "nsls2.fitting", "nsls2.fitting.model"],
     )
