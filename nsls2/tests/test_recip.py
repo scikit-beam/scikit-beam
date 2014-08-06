@@ -70,13 +70,9 @@ def test_process_grid():
                      np.ravel(Z)])
     data = data.T
 
-<<<<<<< HEAD
+
     gridData, gridOccu, gridStd, gridOut, emptNb, gridbins = recip.process_grid(data, out, Qmax, Qmin, dQN)
     
-=======
-    gridData, gridOccu, gridStd, gridOut, emptNb, gridbins = recip.process_grid(data, Qmax, Qmin, dQN)
-
->>>>>>> d378b80... TST/BLD : python 3 related issues
     # Values that have to go to the gridder
     Databack = np.ravel(out)
 
