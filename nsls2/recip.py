@@ -53,7 +53,8 @@ except:
     try:
         import ctrans
     except:
-        raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
+        pass
+        #raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
 
 
 
