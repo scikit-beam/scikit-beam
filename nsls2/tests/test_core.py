@@ -89,8 +89,8 @@ def _bin_edges_helper(p_dict):
 
 
 @raises(ValueError)
-def _bin_edges_exceptions(p_dict):
-    core.bin_edges(**p_dict)
+def _bin_edges_exceptions(param_dict):
+    core.bin_edges(**param_dict)
 
 
 def test_bin_edges():
@@ -98,9 +98,9 @@ def test_bin_edges():
                    'range_max': 5.678,
                    'nbins': 42,
                    'step': np.pi / 10}, ]
-    for p_dict in test_dicts:
+    for param_dict in test_dicts:
         for drop_key in ['range_min', 'range_max', 'step', 'nbins']:
-            tmp_pdict = dict(p_dict)
+            tmp_pdict = dict(param_dict)
             tmp_pdict.pop(drop_key)
             yield _bin_edges_helper, tmp_pdict
 
@@ -129,5 +129,5 @@ def test_bin_edges():
                    'nbins': 0},  # nbins == 0
                    ]
 
-    for p_dict in fail_dicts:
-        yield _bin_edges_exceptions, p_dict
+    for param_dict in fail_dicts:
+        yield _bin_edges_exceptions, param_dict
