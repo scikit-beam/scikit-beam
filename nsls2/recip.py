@@ -229,13 +229,13 @@ def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
     istack : ndarray
         intensity array of the images
         
-    Qmin : ndarray
+    Qmin : ndarray, optional
         minimum values of the voxel[Qx, Qy, Qz]_min
         
-    Qmax : ndarray
+    Qmax : ndarray, optional
         maximum values of the voxel [Qx, Qy, Qz]_max
         
-    dQN  : ndarray
+    dQN  : ndarray, optional
         No. of grid parts (bins) [Nqx, Nqy, Nqz]
         
     Returns
@@ -258,8 +258,6 @@ def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
     gridbins : int
         No. of bins in the grid
         
-    Optional
-    --------
         
     """
     
