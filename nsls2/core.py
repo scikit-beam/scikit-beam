@@ -433,8 +433,9 @@ def wedge_integration(src_data, center, theta_start,
 
 def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
     """
-    Returns bin edges, including the right most for any combinations
-    of input parameters
+    Generate bin edges.  The last value is the returned array is
+    the right edge of the last bin, the rest of the values are the
+    left edges of each bin.
 
     If `range_max` is specified all bin edges will be less than or
     equal to it's value.
@@ -456,10 +457,12 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
     `np.arange(nbins) * step` are not identical.  This function uses
     the second method in all cases where `step` is specified.
 
-    If the set (range_min, range_max, step) is given there is no grantee
-    that range_max  - range_min is an integer multiple of step.  In this case
-    the left most bin edge is range_min and the right most bin edge is less than
-    range_max and (range_max - ret[-1] < step)
+    If the set (range_min, range_max, step) is given there is no
+    guarantee that `range_max - range_min` is an integer multiple of
+    `step`.  In this case the left most bin edge is `range_min` and the
+    right most bin edge is less than `range_max` and the distance
+    between the right most edge and `range_max` is not greater than
+    `step`.
 
     Parameters
     ----------
