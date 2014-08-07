@@ -53,7 +53,7 @@ except:
     try:
         import ctrans
     except:
-        pass
+        raise ImportError(" Failed to import ctrans ")
 
 
 
