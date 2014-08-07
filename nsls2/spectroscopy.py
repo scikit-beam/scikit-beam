@@ -12,7 +12,9 @@ import six
 from six.moves import zip
 import numpy as np
 from scipy.integrate import simps
+import logging
 
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 def fit_quad_to_peak(x, y):
     """
@@ -203,7 +205,7 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
     if np.all(eval_x_arr_sign < 0):
         x_value_array = x_value_array[::-1]
         counts = counts[::-1]
-        print ("Input values for 'x_value_array' were found to be monotonically "
+        logging.warning("Input values for 'x_value_array' were found to be monotonically "
                 "decreasing. The 'x_value_array' and 'counts' arrays have been"
                 "reversed prior to integration.")
         #sign array has to be re-evaluated since diff-sign has changed.
