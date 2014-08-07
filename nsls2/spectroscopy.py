@@ -196,30 +196,26 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
     #sign change array.
     eval_x_arr_sign = np.sign(np.diff(x_value_array))
     
+    #check to make sure no outliers exist which violate the monotonically 
+    #increasing requirement, and if exceptions exist, then error points to the 
+    #location within the source array where the exception occurs.
+    if not np.all(eval_x_arr_sign * eval_x_arr_sign):
+        error_locations = np.where(eval_x_arr_sign <= 0)
+        raise ValueError("Independent variable must be monotonically "
+                         "increasing. Erroneous values found at x-value "
+                         "array index locations: {0}".format(error_locations))
+        
     # check whether the sign of all diff measures are negative in the 
     # x_value_array. If so, then the input array for both x_values and 
     # count are reversed so that they are positive, and monotonically increase 
     # in value
-    # added a print statement so that user is at least notified that this
-    # operation was required.
-    if np.all(eval_x_arr_sign < 0):
+    if eval_x_arr_sign[0) == -1:
         x_value_array = x_value_array[::-1]
         counts = counts[::-1]
         logging.warning("Input values for 'x_value_array' were found to be monotonically "
                 "decreasing. The 'x_value_array' and 'counts' arrays have been"
                 "reversed prior to integration.")
-        #sign array has to be re-evaluated since diff-sign has changed.
-        eval_x_arr_sign = np.sign(np.diff(x_value_array))
     
-    #check to make sure no outliers exist which violate the monotonically 
-    #increasing requirement, and if exceptions exist, then error points to the 
-    #location within the source array where the exception occurs.
-    if not np.all(eval_x_arr_sign > 0):
-        error_locations = np.where(eval_x_arr_sign <= 0)
-        raise ValueError("Independent variable must be monotonically "
-                         "increasing. Erroneous values found at x-value "
-                         "array index locations: {0}".format(error_locations))
-     
     # up-cast to 1d and make sure it is flat
     x_min = np.atleast_1d(x_min).ravel()
     x_max = np.atleast_1d(x_max).ravel()
