@@ -48,14 +48,15 @@ import logging
 logger = logging.getLogger(__name__)
 import time
 import operator
+
 try:
-    import nsls2.ctrans as ctrans
+    import src.ctrans as ctrans
 except:
     try:
         import ctrans
     except:
         #pass
-        raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
+    raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
 
 
 
@@ -260,7 +261,8 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
 
     # ending time for the process
     t2 = time.time()
-                           
+    logging.info('Done Processed in %f seconds') %(t2 - t1)
+
     return totSet[:,:3]
 
 
@@ -331,7 +333,7 @@ def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
     # staring time for griding
     t1 = time.time()
     # print "---- DONE (Processed in %f seconds)" % (t2 - t1)
-    loggin.info(')
+    logging.info('Done Processed in %f seconds') %(t2 - t1)
 
     # ctrans - c routines for fast data anlysis
     gridData, gridOccu, gridStd, gridOut = ctrans.grid3d(totSet, Qmin, Qmax, dQN, norm=1)
@@ -344,7 +346,9 @@ def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
 
     # No. of values zero in the grid
     emptNb = (gridOccu == 0).sum()
-    
+
+    if gridOut != 0:
+        logging.info
     #if gridOut != 0:
     #print ("---- Warning : There are %.2e points outside the grid") % gridOut
     #print (" (%.2e bins in the grid)") % gridData.size
