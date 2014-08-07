@@ -209,12 +209,12 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
     # x_value_array. If so, then the input array for both x_values and 
     # count are reversed so that they are positive, and monotonically increase 
     # in value
-    if eval_x_arr_sign[0) == -1:
+    if eval_x_arr_sign[0] == -1:
         x_value_array = x_value_array[::-1]
         counts = counts[::-1]
         logging.warning("Input values for 'x_value_array' were found to be monotonically "
                 "decreasing. The 'x_value_array' and 'counts' arrays have been"
-                "reversed prior to integration.")
+                " reversed prior to integration.")
     
     # up-cast to 1d and make sure it is flat
     x_min = np.atleast_1d(x_min).ravel()
