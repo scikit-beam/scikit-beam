@@ -48,7 +48,6 @@ import logging
 logger = logging.getLogger(__name__)
 import time
 import operator
-import ctrans
 
 try:
     import src.ctrans as ctrans
