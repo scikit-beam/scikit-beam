@@ -48,15 +48,16 @@ import logging
 logger = logging.getLogger(__name__)
 import time
 import operator
+import ctrans
 
-try:
+"""try:
     import src.ctrans as ctrans
 except:
     try:
         import ctrans
     except:
         #pass
-    raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
+    raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")"""
 
 
 
