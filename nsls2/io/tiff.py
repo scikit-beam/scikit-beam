@@ -3,7 +3,7 @@
 # BSD License
 # See LICENSE for full text
 """
-    This module is for read the .tiff file(load_tif) using FabIO
+    This module is for read the image(.tiff,.edf, .img, etc..) files(load_img) using FabIO
     
     """
 
@@ -13,16 +13,26 @@ import fabio
 import Image
 
 
-def load_tif(file):
+def load_img(file):
     """
     Parameters
     ----------
     file_name : string
-                Complete path to the file to be loaded into memory
+                Complete path to the image file to be loaded into memory
     Returns
     -------
     output : NxN ndarray
-             Returns a numpy array of the tiff file
+             Returns a numpy array of the image file
+             
+    Note
+    ----
+    FabIO is an I/O library for images produced by 2D X-ray detectors.
+    FabIO support images detectors from a dozen of companies (including Mar, 
+    Dectris, ADSC, Hamamatsu, Oxford,.),for a total of 20 different file formats 
+    (like CBF, EDF, TIFF, ...) and offers an unified interface to their headers 
+    (as a python dictionary)and datasets (as a numpy ndarray of integers or floats)
+    https://github.com/kif/fabio
+    
     """
     image = fabio.open(file)
     return image.data
