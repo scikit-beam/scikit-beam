@@ -43,7 +43,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.testing import assert_array_equal, assert_array_almost_equal
+from numpy.testing import assert_allclose
 
 from nsls2.fitting.model.background import snip_method
 
@@ -77,15 +77,17 @@ def test_snip_method():
                      spectral_binning=None, width=0.1)
     
     #plt.semilogy(xval, bg_true, xval, bg)
+    #plt.plot(xval, bg_true, xval, bg)
     #plt.show()
     
-    # we don't care about the boundary part
+    # ignore the boundary part
     cutval = 15
     bg_true_part = bg_true[cutval : -cutval]
     bg_cal_part = bg[cutval : -cutval]
     
-    # use only 
-    assert_array_almost_equal(bg_true_part, bg_cal_part, decimal=2)
+
+    #assert_array_almost_equal(bg_true_part, bg_cal_part, decimal=2)
+    assert_allclose(bg_true_part, bg_cal_part, rtol=1e-3, atol=1e-1)
     
     return
 
