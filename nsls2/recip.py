@@ -174,8 +174,7 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
     ----------
     settingAngles : Nx6 array
         six angles of the all the images
-        delta, theta, chi, phi, mu, gamma
-        (2 detector rotations and 4 sample rotations)
+        delta, theta, chi, phi, mu, gamma 
         
     detSizeX : int
         detector no. of pixels (size) in detector X-direction
@@ -212,6 +211,19 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
     -------
     totSet : Nx4 array
         (Qx, Qy, Qz, I) - HKL values and the intensity
+        
+    Note
+    -----
+    Six angles of an image: (delta, theta, chi, phi, mu, gamma )
+    These axes are dinfined according to the following refrences.
+    
+    Refernces: text [1]_, text [2]_
+    
+    ..[1] M. Loheir and E.Vlieg, "Angle calculations for six-circle surface x-ray diffratometer,"
+    J. Appl. Cryst., vol 26, pp 706-716, 1993.
+    
+    ..[2] E. Vlieg, " A (2+3)-Type surface diffratometer: Mergence of the z-axis and (2+2)-Type 
+    geometries," J. Appl. Cryst., vol 31, pp 198-203, 1998.
         
     """
     
