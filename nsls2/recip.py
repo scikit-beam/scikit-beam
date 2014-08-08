@@ -55,6 +55,7 @@ except:
     try:
         import ctrans
     except:
+        logger.error(" Failed to import ctrans - c routines for fast data anlysis ")
         raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
 
 
@@ -108,8 +109,10 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
             # slice the image based on the desired ROI
             img = np.meshgrid(img[ROI[0]:ROI[1]], img[ROI[2]:ROI[3]], sprase=True)
         else:
+            logger.error(" ROI has to be 4 element array : len(ROI) = 4")
             raise ValueError(" ROI has to be 4 elment array : len(ROI) = 4")
     else:
+        logger.error(" No ROI is specified ")
         raise ValueError(" No ROI is specified ")
     
 
@@ -240,7 +243,8 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
     frameMode = 4
     
     if settingAngles is None:
-        raise ValueError(" No setting angles specified. ")
+        logger.error(" No six angles specified")
+        raise ValueError(" No six angles specified. ")
     
     #  *********** Converting to Q   **************
 
@@ -260,7 +264,7 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
 
     # ending time for the process
     t2 = time.time()
-    #logging.info('Done Processed in %f seconds') %(t2 - t1)
+    logger.info("--- Done processed in %f seconds", (t2-t1))
 
     return totSet[:,:3]
 
@@ -308,7 +312,8 @@ def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
     """
     
     if totSet is None:
-        raise Exception("No set of (Qx, Qy, Qz). Cannot process grid.")
+        logger.error(" No set of (Qx, Qy, Qz). Cannot process grid. ")
+        raise ValueError(" No set of (Qx, Qy, Qz). Cannot process grid. ")
     
 
     # creating (Qx, Qy, Qz, I) Nx4 array - HKL values and Intensity
@@ -331,29 +336,25 @@ def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
     
     # staring time for griding
     t1 = time.time()
-    # print "---- DONE (Processed in %f seconds)" % (t2 - t1)
-    #logging.info('Done Processed in %f seconds') %(t2 - t1)
 
     # ctrans - c routines for fast data anlysis
     gridData, gridOccu, gridStd, gridOut = ctrans.grid3d(totSet, Qmin, Qmax, dQN, norm=1)
 
     # ending time for the griding
     t2 = time.time()
-    
+    logger.info("--- Done processed in %f seconds", (t2-t1))
+
     # No. of bins in the grid
     gridbins = gridData.size
 
     # No. of values zero in the grid
     emptNb = (gridOccu == 0).sum()
 
-    #if gridOut != 0:
-    #logging.info
-    #if gridOut != 0:
-    #print ("---- Warning : There are %.2e points outside the grid") % gridOut
-    #print (" (%.2e bins in the grid)") % gridData.size
-    #if emptNb:
-    #print ("---- Warning : There are %.2e values zero in the grid") % emptNb
-    
+    if gridOut != 0:
+        logger.warning("---- There are %.2e points outside the grid, %2e bins in the grid ", gridOut, gridData.size)
+    if emptNb:
+        logger.warning("---- There are %.2e values zero in th grid ", emptNb)
+
     return gridData, gridOccu, gridStd, gridOut, emptNb, gridbins
 
 
