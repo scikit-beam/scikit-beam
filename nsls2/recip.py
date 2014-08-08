@@ -50,13 +50,12 @@ import time
 import operator
 
 try:
-    import src.ctrans as ctrans
+    import nsls2.ctrans as ctrans
 except:
     try:
         import ctrans
     except:
-        pass
-    #raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")"""
+        raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
 
 
 
