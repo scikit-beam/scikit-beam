@@ -56,7 +56,8 @@ except:
         import ctrans
     except:
         logger.error(" Failed to import ctrans - c routines for fast data anlysis ")
-        raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
+        pass
+        #raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
 
 
 
