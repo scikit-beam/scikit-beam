@@ -56,7 +56,7 @@ except:
         import ctrans
     except:
         logger.error(" Failed to import ctrans - c routines for fast data anlysis ")
-        pass
+        #pass
         #raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
 
 
@@ -109,11 +109,9 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
         if len(ROI) == 4:
             # slice the image based on the desired ROI
             img = np.meshgrid(img[ROI[0]:ROI[1]], img[ROI[2]:ROI[3]], sprase=True)
-        else:
-            logger.error(" ROI has to be 4 element array : len(ROI) = 4")
-            raise ValueError(" ROI has to be 4 elment array : len(ROI) = 4")
     else:
-        logger.error(" No ROI is specified ")
+        raise ValueError(" ROI has to be 4 elment array : len(ROI) = 4")
+    else:
         raise ValueError(" No ROI is specified ")
     
 
@@ -244,7 +242,6 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
     frameMode = 4
     
     if settingAngles is None:
-        logger.error(" No six angles specified")
         raise ValueError(" No six angles specified. ")
     
     #  *********** Converting to Q   **************
@@ -313,7 +310,6 @@ def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
     """
     
     if totSet is None:
-        logger.error(" No set of (Qx, Qy, Qz). Cannot process grid. ")
         raise ValueError(" No set of (Qx, Qy, Qz). Cannot process grid. ")
     
 
