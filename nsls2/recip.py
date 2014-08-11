@@ -50,14 +50,14 @@ import time
 import operator
 
 try:
-    import ..src.ctrans as ctrans
+    import src.ctrans as ctrans
 except:
     try:
         import ctrans
     except:
-        logger.error(" Failed to import ctrans - c routines for fast data anlysis ")
+        #logger.error(" Failed to import ctrans - c routines for fast data anlysis ")
         #pass
-        #raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
+        raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
 
 
 
