@@ -168,8 +168,7 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
     return qi
 
 
-def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
-                 detPixSizeY, detX0, detY0, detDis, waveLen, UBmat):
+def process_to_q(settingAngles, detSizeX, detSizeY, pixel_size, detX0, detY0, dist_sample, wavelength, UBmat):
     """
     This will procees the given images (certain scan) of
     the full set into receiprocal(Q) space, (Qx, Qy, Qz, I)
@@ -186,6 +185,9 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
     detSizeY : int
         detector no. of pixels (size) in detector Y-direction
         
+    pixel_size : tuple
+        see keys_core (mm)
+        
     detPixSizeX : float
         detector pixel size in detector X-direction (mm)
         
@@ -198,11 +200,11 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
     detY0 : float
         detector Y-coordinate of center for reference (mm)
         
-    detDis : float
-        detector distance from sample (mm)
+    dist_sample : float
+        see keys_core (mm)
         
-    waveLen : float
-        wavelength (Angstrom)
+    wavelength : float
+        see keys_core (Angstroms)
         
     UBmat : 3x3 array
         UB matrix (orientation matrix)
@@ -255,8 +257,8 @@ def process_to_q(settingAngles, detSizeX, detSizeY, detPixSizeX,
                            ccd_size=(detSizeX, detSizeY),
                            ccd_pixsize=(detPixSizeX, detPixSizeY),
                            ccd_cen=(detX0, detY0),
-                           dist=detDis,
-                           wavelength=waveLen,
+                           dist=dist_sample,
+                           wavelength=wavelength,
                            UBinv=np.matrix(UBmat).I,
                            **ccdToQkwArgs)
 
