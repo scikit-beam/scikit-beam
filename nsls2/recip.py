@@ -357,7 +357,7 @@ def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
 
     if gridOut != 0:
         logger.warning("---- There are %.2e points outside the grid ", gridOut)
-        logger.info("---- There are %2e bins in the grid " gridData.size)
+        logger.info("---- There are %2e bins in the grid ", gridData.size)
     if emptNb:
         logger.warning("---- There are %.2e values zero in th grid ", emptNb)
 
