@@ -222,12 +222,12 @@ def process_to_q(settingAngles, detector_size, pixel_size,
     
     Refernces: text [1]_, text [2]_
     
-    ..[1] M. Loheir and E.Vlieg, "Angle calculations for six-circle surface
-    x-ray diffratometer," J. Appl. Cryst., vol 26, pp 706-716, 1993.
+    .. [1] M. Loheir and E.Vlieg, "Angle calculations for six-circle surface
+       x-ray diffratometer," J. Appl. Cryst., vol 26, pp 706-716, 1993.
     
-    ..[2] E. Vlieg, " A (2+3)-Type surface diffratometer:
-    Mergence of the z-axis and (2+2)-Type geometries,"
-    J. Appl. Cryst., vol 31, pp 198-203, 1998.
+    .. [2] E. Vlieg, " A (2+3)-Type surface diffratometer:
+       Mergence of the z-axis and (2+2)-Type geometries,"
+       J. Appl. Cryst., vol 31, pp 198-203, 1998.
         
     """
     
