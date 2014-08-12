@@ -42,7 +42,7 @@ calculations.
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-import six 
+import six
 import numpy as np
 import logging
 logger = logging.getLogger(__name__)
@@ -56,8 +56,6 @@ except:
         import ctrans
     except ImportError:
         ctrans = None
-        # raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
-
 
 
 def project_to_sphere(img, dist_sample, detector_center, pixel_size,
@@ -112,7 +110,6 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
         
     """
 
-    
     if ROI is not None:
         if len(ROI) == 4:
             # slice the image based on the desired ROI
@@ -122,7 +119,6 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
     else:
         raise ValueError(" No ROI is specified ")
     
-
     # create the array of x indices
     arr_2d_x = np.zeros((img.shape[0], img.shape[1]), dtype=np.float)
     for x in range(img.shape[0]):
@@ -176,7 +172,8 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
     return qi
 
 
-def process_to_q(settingAngles, detector_size, pixel_size, detector_center, dist_sample, wavelength, UBmat):
+def process_to_q(settingAngles, detector_size, pixel_size,
+                 detector_center, dist_sample, wavelength, UBmat):
     """
     This will procees the given images (certain scan) of
     the full set into receiprocal(Q) space, (Qx, Qy, Qz, I)
@@ -185,7 +182,7 @@ def process_to_q(settingAngles, detector_size, pixel_size, detector_center, dist
     ----------
     settingAngles : Nx6 array
         six angles of the all the images
-        delta, theta, chi, phi, mu, gamma 
+        delta, theta, chi, phi, mu, gamma
         
     detector_size : tuple
         see keys_core (pixel)
@@ -215,7 +212,8 @@ def process_to_q(settingAngles, detector_size, pixel_size, detector_center, dist
     ------
     ValueError
         Possible causes:
-            Raised when the diffractometer six angles of the images are not specified
+            Raised when the diffractometer six angles of
+            the images are not specified
         
     Note
     -----
@@ -224,11 +222,12 @@ def process_to_q(settingAngles, detector_size, pixel_size, detector_center, dist
     
     Refernces: text [1]_, text [2]_
     
-    ..[1] M. Loheir and E.Vlieg, "Angle calculations for six-circle surface x-ray diffratometer,"
-    J. Appl. Cryst., vol 26, pp 706-716, 1993.
+    ..[1] M. Loheir and E.Vlieg, "Angle calculations for six-circle surface
+    x-ray diffratometer," J. Appl. Cryst., vol 26, pp 706-716, 1993.
     
-    ..[2] E. Vlieg, " A (2+3)-Type surface diffratometer: Mergence of the z-axis and (2+2)-Type 
-    geometries," J. Appl. Cryst., vol 31, pp 198-203, 1998.
+    ..[2] E. Vlieg, " A (2+3)-Type surface diffratometer:
+    Mergence of the z-axis and (2+2)-Type geometries,"
+    J. Appl. Cryst., vol 31, pp 198-203, 1998.
         
     """
     
@@ -265,7 +264,7 @@ def process_to_q(settingAngles, detector_size, pixel_size, detector_center, dist
     t2 = time.time()
     logger.info("--- Done processed in %f seconds", (t2-t1))
 
-    return totSet[:,:3]
+    return totSet[:, :3]
 
 
 def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
@@ -322,7 +321,6 @@ def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
     if totSet is None:
         raise ValueError(" No set of (Qx, Qy, Qz). Cannot process grid. ")
     
-
     # creating (Qx, Qy, Qz, I) Nx4 array - HKL values and Intensity
     # getting the intensity value for each pixel
 
@@ -358,7 +356,8 @@ def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
     emptNb = (gridOccu == 0).sum()
 
     if gridOut != 0:
-        logger.warning("---- There are %.2e points outside the grid, %2e bins in the grid ", gridOut, gridData.size)
+        logger.warning("---- There are %.2e points outside the grid ", gridOut)
+        logger.info("---- There are %2e bins in the grid " gridData.size)
     if emptNb:
         logger.warning("---- There are %.2e values zero in th grid ", emptNb)
 

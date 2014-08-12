@@ -6,13 +6,14 @@ import numpy.testing as npt
 from numpy.testing.noseclasses import KnownFailureTest
 import six
 
+
 def test_process_to_q():
     if six.PY3:
         return
     detector_size = (256, 256)
     pixel_size = (0.0135*8, 0.0135*8)
     detector_center = (256/2.0, 256/2.0)
-    dist_sample =  detAng = 355.0
+    dist_sample = 355.0
     detector_angle = 0.0
 
     energy = 640  # (  in eV)
@@ -71,7 +72,6 @@ def test_process_grid():
                      np.ravel(Y),
                      np.ravel(Z)])
     data = data.T
-
 
     gridData, gridOccu, gridStd, gridOut, emptNb, gridbins = recip.process_grid(data, out, Qmax, Qmin, dQN)
     
