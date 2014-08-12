@@ -108,8 +108,9 @@ def get_element_info(nels=100,
         f = open(els_file, 'r')
         csvf = csv.reader(f, delimiter=',')
     except IOError:
-        print ('Error: Could not find xrf_library.csv file!')
-        return None
+        errmsg = 'Error: Could not find file %s!' % (filename)
+        print (errmsg)
+        logging.critical(errmsg)
 
 
     element = []
