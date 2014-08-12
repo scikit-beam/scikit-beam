@@ -50,7 +50,7 @@ import time
 import operator
 
 try:
-    import nsls2.ctrans as ctrans
+    import ..src.ctrans as ctrans
 except:
     try:
         import ctrans
@@ -168,7 +168,7 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
     return qi
 
 
-def process_to_q(settingAngles, detSizeX, detSizeY, pixel_size, detX0, detY0, dist_sample, wavelength, UBmat):
+def process_to_q(settingAngles, detector_size, pixel_size, detector_center, dist_sample, wavelength, UBmat):
     """
     This will procees the given images (certain scan) of
     the full set into receiprocal(Q) space, (Qx, Qy, Qz, I)
@@ -179,27 +179,15 @@ def process_to_q(settingAngles, detSizeX, detSizeY, pixel_size, detX0, detY0, di
         six angles of the all the images
         delta, theta, chi, phi, mu, gamma 
         
-    detSizeX : int
-        detector no. of pixels (size) in detector X-direction
-        
-    detSizeY : int
-        detector no. of pixels (size) in detector Y-direction
+    detector_size : tuple
+        see keys_core (pixel)
         
     pixel_size : tuple
         see keys_core (mm)
         
-    detPixSizeX : float
-        detector pixel size in detector X-direction (mm)
-        
-    detPixSizeY : float
-        detector pixel size in detector Y-direction (mm)
-        
-    detX0 : float
-        detector X-coordinate of center for reference (mm)
-        
-    detY0 : float
-        detector Y-coordinate of center for reference (mm)
-        
+    detector_center : tuple
+        see key_core (mm)
+    
     dist_sample : float
         see keys_core (mm)
         
@@ -254,9 +242,9 @@ def process_to_q(settingAngles, detSizeX, detSizeY, pixel_size, detX0, detY0, di
     # ctrans - c routines for fast data anlysis
     totSet = ctrans.ccdToQ(angles=settingAngles * np.pi / 180.0,
                            mode=frameMode,
-                           ccd_size=(detSizeX, detSizeY),
-                           ccd_pixsize=(detPixSizeX, detPixSizeY),
-                           ccd_cen=(detX0, detY0),
+                           ccd_size=(detector_size),
+                           ccd_pixsize=(pixel_size),
+                           ccd_cen=(detector_center),
                            dist=dist_sample,
                            wavelength=wavelength,
                            UBinv=np.matrix(UBmat).I,

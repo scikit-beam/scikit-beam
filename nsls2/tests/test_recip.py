@@ -9,13 +9,16 @@ import six
 def test_process_to_q():
     if six.PY3:
         return
-    detPixSizeX, detPixSizeY, detSizeX, detSizeY = 0.0135*8, 0.0135*8, 256, 256
-    detX0, detY0, detDis, detAng = 256/2.0, 256/2.0, 355.0, 0.0
+    detector_size = (256, 256)
+    pixel_size = (0.0135*8, 0.0135*8)
+    detector_center = (256/2.0, 256/2.0)
+    dist_sample =  detAng = 355.0
+    detector_angle = 0.0
 
     energy = 640  # (  in eV)
     # HC_OVER_E to convert from Energy to wavelength (Lambda)
     hc_over_e = 12398.4
-    waveLen = hc_over_e / energy  # (Angstrom )
+    wavelength = hc_over_e / energy  # (Angstrom )
 
     UBmat = np.matrix([[-0.01231028454, 0.7405370482, 0.06323870032],
                        [0.4450897473, 0.04166852402, -0.9509449389],
@@ -25,10 +28,9 @@ def test_process_to_q():
                               [90., 60., 0., 30., 10., 5.]])
     # delta=40, theta=15, chi = 90, phi = 30, mu = 10.0, gamma=5.0
 
-    totSet = recip.process_to_q(settingAngles, detSizeX, detSizeY,
-                                detPixSizeX, detPixSizeY, detX0, detY0,
-                                detDis, waveLen, UBmat)
-    
+    totSet = recip.process_to_q(settingAngles, detector_size, pixel_size, detector_center,
+                                dist_sample, wavelength, UBmat)
+
     #  Known HKL values for the given six angles)
     HKL1 = np.matrix([[-0.15471196, 0.19673939, -0.11440936]])
     HKL2 = np.matrix([[0.10205953,  0.45624416, -0.27200778]])
