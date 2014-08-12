@@ -54,6 +54,28 @@ class element_info:
     information related to element fluorescence
     """
     def __init__(self):
+        """
+        Parameters:
+        ----------
+        self.z : int
+            atomic number
+        self.name : string
+            element name
+        self.xrf : dict
+            all the emission lines
+        self.xrf_abs_yield : dict
+            all the x-ray fluorescence cross section, unit cm2/g
+        self.yieldD : dict
+            yield for k, l1, l2, l3 and m shell
+        self.density : float
+            element density in r.t.
+        self.mass : float
+            atomic mass
+        self.bindingE : dict
+            binding energy for different shells
+        self.jump : dict
+            jump factor for different shells
+        """
         self.z = 0
         self.name = ''
         self.xrf = {'Ka1':0., 'Ka2':0.,
