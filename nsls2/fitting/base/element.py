@@ -37,8 +37,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division)#, print_function,
+#                        unicode_literals)
 
 import numpy as np
 import csv
@@ -107,7 +107,7 @@ class element_info:
 
 
 def get_element_info(nels=100,
-                     filenam='xrf_library.csv'):
+                     filename='xrf_library.csv'):
     """
     get element fluorescence information from file
     
@@ -124,7 +124,7 @@ def get_element_info(nels=100,
     """
     
     file_dir = os.path.dirname(__file__)
-    els_file = os.path.join(file_dir, )
+    els_file = os.path.join(file_dir, filename)
     
     try:
         f = open(els_file, 'r')
@@ -150,51 +150,51 @@ def get_element_info(nels=100,
 
         element[i].z = int(float(row[0]))
         element[i].name = row[1]
-        element[i].xrf['ka1'] = float(row[2])
-        element[i].xrf['ka2'] = float(row[3])
-        element[i].xrf['kb1'] = float(row[4])
-        element[i].xrf['kb2'] = float(row[5])
-        element[i].xrf['la1'] = float(row[6])
-        element[i].xrf['la2'] = float(row[7])
-        element[i].xrf['lb1'] = float(row[8])
-        element[i].xrf['lb2'] = float(row[9])
-        element[i].xrf['lb3'] = float(row[10])
-        element[i].xrf['lb4'] = float(row[11])
-        element[i].xrf['lg1'] = float(row[12])
-        element[i].xrf['lg2'] = float(row[13])
-        element[i].xrf['lg3'] = float(row[14])
-        element[i].xrf['lg4'] = float(row[15])
-        element[i].xrf['ll'] = float(row[16])
-        element[i].xrf['ln'] = float(row[17])
-        element[i].xrf['ma1'] = float(row[18])
-        element[i].xrf['ma2'] = float(row[19])
-        element[i].xrf['mb'] = float(row[20])
-        element[i].xrf['mg'] = float(row[21])
+        element[i].xrf['Ka1'] = float(row[2])
+        element[i].xrf['Ka2'] = float(row[3])
+        element[i].xrf['Kb1'] = float(row[4])
+        element[i].xrf['Kb2'] = float(row[5])
+        element[i].xrf['La1'] = float(row[6])
+        element[i].xrf['La2'] = float(row[7])
+        element[i].xrf['Lb1'] = float(row[8])
+        element[i].xrf['Lb2'] = float(row[9])
+        element[i].xrf['Lb3'] = float(row[10])
+        element[i].xrf['Lb4'] = float(row[11])
+        element[i].xrf['Lg1'] = float(row[12])
+        element[i].xrf['Lg2'] = float(row[13])
+        element[i].xrf['Lg3'] = float(row[14])
+        element[i].xrf['Lg4'] = float(row[15])
+        element[i].xrf['Ll'] = float(row[16])
+        element[i].xrf['Ln'] = float(row[17])
+        element[i].xrf['Ma1'] = float(row[18])
+        element[i].xrf['Ma2'] = float(row[19])
+        element[i].xrf['Mb'] = float(row[20])
+        element[i].xrf['Mg'] = float(row[21])
         element[i].yieldD['k'] = float(row[22])
         element[i].yieldD['l1'] = float(row[23])
         element[i].yieldD['l2'] = float(row[24])
         element[i].yieldD['l3'] = float(row[25])
         element[i].yieldD['m'] = float(row[26])
-        element[i].xrf_abs_yield['ka1'] = float(row[27])
-        element[i].xrf_abs_yield['ka2'] = float(row[28])
-        element[i].xrf_abs_yield['kb1'] = float(row[29])
-        element[i].xrf_abs_yield['kb2'] = float(row[30])
-        element[i].xrf_abs_yield['la1'] = float(row[31])
-        element[i].xrf_abs_yield['la2'] = float(row[32])
-        element[i].xrf_abs_yield['lb1'] = float(row[33])
-        element[i].xrf_abs_yield['lb2'] = float(row[34])
-        element[i].xrf_abs_yield['lb3'] = float(row[35])
-        element[i].xrf_abs_yield['lb4'] = float(row[36])
-        element[i].xrf_abs_yield['lg1'] = float(row[37])
-        element[i].xrf_abs_yield['lg2'] = float(row[38])
-        element[i].xrf_abs_yield['lg3'] = float(row[39])
-        element[i].xrf_abs_yield['lg4'] = float(row[40])
-        element[i].xrf_abs_yield['ll'] = float(row[41])
-        element[i].xrf_abs_yield['ln'] = float(row[42])
-        element[i].xrf_abs_yield['ma1'] = float(row[43])
-        element[i].xrf_abs_yield['ma2'] = float(row[44])
-        element[i].xrf_abs_yield['mb'] = float(row[45])
-        element[i].xrf_abs_yield['mg'] = float(row[46])
+        element[i].xrf_abs_yield['Ka1'] = float(row[27])
+        element[i].xrf_abs_yield['Ka2'] = float(row[28])
+        element[i].xrf_abs_yield['Kb1'] = float(row[29])
+        element[i].xrf_abs_yield['Kb2'] = float(row[30])
+        element[i].xrf_abs_yield['La1'] = float(row[31])
+        element[i].xrf_abs_yield['La2'] = float(row[32])
+        element[i].xrf_abs_yield['Lb1'] = float(row[33])
+        element[i].xrf_abs_yield['Lb2'] = float(row[34])
+        element[i].xrf_abs_yield['Lb3'] = float(row[35])
+        element[i].xrf_abs_yield['Lb4'] = float(row[36])
+        element[i].xrf_abs_yield['Lg1'] = float(row[37])
+        element[i].xrf_abs_yield['Lg2'] = float(row[38])
+        element[i].xrf_abs_yield['Lg3'] = float(row[39])
+        element[i].xrf_abs_yield['Lg4'] = float(row[40])
+        element[i].xrf_abs_yield['Ll'] = float(row[41])
+        element[i].xrf_abs_yield['Ln'] = float(row[42])
+        element[i].xrf_abs_yield['Ma1'] = float(row[43])
+        element[i].xrf_abs_yield['Ma2'] = float(row[44])
+        element[i].xrf_abs_yield['Mb'] = float(row[45])
+        element[i].xrf_abs_yield['Mg'] = float(row[46])
 
         if len(row) > 46 :
             element[i].density = float(row[47])
