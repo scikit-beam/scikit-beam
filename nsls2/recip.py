@@ -54,8 +54,8 @@ try:
 except:
     try:
         import ctrans
-    except:
-        pass
+    except ImportError:
+        ctrans = None
         # raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
 
 
