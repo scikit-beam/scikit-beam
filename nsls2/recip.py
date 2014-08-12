@@ -32,6 +32,7 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
+
 """
     
 This module is for functions and classes specific to reciprocal space
@@ -53,8 +54,8 @@ except:
     try:
         import ctrans
     except:
-        pass
-        #raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
+        #pass
+        raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
 
 
 
@@ -329,6 +330,8 @@ def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
     
     # staring time for griding
     t1 = time.time()
+    # print "---- DONE (Processed in %f seconds)" % (t2 - t1)
+    loggin.info(')
 
     # ctrans - c routines for fast data anlysis
     gridData, gridOccu, gridStd, gridOut = ctrans.grid3d(totSet, Qmin, Qmax, dQN, norm=1)
