@@ -56,7 +56,7 @@ except:
         import ctrans
     except:
         pass
-        #raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
+        # raise ImportError(" Failed to import ctrans - c routines for fast data anlysis ")
 
 
 
@@ -92,7 +92,6 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
     **kwargs : dict
         Bucket for extra parameters from an unpacked dictionary
 
-
     Returns
     -------
     Bucket for extra parameters from an unpacked dictionary
@@ -100,6 +99,16 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
     qi : 4 x N array of the coordinates in Q space (A^-1)
         Rows correspond to individual pixels
         Columns are (Qx, Qy, Qz, I)
+        
+    Raises
+    ------
+    ValueError
+        Possible causes:
+            Raised when the ROI is not a 4 elment array
+            
+    ValueError
+        Possible causes:
+            Raised when ROI is not specified
         
     """
 
@@ -195,15 +204,18 @@ def process_to_q(settingAngles, detector_size, pixel_size, detector_center, dist
         
     UBmat : 3x3 array
         UB matrix (orientation matrix)
-        
-    istack : ndarray
-        intensity array of the images
     
         
     Returns
     -------
     totSet : Nx4 array
         (Qx, Qy, Qz, I) - HKL values and the intensity
+        
+    Raises
+    ------
+    ValueError
+        Possible causes:
+            Raised when the diffractometer six angles of the images are not specified
         
     Note
     -----
@@ -264,7 +276,10 @@ def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
     Prameters
     ---------
     totSet : Nx4 array
-        (Qx, Qy, Qz, I) - HKL values and the intensity
+        (Qx, Qy, Qz) - HKL values
+        
+    istack : Nx1
+        intensity array of the images
         
     Qmin : ndarray, optional
         minimum values of the voxel[Qx, Qy, Qz]_min
@@ -294,6 +309,12 @@ def process_grid(totSet, istack, Qmin=None, Qmax=None, dQN=None):
         
     gridbins : int
         No. of bins in the grid
+        
+    Raises
+    ------
+    ValueError
+        Possible causes:
+            Raised when the HKL values are not provided
         
         
     """
