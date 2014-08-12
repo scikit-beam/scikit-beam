@@ -12,7 +12,7 @@ def test_process_to_q():
         return
     detector_size = (256, 256)
     pixel_size = (0.0135*8, 0.0135*8)
-    detector_center = (256/2.0, 256/2.0)
+    calibrated_center = (256/2.0, 256/2.0)
     dist_sample = 355.0
     detector_angle = 0.0
 
@@ -21,16 +21,16 @@ def test_process_to_q():
     hc_over_e = 12398.4
     wavelength = hc_over_e / energy  # (Angstrom )
 
-    UBmat = np.matrix([[-0.01231028454, 0.7405370482, 0.06323870032],
+    ub_mat = np.matrix([[-0.01231028454, 0.7405370482, 0.06323870032],
                        [0.4450897473, 0.04166852402, -0.9509449389],
                        [-0.7449130975, 0.01265920962, -0.5692399963]])
 
-    settingAngles = np.matrix([[40., 15., 30., 25., 10., 5.],
+    setting_angles = np.matrix([[40., 15., 30., 25., 10., 5.],
                               [90., 60., 0., 30., 10., 5.]])
     # delta=40, theta=15, chi = 90, phi = 30, mu = 10.0, gamma=5.0
 
-    totSet = recip.process_to_q(settingAngles, detector_size, pixel_size, detector_center,
-                                dist_sample, wavelength, UBmat)
+    totSet = recip.process_to_q(setting_angles, detector_size, pixel_size, calibrated_center,
+                                dist_sample, wavelength, ub_mat)
 
     #  Known HKL values for the given six angles)
     HKL1 = np.matrix([[-0.15471196, 0.19673939, -0.11440936]])
