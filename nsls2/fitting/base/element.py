@@ -1,6 +1,11 @@
 '''
-to do: calculate xrf yield based on xraylib
+Copyright (c) 2014, Brookhaven National Laboratory
+All rights reserved.
 
+# @author: Li Li (lili@bnl.gov)
+# created on 08/12/2014
+
+Original code:
 @author: Mirna Lerotic, 2nd Look Consulting
          http://www.2ndlookconsulting.com/
 Copyright (c) 2013, Stefan Vogt, Argonne National Laboratory
