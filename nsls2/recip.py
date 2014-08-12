@@ -51,7 +51,7 @@ import operator
 
 try:
     import src.ctrans as ctrans
-except:
+except ImportError:
     try:
         import ctrans
     except ImportError:
