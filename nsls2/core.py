@@ -271,7 +271,7 @@ keys_core = {
     "detector_angle": {
         "description" : ("Detector tilt angle"),
         "type" : float,
-        "units" : " ?",
+        "units" : "degrees",
         },
     "dist_sample": {
         "description" : "distance from the sample to the detector (mm)",
@@ -283,7 +283,7 @@ keys_core = {
         "type" : float,
         "units" : "angstrom",
         },
-     "UBmat": {
+     "ub_mat": {
          "description" : "UB matrix(orientation matrix) 3x3 array",
          "type" : tuple,
          },
