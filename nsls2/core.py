@@ -493,7 +493,7 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
 
     if range_min is not None and range_max is not None:
         if range_max <= range_min:
-            raise ValueError("The minimum must be greater than the maximum")
+            raise ValueError("The minimum must be less than the maximum")
 
     if nbins is not None:
         if nbins <= 0:
