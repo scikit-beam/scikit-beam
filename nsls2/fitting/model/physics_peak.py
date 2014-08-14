@@ -51,8 +51,8 @@ def model_gauss_peak(A, sigma, dx):
     refer to van espen, spectrum evaluation in van grieken, 
     handbook of x-ray spectrometry, 2nd ed, page 182 ff
     
-    Parameters:
-    -----------
+    Parameters
+    ----------
     A : float
         intensity of gaussian function
     sigma : float
@@ -60,8 +60,8 @@ def model_gauss_peak(A, sigma, dx):
     x : array
         data in x coordinate, relative to center
         
-    Returns:
-    --------
+    Returns
+    -------
     counts : array
         gaussian peak
     
@@ -72,7 +72,6 @@ def model_gauss_peak(A, sigma, dx):
     return counts
 
 
-
 def model_gauss_step(A, sigma, dx, peak_E):
     """
     use scipy erfc function
@@ -80,8 +79,8 @@ def model_gauss_step(A, sigma, dx, peak_E):
     refer to van espen, spectrum evaluation,
     in van grieken, handbook of x-ray spectrometry, 2nd ed, page 182
     
-    Parameters:
-    -----------
+    Parameters
+    ----------
     A : float
         intensity or height
     sigma : float
@@ -91,8 +90,8 @@ def model_gauss_step(A, sigma, dx, peak_E):
     peak_E : float
         need to double check this value
     
-    Returns:
-    --------
+    Returns
+    -------
     counts : array
         gaussian step peak
     """
@@ -102,15 +101,14 @@ def model_gauss_step(A, sigma, dx, peak_E):
     return counts
 
 
-
 def model_gauss_tail(A, sigma, dx, gamma):
     """
     models a gaussian tail function
     refer to van espen, spectrum evaluation,
     in van grieken, handbook of x-ray spectrometry, 2nd ed, page 182
     
-    Parameters:
-    -----------
+    Parameters
+    ----------
     A : float
         intensity or height
     sigma : float
@@ -120,8 +118,8 @@ def model_gauss_tail(A, sigma, dx, gamma):
     gamma : float
         normalization factor
     
-    Returns:
-    --------
+    Returns
+    -------
     counts : array
         gaussian tail peak
     """
@@ -136,15 +134,14 @@ def model_gauss_tail(A, sigma, dx, gamma):
     return counts
 
 
-
 def elastic_peak(coherent_sct_energy, 
                  fwhm_offset, fwhm_fanoprime, 
                  A, ev, epsilon=2.96):
     """
     model elastic peak as a gaussian function
     
-    Parameters:
-    -----------
+    Parameters
+    ----------
     coherent_sct_energy : float
         incident energy                         
     fwhm_offset : float
@@ -160,8 +157,8 @@ def elastic_peak(coherent_sct_energy,
         for Ge 2.96, for Si 3.61 at 300K
         needs to double check this value
     
-    Returns:
-    --------
+    Returns
+    -------
     value : array
         elastic peak
     sigma : float
@@ -180,8 +177,6 @@ def elastic_peak(coherent_sct_energy,
     return value, sigma
 
 
-
-
 def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime, 
                  compton_angle, compton_fwhm_corr, compton_amplitude,
                  compton_f_step, compton_f_tail, compton_gamma,
@@ -190,7 +185,7 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     """
     model compton peak
     
-    Parameters:
+    Parameters
     ----------
     coherent_sct_energy : float
         incident energy                         
@@ -225,8 +220,8 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     matrix : bool
         to be updated
     
-    Returns:
-    --------
+    Returns
+    -------
     counts : array
         compton peak
     sigma : float
@@ -272,11 +267,4 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     counts = counts + value
 
     return counts, sigma, faktor
-    
-
-
-
-    
-    
-
     

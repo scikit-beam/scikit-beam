@@ -55,8 +55,8 @@ def snip_method(spectrum,
     """
     use snip algorithm to obtain background
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     spectrum : array
         intensity spectrum
     e_off : float
@@ -90,8 +90,8 @@ def snip_method(spectrum,
     width_threshold : float
         stop point of the algorithm
 
-    Returns:
-    --------
+    Returns
+    -------
     background : array
         output results with peak removed
     """
@@ -171,6 +171,3 @@ def snip_method(spectrum,
     background[inf_ind] = 0.0
 
     return background
-
-
-

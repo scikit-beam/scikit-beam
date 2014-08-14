@@ -261,14 +261,15 @@ def get_element_xraylib(incident_energy=10.0,
     get all the elements information from xraylib
     the cross section is energy dependent
     
-    Parameters:
+    Parameters
     ----------
     incident_energy : float
         incident x-ray energy to emit fluorescence line
     filename : string
         file saving the element name, density, mass
-    Returns:
-    --------
+    
+    Returns
+    -------
     element : class object
         save all the elements fluorescence information
     """
