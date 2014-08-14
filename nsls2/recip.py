@@ -34,7 +34,7 @@
 ########################################################################
 
 """
-    
+
 This module is for functions and classes specific to reciprocal space
 calculations.
 
@@ -62,52 +62,51 @@ def project_to_sphere(img, dist_sample, calibrated_center, pixel_size,
                       wavelength, ROI=None, **kwargs):
     """
     Project the pixels on the 2D detector to the surface of a sphere.
-    
+
     Parameters
     ----------
     img : ndarray
         2D detector image
-        
+
     dist_sample : float
         see keys_core  (mm)
-        
+
     calibrated_center : 2 element float array
         see keys_core (pixels)
-        
+
     pixel_size : 2 element float array
         see keys_core (mm)
-        
+
     wavelength : float
         see keys_core (Angstroms)
-        
+
     ROI : 4 element int array
         ROI defines a rectangular ROI for img
         ROI[0] == x_min
         ROI[1] == x_max
         ROI[2] == y_min
         ROI[3] == y_max
-        
+
     **kwargs : dict
         Bucket for extra parameters from an unpacked dictionary
 
     Returns
     -------
     Bucket for extra parameters from an unpacked dictionary
-    
+
     qi : 4 x N array of the coordinates in Q space (A^-1)
         Rows correspond to individual pixels
         Columns are (Qx, Qy, Qz, I)
-        
+
     Raises
     ------
     ValueError
         Possible causes:
-            Raised when the ROI is not a 4 elment array
-            
+            Raised when the ROI is not a 4 element array
+
     ValueError
         Possible causes:
             Raised when ROI is not specified
-        
     """
 
     if ROI is not None:
@@ -115,10 +114,10 @@ def project_to_sphere(img, dist_sample, calibrated_center, pixel_size,
             # slice the image based on the desired ROI
             img = np.meshgrid(img[ROI[0]:ROI[1]], img[ROI[2]:ROI[3]], sprase=True)
         else:
-            raise ValueError(" ROI has to be 4 elment array : len(ROI) = 4")
+            raise ValueError(" ROI has to be 4 element array : len(ROI) = 4")
     else:
         raise ValueError(" No ROI is specified ")
-    
+
     # create the array of x indices
     arr_2d_x = np.zeros((img.shape[0], img.shape[1]), dtype=np.float)
     for x in range(img.shape[0]):
@@ -168,7 +167,7 @@ def project_to_sphere(img, dist_sample, calibrated_center, pixel_size,
     qi[:, 0:2] = qi[:, 0:2]/np.linalg.norm(qi[:, 0:2])
     # convert to reciprocal space
     qi[:, 0:2] *= Q
-    
+
     return qi
 
 
@@ -177,79 +176,78 @@ def process_to_q(setting_angles, detector_size, pixel_size,
     """
     This will procees the given images (certain scan) of
     the full set into receiprocal(Q) space, (Qx, Qy, Qz)
-    
+
     Parameters
     ----------
     setting_angles : Nx6 array
         six angles of the all the images
         delta, theta, chi, phi, mu, gamma
-        
+
     detector_size : tuple
         see keys_core (pixel)
-        
+
     pixel_size : tuple
         see keys_core (mm)
-        
+
     calibrated_center : tuple
         see key_core (mm)
-    
+
     dist_sample : float
         see keys_core (mm)
-        
+
     wavelength : float
         see keys_core (Angstroms)
-        
+
     ub_mat : 3x3 array
         UB matrix (orientation matrix)
-    
-        
+
     Returns
     -------
     tot_set : Nx3 array
         (Qx, Qy, Qz) - HKL values
-        
+
     Raises
     ------
     ValueError
         Possible causes:
             Raised when the diffractometer six angles of
             the images are not specified
-        
+
     Note
     -----
     Six angles of an image: (delta, theta, chi, phi, mu, gamma )
-    These axes are dinfined according to the following refrences.
-    
-    Refernces: text [1]_, text [2]_
-    
-    .. [1] M. Loheir and E.Vlieg, "Angle calculations for six-circle surface
-       x-ray diffratometer," J. Appl. Cryst., vol 26, pp 706-716, 1993.
-    
-    .. [2] E. Vlieg, " A (2+3)-Type surface diffratometer:
-       Mergence of the z-axis and (2+2)-Type geometries,"
-       J. Appl. Cryst., vol 31, pp 198-203, 1998.
-        
+    These axes are defined according to the following references.
+
+    References: text [1]_, text [2]_
+
+    .. [1] M. Lohmeier and E.Vlieg, "Angle calculations for a six-circle
+       surface x-ray diffractometer," J. Appl. Cryst., vol 26, pp 706-716,
+       1993.
+
+    .. [2] E. Vlieg, "A (2+3)-Type surface diffractometer: Mergence of the
+       z-axis and (2+2)-Type geometries," J. Appl. Cryst., vol 31, pp 198-203,
+       1998.
+
     """
-    
     ccdToQkwArgs = {}
-    
+
     tot_set = None
-    
+
     # frame_mode = 1 : 'theta'    : Theta axis frame.
     # frame_mode = 2 : 'phi'      : Phi axis frame.
     # frame_mode = 3 : 'cart'     : Crystal cartesian frame.
-    # frame_mode = 4 : 'hkl'      : Reciproal lattice units frame.
+    # frame_mode = 4 : 'hkl'      : Reciprocal lattice units frame.
     frame_mode = 4
-    
+
     if setting_angles is None:
         raise ValueError(" No six angles specified. ")
-    
+
     #  *********** Converting to Q   **************
 
     # starting time for the process
     t1 = time.time()
 
-    # ctrans - c routines for fast data anlysis
+    # ctrans - c routines for fast data analysis
     tot_set = ctrans.ccdToQ(angles=setting_angles * np.pi / 180.0,
                            mode=frame_mode,
                            ccd_size=(detector_size),
@@ -257,7 +255,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
                            ccd_cen=(calibrated_center),
                            dist=dist_sample,
                            wavelength=wavelength,
-                           UBinv=np.matrix(UBmat).I,
+                           UBinv=np.matrix(ub_mat).I,
                            **ccdToQkwArgs)
 
     # ending time for the process
@@ -267,64 +265,61 @@ def process_to_q(setting_angles, detector_size, pixel_size,
     return tot_set[:, :3]
 
 
-def process_grid(tot_set, istack, Qmin=None, Qmax=None, dQN=None):
+def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
     """
     This function will process the set of HKL
     values and the image stack and grid the image data
-        
+
     Prameters
     ---------
     tot_set : Nx3 array
         (Qx, Qy, Qz) - HKL values
-        
+
     istack : Nx1
         intensity array of the images
-        
+
     q_min : ndarray, optional
         minimum values of the voxel[Qx, Qy, Qz]_min
-        
+
     q_max : ndarray, optional
         maximum values of the voxel [Qx, Qy, Qz]_max
-        
+
     dqn : ndarray, optional
         No. of grid parts (bins) [Nqx, Nqy, Nqz]
-        
+
     Returns
     -------
     grid_data : ndarray
         intensity grid
-        
+
     grid_std : ndarray
-        standard devaiation grid
-        
+        standard deviation grid
+
     grid_occu : ndarray
         occupation of the grid
-        
+
     grid_out : int
         No. of data point outside of the grid
-        
+
     empt_nb : int
         No. of values zero in the grid
-        
-    gridbins : int
+
+    grid_bins : int
         No. of bins in the grid
-        
+
     Raises
     ------
     ValueError
         Possible causes:
             Raised when the HKL values are not provided
-        
-        
     """
-    
+
     if tot_set is None:
         raise ValueError(" No set of (Qx, Qy, Qz). Cannot process grid. ")
-    
+
     # creating (Qx, Qy, Qz, I) Nx4 array - HKL values and Intensity
     # getting the intensity value for each pixel
-
-    tot_set = np.insert(tot_set, 3, np.ravel(istack), axis=1)
+    tot_set = np.insert(tot_set, 3, np.ravel(i_stack), axis=1)
 
     # prepare min, max,... from defaults if not set
     if q_min is None:
@@ -337,12 +332,12 @@ def process_grid(tot_set, istack, Qmin=None, Qmax=None, dQN=None):
         dqn = [100, 100, 100]
 
     #            3D grid of the data set
-    #             *** Gridding Data ****
-    
-    # staring time for griding
+    #             *** Griding Data ****
+
+    # starting time for griding
     t1 = time.time()
 
-    # ctrans - c routines for fast data anlysis
+    # ctrans - c routines for fast data analysis
     grid_data, grid_occu, grid_std, grid_out = ctrans.grid3d(tot_set, q_min, q_max, dqn, norm=1)
 
     # ending time for the griding
@@ -350,7 +345,7 @@ def process_grid(tot_set, istack, Qmin=None, Qmax=None, dQN=None):
     logger.info("--- Done processed in %f seconds", (t2-t1))
 
     # No. of bins in the grid
-    gridbins = grid_data.size
+    grid_bins = grid_data.size
 
     # No. of values zero in the grid
     empt_nb = (grid_occu == 0).sum()
@@ -361,54 +356,51 @@ def process_grid(tot_set, istack, Qmin=None, Qmax=None, dQN=None):
     if empt_nb:
         logger.warning("---- There are %.2e values zero in th grid ", empt_nb)
 
-    return grid_data, grid_occu, grid_std, grid_out, empt_nb, gridbins
+    return grid_data, grid_occu, grid_std, grid_out, empt_nb, grid_bins
 
 
 def get_grid_mesh(q_min, q_max, dqn):
     """
-        
     This function returns the H, K and L of the grid as 3d
     arrays. (Return the grid vectors as a mesh.)
-    
+
     Parameters
     ----------
     q_min : ndarray
         minimum values of the voxel [Qx, Qy, Qz]_min
-        
+
     q_max : ndarray
         maximum values of the voxel [Qx, Qy, Qz]_max
-        
+
     dqn  : ndarray
         No. of grid parts (bins) [Nqx, Nqy, Nqz]
-        
+
     Returns
     -------
     X : array
         X co-ordinate of the grid
-        
+
     Y : array
         Y co-ordinate of the grid
-        
+
     Z : array
         Z co-ordinate of the grid
-        
-        
+
     Example
     -------
     These values can be used for obtaining the coordinates of each voxel.
     For instance, the position of the (0,0,0) voxel is given by
-        
+
         x = X[0,0,0]
         y = Y[0,0,0]
         z = Z[0,0,0]
-        
     """
-    
+
     grid = np.mgrid[0:dqn[0], 0:dqn[1], 0:dqn[2]]
     r = (q_max - q_min) / dqn
-    
+
     X = grid[0] * r[0] + q_min[0]
     Y = grid[1] * r[1] + q_min[1]
     Z = grid[2] * r[2] + q_min[2]
-    
+
     return X, Y, Z
