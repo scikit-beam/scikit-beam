@@ -258,6 +258,12 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
     accum = 0
     # integrate each region
     for bot, top in zip(bottom_indx, top_indx):
-        accum += simps(counts[bot:top], x_value_array[bot:top])
+        # Note: If an odd number of intervals is specified, then the
+        # even='avg' setting calculates and averages first AND last
+        # N-2 intervals using trapezoidal rule.
+        # If calculation speed become an issue, then consider changing
+        # setting to 'first', or 'last' in which case trap rule is only
+        # applied to either first or last N-2 intervals.
+        accum += simps(counts[bot:top], x_value_array[bot:top], even='avg')
     
     return accum
