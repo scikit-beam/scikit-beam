@@ -211,7 +211,7 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
     if eval_x_arr_sign[0] == -1:
         x_value_array = x_value_array[::-1]
         counts = counts[::-1]
-        logging.warning("Input values for 'x_value_array' were found to be monotonically "
+        logging.debug("Input values for 'x_value_array' were found to be monotonically "
                 "decreasing. The 'x_value_array' and 'counts' arrays have been"
                 " reversed prior to integration.")
     
