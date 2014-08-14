@@ -49,13 +49,13 @@ import xraylib
 
 
 
-class element_info:
+class ElementInfo(object):
     """
     information related to element fluorescence
     """
     def __init__(self):
         """
-        Parameters:
+        Parameters
         ----------
         self.z : int
             atomic number
@@ -104,20 +104,19 @@ class element_info:
                      'O1':0., 'O2':0., 'O3':0. }
 
 
-
-
 def get_element_info(nels=100,
                      filename='xrf_library.csv'):
     """
     get element fluorescence information from file
     
-    Parameters:
+    Parameters
     ----------
     nels : int
         number of elements saved in the file
     filename : string
         file saving all the elements
-    Returns:
+    
+    Returns
     --------
     element : class object
         save all the elements fluorescence information
@@ -134,11 +133,9 @@ def get_element_info(nels=100,
         print (errmsg)
         logging.critical(errmsg)
 
-
     element = []
     for i in range(nels):
             element.append(element_info())
-
 
     rownum = 1 #skip header
     for row in csvf:
@@ -253,7 +250,6 @@ def get_element_info(nels=100,
             element[i].jump['O2'] = float(row[88])
             element[i].jump['O3'] = float(row[89])      
 
-
     f.close()
 
     return element
@@ -287,10 +283,8 @@ def get_element_xraylib(incident_energy=10.0,
         print (errmsg)
         logging.critical(errmsg)
 
-
     lines = f.readlines()
 
-    
     # for xraylib format
     line_list = [xraylib.KA1_LINE, xraylib.KA2_LINE, xraylib.KB1_LINE, xraylib.KB2_LINE, 
                  xraylib.LA1_LINE, xraylib.LA2_LINE, 
@@ -311,11 +305,9 @@ def get_element_xraylib(incident_energy=10.0,
                  xraylib.N1_SHELL, xraylib.N2_SHELL, xraylib.N3_SHELL, xraylib.N4_SHELL, xraylib.N5_SHELL,
                  xraylib.O1_SHELL, xraylib.O2_SHELL, xraylib.O3_SHELL]
     
-    
     element = []
     for i in np.arange(len(lines)):
         element.append(element_info())
-
 
     for i in np.arange(0, len(lines)):
         
@@ -324,7 +316,6 @@ def get_element_xraylib(incident_energy=10.0,
         
         # ignore the first line
         if myline[0] == 'name': continue
-        
         
         element[i].z = i
         element[i].name = myline[0]
@@ -360,6 +351,3 @@ def get_element_xraylib(incident_energy=10.0,
     f.close()
 
     return element
-
-    
-
