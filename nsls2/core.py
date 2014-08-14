@@ -256,7 +256,7 @@ keys_core = {
         "type": tuple,
         "units": "um",
     },
-    "detector_center": {
+    "calibrated_center": {
         "description": ("2 element tuple defining the (x y) center of the "
                         "detector in pixels"),
         "type": tuple,
