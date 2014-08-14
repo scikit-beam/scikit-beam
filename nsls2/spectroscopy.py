@@ -198,7 +198,7 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
     #check to make sure no outliers exist which violate the monotonically 
     #increasing requirement, and if exceptions exist, then error points to the 
     #location within the source array where the exception occurs.
-    if not np.all(eval_x_arr_sign * eval_x_arr_sign):
+    if not np.all(eval_x_arr_sign * eval_x_arr_sign[0]):
         error_locations = np.where(eval_x_arr_sign <= 0)
         raise ValueError("Independent variable must be monotonically "
                          "increasing. Erroneous values found at x-value "
