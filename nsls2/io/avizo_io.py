@@ -147,11 +147,23 @@ def _sort_amira_header (header_list):
     """
     
     for row in range(len(header_list)):
+        #Remove all new-line characters that are included in original header
         header_list[row] = header_list[row].strip('\n')
+        #Divide each header row into individual strings using 'spaces' as the 
+        #the separating character.
         header_list[row] = header_list[row].split(" ")
+        # The entire header has now been broken down so that each individual
+        # term, or word, is now an object in a list-of-lists. Several of the
+        # header terms still contain extranious commas or quotation marks 
+        # that need to be removed. This for loop steps through and cleans 
+        # each string of these extranous characters
         for column in range(len(header_list[row])):
-            header_list[row] = filter(None, header_list[row])
+            header_list[row][column] = header_list[row][column].translate(None, ',"')
+        # Remove all empty place holders in each list "row"
+        header_list[row] = filter(None, header_list[row])
+    # Remove all empty rows
     header_list = filter(None, header_list)
+    # Return clean header
     return header_list
 
 def _create_md_dict (header_list):
@@ -239,7 +251,7 @@ def _create_md_dict (header_list):
                             continue
     return md_dict
 
-def load_am_as_np(file_path):
+def load_amiramesh_as_np(file_path):
     """
     This function will load and convert an AmiraMesh binary file to a numpy 
     array. All pertinent information contained in the .am header file is written

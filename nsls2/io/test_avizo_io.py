@@ -2,8 +2,26 @@
 #TODO: Need to sort out tests for each function and operation as a whole.
 
 #Reference am files:
-#f_path = '/home/giltis/Dropbox/BNL_Docs/Alt_File_Formats/am_cnvrt_compare/'
-#fname_flt = 'Shew_C5_bio_abv.am' #Grayscale volume: float dtype
+f_path = '/home/giltis/dev/my_src/test_data/file_io/am_files/'
+
+# Avizo v.6.x file format test files
+# ----------------------------------
+v6_am_binary_data = 'gScale_test_av6_binary.am' #Grayscale volume: float dtype
+v6_am_ascii_data = 'gScale_test_av6_ascii.am'
+v6_am_zip_data = 'gScale_test_av6_zip.am'
+
+# Avizo v.7.x file format test files
+# ----------------------------------
+v7_am_binary_data = 'gScale_test_av7_binary.am'
+v7_am_ascii_data = 'gScale_test_av7_ascii.am'
+v7_am_zip_data = 'gScale_test_av7_zip.am'
+
+# Avizo v.8.x file format test files
+# ----------------------------------
+# v8_am_binary_data = XXXXXXXXX
+
+# Avizo data type test files, sourced from Avizo v.7,x
+# ----------------------------------------------------
 #fname_short = 'C2_dType_Short.am' #Grayscale volume: short dtype
 #fname_test = 'APS_2C_Raw_Abv_CROP_tester.am' #Grayscale volume: float dtype
 #fname_dbasin = 'C2_dBasin.am' #labelfield: ushort dtype
@@ -21,9 +39,17 @@ Types of data that is currently able to be loaded:
     Labeled data (e.g. after segmentation, and prior to surface generation)
 
 """
-test_read_amira():
+def test_read_amira():
     pass
 
-test_cnvrt_amira_data_2numpy():
+def test_cnvrt_amira_data_2numpy():
     pass
 
+def test_sort_amira_header():
+    pass
+
+def test_create_md_dict():
+    pass
+
+def test_load_amiramesh_as_np():
+    pass
