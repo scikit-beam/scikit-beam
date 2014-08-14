@@ -267,3 +267,5 @@ def load_am_as_np(file_path):
     md_dict = _create_md_dict(header)
     np_array = _cnvrt_amira_data_2numpy(data, md_dict)
     return md_dict, np_array
+
+

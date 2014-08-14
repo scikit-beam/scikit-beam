@@ -12,4 +12,18 @@
 #fname_binary = 'Shew_C8_bio_blw_GlsBd-Bnry.am' #binary data set: byte dtype
 #fname_list = [fname_flt, fname_short, fname__test, fname_dbasin, fname_label, fname_label2, fname_binary]
 #head_list = [head_flt, head_short, head_test, head_dbasin, head_label, head_label2, head_binary]
-#data_list = 
+#data_list =
+"""
+FunTest data sets for Avizo 6.x
+Types of data that is currently able to be loaded:
+    Grayscale data
+    Binary data (highlighting a particular phase, or material)
+    Labeled data (e.g. after segmentation, and prior to surface generation)
+
+"""
+test_read_amira():
+    pass
+
+test_cnvrt_amira_data_2numpy():
+    pass
+
