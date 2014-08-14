@@ -47,7 +47,6 @@ import numpy as np
 import logging
 logger = logging.getLogger(__name__)
 import time
-import operator
 
 try:
     import src.ctrans as ctrans
@@ -112,7 +111,8 @@ def project_to_sphere(img, dist_sample, calibrated_center, pixel_size,
     if ROI is not None:
         if len(ROI) == 4:
             # slice the image based on the desired ROI
-            img = np.meshgrid(img[ROI[0]:ROI[1]], img[ROI[2]:ROI[3]], sprase=True)
+            img = np.meshgrid(img[ROI[0]:ROI[1]], img[ROI[2]:ROI[3]],
+                              sparse=True)
         else:
             raise ValueError(" ROI has to be 4 element array : len(ROI) = 4")
     else:
@@ -338,7 +338,8 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
     t1 = time.time()
 
     # ctrans - c routines for fast data analysis
-    grid_data, grid_occu, grid_std, grid_out = ctrans.grid3d(tot_set, q_min, q_max, dqn, norm=1)
+    (grid_data, grid_occu,
+        grid_std, grid_out) = ctrans.grid3d(tot_set, q_min, q_max, dqn, norm=1)
 
     # ending time for the griding
     t2 = time.time()
@@ -350,11 +351,11 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
     # No. of values zero in the grid
     empt_nb = (grid_occu == 0).sum()
 
-    if grid_out != 0:
-        logger.warning("---- There are %.2e points outside the grid ", grid_out)
-        logger.info("---- There are %2e bins in the grid ", grid_data.size)
+    if grid_out:
+        logger.deug("There are %.2e points outside the grid ", grid_out)
+    logger.debug("There are %2e bins in the grid ", grid_data.size)
     if empt_nb:
-        logger.warning("---- There are %.2e values zero in th grid ", empt_nb)
+        logger.debug("There are %.2e values zero in th grid ", empt_nb)
 
     return grid_data, grid_occu, grid_std, grid_out, empt_nb, grid_bins
 
