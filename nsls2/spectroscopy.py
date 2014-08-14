@@ -14,7 +14,6 @@ import numpy as np
 from scipy.integrate import simps
 import logging
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 def fit_quad_to_peak(x, y):
     """
