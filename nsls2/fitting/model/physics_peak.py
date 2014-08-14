@@ -45,7 +45,7 @@ import numpy as np
 import scipy.special
 
 
-def model_gauss_peak(A, sigma, dx):
+def model_gauss_peak(area, sigma, dx):
     """
     model a gaussian fluorescence peak 
     refer to van espen, spectrum evaluation in van grieken, 
@@ -53,8 +53,8 @@ def model_gauss_peak(A, sigma, dx):
     
     Parameters
     ----------
-    A : float
-        intensity of gaussian function
+    area : float
+        area of gaussian function
     sigma : float
         standard deviation
     x : array
@@ -67,7 +67,7 @@ def model_gauss_peak(A, sigma, dx):
     
     """
     
-    counts = A / (sigma * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((dx / sigma)**2))
+    counts = area / (sigma * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((dx / sigma)**2))
 
     return counts
 
@@ -96,7 +96,7 @@ def model_gauss_step(A, sigma, dx, peak_E):
         gaussian step peak
     """
     
-    counts = A / 2. /  peak_E * scipy.special.erfc(dx / (np.sqrt(2) * sigma))
+    counts = A / 2. / peak_E * scipy.special.erfc(dx / (np.sqrt(2) * sigma))
 
     return counts
 
@@ -134,9 +134,9 @@ def model_gauss_tail(A, sigma, dx, gamma):
     return counts
 
 
-def elastic_peak(coherent_sct_energy, 
-                 fwhm_offset, fwhm_fanoprime, 
-                 A, ev, epsilon=2.96):
+def elastic_peak(coherent_sct_energy,
+                 fwhm_offset, fwhm_fanoprime,
+                 area, ev, epsilon=2.96):
     """
     model elastic peak as a gaussian function
     
@@ -148,8 +148,8 @@ def elastic_peak(coherent_sct_energy,
         global parameter for peak width    
     fwhm_fanoprime : float
         global parameter for peak width
-    A : float:
-        peak amplitude of gaussian peak
+    area : float:
+        area of gaussian peak
     ev : array
         energy value
     epsilon : float
@@ -167,12 +167,12 @@ def elastic_peak(coherent_sct_energy,
     """
     
     temp_val = 2 * np.sqrt(2 * np.log(2))
-    sigma = np.sqrt((fwhm_offset / temp_val)**2 + \
-                      coherent_sct_energy * epsilon * fwhm_fanoprime)
+    sigma = np.sqrt((fwhm_offset / temp_val)**2 +
+                    coherent_sct_energy * epsilon * fwhm_fanoprime)
     
     delta_energy = ev - coherent_sct_energy
 
-    value = model_gauss_peak(A, sigma, delta_energy)
+    value = model_gauss_peak(area, sigma, delta_energy)
     
     return value, sigma
 
@@ -230,8 +230,8 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
         weight factor of gaussian peak
     """
     
-    compton_E = coherent_sct_energy / (1 + (coherent_sct_energy / 511) * \
-                                     (1 - np.cos(compton_angle * np.pi / 180)))
+    compton_E = coherent_sct_energy / (1 + (coherent_sct_energy / 511) *
+                                       (1 - np.cos(compton_angle * np.pi / 180)))
     
     temp_val = 2 * np.sqrt(2 * np.log(2))
     sigma = np.sqrt((fwhm_offset / temp_val)**2 + compton_E * epsilon * fwhm_fanoprime)
@@ -267,4 +267,3 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     counts = counts + value
 
     return counts, sigma, faktor
-    
