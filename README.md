@@ -8,7 +8,7 @@
 
 [![Pull Requests waiting on the author](https://badge.waffle.io/NSLS-II/NSLS2.png?label=PR:%20Waiting%20For%20Author&title=Waiting%20For%20Author)](https://waffle.io/NSLS-II/NSLS2)
 
-[![Stories in Ready](https://badge.waffle.io/NSLS-II/NSLS2.png?label=ready&title=Ready)](https://waffle.io/NSLS-II/NSLS2)
+[![Stories in Ready](https://badge.waffle.io/NSLS-II/NSLS2.png?label=done&title=Done)](https://waffle.io/NSLS-II/NSLS2)
 
 
 NSLS2
