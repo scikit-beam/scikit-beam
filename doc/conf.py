@@ -271,3 +271,7 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/': None}
+
+
+# The reST default role (used for this markup: `text`) to use for all documents.
+default_role = "autolink"
