@@ -49,8 +49,8 @@ def snip_method(spectrum,
                 xmin=0, xmax=2048, epsilon=2.96,
                 width=0.5, decrease_factor=np.sqrt(2),
                 spectral_binning=None,
-                con_val_bin=3, con_val_no_bin=5,
-                iter_num_bin=3, iter_num_no_bin=5,
+                con_val=None,
+                iter_num=None,
                 width_threshold=0.5):
     """
     use snip algorithm to obtain background
@@ -65,31 +65,29 @@ def snip_method(spectrum,
         energy calibration, such as e_off + e_lin * energy + e_quad * energy^2
     e_quad : float
         energy calibration, such as e_off + e_lin * energy + e_quad * energy^2
-    xmin : float
+    xmin : float, optional
         smallest index to define the range
-    xmax : float
+    xmax : float, optional
         largest index to define the range
-    epsilon : float
+    epsilon : float, optional
         energy to create a hole-electron pair
         for Ge 2.96, for Si 3.61 at 300K
         needs to double check this value
-    width : int
+    width : int, optional
         window size to adjust how much to shift background
-    decrease_factor : float
+    decrease_factor : float, optional
         gradually decrease of window size, default as sqrt(2)
-    spectral_binning : int or bool
+    spectral_binning : float, optional
         bin the data into different size
-    con_val_bin : int
-        size of scipy.signal.boxcar to convolute spectrum,
-        when spectral_binning != None
-    con_val_no_bin : int
-        size of scipy.signal.boxcar to convolute spectrum,
-        when spectral_binning = None
-    iter_num_bin : int
-        initial iteration number, when spectral_binning != None
-    iter_num_no_bin : int
-        initial iteration number, when spectral_binning = None
-    width_threshold : float
+    con_val : int, optional
+        size of scipy.signal.boxcar to convolve the spectrum.
+        When spectral_binning is used, defaults to 5, else default
+        to 3
+    iter_num : int, optional
+        initial iteration number
+        When spectral_binning is used, defaults to 5, else default
+        to 3
+    width_threshold : float, optional
         stop point of the algorithm
 
     Returns
@@ -103,7 +101,20 @@ def snip_method(spectrum,
     .. [1] C.G. Ryan etc, "SNIP, a statistics-sensitive background
            treatment for the quantitative analysis of PIXE spectra in
            geoscience applications", Nuclear Instruments and Methods in
-           Physics Research Section B, vol. 34, 1998.  """
+           Physics Research Section B, vol. 34, 1998.
+    """
+    # clean input a bit
+    if con_val is None:
+        if spectral_binning is None:
+            con_val = 3
+        else:
+            con_val = 5
+
+    if iter_num is None:
+        if spectral_binning is None:
+            iter_num = 3
+        else:
+            iter_num = 5
 
     background = np.array(spectrum)
     n_background = background.size
@@ -122,10 +133,7 @@ def snip_method(spectrum,
     fwhm = std_fwhm * np.sqrt(tmp)
 
     #smooth the background
-    if spectral_binning is not None:
-        s = scipy.signal.boxcar(con_val_bin)
-    else:
-        s = scipy.signal.boxcar(con_val_no_bin)
+    s = scipy.signal.boxcar(con_val)
 
     # For background remove, we only care about the central parts
     # where there are peaks. On the boundary part, we don't care
@@ -143,13 +151,7 @@ def snip_method(spectrum,
     index = np.arange(n_background)
 
     #FIRST SNIPPING
-
-    if spectral_binning is not None:
-        num_iterations = iter_num_bin
-    else:
-        num_iterations = iter_num_no_bin
-
-    for j in range(num_iterations):
+    for j in range(iter_num):
         lo_index = np.clip(index - window_p,
                            np.max([xmin, 0]),
                            np.min([xmax, n_background - 1]))
