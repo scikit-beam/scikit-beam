@@ -60,7 +60,7 @@ def model_gauss_peak(area, sigma, dx):
         
     Returns
     -------
-    counts : array
+    array
         gaussian peak
 
     References
@@ -70,25 +70,23 @@ def model_gauss_peak(area, sigma, dx):
     
     """
     
-    counts = area / (sigma * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((dx / sigma)**2))
-
-    return counts
+    return area / (sigma * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((dx / sigma)**2))
 
 
-def model_gauss_step(A, sigma, dx, peak_E):
+def model_gauss_step(area, sigma, dx, peak_e):
     """
     use scipy erfc function
     erfc = 1-erf
     
     Parameters
     ----------
-    A : float
-        intensity or height
+    area : float
+        area of gauss step function
     sigma : float
         standard deviation
     dx : array
         data in x coordinate, x > 0
-    peak_E : float
+    peak_e : float
         need to double check this value
     
     Returns
@@ -102,12 +100,12 @@ def model_gauss_step(A, sigma, dx, peak_E):
            (Practical Spectroscopy)", CRC Press, 2 edition, pp. 182, 2007.
     """
     
-    counts = A / 2. / peak_E * scipy.special.erfc(dx / (np.sqrt(2) * sigma))
+    counts = area / 2. / peak_e * scipy.special.erfc(dx / (np.sqrt(2) * sigma))
 
     return counts
 
 
-def model_gauss_tail(A, sigma, dx, gamma):
+def model_gauss_tail(area, sigma, dx, gamma):
     """
     models a gaussian tail function
     refer to van espen, spectrum evaluation,
@@ -115,8 +113,8 @@ def model_gauss_tail(A, sigma, dx, gamma):
     
     Parameters
     ----------
-    A : float
-        intensity or height
+    area : float
+        area of gauss tail function
     sigma : float
         control peak width
     dx : array
@@ -139,7 +137,7 @@ def model_gauss_tail(A, sigma, dx, gamma):
     dx_neg[dx_neg > 0] = 0
     
     temp_a = np.exp(dx_neg / (gamma * sigma))
-    counts = A / (2 * gamma * sigma * np.exp(-0.5 / (gamma**2))) * \
+    counts = area / (2 * gamma * sigma * np.exp(-0.5 / (gamma**2))) * \
         temp_a * scipy.special.erfc(dx / (np.sqrt(2) * sigma) + (1 / (gamma*np.sqrt(2))))
 
     return counts
@@ -192,7 +190,7 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
                  compton_angle, compton_fwhm_corr, compton_amplitude,
                  compton_f_step, compton_f_tail, compton_gamma,
                  compton_hi_f_tail, compton_hi_gamma,
-                 A, ev, epsilon=2.96, matrix=False):
+                 area, ev, epsilon=2.96, matrix=False):
     """
     model compton peak
     
@@ -220,8 +218,8 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
         weight factor of gaussian tail on higher side
     compton_hi_gamma : float
         normalization factor of gaussian tail on higher side
-    A : float
-       same peak amplitude for gaussian peak, gaussian step and gaussian tail functions
+    area : float
+        area for gaussian peak, gaussian step and gaussian tail functions
     ev : array
         energy value
     epsilon : float
@@ -243,18 +241,18 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     References
     ----------
     .. [1] M. Van Gysel etc, "Description of Compton peaks in energy-dispersive
-           x-ray ﬂuorescence spectra", X-Ray Spectrom, vol. 32, pp. 139–147, 2003.
+           x-ray ﬂuorescence spectra", X-Ray Spectrometry, vol. 32, pp. 139–147, 2003.
     """
     
-    compton_E = coherent_sct_energy / (1 + (coherent_sct_energy / 511) *
+    compton_e = coherent_sct_energy / (1 + (coherent_sct_energy / 511) *
                                        (1 - np.cos(compton_angle * np.pi / 180)))
     
     temp_val = 2 * np.sqrt(2 * np.log(2))
-    sigma = np.sqrt((fwhm_offset / temp_val)**2 + compton_E * epsilon * fwhm_fanoprime)
+    sigma = np.sqrt((fwhm_offset / temp_val)**2 + compton_e * epsilon * fwhm_fanoprime)
     
     #local_sigma = sigma*p[14]
 
-    delta_energy = ev.copy() - compton_E
+    delta_energy = ev.copy() - compton_e
 
     counts = np.zeros(len(ev))
 
@@ -263,23 +261,23 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     if matrix is False:
         factor = factor * (10.**compton_amplitude)
         
-    value = factor * model_gauss_peak(A, sigma*compton_fwhm_corr, delta_energy)
+    value = factor * model_gauss_peak(area, sigma*compton_fwhm_corr, delta_energy)
     counts += value
 
     # compton peak, step
     if compton_f_step > 0.:
         value = factor * compton_f_step
-        value *= model_gauss_step(A, sigma, delta_energy, compton_E)
+        value *= model_gauss_step(area, sigma, delta_energy, compton_e)
         counts += value
     
     # compton peak, tail on the low side
     value = factor * compton_f_tail
-    value *= model_gauss_tail(A, sigma, delta_energy, compton_gamma)
+    value *= model_gauss_tail(area, sigma, delta_energy, compton_gamma)
     counts += value
 
     # compton peak, tail on the high side
     value = factor * compton_hi_f_tail
-    value *= model_gauss_tail(A, sigma, -1. * delta_energy, compton_hi_gamma)
+    value *= model_gauss_tail(area, sigma, -1. * delta_energy, compton_hi_gamma)
     counts += value
 
     return counts, sigma, factor
