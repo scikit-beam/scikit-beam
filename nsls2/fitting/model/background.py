@@ -43,6 +43,11 @@ from __future__ import (absolute_import, division, print_function,
 import scipy.signal
 import numpy as np
 
+_defaults = {'con_val_no_bin': 3,
+             'con_val_bin': 5,
+             'iter_num_no_bin': 3,
+             'iter_num_bin': 5,}
+
 
 def snip_method(spectrum,
                 e_off, e_lin, e_quad,
@@ -81,12 +86,18 @@ def snip_method(spectrum,
         bin the data into different size
     con_val : int, optional
         size of scipy.signal.boxcar to convolve the spectrum.
-        When spectral_binning is used, defaults to 5, else default
-        to 3
+
+        Default value is controlled by the keys `con_val_no_bin`
+        and `con_val_bin` in the defaults dictionary, depending
+        on if spectral_binning is used or not
+
     iter_num : int, optional
-        initial iteration number
-        When spectral_binning is used, defaults to 5, else default
-        to 3
+        Number of iterations.
+
+        Default value is controlled by the keys `iter_num_no_bin`
+        and `iter_num_bin` in the defaults dictionary, depending
+        on if spectral_binning is used or not
+
     width_threshold : float, optional
         stop point of the algorithm
 
@@ -106,15 +117,15 @@ def snip_method(spectrum,
     # clean input a bit
     if con_val is None:
         if spectral_binning is None:
-            con_val = 3
+            con_val = _defaults['con_val_no_bin']
         else:
-            con_val = 5
+            con_val = _defaults['con_val_bin']
 
     if iter_num is None:
         if spectral_binning is None:
-            iter_num = 3
+            iter_num = _defaults['iter_num_no_bin']
         else:
-            iter_num = 5
+            iter_num = _defaults['iter_num_bin']
 
     background = np.array(spectrum)
     n_background = background.size
