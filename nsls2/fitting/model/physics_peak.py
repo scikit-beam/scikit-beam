@@ -47,9 +47,7 @@ import scipy.special
 
 def model_gauss_peak(area, sigma, dx):
     """
-    model a gaussian fluorescence peak 
-    refer to van espen, spectrum evaluation in van grieken, 
-    handbook of x-ray spectrometry, 2nd ed, page 182 ff
+    model a gaussian fluorescence peak
     
     Parameters
     ----------
@@ -64,6 +62,11 @@ def model_gauss_peak(area, sigma, dx):
     -------
     counts : array
         gaussian peak
+
+    References
+    ----------
+    .. [1] Rene Van Grieken, "Handbook of X-Ray Spectrometry, Second Edition,
+           (Practical Spectroscopy)", CRC Press, 2 edition, pp. 182, 2007.
     
     """
     
@@ -76,8 +79,6 @@ def model_gauss_step(A, sigma, dx, peak_E):
     """
     use scipy erfc function
     erfc = 1-erf
-    refer to van espen, spectrum evaluation,
-    in van grieken, handbook of x-ray spectrometry, 2nd ed, page 182
     
     Parameters
     ----------
@@ -94,6 +95,11 @@ def model_gauss_step(A, sigma, dx, peak_E):
     -------
     counts : array
         gaussian step peak
+
+    References
+    ----------
+    .. [1] Rene Van Grieken, "Handbook of X-Ray Spectrometry, Second Edition,
+           (Practical Spectroscopy)", CRC Press, 2 edition, pp. 182, 2007.
     """
     
     counts = A / 2. / peak_E * scipy.special.erfc(dx / (np.sqrt(2) * sigma))
@@ -122,6 +128,11 @@ def model_gauss_tail(A, sigma, dx, gamma):
     -------
     counts : array
         gaussian tail peak
+
+    References
+    ----------
+    .. [1] Rene Van Grieken, "Handbook of X-Ray Spectrometry, Second Edition,
+           (Practical Spectroscopy)", CRC Press, 2 edition, pp. 182, 2007.
     """
 
     dx_neg = np.array(dx)
@@ -153,7 +164,7 @@ def elastic_peak(coherent_sct_energy,
     ev : array
         energy value
     epsilon : float
-        nergy to create a hole-electron pair
+        energy to create a hole-electron pair
         for Ge 2.96, for Si 3.61 at 300K
         needs to double check this value
     
@@ -214,7 +225,7 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     ev : array
         energy value
     epsilon : float
-        nergy to create a hole-electron pair
+        energy to create a hole-electron pair
         for Ge 2.96, for Si 3.61 at 300K
         needs to double check this value
     matrix : bool
@@ -228,6 +239,11 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
         standard deviation
     factor : float
         weight factor of gaussian peak
+
+    References
+    ----------
+    .. [1] M. Van Gysel etc, "Description of Compton peaks in energy-dispersive
+           x-ray ﬂuorescence spectra", X-Ray Spectrom, vol. 32, pp. 139–147, 2003.
     """
     
     compton_E = coherent_sct_energy / (1 + (coherent_sct_energy / 511) *

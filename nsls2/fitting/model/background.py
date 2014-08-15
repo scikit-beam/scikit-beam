@@ -94,6 +94,12 @@ def snip_method(spectrum,
     -------
     background : array
         output results with peak removed
+
+    References
+    ----------
+    .. [1] C.G. Ryan etc, "SNIP, a statistics-sensitive background treatment for the quantitative
+           analysis of PIXE spectra in geoscience applications", Nuclear Instruments and Methods
+           in Physics Research Section B, vol. 34, 1998.
     """
 
     background = np.array(spectrum)
