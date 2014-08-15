@@ -226,7 +226,7 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
         compton peak
     sigma : float
         standard deviation
-    faktor : float
+    factor : float
         weight factor of gaussian peak
     """
     
@@ -242,28 +242,28 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
 
     counts = np.zeros(len(ev))
 
-    faktor = 1 / (1 + compton_f_step + compton_f_tail + compton_hi_f_tail)
+    factor = 1 / (1 + compton_f_step + compton_f_tail + compton_hi_f_tail)
     
-    if matrix == False :
-        faktor = faktor * (10.**compton_amplitude)
+    if matrix is False:
+        factor = factor * (10.**compton_amplitude)
         
-    value = faktor * model_gauss_peak(A, sigma*compton_fwhm_corr, delta_energy)
-    counts = counts + value
+    value = factor * model_gauss_peak(A, sigma*compton_fwhm_corr, delta_energy)
+    counts += value
 
     # compton peak, step
     if compton_f_step > 0.:
-        value = faktor * compton_f_step
-        value = value * model_gauss_step(A, sigma, delta_energy, compton_E)
-        counts = counts + value
+        value = factor * compton_f_step
+        value *= model_gauss_step(A, sigma, delta_energy, compton_E)
+        counts += value
     
     # compton peak, tail on the low side
-    value = faktor * compton_f_tail
-    value = value * model_gauss_tail(A, sigma, delta_energy, compton_gamma)
-    counts = counts + value
+    value = factor * compton_f_tail
+    value *= model_gauss_tail(A, sigma, delta_energy, compton_gamma)
+    counts += value
 
     # compton peak, tail on the high side
-    value = faktor * compton_hi_f_tail
-    value = value * model_gauss_tail(A, sigma, -1. * delta_energy, compton_hi_gamma)
-    counts = counts + value
+    value = factor * compton_hi_f_tail
+    value *= model_gauss_tail(A, sigma, -1. * delta_energy, compton_hi_gamma)
+    counts += value
 
-    return counts, sigma, faktor
+    return counts, sigma, factor
