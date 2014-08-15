@@ -44,11 +44,11 @@ import scipy.signal
 import numpy as np
 
 
-def snip_method(spectrum, 
-                e_off, e_lin, e_quad, 
-                xmin=0, xmax=2048, epsilon=2.96, 
+def snip_method(spectrum,
+                e_off, e_lin, e_quad,
+                xmin=0, xmax=2048, epsilon=2.96,
                 width=0.5, decrease_factor=np.sqrt(2),
-                spectral_binning=None, 
+                spectral_binning=None,
                 con_val_bin=3, con_val_no_bin=5,
                 iter_num_bin=3, iter_num_no_bin=5,
                 width_threshold=0.5):
@@ -64,25 +64,27 @@ def snip_method(spectrum,
     e_lin : float
         energy calibration, such as e_off + e_lin * energy + e_quad * energy^2
     e_quad : float
-        energy calibration, such as e_off + e_lin * energy + e_quad * energy^2       
+        energy calibration, such as e_off + e_lin * energy + e_quad * energy^2
     xmin : float
         smallest index to define the range
     xmax : float
         largest index to define the range
     epsilon : float
-        energy to create a hole-electron pair 
+        energy to create a hole-electron pair
         for Ge 2.96, for Si 3.61 at 300K
         needs to double check this value
     width : int
-        window size to adjust how much to shift background   
+        window size to adjust how much to shift background
     decrease_factor : float
         gradually decrease of window size, default as sqrt(2)
     spectral_binning : int or bool
-        bin the data into different size 
+        bin the data into different size
     con_val_bin : int
-        size of scipy.signal.boxcar to convolute spectrum, when spectral_binning != None
+        size of scipy.signal.boxcar to convolute spectrum,
+        when spectral_binning != None
     con_val_no_bin : int
-        size of scipy.signal.boxcar to convolute spectrum, when spectral_binning = None
+        size of scipy.signal.boxcar to convolute spectrum,
+        when spectral_binning = None
     iter_num_bin : int
         initial iteration number, when spectral_binning != None
     iter_num_no_bin : int
@@ -97,21 +99,22 @@ def snip_method(spectrum,
 
     References
     ----------
-    .. [1] C.G. Ryan etc, "SNIP, a statistics-sensitive background treatment for the quantitative
-           analysis of PIXE spectra in geoscience applications", Nuclear Instruments and Methods
-           in Physics Research Section B, vol. 34, 1998.
-    """
+
+    .. [1] C.G. Ryan etc, "SNIP, a statistics-sensitive background
+           treatment for the quantitative analysis of PIXE spectra in
+           geoscience applications", Nuclear Instruments and Methods in
+           Physics Research Section B, vol. 34, 1998.  """
 
     background = np.array(spectrum)
     n_background = background.size
 
     energy = np.arange(n_background, dtype=np.float)
-    
+
     if spectral_binning is not None:
         energy = energy * spectral_binning
 
     energy = e_off + energy * e_lin + energy**2 * e_quad
-    
+
     # transfer from std to fwhm
     std_fwhm = 2 * np.sqrt(2 * np.log(2))
     tmp = (e_off / std_fwhm)**2 + energy * epsilon * e_lin
@@ -119,17 +122,17 @@ def snip_method(spectrum,
     fwhm = std_fwhm * np.sqrt(tmp)
 
     #smooth the background
-    if spectral_binning is not None :
+    if spectral_binning is not None:
         s = scipy.signal.boxcar(con_val_bin)
-    else :
+    else:
         s = scipy.signal.boxcar(con_val_no_bin)
-    
-    # For background remove, we only care about the central parts 
-    # where there are peaks. On the boundary part, we don't care 
-    # the accuracy so much. But we need to pay attention to edge 
+
+    # For background remove, we only care about the central parts
+    # where there are peaks. On the boundary part, we don't care
+    # the accuracy so much. But we need to pay attention to edge
     # effects in general convolution.
     A = s.sum()
-    background = scipy.signal.convolve(background,s,mode='same')/A
+    background = scipy.signal.convolve(background, s, mode='same')/A
 
     window_p = width * fwhm / e_lin
     if spectral_binning > 0:
@@ -147,11 +150,16 @@ def snip_method(spectrum,
         num_iterations = iter_num_no_bin
 
     for j in range(num_iterations):
-        lo_index = np.clip(index - window_p, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
-        hi_index = np.clip(index + window_p, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
+        lo_index = np.clip(index - window_p,
+                           np.max([xmin, 0]),
+                           np.min([xmax, n_background - 1]))
+        hi_index = np.clip(index + window_p,
+                           np.max([xmin, 0]),
+                           np.min([xmax, n_background - 1]))
 
-        temp = (background[lo_index.astype(np.int)] + background[hi_index.astype(np.int)]) / 2.
-        
+        temp = (background[lo_index.astype(np.int)] +
+                background[hi_index.astype(np.int)]) / 2.
+
         bg_index  = background > temp
         background[bg_index] = temp[bg_index]
 
@@ -159,10 +167,15 @@ def snip_method(spectrum,
     max_current_width = np.amax(current_width)
 
     while max_current_width >= width_threshold:
-        lo_index = np.clip(index - current_width, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
-        hi_index = np.clip(index + current_width, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
+        lo_index = np.clip(index - current_width,
+                           np.max([xmin, 0]),
+                           np.min([xmax, n_background - 1]))
+        hi_index = np.clip(index + current_width,
+                           np.max([xmin, 0]),
+                           np.min([xmax, n_background - 1]))
 
-        temp = (background[lo_index.astype(np.int)] + background[hi_index.astype(np.int)]) / 2.
+        temp = (background[lo_index.astype(np.int)] +
+                background[hi_index.astype(np.int)]) / 2.
 
         bg_index  = background > temp
         background[bg_index] = temp[bg_index]
@@ -173,7 +186,7 @@ def snip_method(spectrum,
 
     background = np.exp(np.exp(background) - 1) - 1
 
-    inf_ind = np.where(np.isfinite(background) == False)
+    inf_ind = np.where(~np.isfinite(background))
     background[inf_ind] = 0.0
 
     return background
