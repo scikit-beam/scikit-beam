@@ -352,7 +352,7 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
     empt_nb = (grid_occu == 0).sum()
 
     if grid_out:
-        logger.deug("There are %.2e points outside the grid ", grid_out)
+        logger.debug("There are %.2e points outside the grid ", grid_out)
     logger.debug("There are %2e bins in the grid ", grid_data.size)
     if empt_nb:
         logger.debug("There are %.2e values zero in th grid ", empt_nb)
