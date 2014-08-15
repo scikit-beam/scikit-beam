@@ -199,9 +199,9 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     coherent_sct_energy : float
         incident energy                         
     fwhm_offset : float
-        global parameter for peak width    
+        global fitting parameter for peak width
     fwhm_fanoprime : float
-        global parameter for peak width
+        global fitting parameter for peak width
     compton_angle : float
         compton angle
     compton_fwhm_corr : float 
