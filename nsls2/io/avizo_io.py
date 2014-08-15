@@ -100,7 +100,7 @@ def _cnvrt_amira_data_2numpy (am_data, header_dict, flip_Z = True):
     Ydim = header_dict['array_dimensions']['y_dimension']
     Xdim = header_dict['array_dimensions']['x_dimension']
     #Strip out null characters from the string of binary values
-    data_strip = am_data.strip('\n')
+        # data_strip = am_data.translate(None, '\n')
     #Dictionary of the encoding types for AmiraMesh files
     am_format_dict = {'BINARY-LITTLE-ENDIAN' : '<',
                       'BINARY' : '>',
@@ -112,11 +112,21 @@ def _cnvrt_amira_data_2numpy (am_data, header_dict, flip_Z = True):
                      'ushort' : 'H4',
                      'byte' : 'b'
                          }
+    # Had to split out the stripping of new line characters and conversion
+    # of the original string data based on whether source data is BINARY 
+    # format or ASCII format. These format types require different stripping 
+    # tools and different string conversion tools.
     if header_dict['data_format'] == 'BINARY-LITTLE-ENDIAN':
+        data_strip = am_data.strip('\n')
         flt_values = np.fromstring(data_strip, 
                                    (am_format_dict[header_dict['data_format']] + 
                                        am_dtype_dict[header_dict['data_type']]))
-    #Resize the 1D array to the correct ndarray dimensions
+    if header_dict['data_format'] == 'ASCII':
+        data_strip = am_data.translate(None, '\n')
+        string_list = data_strip.split(" ")
+        string_list = string_list[0:(len(string_list)-2)]
+        flt_values = np.array(string_list).astype(am_dtype_dict[header_dict['data_type']])
+    # Resize the 1D array to the correct ndarray dimensions
     flt_values.resize(Zdim, Ydim, Xdim)
     if flip_Z == True:
         output = flt_values[::-1, ..., ...]
@@ -183,6 +193,10 @@ def _create_md_dict (header_list):
                'data_format' : header_list[0][2], #Avizo specific
                'data_format_version' : header_list[0][3] #Avizo specific
                 }
+    if md_dict['data_format'] == '3D':
+        md_dict['data_format'] = header_list[0][3]
+        md_dict['data_format_version'] = header_list[0][4]
+    
     for row in range(len(header_list)):
         try:
             md_dict['array_dimensions'] = {'x_dimension' : int(header_list[row]
