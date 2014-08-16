@@ -180,6 +180,7 @@ def find_larest_peak(X, Y, window=5):
 
     return X0, np.exp(Y0), 1/np.sqrt(-2*w)
 
+
 def integrate_ROI_spectrum(bin_edges, counts, x_min, x_max):
     """Integrate region(s) of histogram.
 
@@ -193,7 +194,6 @@ def integrate_ROI_spectrum(bin_edges, counts, x_min, x_max):
 
     The bins who's centers fall with in the integration limits are
     included in the sum.
-
 
     Parameters
     ----------
@@ -257,16 +257,18 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
     counts = np.asarray(counts)
 
     if x_value_array.shape != counts.shape:
-        raise ValueError("Inputs must be same size")
+        raise ValueError("Inputs (x_value_array and counts) must be the same "
+                         "size. x_value_array.shape = {0} and counts.shape = "
+                         "{1}".format(x_value_array.shape, counts.shape))
 
-    #use np.sign() to obtain array which has evaluated sign changes in all diff
-    #in input x_value array. Checks and tests are then run on the evaluated
-    #sign change array.
+    # use np.sign() to obtain array which has evaluated sign changes in all
+    # diff in input x_value array. Checks and tests are then run on the
+    # evaluated sign change array.
     eval_x_arr_sign = np.sign(np.diff(x_value_array))
 
-    #check to make sure no outliers exist which violate the monotonically
-    #increasing requirement, and if exceptions exist, then error points to the
-    #location within the source array where the exception occurs.
+    # check to make sure no outliers exist which violate the monotonically
+    # increasing requirement, and if exceptions exist, then error points to the
+    # location within the source array where the exception occurs.
     if not np.all(eval_x_arr_sign == eval_x_arr_sign[0]):
         error_locations = np.where(eval_x_arr_sign <= 0)
         raise ValueError("Independent variable must be monotonically "
@@ -280,9 +282,10 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
     if eval_x_arr_sign[0] == -1:
         x_value_array = x_value_array[::-1]
         counts = counts[::-1]
-        logging.debug("Input values for 'x_value_array' were found to be monotonically "
-                "decreasing. The 'x_value_array' and 'counts' arrays have been"
-                " reversed prior to integration.")
+        logging.debug("Input values for 'x_value_array' were found to be "
+                      "monotonically decreasing. The 'x_value_array' and "
+                      "'counts' arrays have been reversed prior to "
+                      "integration.")
 
     # up-cast to 1d and make sure it is flat
     x_min = np.atleast_1d(x_min).ravel()
@@ -303,13 +306,13 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
     # actually contained within the extents of the independent variable array
     if np.any(x_min < x_value_array[0]):
         error_locations = np.where(x_min < x_value_array[0])
-        raise ValueError("Specified lower integration boundary values "
-                         "are outside the spectrum range. All minimum "
-                         "integration boundaries must be greater than, or "
-                         "equal to the lowest value in spectrum range. The "
-                         "erroneous x_min array indices are: {0}".format(error_locations))
+        raise ValueError("Specified lower integration boundary values are "
+                         "outside the spectrum range. All minimum integration "
+                         "boundaries must be greater than, or equal to the "
+                         "lowest value in spectrum range. The erroneous x_min_"
+                         "array indices are: {0}".format(error_locations))
     if np.any(x_max > x_value_array[-1]):
-        error_locations =  np.where(x_max > x_value_array[-1])
+        error_locations = np.where(x_max > x_value_array[-1])
         raise ValueError("Specified upper integration boundary values "
                          "are outside the spectrum range. All maximum "
                          "integration boundary values must be less "
