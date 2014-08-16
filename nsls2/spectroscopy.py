@@ -222,7 +222,7 @@ def integrate_ROI_spectrum(bin_edges, counts, x_min, x_max):
                          counts, x_min, x_max)
 
 
-def integrate_ROI(x_value_array, counts, x_min, x_max):
+def integrate_ROI(x, y, x_min, x_max):
     """Integrate region(s) of .
 
     If `x_min` and `x_max` are arrays/lists they must be equal in
@@ -235,10 +235,10 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
 
     Parameters
     ----------
-    x_value_array : array
+    x : array
         Independent variable, any unit
 
-    counts : array
+    y : array
         Dependent variable, any units
 
     x_min : float or array
@@ -250,21 +250,21 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
     Returns
     -------
     float
-        The totals integrated value in same units as `counts`
+        The totals integrated value in same units as `y`
     """
-    # make sure x_value_array (x-values) and counts (y-values) are arrays
-    x_value_array = np.asarray(x_value_array)
-    counts = np.asarray(counts)
+    # make sure x (x-values) and y (y-values) are arrays
+    x = np.asarray(x)
+    y = np.asarray(y)
 
-    if x_value_array.shape != counts.shape:
-        raise ValueError("Inputs (x_value_array and counts) must be the same "
-                         "size. x_value_array.shape = {0} and counts.shape = "
-                         "{1}".format(x_value_array.shape, counts.shape))
+    if x.shape != y.shape:
+        raise ValueError("Inputs (x and y) must be the same "
+                         "size. x.shape = {0} and y.shape = "
+                         "{1}".format(x.shape, y.shape))
 
     # use np.sign() to obtain array which has evaluated sign changes in all
     # diff in input x_value array. Checks and tests are then run on the
     # evaluated sign change array.
-    eval_x_arr_sign = np.sign(np.diff(x_value_array))
+    eval_x_arr_sign = np.sign(np.diff(x))
 
     # check to make sure no outliers exist which violate the monotonically
     # increasing requirement, and if exceptions exist, then error points to the
@@ -276,15 +276,15 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
                          "array index locations: {0}".format(error_locations))
 
     # check whether the sign of all diff measures are negative in the
-    # x_value_array. If so, then the input array for both x_values and
+    # x. If so, then the input array for both x_values and
     # count are reversed so that they are positive, and monotonically increase
     # in value
     if eval_x_arr_sign[0] == -1:
-        x_value_array = x_value_array[::-1]
-        counts = counts[::-1]
-        logging.debug("Input values for 'x_value_array' were found to be "
-                      "monotonically decreasing. The 'x_value_array' and "
-                      "'counts' arrays have been reversed prior to "
+        x = x[::-1]
+        y = y[::-1]
+        logging.debug("Input values for 'x' were found to be "
+                      "monotonically decreasing. The 'x' and "
+                      "'y' arrays have been reversed prior to "
                       "integration.")
 
     # up-cast to 1d and make sure it is flat
@@ -295,24 +295,24 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
     if len(x_min) != len(x_max):
         raise ValueError("integration bounds must have same lengths")
 
-    # verify that the specified minimum values are actually less than the sister
-    # maximum value, and raise error if any minimum value is actually greater
-    #than the sister maximum value.
+    # verify that the specified minimum values are actually less than the
+    # sister maximum value, and raise error if any minimum value is actually
+    # greater than the sister maximum value.
     if np.any(x_min >= x_max):
         raise ValueError("All lower integration bounds must be less than "
                          "upper integration bounds.")
 
     # check to make sure that all specified minimum and maximum values are
     # actually contained within the extents of the independent variable array
-    if np.any(x_min < x_value_array[0]):
-        error_locations = np.where(x_min < x_value_array[0])
+    if np.any(x_min < x[0]):
+        error_locations = np.where(x_min < x[0])
         raise ValueError("Specified lower integration boundary values are "
                          "outside the spectrum range. All minimum integration "
                          "boundaries must be greater than, or equal to the "
                          "lowest value in spectrum range. The erroneous x_min_"
                          "array indices are: {0}".format(error_locations))
-    if np.any(x_max > x_value_array[-1]):
-        error_locations = np.where(x_max > x_value_array[-1])
+    if np.any(x_max > x[-1]):
+        error_locations = np.where(x_max > x[-1])
         raise ValueError("Specified upper integration boundary values "
                          "are outside the spectrum range. All maximum "
                          "integration boundary values must be less "
@@ -321,10 +321,10 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
                          "{0}".format(error_locations))
 
     # find the bottom index of each integration bound
-    bottom_indx = x_value_array.searchsorted(x_min)
+    bottom_indx = x.searchsorted(x_min)
     # find the top index of each integration bound
     # NOTE: +1 required for correct slicing for integration function
-    top_indx = x_value_array.searchsorted(x_max) + 1
+    top_indx = x.searchsorted(x_max) + 1
 
     # set up temporary variables
     accum = 0
@@ -336,6 +336,6 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
         # If calculation speed become an issue, then consider changing
         # setting to 'first', or 'last' in which case trap rule is only
         # applied to either first or last N-2 intervals.
-        accum += simps(counts[bot:top], x_value_array[bot:top], even='avg')
+        accum += simps(y[bot:top], x[bot:top], even='avg')
 
     return accum
