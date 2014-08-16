@@ -149,29 +149,66 @@ def find_larest_peak(X, Y, window=5):
 
     return X0, np.exp(Y0), 1/np.sqrt(-2*w)
 
+def integrate_ROI_spectrum(bin_edges, counts, x_min, x_max):
+    """Integrate region(s) of histogram.
 
-def integrate_ROI(x_value_array, counts, x_min, x_max):
-    """
-    Integrate region(s) of the given spectrum.  If `x_min` and `x_max` are 
-    arrays/lists they must be equal in length. The values contained in the 
-    'x_value_array' must be monotonically increasing from left to right. 
-    The weight from each of the regions is summed.
+    If `x_min` and `x_max` are arrays/lists they must be equal in
+    length. The values contained in the 'x_value_array' must be
+    monotonic (up or down).  The returned value is the sum
+    of all the regions and a single scalar value is returned.
 
-    This returns a single scalar value for the integration.
+    `bin_edges` is an array of the left edges and the final right
+    edges of the bins.  `counts` is the value in each of those bins.
 
-    Currently this code integrates from the left edge
-    of the first bin fully contained in the range to
-    the right edge of the last bin partially contained
-    in the range.  This may produce bias and should be
-    addressed when this is an issue.
+    The bins who's centers fall with in the integration limits are
+    included in the sum.
+
 
     Parameters
     ----------
+    bin_edges : array
+        Independent variable, any unit.
+
+        Must be one longer in length than counts
+
     counts : array
         Dependent variable, any units
 
+    x_min : float or array
+        The lower edge of the integration region(s).
+
+    x_max : float or array
+        The upper edge of the integration region(s).
+
+    Returns
+    -------
+    float
+        The totals integrated value in same units as `counts`
+
+    """
+    bin_edges = np.asarray(bin_edges)
+    return integrate_ROI(bin_edges[:-1] + np.diff(bin_edges),
+                         counts, x_min, x_max)
+
+
+def integrate_ROI(x_value_array, counts, x_min, x_max):
+    """Integrate region(s) of .
+
+    If `x_min` and `x_max` are arrays/lists they must be equal in
+    length. The values contained in the 'x_value_array' must be
+    monotonic (up or down).  The returned value is the sum
+    of all the regions and a single scalar value is returned.
+
+    This function assumes that `counts` is a function of
+    `x_value_array` sampled at `x_value_array`.
+
+    Parameters
+    ----------
     x_value_array : array
-        Independent variable corresponding to the points in x, any unit
+        Independent variable, any unit
+
+    counts : array
+        Dependent variable, any units
 
     x_min : float or array
         The lower edge of the integration region(s).
@@ -188,6 +225,8 @@ def integrate_ROI(x_value_array, counts, x_min, x_max):
     x_value_array = np.asarray(x_value_array)
     counts = np.asarray(counts)
 
+    if x_value_array.shape != counts.shape:
+        raise ValueError("Inputs must be same size")
 
     #use np.sign() to obtain array which has evaluated sign changes in all diff
     #in input x_value array. Checks and tests are then run on the evaluated
