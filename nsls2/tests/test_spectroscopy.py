@@ -90,12 +90,11 @@ def test_align_and_scale_smoketest():
     e_cor_list, c_cor_list = align_and_scale(e_list, c_list)
 
 
-def test_intagrate_ROI_errors():
+def test_integrate_ROI_errors():
     E = np.arange(100)
     C = np.ones_like(E)
 
     # limits out of order
-    assert_raises(ValueError, integrate_ROI, E, C, 32, 2)
     assert_raises(ValueError, integrate_ROI, E, C,
                   [32, 1], [2, 10])
     # bottom out of range
@@ -105,17 +104,39 @@ def test_intagrate_ROI_errors():
     # different length limits
     assert_raises(ValueError, integrate_ROI, E, C,
                   [32, 1], [2, 10, 32],)
-    # energy not monotonic
+    # independent variable (x_value_array) not increasing monotonically
     assert_raises(ValueError, integrate_ROI, C, C, 2, 10)
+    # outliers present in x_value_array which violate monotonic reqirement
+    E[2] = 50
+    E[50] = 2
+    assert_raises(ValueError, integrate_ROI, E, C, 2, 60)
 
-
-def test_intagrate_ROI_compute():
+def test_integrate_ROI_compute():
     E = np.arange(100)
     C = np.ones_like(E)
     assert_array_almost_equal(integrate_ROI(E, C, 5.5, 6.5),
                               1)
     assert_array_almost_equal(integrate_ROI(E, C, 5.5, 11.5),
                               6)
-
     assert_array_almost_equal(integrate_ROI(E, C, [5.5, 17], [11.5, 23]),
                               12)
+
+def test_integrate_ROI_spectrum_compute():
+    C = np.ones(100)
+    E = np.arange(101)
+    assert_array_almost_equal(integrate_ROI(E, C, 5, 6),
+                              1)
+    assert_array_almost_equal(integrate_ROI(E, C, 5, 11),
+                              6)
+    assert_array_almost_equal(integrate_ROI(E, C, [5, 17], [11, 23]),
+                              12)
+
+def test_integrate_ROI_reverse_input():
+    E = np.arange(100)
+    C = E[::-1]
+    E_rev = E[::-1]
+    C_rev = C[::-1]
+    assert_array_almost_equal(
+            integrate_ROI(E_rev, C_rev, [5.5, 17], [11.5, 23]),
+            integrate_ROI(E, C, [5.5, 17], [11.5, 23])
+            )

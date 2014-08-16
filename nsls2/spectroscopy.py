@@ -180,78 +180,159 @@ def find_larest_peak(X, Y, window=5):
 
     return X0, np.exp(Y0), 1/np.sqrt(-2*w)
 
+def integrate_ROI_spectrum(bin_edges, counts, x_min, x_max):
+    """Integrate region(s) of histogram.
 
-def integrate_ROI(energy, counts, e_min, e_max):
-    """
-    Integrate region(s) of the spectrum.  If `e_min`
-    and `e_max` are arrays/lists they must be the same length
-    and the weight from each of the regions is summed.
+    If `x_min` and `x_max` are arrays/lists they must be equal in
+    length. The values contained in the 'x_value_array' must be
+    monotonic (up or down).  The returned value is the sum
+    of all the regions and a single scalar value is returned.
 
-    This returns a single scalar value for the integration.
+    `bin_edges` is an array of the left edges and the final right
+    edges of the bins.  `counts` is the value in each of those bins.
 
-    Currently this code integrates from the left edge
-    of the first bin fully contained in the range to
-    the right edge of the last bin partially contained
-    in the range.  This may produce bias and should be
-    addressed when this is an issue.
+    The bins who's centers fall with in the integration limits are
+    included in the sum.
+
 
     Parameters
     ----------
+    bin_edges : array
+        Independent variable, any unit.
+
+        Must be one longer in length than counts
+
     counts : array
-        Counts in spectrum, any units
+        Dependent variable, any units
 
-    energy : array
-        The energy of the left (lower) edge of the energy bin,
-        must be monotonic.
+    x_min : float or array
+        The lower edge of the integration region(s).
 
-    e_min : float or array
-        The lower edge of the integration region
-
-    e_max : float or array
-        The upper edge of the integration region
+    x_max : float or array
+        The upper edge of the integration region(s).
 
     Returns
     -------
     float
-        The integrated intensity in same units as `counts`
+        The totals integrated value in same units as `counts`
+
     """
-    # make sure really are arrays
-    energy = np.asarray(energy)
+    bin_edges = np.asarray(bin_edges)
+    return integrate_ROI(bin_edges[:-1] + np.diff(bin_edges),
+                         counts, x_min, x_max)
+
+
+def integrate_ROI(x_value_array, counts, x_min, x_max):
+    """Integrate region(s) of .
+
+    If `x_min` and `x_max` are arrays/lists they must be equal in
+    length. The values contained in the 'x_value_array' must be
+    monotonic (up or down).  The returned value is the sum
+    of all the regions and a single scalar value is returned.
+
+    This function assumes that `counts` is a function of
+    `x_value_array` sampled at `x_value_array`.
+
+    Parameters
+    ----------
+    x_value_array : array
+        Independent variable, any unit
+
+    counts : array
+        Dependent variable, any units
+
+    x_min : float or array
+        The lower edge of the integration region(s).
+
+    x_max : float or array
+        The upper edge of the integration region(s).
+
+    Returns
+    -------
+    float
+        The totals integrated value in same units as `counts`
+    """
+    # make sure x_value_array (x-values) and counts (y-values) are arrays
+    x_value_array = np.asarray(x_value_array)
     counts = np.asarray(counts)
 
-    # make sure energy is sensible
-    if not np.all(np.diff(energy) > 0):
-        raise ValueError("Energy must be monotonically increasing")
+    if x_value_array.shape != counts.shape:
+        raise ValueError("Inputs must be same size")
+
+    #use np.sign() to obtain array which has evaluated sign changes in all diff
+    #in input x_value array. Checks and tests are then run on the evaluated
+    #sign change array.
+    eval_x_arr_sign = np.sign(np.diff(x_value_array))
+
+    #check to make sure no outliers exist which violate the monotonically
+    #increasing requirement, and if exceptions exist, then error points to the
+    #location within the source array where the exception occurs.
+    if not np.all(eval_x_arr_sign == eval_x_arr_sign[0]):
+        error_locations = np.where(eval_x_arr_sign <= 0)
+        raise ValueError("Independent variable must be monotonically "
+                         "increasing. Erroneous values found at x-value "
+                         "array index locations: {0}".format(error_locations))
+
+    # check whether the sign of all diff measures are negative in the
+    # x_value_array. If so, then the input array for both x_values and
+    # count are reversed so that they are positive, and monotonically increase
+    # in value
+    if eval_x_arr_sign[0] == -1:
+        x_value_array = x_value_array[::-1]
+        counts = counts[::-1]
+        logging.debug("Input values for 'x_value_array' were found to be monotonically "
+                "decreasing. The 'x_value_array' and 'counts' arrays have been"
+                " reversed prior to integration.")
 
     # up-cast to 1d and make sure it is flat
-    e_min = np.atleast_1d(e_min).ravel()
-    e_max = np.atleast_1d(e_max).ravel()
+    x_min = np.atleast_1d(x_min).ravel()
+    x_max = np.atleast_1d(x_max).ravel()
 
-    # sanity checks on integration bounds
-    if len(e_min) != len(e_max):
+    # verify that the number of minimum and maximum boundary values are equal
+    if len(x_min) != len(x_max):
         raise ValueError("integration bounds must have same lengths")
 
-    if np.any(e_min >= e_max):
-        raise ValueError("lower integration bound must be less than "
-                         "upper integration bound ")
+    # verify that the specified minimum values are actually less than the sister
+    # maximum value, and raise error if any minimum value is actually greater
+    #than the sister maximum value.
+    if np.any(x_min >= x_max):
+        raise ValueError("All lower integration bounds must be less than "
+                         "upper integration bounds.")
 
-    if np.any(e_min < energy[0]):
-        raise ValueError("lower integration values must be greater "
-                         "than the lowest energy in spectrum")
-
-    if np.any(e_max >= energy[-1]):
-        raise ValueError("lower integration values must be greater "
-                         "than the lowest energy in spectrum")
+    # check to make sure that all specified minimum and maximum values are
+    # actually contained within the extents of the independent variable array
+    if np.any(x_min < x_value_array[0]):
+        error_locations = np.where(x_min < x_value_array[0])
+        raise ValueError("Specified lower integration boundary values "
+                         "are outside the spectrum range. All minimum "
+                         "integration boundaries must be greater than, or "
+                         "equal to the lowest value in spectrum range. The "
+                         "erroneous x_min array indices are: {0}".format(error_locations))
+    if np.any(x_max > x_value_array[-1]):
+        error_locations =  np.where(x_max > x_value_array[-1])
+        raise ValueError("Specified upper integration boundary values "
+                         "are outside the spectrum range. All maximum "
+                         "integration boundary values must be less "
+                         "than, or equal to the highest value in the spectrum "
+                         "range. The erroneous x_max array indices are: "
+                         "{0}".format(error_locations))
 
     # find the bottom index of each integration bound
-    bottom_indx = energy.searchsorted(e_min)
+    bottom_indx = x_value_array.searchsorted(x_min)
     # find the top index of each integration bound
-    top_indx = energy.searchsorted(e_max) + 1
+    # NOTE: +1 required for correct slicing for integration function
+    top_indx = x_value_array.searchsorted(x_max) + 1
 
     # set up temporary variables
     accum = 0
     # integrate each region
     for bot, top in zip(bottom_indx, top_indx):
-        accum += simps(counts[bot:top], energy[bot:top])
+        # Note: If an odd number of intervals is specified, then the
+        # even='avg' setting calculates and averages first AND last
+        # N-2 intervals using trapezoidal rule.
+        # If calculation speed become an issue, then consider changing
+        # setting to 'first', or 'last' in which case trap rule is only
+        # applied to either first or last N-2 intervals.
+        accum += simps(counts[bot:top], x_value_array[bot:top], even='avg')
 
     return accum
