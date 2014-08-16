@@ -64,7 +64,7 @@ def test_integrate_ROI_errors():
     # limits out of order
     # NOTE: this will now get fixed in the code and will not raise exception.
     #assert_raises(ValueError, integrate_ROI, E, C, 32, 2)
-    
+
     #Min boundary greater than max boundary.
     assert_raises(ValueError, integrate_ROI, E, C,
                   [32, 1], [2, 10])
@@ -92,12 +92,22 @@ def test_integrate_ROI_compute():
     assert_array_almost_equal(integrate_ROI(E, C, [5.5, 17], [11.5, 23]),
                               12)
 
+def test_integrate_ROI_spectrum_compute():
+    C = np.np.ones(100)
+    E = np.arange(101)
+    assert_array_almost_equal(integrate_ROI(E, C, 5, 6),
+                              1)
+    assert_array_almost_equal(integrate_ROI(E, C, 5, 11),
+                              6)
+    assert_array_almost_equal(integrate_ROI(E, C, [5, 17], [11, 23]),
+                              12)
+
 def test_integrate_ROI_reverse_input():
     E = np.arange(100)
     C = E[::-1]
     E_rev = E[::-1]
     C_rev = C[::-1]
     assert_array_almost_equal(
-            integrate_ROI(E_rev, C_rev, [5.5, 17], [11.5, 23]), 
+            integrate_ROI(E_rev, C_rev, [5.5, 17], [11.5, 23]),
             integrate_ROI(E, C, [5.5, 17], [11.5, 23])
             )
