@@ -265,15 +265,15 @@ def _region_printer(x, centers, window=1, tab_count=0):
 
 
 def integrate_ROI(x, y, x_min, x_max):
-    """Integrate region(s) of .
+    """Integrate region(s) of input data.
 
     If `x_min` and `x_max` are arrays/lists they must be equal in
-    length. The values contained in the 'x_value_array' must be
+    length. The values contained in the 'x' must be
     monotonic (up or down).  The returned value is the sum
     of all the regions and a single scalar value is returned.
 
-    This function assumes that `counts` is a function of
-    `x_value_array` sampled at `x_value_array`.
+    This function assumes that `y` is a function of
+    `x` sampled at `x`.
 
     Parameters
     ----------
@@ -284,10 +284,12 @@ def integrate_ROI(x, y, x_min, x_max):
         Dependent variable, any units
 
     x_min : float or array
-        The lower edge of the integration region(s).
+        The lower edge of the integration region(s)
+        in units of x.
 
     x_max : float or array
-        The upper edge of the integration region(s).
+        The upper edge of the integration region(s)
+        in units of x.
 
     Returns
     -------
