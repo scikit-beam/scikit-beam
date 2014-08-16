@@ -222,6 +222,48 @@ def integrate_ROI_spectrum(bin_edges, counts, x_min, x_max):
                          counts, x_min, x_max)
 
 
+def _region_printer(x, centers, window=1, tab_count=0):
+    """Returns a formatted string of sub-sections of an array
+
+    Each value in center generates a section of the string like:
+
+       {tab_count*\t}c : [x[c - n] ... x[c] ... x[c + n + 1]]
+
+
+    Parameters
+    ----------
+    x : array
+        The array to be looked into
+
+    centers : iterable
+        The locations to print out around
+
+    window : int, optional
+        how many values on either side of center to include
+
+        defaults to 1
+
+    tab_count : int, optional
+       The number of tabs to pre-fix lines with
+
+       default is 0
+
+    Returns
+    -------
+    str
+      The formatted string
+    """
+    xl = len(x)
+    x = np.asarray(x)
+    header = ("\t"*tab_count + 'center\tarray values\n' +
+              "\t"*tab_count + '------\t------------\n')
+    return header + '\n'.join(["\t"*tab_count +
+               "{c}: \t {vals}".format(c=c,
+                                    vals=x[np.max([0, c-window]):
+                                           np.min([xl, c + window + 1])])
+                for c in centers])
+
+
 def integrate_ROI(x, y, x_min, x_max):
     """Integrate region(s) of .
 
@@ -270,10 +312,11 @@ def integrate_ROI(x, y, x_min, x_max):
     # increasing requirement, and if exceptions exist, then error points to the
     # location within the source array where the exception occurs.
     if not np.all(eval_x_arr_sign == eval_x_arr_sign[0]):
-        error_locations = np.where(eval_x_arr_sign <= 0)
+        error_locations = np.where(eval_x_arr_sign != eval_x_arr_sign[0])[0]
         raise ValueError("Independent variable must be monotonically "
                          "increasing. Erroneous values found at x-value "
-                         "array index locations: {0}".format(error_locations))
+                         "array index locations:\n" +
+                         _region_printer(x, error_locations))
 
     # check whether the sign of all diff measures are negative in the
     # x. If so, then the input array for both x_values and
@@ -305,20 +348,23 @@ def integrate_ROI(x, y, x_min, x_max):
     # check to make sure that all specified minimum and maximum values are
     # actually contained within the extents of the independent variable array
     if np.any(x_min < x[0]):
-        error_locations = np.where(x_min < x[0])
+        error_locations = np.where(x_min < x[0])[0]
         raise ValueError("Specified lower integration boundary values are "
                          "outside the spectrum range. All minimum integration "
                          "boundaries must be greater than, or equal to the "
                          "lowest value in spectrum range. The erroneous x_min_"
-                         "array indices are: {0}".format(error_locations))
+                         "array indices are:\n" +
+                         _region_printer(x_min, error_locations, window=0))
+
     if np.any(x_max > x[-1]):
-        error_locations = np.where(x_max > x[-1])
+        error_locations = np.where(x_max > x[-1])[0]
         raise ValueError("Specified upper integration boundary values "
                          "are outside the spectrum range. All maximum "
                          "integration boundary values must be less "
                          "than, or equal to the highest value in the spectrum "
                          "range. The erroneous x_max array indices are: "
-                         "{0}".format(error_locations))
+                         "\n" +
+                         _region_printer(x_max, error_locations, window=0))
 
     # find the bottom index of each integration bound
     bottom_indx = x.searchsorted(x_min)
