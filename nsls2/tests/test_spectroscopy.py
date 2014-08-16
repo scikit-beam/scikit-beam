@@ -38,9 +38,10 @@ from __future__ import (absolute_import, division, print_function,
 import six
 import numpy as np
 from nose.tools import assert_raises
-from numpy.testing import assert_array_equal, assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal
 
-from nsls2.spectroscopy import align_and_scale, integrate_ROI
+from nsls2.spectroscopy import (align_and_scale, integrate_ROI,
+                                integrate_ROI_spectrum)
 
 
 def synthetic_data(E, E0, sigma, alpha, k, beta):
@@ -124,11 +125,11 @@ def test_integrate_ROI_compute():
 def test_integrate_ROI_spectrum_compute():
     C = np.ones(100)
     E = np.arange(101)
-    assert_array_almost_equal(integrate_ROI(E, C, 5, 6),
+    assert_array_almost_equal(integrate_ROI_spectrum(E, C, 5, 6),
                               1)
-    assert_array_almost_equal(integrate_ROI(E, C, 5, 11),
+    assert_array_almost_equal(integrate_ROI_spectrum(E, C, 5, 11),
                               6)
-    assert_array_almost_equal(integrate_ROI(E, C, [5, 17], [11, 23]),
+    assert_array_almost_equal(integrate_ROI_spectrum(E, C, [5, 17], [11, 23]),
                               12)
 
 def test_integrate_ROI_reverse_input():
