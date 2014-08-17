@@ -45,9 +45,9 @@ import numpy as np
 import scipy.special
 
 
-def model_gauss_peak(area, sigma, dx):
+def gauss_peak(area, sigma, dx):
     """
-    model a gaussian fluorescence peak
+    Use gaussian function to model fluorescence peak from each element
     
     Parameters
     ----------
@@ -73,10 +73,10 @@ def model_gauss_peak(area, sigma, dx):
     return area / (sigma * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((dx / sigma)**2))
 
 
-def model_gauss_step(area, sigma, dx, peak_e):
+def gauss_step(area, sigma, dx, peak_e):
     """
-    use scipy erfc function
-    erfc = 1-erf
+    Gauss step function is an important component in modeling compton peak.
+    Use scipy erfc function. Please note erfc = 1-erf.
     
     Parameters
     ----------
@@ -105,11 +105,9 @@ def model_gauss_step(area, sigma, dx, peak_e):
     return counts
 
 
-def model_gauss_tail(area, sigma, dx, gamma):
+def gauss_tail(area, sigma, dx, gamma):
     """
-    models a gaussian tail function
-    refer to van espen, spectrum evaluation,
-    in van grieken, handbook of x-ray spectrometry, 2nd ed, page 182
+    Use a gaussian tail function to simulate compton peak
     
     Parameters
     ----------
@@ -147,7 +145,7 @@ def elastic_peak(coherent_sct_energy,
                  fwhm_offset, fwhm_fanoprime,
                  area, ev, epsilon=2.96):
     """
-    model elastic peak as a gaussian function
+    Use gaussian function to model elastic peak
     
     Parameters
     ----------
@@ -181,7 +179,7 @@ def elastic_peak(coherent_sct_energy,
     
     delta_energy = ev - coherent_sct_energy
 
-    value = model_gauss_peak(area, sigma, delta_energy)
+    value = gauss_peak(area, sigma, delta_energy)
     
     return value, sigma
 
@@ -261,23 +259,23 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     if matrix is False:
         factor = factor * (10.**compton_amplitude)
         
-    value = factor * model_gauss_peak(area, sigma*compton_fwhm_corr, delta_energy)
+    value = factor * gauss_peak(area, sigma*compton_fwhm_corr, delta_energy)
     counts += value
 
     # compton peak, step
     if compton_f_step > 0.:
         value = factor * compton_f_step
-        value *= model_gauss_step(area, sigma, delta_energy, compton_e)
+        value *= gauss_step(area, sigma, delta_energy, compton_e)
         counts += value
     
     # compton peak, tail on the low side
     value = factor * compton_f_tail
-    value *= model_gauss_tail(area, sigma, delta_energy, compton_gamma)
+    value *= gauss_tail(area, sigma, delta_energy, compton_gamma)
     counts += value
 
     # compton peak, tail on the high side
     value = factor * compton_hi_f_tail
-    value *= model_gauss_tail(area, sigma, -1. * delta_energy, compton_hi_gamma)
+    value *= gauss_tail(area, sigma, -1. * delta_energy, compton_hi_gamma)
     counts += value
 
     return counts, sigma, factor
