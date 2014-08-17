@@ -152,9 +152,9 @@ def elastic_peak(coherent_sct_energy,
     coherent_sct_energy : float
         incident energy                         
     fwhm_offset : float
-        global parameter for peak width    
+        global fitting parameter for peak width
     fwhm_fanoprime : float
-        global parameter for peak width
+        global fitting parameter for peak width
     area : float:
         area of gaussian peak
     ev : array
@@ -190,7 +190,8 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
                  compton_hi_f_tail, compton_hi_gamma,
                  area, ev, epsilon=2.96, matrix=False):
     """
-    model compton peak
+    Model compton peak, which is generated as an inelastic peak and always
+    stays to the left of elastic peak on the spectrum.
     
     Parameters
     ----------
