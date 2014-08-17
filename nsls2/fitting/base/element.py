@@ -31,7 +31,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
-
+from __future__ import (absolute_import, division)
 from collections import Mapping
 import six
 
@@ -40,7 +40,25 @@ from element_data import (XRAYLIB_MAP, OTHER_VAL)
 
 
 class Element(object):
+    """
+    Object to return all the element information
 
+    Attributes
+    ----------
+    element : int or str
+        element name or element atomic z
+    energy : float
+        incident x-ray energy
+
+    Examples
+    --------
+    >>> e = Element('Zn', 10) # or e = Element(30, 10)
+    >>> print (e.emission_line['Ka1']) # energy for emission line Ka1
+    >>> print (e.cs['Ka1']) # cross section for emission line Ka1
+    >>> print (e.f_yield['K']) # fluorescence yield for K shell
+    >>> print (e.mass) #atomic mass
+    >>> print (e.density) #density
+    """
     def __init__(self, element, energy):
 
         if isinstance(element, str):
@@ -50,12 +68,12 @@ class Element(object):
         else:
             raise TypeError('Please define element by '
                             'atomic number z or element name')
+
         self.name = item_val[0]
         self.z = item_val[1]['Z']
         self.mass = item_val[1]['mass']
         self.density = item_val[1]['rho']
         self._element = self.z
-
 
         if not isinstance(energy, float and int):
             raise TypeError('Expected a number for energy')
@@ -86,13 +104,13 @@ class Element(object):
 
 class _XrayLibWrap(Mapping):
     """
-    This is an interface to wrap xraylib to obtain calculations related
+    This is an interface to wrap xraylib to perform calculation related
     to xray fluorescence.
 
     Attributes
     ----------
     info_type : string
-        defines which physics quantity to calculate
+        option to choose which physics quantity to calculate
     element : int
         atomic number
     energy : float, optional
@@ -142,11 +160,3 @@ class _XrayLibWrap(Mapping):
 
     def __len__(self):
         return len(self._keys)
-
-
-e = Element('Zn', 10)
-#e.energy='A'
-print e.emission_line['Ka1']
-print e.cs['Ka1']
-print e.f_yield['K']
-#e.energy = new_energy
