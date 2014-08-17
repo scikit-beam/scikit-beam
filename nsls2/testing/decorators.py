@@ -46,9 +46,10 @@ from nose.tools import make_decorator
 
 def known_fail_if(cond):
     """
-    Make sure a know failure fails.  This function is a decorator
-    factory
-ip    """
+    Make sure a known failure fails.
+
+    This function is a decorator factory.
+    """
     # make the decorator function
     def dec(in_func):
         # make the wrapper function
@@ -68,14 +69,14 @@ ip    """
                 # but knowing when tests that _should_ fail don't can be useful
                 else:
                     raise KnownFailureDidNotFailTest()
+            # use `make_decorator` from nose to make sure that the meta-data on
+            # the function is forwarded properly (name, teardown, setup, etc)
             return make_decorator(in_func)(inner_wrap)
 
         # if the condition is false, don't make a wrapper function
         # this is effectively a no-op
         else:
             return in_func
-
-        # return the (possibly) wrapped function
 
     # return the decorator function
     return dec
