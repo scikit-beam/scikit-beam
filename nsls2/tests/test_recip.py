@@ -14,7 +14,6 @@ def test_process_to_q():
     pixel_size = (0.0135*8, 0.0135*8)
     calibrated_center = (256/2.0, 256/2.0)
     dist_sample = 355.0
-    detector_angle = 0.0
 
     energy = 640  # (  in eV)
     # HC_OVER_E to convert from Energy to wavelength (Lambda)

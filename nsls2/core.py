@@ -268,9 +268,9 @@ keys_core = {
         "type": tuple,
         "units": "pixel",
     },
-    "detector_angle": {
+    "detector_tilt_angle": {
         "description": "Detector tilt angle",
-        "type": float,
+        "type": tuple,
         "units": " degrees",
     },
     "dist_sample": {
