@@ -181,7 +181,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
     ----------
     setting_angles : Nx6 array
         six angles of the all the images
-        delta, theta, chi, phi, mu, gamma
+        delta, theta, chi, phi, mu, gamma (degrees)
 
     detector_size : tuple
         see keys_core (pixel)
@@ -239,8 +239,10 @@ def process_to_q(setting_angles, detector_size, pixel_size,
     # frame_mode = 4 : 'hkl'      : Reciprocal lattice units frame.
     frame_mode = 4
 
-    if setting_angles is None:
-        raise ValueError(" No six angles specified. ")
+    setting_angles = np.atleast_2d(setting_angles)
+    setting_angles.shape
+    if setting_angles.shape[1] != 6:
+        raise ValueError()
 
     #  *********** Converting to Q   **************
 
@@ -270,7 +272,7 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
     This function will process the set of HKL
     values and the image stack and grid the image data
 
-    Prameters
+    Parameters
     ---------
     tot_set : Nx3 array
         (Qx, Qy, Qz) - HKL values
@@ -304,9 +306,6 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
     empt_nb : int
         No. of values zero in the grid
 
-    grid_bins : int
-        No. of bins in the grid
-
     Raises
     ------
     ValueError
@@ -316,6 +315,10 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
 
     if tot_set is None:
         raise ValueError(" No set of (Qx, Qy, Qz). Cannot process grid. ")
+    tot_set = np.atleast_2d(tot_set)
+    tot_set.shape
+    if tot_set.shape[1] != 3:
+        raise ValueError()
 
     # creating (Qx, Qy, Qz, I) Nx4 array - HKL values and Intensity
     # getting the intensity value for each pixel
@@ -332,21 +335,18 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
         dqn = [100, 100, 100]
 
     #            3D grid of the data set
-    #             *** Griding Data ****
+    #             *** Gridding Data ****
 
-    # starting time for griding
+    # starting time for gridding
     t1 = time.time()
 
     # ctrans - c routines for fast data analysis
     (grid_data, grid_occu,
         grid_std, grid_out) = ctrans.grid3d(tot_set, q_min, q_max, dqn, norm=1)
 
-    # ending time for the griding
+    # ending time for the gridding
     t2 = time.time()
     logger.info("--- Done processed in %f seconds", (t2-t1))
-
-    # No. of bins in the grid
-    grid_bins = grid_data.size
 
     # No. of values zero in the grid
     empt_nb = (grid_occu == 0).sum()
@@ -357,4 +357,4 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
     if empt_nb:
         logger.debug("There are %.2e values zero in th grid ", empt_nb)
 
-    return grid_data, grid_occu, grid_std, grid_out, empt_nb, grid_bins
+    return grid_data, grid_occu, grid_std, grid_out, empt_nb
