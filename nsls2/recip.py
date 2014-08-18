@@ -241,6 +241,8 @@ def process_to_q(setting_angles, detector_size, pixel_size,
 
     setting_angles = np.atleast_2d(setting_angles)
     setting_angles.shape
+    if setting_angles.ndim != 2:
+        raise ValueError()
     if setting_angles.shape[1] != 6:
         raise ValueError()
 
@@ -313,10 +315,10 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
             Raised when the HKL values are not provided
     """
 
-    if tot_set is None:
-        raise ValueError(" No set of (Qx, Qy, Qz). Cannot process grid. ")
     tot_set = np.atleast_2d(tot_set)
     tot_set.shape
+    if tot_set.ndim != 2:
+        raise ValueError()
     if tot_set.shape[1] != 3:
         raise ValueError()
 
