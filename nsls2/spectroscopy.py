@@ -121,7 +121,6 @@ def align_and_scale(energy_list, counts_list, pk_find_fun=None):
     out_e, out_c = [], []
     for e, c in zip(energy_list, counts_list):
         E0, max_val, sigma = pk_find_fun(e, c)
-        print(E0, max_val, sigma)
         if base_sigma is None:
             base_sigma = sigma
         out_e.append((e - E0) * base_sigma / sigma)
