@@ -59,19 +59,16 @@ class Element(object):
     >>> print (e.density) #density
     """
     def __init__(self, element, energy):
+        try:
+            elm_dict = OTHER_VAL[element]
+        except KeyError:
+            raise ValueError('Please define element by '
+                             'atomic number z or element name')
 
-        if isinstance(element, str):
-            item_val = OTHER_VAL[OTHER_VAL[:, 0] == element][0]
-        elif isinstance(element, int):
-            item_val = OTHER_VAL[element-1]
-        else:
-            raise TypeError('Please define element by '
-                            'atomic number z or element name')
-
-        self.name = item_val[0]
-        self.z = item_val[1]['Z']
-        self.mass = item_val[1]['mass']
-        self.density = item_val[1]['rho']
+        self.name = elm_dict['sym']
+        self.z = elm_dict['Z']
+        self.mass = elm_dict['mass']
+        self.density = elm_dict['rho']
         self._element = self.z
 
         if not isinstance(energy, float and int):
