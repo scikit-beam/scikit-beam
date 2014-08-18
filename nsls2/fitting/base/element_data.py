@@ -171,7 +171,7 @@ elm_data_list = [{'Z': 1, 'mass': 1.01, 'rho': 9e-05, 'sym': 'H'},
                  {'Z': 97, 'mass': 247.0, 'rho': 14.78, 'sym': 'Bk'},
                  {'Z': 98, 'mass': 251.0, 'rho': 15.1, 'sym': 'Cf'},
                  {'Z': 99, 'mass': 252.0, 'rho': 8.84, 'sym': 'Es'},
-                 {'Z': 100, 'mass': 257.0, 'rho': 0.0, 'sym': 'Fm'}]
+                 {'Z': 100, 'mass': 257.0, 'rho': np.nan, 'sym': 'Fm'}]
 
 # make an empty dictionary
 OTHER_VAL = dict()
