@@ -38,7 +38,6 @@ import six
 from element_data import (XRAYLIB_MAP, OTHER_VAL)
 
 
-
 class Element(object):
     """
     Object to return all the element information
@@ -60,31 +59,28 @@ class Element(object):
     >>> print (e.density) #density
     """
     def __init__(self, element, energy):
+        try:
+            # forcibly down-cast stringy inputs to lowercase
+            if isinstance(element, six.string_types):
+                element = element.lower()
+            elm_dict = OTHER_VAL[element]
+        except KeyError:
+            raise ValueError('Please define element by '
+                             'atomic number z or element name')
 
-        if isinstance(element, str):
-            item_val = OTHER_VAL[OTHER_VAL[:, 0] == element][0]
-        elif isinstance(element, int):
-            item_val = OTHER_VAL[element-1]
-        else:
-            raise TypeError('Please define element by '
-                            'atomic number z or element name')
-
-        self.name = item_val[0]
-        self.z = item_val[1]['Z']
-        self.mass = item_val[1]['mass']
-        self.density = item_val[1]['rho']
+        self.name = elm_dict['sym']
+        self.z = elm_dict['Z']
+        self.mass = elm_dict['mass']
+        self.density = elm_dict['rho']
         self._element = self.z
 
-        if not isinstance(energy, float and int):
-            raise TypeError('Expected a number for energy')
-            self._energy = energy
+        self._energy = float(energy)
 
         self.emission_line = _XrayLibWrap('lines', self._element)
         self.cs = _XrayLibWrap('cs', self._element, energy)
         self.bind_energy = _XrayLibWrap('binding_e', self._element)
         self.jump_factor = _XrayLibWrap('jump', self._element)
         self.f_yield = _XrayLibWrap('yield', self._element)
-
 
     @property
     def element(self):
