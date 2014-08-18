@@ -71,9 +71,7 @@ class Element(object):
         self.density = elm_dict['rho']
         self._element = self.z
 
-        if not isinstance(energy, float and int):
-            raise TypeError('Expected a number for energy')
-            self._energy = energy
+        self._energy = float(energy)
 
         self.emission_line = _XrayLibWrap('lines', self._element)
         self.cs = _XrayLibWrap('cs', self._element, energy)
