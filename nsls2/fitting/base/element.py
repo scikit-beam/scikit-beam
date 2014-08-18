@@ -38,7 +38,6 @@ import six
 from element_data import (XRAYLIB_MAP, OTHER_VAL)
 
 
-
 class Element(object):
     """
     Object to return all the element information
@@ -84,7 +83,6 @@ class Element(object):
         self.bind_energy = _XrayLibWrap('binding_e', self._element)
         self.jump_factor = _XrayLibWrap('jump', self._element)
         self.f_yield = _XrayLibWrap('yield', self._element)
-
 
     @property
     def element(self):

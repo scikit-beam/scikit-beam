@@ -35,25 +35,33 @@ import numpy as np
 import six
 import xraylib
 
-line_name = ['Ka1', 'Ka2', 'Kb1', 'Kb2', 'La1', 'La2', 'Lb1', 'Lb2', 'Lb3', 'Lb4', 'Lb5',
-             'Lg1', 'Lg2', 'Lg3', 'Lg4', 'Ll', 'Ln', 'Ma1', 'Ma2', 'Mb', 'Mg']
-line_list = [xraylib.KA1_LINE, xraylib.KA2_LINE, xraylib.KB1_LINE, xraylib.KB2_LINE,
-             xraylib.LA1_LINE, xraylib.LA2_LINE,
-             xraylib.LB1_LINE, xraylib.LB2_LINE, xraylib.LB3_LINE, xraylib.LB4_LINE, xraylib.LB5_LINE,
-             xraylib.LG1_LINE, xraylib.LG2_LINE, xraylib.LG3_LINE, xraylib.LG4_LINE,
-             xraylib.LL_LINE, xraylib.LE_LINE,
-             xraylib.MA1_LINE, xraylib.MA2_LINE, xraylib.MB_LINE, xraylib.MG_LINE]
+line_name = ['Ka1', 'Ka2', 'Kb1', 'Kb2', 'La1', 'La2', 'Lb1', 'Lb2',
+             'Lb3', 'Lb4', 'Lb5', 'Lg1', 'Lg2', 'Lg3', 'Lg4', 'Ll',
+             'Ln', 'Ma1', 'Ma2', 'Mb', 'Mg']
+line_list = [xraylib.KA1_LINE, xraylib.KA2_LINE, xraylib.KB1_LINE,
+             xraylib.KB2_LINE, xraylib.LA1_LINE, xraylib.LA2_LINE,
+             xraylib.LB1_LINE, xraylib.LB2_LINE, xraylib.LB3_LINE,
+             xraylib.LB4_LINE, xraylib.LB5_LINE, xraylib.LG1_LINE,
+             xraylib.LG2_LINE, xraylib.LG3_LINE, xraylib.LG4_LINE,
+             xraylib.LL_LINE, xraylib.LE_LINE, xraylib.MA1_LINE,
+             xraylib.MA2_LINE, xraylib.MB_LINE, xraylib.MG_LINE]
+
 line_dict = dict(zip(line_name, line_list))
 
 
-bindingE = ['K', 'L1', 'L2', 'L3', 'M1', 'M2', 'M3', 'M4', 'M5',
-            'N1', 'N2', 'N3', 'N4', 'N5', 'N6', 'N7', 'O1', 'O2', 'O3', 'O4', 'O5', 'P1', 'P2', 'P3']
-shell_list = [xraylib.K_SHELL, xraylib.L1_SHELL, xraylib.L2_SHELL, xraylib.L3_SHELL,
-              xraylib.M1_SHELL, xraylib.M2_SHELL, xraylib.M3_SHELL, xraylib.M4_SHELL, xraylib.M5_SHELL,
-              xraylib.N1_SHELL, xraylib.N2_SHELL, xraylib.N3_SHELL, xraylib.N4_SHELL,
-              xraylib.N5_SHELL, xraylib.N6_SHELL, xraylib.N7_SHELL,
-              xraylib.O1_SHELL, xraylib.O2_SHELL, xraylib.O3_SHELL, xraylib.O4_SHELL, xraylib.O5_SHELL,
+bindingE = ['K', 'L1', 'L2', 'L3', 'M1', 'M2', 'M3', 'M4', 'M5', 'N1',
+            'N2', 'N3', 'N4', 'N5', 'N6', 'N7', 'O1', 'O2', 'O3',
+            'O4', 'O5', 'P1', 'P2', 'P3']
+
+shell_list = [xraylib.K_SHELL, xraylib.L1_SHELL, xraylib.L2_SHELL,
+              xraylib.L3_SHELL, xraylib.M1_SHELL, xraylib.M2_SHELL,
+              xraylib.M3_SHELL, xraylib.M4_SHELL, xraylib.M5_SHELL,
+              xraylib.N1_SHELL, xraylib.N2_SHELL, xraylib.N3_SHELL,
+              xraylib.N4_SHELL, xraylib.N5_SHELL, xraylib.N6_SHELL,
+              xraylib.N7_SHELL, xraylib.O1_SHELL, xraylib.O2_SHELL,
+              xraylib.O3_SHELL, xraylib.O4_SHELL, xraylib.O5_SHELL,
               xraylib.P1_SHELL, xraylib.P2_SHELL, xraylib.P3_SHELL]
+
 shell_dict = dict(zip(bindingE, shell_list))
 
 
