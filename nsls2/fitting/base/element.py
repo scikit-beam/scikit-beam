@@ -45,9 +45,9 @@ class Element(object):
     Attributes
     ----------
     element : int or str
-        element name or element atomic z
+        element name or element atomic Z
     energy : float
-        incident x-ray energy
+        incident x-ray energy, in KeV
 
     Examples
     --------
@@ -63,15 +63,15 @@ class Element(object):
             # forcibly down-cast stringy inputs to lowercase
             if isinstance(element, six.string_types):
                 element = element.lower()
-            elm_dict = OTHER_VAL[element]
+            elem_dict = OTHER_VAL[element]
         except KeyError:
             raise ValueError('Please define element by '
                              'atomic number z or element name')
 
-        self.name = elm_dict['sym']
-        self.z = elm_dict['Z']
-        self.mass = elm_dict['mass']
-        self.density = elm_dict['rho']
+        self.name = elem_dict['sym']
+        self.z = elem_dict['Z']
+        self.mass = elem_dict['mass']
+        self.density = elem_dict['rho']
         self._element = self.z
 
         self._energy = float(energy)
@@ -92,6 +92,11 @@ class Element(object):
 
     @energy.setter
     def energy(self, val):
+        """
+        Parameters
+        val : float
+            new energy value
+        """
         if not isinstance(val, float and int):
             raise TypeError('Expected a number for energy')
         self._energy = val
@@ -105,7 +110,7 @@ class _XrayLibWrap(Mapping):
 
     Attributes
     ----------
-    info_type : string
+    info_type : str
         option to choose which physics quantity to calculate
     element : int
         atomic number
@@ -140,7 +145,7 @@ class _XrayLibWrap(Mapping):
 
         Parameters
         ----------
-        key : string
+        key : str
             defines which physics quantity to calculate
         """
         if self.info_type == 'cs':
