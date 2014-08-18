@@ -95,7 +95,7 @@ class Element(object):
         """
         Parameters
         val : float
-            new energy value
+            new energy value in KeV
         """
         if not isinstance(val, float and int):
             raise TypeError('Expected a number for energy')
@@ -115,7 +115,7 @@ class _XrayLibWrap(Mapping):
     element : int
         atomic number
     energy : float, optional
-        incident energy for fluorescence
+        incident energy for fluorescence in KeV
     """
     def __init__(self, info_type,
                  element, energy=None):
