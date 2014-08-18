@@ -176,6 +176,6 @@ elm_data_list = [{'Z': 1, 'mass': 1.01, 'rho': 9e-05, 'sym': 'H'},
 # make an empty dictionary
 OTHER_VAL = dict()
 # fill it with the data keyed on the symbol
-OTHER_VAL.update((elm['sym'], elm) for elm in elm_data_list)
+OTHER_VAL.update((elm['sym'].lower(), elm) for elm in elm_data_list)
 # also add entries with it keyed on atomic number
 OTHER_VAL.update((elm['Z'], elm) for elm in elm_data_list)
