@@ -60,6 +60,9 @@ class Element(object):
     """
     def __init__(self, element, energy):
         try:
+            # forcibly down-cast stringy inputs to lowercase
+            if isinstance(element, six.string_types):
+                element = element.lower()
             elm_dict = OTHER_VAL[element]
         except KeyError:
             raise ValueError('Please define element by '
