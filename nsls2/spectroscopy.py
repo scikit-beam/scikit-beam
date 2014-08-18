@@ -186,8 +186,10 @@ def integrate_ROI_spectrum(bin_edges, counts, x_min, x_max):
 
     If `x_min` and `x_max` are arrays/lists they must be equal in
     length. The values contained in the 'x_value_array' must be
-    monotonic (up or down).  The returned value is the sum
-    of all the regions and a single scalar value is returned.
+    monotonic (up or down).  The returned value is the sum of all the
+    regions and a single scalar value is returned.  Each region is
+    computed independently, if regions overlap the overlapped area will
+    be included multiple times in the final sum.
 
     `bin_edges` is an array of the left edges and the final right
     edges of the bins.  `counts` is the value in each of those bins.
@@ -268,9 +270,11 @@ def integrate_ROI(x, y, x_min, x_max):
     """Integrate region(s) of input data.
 
     If `x_min` and `x_max` are arrays/lists they must be equal in
-    length. The values contained in the 'x' must be
-    monotonic (up or down).  The returned value is the sum
-    of all the regions and a single scalar value is returned.
+    length. The values contained in the 'x' must be monotonic (up or
+    down).  The returned value is the sum of all the regions and a
+    single scalar value is returned.  Each region is computed
+    independently, if regions overlap the overlapped area will be
+    included multiple times in the final sum.
 
     This function assumes that `y` is a function of
     `x` sampled at `x`.
