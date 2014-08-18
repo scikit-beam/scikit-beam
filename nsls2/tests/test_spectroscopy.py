@@ -37,8 +37,11 @@ from __future__ import (absolute_import, division, print_function,
 
 import six
 import numpy as np
+from nose.tools import assert_raises
+from numpy.testing import assert_array_almost_equal
 
-from nsls2.spectroscopy import align_and_scale
+from nsls2.spectroscopy import (align_and_scale, integrate_ROI,
+                                integrate_ROI_spectrum)
 
 
 def synthetic_data(E, E0, sigma, alpha, k, beta):
@@ -86,3 +89,55 @@ def test_align_and_scale_smoketest():
                                      2*np.pi * 6/50, 60))
     # call the function
     e_cor_list, c_cor_list = align_and_scale(e_list, c_list)
+
+
+def test_integrate_ROI_errors():
+    E = np.arange(100)
+    C = np.ones_like(E)
+
+    # limits out of order
+    assert_raises(ValueError, integrate_ROI, E, C,
+                  [32, 1], [2, 10])
+    # bottom out of range
+    assert_raises(ValueError, integrate_ROI, E, C, -1, 2)
+    # top out of range
+    assert_raises(ValueError, integrate_ROI, E, C, 2, 110)
+    # different length limits
+    assert_raises(ValueError, integrate_ROI, E, C,
+                  [32, 1], [2, 10, 32],)
+    # independent variable (x_value_array) not increasing monotonically
+    assert_raises(ValueError, integrate_ROI, C, C, 2, 10)
+    # outliers present in x_value_array which violate monotonic reqirement
+    E[2] = 50
+    E[50] = 2
+    assert_raises(ValueError, integrate_ROI, E, C, 2, 60)
+
+def test_integrate_ROI_compute():
+    E = np.arange(100)
+    C = np.ones_like(E)
+    assert_array_almost_equal(integrate_ROI(E, C, 5.5, 6.5),
+                              1)
+    assert_array_almost_equal(integrate_ROI(E, C, 5.5, 11.5),
+                              6)
+    assert_array_almost_equal(integrate_ROI(E, C, [5.5, 17], [11.5, 23]),
+                              12)
+
+def test_integrate_ROI_spectrum_compute():
+    C = np.ones(100)
+    E = np.arange(101)
+    assert_array_almost_equal(integrate_ROI_spectrum(E, C, 5, 6),
+                              1)
+    assert_array_almost_equal(integrate_ROI_spectrum(E, C, 5, 11),
+                              6)
+    assert_array_almost_equal(integrate_ROI_spectrum(E, C, [5, 17], [11, 23]),
+                              12)
+
+def test_integrate_ROI_reverse_input():
+    E = np.arange(100)
+    C = E[::-1]
+    E_rev = E[::-1]
+    C_rev = C[::-1]
+    assert_array_almost_equal(
+            integrate_ROI(E_rev, C_rev, [5.5, 17], [11.5, 23]),
+            integrate_ROI(E, C, [5.5, 17], [11.5, 23])
+            )

@@ -43,6 +43,7 @@ from six.moves import zip
 import numpy as np
 import logging
 logger = logging.getLogger(__name__)
+from scipy.integrate import simps
 
 
 def fit_quad_to_peak(x, y):
@@ -178,3 +179,217 @@ def find_larest_peak(X, Y, window=5):
                                         np.log(Y[roi]))
 
     return X0, np.exp(Y0), 1/np.sqrt(-2*w)
+
+
+def integrate_ROI_spectrum(bin_edges, counts, x_min, x_max):
+    """Integrate region(s) of histogram.
+
+    If `x_min` and `x_max` are arrays/lists they must be equal in
+    length. The values contained in the 'x_value_array' must be
+    monotonic (up or down).  The returned value is the sum of all the
+    regions and a single scalar value is returned.  Each region is
+    computed independently, if regions overlap the overlapped area will
+    be included multiple times in the final sum.
+
+    `bin_edges` is an array of the left edges and the final right
+    edges of the bins.  `counts` is the value in each of those bins.
+
+    The bins who's centers fall with in the integration limits are
+    included in the sum.
+
+    Parameters
+    ----------
+    bin_edges : array
+        Independent variable, any unit.
+
+        Must be one longer in length than counts
+
+    counts : array
+        Dependent variable, any units
+
+    x_min : float or array
+        The lower edge of the integration region(s).
+
+    x_max : float or array
+        The upper edge of the integration region(s).
+
+    Returns
+    -------
+    float
+        The totals integrated value in same units as `counts`
+
+    """
+    bin_edges = np.asarray(bin_edges)
+    return integrate_ROI(bin_edges[:-1] + np.diff(bin_edges),
+                         counts, x_min, x_max)
+
+
+def _formatter_array_regions(x, centers, window=1, tab_count=0):
+    """Returns a formatted string of sub-sections of an array
+
+    Each value in center generates a section of the string like:
+
+       {tab_count*\t}c : [x[c - n] ... x[c] ... x[c + n + 1]]
+
+
+    Parameters
+    ----------
+    x : array
+        The array to be looked into
+
+    centers : iterable
+        The locations to print out around
+
+    window : int, optional
+        how many values on either side of center to include
+
+        defaults to 1
+
+    tab_count : int, optional
+       The number of tabs to pre-fix lines with
+
+       default is 0
+
+    Returns
+    -------
+    str
+      The formatted string
+    """
+    xl = len(x)
+    x = np.asarray(x)
+    header = ("\t"*tab_count + 'center\tarray values\n' +
+              "\t"*tab_count + '------\t------------\n')
+    return header + '\n'.join(["\t"*tab_count +
+               "{c}: \t {vals}".format(c=c,
+                                    vals=x[np.max([0, c-window]):
+                                           np.min([xl, c + window + 1])])
+                for c in centers])
+
+
+def integrate_ROI(x, y, x_min, x_max):
+    """Integrate region(s) of input data.
+
+    If `x_min` and `x_max` are arrays/lists they must be equal in
+    length. The values contained in the 'x' must be monotonic (up or
+    down).  The returned value is the sum of all the regions and a
+    single scalar value is returned.  Each region is computed
+    independently, if regions overlap the overlapped area will be
+    included multiple times in the final sum.
+
+    This function assumes that `y` is a function of
+    `x` sampled at `x`.
+
+    Parameters
+    ----------
+    x : array
+        Independent variable, any unit
+
+    y : array
+        Dependent variable, any units
+
+    x_min : float or array
+        The lower edge of the integration region(s)
+        in units of x.
+
+    x_max : float or array
+        The upper edge of the integration region(s)
+        in units of x.
+
+    Returns
+    -------
+    float
+        The totals integrated value in same units as `y`
+    """
+    # make sure x (x-values) and y (y-values) are arrays
+    x = np.asarray(x)
+    y = np.asarray(y)
+
+    if x.shape != y.shape:
+        raise ValueError("Inputs (x and y) must be the same "
+                         "size. x.shape = {0} and y.shape = "
+                         "{1}".format(x.shape, y.shape))
+
+    # use np.sign() to obtain array which has evaluated sign changes in all
+    # diff in input x_value array. Checks and tests are then run on the
+    # evaluated sign change array.
+    eval_x_arr_sign = np.sign(np.diff(x))
+
+    # check to make sure no outliers exist which violate the monotonically
+    # increasing requirement, and if exceptions exist, then error points to the
+    # location within the source array where the exception occurs.
+    if not np.all(eval_x_arr_sign == eval_x_arr_sign[0]):
+        error_locations = np.where(eval_x_arr_sign != eval_x_arr_sign[0])[0]
+        raise ValueError("Independent variable must be monotonically "
+                         "increasing. Erroneous values found at x-value "
+                         "array index locations:\n" +
+                         _formatter_array_regions(x, error_locations))
+
+    # check whether the sign of all diff measures are negative in the
+    # x. If so, then the input array for both x_values and
+    # count are reversed so that they are positive, and monotonically increase
+    # in value
+    if eval_x_arr_sign[0] == -1:
+        x = x[::-1]
+        y = y[::-1]
+        logging.debug("Input values for 'x' were found to be "
+                      "monotonically decreasing. The 'x' and "
+                      "'y' arrays have been reversed prior to "
+                      "integration.")
+
+    # up-cast to 1d and make sure it is flat
+    x_min = np.atleast_1d(x_min).ravel()
+    x_max = np.atleast_1d(x_max).ravel()
+
+    # verify that the number of minimum and maximum boundary values are equal
+    if len(x_min) != len(x_max):
+        raise ValueError("integration bounds must have same lengths")
+
+    # verify that the specified minimum values are actually less than the
+    # sister maximum value, and raise error if any minimum value is actually
+    # greater than the sister maximum value.
+    if np.any(x_min >= x_max):
+        raise ValueError("All lower integration bounds must be less than "
+                         "upper integration bounds.")
+
+    # check to make sure that all specified minimum and maximum values are
+    # actually contained within the extents of the independent variable array
+    if np.any(x_min < x[0]):
+        error_locations = np.where(x_min < x[0])[0]
+        raise ValueError("Specified lower integration boundary values are "
+                         "outside the spectrum range. All minimum integration "
+                         "boundaries must be greater than, or equal to the "
+                         "lowest value in spectrum range. The erroneous x_min_"
+                         "array indices are:\n" +
+                         _formatter_array_regions(x_min,
+                                                  error_locations, window=0))
+
+    if np.any(x_max > x[-1]):
+        error_locations = np.where(x_max > x[-1])[0]
+        raise ValueError("Specified upper integration boundary values "
+                         "are outside the spectrum range. All maximum "
+                         "integration boundary values must be less "
+                         "than, or equal to the highest value in the spectrum "
+                         "range. The erroneous x_max array indices are: "
+                         "\n" +
+                         _formatter_array_regions(x_max,
+                                                  error_locations, window=0))
+
+    # find the bottom index of each integration bound
+    bottom_indx = x.searchsorted(x_min)
+    # find the top index of each integration bound
+    # NOTE: +1 required for correct slicing for integration function
+    top_indx = x.searchsorted(x_max) + 1
+
+    # set up temporary variables
+    accum = 0
+    # integrate each region
+    for bot, top in zip(bottom_indx, top_indx):
+        # Note: If an odd number of intervals is specified, then the
+        # even='avg' setting calculates and averages first AND last
+        # N-2 intervals using trapezoidal rule.
+        # If calculation speed become an issue, then consider changing
+        # setting to 'first', or 'last' in which case trap rule is only
+        # applied to either first or last N-2 intervals.
+        accum += simps(y[bot:top], x[bot:top], even='avg')
+
+    return accum
