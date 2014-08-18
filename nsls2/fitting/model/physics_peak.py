@@ -237,12 +237,11 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     factor : float
         weight factor of gaussian peak
 
-    References
-    ----------
-    .. [1] M. Van Gysel etc, "Description of Compton peaks in energy-dispersive
-           x-ray ﬂuorescence spectra", X-Ray Spectrometry, vol. 32, pp. 139–147, 2003.
+     References
+    -----------
+    .. [1] M. Van Gysel etc, "Description of Compton peaks in energy-dispersive x-ray fluorescence spectra",
+           X-Ray Spectrometry, vol. 32, pp. 139-147, 2003.
     """
-    
     compton_e = coherent_sct_energy / (1 + (coherent_sct_energy / 511) *
                                        (1 - np.cos(compton_angle * np.pi / 180)))
     
