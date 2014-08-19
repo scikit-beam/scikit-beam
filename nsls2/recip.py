@@ -322,21 +322,17 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
     if tot_set.shape[1] != 3:
         raise ValueError()
 
-    # creating (Qx, Qy, Qz, I) Nx4 array - HKL values and Intensity
-    # getting the intensity value for each pixel
-    tot_set = np.insert(tot_set, 3, np.ravel(i_stack), axis=1)
-
     # prepare min, max,... from defaults if not set
     if q_min is None:
         q_min = np.min(tot_set, axis=0)
-        #q_min = np.array([tot_set[:, 0].min(), tot_set[:, 1].min(),
-        #tot_set[:, 2].min()])
     if q_max is None:
         q_max = np.max(tot_set, axis=0)
-        #q_max = np.array([tot_set[:, 0].max(), tot_set[:, 1].max(),
-        # tot_set[:, 2].max()])
     if dqn is None:
         dqn = [100, 100, 100]
+
+    # creating (Qx, Qy, Qz, I) Nx4 array - HKL values and Intensity
+    # getting the intensity value for each pixel
+    tot_set = np.insert(tot_set, 3, np.ravel(i_stack), axis=1)
 
     #            3D grid of the data set
     #             *** Gridding Data ****
