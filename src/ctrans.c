@@ -1,7 +1,7 @@
 /*
  
  This is ctranc.c routine. process_to_q and process_grid
- functions in the nsls2/recip.py call  ctranc.c routine fo
+ functions in the nsls2/recip.py call  ctranc.c routine for
  fast data analysis.
  
  */
