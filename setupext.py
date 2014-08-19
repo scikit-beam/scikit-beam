@@ -4,10 +4,10 @@
 # BSD License
 # See LICENSE for full text
 
-""""
+"""
      setupext.py is for c routines
 
-""""
+"""
 
 import os
 import sys
@@ -104,6 +104,7 @@ if setupfile is not None:
     if threads:
         ctrans['define_macros'].append(('USE_THREADS', None))
         ctrans['define_macros'].append(('NTHREADS', nthreads))
+
 
 ext_modules = []
 if options['build_ctrans']:

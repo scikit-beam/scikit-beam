@@ -3,6 +3,7 @@
 import setuptools
 from distutils.core import setup, Extension
 from setupext import ext_modules
+import numpy as np
 
 setup(
     name='NSLS2',
