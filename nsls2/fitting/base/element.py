@@ -40,14 +40,39 @@ from element_data import (XRAYLIB_MAP, OTHER_VAL)
 
 class Element(object):
     """
-    Object to return all the element information
+    Object to return all the elemental information
+    related to fluorescence
 
     Attributes
     ----------
-    element : int or str
-        element name or element atomic Z
+    name : str
+        element name, such as Fe, Cu
+    z : int
+        atomic number
+    mass : float
+        atomic mass in g/mol
+    density : float
+        element density in g/cm3
     energy : float
-        incident x-ray energy, in KeV
+        incident energy in KeV
+    emission_line[line] : float
+        energy of emission line
+        line is string type and defined as 'Ka1', 'Kb1'.
+        unit in KeV
+    cs[line] : float
+        scattering cross section
+        line is string type and defined as 'Ka1', 'Kb1'.
+        unit in cm2/g
+    bind_energy[shell] : float
+        binding energy
+        shell is string type and defined as "K", "L1".
+        unit in KeV
+    jump_factor[shell] : float
+        jump factor
+        shell is string type and defined as "K", "L1".
+    f_yield[shell] : float
+        fluorescence yield
+        shell is string type and defined as "K", "L1".
 
     Examples
     --------
@@ -59,6 +84,14 @@ class Element(object):
     >>> print (e.density) #density
     """
     def __init__(self, element, energy):
+        """
+        Parameters
+        ----------
+        element : int or str
+            element name or element atomic Z
+        energy : float
+            incident x-ray energy, in KeV
+        """
         try:
             # forcibly down-cast stringy inputs to lowercase
             if isinstance(element, six.string_types):
