@@ -346,8 +346,7 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
     t1 = time.time()
 
     # ctrans - c routines for fast data analysis
-    (grid_data, grid_occu,
-        grid_std, grid_out) = ctrans.grid3d(tot_set, q_min, q_max, dqn, norm=1)
+    (grid_data, grid_occu, grid_std, grid_out) = ctrans.grid3d(tot_set, q_min, q_max, dqn, norm=1)
 
     # ending time for the gridding
     t2 = time.time()
