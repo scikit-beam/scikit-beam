@@ -245,33 +245,48 @@ def _iter_helper(path_list, split, md_dict):
 
 keys_core = {
     "pixel_size": {
-        "description" : ("2 element tuple defining the (x y) dimensions of the "
-                         "pixel"),
-        "type" : tuple,
-        "units" : "um",
-        },
+        "description": ("2 element tuple defining the (x y) dimensions of the "
+                        "pixel"),
+        "type": tuple,
+        "units": "um",
+    },
     "voxel_size": {
-        "description" : ("3 element tuple defining the (x y z) dimensions of the "
-                         "voxel"),
-        "type" : tuple,
-        "units" : "um",
-        },
-     "detector_center": {
-        "description" : ("2 element tuple defining the (x y) center of the "
-                         "detector in pixels"),
-        "type" : tuple,
-        "units" : "pixel",
-        },
-     "dist_sample": {
-        "description" : "distance from the sample to the detector (mm)",
-        "type" : float,
-        "units" : "mm",
+        "description": ("3 element tuple defining the (x y z) dimensions of "
+                        "the voxel"),
+        "type": tuple,
+        "units": "um",
+    },
+    "calibrated_center": {
+        "description": ("2 element tuple defining the (x y) center of the "
+                        "detector in pixels"),
+        "type": tuple,
+        "units": "pixel",
+    },
+    "detector_size": {
+            "description": ("2 element tuple defining no. of pixels(size) in the "
+                            "detector X and Y direction"),
+        "type": tuple,
+        "units": "pixel",
+    },
+    "detector_tilt_angle": {
+        "description": "Detector tilt angle",
+        "type": tuple,
+        "units": " degrees",
+    },
+    "dist_sample": {
+        "description": "distance from the sample to the detector (mm)",
+        "type": float,
+        "units": "mm",
         },
      "wavelength": {
-        "description" : "wavelength of incident radiation (Angstroms)",
-        "type" : float,
-        "units" : "angstrom",
+        "description": "wavelength of incident radiation (Angstroms)",
+        "type": float,
+        "units": "angstrom",
         },
+     "ub_mat": {
+         "description": "UB matrix(orientation matrix) 3x3 array",
+         "type": "ndarray",
+         },
      }
 
 

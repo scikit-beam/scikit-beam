@@ -32,60 +32,91 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
+
 """
+
 This module is for functions and classes specific to reciprocal space
 calculations.
+
 """
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-
 import six
 import numpy as np
 import logging
 logger = logging.getLogger(__name__)
+import time
+
+try:
+    import src.ctrans as ctrans
+except ImportError:
+    try:
+        import ctrans
+    except ImportError:
+        ctrans = None
 
 
-def project_to_sphere(img, dist_sample, detector_center, pixel_size,
+def project_to_sphere(img, dist_sample, calibrated_center, pixel_size,
                       wavelength, ROI=None, **kwargs):
     """
     Project the pixels on the 2D detector to the surface of a sphere.
 
     Parameters
     ----------
-    img: ndarray
-         2D detector image
-    dist_sample: float
-                 see keys_core
-                 (mm)
-    detector_center: 2 element float array
-                     see keys_core
-                     (pixels)
-    pixel_size: 2 element float array
-                see keys_core
-                (mm)
-    wavelength: float
-                see keys_core
-                (Angstroms)
-    ROI: 4 element int array
-           ROI defines a rectangular ROI for img
-           ROI[0] == x_min
-           ROI[1] == x_max
-           ROI[2] == y_min
-           ROI[3] == y_max
-    **kwargs: dict
-              Bucket for extra parameters from an unpacked dictionary
+    img : ndarray
+        2D detector image
+
+    dist_sample : float
+        see keys_core  (mm)
+
+    calibrated_center : 2 element float array
+        see keys_core (pixels)
+
+    pixel_size : 2 element float array
+        see keys_core (mm)
+
+    wavelength : float
+        see keys_core (Angstroms)
+
+    ROI : 4 element int array
+        ROI defines a rectangular ROI for img
+        ROI[0] == x_min
+        ROI[1] == x_max
+        ROI[2] == y_min
+        ROI[3] == y_max
+
+    **kwargs : dict
+        Bucket for extra parameters from an unpacked dictionary
 
     Returns
     -------
-    qi: 4 x N array of the coordinates in Q space (A^-1)
+    Bucket for extra parameters from an unpacked dictionary
+
+    qi : 4 x N array of the coordinates in Q space (A^-1)
         Rows correspond to individual pixels
         Columns are (Qx, Qy, Qz, I)
+
+    Raises
+    ------
+    ValueError
+        Possible causes:
+            Raised when the ROI is not a 4 element array
+
+    ValueError
+        Possible causes:
+            Raised when ROI is not specified
     """
 
-    if ROI is not None and len(ROI) == 4:
-        # slice the image based on the desired ROI
-        img=img[ROI[0]:ROI[1], ROI[2]:ROI[3]]
+    if ROI is not None:
+        if len(ROI) == 4:
+            # slice the image based on the desired ROI
+            img = np.meshgrid(img[ROI[0]:ROI[1]], img[ROI[2]:ROI[3]],
+                              sparse=True)
+        else:
+            raise ValueError(" ROI has to be 4 element array : len(ROI) = 4")
+    else:
+        raise ValueError(" No ROI is specified ")
 
     # create the array of x indices
     arr_2d_x = np.zeros((img.shape[0], img.shape[1]), dtype=np.float)
@@ -98,40 +129,231 @@ def project_to_sphere(img, dist_sample, detector_center, pixel_size,
         arr_2d_y[:, y:y + 1] = y + 1 + ROI[2]
 
     # subtract the detector center
-    arr_2d_x -= detector_center[0]
-    arr_2d_y -= detector_center[1]
+    arr_2d_x -= calibrated_center[0]
+    arr_2d_y -= calibrated_center[1]
 
     # convert the pixels into real-space dimensions
     arr_2d_x *= pixel_size[0]
     arr_2d_y *= pixel_size[1]
 
-    print("Image shape: {0}".format(img.shape))
     # define a new 4 x N array
     qi = np.zeros((4,) + (img.shape[0] * img.shape[1],))
     # fill in the x coordinates
     qi[0] = arr_2d_x.flatten()
     # fill in the y coordinates
     qi[1] = arr_2d_y.flatten()
-    # set the z coordinate for all pixels to the distance from the sample to the detector
+    # set the z coordinate for all pixels to
+    # the distance from the sample to the detector
     qi[2].fill(dist_sample)
     # fill in the intensity values of the pixels
     qi[3] = img.flatten()
     # convert to an N x 4 array
     qi = qi.transpose()
     # compute the unit vector of each pixel
-    qi[:,0:2] = qi[:,0:2]/np.linalg.norm(qi[:,0:2])
-    # convert the pixel positions from real space distances into the reciprocal space
+    qi[:, 0:2] = qi[:, 0:2]/np.linalg.norm(qi[:, 0:2])
+    # convert the pixel positions from real space distances
+    # into the reciprocal space
     # vector, Q
-    Q = 4 * np.pi / wavelength * np.sin(np.arctan(qi[:,0:2]))
-    # project the pixel coordinates onto the surface of a sphere of radius dist_sample
-    qi[:,0:2] *= dist_sample
-    # compute the vector from the center of the detector (i.e., the zero of reciprocal
-    # space) to each pixel
-    qi[:,2] -= dist_sample
-    # compute the unit vector for each pixels position relative to the center of the
-    # detector, but now on the surface of a sphere
-    qi[:,0:2] = qi[:,0:2]/np.linalg.norm(qi[:,0:2])
+    Q = 4 * np.pi / wavelength * np.sin(np.arctan(qi[:, 0:2]))
+    # project the pixel coordinates onto the surface of a sphere
+    # of radius dist_sample
+    qi[:, 0:2] *= dist_sample
+    # compute the vector from the center of the detector
+    # (i.e., the zero of reciprocal space) to each pixel
+    qi[:, 2] -= dist_sample
+    # compute the unit vector for each pixels position
+    # relative to the center of the detector,
+    #  but now on the surface of a sphere
+    qi[:, 0:2] = qi[:, 0:2]/np.linalg.norm(qi[:, 0:2])
     # convert to reciprocal space
-    qi[:,0:2] *= Q
+    qi[:, 0:2] *= Q
 
     return qi
+
+
+def process_to_q(setting_angles, detector_size, pixel_size,
+                 calibrated_center, dist_sample, wavelength, ub_mat):
+    """
+    This will procees the given images (certain scan) of
+    the full set into receiprocal(Q) space, (Qx, Qy, Qz)
+
+    Parameters
+    ----------
+    setting_angles : ndarray
+        six angles of all the images - Nx6 array
+        delta, theta, chi, phi, mu, gamma (degrees)
+
+    detector_size : tuple
+        2 element tuple defining no. of pixels(size) in the
+        detector X and Y direction(mm)
+
+    pixel_size : tuple
+        2 element tuple defining the (x y) dimensions of the
+        pixel (mm)
+
+    calibrated_center : tuple
+        2 element tuple defining the (x y) center of the
+        detector (mm)
+
+    dist_sample : float
+        distance from the sample to the detector (mm)
+
+    wavelength : float
+        wavelength of incident radiation (Angstroms)
+
+    ub_mat :  ndarray
+        UB matrix (orientation matrix) 3x3 matrix
+
+    Returns
+    -------
+    tot_set : ndarray
+        (Qx, Qy, Qz) - HKL values - Nx3 matrix
+
+    Raises
+    ------
+    ValueError
+        Possible causes:
+            Raised when the diffractometer six angles of
+            the images are not specified
+
+    Note
+    -----
+    Six angles of an image: (delta, theta, chi, phi, mu, gamma )
+    These axes are defined according to the following references.
+
+    References: text [1]_, text [2]_
+
+    .. [1] M. Lohmeier and E.Vlieg, "Angle calculations for a six-circle
+       surface x-ray diffractometer," J. Appl. Cryst., vol 26, pp 706-716,
+       1993.
+
+    .. [2] E. Vlieg, "A (2+3)-Type surface diffractometer: Mergence of the
+       z-axis and (2+2)-Type geometries," J. Appl. Cryst., vol 31, pp 198-203,
+       1998.
+
+    """
+    ccdToQkwArgs = {}
+
+    tot_set = None
+
+    # frame_mode = 1 : 'theta'    : Theta axis frame.
+    # frame_mode = 2 : 'phi'      : Phi axis frame.
+    # frame_mode = 3 : 'cart'     : Crystal cartesian frame.
+    # frame_mode = 4 : 'hkl'      : Reciprocal lattice units frame.
+    frame_mode = 4
+
+    setting_angles = np.atleast_2d(setting_angles)
+    setting_angles.shape
+    if setting_angles.ndim != 2:
+        raise ValueError()
+    if setting_angles.shape[1] != 6:
+        raise ValueError()
+
+    #  *********** Converting to Q   **************
+
+    # starting time for the process
+    t1 = time.time()
+
+    # ctrans - c routines for fast data analysis
+    tot_set = ctrans.ccdToQ(angles=setting_angles * np.pi / 180.0,
+                           mode=frame_mode,
+                           ccd_size=(detector_size),
+                           ccd_pixsize=(pixel_size),
+                           ccd_cen=(calibrated_center),
+                           dist=dist_sample,
+                           wavelength=wavelength,
+                           UBinv=np.matrix(ub_mat).I,
+                           **ccdToQkwArgs)
+
+    # ending time for the process
+    t2 = time.time()
+    logger.info("--- Done processed in %f seconds", (t2-t1))
+
+    return tot_set[:, :3]
+
+
+def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
+    """
+    This function will process the set of HKL
+    values and the image stack and grid the image data
+
+    Parameters
+    ---------
+    tot_set : ndarray
+        (Qx, Qy, Qz) - HKL values - Nx3 array
+
+    istack : ndarray
+        intensity array of the images - Nx1 array
+
+    q_min : ndarray, optional
+        minimum values of the voxel [Qx, Qy, Qz]_min
+
+    q_max : ndarray, optional
+        maximum values of the voxel [Qx, Qy, Qz]_max
+
+    dqn : ndarray, optional
+        No. of grid parts (bins) [Nqx, Nqy, Nqz]
+
+    Returns
+    -------
+    grid_data : ndarray
+        intensity grid
+
+    grid_std : ndarray
+        standard deviation grid
+
+    grid_occu : ndarray
+        occupation of the grid
+
+    grid_out : int
+        No. of data point outside of the grid
+
+    Raises
+    ------
+    ValueError
+        Possible causes:
+            Raised when the HKL values are not provided
+    """
+
+    tot_set = np.atleast_2d(tot_set)
+    tot_set.shape
+    if tot_set.ndim != 2:
+        raise ValueError()
+    if tot_set.shape[1] != 3:
+        raise ValueError()
+
+    # prepare min, max,... from defaults if not set
+    if q_min is None:
+        q_min = np.min(tot_set, axis=0)
+    if q_max is None:
+        q_max = np.max(tot_set, axis=0)
+    if dqn is None:
+        dqn = [100, 100, 100]
+
+    # creating (Qx, Qy, Qz, I) Nx4 array - HKL values and Intensity
+    # getting the intensity value for each pixel
+    tot_set = np.insert(tot_set, 3, np.ravel(i_stack), axis=1)
+
+    #            3D grid of the data set
+    #             *** Gridding Data ****
+
+    # starting time for gridding
+    t1 = time.time()
+
+    # ctrans - c routines for fast data analysis
+    (grid_data, grid_occu, grid_std, grid_out) = ctrans.grid3d(tot_set, q_min, q_max, dqn, norm=1)
+
+    # ending time for the gridding
+    t2 = time.time()
+    logger.info("--- Done processed in %f seconds", (t2-t1))
+
+    # No. of values zero in the grid
+    empt_nb = (grid_occu == 0).sum()
+
+    if grid_out:
+        logger.debug("There are %.2e points outside the grid ", grid_out)
+    logger.debug("There are %2e bins in the grid ", grid_data.size)
+    if empt_nb:
+        logger.debug("There are %.2e values zero in the grid ", empt_nb)
+
+    return grid_data, grid_occu, grid_std, grid_out
