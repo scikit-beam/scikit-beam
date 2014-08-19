@@ -201,13 +201,13 @@ def process_to_q(setting_angles, detector_size, pixel_size,
     wavelength : float
         wavelength of incident radiation (Angstroms)
 
-    ub_mat : 3x3 array
-        UB matrix (orientation matrix)
+    ub_mat :  ndarray
+        UB matrix (orientation matrix) 3x3 matrix
 
     Returns
     -------
-    tot_set : Nx3 array
-        (Qx, Qy, Qz) - HKL values
+    tot_set : ndarray
+        (Qx, Qy, Qz) - HKL values - Nx3 matrix
 
     Raises
     ------
@@ -279,11 +279,11 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
 
     Parameters
     ---------
-    tot_set : Nx3 array
-        (Qx, Qy, Qz) - HKL values
+    tot_set : ndarray
+        (Qx, Qy, Qz) - HKL values - Nx3 array
 
-    istack : Nx1
-        intensity array of the images
+    istack : ndarray
+        intensity array of the images - Nx1 array
 
     q_min : ndarray, optional
         minimum values of the voxel [Qx, Qy, Qz]_min
@@ -328,11 +328,13 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
 
     # prepare min, max,... from defaults if not set
     if q_min is None:
-        q_min = np.array([tot_set[:, 0].min(), tot_set[:, 1].min(),
-                         tot_set[:, 2].min()])
+        q_min = np.min(tot_set, axis=0)
+        #q_min = np.array([tot_set[:, 0].min(), tot_set[:, 1].min(),
+        #tot_set[:, 2].min()])
     if q_max is None:
-        q_max = np.array([tot_set[:, 0].max(), tot_set[:, 1].max(),
-                         tot_set[:, 2].max()])
+        q_max = np.max(tot_set, axis=0)
+        #q_max = np.array([tot_set[:, 0].max(), tot_set[:, 1].max(),
+        # tot_set[:, 2].max()])
     if dqn is None:
         dqn = [100, 100, 100]
 

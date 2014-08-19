@@ -285,7 +285,7 @@ keys_core = {
         },
      "ub_mat": {
          "description": "UB matrix(orientation matrix) 3x3 array",
-         "type": "3x3 array",
+         "type": "ndarray",
          },
      }
 
