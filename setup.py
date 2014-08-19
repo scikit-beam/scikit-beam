@@ -1,4 +1,4 @@
-#!/usr/bin/env python/Users/sameera/Desktop/setup.py
+#!/usr/bin/env python
 
 import setuptools
 from distutils.core import setup, Extension
