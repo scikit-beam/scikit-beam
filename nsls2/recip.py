@@ -179,8 +179,8 @@ def process_to_q(setting_angles, detector_size, pixel_size,
 
     Parameters
     ----------
-    setting_angles : Nx6 array
-        six angles of the all the images
+    setting_angles : ndarray
+        six angles of all the images - Nx6 array
         delta, theta, chi, phi, mu, gamma (degrees)
 
     detector_size : tuple
