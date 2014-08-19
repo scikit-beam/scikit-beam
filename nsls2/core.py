@@ -263,8 +263,8 @@ keys_core = {
         "units": "pixel",
     },
     "detector_size": {
-        "description": ("2 element tuple defining no. of pixels(size) in the "
-                        "detector X and Y direction"),
+            "description": ("2 element tuple defining no. of pixels(size) in the "
+                            "detector X and Y direction"),
         "type": tuple,
         "units": "pixel",
     },

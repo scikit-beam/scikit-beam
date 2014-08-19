@@ -184,19 +184,22 @@ def process_to_q(setting_angles, detector_size, pixel_size,
         delta, theta, chi, phi, mu, gamma (degrees)
 
     detector_size : tuple
-        see keys_core (pixel)
+        2 element tuple defining no. of pixels(size) in the
+        detector X and Y direction(mm)
 
     pixel_size : tuple
-        see keys_core (mm)
+        2 element tuple defining the (x y) dimensions of the
+        pixel (mm)
 
     calibrated_center : tuple
-        see key_core (mm)
+        2 element tuple defining the (x y) center of the
+        detector (mm)
 
     dist_sample : float
-        see keys_core (mm)
+        distance from the sample to the detector (mm)
 
     wavelength : float
-        see keys_core (Angstroms)
+        wavelength of incident radiation (Angstroms)
 
     ub_mat : 3x3 array
         UB matrix (orientation matrix)
@@ -283,7 +286,7 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
         intensity array of the images
 
     q_min : ndarray, optional
-        minimum values of the voxel[Qx, Qy, Qz]_min
+        minimum values of the voxel [Qx, Qy, Qz]_min
 
     q_max : ndarray, optional
         maximum values of the voxel [Qx, Qy, Qz]_max
@@ -359,4 +362,4 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
     if empt_nb:
         logger.debug("There are %.2e values zero in the grid ", empt_nb)
 
-    return grid_data, grid_occu, grid_std, grid_out, empt_nb
+    return grid_data, grid_occu, grid_std, grid_out

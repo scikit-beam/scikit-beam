@@ -72,7 +72,7 @@ def test_process_grid():
                      np.ravel(Z)])
     data = data.T
 
-    grid_data, grid_occu, grid_std, grid_out, empt_nb = recip.process_grid(data, out, q_max, q_min, dqn)
+    grid_data, grid_occu, grid_std, grid_out = recip.process_grid(data, out, q_max, q_min, dqn)
     
     # Values that have to go to the gridder
     databack = np.ravel(out)
