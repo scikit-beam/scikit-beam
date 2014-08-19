@@ -308,9 +308,6 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
     grid_out : int
         No. of data point outside of the grid
 
-    empt_nb : int
-        No. of values zero in the grid
-
     Raises
     ------
     ValueError
