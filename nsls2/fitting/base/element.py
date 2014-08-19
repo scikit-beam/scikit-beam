@@ -79,6 +79,7 @@ class Element(object):
     >>> e = Element('Zn', 10) # or e = Element(30, 10)
     >>> print (e.emission_line['Ka1']) # energy for emission line Ka1
     >>> print (e.cs['Ka1']) # cross section for emission line Ka1
+    >>> print (e.cs.items()) # output all the cross section
     >>> print (e.f_yield['K']) # fluorescence yield for K shell
     >>> print (e.mass) #atomic mass
     >>> print (e.density) #density
@@ -134,6 +135,9 @@ class Element(object):
             raise TypeError('Expected a number for energy')
         self._energy = val
         self.cs.energy = val
+
+    def __repr__(self):
+        return 'Element name %s with atomic Z %s' % (self.name, self.z)
 
 
 class _XrayLibWrap(Mapping):
