@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python/Users/sameera/Desktop/setup.py
 
 import setuptools
 from distutils.core import setup, Extension
@@ -11,4 +11,6 @@ setup(
     author='Brookhaven National Lab',
     packages=["nsls2",
               "nsls2.testing"],
+    include_dirs=[np.get_include()],
+    ext_modules=ext_modules
     )
