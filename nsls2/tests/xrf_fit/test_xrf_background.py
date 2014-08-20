@@ -90,9 +90,4 @@ def test_snip_method():
     assert_allclose(bg_true_part, bg_cal_part, rtol=1e-3, atol=1e-1)
     
     return
-
-
-if __name__=="__main__":
-    test_snip_method()
-    
     
