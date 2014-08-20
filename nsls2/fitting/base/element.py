@@ -35,7 +35,7 @@ from __future__ import (absolute_import, division)
 from collections import Mapping
 import six
 
-from element_data import (XRAYLIB_MAP, OTHER_VAL)
+from nsls2.fitting.base.element_data import (XRAYLIB_MAP, OTHER_VAL)
 
 
 class Element(object):
@@ -128,6 +128,7 @@ class Element(object):
     def energy(self, val):
         """
         Parameters
+        ----------
         val : float
             new energy value in KeV
         """
