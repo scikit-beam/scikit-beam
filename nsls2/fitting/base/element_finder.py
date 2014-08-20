@@ -63,7 +63,16 @@ class ElementFinder(object):
     """
 
     def __init__(self, incident_e, **kwargs):
-
+        """
+        Parameters
+        ----------
+        incident_e : float
+            incident energy in KeV
+        kwargs : dict, option
+            define element name,
+            name1='Fe', name2='Cu'
+            if not defined, search all elements
+        """
         self._incident_e = incident_e
 
         if len(kwargs) == 0:
