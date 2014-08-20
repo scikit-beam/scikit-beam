@@ -67,7 +67,3 @@ def test_element_data():
     assert_array_equal(data1, data2)
 
     return
-
-
-if __name__ == "__main__":
-    test_element_data()
