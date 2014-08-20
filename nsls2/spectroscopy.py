@@ -115,7 +115,7 @@ def align_and_scale(energy_list, counts_list, pk_find_fun=None):
        The count arrays (should be the same as the input)
     """
     if pk_find_fun is None:
-        pk_find_fun = find_larest_peak
+        pk_find_fun = find_largest_peak
 
     base_sigma = None
     out_e, out_c = [], []
