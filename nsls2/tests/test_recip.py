@@ -74,3 +74,46 @@ def test_process_grid():
     npt.assert_array_equal(grid_data.ravel(), I)
     npt.assert_equal(grid_out, 0)
     npt.assert_array_equal(grid_occu, np.ones_like(grid_occu))
+    npt.assert_array_equal(grid_std, 0)
+
+
+@known_fail_if(six.PY3)
+def test_process_grid_std():
+    size = 10
+    q_max = np.array([1.0, 1.0, 1.0])
+    q_min = np.array([-1.0, -1.0, -1.0])
+    dqn = np.array([size, size, size])
+    # slice tricks
+    # this make a list of slices, the imaginary value in the
+    # step is interpreted as meaning 'this many values'
+    slc = [slice(_min + (_max - _min)/(s * 2),
+                 _max - (_max - _min)/(s * 2),
+                 1j * s)
+           for _min, _max, s in zip(q_min, q_max, dqn)]
+    # use the numpy slice magic to make X, Y, Z these are dense meshes with
+    # points in the center of each bin
+    X, Y, Z = np.mgrid[slc]
+
+    # make and ravel the image data (which is all ones)
+    I = np.hstack([j * np.ones_like(X).ravel() for j in range(1, 6)])
+
+    # make input data (N*5x3)
+    data = np.vstack([np.tile(_, 5)
+                      for _ in (np.ravel(X), np.ravel(Y), np.ravel(Z))]).T
+
+    (grid_data, grid_occu,
+         grid_std, grid_out) = recip.process_grid(data, I,
+                                                  q_min, q_max,
+                                                  dqn=dqn)
+
+    # check the values are as expected
+    npt.assert_array_equal(grid_data,
+                           np.ones_like(X) * np.mean(np.arange(1, 6)))
+    npt.assert_equal(grid_out, 0)
+    npt.assert_array_equal(grid_occu, np.ones_like(grid_occu)*5)
+    # need to convert std -> ste (standard error)
+    # according to wikipedia ste = std/sqrt(n), but experimentally, this is
+    # implemented as ste = std / srt(n - 1)
+    npt.assert_array_equal(grid_std,
+                           (np.ones_like(grid_occu) *
+                            np.std(np.arange(1, 6))/np.sqrt(5 - 1)))
