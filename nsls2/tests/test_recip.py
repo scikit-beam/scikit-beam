@@ -3,13 +3,12 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 import nsls2.recip as recip
 import numpy.testing as npt
-from numpy.testing.noseclasses import KnownFailureTest
 import six
+from nsls2.testing.decorators import known_fail_if
 
 
+@known_fail_if(six.PY3)
 def test_process_to_q():
-    if six.PY3:
-        return
     detector_size = (256, 256)
     pixel_size = (0.0135*8, 0.0135*8)
     calibrated_center = (256/2.0, 256/2.0)
@@ -28,7 +27,8 @@ def test_process_to_q():
                               [90., 60., 0., 30., 10., 5.]])
     # delta=40, theta=15, chi = 90, phi = 30, mu = 10.0, gamma=5.0
 
-    tot_set = recip.process_to_q(setting_angles, detector_size, pixel_size, calibrated_center,
+    tot_set = recip.process_to_q(setting_angles, detector_size,
+                                 pixel_size, calibrated_center,
                                 dist_sample, wavelength, ub_mat)
 
     #  Known HKL values for the given six angles)
@@ -47,9 +47,8 @@ def test_process_to_q():
     npt.assert_array_equal(hkl2, n_hkl2)
 
 
+@known_fail_if(six.PY3)
 def test_process_grid():
-    if six.PY3:
-        return
     size = 4
     sigma = 0.1
     q_max = np.array([1.0, 1.0, 1.0])
@@ -72,8 +71,9 @@ def test_process_grid():
                      np.ravel(Z)])
     data = data.T
 
-    grid_data, grid_occu, grid_std, grid_out = recip.process_grid(data, out, q_max, q_min, dqn)
-    
+    (grid_data, grid_occu,
+         grid_std, grid_out) = recip.process_grid(data, out, q_max, q_min, dqn)
+
     # Values that have to go to the gridder
     databack = np.ravel(out)
 
