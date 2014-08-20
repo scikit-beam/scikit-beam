@@ -19,11 +19,11 @@ def test_process_to_q():
     hc_over_e = 12398.4
     wavelength = hc_over_e / energy  # (Angstrom )
 
-    ub_mat = np.matrix([[-0.01231028454, 0.7405370482, 0.06323870032],
+    ub_mat = np.array([[-0.01231028454, 0.7405370482, 0.06323870032],
                        [0.4450897473, 0.04166852402, -0.9509449389],
                        [-0.7449130975, 0.01265920962, -0.5692399963]])
 
-    setting_angles = np.matrix([[40., 15., 30., 25., 10., 5.],
+    setting_angles = np.array([[40., 15., 30., 25., 10., 5.],
                               [90., 60., 0., 30., 10., 5.]])
     # delta=40, theta=15, chi = 90, phi = 30, mu = 10.0, gamma=5.0
 
@@ -31,20 +31,13 @@ def test_process_to_q():
                                  pixel_size, calibrated_center,
                                 dist_sample, wavelength, ub_mat)
 
-    #  Known HKL values for the given six angles)
-    hkl1 = np.matrix([[-0.15471196, 0.19673939, -0.11440936]])
-    hkl2 = np.matrix([[0.10205953,  0.45624416, -0.27200778]])
+    # Known HKL values for the given six angles)
+    # each entry in list is (pixel_number, known hkl value)
+    known_hkl = [(32896, np.array([-0.15471196, 0.19673939, -0.11440936])),
+                 (98432, np.array([0.10205953,  0.45624416, -0.27200778]))]
 
-    # New HKL values obtained from the process_to_q
-
-    n_hkl1 = np.around(np.matrix([[tot_set[32896, 0],
-                    tot_set[32896, 1], tot_set[32896, 2]]]), decimals=8)
-    n_hkl2 = np.around(np.matrix([[tot_set[98432, 0],
-                    tot_set[98432, 1], tot_set[98432, 2]]]), decimals=8)
-
-    # check the values are as expected
-    npt.assert_array_equal(hkl1, n_hkl1)
-    npt.assert_array_equal(hkl2, n_hkl2)
+    for pixel, kn_hkl in known_hkl:
+        npt.assert_array_almost_equal(tot_set[pixel], kn_hkl, decimal=8)
 
 
 @known_fail_if(six.PY3)
