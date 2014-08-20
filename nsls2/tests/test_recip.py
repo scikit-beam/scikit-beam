@@ -42,36 +42,35 @@ def test_process_to_q():
 
 @known_fail_if(six.PY3)
 def test_process_grid():
-    size = 4
-    sigma = 0.1
+    size = 10
     q_max = np.array([1.0, 1.0, 1.0])
     q_min = np.array([-1.0, -1.0, -1.0])
     dqn = np.array([size, size, size])
+    # slice tricks
+    # this make a list of slices, the imaginary value in the
+    # step is interpreted as meaning 'this many values'
+    slc = [slice(_min + (_max - _min)/(s * 2),
+                 _max - (_max - _min)/(s * 2),
+                 1j * s)
+           for _min, _max, s in zip(q_min, q_max, dqn)]
+    # use the numpy slice magic to make X, Y, Z these are dense meshes with
+    # points in the center of each bin
+    X, Y, Z = np.mgrid[slc]
 
-    grid = np.mgrid[0:dqn[0], 0:dqn[1], 0:dqn[2]]
-    r = (q_max - q_min) / dqn
+    # make and ravel the image data (which is all ones)
+    I = np.ones_like(X).ravel()
 
-    X = grid[0] * r[0] + q_min[0]
-    Y = grid[1] * r[1] + q_min[1]
-    Z = grid[2] * r[2] + q_min[2]
-
-    out = np.zeros((size, size, size))
-
-    out = np.exp(-(X**2 + Y**2 + Z**2) / (2 * sigma**2))
-
+    # make input data (Nx3
     data = np.array([np.ravel(X),
                      np.ravel(Y),
-                     np.ravel(Z)])
-    data = data.T
+                     np.ravel(Z)]).T
 
     (grid_data, grid_occu,
-         grid_std, grid_out) = recip.process_grid(data, out, q_max, q_min, dqn)
-
-    # Values that have to go to the gridder
-    databack = np.ravel(out)
-
-    # Values from the gridder
-    grid_databack = np.ravel(grid_data)
+         grid_std, grid_out) = recip.process_grid(data, I,
+                                                  q_min, q_max,
+                                                  dqn=dqn)
 
     # check the values are as expected
-    npt.assert_array_almost_equal(grid_databack, databack)
+    npt.assert_array_equal(grid_data.ravel(), I)
+    npt.assert_equal(grid_out, 0)
+    npt.assert_array_equal(grid_occu, np.ones_like(grid_occu))
