@@ -318,9 +318,12 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
     tot_set = np.atleast_2d(tot_set)
     tot_set.shape
     if tot_set.ndim != 2:
-        raise ValueError()
+        raise ValueError(
+            "The tot_set.nidm must be 2, not {}".format(tot_set.ndim))
     if tot_set.shape[1] != 3:
-        raise ValueError()
+        raise ValueError(
+            "The shape of tot_set must be Nx3 not "
+            "{}X{}".format(*tot_set.shape))
 
     # prepare min, max,... from defaults if not set
     if q_min is None:
