@@ -297,16 +297,18 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
     Returns
     -------
     grid_data : ndarray
-        intensity grid
+        intensity grid.  The values in this grid are the
+        mean of the values that fill with in the grid.
 
     grid_std : ndarray
-        standard deviation grid
+        This is the standard error of the value in the
+        grid box.
 
     grid_occu : ndarray
-        occupation of the grid
+        The number of data points that fell in the grid.
 
     grid_out : int
-        No. of data point outside of the grid
+        No. of data points that were outside of the gridded region.
 
     Raises
     ------
