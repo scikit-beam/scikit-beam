@@ -296,18 +296,18 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
 
     Returns
     -------
-    grid_data : ndarray
+    grid_mean : ndarray
         intensity grid.  The values in this grid are the
         mean of the values that fill with in the grid.
 
-    grid_std : ndarray
+    grid_error : ndarray
         This is the standard error of the value in the
         grid box.
 
     grid_occu : ndarray
         The number of data points that fell in the grid.
 
-    grid_out : int
+    n_out_of_bounds : int
         No. of data points that were outside of the gridded region.
 
     Raises
@@ -346,21 +346,24 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
     t1 = time.time()
 
     # ctrans - c routines for fast data analysis
-    (grid_data, grid_occu, grid_std, grid_out) = ctrans.grid3d(tot_set, q_min,
-                                                               q_max, dqn,
-                                                               norm=1)
+
+    (grid_mean, grid_occu,
+         grid_error, n_out_of_bounds) = ctrans.grid3d(tot_set,
+                                                      q_min, q_max, dqn,
+                                                      norm=1)
 
     # ending time for the gridding
     t2 = time.time()
-    logger.info("--- Done processed in %f seconds", (t2-t1))
+    logger.info("Done processed in %f seconds", (t2-t1))
 
     # No. of values zero in the grid
     empt_nb = (grid_occu == 0).sum()
 
-    if grid_out:
-        logger.debug("There are %.2e points outside the grid ", grid_out)
-    logger.debug("There are %2e bins in the grid ", grid_data.size)
+    if n_out_of_bounds:
+        logger.debug("There are %.2e points outside the grid ",
+                     n_out_of_bounds)
+    logger.debug("There are %2e bins in the grid ", grid_mean.size)
     if empt_nb:
         logger.debug("There are %.2e values zero in the grid ", empt_nb)
 
-    return grid_data, grid_occu, grid_std, grid_out
+    return grid_mean, grid_occu, grid_error, n_out_of_bounds
