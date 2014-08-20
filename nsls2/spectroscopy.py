@@ -115,7 +115,7 @@ def align_and_scale(energy_list, counts_list, pk_find_fun=None):
        The count arrays (should be the same as the input)
     """
     if pk_find_fun is None:
-        pk_find_fun = find_larest_peak
+        pk_find_fun = find_largest_peak
 
     base_sigma = None
     out_e, out_c = [], []
@@ -129,7 +129,7 @@ def align_and_scale(energy_list, counts_list, pk_find_fun=None):
     return out_e, out_c
 
 
-def find_larest_peak(X, Y, window=5):
+def find_largest_peak(x, y, window=5):
     """
     Finds and estimates the location, width, and height of
     the largest peak. Assumes the top of the peak can be
@@ -142,10 +142,10 @@ def find_larest_peak(X, Y, window=5):
 
     Parameters
     ----------
-    X : ndarray
+    x : ndarray
        The independent variable
 
-    Y : ndarary
+    y : ndarary
       Dependent variable sampled at positions X
 
     window : int, optional
@@ -155,10 +155,10 @@ def find_larest_peak(X, Y, window=5):
 
     Returns
     -------
-    X0 : float
+    x0 : float
         The location of the peak
 
-    Y0 : float
+    y0 : float
         The magnitude of the peak
 
     sigma : float
@@ -166,18 +166,18 @@ def find_larest_peak(X, Y, window=5):
     """
 
     # make sure they are _really_ arrays
-    X = np.asarray(X)
-    Y = np.asarray(Y)
+    x = np.asarray(x)
+    y = np.asarray(y)
 
     # get the bin with the largest number of counts
-    j = np.argmax(Y)
+    j = np.argmax(y)
     roi = slice(np.max(j - window, 0),
                 j + window + 1)
 
-    (w, X0, Y0), R2 = fit_quad_to_peak(X[roi],
-                                        np.log(Y[roi]))
+    (w, x0, y0), r2 = fit_quad_to_peak(x[roi],
+                                       np.log(y[roi]))
 
-    return X0, np.exp(Y0), 1/np.sqrt(-2*w)
+    return x0, np.exp(y0), 1/np.sqrt(-2*w)
 
 
 def integrate_ROI_spectrum(bin_edges, counts, x_min, x_max):

@@ -263,12 +263,12 @@ keys_core = {
         "units": "pixel",
     },
     "detector_size": {
-            "description": ("2 element tuple defining no. of pixels(size) in the "
-                            "detector X and Y direction"),
+        "description": ("2 element tuple defining no. of pixels(size) in the "
+                        "detector X and Y direction"),
         "type": tuple,
         "units": "pixel",
     },
-    "detector_tilt_angle": {
+    "detector_tilt_angles": {
         "description": "Detector tilt angle",
         "type": tuple,
         "units": " degrees",
@@ -277,17 +277,17 @@ keys_core = {
         "description": "distance from the sample to the detector (mm)",
         "type": float,
         "units": "mm",
-        },
-     "wavelength": {
+    },
+    "wavelength": {
         "description": "wavelength of incident radiation (Angstroms)",
         "type": float,
         "units": "angstrom",
-        },
-     "ub_mat": {
-         "description": "UB matrix(orientation matrix) 3x3 array",
-         "type": "ndarray",
-         },
-     }
+    },
+    "ub_mat": {
+        "description": "UB matrix(orientation matrix) 3x3 array",
+        "type": "ndarray",
+    },
+}
 
 
 def img_subtraction_pre(img_arr, is_reference):
@@ -530,10 +530,10 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
         right edge of the last bin.
     """
     num_valid_args = sum((range_min is not None, range_max is not None,
-          step is not None, nbins is not None))
+                          step is not None, nbins is not None))
     if num_valid_args != 3:
         raise ValueError("Exactly three of the arguments must be non-None "
-                        "not {}.".format(num_valid_args))
+                         "not {}.".format(num_valid_args))
 
     if range_min is not None and range_max is not None:
         if range_max <= range_min:

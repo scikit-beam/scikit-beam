@@ -256,14 +256,14 @@ def process_to_q(setting_angles, detector_size, pixel_size,
 
     # ctrans - c routines for fast data analysis
     tot_set = ctrans.ccdToQ(angles=setting_angles * np.pi / 180.0,
-                           mode=frame_mode,
-                           ccd_size=(detector_size),
-                           ccd_pixsize=(pixel_size),
-                           ccd_cen=(calibrated_center),
-                           dist=dist_sample,
-                           wavelength=wavelength,
-                           UBinv=np.matrix(ub_mat).I,
-                           **ccdToQkwArgs)
+                            mode=frame_mode,
+                            ccd_size=(detector_size),
+                            ccd_pixsize=(pixel_size),
+                            ccd_cen=(calibrated_center),
+                            dist=dist_sample,
+                            wavelength=wavelength,
+                            UBinv=np.matrix(ub_mat).I,
+                            **ccdToQkwArgs)
 
     # ending time for the process
     t2 = time.time()
@@ -341,7 +341,9 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
     t1 = time.time()
 
     # ctrans - c routines for fast data analysis
-    (grid_data, grid_occu, grid_std, grid_out) = ctrans.grid3d(tot_set, q_min, q_max, dqn, norm=1)
+    (grid_data, grid_occu, grid_std, grid_out) = ctrans.grid3d(tot_set, q_min,
+                                                               q_max, dqn,
+                                                               norm=1)
 
     # ending time for the gridding
     t2 = time.time()
