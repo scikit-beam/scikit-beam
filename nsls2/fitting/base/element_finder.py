@@ -108,19 +108,20 @@ class ElementFinder(object):
         -------
         result : dict
             elements and possible lines
-
         """
 
         result = {}
         if self._search == 'all':
             for i in np.arange(100):
                 e = Element(i+1, self._incident_e)
-                if find_line(e, energy, diff) is None: continue
+                if find_line(e, energy, diff) is None:
+                    continue
                 result.update(find_line(e, energy, diff))
         else:
             for item in self._search:
                 e = Element(item, self._incident_e)
-                if find_line(e, energy, diff) is None: continue
+                if find_line(e, energy, diff) is None:
+                    continue
                 result.update(find_line(e, energy, diff))
 
         return result
@@ -145,11 +146,11 @@ def find_line(element, energy, diff):
     dict or None
         elements with associated lines
     """
-    mydict = {k : v for k, v in element.emission_line.items() if abs(v - energy) < diff}
+    mydict = {k : v for k, v in six.iteritems(element.emission_line) if abs(v - energy) < diff}
     if len(mydict) == 0:
         return
     else:
-        newdict = {k : v for k, v in mydict.items() if element.cs[k] > 0}
+        newdict = {k : v for k, v in six.iteritems(mydict) if element.cs[k] > 0}
         if len(newdict) == 0:
             return
         else:
