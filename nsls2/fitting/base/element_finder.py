@@ -155,13 +155,3 @@ def find_line(element, energy, diff):
             return
         else:
             return {element.name: newdict}
-
-
-
-class Test(object):
-
-    def __init__(self, a):
-        self.a = a
-
-    def outv(self):
-        print (self.a)
