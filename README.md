@@ -8,6 +8,7 @@
 
 [![Pull Requests waiting on the author](https://badge.waffle.io/NSLS-II/NSLS2.png?label=PR:%20Waiting%20For%20Author&title=Waiting%20For%20Author)](https://waffle.io/NSLS-II/NSLS2)
 
+[![Throughput Graph](https://graphs.waffle.io/nsls-ii/nsls2/throughput.svg)](https://waffle.io/nsls-ii/nsls2/metrics)
 
 NSLS2
 =====
