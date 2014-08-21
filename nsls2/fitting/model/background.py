@@ -154,7 +154,7 @@ def snip_method(spectrum,
     background = scipy.signal.convolve(background, s, mode='same')/A
 
     window_p = width * fwhm / e_lin
-    if spectral_binning > 0:
+    if spectral_binning is not None and spectral_binning > 0:
         window_p = window_p/2.
 
     background = np.log(np.log(background + 1) + 1)
