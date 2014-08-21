@@ -46,7 +46,7 @@ line_list = [xraylib.KA1_LINE, xraylib.KA2_LINE, xraylib.KB1_LINE,
              xraylib.LL_LINE, xraylib.LE_LINE, xraylib.MA1_LINE,
              xraylib.MA2_LINE, xraylib.MB_LINE, xraylib.MG_LINE]
 
-line_dict = dict(zip(line_name, line_list))
+line_dict = dict((k.lower(), v) for k, v in zip(line_name, line_list))
 
 
 bindingE = ['K', 'L1', 'L2', 'L3', 'M1', 'M2', 'M3', 'M4', 'M5', 'N1',
@@ -62,7 +62,7 @@ shell_list = [xraylib.K_SHELL, xraylib.L1_SHELL, xraylib.L2_SHELL,
               xraylib.O3_SHELL, xraylib.O4_SHELL, xraylib.O5_SHELL,
               xraylib.P1_SHELL, xraylib.P2_SHELL, xraylib.P3_SHELL]
 
-shell_dict = dict(zip(bindingE, shell_list))
+shell_dict = dict((k.lower(), v) for k, v in zip(bindingE, shell_list))
 
 
 XRAYLIB_MAP = {'lines': (line_dict, xraylib.LineEnergy),

@@ -188,11 +188,11 @@ class _XrayLibWrap(Mapping):
         """
         if self.info_type == 'cs':
             return self._func(self._element,
-                              self._map[key],
+                              self._map[key.lower()],
                               self.energy)
         else:
             return self._func(self._element,
-                              self._map[key])
+                              self._map[key.lower()])
 
     def __iter__(self):
         return iter(self._keys)
