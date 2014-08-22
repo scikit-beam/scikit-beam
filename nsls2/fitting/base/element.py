@@ -90,7 +90,7 @@ class Element(object):
     >>> print (e.f_yield['K']) # fluorescence yield for K shell
     >>> print (e.mass) #atomic mass
     >>> print (e.density) #density
-    >>> print find(10, 0.5) #emission lines within range(10 - 0.5, 10 + 0.5)
+    >>> print (e.find(10, 0.5)) #emission lines within range(10 - 0.5, 10 + 0.5)
     """
     def __init__(self, element, incident_energy):
         """
@@ -101,14 +101,11 @@ class Element(object):
         incident_energy : float
             incident x-ray energy, in KeV
         """
-        try:
-            # forcibly down-cast stringy inputs to lowercase
-            if isinstance(element, six.string_types):
-                element = element.lower()
-            elem_dict = OTHER_VAL[element]
-        except KeyError:
-            raise ValueError('Please define element by '
-                             'atomic number z or element name')
+
+        # forcibly down-cast stringy inputs to lowercase
+        if isinstance(element, six.string_types):
+            element = element.lower()
+        elem_dict = OTHER_VAL[element]
 
         self.name = elem_dict['sym']
         self.z = elem_dict['Z']
