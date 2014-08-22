@@ -38,120 +38,37 @@ import numpy as np
 from nsls2.fitting.base.element import Element
 
 
-
-class ElementFinder(object):
+def emission_line_search(incident_energy,
+                         line_e, delta_e, element_list=None):
     """
-    Find emission lines close to a given energy
-
-    Attributes
-    ----------
-    incident_e : float
-        incident energy in KeV
-
-    Methods
-    -------
-    find(self, energy, diff)
-        return the possible lines close
-        to a given energy value
-
-    Examples
-    --------
-    >>> ef = ElementFinder(10)
-    >>> out = ef.find(8, 0.5)
-    >>> print (out)
-    {'Eu': {'Lg4': 8.029999732971191}, 'Cu': {'Ka2': 8.027899742126465, 'Ka1': 8.047800064086914}}
-    """
-
-    def __init__(self, incident_e, **kwargs):
-        """
-        Parameters
-        ----------
-        incident_e : float
-            incident energy in KeV
-        kwargs : dict, option
-            define element name,
-            name1='Fe', name2='Cu'
-            if not defined, search all elements
-        """
-        self._incident_e = incident_e
-
-        if len(kwargs) == 0:
-            self._search = 'all'
-        else:
-            self._search = kwargs.values()
-
-    @property
-    def incident_e(self):
-        return self._incident_e
-
-    @incident_e.setter
-    def incident_e(self, val):
-        """
-        Parameters
-        ----------
-        val : float
-            new incident energy value in KeV
-        """
-        self._incident_e = float(val)
-
-
-    def find(self, energy, diff):
-        """
-        Parameters
-        ----------
-        energy : float
-            energy value to search for
-        diff : float
-            difference compared to energy
-
-        Returns
-        -------
-        result : dict
-            elements and possible lines
-        """
-
-        result = {}
-        if self._search == 'all':
-            for i in np.arange(100):
-                e = Element(i+1, self._incident_e)
-                if find_line(e, energy, diff) is None:
-                    continue
-                result.update(find_line(e, energy, diff))
-        else:
-            for item in self._search:
-                e = Element(item, self._incident_e)
-                if find_line(e, energy, diff) is None:
-                    continue
-                result.update(find_line(e, energy, diff))
-
-        return result
-
-
-
-def find_line(element, energy, diff):
-    """
-    Fine possible line from a given element
-
     Parameters
     ----------
-    element : class instance
-        instance of Element
-    energy : float
-        energy value to search for
-    diff : float
-        define search range (energy - diff, energy + diff)
+    incident_energy : float
+        incident x-ray energy in KeV
+    line_e : float
++        energy value to search for
++    delta_e : float
++        difference compared to energy
++    element_list : list
++        List of elements to search for. Element abbreviations can be
++        any mix of upper and lower case, e.g., Hg, hG, hg, HG
 
     Returns
     -------
-    dict or None
-        elements with associated lines
+    out_dict : dict
+        element and associate emission lines
+
     """
-    mydict = {k : v for k, v in six.iteritems(element.emission_line) if abs(v - energy) < diff}
-    if len(mydict) == 0:
-        return
+    if element_list is None:
+        search_list = [Element(j + 1, incident_energy) for j in range(100)]
     else:
-        newdict = {k : v for k, v in six.iteritems(mydict) if element.cs[k] > 0}
-        if len(newdict) == 0:
-            return
-        else:
-            return {element.name: newdict}
+        search_list = [Element(item, incident_energy) for item in element_list]
+
+    cand_lines = [e.line_near(line_e, delta_e) for e in search_list]
+
+    out_dict = dict()
+    for e, lines in zip(search_list, cand_lines):
+        if lines:
+            out_dict[e.name] = lines
+
+    return out_dict
