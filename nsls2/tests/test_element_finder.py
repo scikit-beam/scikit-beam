@@ -43,14 +43,13 @@ import six
 
 from numpy.testing import assert_array_equal
 
-from nsls2.fitting.base.element_finder import ElementFinder
+from nsls2.fitting.base.element_finder import emission_line_search
 
 
 def test_element_finder():
 
     true_name = ['Eu', 'Cu']
-    ef = ElementFinder(10)
-    out = ef.find(8, 0.05)
+    out = emission_line_search(10, 8, 0.05)
 
     assert_array_equal(true_name, out.keys())
 
