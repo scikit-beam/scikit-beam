@@ -33,7 +33,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from __future__ import (absolute_import, division)
 from collections import Mapping
+import numpy as np
 import six
+
 
 from nsls2.fitting.base.element_data import (XRAYLIB_MAP, OTHER_VAL)
 
@@ -74,6 +76,11 @@ class Element(object):
         fluorescence yield
         shell is string type and defined as "K", "L1".
 
+    Methods
+    -------
+    find(energy, delta_e)
+        find possible emission lines close to a energy
+
     Examples
     --------
     >>> e = Element('Zn', 10) # or e = Element(30, 10)
@@ -83,14 +90,15 @@ class Element(object):
     >>> print (e.f_yield['K']) # fluorescence yield for K shell
     >>> print (e.mass) #atomic mass
     >>> print (e.density) #density
+    >>> print find(10, 0.5) #emission lines within range(10 - 0.5, 10 + 0.5)
     """
-    def __init__(self, element, energy):
+    def __init__(self, element, incident_energy):
         """
         Parameters
         ----------
         element : int or str
             element name or element atomic Z
-        energy : float
+        incident_energy : float
             incident x-ray energy, in KeV
         """
         try:
@@ -108,10 +116,10 @@ class Element(object):
         self.density = elem_dict['rho']
         self._element = self.z
 
-        self._energy = float(energy)
+        self._incident_energy = float(incident_energy)
 
         self.emission_line = _XrayLibWrap('lines', self._element)
-        self.cs = _XrayLibWrap('cs', self._element, energy)
+        self.cs = _XrayLibWrap('cs', self._element, incident_energy)
         self.bind_energy = _XrayLibWrap('binding_e', self._element)
         self.jump_factor = _XrayLibWrap('jump', self._element)
         self.f_yield = _XrayLibWrap('yield', self._element)
@@ -121,11 +129,11 @@ class Element(object):
         return self._element
 
     @property
-    def energy(self):
-        return self._energy
+    def incident_energy(self):
+        return self._incident_energy
 
-    @energy.setter
-    def energy(self, val):
+    @incident_energy.setter
+    def incident_energy(self, val):
         """
         Parameters
         ----------
@@ -134,11 +142,36 @@ class Element(object):
         """
         if not isinstance(val, float and int):
             raise TypeError('Expected a number for energy')
-        self._energy = val
-        self.cs.energy = val
+        self._incident_energy = val
+        self.cs.incident_energy = val
 
     def __repr__(self):
         return 'Element name %s with atomic Z %s' % (self.name, self.z)
+
+    def line_near(self, energy, delta_e):
+        """
+        Fine possible lines from the element
+
+        Parameters
+        ----------
+        energy : float
+            energy value to search for
+        delta_e : float
+            define search range (energy - delta_e, energy + delta_e)
+
+        Returns
+        -------
+        out_dict : dict
+            all possible emission lines
+        """
+        out_dict = dict()
+        for k, v in six.iteritems(self.emission_line):
+            if self.cs[k] == 0:
+                continue
+            if np.abs(v - energy) < delta_e:
+                out_dict[k] = v
+        return out_dict
+
 
 
 class _XrayLibWrap(Mapping):
@@ -152,30 +185,30 @@ class _XrayLibWrap(Mapping):
         option to choose which physics quantity to calculate
     element : int
         atomic number
-    energy : float, optional
+    incident_energy : float, optional
         incident energy for fluorescence in KeV
     """
     def __init__(self, info_type,
-                 element, energy=None):
+                 element, incident_energy=None):
         self.info_type = info_type
         self._map, self._func = XRAYLIB_MAP[info_type]
         self._keys = sorted(list(six.iterkeys(self._map)))
         self._element = element
-        self._energy = energy
+        self._incident_energy = incident_energy
 
     @property
-    def energy(self):
-        return self._energy
+    def incident_energy(self):
+        return self._incident_energy
 
-    @energy.setter
-    def energy(self, val):
+    @incident_energy.setter
+    def incident_energy(self, val):
         """
         Parameters
         ----------
         val : float
             new energy value
         """
-        self._energy = val
+        self._incident_energy = val
 
     def __getitem__(self, key):
         """
@@ -189,7 +222,7 @@ class _XrayLibWrap(Mapping):
         if self.info_type == 'cs':
             return self._func(self._element,
                               self._map[key.lower()],
-                              self.energy)
+                              self._incident_energy)
         else:
             return self._func(self._element,
                               self._map[key.lower()])
