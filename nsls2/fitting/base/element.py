@@ -72,7 +72,7 @@ class Element(object):
     jump_factor[shell] : float
         jump factor
         shell is string type and defined as "K", "L1".
-    f_yield[shell] : float
+    fluor_yield[shell] : float
         fluorescence yield
         shell is string type and defined as "K", "L1".
 
@@ -87,7 +87,7 @@ class Element(object):
     >>> print (e.emission_line['Ka1']) # energy for emission line Ka1
     >>> print (e.cs['Ka1']) # cross section for emission line Ka1
     >>> print (e.cs.items()) # output all the cross section
-    >>> print (e.f_yield['K']) # fluorescence yield for K shell
+    >>> print (e.fluor_yield['K']) # fluorescence yield for K shell
     >>> print (e.mass) #atomic mass
     >>> print (e.density) #density
     >>> print (e.find(10, 0.5)) #emission lines within range(10 - 0.5, 10 + 0.5)
@@ -107,23 +107,50 @@ class Element(object):
             element = element.lower()
         elem_dict = OTHER_VAL[element]
 
-        self.name = elem_dict['sym']
-        self.z = elem_dict['Z']
-        self.mass = elem_dict['mass']
-        self.density = elem_dict['rho']
-        self._element = self.z
+        self._name = elem_dict['sym']
+        self._z = elem_dict['Z']
+        self._mass = elem_dict['mass']
+        self._density = elem_dict['rho']
 
         self._incident_energy = float(incident_energy)
 
-        self.emission_line = _XrayLibWrap('lines', self._element)
-        self.cs = _XrayLibWrap('cs', self._element, incident_energy)
-        self.bind_energy = _XrayLibWrap('binding_e', self._element)
-        self.jump_factor = _XrayLibWrap('jump', self._element)
-        self.f_yield = _XrayLibWrap('yield', self._element)
+        self._emission_line = _XrayLibWrap('lines', self._z)
+        self._cs = _XrayLibWrap('cs', self.z, incident_energy)
+        self._bind_energy = _XrayLibWrap('binding_e', self._z)
+        self._jump_factor = _XrayLibWrap('jump', self._z)
+        self._fluor_yield = _XrayLibWrap('yield', self._z)
 
     @property
-    def element(self):
-        return self._element
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, val):
+        raise ValueError('Not allowed to rename element')
+
+    @property
+    def z(self):
+        return self._z
+
+    @z.setter
+    def z(self, val):
+        raise ValueError('Not allowed to change atomic number Z')
+
+    @property
+    def mass(self):
+        return self._mass
+
+    @mass.setter
+    def mass(self, val):
+        raise ValueError('Not allowed to change element mass')
+
+    @property
+    def density(self):
+        return self._density
+
+    @density.setter
+    def density(self, val):
+        raise ValueError('Not allowed to change element density')
 
     @property
     def incident_energy(self):
@@ -141,6 +168,46 @@ class Element(object):
             raise TypeError('Expected a number for energy')
         self._incident_energy = val
         self.cs.incident_energy = val
+
+    @property
+    def emission_line(self):
+        return self._emission_line
+
+    @emission_line.setter
+    def emission_line(self, val):
+        raise ValueError('Not allowed to change element emission lines')
+
+    @property
+    def cs(self):
+        return self._cs
+
+    @cs.setter
+    def cs(self, val):
+        raise ValueError('Not allowed to change fluorescence cross section')
+
+    @property
+    def bind_energy(self):
+        return self._bind_energy
+
+    @bind_energy.setter
+    def bind_energy(self, val):
+        raise ValueError('Not allowed to change element binding energy')
+
+    @property
+    def jump_factor(self):
+        return self._jump_factor
+
+    @jump_factor.setter
+    def jump_factor(self, val):
+        raise ValueError('Not allowed to change element jump factor')
+
+    @property
+    def fluor_yield(self):
+        return self._fluor_yield
+
+    @fluor_yield.setter
+    def fluor_yield(self, val):
+        raise ValueError('Not allowed to change element fluorescence yield')
 
     def __repr__(self):
         return 'Element name %s with atomic Z %s' % (self.name, self.z)
