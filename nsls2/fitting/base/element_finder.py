@@ -55,7 +55,7 @@ def emission_line_search(incident_energy,
 
     Returns
     -------
-    out_dict : dict
+    dict
         element and associate emission lines
 
     """

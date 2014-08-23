@@ -189,7 +189,7 @@ class Element(object):
 
         Returns
         -------
-        out_dict : dict
+        dict
             all possible emission lines
         """
         out_dict = dict()
