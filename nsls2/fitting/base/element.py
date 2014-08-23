@@ -124,33 +124,17 @@ class Element(object):
     def name(self):
         return self._name
 
-    @name.setter
-    def name(self, val):
-        raise ValueError('Not allowed to rename element')
-
     @property
     def z(self):
         return self._z
-
-    @z.setter
-    def z(self, val):
-        raise ValueError('Not allowed to change atomic number Z')
 
     @property
     def mass(self):
         return self._mass
 
-    @mass.setter
-    def mass(self, val):
-        raise ValueError('Not allowed to change element mass')
-
     @property
     def density(self):
         return self._density
-
-    @density.setter
-    def density(self, val):
-        raise ValueError('Not allowed to change element density')
 
     @property
     def incident_energy(self):
@@ -173,41 +157,21 @@ class Element(object):
     def emission_line(self):
         return self._emission_line
 
-    @emission_line.setter
-    def emission_line(self, val):
-        raise ValueError('Not allowed to change element emission lines')
-
     @property
     def cs(self):
         return self._cs
-
-    @cs.setter
-    def cs(self, val):
-        raise ValueError('Not allowed to change fluorescence cross section')
 
     @property
     def bind_energy(self):
         return self._bind_energy
 
-    @bind_energy.setter
-    def bind_energy(self, val):
-        raise ValueError('Not allowed to change element binding energy')
-
     @property
     def jump_factor(self):
         return self._jump_factor
 
-    @jump_factor.setter
-    def jump_factor(self, val):
-        raise ValueError('Not allowed to change element jump factor')
-
     @property
     def fluor_yield(self):
         return self._fluor_yield
-
-    @fluor_yield.setter
-    def fluor_yield(self, val):
-        raise ValueError('Not allowed to change element fluorescence yield')
 
     def __repr__(self):
         return 'Element name %s with atomic Z %s' % (self.name, self.z)
