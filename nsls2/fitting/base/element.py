@@ -61,8 +61,9 @@ class Element(object):
         energy of emission line
         line is string type and defined as 'Ka1', 'Kb1'.
         unit in KeV
-    cs[line] : float
+    cs(energy)[line] : float
         scattering cross section
+        energy is incident energy
         line is string type and defined as 'Ka1', 'Kb1'.
         unit in cm2/g
     bind_energy[shell] : float
@@ -83,23 +84,21 @@ class Element(object):
 
     Examples
     --------
-    >>> e = Element('Zn', 10) # or e = Element(30, 10)
+    >>> e = Element('Zn') # or e = Element(30), 30 is atomic number
     >>> print (e.emission_line['Ka1']) # energy for emission line Ka1
-    >>> print (e.cs['Ka1']) # cross section for emission line Ka1
+    >>> print (e.cs(10)['Ka1']) # cross section for emission line Ka1, 10 is incident energy
     >>> print (e.cs.items()) # output all the cross section
     >>> print (e.fluor_yield['K']) # fluorescence yield for K shell
     >>> print (e.mass) #atomic mass
     >>> print (e.density) #density
     >>> print (e.find(10, 0.5)) #emission lines within range(10 - 0.5, 10 + 0.5)
     """
-    def __init__(self, element, incident_energy):
+    def __init__(self, element):
         """
         Parameters
         ----------
         element : int or str
             element name or element atomic Z
-        incident_energy : float
-            incident x-ray energy, in KeV
         """
 
         # forcibly down-cast stringy inputs to lowercase
@@ -112,10 +111,7 @@ class Element(object):
         self._mass = elem_dict['mass']
         self._density = elem_dict['rho']
 
-        self._incident_energy = float(incident_energy)
-
         self._emission_line = _XrayLibWrap('lines', self._z)
-        self._cs = _XrayLibWrap('cs', self.z, incident_energy)
         self._bind_energy = _XrayLibWrap('binding_e', self._z)
         self._jump_factor = _XrayLibWrap('jump', self._z)
         self._fluor_yield = _XrayLibWrap('yield', self._z)
@@ -137,29 +133,20 @@ class Element(object):
         return self._density
 
     @property
-    def incident_energy(self):
-        return self._incident_energy
-
-    @incident_energy.setter
-    def incident_energy(self, val):
-        """
-        Parameters
-        ----------
-        val : float
-            new energy value in KeV
-        """
-        if not isinstance(val, float and int):
-            raise TypeError('Expected a number for energy')
-        self._incident_energy = val
-        self.cs.incident_energy = val
-
-    @property
     def emission_line(self):
         return self._emission_line
 
     @property
     def cs(self):
-        return self._cs
+        """
+        Returns
+        -------
+        function:
+            function with incident energy as argument
+        """
+        def myfunc(incident_energy):
+            return _XrayLibWrap('cs', self.z, incident_energy)
+        return myfunc
 
     @property
     def bind_energy(self):
