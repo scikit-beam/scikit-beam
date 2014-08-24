@@ -55,8 +55,6 @@ class Element(object):
         atomic mass in g/mol
     density : float
         element density in g/cm3
-    energy : float
-        incident energy in KeV
     emission_line[line] : float
         energy of emission line
         line is string type and defined as 'Ka1', 'Kb1'.
