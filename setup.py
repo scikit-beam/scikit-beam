@@ -7,7 +7,7 @@ import numpy as np
 
 setup(
     name='NSLS2',
-    version='0.0.2',
+    version='0.0.x',
     author='Brookhaven National Lab',
     packages=["nsls2",
               "nsls2.testing",
