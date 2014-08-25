@@ -38,6 +38,7 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 import nsls2.recip as recip
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 def recip_ex():
     detector_size = (256, 256)
