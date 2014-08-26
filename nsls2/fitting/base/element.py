@@ -56,7 +56,7 @@ class Element(object):
     ----------
     name : str
         element name, such as Fe, Cu
-    z : int
+    Z : int
         atomic number
     mass : float
         atomic mass in g/mol
@@ -126,7 +126,7 @@ class Element(object):
         return self._name
 
     @property
-    def z(self):
+    def Z(self):
         return self._z
 
     @property
@@ -150,7 +150,7 @@ class Element(object):
             function with incident energy as argument
         """
         def myfunc(incident_energy):
-            return _XrayLibWrap('cs', self.z, incident_energy)
+            return _XrayLibWrap('cs', self._z, incident_energy)
         return myfunc
 
     @property
@@ -166,7 +166,7 @@ class Element(object):
         return self._fluor_yield
 
     def __repr__(self):
-        return 'Element name %s with atomic Z %s' % (self.name, self.z)
+        return 'Element name %s with atomic Z %s' % (self.name, self._z)
 
     def line_near(self, energy, delta_e,
                   incident_energy):
