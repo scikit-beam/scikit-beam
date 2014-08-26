@@ -63,23 +63,29 @@ class Element(object):
     density : float
         element density in g/cm3
     emission_line[line] : float
-        energy of emission line
+        emission line can be used as a unique characteristic
+        for qualitative identification of the element.
         line is string type and defined as 'Ka1', 'Kb1'.
         unit in KeV
     cs(energy)[line] : float
-        scattering cross section
+        fluorescence cross section
         energy is incident energy
         line is string type and defined as 'Ka1', 'Kb1'.
         unit in cm2/g
     bind_energy[shell] : float
-        binding energy
+        binding energy is a measure of the energy required
+        to free electrons from their atomic orbits.
         shell is string type and defined as "K", "L1".
         unit in KeV
     jump_factor[shell] : float
-        jump factor
+        absorption jump factor is defined as the fraction
+        of the total absorption that is associated with
+        a given shell rather than for any other shell.
         shell is string type and defined as "K", "L1".
     fluor_yield[shell] : float
-        fluorescence yield
+        the fluorescence quantum yield gives the efficiency
+        of the fluorescence process, and is defined as the ratio of the
+        number of photons emitted to the number of photons absorbed.
         shell is string type and defined as "K", "L1".
 
     Methods
