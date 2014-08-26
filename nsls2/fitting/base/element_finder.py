@@ -65,9 +65,9 @@ def emission_line_search(line_e, delta_e,
 
     """
     if element_list is None:
-        search_list = [Element(j + 1) for j in range(100)]
-    else:
-        search_list = [Element(item) for item in element_list]
+        element_list = range(1, 101)
+
+    search_list = [Element(item) for item in element_list]
 
     cand_lines = [e.line_near(line_e, delta_e, incident_energy) for e in search_list]
 
