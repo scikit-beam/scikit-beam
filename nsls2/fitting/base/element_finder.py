@@ -43,20 +43,20 @@ import numpy as np
 from nsls2.fitting.base.element import Element
 
 
-def emission_line_search(incident_energy,
-                         line_e, delta_e, element_list=None):
+def emission_line_search(line_e, delta_e,
+                         incident_energy, element_list=None):
     """
     Parameters
     ----------
-    incident_energy : float
-        incident x-ray energy in KeV
     line_e : float
-+        energy value to search for
-+    delta_e : float
-+        difference compared to energy
-+    element_list : list
-+        List of elements to search for. Element abbreviations can be
-+        any mix of upper and lower case, e.g., Hg, hG, hg, HG
+         energy value to search for in KeV
+     delta_e : float
+         difference compared to energy in KeV
+     incident_energy : float
+        incident x-ray energy in KeV
+     element_list : list
+         List of elements to search for. Element abbreviations can be
+         any mix of upper and lower case, e.g., Hg, hG, hg, HG
 
     Returns
     -------
@@ -65,11 +65,11 @@ def emission_line_search(incident_energy,
 
     """
     if element_list is None:
-        search_list = [Element(j + 1, incident_energy) for j in range(100)]
+        search_list = [Element(j + 1) for j in range(100)]
     else:
-        search_list = [Element(item, incident_energy) for item in element_list]
+        search_list = [Element(item) for item in element_list]
 
-    cand_lines = [e.line_near(line_e, delta_e) for e in search_list]
+    cand_lines = [e.line_near(line_e, delta_e, incident_energy) for e in search_list]
 
     out_dict = dict()
     for e, lines in zip(search_list, cand_lines):

@@ -55,13 +55,13 @@ def test_element_data():
 
     name_list = []
     for i in range(100):
-        e = Element(i+1, 10.0)
-        data1.append(e.cs['Ka1'])
+        e = Element(i+1)
+        data1.append(e.cs(10)['Ka1'])
         name_list.append(e.name)
 
     for item in name_list:
-        e = Element(item, 10.0)
-        data2.append(e.cs['Ka1'])
+        e = Element(item)
+        data2.append(e.cs(10)['Ka1'])
 
     assert_array_equal(data1, data2)
 

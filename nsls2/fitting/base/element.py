@@ -168,7 +168,8 @@ class Element(object):
     def __repr__(self):
         return 'Element name %s with atomic Z %s' % (self.name, self.z)
 
-    def line_near(self, energy, delta_e):
+    def line_near(self, energy, delta_e,
+                  incident_energy):
         """
         Fine possible lines from the element
 
@@ -178,6 +179,8 @@ class Element(object):
             energy value to search for
         delta_e : float
             define search range (energy - delta_e, energy + delta_e)
+        incident_energy : float
+            incident energy of x-ray in KeV
 
         Returns
         -------
@@ -186,7 +189,7 @@ class Element(object):
         """
         out_dict = dict()
         for k, v in six.iteritems(self.emission_line):
-            if self.cs[k] == 0:
+            if self.cs(incident_energy)[k] == 0:
                 continue
             if np.abs(v - energy) < delta_e:
                 out_dict[k] = v
