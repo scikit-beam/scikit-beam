@@ -47,10 +47,8 @@ from nsls2.fitting.base.element_finder import emission_line_search
 
 def test_element_finder():
 
-    true_name = ['Eu', 'Cu']
+    true_name = sorted(['Eu', 'Cu'])
     out = emission_line_search(8, 0.05, 10)
-
-    assert_array_equal(true_name, out.keys())
-
+    found_name = sorted(list(six.iterkeys(out)))
+    assert_array_equal(true_name, found_name)
     return
-
