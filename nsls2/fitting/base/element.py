@@ -202,7 +202,6 @@ class Element(object):
         return out_dict
 
 
-
 class XrayLibWrap(Mapping):
     """
     This is an interface to wrap xraylib to perform calculation related
@@ -217,12 +216,36 @@ class XrayLibWrap(Mapping):
     incident_energy : float, optional
         incident energy for fluorescence in KeV
     """
-    def __init__(self, info_type,
-                 element, incident_energy=None):
+    def __init__(self, info_type, element):
         self.info_type = info_type
         self._map, self._func = XRAYLIB_MAP[info_type]
         self._keys = sorted(list(six.iterkeys(self._map)))
         self._element = element
+
+    def __getitem__(self, key):
+        """
+        call xraylib function to calculate physics quantity
+
+        Parameters
+        ----------
+        key : str
+            defines which physics quantity to calculate
+        """
+
+        return self._func(self._element,
+                          self._map[key.lower()])
+
+    def __iter__(self):
+        return iter(self._keys)
+
+    def __len__(self):
+        return len(self._keys)
+
+
+class XrayLibWrap_Energy(XrayLibWrap):
+
+    def __init__(self, element, incident_energy, info_type='cs'):
+        super(XrayLibWrap_Energy, self).__init__(info_type, element)
         self._incident_energy = incident_energy
 
     @property
@@ -248,16 +271,6 @@ class XrayLibWrap(Mapping):
         key : str
             defines which physics quantity to calculate
         """
-        if self.info_type == 'cs':
-            return self._func(self._element,
-                              self._map[key.lower()],
-                              self._incident_energy)
-        else:
-            return self._func(self._element,
-                              self._map[key.lower()])
-
-    def __iter__(self):
-        return iter(self._keys)
-
-    def __len__(self):
-        return len(self._keys)
+        return self._func(self._element,
+                          self._map[key.lower()],
+                          self._incident_energy)
