@@ -103,6 +103,11 @@ class Element(object):
     >>> print (e.mass) #atomic mass
     >>> print (e.density) #density
     >>> print (e.find(10, 0.5)) #emission lines within range(10 - 0.5, 10 + 0.5)
+
+    #########################   useful command   ###########################
+    >>> print (e.emission_line.items()) # list all the emission lines
+    >>> print (e.emission_line.keys()) # list all the names of the line
+
     """
     def __init__(self, element):
         """
@@ -122,10 +127,10 @@ class Element(object):
         self._mass = elem_dict['mass']
         self._density = elem_dict['rho']
 
-        self._emission_line = _XrayLibWrap('lines', self._z)
-        self._bind_energy = _XrayLibWrap('binding_e', self._z)
-        self._jump_factor = _XrayLibWrap('jump', self._z)
-        self._fluor_yield = _XrayLibWrap('yield', self._z)
+        self._emission_line = XrayLibWrap('lines', self._z)
+        self._bind_energy = XrayLibWrap('binding_e', self._z)
+        self._jump_factor = XrayLibWrap('jump', self._z)
+        self._fluor_yield = XrayLibWrap('yield', self._z)
 
     @property
     def name(self):
@@ -156,7 +161,7 @@ class Element(object):
             function with incident energy as argument
         """
         def myfunc(incident_energy):
-            return _XrayLibWrap('cs', self._z, incident_energy)
+            return XrayLibWrap_Energy(self._z, incident_energy)
         return myfunc
 
     @property
@@ -210,7 +215,13 @@ class XrayLibWrap(Mapping):
     Attributes
     ----------
     info_type : str
-        option to choose which physics quantity to calculate
+        option to choose which physics quantity to calculate as follows
+
+        lines : emission lines
+        bind_e : binding energy
+        jump : absorption jump factor
+        yield : fluorescence yield
+
     element : int
         atomic number
     incident_energy : float, optional
@@ -243,9 +254,20 @@ class XrayLibWrap(Mapping):
 
 
 class XrayLibWrap_Energy(XrayLibWrap):
+    """
+    This is an interface to wrap xraylib to perform calculation on
+    fluorescence cross section.
 
-    def __init__(self, element, incident_energy, info_type='cs'):
-        super(XrayLibWrap_Energy, self).__init__(info_type, element)
+    Attributes
+    ----------
+
+    element : int
+        atomic number
+    incident_energy : float, optional
+        incident energy for fluorescence in KeV
+    """
+    def __init__(self, element, incident_energy):
+        super(XrayLibWrap_Energy, self).__init__('cs', element)
         self._incident_energy = incident_energy
 
     @property
