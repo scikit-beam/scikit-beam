@@ -179,6 +179,21 @@ class Element(object):
     def __repr__(self):
         return 'Element name %s with atomic Z %s' % (self.name, self._z)
 
+    def __eq__(self, other):
+        return self.Z == other.Z
+
+    def __lt__(self, other):
+        return self.Z < other.Z
+
+    def __le__(self, other):
+        return self.Z <= other.Z
+
+    def __gt__(self, other):
+        return self.Z > other.Z
+
+    def __ge__(self, other):
+        return self.Z >= other.Z
+
     def line_near(self, energy, delta_e,
                   incident_energy):
         """
