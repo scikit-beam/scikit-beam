@@ -203,7 +203,7 @@ class Element(object):
 
 
 
-class _XrayLibWrap(Mapping):
+class XrayLibWrap(Mapping):
     """
     This is an interface to wrap xraylib to perform calculation related
     to xray fluorescence.
