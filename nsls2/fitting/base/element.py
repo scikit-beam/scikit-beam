@@ -260,7 +260,6 @@ class XrayLibWrap_Energy(XrayLibWrap):
 
     Attributes
     ----------
-
     element : int
         atomic number
     incident_energy : float, optional
