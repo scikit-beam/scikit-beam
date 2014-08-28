@@ -58,9 +58,9 @@ use :
 4 with high boundary
 5 no fitting boundary
 
-option0, option1, ..., option4
-different strategies to turn on or turn off some parameters
-empirical experience from author of original code
+option0, option1, ..., option4:
+Those are different strategies to turn on or turn off some parameters.
+They are empirical experience from authors of the original code.
 """
 
 para_dict = {'coherent_sct_amplitude ': {'use': 5.0, 'min': 7.0, 'max': 8.0, 'value': 6.0, 'option4': 5.0, 'option2': 5.0, 'option3': 5.0, 'option0': 5.0, 'option1': 5.0},
