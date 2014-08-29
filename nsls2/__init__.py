@@ -40,4 +40,7 @@ import six
 import logging
 logger = logging.getLogger(__name__)
 
+from logging import NullHandler
+logger.addHandler(NullHandler())
+
 __version__ = '0.0.x'
