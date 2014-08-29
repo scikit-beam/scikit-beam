@@ -96,17 +96,16 @@ class Element(object):
     Examples
     --------
     >>> e = Element('Zn') # or e = Element(30), 30 is atomic number
-    >>> print (e.emission_line['Ka1']) # energy for emission line Ka1
-    >>> print (e.cs(10)['Ka1']) # cross section for emission line Ka1, 10 is incident energy
-    >>> print (e.cs.items()) # output all the cross section
-    >>> print (e.fluor_yield['K']) # fluorescence yield for K shell
-    >>> print (e.mass) #atomic mass
-    >>> print (e.density) #density
-    >>> print (e.find(10, 0.5)) #emission lines within range(10 - 0.5, 10 + 0.5)
+    >>> e.emission_line['Ka1'] # energy for emission line Ka1
+    >>> e.cs(10)['Ka1'] # cross section for emission line Ka1, 10 is incident energy
+    >>> e.fluor_yield['K'] # fluorescence yield for K shell
+    >>> e.mass #atomic mass
+    >>> e.density #density
+    >>> e.find(10, 0.5) #emission lines within range(10 - 0.5, 10 + 0.5)
 
     #########################   useful command   ###########################
-    >>> print (e.emission_line.items()) # list all the emission lines
-    >>> print (e.emission_line.keys()) # list all the names of the line
+    >>> e.emission_line.all() # list all the emission lines
+    >>> e.cs(10).all() # list all the emission lines
 
     """
     def __init__(self, element):
@@ -229,12 +228,19 @@ class XrayLibWrap(Mapping):
         bind_e : binding energy
         jump : absorption jump factor
         yield : fluorescence yield
+    all : list
+        list the physics quantity for
+        all the lines or all the shells
     """
     def __init__(self, element, info_type):
         self._element = element
         self.info_type = info_type
         self._map, self._func = XRAYLIB_MAP[info_type]
         self._keys = sorted(list(six.iterkeys(self._map)))
+
+    @property
+    def all(self):
+        return list(self.items())
 
     def __getitem__(self, key):
         """
