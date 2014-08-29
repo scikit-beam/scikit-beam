@@ -44,3 +44,56 @@ from __future__ import (absolute_import, division, print_function,
 import six
 import logging
 logger = logging.getLogger(__name__)
+import numpy as np
+
+
+def find_ring_center_acorr_1D(input_image):
+    """
+    Find the pixel-resolution center of a set of concentric rings.
+
+    This function uses correlation between the image and it's mirror
+    to find the approximate center of  a single set of concentric rings.
+    It is assumed that there is only one set of rings in the image.  For
+    this method to work well the image must have significant mirror-symmetry
+    in both dimensions.
+
+    Parameters
+    ----------
+    input_image : ndarray
+        A single image.
+
+    Returns
+    -------
+    tuple
+        Returns the index (row, col) of the pixel that rings
+        are centered on.
+    """
+    return [_corr_ax1(_im) for _im in (input_image, input_image.T)]
+
+
+def _corr_ax1(input_image):
+    """
+    Internal helper function that finds the best estimate for the
+    location of the vertical mirror plane.  For each row the maximum
+    of the correlating with it's mirror is found.  The most common value
+    is reported back as the location of the mirror plane.
+
+    Parameters
+    ----------
+    input_image : ndarray
+        The input image
+
+    Returns
+    -------
+    int
+        The pixel which contains the estimated mirror plane.
+    """
+    dim = input_image.shape[0]
+    m_ones = np.ones(dim)
+    norm_mask = np.correlate(m_ones, m_ones, mode='full')
+    # not sure that the /2 is the correct correction
+    est_by_row = [np.argmax(np.correlate(v, v[::-1],
+                                         mode='full')/norm_mask) / 2
+             for v in input_image]
+    vals, bins = np.histogram(est_by_row, bins=np.arange(0, dim + 1))
+    return bins[np.argmax(vals)]
