@@ -421,7 +421,7 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     val : 1D array
         sum of values in each bin, length nx
 
-    count : ID
+    count : 1D array
         The number of counts in each bin, length nx
     """
 
@@ -681,3 +681,23 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
         logger.debug("There are %.2e values zero in the grid ", empt_nb)
 
     return grid_mean, grid_occu, grid_error, n_out_of_bounds
+
+
+def bin_edges_to_centers(input_edges):
+    """
+    Helper function for turning a array of bin edges into
+    an array of bin centers
+
+    Parameters
+    ----------
+    input_edges : array-like
+        N + 1 values which are the left edges of N bins
+        and the right edge of the last bin
+
+    Returns
+    -------
+    ndarray
+        A length N array giving the centers of the bins
+    """
+    input_edges = np.asarray(input_edges)
+    return input_edges[:-1] + np.diff(input_edges) / 2
