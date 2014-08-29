@@ -88,7 +88,7 @@ def _corr_ax1(input_image):
     int
         The pixel which contains the estimated mirror plane.
     """
-    dim = input_image.shape[0]
+    dim = input_image.shape[1]
     m_ones = np.ones(dim)
     norm_mask = np.correlate(m_ones, m_ones, mode='full')
     # not sure that the /2 is the correct correction
