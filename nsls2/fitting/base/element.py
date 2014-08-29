@@ -37,16 +37,16 @@
 ########################################################################
 
 
-
 from __future__ import (absolute_import, division)
 from collections import Mapping
 import numpy as np
 import six
-
+import functools
 
 from nsls2.fitting.base.element_data import (XRAYLIB_MAP, OTHER_VAL)
 
 
+@functools.total_ordering
 class Element(object):
     """
     Object to return all the elemental information
@@ -184,15 +184,6 @@ class Element(object):
 
     def __lt__(self, other):
         return self.Z < other.Z
-
-    def __le__(self, other):
-        return self.Z <= other.Z
-
-    def __gt__(self, other):
-        return self.Z > other.Z
-
-    def __ge__(self, other):
-        return self.Z >= other.Z
 
     def line_near(self, energy, delta_e,
                   incident_energy):
