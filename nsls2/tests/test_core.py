@@ -45,6 +45,9 @@ from nose.tools import assert_equal, assert_true, raises
 
 import nsls2.core as core
 
+from nsls2.testing.decorators import known_fail_if
+import numpy.testing as npt
+
 
 def test_bin_1D():
     # set up simple data
@@ -161,7 +164,45 @@ def test_bin_edges():
                    {'range_min': 1.234,
                    'range_max': 5.678,
                    'nbins': 0},  # nbins == 0
-                   ]
+                ]
 
     for param_dict in fail_dicts:
         yield _bin_edges_exceptions, param_dict
+
+
+@known_fail_if(six.PY3)
+def test_process_grid():
+    size = 10
+    q_max = np.array([1.0, 1.0, 1.0])
+    q_min = np.array([-1.0, -1.0, -1.0])
+    dqn = np.array([size, size, size])
+    # slice tricks
+    # this make a list of slices, the imaginary value in the
+    # step is interpreted as meaning 'this many values'
+    slc = [slice(_min + (_max - _min)/(s * 2),
+                 _max - (_max - _min)/(s * 2),
+                 1j * s)
+           for _min, _max, s in zip(q_min, q_max, dqn)]
+    # use the numpy slice magic to make X, Y, Z these are dense meshes with
+    # points in the center of each bin
+    X, Y, Z = np.mgrid[slc]
+
+    # make and ravel the image data (which is all ones)
+    I = np.ones_like(X).ravel()
+
+    # make input data (Nx3
+    data = np.array([np.ravel(X),
+                     np.ravel(Y),
+                     np.ravel(Z)]).T
+
+    (grid_data, grid_occu,
+         grid_std, grid_out) = core.process_grid(data, I,
+                                                  q_min, q_max,
+                                                  dqn=dqn)
+
+    # check the values are as expected
+    npt.assert_array_equal(grid_data.ravel(), I)
+    npt.assert_equal(grid_out, 0)
+    npt.assert_array_equal(grid_occu, np.ones_like(grid_occu))
+    npt.assert_array_equal(grid_std, 0)
+

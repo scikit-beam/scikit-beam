@@ -47,6 +47,13 @@ import numpy as np
 import logging
 logger = logging.getLogger(__name__)
 import time
+try:
+    import src.ctrans as ctrans
+except ImportError:
+    try:
+        import ctrans
+    except ImportError:
+        ctrans = None
 
 
 def project_to_sphere(img, dist_sample, calibrated_center, pixel_size,
