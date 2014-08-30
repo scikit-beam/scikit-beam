@@ -102,10 +102,9 @@ class Element(object):
     >>> e.mass #atomic mass
     >>> e.density #density
     >>> e.find(10, 0.5) #emission lines within range(10 - 0.5, 10 + 0.5)
-
     #########################   useful command   ###########################
-    >>> e.emission_line.all() # list all the emission lines
-    >>> e.cs(10).all() # list all the emission lines
+    >>> e.emission_line.all # list all the emission lines
+    >>> e.cs(10).all # list all the emission lines
 
     """
     def __init__(self, element):
