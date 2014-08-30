@@ -40,6 +40,7 @@ This module is for the 'core' data types.
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import time
 import six
 from six.moves import zip
 from six import string_types
@@ -48,6 +49,15 @@ import numpy as np
 
 import logging
 logger = logging.getLogger(__name__)
+
+try:
+    import src.ctrans as ctrans
+except ImportError:
+    try:
+        import ctrans
+    except ImportError:
+        ctrans = None
+
 
 md_value = namedtuple("md_value", ['value', 'units'])
 
@@ -380,7 +390,7 @@ def detector2D_to_1D(img, detector_center, **kwargs):
 
     # Caswell's incredible terse rewrite
     X, Y = np.meshgrid(np.arange(img.shape[0]) - detector_center[0],
-                        np.arange(img.shape[1]) - detector_center[1])
+                       np.arange(img.shape[1]) - detector_center[1])
 
     # return the x, y and z coordinates (as a tuple? or is this a list?)
     return X.ravel(), Y.ravel(), img.ravel()
@@ -575,3 +585,99 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
     # in this case we got range_max, nbins, step
     if range_min is None:
         return range_max - np.arange(nbins + 1)[::-1] * step
+
+
+def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
+    """
+    This function will process the set of HKL
+    values and the image stack and grid the image data
+
+    Parameters
+    ---------
+    tot_set : ndarray
+        (Qx, Qy, Qz) - HKL values - Nx3 array
+
+    istack : ndarray
+        intensity array of the images - Nx1 array
+
+    q_min : ndarray, optional
+        minimum values of the voxel [Qx, Qy, Qz]_min
+
+    q_max : ndarray, optional
+        maximum values of the voxel [Qx, Qy, Qz]_max
+
+    dqn : ndarray, optional
+        No. of grid parts (bins) [Nqx, Nqy, Nqz]
+
+    Returns
+    -------
+    grid_mean : ndarray
+        intensity grid.  The values in this grid are the
+        mean of the values that fill with in the grid.
+
+    grid_error : ndarray
+        This is the standard error of the value in the
+        grid box.
+
+    grid_occu : ndarray
+        The number of data points that fell in the grid.
+
+    n_out_of_bounds : int
+        No. of data points that were outside of the gridded region.
+
+    Raises
+    ------
+    ValueError
+        Possible causes:
+            Raised when the HKL values are not provided
+    """
+
+    tot_set = np.atleast_2d(tot_set)
+    tot_set.shape
+    if tot_set.ndim != 2:
+        raise ValueError(
+            "The tot_set.nidm must be 2, not {}".format(tot_set.ndim))
+    if tot_set.shape[1] != 3:
+        raise ValueError(
+            "The shape of tot_set must be Nx3 not "
+            "{}X{}".format(*tot_set.shape))
+
+    # prepare min, max,... from defaults if not set
+    if q_min is None:
+        q_min = np.min(tot_set, axis=0)
+    if q_max is None:
+        q_max = np.max(tot_set, axis=0)
+    if dqn is None:
+        dqn = [100, 100, 100]
+
+    # creating (Qx, Qy, Qz, I) Nx4 array - HKL values and Intensity
+    # getting the intensity value for each pixel
+    tot_set = np.insert(tot_set, 3, np.ravel(i_stack), axis=1)
+
+    #            3D grid of the data set
+    #             *** Gridding Data ****
+
+    # starting time for gridding
+    t1 = time.time()
+
+    # ctrans - c routines for fast data analysis
+
+    (grid_mean, grid_occu,
+     grid_error, n_out_of_bounds) = ctrans.grid3d(tot_set, q_min,
+                                                  q_max, dqn, norm=1)
+
+    # ending time for the gridding
+    t2 = time.time()
+    logger.info("Done processed in %f seconds", (t2-t1))
+
+    # No. of values zero in the grid
+    empt_nb = (grid_occu == 0).sum()
+
+    if n_out_of_bounds:
+        logger.debug("There are %.2e points outside the grid ",
+                     n_out_of_bounds)
+    logger.debug("There are %2e bins in the grid ", grid_mean.size)
+    if empt_nb:
+        logger.debug("There are %.2e values zero in the grid ", empt_nb)
+
+    return grid_mean, grid_occu, grid_error, n_out_of_bounds
