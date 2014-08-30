@@ -21,6 +21,7 @@ install:
   - git clone -b xraylib --single-branch --depth=1 https://github.com/tacaswell/conda-recipes.git ../conda-recipes
   - conda build ../conda-recipes/xraylib
   - conda install xraylib --use-local --yes
+  - conda install scikit-image --yes
   - python setup.py install
 
 
