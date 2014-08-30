@@ -22,6 +22,7 @@ install:
   - conda build ../conda-recipes/xraylib
   - conda install xraylib --use-local --yes
   - python setup.py install
+  - conda install scikit-image
 
 
 script:
