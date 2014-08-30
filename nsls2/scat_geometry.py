@@ -138,7 +138,8 @@ def q_pattern(detector_size, pixel_size,  dist_sample,
         # surface plane,the x-axis is the direction along the surface
         # parallel to the beam and the y-axis perpendicular to it.
 
-        in_angle_i = (incident_angle)/180.0*np.pi  # incident angle αi
+         # incident angle αi
+        in_angle_i = (incident_angle)/180.0*np.pi
 
         x_origin = (calibrated_center[0] + ref_beam[0])/2
         y_origin = (calibrated_center[1] + ref_beam[1])/2
@@ -152,7 +153,8 @@ def q_pattern(detector_size, pixel_size,  dist_sample,
         y_mm = y_pix * pixel_size[1]
 
         if (rod_geometry == 'horizontel'):
-            in_angle_f = np.arctan(x_mm/dist_sample)  # angle αf
+            # angle αf
+            in_angle_f = np.arctan(x_mm/dist_sample)
 
             two_theta = np.arctan(y_mm/dist_sample)
             # x component
