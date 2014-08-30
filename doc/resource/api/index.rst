@@ -13,3 +13,4 @@ Contents:
    rcparams
    spectroscopy
    io/index
+   fitting/index

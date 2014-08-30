@@ -240,7 +240,7 @@ class XrayLibWrap(Mapping):
 
     @property
     def all(self):
-        return list(self.items())
+        return list(six.iteritems(self))
 
     def __getitem__(self, key):
         """
