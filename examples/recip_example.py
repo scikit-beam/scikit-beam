@@ -39,21 +39,7 @@ import numpy as np
 import nsls2.recip as recip
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-
-spec_folder_path = "/Volumes/Data/BeamLines/Demos/X1Data/"
-numpy_path = spec_folder_path + "LSCO_Oct13_numpy/"
-broker_path = spec_folder_path + "LSCO_Oct13_broker/"
-
-motors = np.load(broker_path+"motors.npy")
-ub = np.load(broker_path+"ub.npy")
-wavelength = np.load(broker_path+"wavelength.npy")
-temp = np.load(broker_path+"temp.npy")
-i_stack = np.load(broker_path+"i_stack.npy")
-
-scan_nos = [397,450]
-
-def reading_data():
-    pass
+from collections import OrderedDict
 
 
 def recip_ex():
@@ -61,18 +47,25 @@ def recip_ex():
     pixel_size = (0.0135*8, 0.0135*8) # (mm)
     calibrated_center = (256/2.0, 256/2.0) # (mm)
     dist_sample = 355.0 # (mm)
-    
-    
-    """wavelength = 13.27171266  # (Angstrom )
 
-    # UB matrix (orientation matrix)
-    ub_mat = np.array([[-1.397723053000000104e-01, -1.655595646000000087e+00, -1.405017159000000043e-02],
-                       [-1.656324383999999927e+00, 1.398531698999999906e-01, -1.846509650999999868e-04],
-                       [4.799233901999999836e-03, 4.913187235000000125e-02, -4.729227238000000000e-01]])
+    spec_folder_path = "/Volumes/Data/BeamLines/Demos/X1Data/"
+    numpy_path = spec_folder_path + "LSCO_Oct13_numpy/"
+    broker_path = spec_folder_path + "LSCO_Oct13_broker/"
 
-    # six angles of the diffractometer in following order
-    # delta, theta, chi, phi, mu, gamma (in degrees)
-    setting_angles = np.loadtxt("setAngles.dat", unpack = True).T"""
+    motors = np.load(broker_path+"motors.npy")
+    ub = np.load(broker_path+"ub.npy")
+    wavelength = np.load(broker_path+"wavelength.npy")
+    temp = np.load(broker_path+"temp.npy")
+    i_stack = np.load(broker_path+"i_stack.npy")
+
+    scan_nos = [[56]]
+    scan_nos = OrderedDict()
+    scan_nos['E=933eV T=015K H=[-0.270,-0.200] K=[+0.002,-0.002] L=[+1.370,+1.410]'] = [[56]] # scan 56
+    for idx, tit in enumerate(scan_nos.keys()[0:2]):
+        H_range = [float(tit[18:24]) - 0.006, float(tit[25:31]) + 0.006]
+        K_range = [float(tit[36:42]) - 0.015, float(tit[43:49]) + 0.015]
+        L_range = [float(tit[54:60]) - 0.020, float(tit[61:67]) + 0.020]
+
     for i in range(len(scan_nos)):
         ub_mat = ub[i]
         setting_angles = motors[i]
