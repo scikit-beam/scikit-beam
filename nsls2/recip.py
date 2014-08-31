@@ -429,12 +429,14 @@ def q_pattern(detector_size, pixel_size,  dist_sample,
     k = 2*np.pi / wavelength
 
     if (geometry == 'saxs') | (geometry == 'waxs'):
-        # A monochromatic beam of incident wave vector falls
-        # on the sample. The scattered intensity is collected
-        # as a function of the scattering angle 2θ.
-        # waxs is the same technique as saxs  only the distance
-        # from sample to the detector is shorter and thus
-        # diffraction maxima at larger angles are observed.
+        """
+        A monochromatic beam of incident wave vector falls
+        on the sample. The scattered intensity is collected
+        as a function of the scattering angle 2θ.
+        waxs is the same technique as saxs  only the distance
+        from sample to the detector is shorter and thus
+        diffraction maxima at larger angles are observed.
+        """
 
         x_pix = np.reshape(np.arange(detector_size[0]) -
                            calibrated_center[0], (1, -1))
@@ -452,12 +454,14 @@ def q_pattern(detector_size, pixel_size,  dist_sample,
         q_values = 2 * k * np.sin(two_theta/2)
 
     elif (geometry == 'gisaxs'):
-        # A monochromatic x-ray beam with the wave vector ki is directed
-        # on a surface with a very small incident angle αi with respect
-        # to the surface. The x-rays are scattered along kf in the
-        # direction (2θ, αf). The Cartesian z-axis is the normal to the
-        # surface plane,the x-axis is the direction along the surface
-        # parallel to the beam and the y-axis perpendicular to it.
+        """
+        A monochromatic x-ray beam with the wave vector ki is directed
+        on a surface with a very small incident angle αi with respect
+        to the surface. The x-rays are scattered along kf in the
+        direction (2θ, αf). The Cartesian z-axis is the normal to the
+        surface plane,the x-axis is the direction along the surface
+        parallel to the beam and the y-axis perpendicular to it.
+        """
 
          # incident angle αi
         in_angle_i = (incident_angle)/180.0*np.pi
