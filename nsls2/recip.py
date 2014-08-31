@@ -431,7 +431,7 @@ def q_pattern(detector_size, pixel_size,  dist_sample,
     if (geometry == 'saxs') | (geometry == 'waxs'):
         # A monochromatic beam of incident wave vector falls
         # on the sample. The scattered intensity is collected
-        # as a function of the scattering angle (2theta)
+        # as a function of the scattering angle 2θ.
         # waxs is the same technique as saxs  only the distance
         # from sample to the detector is shorter and thus
         # diffraction maxima at larger angles are observed.
