@@ -502,4 +502,3 @@ def q_pattern(detector_size, pixel_size,  dist_sample,
         raise Exception(" ---- Specify the scattering geometry --- ")
 
     return q_values
-
