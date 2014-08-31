@@ -432,7 +432,7 @@ def q_pattern(detector_size, pixel_size,  dist_sample,
         """
         A monochromatic beam of incident wave vector falls
         on the sample. The scattered intensity is collected
-        as a function of the scattering angle 2θ.
+        as a function of the scattering angle (2theta).
         waxs is the same technique as saxs  only the distance
         from sample to the detector is shorter and thus
         diffraction maxima at larger angles are observed.
@@ -456,14 +456,14 @@ def q_pattern(detector_size, pixel_size,  dist_sample,
     elif (geometry == 'gisaxs'):
         """
         A monochromatic x-ray beam with the wave vector ki is directed
-        on a surface with a very small incident angle αi with respect
+        on a surface with a very small incident angle alpha(i) with respect
         to the surface. The x-rays are scattered along kf in the
-        direction (2θ, αf). The Cartesian z-axis is the normal to the
+        direction (2theta, alpha(f)). The Cartesian z-axis is the normal to the
         surface plane,the x-axis is the direction along the surface
         parallel to the beam and the y-axis perpendicular to it.
         """
 
-         # incident angle αi
+         # incident angle alpha(i)
         in_angle_i = (incident_angle)/180.0*np.pi
 
         x_origin = (calibrated_center[0] + ref_beam[0])/2
@@ -478,7 +478,7 @@ def q_pattern(detector_size, pixel_size,  dist_sample,
         y_mm = y_pix * pixel_size[1]
 
         if (rod_geometry == 'horizontel'):
-            # angle αf
+            # angle alpha(f)
             in_angle_f = np.arctan(x_mm/dist_sample)
 
             two_theta = np.arctan(y_mm/dist_sample)
@@ -486,6 +486,7 @@ def q_pattern(detector_size, pixel_size,  dist_sample,
             q_x = k*(-np.cos(in_angle_f) * np.cos(two_theta) +
                      np.cos(in_angle_i))
         else:
+            # angle alpha(f)
             in_angle_f = np.arctan(y_mm/dist_sample)
 
             two_theta = np.arctan(x_mm/dist_sample)
