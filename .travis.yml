@@ -26,7 +26,7 @@ install:
 
 
 script:
-  - coverage run --source=nsls2 setup.py test
+  - nosetests --with-coverage --cover-package=nsls2
 
 after_success:
   coveralls
