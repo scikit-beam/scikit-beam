@@ -21,8 +21,12 @@ install:
   - git clone -b xraylib --single-branch --depth=1 https://github.com/tacaswell/conda-recipes.git ../conda-recipes
   - conda build ../conda-recipes/xraylib
   - conda install xraylib --use-local --yes
+  - pip install coveralls
   - python setup.py install
 
 
 script:
-  - python run_tests.py
+  - coverage run --source=nsls2 serup.py test
+
+after_success:
+  coveralls
