@@ -93,6 +93,11 @@ class Element(object):
     find(energy, delta_e)
         find possible emission lines close to a energy
 
+    Parameters
+    ----------
+    element : int or str
+        element name or element atomic Z
+
     Examples
     --------
     >>> e = Element('Zn') # or e = Element(30), 30 is atomic number
@@ -105,15 +110,8 @@ class Element(object):
     #########################   useful command   ###########################
     >>> e.emission_line.all # list all the emission lines
     >>> e.cs(10).all # list all the emission lines
-
     """
     def __init__(self, element):
-        """
-        Parameters
-        ----------
-        element : int or str
-            element name or element atomic Z
-        """
 
         # forcibly down-cast stringy inputs to lowercase
         if isinstance(element, six.string_types):
@@ -219,6 +217,12 @@ class XrayLibWrap(Mapping):
 
     Attributes
     ----------
+    all : list
+        list the physics quantity for
+        all the lines or all the shells
+
+    Parameters
+    ----------
     element : int
         atomic number
     info_type : str
@@ -227,9 +231,6 @@ class XrayLibWrap(Mapping):
         bind_e : binding energy
         jump : absorption jump factor
         yield : fluorescence yield
-    all : list
-        list the physics quantity for
-        all the lines or all the shells
     """
     def __init__(self, element, info_type):
         self._element = element
@@ -269,6 +270,11 @@ class XrayLibWrap_Energy(XrayLibWrap):
     related quantity.
 
     Attributes
+    ----------
+    incident_energy : float
+        incident energy for fluorescence in KeV
+
+    Parameters
     ----------
     element : int
         atomic number
