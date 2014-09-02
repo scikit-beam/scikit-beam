@@ -13,7 +13,6 @@ setup(
               "nsls2.testing",
               "nsls2.fitting",
               "nsls2.fitting.model",
-              "nsls2.fitting.base",
               "nsls2.io",
               ],
     include_dirs=[np.get_include()],
