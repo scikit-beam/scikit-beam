@@ -404,11 +404,6 @@ def convert_to_q_saxs(detector_size, pixel_size, dist_sample,
     q_values : ndarray
         NxN array of Q(reciprocal) space values
 
-    Raises
-    ------
-    Exception
-        Possible causes:
-            Raised when the scattering geometry is not specified
     """
 
     # angular_wave_number
@@ -441,7 +436,7 @@ def convert_to_q_waxs(detector_size, pixel_size,  dist_sample,
     A monochromatic beam of incident wave vector falls
     on the sample. The scattered intensity is collected
     as a function of the scattering angle (2theta).
-    waxs is the same technique as saxs  only the distance
+    waxs is the same technique as saxs only the distance
     from sample to the detector is shorter and thus
     diffraction maxima at larger angles are observed.
 
@@ -470,11 +465,6 @@ def convert_to_q_waxs(detector_size, pixel_size,  dist_sample,
     q_values : ndarray
         NxN array of Q(reciprocal) space values
 
-    Raises
-    ------
-    Exception
-        Possible causes:
-            Raised when the scattering geometry is not specified
     """
 
     # angular_wave_number
@@ -548,11 +538,6 @@ def convert_to_q_giaxs(detector_size, pixel_size,  dist_sample,
     q_values : ndarray
         NxN array of Q(reciprocal) space values
 
-    Raises
-    ------
-    Exception
-        Possible causes:
-            Raised when the scattering geometry is not specified
     """
 
     # angular_wave_number

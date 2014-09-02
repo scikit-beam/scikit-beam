@@ -117,3 +117,12 @@ def test_process_grid_std():
     npt.assert_array_equal(grid_std,
                            (np.ones_like(grid_occu) *
                             np.std(np.arange(1, 6))/np.sqrt(5 - 1)))
+
+
+def test_convert_to_q_saxs():
+
+
+def test_convert_to_q_waxs():
+
+
+def test_convert_to_q_gisaxs():
