@@ -90,8 +90,9 @@ class Element(object):
 
     Methods
     -------
-    find(energy, delta_e)
-        find possible emission lines close to a energy
+    line_near(energy, delta_e, incident_energy)
+        find possible emission lines close to a energy at given
+        incident_energy
 
     Parameters
     ----------
@@ -102,14 +103,62 @@ class Element(object):
     --------
     >>> e = Element('Zn') # or e = Element(30), 30 is atomic number
     >>> e.emission_line['Ka1'] # energy for emission line Ka1
+    8.638900756835938
     >>> e.cs(10)['Ka1'] # cross section for emission line Ka1, 10 is incident energy
+    54.756561279296875
     >>> e.fluor_yield['K'] # fluorescence yield for K shell
+    0.46936899423599243
     >>> e.mass #atomic mass
+    65.37
     >>> e.density #density
-    >>> e.find(10, 0.5) #emission lines within range(10 - 0.5, 10 + 0.5)
+    7.14
+    >>> e.find(10, 0.5, 12) #emission lines within range(10 - 0.5, 10 + 0.5) at incident 12 KeV
+    {'kb1': 9.571999549865723}
     #########################   useful command   ###########################
     >>> e.emission_line.all # list all the emission lines
+    [('ka1', 8.638900756835938),
+     ('ka2', 8.615799903869629),
+     ('kb1', 9.571999549865723),
+     ('kb2', 0.0),
+     ('la1', 1.0116000175476074),
+     ('la2', 1.0116000175476074),
+     ('lb1', 1.0346999168395996),
+     ('lb2', 0.0),
+     ('lb3', 1.1069999933242798),
+     ('lb4', 1.1069999933242798),
+     ('lb5', 0.0),
+     ('lg1', 0.0),
+     ('lg2', 0.0),
+     ('lg3', 0.0),
+     ('lg4', 0.0),
+     ('ll', 0.8837999701499939),
+     ('ln', 0.9069000482559204),
+     ('ma1', 0.0),
+     ('ma2', 0.0),
+     ('mb', 0.0),
+     ('mg', 0.0)]
     >>> e.cs(10).all # list all the emission lines
+    [('ka1', 54.756561279296875),
+     ('ka2', 28.13692855834961),
+     ('kb1', 7.509212970733643),
+     ('kb2', 0.0),
+     ('la1', 0.13898827135562897),
+     ('la2', 0.01567710004746914),
+     ('lb1', 0.0791187509894371),
+     ('lb2', 0.0),
+     ('lb3', 0.004138986114412546),
+     ('lb4', 0.002259803470224142),
+     ('lb5', 0.0),
+     ('lg1', 0.0),
+     ('lg2', 0.0),
+     ('lg3', 0.0),
+     ('lg4', 0.0),
+     ('ll', 0.008727769367396832),
+     ('ln', 0.00407258840277791),
+     ('ma1', 0.0),
+     ('ma2', 0.0),
+     ('mb', 0.0),
+     ('mg', 0.0)]
     """
     def __init__(self, element):
 
