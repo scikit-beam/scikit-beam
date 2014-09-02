@@ -68,7 +68,7 @@ def find_ring_center_acorr_1D(input_image):
         Returns the index (row, col) of the pixel that rings
         are centered on.
     """
-    return [_corr_ax1(_im) for _im in (input_image, input_image.T)]
+    return tuple(_corr_ax1(_im) for _im in (input_image, input_image.T))
 
 
 def _corr_ax1(input_image):
