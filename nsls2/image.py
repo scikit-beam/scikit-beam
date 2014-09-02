@@ -68,7 +68,8 @@ def find_ring_center_acorr_1D(input_image):
         Returns the index (row, col) of the pixel that rings
         are centered on.
     """
-    return tuple(_corr_ax1(_im) for _im in (input_image, input_image.T))
+    return tuple(bins[np.argmax(vals)] for vals, bins in
+                  (_corr_ax1(_im) for _im in (input_image, input_image.T)))
 
 
 def _corr_ax1(input_image):
@@ -85,8 +86,11 @@ def _corr_ax1(input_image):
 
     Returns
     -------
-    int
-        The pixel which contains the estimated mirror plane.
+    vals : ndarray
+        histogram of what pixel has the highest correlation
+
+    bins : ndarray
+        Bin edges for the vals histogram
     """
     dim = input_image.shape[1]
     m_ones = np.ones(dim)
@@ -95,5 +99,4 @@ def _corr_ax1(input_image):
     est_by_row = [np.argmax(np.correlate(v, v[::-1],
                                          mode='full')/norm_mask) / 2
              for v in input_image]
-    vals, bins = np.histogram(est_by_row, bins=np.arange(0, dim + 1))
-    return bins[np.argmax(vals)]
+    return np.histogram(est_by_row, bins=np.arange(0, dim + 1))
