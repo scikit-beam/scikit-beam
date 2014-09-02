@@ -700,4 +700,4 @@ def bin_edges_to_centers(input_edges):
         A length N array giving the centers of the bins
     """
     input_edges = np.asarray(input_edges)
-    return input_edges[:-1] + np.diff(input_edges) / 2
+    return (input_edges[:-1] + input_edges[1:]) * 0.5
