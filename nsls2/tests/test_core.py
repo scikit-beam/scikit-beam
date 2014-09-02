@@ -206,3 +206,9 @@ def test_process_grid():
     npt.assert_array_equal(grid_occu, np.ones_like(grid_occu))
     npt.assert_array_equal(grid_std, 0)
 
+
+def test_bin_edge2center():
+    test_edges = np.arange(11)
+    centers = core.bin_edges_to_centers(test_edges)
+    assert_array_almost_equal(.5, centers % 1)
+    assert_equal(10, len(centers))
