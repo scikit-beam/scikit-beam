@@ -101,9 +101,10 @@ def recip_ex():
 
 
 def plottdep(ip, plane='HK'):
+    # plot the HK plane
     grid = ip[0]
 
-    x, y, i_slice, lx, x_ran, y_ran, x_tit, y_tit = get_xyz(grid, plane)
+    x, y, i_slice, lx, x_ran, y_ran = get_xyz(grid, plane)
 
     i_slice_range = [0.006, 0.0115]
 
@@ -121,13 +122,10 @@ def plottdep(ip, plane='HK'):
     subp.set_xlim(x_ran)
     subp.set_ylim(y_ran)
 
-    subp.set_xlabel(x_tit, size=10)
-    subp.set_ylabel(y_tit, size=10)
+    subp.set_xlabel("H", size=10)
+    subp.set_ylabel("K", size=10)
 
     subp.tick_params(labelsize=9)
-
-    subp.xaxis.set_major_locator(MaxNLocator(4))
-    subp.yaxis.set_major_locator(MaxNLocator(3))
 
     cbar = plt.colorbar(cnt, ticks=np.linspace(i_slice_range[0],
                                                  i_slice_range[1],
@@ -152,19 +150,16 @@ def get_xyz(grid, plane):
     x_ran = eval(plane[0] + '_range')  # x range
     y_ran = eval(plane[1] + '_range')  # y range
 
-    x_tit = plane[0:1]
-    y_tit = plane[1:2]
-
     x = eval(plane[0] + plane[0])
     y = eval(plane[1] + plane[1])
     lx = eval(plane[0])
 
-    return x, y, i_slice, lx, x_ran, y_ran, x_tit, y_tit
+    return x, y, i_slice, lx, x_ran, y_ran
 
 
 if __name__ == "__main__":
     #  Data folder path
-    broker_path = "LSCO_Nov12_broker/"
+    broker_path = "/Volumes/Data/BeamLines/CSX_Data/Python Programs and Data/LSCO_Nov12_broker/"
 
     # scan numbers
     scan_nos = OrderedDict()
