@@ -590,10 +590,10 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
         return range_max - np.arange(nbins + 1)[::-1] * step
 
 
-def process_grid(q, img_stack,
-                 nx=None, ny=None, nz=None,
-                 xmin=None, xmax=None, ymin=None,
-                 ymax=None, zmin=None, zmax=None):
+def grid3d(q, img_stack,
+           nx=None, ny=None, nz=None,
+           xmin=None, xmax=None, ymin=None,
+           ymax=None, zmin=None, zmax=None):
     """Grid irregularly spaced data points onto a regular grid via histogramming
 
     This function will process the set of reciprocal space values (q), the

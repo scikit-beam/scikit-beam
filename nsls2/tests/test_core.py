@@ -171,7 +171,7 @@ def test_bin_edges():
 
 
 @known_fail_if(six.PY3)
-def test_process_grid():
+def test_grid3d():
     size = 10
     q_max = np.array([1.0, 1.0, 1.0])
     q_min = np.array([-1.0, -1.0, -1.0])
@@ -205,7 +205,7 @@ def test_process_grid():
                      np.ravel(Z)]).T
 
     (mean, occupancy,
-     std_err, oob, bounds) = core.process_grid(data, I, **param_dict)
+     std_err, oob, bounds) = core.grid3d(data, I, **param_dict)
 
     # check the values are as expected
     npt.assert_array_equal(mean.ravel(), I)
