@@ -37,6 +37,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import numpy as np
 import nsls2.recip as recip
+import nsls2.core as core
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from collections import OrderedDict
@@ -108,7 +109,7 @@ def recip_ex():
         # grid1 = grid_data.ravel()
         # grid2 = grid_occu.ravel()
         # grid3 = grid_std.ravel()
-        _mask = grid_occu <= 8
+        _mask = grid_occu <= 10
         grid_Std = ma.masked_array(grid_std,_mask)
         grid_Data = ma.masked_array(grid_data,_mask)
         grid_Occu = ma.masked_array(grid_occu,_mask)
