@@ -36,14 +36,11 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import numpy as np
-import nsls2.recip as recip
-import nsls2.core as core
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-from collections import OrderedDict
 import numpy.ma as ma
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
+import nsls2.recip as recip
+import nsls2.core as core
 
 
 def recip_ex():
@@ -53,54 +50,84 @@ def recip_ex():
     dist_sample = 355.0  # (mm)
 
     # six angles data
-    motors = np.load(broker_path+"motors.npy")
+    motors = np.array([[102.3546, 77.874608, -90., 0., 0., 1.0205],
+                       [102.6738, 78.285008, -90., 0., 0., 1.0575],
+                       [102.9969, 78.696608, -90., 0., 0., 1.0945],
+                       [103.3236, 79.108808, -90., 0., 0., 1.1315],
+                       [103.6545, 79.521908, -90., 0., 0., 1.1685],
+                       [103.9893, 79.935908, -90., 0., 0., 1.2055],
+                       [104.3283, 80.350808, -90., 0., 0., 1.243],
+                       [104.6712, 80.766608, -90., 0., 0., 1.28],
+                       [105.018, 81.183308, -90., 0., 0., 1.317],
+                       [105.369, 81.600908, -90., 0., 0., 1.354],
+                       [105.7242, 82.019408, -90., 0., 0., 1.391],
+                       [106.0836, 82.438808, -90., 0., 0., 1.428],
+                       [106.4472, 82.859108, -90., 0., 0., 1.465],
+                       [106.815, 83.280608, -90., 0., 0., 1.502],
+                       [107.187, 83.703308, -90., 0., 0., 1.539],
+                       [107.5632, 84.126608, -90., 0., 0., 1.576],
+                       [107.9442, 84.551108, -90.,  0., 0., 1.6135],
+                       [108.3291, 84.976808, -90.,  0., 0., 1.6505],
+                       [108.7188, 85.403709, -90.,  0., 0., 1.6875],
+                       [109.113, 85.831509, -90.,  0., 0., 1.7245],
+                       [109.5117, 86.260509, -90.,  0., 0., 1.7615],
+                       [109.9149, 86.690709, -90.,  0., 0., 1.7985],
+                       [110.3229, 87.122109, -90.,  0., 0., 1.8355],
+                       [110.7357, 87.554709, -90.,  0., 0., 1.8725],
+                       [111.153, 87.988809, -90.,  0., 0., 1.91],
+                       [111.5754, 88.424109, -90., 0., 0., 1.947],
+                       [112.0026, 88.860609, -90., 0., 0., 1.984],
+                       [112.4349, 89.298609, -90., 0., 0., 2.021],
+                       [112.8723, 89.737809, -90., 0., 0., 2.058],
+                       [113.3145, 90.178809, -90., 0., 0., 2.095],
+                       [113.7621, 90.621009, -90., 0., 0., 2.132],
+                       [114.2151, 91.065009, -90., 0., 0., 2.169],
+                       [114.6735, 91.510209, -90., 0., 0., 2.2065]])
+
     # ub matrix data
-    ub = np.load(broker_path+"ub.npy")
+    ub_mat = np. array([[-1.39772305e-01, -1.65559565e+00, -1.40501716e-02],
+                        [-1.65632438e+00, 1.39853170e-01, -1.84650965e-04],
+                        [4.79923390e-03, 4.91318724e-02, -4.72922724e-01]])
+
     # wavelength data
-    wavelength = np.load(broker_path+"wavelength.npy")
-    # temperature data
-    temp = np.load(broker_path+"temp.npy")
+    wavelength = np.array([13.28559417])
+
+    # Data folder path
+    broker_path = "LSCO_Nov12_broker/"
     # intensity of the image stack data
     i_stack = np.load(broker_path+"i_stack.npy")
 
-    for i in range(len(scan_nos)):
-        ub_mat = ub[i]
-        setting_angles = motors[i]
-        wave_length = wavelength[i]
-        I_stack = i_stack[i]
-        temperature = temp[i]
+    tot_set = recip.process_to_q(motors, detector_size,
+                                 pixel_size, calibrated_center,
+                                 dist_sample, wavelength, ub_mat)
 
-        tot_set = recip.process_to_q(setting_angles, detector_size,
-                                     pixel_size, calibrated_center,
-                                     dist_sample, wave_length, ub_mat)
+    # minimum and maximum values of the voxel
+    q_min = np.array([H_range[0], K_range[0], L_range[0]])
+    q_max = np.array([H_range[1], K_range[1], L_range[1]])
 
-        # minimum and maximum values of the voxel
-        q_min = np.array([H_range[0], K_range[0], L_range[0]])
-        q_max = np.array([H_range[1], K_range[1], L_range[1]])
+    # no. of bins
+    dqn = np.array([40, 40, 1])
 
-        # no. of bins
-        dqn = np.array([40, 40, 1])
+    (grid_data, grid_occu, grid_std,
+     grid_out) = recip.process_grid(tot_set, i_stack.ravel(), dqn=dqn)
 
-        (grid_data, grid_occu, grid_std,
-         grid_out) = core.process_grid(tot_set, I_stack.ravel(), dqn=dqn)
+    grid = np.mgrid[0:dqn[0], 0:dqn[1], 0:dqn[2]]
+    r = (q_max - q_min) / dqn
 
-        grid = np.mgrid[0:dqn[0], 0:dqn[1], 0:dqn[2]]
-        r = (q_max - q_min) / dqn
+    X = grid[0] * r[0] + q_min[0]
+    Y = grid[1] * r[1] + q_min[1]
+    Z = grid[2] * r[2] + q_min[2]
 
-        X = grid[0] * r[0] + q_min[0]
-        Y = grid[1] * r[1] + q_min[1]
-        Z = grid[2] * r[2] + q_min[2]
-
-        # creating a mask
-        _mask = grid_occu <= 10
-        grid_Std = ma.masked_array(grid_std, _mask)
-        grid_Data = ma.masked_array(grid_data, _mask)
-        grid_Occu = ma.masked_array(grid_occu, _mask)
+    # creating a mask
+    _mask = grid_occu <= 10
+    grid_Std = ma.masked_array(grid_std, _mask)
+    grid_Data = ma.masked_array(grid_data, _mask)
+    grid_Occu = ma.masked_array(grid_occu, _mask)
 
     return X, Y, Z, grid_Data, grid_Std, grid_Occu
 
 
-def plottdep(ip, plane='HK'):
+def plot_slice(ip, plane='HK'):
     # plot the HK plane
     grid = ip[0]
 
@@ -128,8 +155,8 @@ def plottdep(ip, plane='HK'):
     subp.tick_params(labelsize=9)
 
     cbar = plt.colorbar(cnt, ticks=np.linspace(i_slice_range[0],
-                                                 i_slice_range[1],
-                                                 3, endpoint=True),
+                                               i_slice_range[1],
+                                               3, endpoint=True),
                         format='%.4f')
     cbar.ax.tick_params(labelsize=8)
 
@@ -158,16 +185,6 @@ def get_xyz(grid, plane):
 
 
 if __name__ == "__main__":
-    #  Data folder path
-    broker_path = "/Volumes/Data/BeamLines/CSX_Data/Python Programs and Data/LSCO_Nov12_broker/"
-
-    # scan numbers
-    scan_nos = OrderedDict()
-    scan_nos["T = 015K"] = [[56]]
-    scanKeys = scan_nos.keys()[0:]
-    for idx, tit in enumerate(scanKeys):
-        scan_no = scan_nos[tit]
-
     H_range = [-0.270, -0.200]
     K_range = [+0.010, -0.010]
     L_range = [+1.370, +1.410]
@@ -175,5 +192,5 @@ if __name__ == "__main__":
     ip = []
     ip.append(recip_ex())
 
-    plottdep(ip, plane='HK')
+    plot_slice(ip, plane='HK')
     plt.show()
