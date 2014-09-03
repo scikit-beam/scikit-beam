@@ -37,7 +37,7 @@
 ########################################################################
 
 
-from __future__ import (absolute_import, division)
+from __future__ import (absolute_import, division, unicode_literals, print_function)
 import six
 from numpy.testing import assert_array_equal
 from nose.tools import assert_equal

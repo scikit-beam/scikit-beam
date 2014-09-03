@@ -36,7 +36,7 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 
-from __future__ import (absolute_import, division)
+from __future__ import (absolute_import, division, unicode_literals, print_function)
 import numpy as np
 import six
 from collections import Mapping
@@ -199,41 +199,39 @@ class Element(object):
 
     Attributes
     ----------
-    name
-    Z
-    mass
-    density
-    emission_line : float
+    name : str
+        element name, such as Fe, Cu
+    Z : int
+        atomic number
+    mass : float
+        atomic mass in g/mol
+    density : float
+        element density in g/cm3
+    emission_line : dict
         Emission line can be used as a unique characteristic
         for qualitative identification of the element.
         line is string type and defined as 'Ka1', 'Kb1'.
         unit in KeV
-    cs : float
+    cs : dict
         Fluorescence cross section
         energy is incident energy
         line is string type and defined as 'Ka1', 'Kb1'.
         unit in cm2/g
-    bind_energy : float
+    bind_energy : dict
         Binding energy is a measure of the energy required
         to free electrons from their atomic orbits.
         shell is string type and defined as "K", "L1".
         unit in KeV
-    jump_factor : float
+    jump_factor : dict
         Absorption jump factor is defined as the fraction
         of the total absorption that is associated with
         a given shell rather than for any other shell.
         shell is string type and defined as "K", "L1".
-    fluor_yield : float
+    fluor_yield : dict
         The fluorescence quantum yield gives the efficiency
         of the fluorescence process, and is defined as the ratio of the
         number of photons emitted to the number of photons absorbed.
         shell is string type and defined as "K", "L1".
-
-    Methods
-    -------
-    line_near(energy, delta_e, incident_energy)
-        Find possible emission lines close to a energy at given
-        incident_energy
 
     Parameters
     ----------
