@@ -1,3 +1,4 @@
+[![Coverage Status](https://img.shields.io/coveralls/NSLS-II/NSLS2.svg)](https://coveralls.io/r/NSLS-II/NSLS2)
 [![Build Status](https://travis-ci.org/NSLS-II/NSLS2.svg?branch=master)](https://travis-ci.org/NSLS-II/NSLS2)
 
 [![Issues not currently under active development](https://badge.waffle.io/NSLS-II/NSLS2.png?label=DEV:%20Inactive&title=Not%20Under%20Active%20Development)](https://waffle.io/NSLS-II/NSLS2)
