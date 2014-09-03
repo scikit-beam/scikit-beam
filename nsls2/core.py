@@ -587,100 +587,125 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
         return range_max - np.arange(nbins + 1)[::-1] * step
 
 
-def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
-    """
-    This function will process the set of HKL
-    values and the image stack and grid the image data
+def process_grid(q, img_stack,
+                 nx=None, ny=None, nz=None,
+                 xmin=None, xmax=None, ymin=None,
+                 ymax=None, zmin=None, zmax=None):
+    """Grid irregularly spaced data points onto a regular grid via histogramming
+
+    This function will process the set of reciprocal space values (q), the
+    image stack (img_stack) and grid the image data based on the bounds
+    provided, using defaults if none are provided.
 
     Parameters
-    ---------
-    tot_set : ndarray
+    ----------
+    q : ndarray
         (Qx, Qy, Qz) - HKL values - Nx3 array
-
-    istack : ndarray
-        intensity array of the images - Nx1 array
-
-    q_min : ndarray, optional
-        minimum values of the voxel [Qx, Qy, Qz]_min
-
-    q_max : ndarray, optional
-        maximum values of the voxel [Qx, Qy, Qz]_max
-
-    dqn : ndarray, optional
-        No. of grid parts (bins) [Nqx, Nqy, Nqz]
+    img_stack : ndarray
+        Intensity array of the images
+        dimensions are: [num_img][x_dim][y_dim]
+    nx : int, optional
+        Number of voxels along x
+    ny : int, optional
+        Number of voxels along y
+    nz : int, optional
+        Number of voxels along z
+    xmin : float, optional
+        Minimum value along x. Defaults to smallest x value in tot_set
+    ymin : float, optional
+        Minimum value along y. Defaults to smallest y value in tot_set
+    zmin : float, optional
+        Minimum value along z. Defaults to smallest z value in tot_set
+    xmax : float, optional
+        Maximum value along x. Defaults to largest x value in tot_set
+    ymax : float, optional
+        Maximum value along y. Defaults to largest y value in tot_set
+    zmax : float, optional
+        Maximum value along z. Defaults to largest z value in tot_set
 
     Returns
     -------
-    grid_mean : ndarray
+    mean : ndarray
         intensity grid.  The values in this grid are the
         mean of the values that fill with in the grid.
-
-    grid_error : ndarray
+    occupancy : ndarray
+        The number of data points that fell in the grid.
+    std_err : ndarray
         This is the standard error of the value in the
         grid box.
-
-    grid_occu : ndarray
-        The number of data points that fell in the grid.
-
-    n_out_of_bounds : int
+    oob : int
         No. of data points that were outside of the gridded region.
+    bounds : list
+        tuple of (min, max, step) for x, y, z in order: [x_bounds,
+        y_bounds, z_bounds]
 
-    Raises
-    ------
-    ValueError
-        Possible causes:
-            Raised when the HKL values are not provided
     """
 
-    tot_set = np.atleast_2d(tot_set)
-    tot_set.shape
-    if tot_set.ndim != 2:
-        raise ValueError(
-            "The tot_set.nidm must be 2, not {}".format(tot_set.ndim))
-    if tot_set.shape[1] != 3:
-        raise ValueError(
-            "The shape of tot_set must be Nx3 not "
-            "{}X{}".format(*tot_set.shape))
+    q = np.atleast_2d(q)
+    q.shape
+    if q.ndim != 2:
+        raise ValueError("q.ndim must be a 2-D array of shape Nx3 array. "
+                         "You provided an array with {0} dimensions."
+                         "".format(q.ndim))
+    if q.shape[1] != 3:
+        raise ValueError("The shape of q must be an Nx3 array, not {0}X{1}"
+                         " which you provided.".format(*q.shape))
 
-    # prepare min, max,... from defaults if not set
-    if q_min is None:
-        q_min = np.min(tot_set, axis=0)
-    if q_max is None:
-        q_max = np.max(tot_set, axis=0)
-    if dqn is None:
-        dqn = [100, 100, 100]
+    # set defaults for qmin, qmax, dq
+    qmin = np.min(q, axis=0)
+    qmax = np.max(q, axis=0)
+    dqn = [_defaults['nx'], _defaults['ny'], _defaults['nz']]
+
+    # check for non-default input
+    if nx is not None:
+        dqn[0] = nx
+    if ny is not None:
+        dqn[1] = ny
+    if nz is not None:
+        dqn[2] = nz
+    if xmin is not None:
+        qmin[0] = xmin
+    if ymin is not None:
+        qmin[1] = ymin
+    if zmin is not None:
+        qmin[2] = zmin
+    if xmax is not None:
+        qmax[0] = xmax
+    if ymax is not None:
+        qmax[1] = ymax
+    if zmax is not None:
+        qmax[2] = zmax
+
+    # format bounds
+    bounds = np.array([qmin, qmax, dqn]).T
 
     # creating (Qx, Qy, Qz, I) Nx4 array - HKL values and Intensity
     # getting the intensity value for each pixel
-    tot_set = np.insert(tot_set, 3, np.ravel(i_stack), axis=1)
+    q = np.insert(q, 3, np.ravel(img_stack), axis=1)
 
     #            3D grid of the data set
-    #             *** Gridding Data ****
-
     # starting time for gridding
     t1 = time.time()
 
-    # ctrans - c routines for fast data analysis
-
-    (grid_mean, grid_occu,
-     grid_error, n_out_of_bounds) = ctrans.grid3d(tot_set, q_min,
-                                                  q_max, dqn, norm=1)
+    # call the c library
+    mean, occupancy, std_err, oob = ctrans.grid3d(q, qmin, qmax, dqn, norm=1)
 
     # ending time for the gridding
     t2 = time.time()
-    logger.info("Done processed in %f seconds", (t2-t1))
+    logger.info("Done processed in {0} seconds".format(t2-t1))
 
     # No. of values zero in the grid
-    empt_nb = (grid_occu == 0).sum()
+    empt_nb = (occupancy == 0).sum()
 
-    if n_out_of_bounds:
-        logger.debug("There are %.2e points outside the grid ",
-                     n_out_of_bounds)
-    logger.debug("There are %2e bins in the grid ", grid_mean.size)
+    # log some information about the grid at the debug level
+    if oob:
+        logger.debug("There are %.2e points outside the grid {0}".format(oob))
+    logger.debug("There are %2e bins in the grid {0}".format(mean.size))
     if empt_nb:
-        logger.debug("There are %.2e values zero in the grid ", empt_nb)
+        logger.debug("There are %.2e values zero in the grid {0}"
+                     "".format(empt_nb))
 
-    return grid_mean, grid_occu, grid_error, n_out_of_bounds
+    return mean, occupancy, std_err, oob, bounds
 
 
 def bin_edges_to_centers(input_edges):
