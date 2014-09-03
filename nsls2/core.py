@@ -64,6 +64,9 @@ md_value = namedtuple("md_value", ['value', 'units'])
 
 _defaults = {
     "bins": 100,
+    'nx': 100,
+    'ny': 100,
+    'nz': 100
 }
 
 
