@@ -164,7 +164,7 @@ def get_xyz(grid, plane):
 
 if __name__ == "__main__":
     #  Data folder path
-    broker_path = "/Volumes/Data/All_NSLS2/NSLS2/examples/LSCO_Nov12_broker/"
+    broker_path = "LSCO_Nov12_broker/"
 
     # scan numbers
     scan_nos = OrderedDict()
