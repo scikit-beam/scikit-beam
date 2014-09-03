@@ -1,4 +1,4 @@
-# ######################################################################
+ # ######################################################################
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
@@ -496,6 +496,9 @@ def convert_to_q_giaxs(detector_size, pixel_size,  dist_sample,
     (grazing-incidence small angle x-ray scattering)
     scattering geometry
 
+    The original code from :
+    https://github.com/NSLS-II/pyXPCS
+
     A monochromatic x-ray beam with the wave vector ki is
     directed on a surface with a very small incident angle
     alpha(i) with respect to the surface. The x-rays are
@@ -574,13 +577,13 @@ def convert_to_q_giaxs(detector_size, pixel_size,  dist_sample,
         q_x = k*(-np.cos(in_angle_f) * np.cos(two_theta) +
                      np.cos(in_angle_i))
 
-        # y component
-        q_y = k*np.cos(in_angle_f) * np.sin(two_theta)
+    # y component
+    q_y = k*np.cos(in_angle_f) * np.sin(two_theta)
 
-        # z component
-        q_z = np.resize(k*np.sin(in_angle_f) + k*np.sin(in_angle_i),
-                        (detector_size[1], detector_size[0]))
+    # z component
+    q_z = np.resize(k*np.sin(in_angle_f) + k*np.sin(in_angle_i),
+                    (detector_size[1], detector_size[0]))
 
-        q_values = np.sqrt(q_x ** 2 + q_y ** 2 + q_z ** 2)
+    q_values = np.sqrt(q_x ** 2 + q_y ** 2 + q_z ** 2)
 
     return q_values

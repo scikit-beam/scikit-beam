@@ -120,9 +120,39 @@ def test_process_grid_std():
 
 
 def test_convert_to_q_saxs():
+   detector_size = (256, 256)
+   pixel_size = (0.0135*8, 0.0135*8)
+   calibrated_center = (256/2.0, 256/2.0)
+   dist_sample = 355.0
+
+   energy = 640  # (  in eV)
+   # HC_OVER_E to convert from Energy to wavelength (Lambda)
+   hc_over_e = 12398.4
+   wavelength = hc_over_e / energy  # (Angstrom )
 
 
 def test_convert_to_q_waxs():
+   detector_size = (256, 256)
+   pixel_size = (0.0135*8, 0.0135*8)
+   calibrated_center = (256/2.0, 256/2.0)
+   dist_sample = 355.0
 
+   energy = 640  # (  in eV)
+   # HC_OVER_E to convert from Energy to wavelength (Lambda)
+   hc_over_e = 12398.4
+   wavelength = hc_over_e / energy  # (Angstrom )
 
 def test_convert_to_q_gisaxs():
+   detector_size = (256, 256)
+   pixel_size = (0.0135*8, 0.0135*8)
+   calibrated_center = (256/2.0, 256/2.0)
+   dist_sample = 355.0
+   ref_beam = (143, 123)
+   incident_angle =
+   rod_geometry = None
+
+   energy = 640  # (  in eV)
+   # HC_OVER_E to convert from Energy to wavelength (Lambda)
+   hc_over_e = 12398.4
+   wavelength = hc_over_e / energy  # (Angstrom )
+
