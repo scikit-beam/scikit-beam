@@ -207,27 +207,27 @@ class Element(object):
         atomic mass in g/mol
     density : float
         element density in g/cm3
-    emission_line : dict
+    emission_line : `XrayLibWrap`
         Emission line can be used as a unique characteristic
         for qualitative identification of the element.
         line is string type and defined as 'Ka1', 'Kb1'.
-        unit in KeV
-    cs : dict
+        unit in KeV `XrayLibWrap`
+    cs : `XrayLibWrap`
         Fluorescence cross section
         energy is incident energy
         line is string type and defined as 'Ka1', 'Kb1'.
         unit in cm2/g
-    bind_energy : dict
+    bind_energy : `XrayLibWrap`
         Binding energy is a measure of the energy required
         to free electrons from their atomic orbits.
         shell is string type and defined as "K", "L1".
         unit in KeV
-    jump_factor : dict
+    jump_factor : `XrayLibWrap`
         Absorption jump factor is defined as the fraction
         of the total absorption that is associated with
         a given shell rather than for any other shell.
         shell is string type and defined as "K", "L1".
-    fluor_yield : dict
+    fluor_yield : `XrayLibWrap`
         The fluorescence quantum yield gives the efficiency
         of the fluorescence process, and is defined as the ratio of the
         number of photons emitted to the number of photons absorbed.
@@ -318,34 +318,26 @@ class Element(object):
 
     @property
     def name(self):
-        """element name, such as Fe, Cu"""
         return self._name
 
     @property
     def Z(self):
-        """atomic number"""
         return self._z
 
     @property
     def mass(self):
-        """atomic mass in g/mol"""
         return self._mass
 
     @property
     def density(self):
-        """element density in g/cm3"""
         return self._density
 
     @property
     def emission_line(self):
-        """
-        unique characteristic for qualitative identification of the element, defined as 'Ka1', 'Kb1'.
-        """
         return self._emission_line
 
     @property
     def cs(self):
-        """fluorescence cross section in cm2/g, defined as 'Ka1', 'Kb1'."""
         def myfunc(incident_energy):
             return XrayLibWrap_Energy(self._z, 'cs',
                                       incident_energy)
@@ -353,19 +345,14 @@ class Element(object):
 
     @property
     def bind_energy(self):
-        """measure of the energy required to free electrons from their atomic orbits, in KeV"""
         return self._bind_energy
 
     @property
     def jump_factor(self):
-        """
-        the fraction of the total absorption that is associated with a given shell rather than for any other shell.
-        """
         return self._jump_factor
 
     @property
     def fluor_yield(self):
-        """the ratio of the number of photons emitted to the number of photons absorbed."""
         return self._fluor_yield
 
     def __repr__(self):
@@ -487,7 +474,6 @@ class XrayLibWrap_Energy(XrayLibWrap):
 
     @property
     def incident_energy(self):
-        """incident energy for fluorescence in KeV"""
         return self._incident_energy
 
     @incident_energy.setter
