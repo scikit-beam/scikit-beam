@@ -82,7 +82,7 @@ def recip_ex():
         dqn = np.array([40, 40, 1])
 
         (grid_data, grid_occu, grid_std,
-         grid_out) = recip.process_grid(tot_set, I_stack.ravel(), dqn=dqn)
+         grid_out) = core.process_grid(tot_set, I_stack.ravel(), dqn=dqn)
 
         grid = np.mgrid[0:dqn[0], 0:dqn[1], 0:dqn[2]]
         r = (q_max - q_min) / dqn
