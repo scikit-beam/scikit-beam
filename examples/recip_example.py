@@ -33,21 +33,124 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 
+"""
+    This is an example of using real experimental data for the six angles
+    (motor position) and image stack to plot the HK plane. Here
+    nsls2.recip.py -> process_to_q function is used to convert to Q
+    (reciprocal space) and then that data is gridded using nsls2.core.py
+    -> process_grid function.
+"""
+
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import numpy as np
 import numpy.ma as ma
+import os
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import nsls2.recip as recip
 import nsls2.core as core
 
 
-def recip_ex():
+def recip_ex(detector_size, pixel_size, calibrated_center, dist_sample,
+             ub_mat, wavelength, motors, i_stack, H_range, K_range, L_range):
+    # convert to Q space
+    tot_set = recip.process_to_q(motors, detector_size,
+                                 pixel_size, calibrated_center,
+                                 dist_sample, wavelength, ub_mat)
+
+    # minimum and maximum values of the voxel
+    q_min = np.array([H_range[0], K_range[0], L_range[0]])
+    q_max = np.array([H_range[1], K_range[1], L_range[1]])
+
+    # no. of bins
+    dqn = np.array([40, 40, 1])
+
+    # process the grid values
+    (grid_data, grid_occu, grid_std,
+     grid_out) = core.process_grid(tot_set, i_stack.ravel(), dqn=dqn)
+
+    grid = np.mgrid[0:dqn[0], 0:dqn[1], 0:dqn[2]]
+    r = (q_max - q_min) / dqn
+
+    X = grid[0] * r[0] + q_min[0]
+    Y = grid[1] * r[1] + q_min[1]
+    Z = grid[2] * r[2] + q_min[2]
+
+    # creating a mask
+    _mask = grid_occu <= 10
+    grid_Data = ma.masked_array(grid_data, _mask)
+    grid_Std = ma.masked_array(grid_std, _mask)
+    grid_Occu = ma.masked_array(grid_occu, _mask)
+
+    return X, Y, Z, grid_Data, grid_Std, grid_Occu
+
+
+def plot_slice(x, y, i_slice, lx, H_range, K_range):
+    # plot the HK plane
+
+    i_slice_range = [0.006, 0.0115]
+
+    f = plt.figure("HK plane", figsize=(7.5, 2.3))
+    plt.subplots_adjust(left=0.10, bottom=0.155555,
+                        right=1.05, top=0.95,
+                        wspace=0.2, hspace=0.45)
+    subp = f.add_subplot(111)
+
+    cnt = subp.contourf(x, y, i_slice, np.linspace(i_slice_range[0],
+                                                   i_slice_range[1],
+                                                   50, endpoint=True),
+                        extend='both')
+    subp.axis('scaled')
+    subp.set_xlim(H_range)
+    subp.set_ylim(K_range)
+
+    subp.set_xlabel("H", size=10)
+    subp.set_ylabel("K", size=10)
+
+    subp.tick_params(labelsize=9)
+
+    cbar = plt.colorbar(cnt, ticks=np.linspace(i_slice_range[0],
+                                               i_slice_range[1],
+                                               3, endpoint=True),
+                        format='%.4f')
+    cbar.ax.tick_params(labelsize=8)
+
+
+def get_xyz(grid, plane):
+    HKL = 'HKL'
+    for i in plane:
+        HKL = HKL.replace(i, '')
+
+    HH = grid[0][:, :, :].squeeze()
+    H = grid[0][:, 0, 0]
+    KK = grid[1][:, :, :].squeeze()
+    K = grid[1][0, :, 0]
+    LL = grid[2][:, :, :].squeeze()
+    L = grid[2][0, 0, :]
+
+    i_slice = grid[3][:, :, :].squeeze()  # intensity slice
+    lx = eval(plane[0])
+
+    return i_slice, lx
+
+if __name__ == "__main__":
+    H_range = [-0.270, -0.200]
+    K_range = [+0.010, -0.010]
+    L_range = [+1.370, +1.410]
+
     detector_size = (256, 256)
     pixel_size = (0.0135*8, 0.0135*8)  # (mm)
     calibrated_center = (256/2.0, 256/2.0)  # (mm)
     dist_sample = 355.0  # (mm)
+
+    # ub matrix data
+    ub_mat = np. array([[-1.39772305e-01, -1.65559565e+00, -1.40501716e-02],
+                        [-1.65632438e+00, 1.39853170e-01, -1.84650965e-04],
+                        [4.79923390e-03, 4.91318724e-02, -4.72922724e-01]])
+
+    # wavelength data
+    wavelength = np.array([13.28559417])
 
     # six angles data
     motors = np.array([[102.3546, 77.874608, -90., 0., 0., 1.0205],
@@ -84,113 +187,21 @@ def recip_ex():
                        [114.2151, 91.065009, -90., 0., 0., 2.169],
                        [114.6735, 91.510209, -90., 0., 0., 2.2065]])
 
-    # ub matrix data
-    ub_mat = np. array([[-1.39772305e-01, -1.65559565e+00, -1.40501716e-02],
-                        [-1.65632438e+00, 1.39853170e-01, -1.84650965e-04],
-                        [4.79923390e-03, 4.91318724e-02, -4.72922724e-01]])
-
-    # wavelength data
-    wavelength = np.array([13.28559417])
-
     # Data folder path
-    broker_path = "LSCO_Nov12_broker/"
+    path = os.path.join("LSCO_Nov12_broker/")
     # intensity of the image stack data
-    i_stack = np.load(broker_path+"i_stack.npy")
-
-    tot_set = recip.process_to_q(motors, detector_size,
-                                 pixel_size, calibrated_center,
-                                 dist_sample, wavelength, ub_mat)
-
-    # minimum and maximum values of the voxel
-    q_min = np.array([H_range[0], K_range[0], L_range[0]])
-    q_max = np.array([H_range[1], K_range[1], L_range[1]])
-
-    # no. of bins
-    dqn = np.array([40, 40, 1])
-
-    (grid_data, grid_occu, grid_std,
-     grid_out) = recip.process_grid(tot_set, i_stack.ravel(), dqn=dqn)
-
-    grid = np.mgrid[0:dqn[0], 0:dqn[1], 0:dqn[2]]
-    r = (q_max - q_min) / dqn
-
-    X = grid[0] * r[0] + q_min[0]
-    Y = grid[1] * r[1] + q_min[1]
-    Z = grid[2] * r[2] + q_min[2]
-
-    # creating a mask
-    _mask = grid_occu <= 10
-    grid_Std = ma.masked_array(grid_std, _mask)
-    grid_Data = ma.masked_array(grid_data, _mask)
-    grid_Occu = ma.masked_array(grid_occu, _mask)
-
-    return X, Y, Z, grid_Data, grid_Std, grid_Occu
-
-
-def plot_slice(ip, plane='HK'):
-    # plot the HK plane
-    grid = ip[0]
-
-    x, y, i_slice, lx, x_ran, y_ran = get_xyz(grid, plane)
-
-    i_slice_range = [0.006, 0.0115]
-
-    f = plt.figure(1, figsize=(7.5, 2.3))
-    plt.subplots_adjust(left=0.10, bottom=0.155555,
-                        right=1.05, top=0.95,
-                        wspace=0.2, hspace=0.45)
-    subp = f.add_subplot(111)
-
-    cnt = subp.contourf(x, y, i_slice, np.linspace(i_slice_range[0],
-                                                   i_slice_range[1],
-                                                   50, endpoint=True),
-                        extend='both')
-    subp.axis('scaled')
-    subp.set_xlim(x_ran)
-    subp.set_ylim(y_ran)
-
-    subp.set_xlabel("H", size=10)
-    subp.set_ylabel("K", size=10)
-
-    subp.tick_params(labelsize=9)
-
-    cbar = plt.colorbar(cnt, ticks=np.linspace(i_slice_range[0],
-                                               i_slice_range[1],
-                                               3, endpoint=True),
-                        format='%.4f')
-    cbar.ax.tick_params(labelsize=8)
-
-
-def get_xyz(grid, plane):
-    HKL = 'HKL'
-    for i in plane:
-        HKL = HKL.replace(i, '')
-
-    HH = grid[0][:, :, :].squeeze()
-    H = grid[0][:, 0, 0]
-    KK = grid[1][:, :, :].squeeze()
-    K = grid[1][0, :, 0]
-    LL = grid[2][:, :, :].squeeze()
-    L = grid[2][0, 0, :]
-
-    i_slice = grid[3][:, :, :].squeeze()  # intensity slice
-    x_ran = eval(plane[0] + '_range')  # x range
-    y_ran = eval(plane[1] + '_range')  # y range
-
-    x = eval(plane[0] + plane[0])
-    y = eval(plane[1] + plane[1])
-    lx = eval(plane[0])
-
-    return x, y, i_slice, lx, x_ran, y_ran
-
-
-if __name__ == "__main__":
-    H_range = [-0.270, -0.200]
-    K_range = [+0.010, -0.010]
-    L_range = [+1.370, +1.410]
+    i_stack = np.load(path + "i_stack.npy")
 
     ip = []
-    ip.append(recip_ex())
+    ip.append(recip_ex(detector_size, pixel_size, calibrated_center,
+                       dist_sample, ub_mat, wavelength, motors,
+                       i_stack, H_range, K_range, L_range))
 
-    plot_slice(ip, plane='HK')
+    # grid = ip[0]
+    i_slice, lx = get_xyz(ip[0], plane='HK')
+
+    x = ip[0][0].reshape(40, 40)
+    y = ip[0][1].reshape(40, 40)
+
+    plot_slice(x, y, i_slice, lx, H_range, K_range)
     plt.show()
