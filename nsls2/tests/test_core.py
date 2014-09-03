@@ -176,6 +176,15 @@ def test_process_grid():
     q_max = np.array([1.0, 1.0, 1.0])
     q_min = np.array([-1.0, -1.0, -1.0])
     dqn = np.array([size, size, size])
+    param_dict = {'nx': dqn[0],
+                  'ny': dqn[1],
+                  'nz': dqn[2],
+                  'xmin': q_min[0],
+                  'ymin': q_min[1],
+                  'zmin': q_min[2],
+                  'xmax': q_max[0],
+                  'ymax': q_max[1],
+                  'zmax': q_max[2]}
     # slice tricks
     # this make a list of slices, the imaginary value in the
     # step is interpreted as meaning 'this many values'
@@ -195,16 +204,14 @@ def test_process_grid():
                      np.ravel(Y),
                      np.ravel(Z)]).T
 
-    (grid_data, grid_occu,
-         grid_std, grid_out) = core.process_grid(data, I,
-                                                  q_min, q_max,
-                                                  dqn=dqn)
+    (mean, occupancy,
+     std_err, oob, bounds) = core.process_grid(data, I, **param_dict)
 
     # check the values are as expected
-    npt.assert_array_equal(grid_data.ravel(), I)
-    npt.assert_equal(grid_out, 0)
-    npt.assert_array_equal(grid_occu, np.ones_like(grid_occu))
-    npt.assert_array_equal(grid_std, 0)
+    npt.assert_array_equal(mean.ravel(), I)
+    npt.assert_equal(oob, 0)
+    npt.assert_array_equal(occupancy, np.ones_like(occupancy))
+    npt.assert_array_equal(std_err, 0)
 
 
 def test_bin_edge2center():
