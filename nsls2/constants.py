@@ -394,8 +394,10 @@ class Element(object):
 
 class XrayLibWrap(Mapping):
     """
-    This is an interface to wrap xraylib to perform calculation related
-    to xray fluorescence.
+    This is a read-only interface to wrap xraylib to perform calculation related
+    to xray fluorescence. The code does one to one map between user options, such as
+    emission line, or bingding energy, to xraylib function calls. The return is a
+    dict-like object.
 
     Attributes
     ----------
@@ -413,6 +415,34 @@ class XrayLibWrap(Mapping):
         bind_e : binding energy
         jump : absorption jump factor
         yield : fluorescence yield
+
+    Examples
+    --------
+    >>> x = XrayLibWrap(30, 'lines') # 30 is atomic number for element Zn
+    >>> x['Ka1'] # energy of emission line Ka1
+    8.047800064086914
+    >>> x.all  # list energy of all the lines
+    [(u'ka1', 8.047800064086914),
+     (u'ka2', 8.027899742126465),
+     (u'kb1', 8.90530014038086),
+     (u'kb2', 0.0),
+     (u'la1', 0.9294999837875366),
+     (u'la2', 0.9294999837875366),
+     (u'lb1', 0.949400007724762),
+     (u'lb2', 0.0),
+     (u'lb3', 1.0225000381469727),
+     (u'lb4', 1.0225000381469727),
+     (u'lb5', 0.0),
+     (u'lg1', 0.0),
+     (u'lg2', 0.0),
+     (u'lg3', 0.0),
+     (u'lg4', 0.0),
+     (u'll', 0.8112999796867371),
+     (u'ln', 0.8312000036239624),
+     (u'ma1', 0.0),
+     (u'ma2', 0.0),
+     (u'mb', 0.0),
+     (u'mg', 0.0)]
     """
     def __init__(self, element, info_type):
         self._element = element
@@ -464,9 +494,37 @@ class XrayLibWrap_Energy(XrayLibWrap):
     info_type : str
         option to calculate physics quantity
         related to incident energy, such as
-        cs : cross section
+        cs : cross section, unit in cm2/g
     incident_energy : float
         incident energy for fluorescence in KeV
+
+    Examples
+    --------
+    >>> x = XrayLibWrap_Energy(30, 'cs', 12) # 30 is atomic number for element Zn, incident X-ray at 12 KeV
+    >>> x['Ka1'] # cross section for Ka1, unit in cm2/g
+    34.44424057006836
+    >>> x.all  # list cross section for all the lines
+    [(u'ka1', 34.44424057006836),
+     (u'ka2', 17.699342727661133),
+     (u'kb1', 4.72361946105957),
+     (u'kb2', 0.0),
+     (u'la1', 0.08742962032556534),
+     (u'la2', 0.00986157264560461),
+     (u'lb1', 0.04976911097764969),
+     (u'lb2', 0.0),
+     (u'lb3', 0.0026036009658128023),
+     (u'lb4', 0.0014215140836313367),
+     (u'lb5', 0.0),
+     (u'lg1', 0.0),
+     (u'lg2', 0.0),
+     (u'lg3', 0.0),
+     (u'lg4', 0.0),
+     (u'll', 0.005490143783390522),
+     (u'ln', 0.0025618337094783783),
+     (u'ma1', 0.0),
+     (u'ma2', 0.0),
+     (u'mb', 0.0),
+     (u'mg', 0.0)]
     """
     def __init__(self, element, info_type, incident_energy):
         super(XrayLibWrap_Energy, self).__init__(element, info_type)
