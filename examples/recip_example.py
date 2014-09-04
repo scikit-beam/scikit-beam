@@ -55,7 +55,7 @@ import nsls2.core as core
 def recip_ex(detector_size, pixel_size, calibrated_center, dist_sample,
              ub_mat, wavelength, motors, i_stack, H_range, K_range, L_range):
     # convert to Q space
-    tot_set = recip.process_to_q(motors, detector_size,
+    q_values = recip.process_to_q(motors, detector_size,
                                  pixel_size, calibrated_center,
                                  dist_sample, wavelength, ub_mat)
 
@@ -68,7 +68,7 @@ def recip_ex(detector_size, pixel_size, calibrated_center, dist_sample,
 
     # process the grid values
     (grid_data, grid_occu, grid_std,
-     grid_out) = recip.process_grid(tot_set, i_stack.ravel(), dqn=dqn)
+     grid_out) = recip.process_grid(q_values, i_stack.ravel(), dqn=dqn)
 
     grid = np.mgrid[0:dqn[0], 0:dqn[1], 0:dqn[2]]
     r = (q_max - q_min) / dqn
@@ -79,11 +79,11 @@ def recip_ex(detector_size, pixel_size, calibrated_center, dist_sample,
 
     # creating a mask
     _mask = grid_occu <= 10
-    grid_Data = ma.masked_array(grid_data, _mask)
-    grid_Std = ma.masked_array(grid_std, _mask)
-    grid_Occu = ma.masked_array(grid_occu, _mask)
+    grid_mask_data = ma.masked_array(grid_data, _mask)
+    grid_mask_std = ma.masked_array(grid_std, _mask)
+    grid_mask_occu = ma.masked_array(grid_occu, _mask)
 
-    return X, Y, Z, grid_Data
+    return X, Y, Z, grid_mask_data
 
 
 def plot_slice(x, y, i_slice, lx, H_range, K_range):
@@ -117,7 +117,7 @@ def plot_slice(x, y, i_slice, lx, H_range, K_range):
     cbar.ax.tick_params(labelsize=8)
 
 
-def get_data(X, Y, grid_Data, plane):
+def get_data(X, Y, grid_mask_data, plane):
     HKL = 'HKL'
     for i in plane:
         HKL = HKL.replace(i, '')
@@ -127,7 +127,7 @@ def get_data(X, Y, grid_Data, plane):
     KK = Y[:, :, :].squeeze()
     K = Y[0, :, 0]
 
-    i_slice = grid_Data[:, :, :].squeeze()  # intensity slice
+    i_slice = grid_mask_data[:, :, :].squeeze()  # intensity slice
     lx = eval(plane[0])
 
     return i_slice, lx
@@ -191,12 +191,12 @@ if __name__ == "__main__":
     # intensity of the image stack data
     i_stack = np.load(path + "i_stack.npy")
 
-    X, Y, Z, grid_Data = recip_ex(detector_size, pixel_size,
+    X, Y, Z, grid_mask_data = recip_ex(detector_size, pixel_size,
                                   calibrated_center, dist_sample, ub_mat,
                                   wavelength, motors, i_stack, H_range,
                                   K_range, L_range)
 
-    i_slice, lx = get_data(X, Y, grid_Data, plane='HK')
+    i_slice, lx = get_data(X, Y, grid_mask_data, plane='HK')
 
     x = X.reshape(40, 40)
     y = Y.reshape(40, 40)
