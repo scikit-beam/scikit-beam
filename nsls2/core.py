@@ -606,7 +606,7 @@ def grid3d(q, img_stack,
         (Qx, Qy, Qz) - HKL values - Nx3 array
     img_stack : ndarray
         Intensity array of the images
-        dimensions are: [num_img][x_dim][y_dim]
+        dimensions are: [num_img][num_rows][num_cols]
     nx : int, optional
         Number of voxels along x
     ny : int, optional
@@ -614,17 +614,17 @@ def grid3d(q, img_stack,
     nz : int, optional
         Number of voxels along z
     xmin : float, optional
-        Minimum value along x. Defaults to smallest x value in tot_set
+        Minimum value along x. Defaults to smallest x value in q
     ymin : float, optional
-        Minimum value along y. Defaults to smallest y value in tot_set
+        Minimum value along y. Defaults to smallest y value in q
     zmin : float, optional
-        Minimum value along z. Defaults to smallest z value in tot_set
+        Minimum value along z. Defaults to smallest z value in q
     xmax : float, optional
-        Maximum value along x. Defaults to largest x value in tot_set
+        Maximum value along x. Defaults to largest x value in q
     ymax : float, optional
-        Maximum value along y. Defaults to largest y value in tot_set
+        Maximum value along y. Defaults to largest y value in q
     zmax : float, optional
-        Maximum value along z. Defaults to largest z value in tot_set
+        Maximum value along z. Defaults to largest z value in q
 
     Returns
     -------
@@ -637,7 +637,8 @@ def grid3d(q, img_stack,
         This is the standard error of the value in the
         grid box.
     oob : int
-        No. of data points that were outside of the gridded region.
+        Out Of Bounds. Number of data points that are outside of
+        the gridded region.
     bounds : list
         tuple of (min, max, step) for x, y, z in order: [x_bounds,
         y_bounds, z_bounds]
@@ -658,6 +659,10 @@ def grid3d(q, img_stack,
     qmin = np.min(q, axis=0)
     qmax = np.max(q, axis=0)
     dqn = [_defaults['nx'], _defaults['ny'], _defaults['nz']]
+
+    # pad the upper edge by just enough to ensure that all of the
+    # points are in-bounds with the binning rules: lo <= val < hi
+    qmax += np.spacing(qmax)
 
     # check for non-default input
     if nx is not None:
