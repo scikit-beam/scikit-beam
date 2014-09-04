@@ -90,5 +90,20 @@ def load_netCDF(file_name,
         # to ensure values are of type float
         scale_value = 1.0
     data=data/scale_value
+
+    try:
+        # Accounts for specific case where z_pixel_size doesn't get assigned 
+        # even though dimensions are actuall isotropic. This occurs when 
+        # reconstruction is completed using tomo_recon on data collected at APS-13BMD.
+        if md_dict['x_pixel_size'] == md_dict['y_pixel_size'] 
+            and 
+            md_dict['z_pixel_size'] == 0.0 
+            and 
+            data.shape[0] > 1:
+                md_dict['voxel_size'] = {
+                        'value' : md_dict['x_pixel_size'],
+                        'type' : float,
+                        'units' : ''
+                        }
     return data, md_dict 
 

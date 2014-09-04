@@ -12,12 +12,24 @@ data collected at Argonne National Laboratory, Sector 13, GSECars.
 
 import numpy as np
 import six
-import net_cdf_io as ncd
+from nose.tools import eq_
+import nsls2.io.net_cdf_io as ncd
 
-test_data = ../../../test_data/file_io/netCDF/'tst_netCDF_recon.volume'
+test_data = '../../../test_data/file_io/netCDF/tst_netCDF_recon.volume'
 
 def test_net_cdf_io(test_data):
+    """
+    Test function for netCDF read function load_netCDF()
+
+    Parameters
+    ----------
+    test_data : str
+
+    Returns
+    -------
+
+    """
     data, md_dict = ncd.load_netCDF(test_data)
-    if md_dict['operator'] != 'Iltis':
-        raise Exception
+    eq_(md_dict['operator'], 'Iltis')
+    eq_(data.shape, (470, 695, 695))
 
