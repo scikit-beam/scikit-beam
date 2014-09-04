@@ -212,7 +212,7 @@ class Element(object):
         for qualitative identification of the element.
         line is string type and defined as 'Ka1', 'Kb1'.
         unit in KeV `XrayLibWrap`
-    cs : `XrayLibWrap_Energy`
+    cs : function
         Fluorescence cross section
         energy is incident energy
         line is string type and defined as 'Ka1', 'Kb1'.
@@ -235,8 +235,8 @@ class Element(object):
 
     Parameters
     ----------
-    element : int or str
-        Element name or element atomic Z
+    element : str or int
+        Element symbol or element atomic Z
 
     Examples
     --------
@@ -394,10 +394,10 @@ class Element(object):
 
 class XrayLibWrap(Mapping):
     """
-    This is a read-only interface to wrap xraylib to perform calculation related
-    to xray fluorescence. The code does one to one map between user options, such as
-    emission line, or bingding energy, to xraylib function calls. The return is a
-    dict-like object.
+    This is an interface to wrap xraylib to perform calculation related
+    to xray fluorescence. The code does one to one map between user options,
+    such as emission line, or binding energy, to xraylib function calls. Objects
+    of this class are read-only dicts and have all the expected methods.
 
     Attributes
     ----------
