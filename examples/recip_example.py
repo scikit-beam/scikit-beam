@@ -132,6 +132,7 @@ def get_data(X, Y, grid_Data, plane):
 
     return i_slice, lx
 
+
 if __name__ == "__main__":
     H_range = [-0.270, -0.200]
     K_range = [+0.010, -0.010]
