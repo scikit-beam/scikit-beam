@@ -665,24 +665,12 @@ def grid3d(q, img_stack,
     qmax += np.spacing(qmax)
 
     # check for non-default input
-    if nx is not None:
-        dqn[0] = nx
-    if ny is not None:
-        dqn[1] = ny
-    if nz is not None:
-        dqn[2] = nz
-    if xmin is not None:
-        qmin[0] = xmin
-    if ymin is not None:
-        qmin[1] = ymin
-    if zmin is not None:
-        qmin[2] = zmin
-    if xmax is not None:
-        qmax[0] = xmax
-    if ymax is not None:
-        qmax[1] = ymax
-    if zmax is not None:
-        qmax[2] = zmax
+    for target, input_vals in ((dqn, (nx, ny, nz)),
+                               (qmin, (xmin, ymin, zmin)),
+                               (qmax, (xmax, ymax, zmax))):
+        for j, in_val in enumerate(input_vals):
+            if in_val is not None:
+                target[j] = in_val
 
     # format bounds
     bounds = np.array([qmin, qmax, dqn]).T
