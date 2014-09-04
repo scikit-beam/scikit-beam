@@ -72,28 +72,23 @@ def load_netCDF(file_name,
         acquisition or reconstruction. If a scale factor is not present, 
         then a default value of 1.0 is used.
     
-    tmp_dict : dict
+    md_dict : dict
         Dictionary containing all metadata contained in the netCDF file.
         This metadata contains data collection, and experiment information
         as well as values and variables pertinent to the image data.
     """
     
-    def _md_dict_cleanup(imported_dict):
-        #dictioary cleanup
-        
 
-    def _md_dict_convert(cleanded_dict):
-#dictionary parameter assignment for export
-#names need to be registered and correspond directly to those entered in core.py
     src_file = Dataset(file_name)
     data = src_file.variables['VOLUME']
-    tmp_dict = src_file.__dict__
+    md_dict = src_file.__dict__
     try:
+        #Check for voxel intensity scale factor and apply if value is present
         scale_value = data.scale_factor
-        print 'Image data values adjusted by the recorded scale factor.'
     except:
-        print 'the scale factor is non existent'
+        # Value is set to 1.0 otherwise so values are not altered, other than 
+        # to ensure values are of type float
         scale_value = 1.0
     data=data/scale_value
-    return data, tmp_dict 
-   
+    return data, md_dict 
+
