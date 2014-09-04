@@ -64,9 +64,9 @@ def find_ring_center_acorr_1D(input_image):
 
     Returns
     -------
-    tuple
+    calibrated_center : tuple
         Returns the index (row, col) of the pixel that rings
-        are centered on.
+        are centered on.  Accurate to pixel resolution.
     """
     return tuple(bins[np.argmax(vals)] for vals, bins in
                   (_corr_ax1(_im) for _im in (input_image, input_image.T)))
