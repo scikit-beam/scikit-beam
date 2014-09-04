@@ -36,9 +36,14 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 
+from __future__ import (absolute_import, division, unicode_literals, print_function)
 import numpy as np
 import six
+from collections import Mapping
+import functools
+
 import xraylib
+
 
 line_name = ['Ka1', 'Ka2', 'Kb1', 'Kb2', 'La1', 'La2', 'Lb1', 'Lb2',
              'Lb3', 'Lb4', 'Lb5', 'Lg1', 'Lg2', 'Lg3', 'Lg4', 'Ll',
@@ -184,3 +189,405 @@ OTHER_VAL = dict()
 OTHER_VAL.update((elm['sym'].lower(), elm) for elm in elm_data_list)
 # also add entries with it keyed on atomic number
 OTHER_VAL.update((elm['Z'], elm) for elm in elm_data_list)
+
+
+@functools.total_ordering
+class Element(object):
+    """
+    Object to return all the elemental information
+    related to fluorescence
+
+    Attributes
+    ----------
+    name : str
+        element name, such as Fe, Cu
+    Z : int
+        atomic number
+    mass : float
+        atomic mass in g/mol
+    density : float
+        element density in g/cm3
+    emission_line : `XrayLibWrap`
+        Emission line can be used as a unique characteristic
+        for qualitative identification of the element.
+        line is string type and defined as 'Ka1', 'Kb1'.
+        unit in KeV `XrayLibWrap`
+    cs : function
+        Fluorescence cross section
+        energy is incident energy
+        line is string type and defined as 'Ka1', 'Kb1'.
+        unit in cm2/g
+    bind_energy : `XrayLibWrap`
+        Binding energy is a measure of the energy required
+        to free electrons from their atomic orbits.
+        shell is string type and defined as "K", "L1".
+        unit in KeV
+    jump_factor : `XrayLibWrap`
+        Absorption jump factor is defined as the fraction
+        of the total absorption that is associated with
+        a given shell rather than for any other shell.
+        shell is string type and defined as "K", "L1".
+    fluor_yield : `XrayLibWrap`
+        The fluorescence quantum yield gives the efficiency
+        of the fluorescence process, and is defined as the ratio of the
+        number of photons emitted to the number of photons absorbed.
+        shell is string type and defined as "K", "L1".
+
+    Parameters
+    ----------
+    element : str or int
+        Element symbol or element atomic Z
+
+    Examples
+    --------
+    >>> e = Element('Zn') # or e = Element(30), 30 is atomic number
+    >>> e.emission_line['Ka1'] # energy for emission line Ka1
+    8.638900756835938
+    >>> e.cs(10)['Ka1'] # cross section for emission line Ka1, 10 is incident energy
+    54.756561279296875
+    >>> e.fluor_yield['K'] # fluorescence yield for K shell
+    0.46936899423599243
+    >>> e.mass #atomic mass
+    65.37
+    >>> e.density #density
+    7.14
+    >>> e.find(10, 0.5, 12) #emission lines within range(10 - 0.5, 10 + 0.5) at incident 12 KeV
+    {'kb1': 9.571999549865723}
+    #########################   useful command   ###########################
+    >>> e.emission_line.all # list all the emission lines
+    [('ka1', 8.638900756835938),
+     ('ka2', 8.615799903869629),
+     ('kb1', 9.571999549865723),
+     ('kb2', 0.0),
+     ('la1', 1.0116000175476074),
+     ('la2', 1.0116000175476074),
+     ('lb1', 1.0346999168395996),
+     ('lb2', 0.0),
+     ('lb3', 1.1069999933242798),
+     ('lb4', 1.1069999933242798),
+     ('lb5', 0.0),
+     ('lg1', 0.0),
+     ('lg2', 0.0),
+     ('lg3', 0.0),
+     ('lg4', 0.0),
+     ('ll', 0.8837999701499939),
+     ('ln', 0.9069000482559204),
+     ('ma1', 0.0),
+     ('ma2', 0.0),
+     ('mb', 0.0),
+     ('mg', 0.0)]
+    >>> e.cs(10).all # list all the emission lines
+    [('ka1', 54.756561279296875),
+     ('ka2', 28.13692855834961),
+     ('kb1', 7.509212970733643),
+     ('kb2', 0.0),
+     ('la1', 0.13898827135562897),
+     ('la2', 0.01567710004746914),
+     ('lb1', 0.0791187509894371),
+     ('lb2', 0.0),
+     ('lb3', 0.004138986114412546),
+     ('lb4', 0.002259803470224142),
+     ('lb5', 0.0),
+     ('lg1', 0.0),
+     ('lg2', 0.0),
+     ('lg3', 0.0),
+     ('lg4', 0.0),
+     ('ll', 0.008727769367396832),
+     ('ln', 0.00407258840277791),
+     ('ma1', 0.0),
+     ('ma2', 0.0),
+     ('mb', 0.0),
+     ('mg', 0.0)]
+    """
+    def __init__(self, element):
+
+        # forcibly down-cast stringy inputs to lowercase
+        if isinstance(element, six.string_types):
+            element = element.lower()
+        elem_dict = OTHER_VAL[element]
+
+        self._name = elem_dict['sym']
+        self._z = elem_dict['Z']
+        self._mass = elem_dict['mass']
+        self._density = elem_dict['rho']
+
+        self._emission_line = XrayLibWrap(self._z, 'lines')
+        self._bind_energy = XrayLibWrap(self._z, 'binding_e')
+        self._jump_factor = XrayLibWrap(self._z, 'jump')
+        self._fluor_yield = XrayLibWrap(self._z, 'yield')
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def Z(self):
+        return self._z
+
+    @property
+    def mass(self):
+        return self._mass
+
+    @property
+    def density(self):
+        return self._density
+
+    @property
+    def emission_line(self):
+        return self._emission_line
+
+    @property
+    def cs(self):
+        def myfunc(incident_energy):
+            return XrayLibWrap_Energy(self._z, 'cs',
+                                      incident_energy)
+        return myfunc
+
+    @property
+    def bind_energy(self):
+        return self._bind_energy
+
+    @property
+    def jump_factor(self):
+        return self._jump_factor
+
+    @property
+    def fluor_yield(self):
+        return self._fluor_yield
+
+    def __repr__(self):
+        return 'Element name %s with atomic Z %s' % (self.name, self._z)
+
+    def __eq__(self, other):
+        return self.Z == other.Z
+
+    def __lt__(self, other):
+        return self.Z < other.Z
+
+    def line_near(self, energy, delta_e,
+                  incident_energy):
+        """
+        Find possible emission lines given the element.
+
+        Parameters
+        ----------
+        energy : float
+            Energy value to search for
+        delta_e : float
+            Define search range (energy - delta_e, energy + delta_e)
+        incident_energy : float
+            incident energy of x-ray in KeV
+
+        Returns
+        -------
+        dict
+            all possible emission lines
+        """
+        out_dict = dict()
+        for k, v in six.iteritems(self.emission_line):
+            if self.cs(incident_energy)[k] == 0:
+                continue
+            if np.abs(v - energy) < delta_e:
+                out_dict[k] = v
+        return out_dict
+
+
+class XrayLibWrap(Mapping):
+    """
+    This is an interface to wrap xraylib to perform calculation related
+    to xray fluorescence. The code does one to one map between user options,
+    such as emission line, or binding energy, to xraylib function calls. Objects
+    of this class are read-only dicts and have all the expected methods.
+
+    Attributes
+    ----------
+    all : list
+        List the physics quantity for
+        all the lines or all the shells.
+
+    Parameters
+    ----------
+    element : int
+        atomic number
+    info_type : str
+        option to choose which physics quantity to calculate as follows
+        lines : emission lines
+        bind_e : binding energy
+        jump : absorption jump factor
+        yield : fluorescence yield
+
+    Examples
+    --------
+    >>> x = XrayLibWrap(30, 'lines') # 30 is atomic number for element Zn
+    >>> x['Ka1'] # energy of emission line Ka1
+    8.047800064086914
+    >>> x.all  # list energy of all the lines
+    [(u'ka1', 8.047800064086914),
+     (u'ka2', 8.027899742126465),
+     (u'kb1', 8.90530014038086),
+     (u'kb2', 0.0),
+     (u'la1', 0.9294999837875366),
+     (u'la2', 0.9294999837875366),
+     (u'lb1', 0.949400007724762),
+     (u'lb2', 0.0),
+     (u'lb3', 1.0225000381469727),
+     (u'lb4', 1.0225000381469727),
+     (u'lb5', 0.0),
+     (u'lg1', 0.0),
+     (u'lg2', 0.0),
+     (u'lg3', 0.0),
+     (u'lg4', 0.0),
+     (u'll', 0.8112999796867371),
+     (u'ln', 0.8312000036239624),
+     (u'ma1', 0.0),
+     (u'ma2', 0.0),
+     (u'mb', 0.0),
+     (u'mg', 0.0)]
+    """
+    def __init__(self, element, info_type):
+        self._element = element
+        self.info_type = info_type
+        self._map, self._func = XRAYLIB_MAP[info_type]
+        self._keys = sorted(list(six.iterkeys(self._map)))
+
+    @property
+    def all(self):
+        """List the physics quantity for all the lines or all the shells. """
+        return list(six.iteritems(self))
+
+    def __getitem__(self, key):
+        """
+        Call xraylib function to calculate physics quantity.
+
+        Parameters
+        ----------
+        key : str
+            Define which physics quantity to calculate.
+        """
+
+        return self._func(self._element,
+                          self._map[key.lower()])
+
+    def __iter__(self):
+        return iter(self._keys)
+
+    def __len__(self):
+        return len(self._keys)
+
+
+class XrayLibWrap_Energy(XrayLibWrap):
+    """
+    This is an interface to wrap xraylib
+    to perform calculation on fluorescence
+    cross section, or other incident energy
+    related quantity.
+
+    Attributes
+    ----------
+    incident_energy : float
+        incident energy for fluorescence in KeV
+
+    Parameters
+    ----------
+    element : int
+        atomic number
+    info_type : str
+        option to calculate physics quantity
+        related to incident energy, such as
+        cs : cross section, unit in cm2/g
+    incident_energy : float
+        incident energy for fluorescence in KeV
+
+    Examples
+    --------
+    >>> x = XrayLibWrap_Energy(30, 'cs', 12) # 30 is atomic number for element Zn, incident X-ray at 12 KeV
+    >>> x['Ka1'] # cross section for Ka1, unit in cm2/g
+    34.44424057006836
+    >>> x.all  # list cross section for all the lines
+    [(u'ka1', 34.44424057006836),
+     (u'ka2', 17.699342727661133),
+     (u'kb1', 4.72361946105957),
+     (u'kb2', 0.0),
+     (u'la1', 0.08742962032556534),
+     (u'la2', 0.00986157264560461),
+     (u'lb1', 0.04976911097764969),
+     (u'lb2', 0.0),
+     (u'lb3', 0.0026036009658128023),
+     (u'lb4', 0.0014215140836313367),
+     (u'lb5', 0.0),
+     (u'lg1', 0.0),
+     (u'lg2', 0.0),
+     (u'lg3', 0.0),
+     (u'lg4', 0.0),
+     (u'll', 0.005490143783390522),
+     (u'ln', 0.0025618337094783783),
+     (u'ma1', 0.0),
+     (u'ma2', 0.0),
+     (u'mb', 0.0),
+     (u'mg', 0.0)]
+    """
+    def __init__(self, element, info_type, incident_energy):
+        super(XrayLibWrap_Energy, self).__init__(element, info_type)
+        self._incident_energy = incident_energy
+
+    @property
+    def incident_energy(self):
+        return self._incident_energy
+
+    @incident_energy.setter
+    def incident_energy(self, val):
+        """
+        Parameters
+        ----------
+        val : float
+            new energy value
+        """
+        self._incident_energy = val
+
+    def __getitem__(self, key):
+        """
+        Call xraylib function to calculate physics quantity.
+
+        Parameters
+        ----------
+        key : str
+            defines which physics quantity to calculate
+        """
+        return self._func(self._element,
+                          self._map[key.lower()],
+                          self._incident_energy)
+
+def emission_line_search(line_e, delta_e,
+                         incident_energy, element_list=None):
+    """
+    Parameters
+    ----------
+    line_e : float
+         energy value to search for in KeV
+     delta_e : float
+         difference compared to energy in KeV
+     incident_energy : float
+        incident x-ray energy in KeV
+     element_list : list
+         List of elements to search for. Element abbreviations can be
+         any mix of upper and lower case, e.g., Hg, hG, hg, HG
+
+    Returns
+    -------
+    dict
+        element and associate emission lines
+
+    """
+    if element_list is None:
+        element_list = range(1, 101)
+
+    search_list = [Element(item) for item in element_list]
+
+    cand_lines = [e.line_near(line_e, delta_e, incident_energy) for e in search_list]
+
+    out_dict = dict()
+    for e, lines in zip(search_list, cand_lines):
+        if lines:
+            out_dict[e.name] = lines
+
+    return out_dict
