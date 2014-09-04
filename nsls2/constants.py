@@ -212,7 +212,7 @@ class Element(object):
         for qualitative identification of the element.
         line is string type and defined as 'Ka1', 'Kb1'.
         unit in KeV `XrayLibWrap`
-    cs : `XrayLibWrap`
+    cs : `XrayLibWrap_Energy`
         Fluorescence cross section
         energy is incident energy
         line is string type and defined as 'Ka1', 'Kb1'.
