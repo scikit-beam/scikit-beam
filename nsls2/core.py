@@ -237,7 +237,12 @@ keys_core = {
         "type" : float,
         "units" : "mm",
         },
-     "wavelength": {
+    "energy": {
+        "description" : "scanning energy for data collection",
+        "type" : float,
+        "units" : "keV",
+        }
+    "wavelength": {
         "description" : "wavelength of incident radiation (Angstroms)",
         "type" : float,
         "units" : "angstrom",
