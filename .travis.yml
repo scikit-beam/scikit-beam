@@ -9,21 +9,16 @@ before_install:
   - chmod +x miniconda.sh
   - ./miniconda.sh -b -p /home/travis/mc
   - export PATH=/home/travis/mc/bin:$PATH
+  - wget https://gist.githubusercontent.com/tacaswell/128bb482f845feb024eb/raw/5cf21dc03a354fc87140d4a75e17cb5c076a0517/.condarc -O /home/travis/.condarc
 
 install:
   - conda update conda --yes
-  - conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
-  - conda update conda --yes
   - conda install conda-build jinja2 --yes
+  - conda build ./conda-recipe
+  - conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
   - source activate testenv
-  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes imaging; else pip install pillow; fi
-  - conda install --yes numpy scipy nose six
-  - git clone -b xraylib --single-branch --depth=1 https://github.com/tacaswell/conda-recipes.git ../conda-recipes
-  - conda build ../conda-recipes/xraylib
-  - conda install xraylib --use-local --yes
-  - conda install scikit-image --yes
+  - conda install nose nsls2 --use-local --yes
   - pip install coveralls
-  - python setup.py install
 
 script:
   - python run_tests.py

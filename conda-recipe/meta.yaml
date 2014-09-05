@@ -12,11 +12,15 @@ requirements:
   build:
     - python
     - distribute
+    - numpy
+    - six
   run:
     - python
     - numpy
     - scipy
     - six
+    - xraylib
+    - scikit-image
 
 test:
   requires:
