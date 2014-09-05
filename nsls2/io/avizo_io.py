@@ -36,22 +36,21 @@ def _read_amira(src_file):
         in order to be useful in the analysis of the data using the NSLS-2 
         image processing function set.
     
-    am_data : string
+    am_data : str
         A compiled string containing all of the image array data, that was stored
         in the source AmiraMesh data file.  
     """
     
     am_header = []
     am_data = []
-    f = open(os.path.normpath(src_file), 'r')
-    while True:
-        line = f.readline()
-        am_header.append(line)
-        if (line == '# Data section follows\n'):
-            f.readline()
-            break
-    am_data = f.read()
-    f.close()
+    with open(os.path.normpath(src_file), 'r') as input_file:
+        while True:
+            line = input_file.readline()
+            am_header.append(line)
+            if (line == '# Data section follows\n'):
+                input_file.readline()
+                break
+        am_data = input_file.read()
     return am_header, am_data
 
 
@@ -135,7 +134,7 @@ def _amira_data_to_numpy(am_data, header_dict, flip_z=True):
     return output
 
 
-def _sort_amira_header(header_list):
+def _clean_amira_header(header_list):
     """
     This function takes the raw string list containing the AmiraMesh header
     informationa and strips the string list of all "empty" characters,
@@ -156,29 +155,14 @@ def _sort_amira_header(header_list):
         This header list has been stripped and sorted and is now ready for
         populating the metadata dictionary for the image data set.
     """
-    
-    for row in range(len(header_list)):
-        #Remove all new-line characters that are included in original header
-        header_list[row] = header_list[row].strip('\n')
-        #Divide each header row into individual strings using 'spaces' as the 
-        #the separating character.
-        header_list[row] = header_list[row].split(" ")
-        # The entire header has now been broken down so that each individual
-        # term, or word, is now an object in a list-of-lists. Several of the
-        # header terms still contain extranious commas or quotation marks 
-        # that need to be removed. This for loop steps through and cleans 
-        # each string of these extranous characters
-        for column in range(len(header_list[row])):
-            header_list[row][column] = header_list[row][column].translate(None, ',"')
-        # Remove all empty place holders in each list "row"
-        header_list[row] = filter(None, header_list[row])
-    # Remove all empty rows
-    header_list = filter(None, header_list)
-    # Return clean header
-    return header_list
+    clean_header = []
+    for row in header_list:
+        split_header = filter(None, [word.translate(None, ',"') 
+            for word in row.strip('\n').split()])
+        clean_header.append(split_header)
+    return clean_header
 
-
-def _create_md_dict(header_list):
+def _create_md_dict(clean_header):
     """
     This function takes the sorted header list as input and populates the
     metadata dictionary containing all relevant header information pertinent to
@@ -191,80 +175,75 @@ def _create_md_dict(header_list):
     
     """
 
-    md_dict = {'software_src' : header_list[0][1], #Avizo specific
-               'data_format' : header_list[0][2], #Avizo specific
-               'data_format_version' : header_list[0][3] #Avizo specific
+    md_dict = {'software_src' : clean_header[0][1], #Avizo specific
+               'data_format' : clean_header[0][2], #Avizo specific
+               'data_format_version' : clean_header[0][3] #Avizo specific
                 }
     if md_dict['data_format'] == '3D':
-        md_dict['data_format'] = header_list[0][3]
-        md_dict['data_format_version'] = header_list[0][4]
+        md_dict['data_format'] = clean_header[0][3]
+        md_dict['data_format_version'] = clean_header[0][4]
     
-    for row in range(len(header_list)):
+    for row in range(len(clean_header)):
         try:
-            md_dict['array_dimensions'] = {'x_dimension' : int(header_list[row]
-                                                   [header_list[row]
+            md_dict['array_dimensions'] = {'x_dimension' : int(clean_header[row]
+                                                   [clean_header[row]
                                                        .index('define') + 2]),
-                                     'y_dimension' : int(header_list[row]
-                                                   [header_list[row]
+                                     'y_dimension' : int(clean_header[row]
+                                                   [clean_header[row]
                                                        .index('define') + 3]),
-                                     'z_dimension' : int(header_list[row]
-                                                   [header_list[row]
+                                     'z_dimension' : int(clean_header[row]
+                                                   [clean_header[row]
                                                        .index('define') + 4])
                                      }
-        except:
-        #    continue
-            try:
-                md_dict['data_type'] = header_list[row][header_list[row]
+        #except:
+        try:
+            md_dict['data_type'] = clean_header[row][clean_header[row]
                         .index('Content') + 2]
-            except: 
-            #    continue
-                try:
-                    md_dict['coord_type'] = header_list[row][header_list[row]
+            #except: 
+        try:
+            md_dict['coord_type'] = clean_header[row][clean_header[row]
                             .index('CoordType') + 1]
-                except:
-                    try:
-                        #TODO: add "voxel_size" computation, 
-                        #       and Check for anisotropy
-                        md_dict['bounding_box'] = {'x_min' : 
-                                                    float(
-                                                        header_list[row][
-                                                            header_list[row]
-                                                            .index(
-                                                                'BoundingBox')
-                                                            + 1]),
-                                                   'x_max' : 
-                                                   float(header_list[row][
-                                                        header_list[row]
-                                                        .index('BoundingBox')
-                                                        + 2]),
-                                                   'y_min' : 
-                                                   float(header_list[row][
-                                                        header_list[row]
-                                                        .index('BoundingBox')
-                                                        + 3]),
-                                                   'y_max' : 
-                                                   float(header_list[row][
-                                                        header_list[row]
-                                                        .index('BoundingBox')
-                                                        + 4]),
-                                                   'z_min' : 
-                                                   float(header_list[row][
-                                                        header_list[row]
-                                                        .index('BoundingBox')
-                                                        + 5]),
-                                                   'z_max' : 
-                                                   float(header_list[row][
-                                                        header_list[row]
-                                                        .index('BoundingBox')
-                                                        + 6])
-                                                   }
-                    except:
-                        try:
-                            md_dict['units'] = (header_list[row][
-                                header_list[row].index('Units') + 2])
-                            md_dict['coordinates'] = header_list[row + 1][1]
-                        except:
-                            continue
+                #except:
+        try:
+            md_dict['bounding_box'] = {'x_min' : float(
+                clean_header[row][clean_header[row].index('BoundingBox') + 1]),
+                'x_max' : float(clean_header[row][clean_header[row].index('BoundingBox') + 2]),
+                'y_min' : float(clean_header[row][clean_header[row].index('BoundingBox') + 3]),
+                'y_max' : float(clean_header[row][clean_header[row].index('BoundingBox') + 4]),
+                'z_min' : float(clean_header[row][clean_header[row].index('BoundingBox') + 5]),
+                'z_max' : float(clean_header[row][clean_header[row].index('BoundingBox') + 6])}
+            bbox = [md_dict['bounding_box']['x_min'], 
+                    md_dict['bounding_box']['x_max'],
+                    md_dict['bounding_box']['y_min'],
+                    md_dict['bounding_box']['y_max'],
+                    md_dict['bounding_box']['z_min'],
+                    md_dict['bounding_box']['z_max']]
+            dims = [md_dict['array_dimensions']['x_dimension'],
+                    md_dict['array_dimensions']['y_dimension'],
+                    md_dict['array_dimensions']['z_dimension']]
+            resolution_list = []
+            for index in np.arange(len(dims)):
+                if dims[index] > 1:
+                    resolution_list.append((bbox[(2*index+1)] - 
+                        bbox[(2*index)]) / (dims[index] - 1))
+                else:
+                    resolution_list.append(0)
+                if (resolution_list[1]/resolution_list[0] > 0.99 and
+                        resolution_list[2]/resolution_list[0] > 0.99 and
+                        resolution_list[1]/resolution_list[0] < 1.01 and
+                        resolution_list[2]/resolution_list[0] < 1.01):
+                    md_dict['resolution'] = {'zyx_value' : resolution_list[0],
+                            'type' : 'isotropic'}
+                else:
+                    md_dict['resolution'] = {
+                            'zyx_value' : (resolution_list[2], 
+                                resolution_list[1], resolution_list[0]),
+                            'type' : 'anisotropic'}
+                    #except:
+        try:
+            md_dict['units'] = (clean_header[row][clean_header[row]
+                .index('Units') + 2])
+            md_dict['coordinates'] = clean_header[row + 1][1]
     return md_dict
 
 
@@ -292,7 +271,7 @@ def load_amiramesh_as_np(file_path):
     """
     
     header, data = _read_amira(file_path)
-    header = _sort_amira_header(header)
+    header = _clean_amira_header(header)
     md_dict = _create_md_dict(header)
     np_array = _amira_data_to_numpy(data, md_dict)
     return md_dict, np_array
