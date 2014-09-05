@@ -66,8 +66,8 @@ def get_line(name, incident_energy):
     for item in ratio:
         for data in lines:
             if item[0] == data[0]:
-                plt.semilogy([data[1], data[1]],
-                             [i_min, item[1]], 'g-', linewidth=2.0)
+                plt.plot([data[1], data[1]],
+                         [i_min, item[1]], 'g-', linewidth=2.0)
 
     plt.xlabel('Energy [KeV]')
     plt.ylabel('Intensity')
