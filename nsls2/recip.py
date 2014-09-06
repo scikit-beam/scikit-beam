@@ -215,7 +215,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
             Raised when the diffractometer six angles of
             the images are not specified
 
-    Note
+    Notes
     -----
     Six angles of an image: (delta, theta, chi, phi, mu, gamma )
     These axes are defined according to the following references.
