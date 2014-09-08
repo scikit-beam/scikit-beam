@@ -28,6 +28,8 @@ wrapping (the return variable names are the output ports).  Example: ::
    stdev : float
        The standard deviation
 
+**THESE MUST BE IN THE ORDER THAT THE FUNCTION RETURNS THEM IN**
+
 
 Sphinx
 ------
