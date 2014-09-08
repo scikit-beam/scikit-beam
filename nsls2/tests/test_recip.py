@@ -27,7 +27,7 @@ def test_process_to_q():
                               [90., 60., 0., 30., 10., 5.]])
     # delta=40, theta=15, chi = 90, phi = 30, mu = 10.0, gamma=5.0
 
-    tot_set = recip.process_to_q(setting_angles, detector_size,
+    hkl_val = recip.process_to_q(setting_angles, detector_size,
                                  pixel_size, calibrated_center,
                                 dist_sample, wavelength, ub_mat)
 
@@ -37,7 +37,7 @@ def test_process_to_q():
                  (98432, np.array([0.10205953,  0.45624416, -0.27200778]))]
 
     for pixel, kn_hkl in known_hkl:
-        npt.assert_array_almost_equal(tot_set[pixel], kn_hkl, decimal=8)
+        npt.assert_array_almost_equal(hkl_val[pixel], kn_hkl, decimal=8)
 
 
 @known_fail_if(six.PY3)
@@ -120,27 +120,24 @@ def test_process_grid_std():
 
 
 def test_convert_to_q_saxs():
-   detector_size = (256, 256)
-   pixel_size = (0.0135*8, 0.0135*8)
-   calibrated_center = (256/2.0, 256/2.0)
-   dist_sample = 355.0
+   detector_size = (2048, 2048)
+   pixel_size = (0.2, 0.2) # (mm)
+   calibrated_center = (1006.58, 1043.71)  # (mm)
+   dist_sample = 3500.00  # (mm)
+   wavelength = 0.1859  # (Angstrom )
 
-   energy = 640  # (  in eV)
-   # HC_OVER_E to convert from Energy to wavelength (Lambda)
-   hc_over_e = 12398.4
-   wavelength = hc_over_e / energy  # (Angstrom )
-
+   q_values = recip.convert_to_q_saxs(detector_size, pixel_size, dist_sample,
+                                      calibrated_center, wavelength)
 
 def test_convert_to_q_waxs():
-   detector_size = (256, 256)
-   pixel_size = (0.0135*8, 0.0135*8)
-   calibrated_center = (256/2.0, 256/2.0)
-   dist_sample = 355.0
+   detector_size = (2048, 2048)
+   pixel_size = (0.2, 0.2) # (mm)
+   calibrated_center = (1006.58, 1043.71)  # (mm)
+   dist_sample = 1498.76 # (mm)
+   wavelength = 0.1859  # (Angstrom )
 
-   energy = 640  # (  in eV)
-   # HC_OVER_E to convert from Energy to wavelength (Lambda)
-   hc_over_e = 12398.4
-   wavelength = hc_over_e / energy  # (Angstrom )
+   q_values = recip.convert_to_q_waxs(detector_size,pixel_size, dist_sample,
+                                      calibrated_center, wavelength)
 
 def test_convert_to_q_gisaxs():
    detector_size = (256, 256)
@@ -156,3 +153,5 @@ def test_convert_to_q_gisaxs():
    hc_over_e = 12398.4
    wavelength = hc_over_e / energy  # (Angstrom )
 
+   q_values = recip.convert_to_q_waxs_this(detector_size, pixel_size, dist_sample,
+                      calibrated_center, wavelength)

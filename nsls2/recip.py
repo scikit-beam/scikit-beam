@@ -255,7 +255,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
     t1 = time.time()
 
     # ctrans - c routines for fast data analysis
-    tot_set = ctrans.ccdToQ(angles=setting_angles * np.pi / 180.0,
+    hkl_values = ctrans.ccdToQ(angles=setting_angles * np.pi / 180.0,
                             mode=frame_mode,
                             ccd_size=(detector_size),
                             ccd_pixsize=(pixel_size),
@@ -269,7 +269,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
     t2 = time.time()
     logger.info("--- Done processed in %f seconds", (t2-t1))
 
-    return tot_set[:, :3]
+    return hkl_values[:, :3]
 
 
 def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
@@ -372,7 +372,7 @@ def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
 def convert_to_q_saxs(detector_size, pixel_size, dist_sample,
                       calibrated_center, wavelength):
     """
-    This module is for finding Q values for saxs (small
+    This module is for finding Q values from saxs (small
     angle scattering geometry) scattering geometries
 
     A monochromatic beam of incident wave vector falls
@@ -406,23 +406,18 @@ def convert_to_q_saxs(detector_size, pixel_size, dist_sample,
 
     """
 
-    # angular_wave_number
-    k = 2*np.pi / wavelength
+    # delta=40, theta=15, chi = 90, phi = 30, mu = 10.0, gamma=5.0
+    setting_angles = np.array([0., 0., 0., 0., 0., 0.])
 
-    x_pix = np.reshape(np.arange(detector_size[0]) -
-                           calibrated_center[0], (1, -1))
-    y_pix = np.reshape(np.arange(detector_size[1]) -
-                           calibrated_center[1], (-1, 1))
+    # UB matrix (orientation matrix) 3x3 matrix
+    ub_mat = np.identity(3)
 
-    x_mm = x_pix * pixel_size[0]
-    y_mm = y_pix * pixel_size[1]
+    hkl_val = process_to_q(setting_angles, detector_size,
+                            pixel_size, calibrated_center,
+                            dist_sample, wavelength, ub_mat)
 
-    pix_distance = np.sqrt(x_mm**2 + y_mm**2)
-
-    # scattering angle
-    two_theta = np.arctan(pix_distance/dist_sample)
-    # q values
-    q_values = 2 * k * np.sin(two_theta/2)
+    q_val = np.sqrt(hkl_val[:,0]**2 + hkl_val[:,1]**2 + hkl_val[:,2]**2)
+    q_values = q_val.reshape(detector_size[0], detector_size[1])
 
     return q_values
 
@@ -430,7 +425,64 @@ def convert_to_q_saxs(detector_size, pixel_size, dist_sample,
 def convert_to_q_waxs(detector_size, pixel_size,  dist_sample,
                       calibrated_center, wavelength):
     """
-    This module is for finding Q values for waxs (wide angle
+    This module is for finding Q values from waxs (wide angle
+    scattering geometry) scattering geometries
+
+    A monochromatic beam of incident wave vector falls
+    on the sample. The scattered intensity is collected
+    as a function of the scattering angle (2theta).
+    waxs is the same technique as saxs only the distance
+    from sample to the detector is shorter and thus
+    diffraction maxima at larger angles are observed.
+
+    Parameters
+    ----------
+    detector_size : tuple
+        2 element tuple defining no. of pixels(size) in the
+        detector X and Y direction(mm)
+
+    pixel_size : tuple
+        2 element tuple defining the (x y) dimensions of the
+        pixel (mm)
+
+    dist_sample : float
+        distance from the sample to the detector (mm)
+
+    calibrated_center : tuple
+        2 element tuple defining the (x y) center of the
+        detector (mm)
+
+    wavelength : float
+        wavelength of incident radiation (Angstroms)
+
+    Returns
+    -------
+    q_values : ndarray
+        NxN array of Q(reciprocal) space values
+
+    """
+
+    # delta=40, theta=15, chi = 90, phi = 30, mu = 10.0, gamma=5.0
+    setting_angles = np.array([0., 0., 0., 0., 0., 0.])
+
+    # UB matrix (orientation matrix) 3x3 matrix
+    ub_mat = np.identity(3)
+
+    hkl_val = process_to_q(setting_angles, detector_size,
+                            pixel_size, calibrated_center,
+                            dist_sample, wavelength, ub_mat)
+
+    q_val = np.sqrt(hkl_val[:,0]**2 + hkl_val[:,1]**2 + hkl_val[:,2]**2)
+
+    q_values = q_val.reshape(detector_size[0], detector_size[1])
+
+    return q_values
+
+
+def convert_to_q_waxs_this(detector_size, pixel_size,  dist_sample,
+                      calibrated_center, wavelength):
+    """
+    This module is for finding Q values from waxs (wide angle
     scattering geometry) scattering geometries
 
     A monochromatic beam of incident wave vector falls
@@ -492,7 +544,7 @@ def convert_to_q_giaxs(detector_size, pixel_size,  dist_sample,
               calibrated_center, wavelength, ref_beam,
               incident_angle, rod_geometry=None):
     """
-    This module is for finding Q values for gisaxs
+    This module is for finding Q values from gisaxs
     (grazing-incidence small angle x-ray scattering)
     scattering geometry
 
@@ -540,6 +592,7 @@ def convert_to_q_giaxs(detector_size, pixel_size,  dist_sample,
     -------
     q_values : ndarray
         NxN array of Q(reciprocal) space values
+
 
     """
 
