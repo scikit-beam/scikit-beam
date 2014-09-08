@@ -564,17 +564,17 @@ def emission_line_search(line_e, delta_e,
     ----------
     line_e : float
          energy value to search for in KeV
-     delta_e : float
+    delta_e : float
          difference compared to energy in KeV
-     incident_energy : float
+    incident_energy : float
         incident x-ray energy in KeV
-     element_list : list
+    element_list : list
          List of elements to search for. Element abbreviations can be
          any mix of upper and lower case, e.g., Hg, hG, hg, HG
 
     Returns
     -------
-    dict
+    lines_dict : dict
         element and associate emission lines
 
     """
