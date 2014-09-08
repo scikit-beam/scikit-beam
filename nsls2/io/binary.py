@@ -48,7 +48,7 @@ def read_binary(filename, nx, ny, nz, dsize, headersize, **kwargs):
     Parameters
     ----------
     filename : String
-              The name of the file to open
+        The name of the file to open
     nx : integer
         The number of data elements in the x-direction
     ny : integer
@@ -56,12 +56,13 @@ def read_binary(filename, nx, ny, nz, dsize, headersize, **kwargs):
     nz : integer
         The number of data elements in the z-direction
     dsize : numpy.dtype
-           The size of each element in the numpy array
+        The size of each element in the numpy array
     headersize : integer
-                The size of the file header in bytes
-    extras : dict
-            unnecessary keys that were passed to this function through
-            dictionary unpacking
+        The size of the file header in bytes
+    args : list
+        extra parameters that were passed in
+    kwargs : dict
+        extrs key-value pairs that were passed in
 
     Returns
     -------
