@@ -43,6 +43,8 @@ from collections import Mapping
 import functools
 
 import xraylib
+xraylib.XRayInit()
+xraylib.SetErrorMessages(0)
 
 
 line_name = ['Ka1', 'Ka2', 'Kb1', 'Kb2', 'La1', 'La2', 'Lb1', 'Lb2',
