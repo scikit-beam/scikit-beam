@@ -18,7 +18,12 @@ format.
 
 For the 'Returns' section of numpydoc, you must include the return
 variable name because this variable name is needed for automated vistrails
-wrapping (the return variable names are the output ports).  Example: ::
+wrapping (the return variable names are the output ports).  
+
+
+**THESE MUST BE IN THE ORDER THAT THE FUNCTION RETURNS THEM IN**
+
+Example: ::
 
 
    Returns
@@ -28,7 +33,6 @@ wrapping (the return variable names are the output ports).  Example: ::
    stdev : float
        The standard deviation
 
-**THESE MUST BE IN THE ORDER THAT THE FUNCTION RETURNS THEM IN**
 
 
 Sphinx
