@@ -200,7 +200,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
     wavelength : float
         wavelength of incident radiation (Angstroms)
 
-    ub_mat :  ndarray
+    ub_mat : ndarray
         UB matrix (orientation matrix) 3x3 matrix
 
     Returns
