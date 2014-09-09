@@ -250,3 +250,46 @@ def filter_n_largest(y, cands, N):
         return cands[sorted_args][::-1]
 
     return cands[sorted_args[-N:]][::-1]
+
+
+def filter_peak_height(y, cands, thresh, window=5):
+    """
+    Filter to remove candidate peaks that have height.  This
+    is implemented by looking at the peak-to-peak height of the peak in
+    a window around the candidate peak.
+
+    This is effectively filtering on aspect ratio as it is looking at
+    the height in a fixed window size.
+
+
+    Parameters
+    ----------
+    y : array
+        Independent variable
+
+    cands : array
+        An array containing the indices of candidate peaks
+
+    thresh : int
+        The minimum peak-to-peak size of the candidate peak to be accepted
+
+    window : int, optional
+        The size of the window around the peak to consider
+
+    Returns
+    -------
+    cands : array
+        An array of the indices which pass the filter
+
+    """
+    y = np.asarray(y)
+    out_tmp = deque()
+    max_ind = len(y)
+    for ind in cands:
+        slc = slice(np.max([0, ind-window]),
+                    np.min([max_ind, ind + window + 1]))
+        pk_hght = np.ptp(y[slc])
+        if pk_hght > thresh:
+            out_tmp.append(ind)
+
+    return np.array(out_tmp)
