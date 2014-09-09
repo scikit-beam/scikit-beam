@@ -69,7 +69,7 @@ def peak_refinement(x, y, cands, window, refine_function, refine_args=None):
         The dependent variable
 
     cands : array
-        Array of the indicies in x, y for candidate peaks.
+        Array of the indices in x, y for candidate peaks.
 
     refine_function : function
         A function which takes a section of data with a peak in it and returns
@@ -213,3 +213,40 @@ def refine_log_quadratic(x, y, Rval_thresh=None):
         if R2 < Rval_thresh:
             raise RejectPeak()
     return beta[1], np.exp(beta[2])
+
+
+def filter_n_largest(y, cands, N):
+    """Filters the N largest candidate peaks
+
+    Return a maximum of N largest candidates.  If N > len(cands) then
+    all of the cands will be returned sorted, else the indices
+    of the N largest peaks will be returned in descending order.
+
+    Parameters
+    ----------
+    y : array
+        Independent variable
+
+    cands : array
+        An array containing the indices of candidate peaks
+
+    N : int
+        The maximum number of peaks to return, sorted by size
+
+    Returns
+    -------
+    cands : array
+        An array of the indices of up to the N largest candidates
+    """
+    cands = np.asarray(cands)
+    N = int(N)
+    if N < 0:
+        raise ValueError("The maximum number of peaks to return must "
+                         "be positive not {}".format(N))
+
+    sorted_args = np.argsort(y[cands])
+    # cut out if asking for more peaks than exist
+    if len(cands) < N:
+        return cands[sorted_args][::-1]
+
+    return cands[sorted_args[-N:]][::-1]
