@@ -424,7 +424,7 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     val : array
         sum of values in each bin, length nx
 
-    count : 1D array
+    count : array
         The number of counts in each bin, length nx
     """
 
