@@ -79,8 +79,8 @@ def fit_quad_to_peak(x, y):
     # use linear least squares fitting
     beta, _, _, _ = np.linalg.lstsq(X, y)
 
-    SSerr = np.sum(np.power(np.polyval(beta, x) - y, 2))
-    SStot = np.sum(np.power(y - np.mean(y), 2))
+    SSerr = np.sum((np.polyval(beta, x) - y)**2)
+    SStot = np.sum((y - np.mean(y))**2)
     # re-map the returned value to match the form we want
     ret_beta = (beta[0],
                 -beta[1] / (2 * beta[0]),
