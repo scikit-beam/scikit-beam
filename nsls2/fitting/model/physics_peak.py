@@ -65,7 +65,7 @@ def gauss_peak(area, sigma, dx):
         
     Returns
     -------
-    array
+    couunts : ndarray
         gaussian peak
 
     References
@@ -160,7 +160,7 @@ def elastic_peak(coherent_sct_energy,
         global fitting parameter for peak width
     fwhm_fanoprime : float
         global fitting parameter for peak width
-    area : float:
+    area : float
         area of gaussian peak
     ev : array
         energy value
