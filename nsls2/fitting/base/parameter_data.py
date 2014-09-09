@@ -45,6 +45,7 @@
 from __future__ import (absolute_import, division, unicode_literals, print_function)
 import six
 
+
 """
 Parameter dictionary are included for xrf fitting.
 Element data not included.
@@ -65,51 +66,65 @@ They are empirical experience from authors of the original code.
 """
 
 
-para_dict = {'coherent_sct_amplitude': {'bound_type': 'none', 'min': 7.0, 'max': 8.0, 'value': 6.0, 'e_calibration': 'none', 'free_energy': 'none', 'free_all': 'none', 'default': 'none', 'linear': 'none'},
-             'coherent_sct_energy': {'bound_type': 'none', 'min': 10.4, 'max': 12.4, 'value': 11.8, 'e_calibration': 'fixed', 'free_energy': 'lohi', 'free_all': 'lohi', 'default': 'fixed', 'linear': 'fixed'},
-             'compton_amplitude': {'bound_type': 'none', 'min': 0.0, 'max': 10.0, 'value': 5.0, 'e_calibration': 'none', 'free_energy': 'none', 'free_all': 'none', 'default': 'none', 'linear': 'none'},
-             'compton_angle': {'bound_type': 'lohi', 'min': 75.0, 'max': 90.0, 'value': 90.0, 'e_calibration': 'fixed', 'free_energy': 'lohi', 'free_all': 'lohi', 'default': 'fixed', 'linear': 'fixed'},
-             'compton_f_step': {'bound_type': 'lohi', 'min': 0.0, 'max': 1.5, 'value': 0.1, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'lohi', 'default': 'fixed', 'linear': 'fixed'},
-             'compton_f_tail': {'bound_type': 'lohi', 'min': 0.0, 'max': 3.0, 'value': 0.8, 'e_calibration': 'fixed', 'free_energy': 'lo', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'compton_fwhm_corr': {'bound_type': 'lohi', 'min': 0.1, 'max': 3.0, 'value': 1.4, 'e_calibration': 'fixed', 'free_energy': 'lohi', 'free_all': 'lohi', 'default': 'fixed', 'linear': 'fixed'},
-             'compton_gamma': {'bound_type': 'none', 'min': 0.1, 'max': 10.0, 'value': 1.0, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'lohi', 'default': 'fixed', 'linear': 'fixed'},
-             'compton_hi_f_tail': {'bound_type': 'none', 'min': 1e-06, 'max': 1.0, 'value': 0.01, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'compton_hi_gamma': {'bound_type': 'none', 'min': 0.1, 'max': 3.0, 'value': 1.0, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'e_linear': {'bound_type': 'fixed', 'min': 0.001, 'max': 0.1, 'value': 1.0, 'e_calibration': 'lohi', 'free_energy': 'lohi', 'free_all': 'lohi', 'default': 'fixed', 'linear': 'fixed'},
-             'e_offset': {'bound_type': 'fixed', 'min': -0.2, 'max': 0.2, 'value': 0.0, 'e_calibration': 'lohi', 'free_energy': 'lohi', 'free_all': 'lohi', 'default': 'fixed', 'linear': 'fixed'},
-             'e_quadratic': {'bound_type': 'none', 'min': -0.0001, 'max': 0.0001, 'value': 0.0, 'e_calibration': 'lohi', 'free_energy': 'lohi', 'free_all': 'lohi', 'default': 'fixed', 'linear': 'fixed'},
-             'f_step_linear': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'f_step_offset': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'f_step_quadratic': {'bound_type': 'none', 'min': 0.0, 'max': 0.0, 'value': 0.0, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'f_tail_linear': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.01, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'lohi', 'default': 'fixed', 'linear': 'fixed'},
-             'f_tail_offset': {'bound_type': 'none', 'min': 0.0, 'max': 0.1, 'value': 0.04, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'lohi', 'default': 'fixed', 'linear': 'fixed'},
-             'f_tail_quadratic': {'bound_type': 'none', 'min': 0.0, 'max': 0.01, 'value': 0.0, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'fwhm_fanoprime': {'bound_type': 'lohi', 'min': 1e-06, 'max': 0.05, 'value': 0.00012, 'e_calibration': 'fixed', 'free_energy': 'lohi', 'free_all': 'lohi', 'default': 'fixed', 'linear': 'fixed'},
-             'fwhm_offset': {'bound_type': 'lohi', 'min': 0.005, 'max': 0.5, 'value': 0.12, 'e_calibration': 'fixed', 'free_energy': 'lohi', 'free_all': 'lohi', 'default': 'fixed', 'linear': 'fixed'},
-             'gamma_linear': {'bound_type': 'none', 'min': 0.0, 'max': 3.0, 'value': 0.0, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'gamma_offset': {'bound_type': 'none', 'min': 0.1, 'max': 10.0, 'value': 2.0, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'gamma_quadratic': {'bound_type': 'none', 'min': 0.0, 'max': 0.0, 'value': 0.0, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'ge_escape': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'kb_f_tail_linear': {'bound_type': 'none', 'min': 0.0, 'max': 0.02, 'value': 0.0, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'lohi', 'default': 'fixed', 'linear': 'fixed'},
-             'kb_f_tail_offset': {'bound_type': 'none', 'min': 0.0, 'max': 0.2, 'value': 0.0, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'lohi', 'default': 'fixed', 'linear': 'fixed'},
-             'kb_f_tail_quadratic': {'bound_type': 'none', 'min': 0.0, 'max': 0.0, 'value': 0.0, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'linear': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'pileup0': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'pileup1': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'pileup2': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'pileup3': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'pileup4': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'pileup5': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'pileup6': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'pileup7': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'pileup8': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'si_escape': {'bound_type': 'none', 'min': 0.0, 'max': 0.5, 'value': 0.0, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
-             'snip_width': {'bound_type': 'none', 'min': 0.1, 'max': 2.82842712475, 'value': 0.15, 'e_calibration': 'fixed', 'free_energy': 'fixed', 'free_all': 'fixed', 'default': 'fixed', 'linear': 'fixed'},
+para_dict = {'coherent_sct_amplitude': {'bound_type': 'none', 'min': 7.0, 'max': 8.0, 'value': 6.0},
+             'coherent_sct_energy': {'bound_type': 'none', 'min': 10.4, 'max': 12.4, 'value': 11.8},
+             'compton_amplitude': {'bound_type': 'none', 'min': 0.0, 'max': 10.0, 'value': 5.0},
+             'compton_angle': {'bound_type': 'lohi', 'min': 75.0, 'max': 90.0, 'value': 90.0},
+             'compton_f_step': {'bound_type': 'lohi', 'min': 0.0, 'max': 1.5, 'value': 0.1},
+             'compton_f_tail': {'bound_type': 'lohi', 'min': 0.0, 'max': 3.0, 'value': 0.8},
+             'compton_fwhm_corr': {'bound_type': 'lohi', 'min': 0.1, 'max': 3.0, 'value': 1.4},
+             'compton_gamma': {'bound_type': 'none', 'min': 0.1, 'max': 10.0, 'value': 1.0},
+             'compton_hi_f_tail': {'bound_type': 'none', 'min': 1e-06, 'max': 1.0, 'value': 0.01},
+             'compton_hi_gamma': {'bound_type': 'none', 'min': 0.1, 'max': 3.0, 'value': 1.0},
+             'e_linear': {'bound_type': 'fixed', 'min': 0.001, 'max': 0.1, 'value': 1.0},
+             'e_offset': {'bound_type': 'fixed', 'min': -0.2, 'max': 0.2, 'value': 0.0},
+             'e_quadratic': {'bound_type': 'none', 'min': -0.0001, 'max': 0.0001, 'value': 0.0},
+             'f_step_linear': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0},
+             'f_step_offset': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0},
+             'f_step_quadratic': {'bound_type': 'none', 'min': 0.0, 'max': 0.0, 'value': 0.0},
+             'f_tail_linear': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.01},
+             'f_tail_offset': {'bound_type': 'none', 'min': 0.0, 'max': 0.1, 'value': 0.04},
+             'f_tail_quadratic': {'bound_type': 'none', 'min': 0.0, 'max': 0.01, 'value': 0.0},
+             'fwhm_fanoprime': {'bound_type': 'lohi', 'min': 1e-06, 'max': 0.05, 'value': 0.00012},
+             'fwhm_offset': {'bound_type': 'lohi', 'min': 0.005, 'max': 0.5, 'value': 0.12},
+             'gamma_linear': {'bound_type': 'none', 'min': 0.0, 'max': 3.0, 'value': 0.0},
+             'gamma_offset': {'bound_type': 'none', 'min': 0.1, 'max': 10.0, 'value': 2.0},
+             'gamma_quadratic': {'bound_type': 'none', 'min': 0.0, 'max': 0.0, 'value': 0.0},
+             'ge_escape': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0},
+             'kb_f_tail_linear': {'bound_type': 'none', 'min': 0.0, 'max': 0.02, 'value': 0.0},
+             'kb_f_tail_offset': {'bound_type': 'none', 'min': 0.0, 'max': 0.2, 'value': 0.0},
+             'kb_f_tail_quadratic': {'bound_type': 'none', 'min': 0.0, 'max': 0.0, 'value': 0.0},
+             'linear': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0},
+             'pileup0': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+             'pileup1': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+             'pileup2': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+             'pileup3': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+             'pileup4': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+             'pileup5': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+             'pileup6': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+             'pileup7': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+             'pileup8': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+             'si_escape': {'bound_type': 'none', 'min': 0.0, 'max': 0.5, 'value': 0.0},
+             'snip_width': {'bound_type': 'none', 'min': 0.1, 'max': 2.82842712475, 'value': 0.15},
              }
 
 
-#e_calibration = {'coherent_sct_amplitude': 'none', 'compton_amplitude': 'none', 'e_linear': 'lohi', 'e_offset': 'lohi', 'e_quadratic': 'lohi'}
-#free_energy = {'coherent_sct_amplitude': 'none', 'coherent_sct_energy': 'lohi', 'compton_amplitude': 'none', 'compton_angle': 'lohi'}
+# fitting strategy
+linear = {'coherent_sct_amplitude': 'none', 'compton_amplitude': 'none'}
 
-#fit_strategy = { }
+e_calibration = {'coherent_sct_amplitude': 'none', 'compton_amplitude': 'none',
+                 'e_linear': 'lohi', 'e_offset': 'lohi', 'e_quadratic': 'lohi'}
 
+free_energy = {'coherent_sct_amplitude': 'none', 'coherent_sct_energy': 'lohi',
+               'compton_amplitude': 'none', 'compton_angle': 'lohi',
+               'compton_f_tail': 'lo', 'compton_fwhm_corr': 'lohi',
+               'e_linear': 'lohi', 'e_offset': 'lohi', 'e_quadratic': 'lohi',
+               'fwhm_fanoprime': 'lohi', 'fwhm_offset': 'lohi'}
+
+free_all = {'coherent_sct_amplitude': 'none', 'coherent_sct_energy': 'lohi',
+            'compton_amplitude': 'none', 'compton_angle': 'lohi',
+            'compton_f_step': 'lohi', 'compton_fwhm_corr': 'lohi', 'compton_gamma': 'lohi',
+            'e_linear': 'lohi', 'e_offset': 'lohi', 'e_quadratic': 'lohi',
+            'f_tail_linear': 'lohi', 'f_tail_offset': 'lohi',
+            'fwhm_fanoprime': 'lohi', 'fwhm_offset': 'lohi',
+            'kb_f_tail_linear': 'lohi', 'kb_f_tail_offset': 'lohi'}
