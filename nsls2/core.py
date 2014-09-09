@@ -405,9 +405,9 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
 
     Parameters
     ----------
-    x : 1D array-like
+    x : array
         position
-    y : 1D array-like
+    y : array
         intensity
     nx : integer
         number of bins to use
@@ -418,10 +418,10 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
 
     Returns
     -------
-    edges : 1D array
+    edges : array
         edges of bins, length nx + 1
 
-    val : 1D array
+    val : array
         sum of values in each bin, length nx
 
     count : 1D array
