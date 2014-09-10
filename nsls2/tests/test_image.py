@@ -32,4 +32,4 @@ def _helper_find_rings(proc_method, center, radii_list):
 
     tt = tt + noise
     res = proc_method(tt)
-    assert_equal(res[::-1], center)
+    assert_equal(res, center)
