@@ -409,11 +409,11 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
         position
     y : array
         intensity
-    nx : integer
+    nx : integer, optional
         number of bins to use
-    min_x : float
+    min_x : float, optional
         Left edge of first bin
-    max_x : float
+    max_x : float, optional
         Right edge of last bin
 
     Returns

@@ -41,7 +41,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def read_binary(filename, nx, ny, nz, dsize, headersize, **kwargs):
+def read_binary(filename, nx, ny, nz, dsize, headersize):
     """
     docstring, woo!
 
@@ -59,10 +59,6 @@ def read_binary(filename, nx, ny, nz, dsize, headersize, **kwargs):
         The size of each element in the numpy array
     headersize : integer
         The size of the file header in bytes
-    args : list
-        extra parameters that were passed in
-    kwargs : dict
-        extrs key-value pairs that were passed in
 
     Returns
     -------
