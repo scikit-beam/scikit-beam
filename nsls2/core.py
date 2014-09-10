@@ -406,12 +406,104 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     return bins, val, count
 
 
-def radial_integration(img, detector_center, sample_to_detector_distance,
-                       pixel_size, wavelength):
+def bin_image_to_1D(img,
+                    calibrated_center,
+                    warp_to_1D_func, warp_kwargs=None,
+                    bin_min=None, bin_max=None, bin_num=None):
+    """Integrates an image to a 1D curve.
+
+    The first step is use the `warp_to_1D_func` to convert
+    each pixel location to a scalar.  Example of this would be
+    distance from the center in mm, azimuths angle,  or converting to q.
+
+    Parameters
+    ----------
+    img : ndarray
+        The image to integrate
+
+    calibrated_center : tuple
+        The center of the image (row, col)
+
+    warp_to_1D_func : function
+        A function that takes in an image shape, calibrated_center
+        and a dict of kwargs and returns an array of the same shape
+        filled with a scalar for that pixel position.  The function
+        must have the following signature ::
+
+            output = func(img.shape, calibrated_center, **warp_kwargs)
+
+        such that ::
+
+            output.shape == img.shape
+
+        and output[i, j] corresponds to img[i, j]
+
+
+    warp_kwargs : dict, optional
+        Any additional keyword arguments to pass through to the warp function
+
+    bin_min : float, optional
+        The lower limit of the binning
+
+    bin_max : float, optional
+        The upper limit of binning
+
+    bin_num : int, optional
+        The number of bins
+
+    Returns
+    -------
+    bin_edges : array
+        The bin edges, length N+1
+
+    bin_sum : array
+        The sum of the pixels that fell in each bin
+
+    bin_count : array
+        The number of pixels in each bin
     """
-    docstring!
+    if warp_kwargs is None:
+        warp_kwargs = {}
+
+    values_1D = warp_to_1D_func(img.shape, calibrated_center,
+                             **warp_kwargs)
+
+    return bin_1D(values_1D.ravel(), img.ravel(), min_x=bin_min,
+                  max_x=bin_max, nx=bin_num)
+
+
+def warp_to_radius(shape, calibrated_center, pixel_size=None):
     """
-    pass
+    Converts pixel positions to radius from the calibrated center
+
+    Parameters
+    ----------
+    shape : tuple
+        The shape of the image (nrow, ncol) to warp
+        the coordinates of
+
+    calibrated_center : tuple
+        The center in pixels (row, col)
+
+    pixel_size : tuple, optional
+        The size of a pixel (really the pitch) in real units. (height, width).
+
+        Defaults to 1 pixel/pixel in not specified
+
+    Returns
+    -------
+    R : array
+        The L2 norm of the distance of each pixel from the calibrated center.
+    """
+
+    if pixel_size is None:
+        pixel_size = (1, 1)
+
+    X, Y = np.meshgrid(pixel_size[1] * (np.arange(shape[1]) -
+                                        calibrated_center[1]),
+                       pixel_size[0] * (np.arange(shape[0]) -
+                                        calibrated_center[0]))
+    return np.sqrt(X*X + Y*Y)
 
 
 def wedge_integration(src_data, center, theta_start,
