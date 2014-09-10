@@ -316,7 +316,8 @@ def img_subtraction_pre(img_arr, is_reference):
     return corrected_image
 
 
-def detector2D_to_1D(img, detector_center, **kwargs):
+def detector2D_to_1D(img, calibrated_center, pixel_size=None,
+                     **kwargs):
     """
     Convert the 2D image to a list of x y I coordinates where
     x == x_img - detector_center[0] and
@@ -324,29 +325,36 @@ def detector2D_to_1D(img, detector_center, **kwargs):
 
     Parameters
     ----------
-    img: ndarray
+    img: `ndarray`
         2D detector image
-    detector_center: 2 element array
-        see keys_core["detector_center"]["description"]
+
+    calibrated_center : tuple
+        see keys_core["calibrated_center"]["description"]
+
+    pixel_size : tuple, optional
+        conversion between pixels and real units
+
+        see keys_core["pixel_size"]["description"]
     **kwargs: dict
         Bucket for extra parameters in an unpacked dictionary
 
     Returns
     -------
-    X : numpy.ndarray
-        1 x N
-        x-coordinate of pixel
-    Y : numpy.ndarray
-        1 x N
-        y-coordinate of pixel
-    I : numpy.ndarray
-        1 x N
-        intensity of pixel
+    X : `ndarray`
+        x-coordinate of pixel. shape (N, )
+    Y : `ndarray`
+        y-coordinate of pixel. shape (N, )
+    I : `ndarray`
+        intensity of pixel. shape (N, )
     """
+    if pixel_size is None:
+        pixel_size = (1, 1)
 
     # Caswell's incredible terse rewrite
-    X, Y = np.meshgrid(np.arange(img.shape[0]) - detector_center[0],
-                       np.arange(img.shape[1]) - detector_center[1])
+    X, Y = np.meshgrid(pixel_size[0] * (np.arange(img.shape[0]) -
+                                        calibrated_center[0]),
+                       pixel_size[1] * (np.arange(img.shape[1]) -
+                                        calibrated_center[1]))
 
     # return the x, y and z coordinates (as a tuple? or is this a list?)
     return X.ravel(), Y.ravel(), img.ravel()
