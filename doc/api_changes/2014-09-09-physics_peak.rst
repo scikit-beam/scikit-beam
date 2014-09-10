@@ -2,48 +2,49 @@ Changes
 ----
 - changed function arguments, including add center positions, and put independent variable x as first argument to function
 
-- from :
-def gauss_peak(area, sigma, dx)
+- from ::
 
- to:
+  def gauss_peak(area, sigma, dx)
 
- def gauss_peak(x, area, center, sigma)
+  to::
 
-- from :
- gauss_step(area, sigma, dx, peak_e)
+  def gauss_peak(x, area, center, sigma)
 
-  to :
+- from ::
+
+  gauss_step(area, sigma, dx, peak_e)
+
+  to ::
 
   gauss_step(x, area, center, sigma, peak_e)
 
-- from :
-def gauss_tail(area, sigma, dx, gamma)
+- from ::
 
-to:
+  def gauss_tail(area, sigma, dx, gamma)
 
-gauss_tail(x, area, center, sigma, gamma)
+  to ::
 
-- from :
-elastic_peak(coherent_sct_energy,fwhm_offset, fwhm_fanoprime, area, ev, epsilon=2.96)
+  gauss_tail(x, area, center, sigma, gamma)
 
-to :
+- from ::
 
-elastic_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime, area, epsilon=2.96)
+  elastic_peak(coherent_sct_energy,fwhm_offset, fwhm_fanoprime, area, ev, epsilon=2.96)
 
-- from:
-def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
-                 compton_angle, compton_fwhm_corr, compton_amplitude,
-                 compton_f_step, compton_f_tail, compton_gamma,
-                 compton_hi_f_tail, compton_hi_gamma,
-                 area, ev, epsilon=2.96, matrix=False)
+  to ::
+  elastic_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime, area, epsilon=2.96)
 
-to :
+- from ::
 
-def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
-                 compton_angle, compton_fwhm_corr, compton_amplitude,
-                 compton_f_step, compton_f_tail, compton_gamma,
-                 compton_hi_f_tail, compton_hi_gamma,
-                 area, epsilon=2.96, matrix=False)
+  def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
+                   compton_angle, compton_fwhm_corr, compton_amplitude,
+                   compton_f_step, compton_f_tail, compton_gamma,
+                   compton_hi_f_tail, compton_hi_gamma,
+                   area, ev, epsilon=2.96, matrix=False)
 
+  to ::
 
-
+  def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
+                   compton_angle, compton_fwhm_corr, compton_amplitude,
+                   compton_f_step, compton_f_tail, compton_gamma,
+                   compton_hi_f_tail, compton_hi_gamma,
+                   area, epsilon=2.96, matrix=False)
