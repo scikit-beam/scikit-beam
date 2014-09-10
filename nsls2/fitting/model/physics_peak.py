@@ -57,7 +57,7 @@ def gauss_peak(x, area, center, sigma):
     Parameters
     ----------
     x : array
-        data in x coordinate, relative to center
+        data in x coordinate
     area : float
         area of gaussian function
     center : float
