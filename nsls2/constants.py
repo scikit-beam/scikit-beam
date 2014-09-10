@@ -40,7 +40,7 @@ from __future__ import (absolute_import, division,
                         unicode_literals, print_function)
 import numpy as np
 import six
-from collections import Mapping
+from collections import Mapping, namedtuple
 import functools
 
 import xraylib
@@ -560,6 +560,7 @@ class XrayLibWrap_Energy(XrayLibWrap):
                           self._map[key.lower()],
                           self._incident_energy)
 
+
 def emission_line_search(line_e, delta_e,
                          incident_energy, element_list=None):
     """
@@ -595,3 +596,174 @@ def emission_line_search(line_e, delta_e,
             out_dict[e.name] = lines
 
     return out_dict
+
+
+# http://stackoverflow.com/questions/3624753/how-to-provide-additional-initialization-for-a-subclass-of-namedtuple
+class HKL(namedtuple('HKL', 'h k l')):
+    '''
+    Class for carrying around hkl values
+    for rings/peaks.
+
+    This class also enforces that the values are
+    integers.
+    '''
+    __slots__ = ()
+
+    def __new__(cls, *args, **kwargs):
+        args = [int(_) for _ in args]
+        for k in list(kwargs):
+            kwargs[k] = int(kwargs[k])
+
+        return super(HKL, cls).__new__(cls, *args, **kwargs)
+
+    @property
+    def length(self):
+        """
+        The L2 length of the hkl vector.
+        """
+        return np.sqrt(np.sum(np.array(self)**2))
+
+
+class CalibrationAngles(object):
+    """
+    class for carrying around calibration data.
+
+    Properties make this a read-only class
+
+    Parameters
+    ----------
+    name : str
+        The name of the standard
+
+    a : float
+        Lattice parameter in nm
+
+    calibration_lambda : float
+        The wave length of the x-rays used for calibration in nm
+
+    known_twotheta : array
+        Known 2theta values in radian
+
+    known_hkl : list
+        List of length 3 element with the hkl values corresponding to
+        the known angles.
+    """
+
+    def __init__(self, name, calibration_lambda, a, known_twotheta, known_hkl):
+        self.name = name
+        self._a = a
+        self._cal_lambda = calibration_lambda
+        self._twotheta = np.asarray(known_twotheta)
+        self._hkl = [HKL(*hkl) for hkl in known_hkl]
+
+    def convert_2theta(self, new_lambda):
+        """
+        Convert the measured 2theta values to a different wavelength
+
+        Parameters
+        ----------
+        new_lambda : float
+            The new lambda in nm
+
+        Returns
+        -------
+        two_theta : array
+            The new 2theta values in radians
+        """
+
+        return convert_two_theta(self.cal_lambda, new_lambda,
+                              self.two_theta)
+
+    @property
+    def cal_lambda(self):
+        """
+        Wavelength used for calibration
+        """
+        return self._cal_lambda
+
+    @property
+    def hkl(self):
+        """
+        List of hkl values
+        """
+        return self._hkl
+
+    @property
+    def two_theta(self):
+        """
+        Array of measured 2theta values
+        """
+        return self._twotheta
+
+    @property
+    def a(self):
+        return self._a
+
+
+def convert_two_theta(cal_lambda, new_lambda, twotheta):
+    """
+    This converts the calibrated angles from one wavelength to another.
+
+    Parameters
+    ----------
+    cal_lambda : float
+        The wave length used to measure 2theta.  In same units as `new_lambda`.
+
+    new_lambda : float
+        The wave length the return 2theta will be for.
+        In same units as `cal_lambda`.
+
+    twotheta : array
+        The measured 2theta values in radians
+
+    Returns
+    -------
+    twotheta : array
+        The 2theta values for `new_lambda` in radians
+
+
+    Notes
+    -----
+    Given that
+
+    .. math ::
+
+        \\frac{\\lambda_c}{2 a} \\sqrt{h^2 + k^2 + l^2} = \\sin\\left(\\frac{2\\theta_c}{2}\\right)
+
+    If we multiply both sides by
+    :math:`\\frac{\\lambda_n}{\\lambda_c}` then we have
+
+    .. math ::
+
+        \\frac{\lambda_n}{2 a} \\sqrt{h^2 + k^2 + l^2} = \\frac{\\lambda_n}{\\lambda_c} \\sin\\left(\\frac{2\theta_c}{2}\\right)
+
+        \\sin\\left(\\frac{2\\theta_n}{2}\\right) = \\frac{\\lambda_n}{\\lambda_c} \\sin\\left(\\frac{2\\theta_c}{2}\\right)
+
+    which solving for :math:`2\\theta_n` gives us
+
+    .. math ::
+
+       2\\theta_n = 2 \\arcsin\\left(\\frac{\\lambda_n}{\\lambda_c} \\sin\\left(\\frac{2\\theta_c}{2}\\right)\\right)
+    """
+    return 2 * np.arcsin((new_lambda/cal_lambda) * np.sin(twotheta / 2))
+
+# Si data taken from
+# https://www-s.nist.gov/srmors/certificates/640D.pdf?CFID=3219362&CFTOKEN=c031f50442c44e42-57C377F6-BC7A-395A-F39B8F6F2E4D0246&jsessionid=f030c7ded9b463332819566354567a698744
+calibration_standards = {'Si':
+                         CalibrationAngles(name='Si',
+                                           calibration_lambda=0.15405929,
+                                           a=0.543123,
+                                           known_twotheta=np.deg2rad([
+                                               28.441, 47.3,
+                                               56.119, 69.126,
+                                               76.371, 88.024,
+                                               94.946, 106.7,
+                                               114.082, 127.532,
+                                               136.877]),
+                                           known_hkl=(
+                                               (1, 1, 1), (2, 2, 0),
+                                               (3, 1, 1), (4, 0, 0),
+                                               (3, 3, 1), (4, 2, 2),
+                                               (5, 1, 1), (4, 4, 0),
+                                               (5, 3, 1), (6, 2, 0),
+                                               (5, 3, 3)))}
