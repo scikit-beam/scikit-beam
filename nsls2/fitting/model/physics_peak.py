@@ -152,7 +152,7 @@ def gauss_tail(x, area, center, sigma, gamma):
 
 def elastic_peak(x, coherent_sct_energy,
                  fwhm_offset, fwhm_fanoprime,
-                 area, epsilon=2.96):
+                 coherent_sct_amplitude, epsilon=2.96):
     """
     Use gaussian function to model elastic peak
     
@@ -166,7 +166,7 @@ def elastic_peak(x, coherent_sct_energy,
         global fitting parameter for peak width
     fwhm_fanoprime : float
         global fitting parameter for peak width
-    area : float
+    coherent_sct_amplitude : float
         area of gaussian peak
     epsilon : float
         energy to create a hole-electron pair
@@ -186,7 +186,7 @@ def elastic_peak(x, coherent_sct_energy,
     sigma = np.sqrt((fwhm_offset / temp_val)**2 +
                     coherent_sct_energy * epsilon * fwhm_fanoprime)
 
-    value = gauss_peak(x, area, coherent_sct_energy, sigma)
+    value = gauss_peak(x, coherent_sct_amplitude, coherent_sct_energy, sigma)
     
     return value, sigma
 
