@@ -36,7 +36,8 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 
-from __future__ import (absolute_import, division, unicode_literals, print_function)
+from __future__ import (absolute_import, division,
+                        unicode_literals, print_function)
 import numpy as np
 import six
 from collections import Mapping
@@ -585,7 +586,8 @@ def emission_line_search(line_e, delta_e,
 
     search_list = [Element(item) for item in element_list]
 
-    cand_lines = [e.line_near(line_e, delta_e, incident_energy) for e in search_list]
+    cand_lines = [e.line_near(line_e, delta_e, incident_energy)
+                  for e in search_list]
 
     out_dict = dict()
     for e, lines in zip(search_list, cand_lines):
