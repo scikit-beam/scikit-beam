@@ -52,9 +52,10 @@ def test_gauss_peak():
     test of gauss function from xrf fit
     """
     area = 1
+    cen  = 0
     std = 1
-    dx = np.arange(-3, 3, 0.5)
-    out = gauss_peak(area, std, dx)
+    x = np.arange(-3, 3, 0.5)
+    out = gauss_peak(x, area, cen, std)
 
     y_true = [0.00443185, 0.0175283, 0.05399097, 0.1295176, 0.24197072, 0.35206533,
               0.39894228, 0.35206533, 0.24197072, 0.1295176, 0.05399097, 0.0175283]
@@ -75,10 +76,11 @@ def test_gauss_step():
               8.41344746e-01,   5.00000000e-01,   1.58655254e-01,
               2.27501319e-02,   1.34989803e-03,   3.16712418e-05]
     area = 1
+    cen = 0
     std = 1
-    dx = np.arange(-10, 5, 1)
+    x = np.arange(-10, 5, 1)
     peak_e = 1.0
-    out = gauss_step(area, std, dx, peak_e)
+    out = gauss_step(x, area, cen, std, peak_e)
 
     assert_array_almost_equal(y_true, out)
     return
@@ -95,10 +97,11 @@ def test_gauss_tail():
               2.22560560e-03, 5.22170501e-05, 4.72608544e-07]
 
     area = 1
+    cen = 0
     std = 1
-    dx = np.arange(-10, 5, 1)
+    x = np.arange(-10, 5, 1)
     gamma = 1.0
-    out = gauss_tail(area, std, dx, gamma)
+    out = gauss_tail(x, area, cen, std, gamma)
 
     assert_array_almost_equal(y_true, out)
 
@@ -125,8 +128,8 @@ def test_elastic_peak():
     fanoprime = 0.01
 
     ev = np.arange(8, 12, 0.1)
-    out, sigma = elastic_peak(energy, offset,
-                              fanoprime, area, ev)
+    out, sigma = elastic_peak(ev, energy, offset,
+                              fanoprime, area)
 
     assert_array_almost_equal(y_true, out)
     return
@@ -160,9 +163,9 @@ def test_compton_peak():
     area = 1
     ev = np.arange(8, 12, 0.1)
 
-    out, sigma, factor = compton_peak(energy, offset, fano, angle,
+    out, sigma, factor = compton_peak(ev, energy, offset, fano, angle,
                                       fwhm_corr, amp, f_step, f_tail,
-                                      gamma, hi_f_tail, hi_gamma, area, ev)
+                                      gamma, hi_f_tail, hi_gamma, area)
 
     assert_array_almost_equal(y_true, out)
     return

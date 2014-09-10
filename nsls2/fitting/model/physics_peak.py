@@ -50,18 +50,20 @@ import numpy as np
 import scipy.special
 
 
-def gauss_peak(area, sigma, dx):
+def gauss_peak(x, area, center, sigma):
     """
     Use gaussian function to model fluorescence peak from each element
     
     Parameters
     ----------
+    x : array
+        data in x coordinate
     area : float
         area of gaussian function
+    center : float
+        center position
     sigma : float
         standard deviation
-    x : array
-        data in x coordinate, relative to center
         
     Returns
     -------
@@ -75,24 +77,26 @@ def gauss_peak(area, sigma, dx):
     
     """
     
-    return area / (sigma * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((dx / sigma)**2))
+    return area / (sigma * np.sqrt(2 * np.pi)) * np.exp(-0.5 * (((x-center) / sigma)**2))
 
 
-def gauss_step(area, sigma, dx, peak_e):
+def gauss_step(x, area, center, sigma, peak_e):
     """
     Gauss step function is an important component in modeling compton peak.
     Use scipy erfc function. Please note erfc = 1-erf.
     
     Parameters
     ----------
+    x : array
+        data in x coordinate
     area : float
         area of gauss step function
+    center : float
+        center position
     sigma : float
         standard deviation
-    dx : array
-        data in x coordinate, x > 0
     peak_e : float
-        need to double check this value
+        emission energy
     
     Returns
     -------
@@ -105,23 +109,23 @@ def gauss_step(area, sigma, dx, peak_e):
            (Practical Spectroscopy)", CRC Press, 2 edition, pp. 182, 2007.
     """
     
-    counts = area / 2. / peak_e * scipy.special.erfc(dx / (np.sqrt(2) * sigma))
-
-    return counts
+    return area / 2. / peak_e * scipy.special.erfc((x - center) / (np.sqrt(2) * sigma))
 
 
-def gauss_tail(area, sigma, dx, gamma):
+def gauss_tail(x, area, center, sigma, gamma):
     """
     Use a gaussian tail function to simulate compton peak
     
     Parameters
     ----------
+    x : array
+        data in x coordinate
     area : float
         area of gauss tail function
+    center : float
+        center position
     sigma : float
         control peak width
-    dx : array
-        data in x coordinate
     gamma : float
         normalization factor
     
@@ -136,24 +140,26 @@ def gauss_tail(area, sigma, dx, gamma):
            (Practical Spectroscopy)", CRC Press, 2 edition, pp. 182, 2007.
     """
 
-    dx_neg = np.array(dx)
+    dx_neg = np.array(x) - center
     dx_neg[dx_neg > 0] = 0
     
     temp_a = np.exp(dx_neg / (gamma * sigma))
     counts = area / (2 * gamma * sigma * np.exp(-0.5 / (gamma**2))) * \
-        temp_a * scipy.special.erfc(dx / (np.sqrt(2) * sigma) + (1 / (gamma*np.sqrt(2))))
+        temp_a * scipy.special.erfc((x - center) / (np.sqrt(2) * sigma) + (1 / (gamma * np.sqrt(2))))
 
     return counts
 
 
-def elastic_peak(coherent_sct_energy,
+def elastic_peak(x, coherent_sct_energy,
                  fwhm_offset, fwhm_fanoprime,
-                 area, ev, epsilon=2.96):
+                 area, epsilon=2.96):
     """
     Use gaussian function to model elastic peak
     
     Parameters
     ----------
+    x : array
+        energy value
     coherent_sct_energy : float
         incident energy                         
     fwhm_offset : float
@@ -162,8 +168,6 @@ def elastic_peak(coherent_sct_energy,
         global fitting parameter for peak width
     area : float
         area of gaussian peak
-    ev : array
-        energy value
     epsilon : float
         energy to create a hole-electron pair
         for Ge 2.96, for Si 3.61 at 300K
@@ -181,25 +185,25 @@ def elastic_peak(coherent_sct_energy,
     temp_val = 2 * np.sqrt(2 * np.log(2))
     sigma = np.sqrt((fwhm_offset / temp_val)**2 +
                     coherent_sct_energy * epsilon * fwhm_fanoprime)
-    
-    delta_energy = ev - coherent_sct_energy
 
-    value = gauss_peak(area, sigma, delta_energy)
+    value = gauss_peak(x, area, coherent_sct_energy, sigma)
     
     return value, sigma
 
 
-def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime, 
+def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
                  compton_angle, compton_fwhm_corr, compton_amplitude,
                  compton_f_step, compton_f_tail, compton_gamma,
                  compton_hi_f_tail, compton_hi_gamma,
-                 area, ev, epsilon=2.96, matrix=False):
+                 area, epsilon=2.96, matrix=False):
     """
     Model compton peak, which is generated as an inelastic peak and always
     stays to the left of elastic peak on the spectrum.
     
     Parameters
     ----------
+    x : array
+        energy value
     coherent_sct_energy : float
         incident energy                         
     fwhm_offset : float
@@ -224,8 +228,6 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
         normalization factor of gaussian tail on higher side
     area : float
         area for gaussian peak, gaussian step and gaussian tail functions
-    ev : array
-        energy value
     epsilon : float
         energy to create a hole-electron pair
         for Ge 2.96, for Si 3.61 at 300K
@@ -252,35 +254,31 @@ def compton_peak(coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     
     temp_val = 2 * np.sqrt(2 * np.log(2))
     sigma = np.sqrt((fwhm_offset / temp_val)**2 + compton_e * epsilon * fwhm_fanoprime)
-    
-    #local_sigma = sigma*p[14]
 
-    delta_energy = ev.copy() - compton_e
-
-    counts = np.zeros(len(ev))
+    counts = np.zeros_like(x)
 
     factor = 1 / (1 + compton_f_step + compton_f_tail + compton_hi_f_tail)
     
     if matrix is False:
         factor = factor * (10.**compton_amplitude)
         
-    value = factor * gauss_peak(area, sigma*compton_fwhm_corr, delta_energy)
+    value = factor * gauss_peak(x, area, compton_e, sigma*compton_fwhm_corr)
     counts += value
 
     # compton peak, step
     if compton_f_step > 0.:
         value = factor * compton_f_step
-        value *= gauss_step(area, sigma, delta_energy, compton_e)
+        value *= gauss_step(x, area, compton_e, sigma, compton_e)
         counts += value
     
     # compton peak, tail on the low side
     value = factor * compton_f_tail
-    value *= gauss_tail(area, sigma, delta_energy, compton_gamma)
+    value *= gauss_tail(x, area, compton_e, sigma, compton_gamma)
     counts += value
 
     # compton peak, tail on the high side
     value = factor * compton_hi_f_tail
-    value *= gauss_tail(area, sigma, -1. * delta_energy, compton_hi_gamma)
+    value *= gauss_tail(-1 * x, area, -1 * compton_e, sigma, compton_hi_gamma)
     counts += value
 
     return counts, sigma, factor
