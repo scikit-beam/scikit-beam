@@ -42,4 +42,4 @@ from nsls2.testing.decorators import known_fail_if
 
 @known_fail_if(True)
 def test_fit_quad_to_peak():
-    assert(True)
+    assert(False)
