@@ -624,6 +624,8 @@ class HKL(namedtuple('HKL', 'h k l')):
         return np.sqrt(np.sum(np.array(self)**2))
 
 
+# TODO this class should probably be re-written do store q instead of 2theta
+# and a `Reflection` named-tuple should be added to store (khl, q) pairs
 class CalibrationAngles(object):
     """
     class for carrying around calibration data.
