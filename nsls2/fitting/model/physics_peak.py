@@ -64,7 +64,6 @@ def gauss_peak(x, area, center, sigma):
         center position
     sigma : float
         standard deviation
-
         
     Returns
     -------
