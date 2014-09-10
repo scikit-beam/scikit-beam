@@ -185,8 +185,6 @@ def elastic_peak(x, coherent_sct_energy,
     temp_val = 2 * np.sqrt(2 * np.log(2))
     sigma = np.sqrt((fwhm_offset / temp_val)**2 +
                     coherent_sct_energy * epsilon * fwhm_fanoprime)
-    
-    #delta_energy = x - coherent_sct_energy
 
     value = gauss_peak(x, area, coherent_sct_energy, sigma)
     
@@ -257,7 +255,7 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     temp_val = 2 * np.sqrt(2 * np.log(2))
     sigma = np.sqrt((fwhm_offset / temp_val)**2 + compton_e * epsilon * fwhm_fanoprime)
 
-    counts = np.zeros(len(x))
+    counts = np.zeros_like(x)
 
     factor = 1 / (1 + compton_f_step + compton_f_tail + compton_hi_f_tail)
     
