@@ -141,7 +141,7 @@ def gauss_tail(x, area, center, sigma, gamma):
            (Practical Spectroscopy)", CRC Press, 2 edition, pp. 182, 2007.
     """
 
-    dx_neg = np.array(x - center)
+    dx_neg = np.array(x) - center
     dx_neg[dx_neg > 0] = 0
     
     temp_a = np.exp(dx_neg / (gamma * sigma))
@@ -187,9 +187,9 @@ def elastic_peak(x, coherent_sct_energy,
     sigma = np.sqrt((fwhm_offset / temp_val)**2 +
                     coherent_sct_energy * epsilon * fwhm_fanoprime)
     
-    delta_energy = x - coherent_sct_energy
+    #delta_energy = x - coherent_sct_energy
 
-    value = gauss_peak(area, sigma, delta_energy)
+    value = gauss_peak(x, area, coherent_sct_energy, sigma)
     
     return value, sigma
 
@@ -258,8 +258,6 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     temp_val = 2 * np.sqrt(2 * np.log(2))
     sigma = np.sqrt((fwhm_offset / temp_val)**2 + compton_e * epsilon * fwhm_fanoprime)
 
-    delta_energy = np.array(x) - compton_e
-
     counts = np.zeros(len(x))
 
     factor = 1 / (1 + compton_f_step + compton_f_tail + compton_hi_f_tail)
@@ -267,23 +265,23 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     if matrix is False:
         factor = factor * (10.**compton_amplitude)
         
-    value = factor * gauss_peak(area, sigma*compton_fwhm_corr, delta_energy)
+    value = factor * gauss_peak(x, area, compton_e, sigma*compton_fwhm_corr)
     counts += value
 
     # compton peak, step
     if compton_f_step > 0.:
         value = factor * compton_f_step
-        value *= gauss_step(area, sigma, delta_energy, compton_e)
+        value *= gauss_step(x, area, compton_e, sigma, compton_e)
         counts += value
     
     # compton peak, tail on the low side
     value = factor * compton_f_tail
-    value *= gauss_tail(area, sigma, delta_energy, compton_gamma)
+    value *= gauss_tail(x, area, compton_e, sigma, compton_gamma)
     counts += value
 
     # compton peak, tail on the high side
     value = factor * compton_hi_f_tail
-    value *= gauss_tail(area, sigma, -1. * delta_energy, compton_hi_gamma)
+    value *= gauss_tail(-1 * x, area, -1 * compton_e, sigma, compton_hi_gamma)
     counts += value
 
     return counts, sigma, factor
