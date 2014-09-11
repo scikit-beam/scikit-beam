@@ -195,7 +195,7 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
                  compton_angle, compton_fwhm_corr, compton_amplitude,
                  compton_f_step, compton_f_tail, compton_gamma,
                  compton_hi_f_tail, compton_hi_gamma,
-                 area, epsilon=2.96, matrix=False):
+                 compton_amplitude, epsilon=2.96, matrix=False):
     """
     Model compton peak, which is generated as an inelastic peak and always
     stays to the left of elastic peak on the spectrum.
@@ -226,7 +226,7 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
         weight factor of gaussian tail on higher side
     compton_hi_gamma : float
         normalization factor of gaussian tail on higher side
-    area : float
+    compton_amplitude : float
         area for gaussian peak, gaussian step and gaussian tail functions
     epsilon : float
         energy to create a hole-electron pair
@@ -262,23 +262,23 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     if matrix is False:
         factor = factor * (10.**compton_amplitude)
         
-    value = factor * gauss_peak(x, area, compton_e, sigma*compton_fwhm_corr)
+    value = factor * gauss_peak(x, compton_amplitude, compton_e, sigma*compton_fwhm_corr)
     counts += value
 
     # compton peak, step
     if compton_f_step > 0.:
         value = factor * compton_f_step
-        value *= gauss_step(x, area, compton_e, sigma, compton_e)
+        value *= gauss_step(x, compton_amplitude, compton_e, sigma, compton_e)
         counts += value
     
     # compton peak, tail on the low side
     value = factor * compton_f_tail
-    value *= gauss_tail(x, area, compton_e, sigma, compton_gamma)
+    value *= gauss_tail(x, compton_amplitude, compton_e, sigma, compton_gamma)
     counts += value
 
     # compton peak, tail on the high side
     value = factor * compton_hi_f_tail
-    value *= gauss_tail(-1 * x, area, -1 * compton_e, sigma, compton_hi_gamma)
+    value *= gauss_tail(-1 * x, compton_amplitude, -1 * compton_e, sigma, compton_hi_gamma)
     counts += value
 
     return counts, sigma, factor
