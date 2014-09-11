@@ -506,6 +506,40 @@ def warp_to_radius(shape, calibrated_center, pixel_size=None):
     return np.sqrt(X*X + Y*Y)
 
 
+def warp_to_phi(shape, calibrated_center, pixel_size=None):
+    """
+    Converts pixel positions to radius from the calibrated center
+
+    Parameters
+    ----------
+    shape : tuple
+        The shape of the image (nrow, ncol) to warp
+        the coordinates of
+
+    calibrated_center : tuple
+        The center in pixels (row, col)
+
+    pixel_size : tuple, optional
+        The size of a pixel (really the pitch) in real units. (height, width).
+
+        Defaults to 1 pixel/pixel in not specified
+
+    Returns
+    -------
+    R : array
+        :math:`\\phi`, the angle from the vertical axis
+    """
+
+    if pixel_size is None:
+        pixel_size = (1, 1)
+
+    X, Y = np.meshgrid(pixel_size[1] * (np.arange(shape[1]) -
+                                        calibrated_center[1]),
+                       pixel_size[0] * (np.arange(shape[0]) -
+                                        calibrated_center[0]))
+    return np.arctan2(X, Y)
+
+
 def wedge_integration(src_data, center, theta_start,
                       delta_theta, r_inner, delta_r):
     """
