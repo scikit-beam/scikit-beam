@@ -173,9 +173,9 @@ def refine_quadratic(x, y, Rval_thresh=None):
 
     """
     beta, R2 = fit_quad_to_peak(x, y)
-    if Rval_thresh is not None:
-        if R2 < Rval_thresh:
-            raise PeakRejection()
+    if Rval_thresh is not None and R2 < Rval_thresh:
+        raise PeakRejection()
+
     return beta[1], beta[2]
 
 
@@ -212,9 +212,9 @@ def refine_log_quadratic(x, y, Rval_thresh=None):
 
     """
     beta, R2 = fit_quad_to_peak(x, np.log(y))
-    if Rval_thresh is not None:
-        if R2 < Rval_thresh:
-            raise PeakRejection()
+    if Rval_thresh is not None and R2 < Rval_thresh:
+        raise PeakRejection()
+
     return beta[1], np.exp(beta[2])
 
 
