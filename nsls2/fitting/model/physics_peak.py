@@ -190,12 +190,6 @@ def elastic_peak(x, coherent_sct_energy,
     
     return value, sigma
 
- def wrap(func, fixed_dict):
-     def inner(*args, **kwargs):
-         kwarg.update(fixed_dict)
-         return func(*args, **kwargs)
-     return inner
-
 
 def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
                  compton_angle, compton_fwhm_corr, compton_amplitude,

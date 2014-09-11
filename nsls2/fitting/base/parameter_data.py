@@ -130,7 +130,7 @@ free_all = {'coherent_sct_amplitude': 'none', 'coherent_sct_energy': 'lohi',
             'kb_f_tail_linear': 'lohi', 'kb_f_tail_offset': 'lohi'}
 
 
-def get_para(free_all):
+def get_para():
     """More to be added here.
        The para_dict will be updated
        based on different algorithms.

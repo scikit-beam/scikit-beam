@@ -97,12 +97,6 @@ class ElasticModel(Model):
     __doc__ = "Wrap the elastic_peak function for fitting within lmfit framework" + elastic_peak.__doc__
 
     def __init__(self, *args, **kwargs):
-        """
-        Parameters
-        ----------
-        independent_vars : list
-            independent variables saved as a list of string
-        """
         super(ElasticModel, self).__init__(elastic_peak, *args, **kwargs)
         set_default(self, elastic_peak)
         self.set_param_hint('epsilon', value=2.96, vary=False)
@@ -113,12 +107,6 @@ class ComptonModel(Model):
     __doc__ = "Wrap the compton_peak function for fitting within lmfit framework" + compton_peak.__doc__
 
     def __init__(self, *args, **kwargs):
-        """
-        Parameters
-        ----------
-        independent_vars : list
-            independent variables saved as a list of string
-        """
         super(ComptonModel, self).__init__(compton_peak, *args, **kwargs)
         set_default(self, compton_peak)
         self.set_param_hint('epsilon', value=2.96, vary=False)
