@@ -68,10 +68,10 @@ def peak_refinement(x, y, cands, window, refine_function, refine_args=None):
         The independent variable, does not need to be evenly spaced.
 
     y : array
-        The dependent variable
+        The dependent variable.  Must correspond 1:1 with the values in `x`
 
     cands : array
-        Array of the indices in x, y for candidate peaks.
+        Array of the indices in `x` (and `y`) for the candidate peaks.
 
     refine_function : function
         A function which takes a section of data with a peak in it and returns
@@ -91,7 +91,7 @@ def peak_refinement(x, y, cands, window, refine_function, refine_args=None):
         data passed to the refine function will be (2 * window + 1).
 
     refine_args : dict, optional
-    The passed to the refine_function
+        The passed to the refine_function
 
     Returns
     -------
@@ -181,7 +181,7 @@ def refine_quadratic(x, y, Rval_thresh=None):
 
 def refine_log_quadratic(x, y, Rval_thresh=None):
     """
-    Attempts to refine the peaks by fitting to a quadratic to the log of
+    Attempts to refine the peaks by fitting a quadratic to the log of
     the y-data.  This is a linear approximation of fitting a Gaussian.
 
     Parameters
@@ -257,12 +257,9 @@ def filter_n_largest(y, cands, N):
 
 def filter_peak_height(y, cands, thresh, window=5):
     """
-    Filter to remove candidate peaks that have height.  This
-    is implemented by looking at the peak-to-peak height of the peak in
-    a window around the candidate peak.
-
-    This is effectively filtering on aspect ratio as it is looking at
-    the height in a fixed window size.
+    Filter to remove candidate that are too small.  This
+    is implemented by looking at the relative height (max - min)
+    of the peak in a window around the candidate peak.
 
 
     Parameters
