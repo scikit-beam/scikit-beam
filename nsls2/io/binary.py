@@ -55,8 +55,9 @@ def read_binary(filename, nx, ny, nz, dsize, headersize):
         The number of data elements in the y-direction
     nz : integer
         The number of data elements in the z-direction
-    dsize : numpy.dtype
-        The size of each element in the numpy array
+    dsize : str
+        A valid argument for np.dtype(some_str). See read_binary.dsize
+        attribute
     headersize : integer
         The size of the file header in bytes
 
@@ -71,21 +72,24 @@ def read_binary(filename, nx, ny, nz, dsize, headersize):
     """
 
     # open the file
-    opened_file = open(filename, "rb")
+    with open(filename, "rb") as opened_file:
+        # read the file header
+        header = opened_file.read(headersize)
 
-    # read the file header
-    header = opened_file.read(headersize)
+        # read the entire file in as 1D list
+        data = np.fromfile(file=opened_file, dtype=np.dtype(dsize), count=-1)
 
-    # read the entire file in as 1D list
-    data = np.fromfile(file=opened_file, dtype=dsize, count=-1)
+        # reshape the array to 3D
+        if nz is not 1:
+            data.resize(nx, ny, nz)
+        # unless the 3rd dimension is 1, in which case reshape the array to 2D
+        elif ny is not 1:
+            data.resize(nx, ny)
+        # unless the 2nd dimension is also 1, in which case leave the array as 1D
 
-    # reshape the array to 3D
-    if nz is not 1:
-        data.resize(nx, ny, nz)
-    # unless the 3rd dimension is 1, in which case reshape the array to 2D
-    elif ny is not 1:
-        data.resize(nx, ny)
-    # unless the 2nd dimension is also 1, in which case leave the array as 1D
+        # return the array and the header
+        return data, header
 
-    # return the array and the header
-    return data, header
+# set an attribute for the dsize params that are valid options
+read_binary.dsize = list(np.typeDict)
+read_binary.dsize.sort()
