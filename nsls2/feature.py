@@ -49,10 +49,12 @@ from collections import deque
 from .fitting import fit_quad_to_peak
 
 
-class RejectPeak(Exception):
-    """
-    Custom exception class to indicate that the refine function rejected
-    the
+class PeakRejection(Exception):
+    """Custom exception class to indicate that the refine function rejected
+    the candidate peak.
+
+    This uses the exception handling framework in a method akin to
+    `StopIteration` to indicate that there will be no return value.
     """
     pass
 
@@ -79,7 +81,7 @@ def peak_refinement(x, y, cands, window, refine_function, refine_args=None):
 
             center, height = refine_func(x, y, **kwargs)
 
-        This function may raise `RejectPeak` to indicate no suitable
+        This function may raise `PeakRejection` to indicate no suitable
         peak was found
 
     window : int
@@ -128,8 +130,9 @@ def peak_refinement(x, y, cands, window, refine_function, refine_args=None):
                     np.min([max_ind, ind + window + 1]))
         try:
             ret = refine_function(x[slc], y[slc], **refine_args)
-        except RejectPeak:
-            #
+        except PeakRejection:
+            # We are catching the PeakRejections raised here as
+            # an indication that no suitable peak was found
             continue
         else:
             out_tmp.append(ret)
@@ -151,8 +154,8 @@ def refine_quadratic(x, y, Rval_thresh=None):
         Dependent variable
 
     Rval_thresh : float, optional
-        Threshold for R2 value of fit,  If the computed R2 is worse than
-        this threshold RejectPeak will be raised
+        Threshold for R^2 value of fit,  If the computed R^2 is worse than
+        this threshold PeakRejection will be raised
 
     Returns
     -------
@@ -164,7 +167,7 @@ def refine_quadratic(x, y, Rval_thresh=None):
 
     Raises
     ------
-    RejectPeak
+    PeakRejection
        Raised to indicate that no suitable peak was found in the
        interval
 
@@ -172,7 +175,7 @@ def refine_quadratic(x, y, Rval_thresh=None):
     beta, R2 = fit_quad_to_peak(x, y)
     if Rval_thresh is not None:
         if R2 < Rval_thresh:
-            raise RejectPeak()
+            raise PeakRejection()
     return beta[1], beta[2]
 
 
@@ -190,8 +193,8 @@ def refine_log_quadratic(x, y, Rval_thresh=None):
         Dependent variable
 
     Rval_thresh : float, optional
-        Threshold for R2 value of fit,  If the computed R2 is worse than
-        this threshold RejectPeak will be raised
+        Threshold for R^2 value of fit,  If the computed R^2 is worse than
+        this threshold PeakRejection will be raised
 
     Returns
     -------
@@ -203,7 +206,7 @@ def refine_log_quadratic(x, y, Rval_thresh=None):
 
     Raises
     ------
-    RejectPeak
+    PeakRejection
        Raised to indicate that no suitable peak was found in the
        interval
 
@@ -211,7 +214,7 @@ def refine_log_quadratic(x, y, Rval_thresh=None):
     beta, R2 = fit_quad_to_peak(x, np.log(y))
     if Rval_thresh is not None:
         if R2 < Rval_thresh:
-            raise RejectPeak()
+            raise PeakRejection()
     return beta[1], np.exp(beta[2])
 
 
