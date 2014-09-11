@@ -625,7 +625,7 @@ class HKL(namedtuple('HKL', 'h k l')):
 
 
 # TODO this class should probably be re-written do store q instead of 2theta
-# and a `Reflection` named-tuple should be added to store (khl, q) pairs
+# and a `Reflection` named-tuple should be added to store (hkl, q) pairs
 class CalibrationAngles(object):
     """
     class for carrying around calibration data.
@@ -651,10 +651,11 @@ class CalibrationAngles(object):
         the known angles.
     """
 
-    def __init__(self, name, calibration_lambda, a, known_twotheta, known_hkl):
+    def __init__(self, name, calibration_wavelength, a,
+                 known_twotheta, known_hkl):
         self.name = name
         self._a = a
-        self._cal_lambda = calibration_lambda
+        self._wavelength = calibration_wavelength
         self._twotheta = np.asarray(known_twotheta)
         self._hkl = [HKL(*hkl) for hkl in known_hkl]
 
@@ -673,15 +674,15 @@ class CalibrationAngles(object):
             The new 2theta values in radians
         """
 
-        return convert_two_theta(self.cal_lambda, new_lambda,
+        return convert_two_theta(self.wavelength, new_lambda,
                               self.two_theta)
 
     @property
-    def cal_lambda(self):
+    def wavelength(self):
         """
         Wavelength used for calibration
         """
-        return self._cal_lambda
+        return self._wavelength
 
     @property
     def hkl(self):
@@ -702,13 +703,13 @@ class CalibrationAngles(object):
         return self._a
 
 
-def convert_two_theta(cal_lambda, new_lambda, twotheta):
+def convert_two_theta(old_lambda, new_lambda, twotheta):
     """
     This converts the calibrated angles from one wavelength to another.
 
     Parameters
     ----------
-    cal_lambda : float
+    old_lambda : float
         The wave length used to measure 2theta.  In same units as `new_lambda`.
 
     new_lambda : float
@@ -747,13 +748,13 @@ def convert_two_theta(cal_lambda, new_lambda, twotheta):
 
        2\\theta_n = 2 \\arcsin\\left(\\frac{\\lambda_n}{\\lambda_c} \\sin\\left(\\frac{2\\theta_c}{2}\\right)\\right)
     """
-    return 2 * np.arcsin((new_lambda/cal_lambda) * np.sin(twotheta / 2))
+    return 2 * np.arcsin((new_lambda/old_lambda) * np.sin(twotheta / 2))
 
 # Si data taken from
 # https://www-s.nist.gov/srmors/certificates/640D.pdf?CFID=3219362&CFTOKEN=c031f50442c44e42-57C377F6-BC7A-395A-F39B8F6F2E4D0246&jsessionid=f030c7ded9b463332819566354567a698744
 calibration_standards = {'Si':
                          CalibrationAngles(name='Si',
-                                           calibration_lambda=0.15405929,
+                                           calibration_wavelength=0.15405929,
                                            a=0.543123,
                                            known_twotheta=np.deg2rad([
                                                28.441, 47.3,
