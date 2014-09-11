@@ -190,12 +190,18 @@ def elastic_peak(x, coherent_sct_energy,
     
     return value, sigma
 
+ def wrap(func, fixed_dict):
+     def inner(*args, **kwargs):
+         kwarg.update(fixed_dict)
+         return func(*args, **kwargs)
+     return inner
+
 
 def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
                  compton_angle, compton_fwhm_corr, compton_amplitude,
                  compton_f_step, compton_f_tail, compton_gamma,
                  compton_hi_f_tail, compton_hi_gamma,
-                 compton_amplitude, epsilon=2.96, matrix=False):
+                 epsilon=2.96, matrix=False):
     """
     Model compton peak, which is generated as an inelastic peak and always
     stays to the left of elastic peak on the spectrum.
@@ -215,7 +221,7 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     compton_fwhm_corr : float 
         correction factor on peak width
     compton_amplitude : float
-        amplitude of compton peak
+        area for gaussian peak, gaussian step and gaussian tail functions
     compton_f_step : float
         weight factor of the gaussian step function
     compton_f_tail : float
@@ -226,8 +232,6 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
         weight factor of gaussian tail on higher side
     compton_hi_gamma : float
         normalization factor of gaussian tail on higher side
-    compton_amplitude : float
-        area for gaussian peak, gaussian step and gaussian tail functions
     epsilon : float
         energy to create a hole-electron pair
         for Ge 2.96, for Si 3.61 at 300K

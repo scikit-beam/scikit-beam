@@ -160,12 +160,11 @@ def test_compton_peak():
     gamma = 10
     hi_f_tail = 0.1
     hi_gamma = 1
-    area = 1
     ev = np.arange(8, 12, 0.1)
 
     out, sigma, factor = compton_peak(ev, energy, offset, fano, angle,
                                       fwhm_corr, amp, f_step, f_tail,
-                                      gamma, hi_f_tail, hi_gamma, area)
+                                      gamma, hi_f_tail, hi_gamma)
 
     assert_array_almost_equal(y_true, out)
     return

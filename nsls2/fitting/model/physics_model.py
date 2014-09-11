@@ -48,54 +48,57 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 import inspect
 
-from nsls2.fitting.model.physics_peak import elastic_peak
+from nsls2.fitting.model.physics_peak import elastic_peak, compton_peak
 from nsls2.fitting.base.parameter_data import get_para
 from lmfit import Model
 
 
+def set_default(model_name, func_name):
+    """set values and bounds to parameters"""
+    paras = inspect.getargspec(func_name)
+    default_len = len(paras.defaults)
+
+    # the first argument is independent variable, also ignored
+    # default values are not considered for fitting in this function
+    my_args = paras.args[1:-default_len]
+    para_dict = get_para()
+
+    for name in my_args:
+        # area and coherent_sct_amplitude are the same thing
+
+        my_dict = para_dict[name]
+        if my_dict['bound_type'] == 'none':
+            model_name.set_param_hint(name, vary=True)
+        elif my_dict['bound_type'] == 'fixed':
+            model_name.set_param_hint(name, vary=False, value=my_dict['value'])
+        elif my_dict['bound_type'] == 'lo':
+            model_name.set_param_hint(name, value=my_dict['value'], vary=True,
+                                min=my_dict['min'])
+        elif my_dict['bound_type'] == 'hi':
+            model_name.set_param_hint(name, value=my_dict['value'], vary=True,
+                                max=my_dict['max'])
+        elif my_dict['bound_type'] == 'lohi':
+            model_name.set_param_hint(name, value=my_dict['value'], vary=True,
+                                min=my_dict['min'], max=my_dict['max'])
+        else:
+            raise TypeError("Boundary type %s can't be used" % (my_dict['bound_type']))
+
+
 class ElasticModel(Model):
 
-    __doc__ = " Wrap the elastic function for fitting within lmfit framework" \
-              + elastic_peak.__doc__
+    " Wrap the peak function for fitting within lmfit framework"
 
-    def __init__(self, independent_vars=['x'],
-                 *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Parameters
         ----------
+        func_name : str
+            function name of physics peak
         independent_vars : list
             independent variables saved as a list of string
         """
-        super(ElasticModel, self).__init__(elastic_peak, independent_vars=['x'],
-                                           *args, **kwargs)
-        self.set_default()
+        super(ElasticModel, self).__init__(elastic_peak, *args, **kwargs)
+        set_default(self, elastic_peak)
+        self.set_param_hint('epsilon', value=2.96, vary=False)
 
-    def set_default(self):
-        """ set values and bounds to parameters"""
-        paras = inspect.getargspec(elastic_peak)
-        default_len = len(paras.defaults)
-
-        # default values are not considered for fitting in this function
-        my_args = paras.args[:-default_len]
-        para_dict = get_para()
-
-        for name in my_args:
-            if name in self.independent_vars:
-                continue
-            # area and coherent_sct_amplitude are the same thing
-
-            my_dict = para_dict[name]
-            if my_dict['bound_type'] == 'none':
-                self.set_param_hint(name, vary=True)
-            elif my_dict['bound_type'] == 'fixed':
-                self.set_param_hint(name, vary=False, value=my_dict['value'])
-            elif my_dict['bound_type'] == 'lo':
-                self.set_param_hint(name, value=my_dict['value'], vary=True,
-                                    min=my_dict['min'])
-            elif my_dict['bound_type'] == 'hi':
-                self.set_param_hint(name, value=my_dict['value'], vary=True,
-                                    max=my_dict['max'])
-            else:
-                self.set_param_hint(name, value=my_dict['value'], vary=True,
-                                    min=my_dict['min'], max=my_dict['max'])
 
