@@ -17,9 +17,13 @@ GCI: 5/13/14 -- Added load function for netCDF files. Specifically for loading
 GCI: 8/1/14 -- Updating documentation to detail required dependencies for 
     netCDF file IO. Without these required dependencies these functions
     will not work.
+GCI: 9/11/14 -- Finished initial requirements for pull request. Load function
+    tested using sample netCDF file in test_data folder and successfully
+    loads and returns the metadata dictionary and the array data.
 """
 
 import numpy as np
+import os
 from netCDF4 import Dataset
 
 
@@ -74,18 +78,17 @@ def load_netCDF(file_name):
         then a default value of 1.0 is used.
     """
     
-
-    src_file = Dataset(file_name)
-    data = src_file.variables['VOLUME']
-    md_dict = src_file.__dict__
-    if data.scale_factor != 1.0:
-        #Check for voxel intensity scale factor and apply if value is present
-        scale_value = data.scale_factor
-    else:
-        # Value is set to 1.0 otherwise so values are not altered, other than 
-        # to ensure values are of type float
-        scale_value = 1.0
-    data = data / scale_value
+    with Dataset(os.path.normpath(file_name), 'r') as src_file:
+        data = src_file.variables['VOLUME']
+        md_dict = src_file.__dict__
+        if data.scale_factor != 1.0:
+            #Check for voxel intensity scale factor and apply if value is present
+            scale_value = data.scale_factor
+        else:
+            # Value is set to 1.0 otherwise so values are not altered, other than
+            # to ensure values are of type float
+            scale_value = 1.0
+        data = data / scale_value
 
     # Accounts for specific case where z_pixel_size doesn't get assigned
     # even though dimensions are actuall isotropic. This occurs when
