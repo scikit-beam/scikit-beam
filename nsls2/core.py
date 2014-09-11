@@ -410,13 +410,13 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
 
 def bin_image_to_1D(img,
                     calibrated_center,
-                    warp_to_1D_func, warp_kwargs=None,
+                    pixel_to_1D_func, warp_kwargs=None,
                     bin_min=None, bin_max=None, bin_num=None):
     """Integrates an image to a 1D curve.
 
-    The first step is use the `warp_to_1D_func` to convert
+    The first step is use the `pixel_to_1D_func` to convert
     each pixel location to a scalar.  Example of this would be
-    distance from the center in mm, azimuths angle,  or converting to q.
+    distance from the center in mm, azimuthal angle, or converting to q.
 
     Parameters
     ----------
@@ -426,11 +426,11 @@ def bin_image_to_1D(img,
     calibrated_center : tuple
         The center of the image (row, col)
 
-    warp_to_1D_func : function
+    pixel_to_1D_func : function
         A function that takes in an image shape, calibrated_center
         and a dict of kwargs and returns an array of the same shape
-        filled with a scalar for that pixel position.  The function
-        must have the following signature ::
+        filled with a scalar for that pixel position (R2 -> R1 mapping).
+        The function must have the following signature ::
 
             output = func(img.shape, calibrated_center, **warp_kwargs)
 
@@ -467,14 +467,14 @@ def bin_image_to_1D(img,
     if warp_kwargs is None:
         warp_kwargs = {}
 
-    values_1D = warp_to_1D_func(img.shape, calibrated_center,
+    values_1D = pixel_to_1D_func(img.shape, calibrated_center,
                              **warp_kwargs)
 
     return bin_1D(values_1D.ravel(), img.ravel(), min_x=bin_min,
                   max_x=bin_max, nx=bin_num)
 
 
-def warp_to_radius(shape, calibrated_center, pixel_size=None):
+def pixel_to_radius(shape, calibrated_center, pixel_size=None):
     """
     Converts pixel positions to radius from the calibrated center
 
@@ -490,7 +490,7 @@ def warp_to_radius(shape, calibrated_center, pixel_size=None):
     pixel_size : tuple, optional
         The size of a pixel (really the pitch) in real units. (height, width).
 
-        Defaults to 1 pixel/pixel in not specified
+        Defaults to 1 pixel/pixel if not specified.
 
     Returns
     -------
@@ -508,9 +508,9 @@ def warp_to_radius(shape, calibrated_center, pixel_size=None):
     return np.sqrt(X*X + Y*Y)
 
 
-def warp_to_phi(shape, calibrated_center, pixel_size=None):
+def pixel_to_phi(shape, calibrated_center, pixel_size=None):
     """
-    Converts pixel positions to radius from the calibrated center
+    Converts pixel positions to :math:`\\phi`, the angle from vertical.
 
     Parameters
     ----------
@@ -524,12 +524,13 @@ def warp_to_phi(shape, calibrated_center, pixel_size=None):
     pixel_size : tuple, optional
         The size of a pixel (really the pitch) in real units. (height, width).
 
-        Defaults to 1 pixel/pixel in not specified
+        Defaults to 1 pixel/pixel if not specified.
 
     Returns
     -------
-    R : array
-        :math:`\\phi`, the angle from the vertical axis
+    phi : array
+        :math:`\\phi`, the angle from the vertical axis.
+        :math:`\\phi \\el [-\pi, \pi]`
     """
 
     if pixel_size is None:

@@ -46,7 +46,7 @@ from collections import deque
 from nsls2.constants import calibration_standards
 from nsls2.feature import (filter_peak_height, peak_refinement,
                            refine_log_quadratic)
-from nsls2.core import (warp_to_phi, warp_to_radius,
+from nsls2.core import (pixel_to_phi, pixel_to_radius,
                         pairwise, bin_edges_to_centers, bin_1D)
 
 
@@ -169,8 +169,8 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps,
     calibrated_center : tuple
         The refined calibrated center.
     """
-    phi = warp_to_phi(image.shape, calibrated_center, pixel_size).ravel()
-    r = warp_to_radius(image.shape, calibrated_center, pixel_size).ravel()
+    phi = pixel_to_phi(image.shape, calibrated_center, pixel_size).ravel()
+    r = pixel_to_radius(image.shape, calibrated_center, pixel_size).ravel()
     I = image.ravel()
 
     phi_steps = np.linspace(-np.pi, np.pi, phi_steps, endpoint=True)
