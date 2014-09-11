@@ -54,7 +54,15 @@ from lmfit import Model
 
 
 def set_default(model_name, func_name):
-    """set values and bounds to parameters"""
+    """set values and bounds to Model parameters in lmfit
+
+    Parameters
+    ----------
+    model_name : class object
+        Model class object from lmfit
+    func_name : function
+        function name of physics peak
+    """
     paras = inspect.getargspec(func_name)
     default_len = len(paras.defaults)
 
@@ -86,14 +94,12 @@ def set_default(model_name, func_name):
 
 class ElasticModel(Model):
 
-    __doc__ = elastic_peak.__doc__ + " Wrap the elastic_peak function for fitting within lmfit framework"
+    __doc__ = "Wrap the elastic_peak function for fitting within lmfit framework" + elastic_peak.__doc__
 
     def __init__(self, *args, **kwargs):
         """
         Parameters
         ----------
-        func_name : str
-            function name of physics peak
         independent_vars : list
             independent variables saved as a list of string
         """
@@ -102,3 +108,17 @@ class ElasticModel(Model):
         self.set_param_hint('epsilon', value=2.96, vary=False)
 
 
+class ComptonModel(Model):
+
+    __doc__ = "Wrap the compton_peak function for fitting within lmfit framework" + compton_peak.__doc__
+
+    def __init__(self, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        independent_vars : list
+            independent variables saved as a list of string
+        """
+        super(ComptonModel, self).__init__(compton_peak, *args, **kwargs)
+        set_default(self, compton_peak)
+        self.set_param_hint('epsilon', value=2.96, vary=False)
