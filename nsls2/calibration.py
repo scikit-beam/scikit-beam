@@ -42,10 +42,12 @@ from __future__ import (absolute_import, division, print_function,
 import six
 import numpy as np
 import scipy.signal
+from collections import deque
 from nsls2.constants import calibration_standards
 from nsls2.feature import (filter_peak_height, peak_refinement,
                            refine_log_quadratic)
-
+from nsls2.core import (warp_to_phi, warp_to_radius,
+                        pairwise, bin_edges_to_centers, bin_1D)
 
 def estimate_d_blind(name, wavelength, bin_centers, ring_average,
                window_size, threshold, max_peak_count=None):
@@ -128,3 +130,79 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
     d_array = (peaks_x[slc] / tan2theta[slc])
 
     return np.mean(d_array), np.std(d_array)
+
+
+def refine_center(image, calibrated_center, pixel_size, phi_steps,
+                  nx=750, min_x=10, max_x=60, window_size=5,
+                  threshold=17000, max_peaks=7):
+    """Refines the location of the center of the beam.
+
+    This relies on being able to see the whole powder pattern.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image
+    calibrated_center : tuple
+        (row, column) the estimated center
+    pixel_size : tuple
+        (pixel_height, pixel_width)
+    phi_steps : int
+        How many regions to split the ring into, should be >10
+    nx : int
+        Number of bins to use for radial binning
+    min_x : float
+        The minimum radius to use for radial binning
+    max_x : float
+        The maximum radius to use for radial binning
+    window_size : int
+        The window size to use (in bins) to use when refining peaks
+    threshold : float
+        Minimum peaks size
+    max_peaks : int
+        Number of rings to look it
+
+    Returns
+    -------
+    calibrated_center : tuple
+        The refined calibrated center.
+    """
+    phi = warp_to_phi(image.shape, calibrated_center, pixel_size).ravel()
+    r = warp_to_radius(image.shape, calibrated_center, pixel_size).ravel()
+    I = image.ravel()
+
+    phi_steps = np.linspace(-np.pi, np.pi, phi_steps, endpoint=True)
+    out = deque()
+    for phi_start, phi_end in pairwise(phi_steps):
+        mask = (phi <= phi_end) * (phi > phi_start)
+        out.append(bin_1D(r[mask], I[mask],
+                          nx=nx, min_x=min_x, max_x=max_x))
+    out = list(out)
+
+    ring_trace = []
+    for bins, b_sum, b_count in out:
+        mask = b_sum > 0
+        avg = b_sum[mask] / b_count[mask]
+        bin_centers = bin_edges_to_centers(bins)[mask]
+
+        cands = scipy.signal.argrelmax(avg, order=window_size)[0]
+        # filter local maximums by size
+        cands = filter_peak_height(avg, cands,
+                                   threshold, window=window_size)
+        ring_trace.append(bin_centers[cands[:max_peaks]])
+
+    print([len(_) for _ in ring_trace])
+    ring_trace = np.vstack(ring_trace).T
+
+    mean_dr = np.mean(ring_trace - np.mean(ring_trace, axis=1, keepdims=True), axis=0)
+
+    phi_centers = bin_edges_to_centers(phi_steps)
+
+    delta = np.mean(np.diff(phi_centers))
+    # this is doing just one term of a Fourier series
+    # note that we have to convert _back_ to pixels from real units
+    # TODO do this with better integration/handle repeat better
+    col_shift = np.sum(np.sin(phi_centers) * mean_dr) * delta / (np.pi * pixel_size[1])
+    row_shift = np.sum(np.cos(phi_centers) * mean_dr) * delta / (np.pi * pixel_size[0])
+
+    return tuple(np.array(calibrated_center) + np.array([row_shift, col_shift]))
