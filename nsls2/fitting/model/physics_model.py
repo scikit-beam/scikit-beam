@@ -86,7 +86,7 @@ def set_default(model_name, func_name):
 
 class ElasticModel(Model):
 
-    " Wrap the peak function for fitting within lmfit framework"
+    __doc__ = elastic_peak.__doc__ + " Wrap the elastic_peak function for fitting within lmfit framework"
 
     def __init__(self, *args, **kwargs):
         """
