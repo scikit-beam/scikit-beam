@@ -49,6 +49,7 @@ from nsls2.feature import (filter_peak_height, peak_refinement,
 from nsls2.core import (warp_to_phi, warp_to_radius,
                         pairwise, bin_edges_to_centers, bin_1D)
 
+
 def estimate_d_blind(name, wavelength, bin_centers, ring_average,
                window_size, threshold, max_peak_count=None):
     """ Estimate the sample-detector distance
@@ -79,7 +80,8 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
         the ring's annulus in mm
 
     ring_average : array
-        The average intensity in the given ring.  In counts [arb]
+        The average intensity in the given ring of a azimuthally integrated
+        powder pattern.  In counts [arb]
 
     window_size : int
         The number of elements on either side of a local maximum to
@@ -102,7 +104,7 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
         from all of the peaks used.
 
     std_dist_sample : float
-        The standard deviation of the d estimated by each of the peaks
+        The standard deviation of d computed from the peaks used.
 
     """
     if max_peak_count is None:
@@ -126,7 +128,7 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
     tan2theta = np.tan(cal.convert_2theta(wavelength))
     # figure out how many peaks we can look at
     slc = slice(0, np.min([len(tan2theta), len(peaks_x), max_peak_count]))
-    # estimate the sample-
+    # estimate the sample-detector distance for each of the peaks
     d_array = (peaks_x[slc] / tan2theta[slc])
 
     return np.mean(d_array), np.std(d_array)
