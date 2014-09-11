@@ -10,6 +10,7 @@ to write the image data set back in AmiraMesh file format.
 
 import numpy as np
 import os
+import logging
 
 def _read_amira(src_file):
     """
@@ -183,35 +184,39 @@ def _create_md_dict(clean_header):
         md_dict['data_format'] = clean_header[0][3]
         md_dict['data_format_version'] = clean_header[0][4]
     
-    for row in range(len(clean_header)):
-        try:
-            md_dict['array_dimensions'] = {'x_dimension' : int(clean_header[row]
-                                                   [clean_header[row]
-                                                       .index('define') + 2]),
-                                     'y_dimension' : int(clean_header[row]
-                                                   [clean_header[row]
-                                                       .index('define') + 3]),
-                                     'z_dimension' : int(clean_header[row]
-                                                   [clean_header[row]
-                                                       .index('define') + 4])
-                                     }
-        #except:
-        try:
-            md_dict['data_type'] = clean_header[row][clean_header[row]
-                        .index('Content') + 2]
-            #except: 
-        try:
-            md_dict['coord_type'] = clean_header[row][clean_header[row]
-                            .index('CoordType') + 1]
-                #except:
-        try:
-            md_dict['bounding_box'] = {'x_min' : float(
-                clean_header[row][clean_header[row].index('BoundingBox') + 1]),
-                'x_max' : float(clean_header[row][clean_header[row].index('BoundingBox') + 2]),
-                'y_min' : float(clean_header[row][clean_header[row].index('BoundingBox') + 3]),
-                'y_max' : float(clean_header[row][clean_header[row].index('BoundingBox') + 4]),
-                'z_min' : float(clean_header[row][clean_header[row].index('BoundingBox') + 5]),
-                'z_max' : float(clean_header[row][clean_header[row].index('BoundingBox') + 6])}
+    for header_line in clean_header:
+        if 'define' in header_line:
+            md_dict['array_dimensions'] = {
+                    'x_dimension' : int(header_line[header_line
+                        .index('define') + 2]),
+                    'y_dimension' : int(header_line[header_line
+                        .index('define') + 3]),
+                    'z_dimension' : int(header_line[header_line
+                        .index('define') + 4])
+                    }
+        elif 'Content' in header_line:
+            md_dict['data_type'] = header_line[header_line
+                    .index('Content') + 2]
+        elif 'CoordType' in header_line:
+            md_dict['coord_type'] = header_line[header_line
+                    .index('CoordType') + 1]
+        elif 'BoundingBox' in header_line:
+            md_dict['bounding_box'] = {
+                    'x_min' : float(header_line[header_line
+                        .index('BoundingBox') + 1]),
+                    'x_max' : float(header_line[header_line
+                        .index('BoundingBox') + 2]),
+                    'y_min' : float(header_line[header_line
+                        .index('BoundingBox') + 3]),
+                    'y_max' : float(header_line[header_line
+                        .index('BoundingBox') + 4]),
+                    'z_min' : float(header_line[header_line
+                        .index('BoundingBox') + 5]),
+                    'z_max' : float(header_line[header_line
+                        .index('BoundingBox') + 6])
+                    }
+            
+            #Parameter definition for voxel resolution calculations
             bbox = [md_dict['bounding_box']['x_min'], 
                     md_dict['bounding_box']['x_max'],
                     md_dict['bounding_box']['y_min'],
@@ -221,6 +226,8 @@ def _create_md_dict(clean_header):
             dims = [md_dict['array_dimensions']['x_dimension'],
                     md_dict['array_dimensions']['y_dimension'],
                     md_dict['array_dimensions']['z_dimension']]
+            
+            #Voxel resolution calculation
             resolution_list = []
             for index in np.arange(len(dims)):
                 if dims[index] > 1:
@@ -228,22 +235,31 @@ def _create_md_dict(clean_header):
                         bbox[(2*index)]) / (dims[index] - 1))
                 else:
                     resolution_list.append(0)
-                if (resolution_list[1]/resolution_list[0] > 0.99 and
-                        resolution_list[2]/resolution_list[0] > 0.99 and
-                        resolution_list[1]/resolution_list[0] < 1.01 and
-                        resolution_list[2]/resolution_list[0] < 1.01):
-                    md_dict['resolution'] = {'zyx_value' : resolution_list[0],
-                            'type' : 'isotropic'}
-                else:
-                    md_dict['resolution'] = {
-                            'zyx_value' : (resolution_list[2], 
-                                resolution_list[1], resolution_list[0]),
-                            'type' : 'anisotropic'}
-                    #except:
-        try:
-            md_dict['units'] = (clean_header[row][clean_header[row]
-                .index('Units') + 2])
-            md_dict['coordinates'] = clean_header[row + 1][1]
+                #isotropy determination (isotropic res, or anisotropic res)
+            if (resolution_list[1]/resolution_list[0] > 0.99 and
+                            resolution_list[2]/resolution_list[0] > 0.99 and
+                            resolution_list[1]/resolution_list[0] < 1.01 and
+                            resolution_list[2]/resolution_list[0] < 1.01):
+                md_dict['resolution'] = {'zyx_value' : resolution_list[0],
+                                         'type' : 'isotropic'}
+            else:
+                md_dict['resolution'] = {'zyx_value' :
+                                             (resolution_list[2],
+                                              resolution_list[1],
+                                              resolution_list[0]),
+                                         'type' : 'anisotropic'}
+            
+        elif 'Units' in header_line:
+            try:
+                md_dict['units'] = str(header_line[header_line
+                                                       .index('Units') + 2])
+            except:
+                logging.debug('Units value undefined in source data set. '
+                        'Reverting to default units value of pixels')
+                md_dict['units'] = 'pixels'
+        elif 'Coordinates' in header_line:
+            md_dict['coordinates'] = str(header_line[header_line
+                    .index('Coordinates') + 1])
     return md_dict
 
 
@@ -271,8 +287,8 @@ def load_amiramesh_as_np(file_path):
     """
     
     header, data = _read_amira(file_path)
-    header = _clean_amira_header(header)
-    md_dict = _create_md_dict(header)
+    clean_header = _clean_amira_header(header)
+    md_dict = _create_md_dict(clean_header)
     np_array = _amira_data_to_numpy(data, md_dict)
     return md_dict, np_array
 
