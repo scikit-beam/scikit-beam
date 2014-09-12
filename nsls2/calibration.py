@@ -196,7 +196,8 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps,
     print([len(_) for _ in ring_trace])
     ring_trace = np.vstack(ring_trace).T
 
-    mean_dr = np.mean(ring_trace - np.mean(ring_trace, axis=1, keepdims=True), axis=0)
+    mean_dr = np.mean(ring_trace - np.mean(ring_trace, axis=1, keepdims=True),
+                      axis=0)
 
     phi_centers = bin_edges_to_centers(phi_steps)
 
@@ -204,7 +205,10 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps,
     # this is doing just one term of a Fourier series
     # note that we have to convert _back_ to pixels from real units
     # TODO do this with better integration/handle repeat better
-    col_shift = np.sum(np.sin(phi_centers) * mean_dr) * delta / (np.pi * pixel_size[1])
-    row_shift = np.sum(np.cos(phi_centers) * mean_dr) * delta / (np.pi * pixel_size[0])
+    col_shift = (np.sum(np.sin(phi_centers) * mean_dr) *
+                 delta / (np.pi * pixel_size[1]))
+    row_shift = (np.sum(np.cos(phi_centers) * mean_dr) *
+                 delta / (np.pi * pixel_size[0]))
 
-    return tuple(np.array(calibrated_center) + np.array([row_shift, col_shift]))
+    return tuple(np.array(calibrated_center) +
+                 np.array([row_shift, col_shift]))
