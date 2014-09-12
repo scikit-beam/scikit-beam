@@ -131,8 +131,8 @@ def test_elastic_peak():
     fanoprime = 0.01
 
     ev = np.arange(8, 12, 0.1)
-    out, sigma = elastic_peak(ev, energy, offset,
-                              fanoprime, area)
+    out = elastic_peak(ev, energy, offset,
+                       fanoprime, area)
 
     assert_array_almost_equal(y_true, out)
     return
@@ -165,9 +165,9 @@ def test_compton_peak():
     hi_gamma = 1
     ev = np.arange(8, 12, 0.1)
 
-    out, sigma, factor = compton_peak(ev, energy, offset, fano, angle,
-                                      fwhm_corr, amp, f_step, f_tail,
-                                      gamma, hi_f_tail, hi_gamma)
+    out = compton_peak(ev, energy, offset, fano, angle,
+                       fwhm_corr, amp, f_step, f_tail,
+                       gamma, hi_f_tail, hi_gamma)
 
     assert_array_almost_equal(y_true, out)
     return
@@ -196,8 +196,11 @@ def test_elastic_model():
 
     area = 1
     energy = 10
-    offset = 0.01
+    offset = 0.02
     fanoprime = 0.01
+    eps = 2.96
+
+    true_param = [fanoprime, area, energy, offset, eps]
 
     x = np.arange(8, 12, 0.1)
     out = elastic_peak(x, energy, offset,
@@ -205,12 +208,14 @@ def test_elastic_model():
 
     elastic = ElasticModel()
 
-    # fwhm_offset is not a sensitive parameter
-    elastic.set_param_hint(name='fwhm_offset', value=0.01, vary=False)
+    # fwhm_offset is not a sensitive parameter, used as a fixed value
+    elastic.set_param_hint(name='fwhm_offset', value=0.02, vary=False)
+
     result = elastic.fit(out, x=x, coherent_sct_energy=10,
-                         fwhm_offset=0.01, fwhm_fanoprime=0.03,
+                         fwhm_offset=0.02, fwhm_fanoprime=0.03,
                          coherent_sct_amplitude=10)
 
+    assert_array_almost_equal(true_param, result.values.values())
     #import matplotlib.pyplot as plt
     #plt.plot(x, y_true,         'bo')
     #plt.plot(x, result.init_fit, 'k--')
@@ -245,9 +250,9 @@ def test_compton_model():
     hi_gamma = 1
     ev = np.arange(8, 12, 0.1)
 
-    out, sigma, factor = compton_peak(ev, energy, offset, fano, angle,
-                                      fwhm_corr, amp, f_step, f_tail,
-                                      gamma, hi_f_tail, hi_gamma)
+    out = compton_peak(ev, energy, offset, fano, angle,
+                       fwhm_corr, amp, f_step, f_tail,
+                       gamma, hi_f_tail, hi_gamma)
 
     compton = ComptonModel()
     p = compton.make_params()
