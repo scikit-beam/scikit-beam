@@ -79,7 +79,7 @@ class XR_data(object):
         """
         Parameters
         ----------
-        data : object
+        data: object
             The 'data' object to be carried around
 
         md : dict
@@ -300,6 +300,12 @@ keys_core = {
         "description": "UB matrix(orientation matrix) 3x3 array",
         "type": "ndarray",
     },
+    "energy": {
+        "description": "scanning energy for data collection",
+        "type": float,
+        "units": "keV",
+    },
+
     "array_dimensions": {
         "description": "axial lengths of the array (Pixels)",
         "x_dimension": {
@@ -317,7 +323,7 @@ keys_core = {
             "type": int,
             "units": "pixels"
             }
-        },
+    },
     "bounding_box": {
         "description": ("physical extents of the array: useful for " +
                         "volume alignment, transformation, merge and " +
@@ -352,8 +358,7 @@ keys_core = {
             "type": float,
             "units": "um"
             },
-        },
-     },
+    },
 }
 
 
