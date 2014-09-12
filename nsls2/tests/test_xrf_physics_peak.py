@@ -46,6 +46,9 @@ from numpy.testing import (assert_allclose, assert_array_almost_equal)
 from nsls2.fitting.model.physics_peak import (gauss_peak, gauss_step, gauss_tail,
                                               elastic_peak, compton_peak)
 
+from nsls2.fitting.model.physics_model import (ComptonModel, ElasticModel,
+                                               GaussModel)
+
 
 def test_gauss_peak():
     """
@@ -168,3 +171,87 @@ def test_compton_peak():
 
     assert_array_almost_equal(y_true, out)
     return
+
+
+def test_gauss_model():
+
+    area = 1
+    cen  = 0
+    std = 1
+    x = np.arange(-3, 3, 0.5)
+    true_param = [area, cen, std]
+
+    out = gauss_peak(x, area, cen, std)
+
+    gauss = GaussModel()
+    result = gauss.fit(out, x=x,
+                       area=1, center=2, sigma=5)
+
+    assert_array_almost_equal(true_param, result.values.values())
+
+    return result
+
+
+def test_elastic_model():
+
+    area = 1
+    energy = 10
+    offset = 0.01
+    fanoprime = 0.01
+
+    x = np.arange(8, 12, 0.1)
+    out = elastic_peak(x, energy, offset,
+                       fanoprime, area)
+
+    elastic = ElasticModel()
+
+    # fwhm_offset is not a sensitive parameter
+    elastic.set_param_hint(name='fwhm_offset', value=0.01, vary=False)
+    result = elastic.fit(out, x=x, coherent_sct_energy=10,
+                         fwhm_offset=0.01, fwhm_fanoprime=0.03,
+                         coherent_sct_amplitude=10)
+
+    #import matplotlib.pyplot as plt
+    #plt.plot(x, y_true,         'bo')
+    #plt.plot(x, result.init_fit, 'k--')
+    #plt.plot(x, result.best_fit, 'r-')
+    #plt.show()
+
+    return result, elastic
+
+
+
+def test_compton_model():
+
+    y_true  = [0.13322374,  0.15369844,  0.18701130,  0.24010139,  0.32232808,
+               0.44551425,  0.62348701,  0.87091681,  1.20134347,  1.62445241,
+               2.14291102,  2.74933771,  3.42416929,  4.13521971,  4.83951630,
+               5.48755599,  6.02952905,  6.42247263,  6.63693264,  6.57925536,
+               6.30502092,  5.84781459,  5.25108917,  4.56740794,  3.85083566,
+               3.15005570,  2.50337782,  1.93622014,  1.46102640,  1.07908755,
+               0.78347806,  0.56230190,  0.40161350,  0.28763835,  0.20817573,
+               0.15326083,  0.11527037,  0.08868334,  0.06968182,  0.05572342]
+
+    energy = 10
+    offset = 0.01
+    fano = 0.01
+    angle = 90
+    fwhm_corr = 1
+    amp = 1
+    f_step = 0
+    f_tail = 0.1
+    gamma = 10
+    hi_f_tail = 0.1
+    hi_gamma = 1
+    ev = np.arange(8, 12, 0.1)
+
+    out, sigma, factor = compton_peak(ev, energy, offset, fano, angle,
+                                      fwhm_corr, amp, f_step, f_tail,
+                                      gamma, hi_f_tail, hi_gamma)
+
+    compton = ComptonModel()
+    p = compton.make_params()
+    result = compton.fit(y_true, x=ev, params=p)
+
+    return result, p
+

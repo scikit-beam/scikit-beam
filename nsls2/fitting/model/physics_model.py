@@ -48,7 +48,8 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 import inspect
 
-from nsls2.fitting.model.physics_peak import elastic_peak, compton_peak
+from nsls2.fitting.model.physics_peak import (elastic_peak, compton_peak,
+                                              gauss_peak)
 from nsls2.fitting.base.parameter_data import get_para
 from lmfit import Model
 
@@ -68,11 +69,15 @@ def set_default(model_name, func_name):
 
     # the first argument is independent variable, also ignored
     # default values are not considered for fitting in this function
-    my_args = paras.args[1:-default_len]
+    #my_args = paras.args[1:-default_len]
+    my_args = paras.args[1:]
     para_dict = get_para()
 
     for name in my_args:
         # area and coherent_sct_amplitude are the same thing
+
+        if name not in para_dict.keys():
+            continue
 
         my_dict = para_dict[name]
         if my_dict['bound_type'] == 'none':
@@ -81,13 +86,13 @@ def set_default(model_name, func_name):
             model_name.set_param_hint(name, vary=False, value=my_dict['value'])
         elif my_dict['bound_type'] == 'lo':
             model_name.set_param_hint(name, value=my_dict['value'], vary=True,
-                                min=my_dict['min'])
+                                      min=my_dict['min'])
         elif my_dict['bound_type'] == 'hi':
             model_name.set_param_hint(name, value=my_dict['value'], vary=True,
-                                max=my_dict['max'])
+                                      max=my_dict['max'])
         elif my_dict['bound_type'] == 'lohi':
             model_name.set_param_hint(name, value=my_dict['value'], vary=True,
-                                min=my_dict['min'], max=my_dict['max'])
+                                      min=my_dict['min'], max=my_dict['max'])
         else:
             raise TypeError("Boundary type %s can't be used" % (my_dict['bound_type']))
 
@@ -110,3 +115,14 @@ class ComptonModel(Model):
         super(ComptonModel, self).__init__(compton_peak, *args, **kwargs)
         set_default(self, compton_peak)
         self.set_param_hint('epsilon', value=2.96, vary=False)
+        self.set_param_hint('matrix', value=False, vary=False)
+
+
+class GaussModel(Model):
+
+    __doc__ = "Wrap the gauss_peak function for fitting within lmfit framework" + gauss_peak.__doc__
+
+    def __init__(self, *args, **kwargs):
+        super(GaussModel, self).__init__(gauss_peak, *args, **kwargs)
+
+
