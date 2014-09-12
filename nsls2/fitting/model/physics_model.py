@@ -94,10 +94,14 @@ def set_default(model_name, func_name):
         else:
             raise TypeError("Boundary type {0} can't be used".format(my_dict['bound_type']))
 
+def _gen_class_docs(func):
+    return ("Wrap the {} function for fitting within lmfit framework\n".format(func.__name__) +
+           func.__doc__)
+
 
 class ElasticModel(Model):
 
-    __doc__ = "Wrap the elastic_peak function for fitting within lmfit framework" + elastic_peak.__doc__
+    __doc__ = _gen_class_docs(elastic_peak)
 
     def __init__(self, *args, **kwargs):
         super(ElasticModel, self).__init__(elastic_peak, *args, **kwargs)
@@ -107,7 +111,7 @@ class ElasticModel(Model):
 
 class ComptonModel(Model):
 
-    __doc__ = "Wrap the compton_peak function for fitting within lmfit framework" + compton_peak.__doc__
+    __doc__ = _gen_class_docs(compton_peak)
 
     def __init__(self, *args, **kwargs):
         super(ComptonModel, self).__init__(compton_peak, *args, **kwargs)
@@ -118,7 +122,7 @@ class ComptonModel(Model):
 
 class GaussModel(Model):
 
-    __doc__ = "Wrap the gauss_peak function for fitting within lmfit framework" + gauss_peak.__doc__
+    __doc__ = _gen_class_docs(gauss_peak)
 
     def __init__(self, *args, **kwargs):
         super(GaussModel, self).__init__(gauss_peak, *args, **kwargs)
