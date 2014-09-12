@@ -293,3 +293,7 @@ def filter_peak_height(y, cands, thresh, window=5):
             out_tmp.append(ind)
 
     return np.array(out_tmp)
+
+# add our refinement functions as an attribute on peak_refinement
+# ta make auto-wrapping for vistrials easier.
+peak_refinement.refine_function = [refine_log_quadratic, refine_quadratic]
