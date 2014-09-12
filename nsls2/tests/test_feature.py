@@ -117,8 +117,7 @@ def test_peak_refinement():
     heights = (10, 20, 30, 40, 50)
     x = np.arange(128, dtype=float)
     y = np.zeros_like(x)
-    for c, h in zip(cands,
-                    heights):
+    for c, h in zip(cands, heights):
         y += gauss_gen(x, c+.5, h, 3)
 
     loc, ht = feature.peak_refinement(x, y, cands, 5,
