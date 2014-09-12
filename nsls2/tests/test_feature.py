@@ -107,3 +107,21 @@ def test_filter_peak_height():
         assert(len(out) == len(heights) - j)
         out = feature.filter_peak_height(y, cands, h + 5, window=5)
         assert(len(out) == len(heights) - j - 1)
+
+
+def test_peak_refinement():
+    gauss_gen = lambda x, center, height, width: (
+                          height * np.exp(-((x-center) / width)**2))
+
+    cands = np.array((10, 25, 50, 75, 100))
+    heights = (10, 20, 30, 40, 50)
+    x = np.arange(128, dtype=float)
+    y = np.zeros_like(x)
+    for c, h in zip(cands,
+                    heights):
+        y += gauss_gen(x, c+.5, h, 3)
+
+    loc, ht = feature.peak_refinement(x, y, cands, 5,
+                                      feature.refine_log_quadratic)
+    assert_array_almost_equal(loc, cands + .5, decimal=3)
+    assert_array_almost_equal(ht, heights, decimal=3)
