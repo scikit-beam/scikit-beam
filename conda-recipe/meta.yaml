@@ -21,6 +21,7 @@ requirements:
     - six
     - xraylib
     - scikit-image
+    - lmfit
 
 test:
   requires:
