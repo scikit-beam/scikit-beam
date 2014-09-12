@@ -2,6 +2,9 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
+# @author: Li Li (lili@bnl.gov)                                        #
+# created on 09/03/2014                                                #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -32,5 +35,94 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-import logging
-logger = logging.getLogger(__name__)
+
+from __future__ import (absolute_import, division, unicode_literals, print_function)
+import numpy as np
+import matplotlib.pyplot as plt
+
+from nsls2.constants import Element
+from nsls2.fitting.model.physics_peak import gauss_peak
+
+
+def get_line(name, incident_energy):
+    """
+    Plot emission lines for a given element.
+
+    Parameters
+    ----------
+    name : str or int
+        element name, or atomic number
+    incident_energy : float
+        xray incident energy for fluorescence emission
+    """
+    e = Element(name)
+    lines = e.emission_line.all
+    ratio = [val for val in e.cs(incident_energy).all if val[1] > 0]
+
+    i_min = 1e-6
+
+    plt.figure(figsize=(8, 6))
+
+    for item in ratio:
+        for data in lines:
+            if item[0] == data[0]:
+                plt.plot([data[1], data[1]],
+                         [i_min, item[1]], 'g-', linewidth=2.0)
+
+    plt.xlabel('Energy [KeV]')
+    plt.ylabel('Intensity')
+    plt.show()
+    plt.close()
+
+    return
+
+
+def get_spectrum(name, incident_energy, emax=15):
+    """
+    Plot fluorescence spectrum for a given element.
+
+    Parameters
+    ----------
+    name : str or int
+        element name, or atomic number
+    incident_energy : float
+        xray incident energy for fluorescence emission
+    emax : float
+        max value on spectrum
+
+    """
+    e = Element(name)
+    lines = e.emission_line.all
+    ratio = [val for val in e.cs(incident_energy).all if val[1] > 0]
+
+    x = np.arange(0, emax, 0.01)
+
+    spec = np.zeros(len(x))
+
+    i_min = 1e-6
+
+    plt.figure(figsize=(8, 6))
+
+    for item in ratio:
+        for data in lines:
+            if item[0] == data[0]:
+
+                plt.plot([data[1], data[1]],
+                         [i_min, item[1]], 'g-', linewidth=2.0)
+
+    std = 0.1
+    area = std * np.sqrt(2 * np.pi)
+    for item in ratio:
+        for data in lines:
+            if item[0] == data[0]:
+                spec += gauss_peak(x, area, data[1], std) * item[1]
+
+    #plt.semilogy(x, spec)
+
+    plt.xlabel('Energy [KeV]')
+    plt.ylabel('Intensity')
+    plt.plot(x, spec)
+    plt.show()
+    plt.close()
+
+    return
