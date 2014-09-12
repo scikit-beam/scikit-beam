@@ -84,3 +84,22 @@ def test_filter_n_largest():
     for j in range(1, len(cands) + 2):
         out = feature.filter_n_largest(y, cands, j)
         assert(len(out) == np.min([len(cands), j]))
+
+
+def test_filter_peak_height():
+    gauss_gen = lambda x, center, height, width: (
+                          height * np.exp(-((x-center) / width)**2))
+
+    cands = np.array((10, 25, 50, 75, 100))
+    heights = (10, 20, 30, 40, 50)
+    x = np.arange(128, dtype=float)
+    y = np.zeros_like(x)
+    for c, h in zip(cands,
+                    heights):
+        y += gauss_gen(x, c, h, 3)
+
+    for j, h in enumerate(heights):
+        out = feature.filter_peak_height(y, cands, h - 5, window=5)
+        assert(len(out) == len(heights) - j)
+        out = feature.filter_peak_height(y, cands, h + 5, window=5)
+        assert(len(out) == len(heights) - j - 1)
