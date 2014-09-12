@@ -68,3 +68,19 @@ def test_refine_methods():
             for rf, dm in zip(refine_methods, test_data_gens):
                 yield (_test_refine_helper,
                        x, dm(x, center, height, 5), center, height, rf, {})
+
+
+def test_filter_n_largest():
+    gauss_gen = lambda x, center, height, width: (
+                          height * np.exp(-((x-center) / width)**2))
+
+    cands = np.array((10, 25, 50, 75, 100))
+    x = np.arange(128, dtype=float)
+    y = np.zeros_like(x)
+    for c, h in zip(cands,
+                    (10, 15, 25, 30, 35)):
+        y += gauss_gen(x, c, h, 3)
+
+    for j in range(1, len(cands) + 2):
+        out = feature.filter_n_largest(y, cands, j)
+        assert(len(out) == np.min([len(cands), j]))
