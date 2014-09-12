@@ -67,7 +67,7 @@ def _amira_data_to_numpy(am_data, header_dict, flip_z=True):
     
     Parameters
     ----------
-    am_data : string
+    am_data : str
         String object containing all of the image array data, formatted as IEEE 
         binary. Current dType options include:
             float
@@ -107,10 +107,10 @@ def _amira_data_to_numpy(am_data, header_dict, flip_z=True):
                       'ASCII' : 'unknown'
                      }
     #Dictionary of the data types encountered so far in AmiraMesh files
-    am_dtype_dict = {'float' : 'f4',
-                     'short' : 'h4',
-                     'ushort' : 'H4',
-                     'byte' : 'b'
+    am_dtype_dict = {'float': 'f4',
+                     'short': 'h4',
+                     'ushort': 'H4',
+                     'byte': 'b'
                          }
     # Had to split out the stripping of new line characters and conversion
     # of the original string data based on whether source data is BINARY 
@@ -176,9 +176,9 @@ def _create_md_dict(clean_header):
     
     """
 
-    md_dict = {'software_src' : clean_header[0][1], #Avizo specific
-               'data_format' : clean_header[0][2], #Avizo specific
-               'data_format_version' : clean_header[0][3] #Avizo specific
+    md_dict = {'software_src': clean_header[0][1], #Avizo specific
+               'data_format': clean_header[0][2], #Avizo specific
+               'data_format_version': clean_header[0][3] #Avizo specific
                 }
     if md_dict['data_format'] == '3D':
         md_dict['data_format'] = clean_header[0][3]
@@ -202,17 +202,17 @@ def _create_md_dict(clean_header):
                     .index('CoordType') + 1]
         elif 'BoundingBox' in header_line:
             md_dict['bounding_box'] = {
-                    'x_min' : float(header_line[header_line
+                    'x_min': float(header_line[header_line
                         .index('BoundingBox') + 1]),
-                    'x_max' : float(header_line[header_line
+                    'x_max': float(header_line[header_line
                         .index('BoundingBox') + 2]),
-                    'y_min' : float(header_line[header_line
+                    'y_min': float(header_line[header_line
                         .index('BoundingBox') + 3]),
-                    'y_max' : float(header_line[header_line
+                    'y_max': float(header_line[header_line
                         .index('BoundingBox') + 4]),
-                    'z_min' : float(header_line[header_line
+                    'z_min': float(header_line[header_line
                         .index('BoundingBox') + 5]),
-                    'z_max' : float(header_line[header_line
+                    'z_max': float(header_line[header_line
                         .index('BoundingBox') + 6])
                     }
             
@@ -240,14 +240,14 @@ def _create_md_dict(clean_header):
                             resolution_list[2]/resolution_list[0] > 0.99 and
                             resolution_list[1]/resolution_list[0] < 1.01 and
                             resolution_list[2]/resolution_list[0] < 1.01):
-                md_dict['resolution'] = {'zyx_value' : resolution_list[0],
-                                         'type' : 'isotropic'}
+                md_dict['resolution'] = {'zyx_value': resolution_list[0],
+                                         'type': 'isotropic'}
             else:
-                md_dict['resolution'] = {'zyx_value' :
+                md_dict['resolution'] = {'zyx_value':
                                              (resolution_list[2],
                                               resolution_list[1],
                                               resolution_list[0]),
-                                         'type' : 'anisotropic'}
+                                         'type': 'anisotropic'}
             
         elif 'Units' in header_line:
             try:
