@@ -69,12 +69,10 @@ def set_default(model_name, func_name):
 
     # the first argument is independent variable, also ignored
     # default values are not considered for fitting in this function
-    #my_args = paras.args[1:-default_len]
     my_args = paras.args[1:]
     para_dict = get_para()
 
     for name in my_args:
-        # area and coherent_sct_amplitude are the same thing
 
         if name not in para_dict.keys():
             continue
@@ -124,5 +122,4 @@ class GaussModel(Model):
 
     def __init__(self, *args, **kwargs):
         super(GaussModel, self).__init__(gauss_peak, *args, **kwargs)
-
 

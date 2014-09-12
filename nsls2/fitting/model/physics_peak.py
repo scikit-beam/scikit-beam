@@ -177,8 +177,6 @@ def elastic_peak(x, coherent_sct_energy,
     -------
     value : array
         elastic peak
-    sigma : float
-        peak width
                      
     """
     
@@ -237,10 +235,6 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     -------
     counts : array
         compton peak
-    sigma : float
-        standard deviation
-    factor : float
-        weight factor of gaussian peak
 
      References
     -----------
