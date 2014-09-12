@@ -187,7 +187,7 @@ def test_gauss_model():
     result = gauss.fit(out, x=x,
                        area=1, center=2, sigma=5)
 
-    assert_array_almost_equal(true_param, result.values.values())
+    assert_array_almost_equal(true_param, result.values.values(), decimal=2)
 
     return
 
@@ -215,7 +215,7 @@ def test_elastic_model():
                          fwhm_offset=0.02, fwhm_fanoprime=0.03,
                          coherent_sct_amplitude=10)
 
-    assert_array_almost_equal(true_param, result.values.values())
+    assert_array_almost_equal(true_param, result.values.values(), decimal=2)
 
     return
 
@@ -259,7 +259,6 @@ def test_compton_model():
                result.values['compton_f_tail'], result.values['compton_gamma'],
                result.values['compton_hi_f_tail']]
 
-    print (fit_val)
     assert_array_almost_equal(true_param, fit_val, decimal=2)
 
     return
