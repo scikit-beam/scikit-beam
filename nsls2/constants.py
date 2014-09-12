@@ -42,6 +42,7 @@ import numpy as np
 import six
 from collections import Mapping, namedtuple
 import functools
+from itertools import repeat
 
 import xraylib
 xraylib.XRayInit()
@@ -624,49 +625,53 @@ class HKL(namedtuple('HKL', 'h k l')):
         return np.sqrt(np.sum(np.array(self)**2))
 
 
-# TODO this class should probably be re-written do store q instead of 2theta
-# and a `Reflection` named-tuple should be added to store (hkl, q) pairs
-class CalibrationAngles(object):
-    """
-    class for carrying around calibration data.
+Reflection = namedtuple('Reflection', ('d', 'hkl', 'q'))
 
-    Properties make this a read-only class
+
+class PowderStandard(object):
+    """
+    Class for providing safe access to powder calibration standards
+    data.
 
     Parameters
     ----------
     name : str
-        The name of the standard
+        Name of the standard
 
-    a : float
-        Lattice parameter in nm
-
-    calibration_lambda : float
-        The wave length of the x-rays used for calibration in nm
-
-    known_twotheta : array
-        Known 2theta values in radian
-
-    known_hkl : list
-        List of length 3 element with the hkl values corresponding to
-        the known angles.
+    reflections : list
+        A list of (d, (h, k, l), q) values.
     """
+    def __init__(self, name, reflections):
+        self._reflections = [Reflection(d, HKL(*hkl), q)
+                             for d, hkl, q in reflections]
+        self._reflections.sort(key=lambda x: x[-1])
+        self._name = name
 
-    def __init__(self, name, calibration_wavelength, a,
-                 known_twotheta, known_hkl):
-        self.name = name
-        self._a = a
-        self._wavelength = calibration_wavelength
-        self._twotheta = np.asarray(known_twotheta)
-        self._hkl = [HKL(*hkl) for hkl in known_hkl]
+    @property
+    def name(self):
+        """
+        Name of the calibration standard
+        """
+        return self._name
 
-    def convert_2theta(self, new_lambda):
+    @property
+    def reflections(self):
+        """
+        List of the known reflections
+        """
+        return self._reflections
+
+    def __iter__(self):
+        return iter(self._reflections)
+
+    def convert_2theta(self, wavelength):
         """
         Convert the measured 2theta values to a different wavelength
 
         Parameters
         ----------
-        new_lambda : float
-            The new lambda in nm
+        wavelength : float
+            The new lambda in Angstroms
 
         Returns
         -------
@@ -674,96 +679,34 @@ class CalibrationAngles(object):
             The new 2theta values in radians
         """
 
-        return convert_two_theta(self.wavelength, new_lambda,
-                              self.two_theta)
+        q = np.array([_.q for _ in self])
+        pre_factor = wavelength / (4 * np.pi)
+        return 2 * np.arcsin(q * pre_factor)
 
-    @property
-    def wavelength(self):
-        """
-        Wavelength used for calibration
-        """
-        return self._wavelength
+    @classmethod
+    def from_lambda_2theta_hkl(cls, name, wavelength, two_theta, hkl):
+        two_theta = np.asarray(two_theta)
+        q = ((4 * np.pi) / wavelength) * np.sin(two_theta / 2)
+        d = 2 * np.pi / q
+        return cls(name, zip(d, hkl, q))
 
-    @property
-    def hkl(self):
-        """
-        List of hkl values
-        """
-        return self._hkl
+    def __len__(self):
+        return len(self._reflections)
 
-    @property
-    def two_theta(self):
-        """
-        Array of measured 2theta values
-        """
-        return self._twotheta
-
-    @property
-    def a(self):
-        return self._a
-
-
-def convert_two_theta(old_lambda, new_lambda, twotheta):
-    """
-    This converts the calibrated angles from one wavelength to another.
-
-    Parameters
-    ----------
-    old_lambda : float
-        The wave length used to measure 2theta.  In same units as `new_lambda`.
-
-    new_lambda : float
-        The wave length the return 2theta will be for.
-        In same units as `cal_lambda`.
-
-    twotheta : array
-        The measured 2theta values in radians
-
-    Returns
-    -------
-    twotheta : array
-        The 2theta values for `new_lambda` in radians
-
-
-    Notes
-    -----
-    Given that
-
-    .. math ::
-
-        \\frac{\\lambda_c}{2 a} \\sqrt{h^2 + k^2 + l^2} = \\sin\\left(\\frac{2\\theta_c}{2}\\right)
-
-    If we multiply both sides by
-    :math:`\\frac{\\lambda_n}{\\lambda_c}` then we have
-
-    .. math ::
-
-        \\frac{\lambda_n}{2 a} \\sqrt{h^2 + k^2 + l^2} = \\frac{\\lambda_n}{\\lambda_c} \\sin\\left(\\frac{2\theta_c}{2}\\right)
-
-        \\sin\\left(\\frac{2\\theta_n}{2}\\right) = \\frac{\\lambda_n}{\\lambda_c} \\sin\\left(\\frac{2\\theta_c}{2}\\right)
-
-    which solving for :math:`2\\theta_n` gives us
-
-    .. math ::
-
-       2\\theta_n = 2 \\arcsin\\left(\\frac{\\lambda_n}{\\lambda_c} \\sin\\left(\\frac{2\\theta_c}{2}\\right)\\right)
-    """
-    return 2 * np.arcsin((new_lambda/old_lambda) * np.sin(twotheta / 2))
 
 # Si data taken from
 # https://www-s.nist.gov/srmors/certificates/640D.pdf?CFID=3219362&CFTOKEN=c031f50442c44e42-57C377F6-BC7A-395A-F39B8F6F2E4D0246&jsessionid=f030c7ded9b463332819566354567a698744
 calibration_standards = {'Si':
-                         CalibrationAngles(name='Si',
-                                           calibration_wavelength=0.15405929,
-                                           a=0.543123,
-                                           known_twotheta=np.deg2rad([
+                         PowderStandard.from_lambda_2theta_hkl(name='Si',
+                                           wavelength=0.15405929,
+                                           two_theta=np.deg2rad([
                                                28.441, 47.3,
                                                56.119, 69.126,
                                                76.371, 88.024,
                                                94.946, 106.7,
                                                114.082, 127.532,
                                                136.877]),
-                                           known_hkl=(
+                                           hkl=(
                                                (1, 1, 1), (2, 2, 0),
                                                (3, 1, 1), (4, 0, 0),
                                                (3, 3, 1), (4, 2, 2),
