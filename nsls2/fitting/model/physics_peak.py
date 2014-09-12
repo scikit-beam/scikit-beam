@@ -188,7 +188,7 @@ def elastic_peak(x, coherent_sct_energy,
 
     value = gauss_peak(x, coherent_sct_amplitude, coherent_sct_energy, sigma)
     
-    return value#, sigma
+    return value
 
 
 def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
@@ -279,4 +279,4 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     value *= gauss_tail(-1 * x, compton_amplitude, -1 * compton_e, sigma, compton_hi_gamma)
     counts += value
 
-    return counts#, sigma, factor
+    return counts

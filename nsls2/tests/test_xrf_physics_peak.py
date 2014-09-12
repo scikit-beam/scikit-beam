@@ -187,7 +187,8 @@ def test_gauss_model():
     result = gauss.fit(out, x=x,
                        area=1, center=2, sigma=5)
 
-    assert_array_almost_equal(true_param, result.values.values(), decimal=2)
+    fitted_val = [result.values['area'], result.values['center'], result.values['sigma']]
+    assert_array_almost_equal(true_param, fitted_val, decimal=2)
 
     return
 
@@ -200,7 +201,7 @@ def test_elastic_model():
     fanoprime = 0.01
     eps = 2.96
 
-    true_param = [fanoprime, area, energy, offset, eps]
+    true_param = [fanoprime, area, energy]
 
     x = np.arange(8, 12, 0.1)
     out = elastic_peak(x, energy, offset,
@@ -215,7 +216,10 @@ def test_elastic_model():
                          fwhm_offset=0.02, fwhm_fanoprime=0.03,
                          coherent_sct_amplitude=10)
 
-    assert_array_almost_equal(true_param, result.values.values(), decimal=2)
+    fitted_val = [result.values['fwhm_fanoprime'], result.values['coherent_sct_amplitude'],
+                  result.values['coherent_sct_energy']]
+
+    assert_array_almost_equal(true_param, fitted_val, decimal=2)
 
     return
 
