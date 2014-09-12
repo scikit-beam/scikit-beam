@@ -189,7 +189,7 @@ def test_gauss_model():
 
     assert_array_almost_equal(true_param, result.values.values())
 
-    return result
+    return
 
 
 def test_elastic_model():
@@ -216,26 +216,11 @@ def test_elastic_model():
                          coherent_sct_amplitude=10)
 
     assert_array_almost_equal(true_param, result.values.values())
-    #import matplotlib.pyplot as plt
-    #plt.plot(x, y_true,         'bo')
-    #plt.plot(x, result.init_fit, 'k--')
-    #plt.plot(x, result.best_fit, 'r-')
-    #plt.show()
 
-    return result, elastic
-
+    return
 
 
 def test_compton_model():
-
-    y_true  = [0.13322374,  0.15369844,  0.18701130,  0.24010139,  0.32232808,
-               0.44551425,  0.62348701,  0.87091681,  1.20134347,  1.62445241,
-               2.14291102,  2.74933771,  3.42416929,  4.13521971,  4.83951630,
-               5.48755599,  6.02952905,  6.42247263,  6.63693264,  6.57925536,
-               6.30502092,  5.84781459,  5.25108917,  4.56740794,  3.85083566,
-               3.15005570,  2.50337782,  1.93622014,  1.46102640,  1.07908755,
-               0.78347806,  0.56230190,  0.40161350,  0.28763835,  0.20817573,
-               0.15326083,  0.11527037,  0.08868334,  0.06968182,  0.05572342]
 
     energy = 10
     offset = 0.01
@@ -243,20 +228,38 @@ def test_compton_model():
     angle = 90
     fwhm_corr = 1
     amp = 1
-    f_step = 0
+    f_step = 0.5
     f_tail = 0.1
-    gamma = 10
+    gamma = 2
     hi_f_tail = 0.1
     hi_gamma = 1
-    ev = np.arange(8, 12, 0.1)
+    x = np.arange(8, 12, 0.1)
 
-    out = compton_peak(ev, energy, offset, fano, angle,
+    true_param = [energy, fano, angle, fwhm_corr, amp, f_step, f_tail, gamma, hi_f_tail]
+
+    out = compton_peak(x, energy, offset, fano, angle,
                        fwhm_corr, amp, f_step, f_tail,
                        gamma, hi_f_tail, hi_gamma)
 
     compton = ComptonModel()
+    # parameters not sensitive
+    compton.set_param_hint(name='compton_hi_gamma', value=1, vary=False)
+    compton.set_param_hint(name='fwhm_offset', value=0.01, vary=False)
+
+    # parameters with boundary
+    compton.set_param_hint(name='coherent_sct_energy', value=11, min=9, max=12.5)
+    compton.set_param_hint(name='compton_gamma', value=3, min=0, max=5)
+    compton.set_param_hint(name='compton_hi_f_tail', value=0.2, min=0, max=1.0)
     p = compton.make_params()
-    result = compton.fit(y_true, x=ev, params=p)
+    result = compton.fit(out, x=x, params=p, compton_amplitude=1.5)
 
-    return result, p
 
+    fit_val = [result.values['coherent_sct_energy'], result.values['fwhm_fanoprime'],
+               result.values['compton_angle'], result.values['compton_fwhm_corr'],
+               result.values['compton_amplitude'], result.values['compton_f_step'],
+               result.values['compton_f_tail'], result.values['compton_gamma'],
+               result.values['compton_hi_f_tail']]
+
+    assert_array_almost_equal(true_param, fit_val)
+
+    return
