@@ -219,3 +219,48 @@ def test_bin_edge2center():
     centers = core.bin_edges_to_centers(test_edges)
     assert_array_almost_equal(.5, centers % 1)
     assert_equal(10, len(centers))
+
+
+def test_small_verbosedict():
+    if six.PY2:
+        expected_string = ("You tried to access the key 'b' "
+                       "which does not exist.  "
+                       "The extant keys are: [u'a']")
+    elif six.PY3:
+        expected_string = ("You tried to access the key 'b' "
+                       "which does not exist.  "
+                       "The extant keys are: ['a']")
+    else:
+        # should never happen....
+        assert(False)
+    dd = core.verbosedict()
+    dd['a'] = 1
+    assert_equal(dd['a'], 1)
+    try:
+        dd['b']
+    except KeyError as e:
+        assert_equal(eval(six.text_type(e)), expected_string)
+    else:
+        # did not raise a KeyError
+        assert(False)
+
+
+def test_large_verbosedict():
+    expected_sting = ("You tried to access the key 'a' "
+                      "which does not exist.  There are 100 "
+                      "extant keys, which is too many to show you")
+
+    dd = core.verbosedict()
+    for j in range(100):
+        dd[j] = j
+    # test success
+    for j in range(100):
+        assert_equal(dd[j], j)
+    # test failure
+    try:
+        dd['a']
+    except KeyError as e:
+        assert_equal(eval(six.text_type(e)), expected_sting)
+    else:
+        # did not raise a KeyError
+        assert(False)
