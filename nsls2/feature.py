@@ -234,7 +234,8 @@ def filter_n_largest(y, cands, N):
         An array containing the indices of candidate peaks
 
     N : int
-        The maximum number of peaks to return, sorted by size
+        The maximum number of peaks to return, sorted by size.
+        Must be positive
 
     Returns
     -------
@@ -243,7 +244,7 @@ def filter_n_largest(y, cands, N):
     """
     cands = np.asarray(cands)
     N = int(N)
-    if N < 0:
+    if N <= 0:
         raise ValueError("The maximum number of peaks to return must "
                          "be positive not {}".format(N))
 
