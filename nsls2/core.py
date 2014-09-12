@@ -1,7 +1,37 @@
-# Copyright (c) Brookhaven National Lab 2O14
-# All rights reserved
-# BSD License
-# See LICENSE for full text
+# ######################################################################
+# Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
+# National Laboratory. All rights reserved.                            #
+#                                                                      #
+# Redistribution and use in source and binary forms, with or without   #
+# modification, are permitted provided that the following conditions   #
+# are met:                                                             #
+#                                                                      #
+# * Redistributions of source code must retain the above copyright     #
+#   notice, this list of conditions and the following disclaimer.      #
+#                                                                      #
+# * Redistributions in binary form must reproduce the above copyright  #
+#   notice this list of conditions and the following disclaimer in     #
+#   the documentation and/or other materials provided with the         #
+#   distribution.                                                      #
+#                                                                      #
+# * Neither the name of the Brookhaven Science Associates, Brookhaven  #
+#   National Laboratory nor the names of its contributors may be used  #
+#   to endorse or promote products derived from this software without  #
+#   specific prior written permission.                                 #
+#                                                                      #
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS  #
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT    #
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS    #
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE       #
+# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,           #
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES   #
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR   #
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)   #
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,  #
+# STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OTHERWISE) ARISING   #
+# IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
+# POSSIBILITY OF SUCH DAMAGE.                                          #
+########################################################################
 """
 This module is for the 'core' data types.
 """
@@ -10,6 +40,7 @@ This module is for the 'core' data types.
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import time
 import six
 from six.moves import zip
 from six import string_types
@@ -19,11 +50,23 @@ import numpy as np
 import logging
 logger = logging.getLogger(__name__)
 
+try:
+    import src.ctrans as ctrans
+except ImportError:
+    try:
+        import ctrans
+    except ImportError:
+        ctrans = None
+
+
 md_value = namedtuple("md_value", ['value', 'units'])
 
 
 _defaults = {
-    "bins" : 100,
+    "bins": 100,
+    'nx': 100,
+    'ny': 100,
+    'nz': 100
 }
 
 
@@ -215,87 +258,103 @@ def _iter_helper(path_list, split, md_dict):
 
 keys_core = {
     "pixel_size": {
-        "description" : ("2 element tuple defining the (x y) dimensions of the "
-                         "pixel"),
-        "type" : tuple,
-        "units" : "um",
-        },
+        "description": ("2 element tuple defining the (x y) dimensions of the "
+                        "pixel"),
+        "type": tuple,
+        "units": "um",
+    },
     "voxel_size": {
-        "description" : ("3 element tuple defining the (x y z) dimensions of the "
+        "description": ("3 element tuple defining the (x y z) dimensions of the "
                          "voxel"),
-        "type" : tuple,
-        "units" : "um",
+        "type": tuple,
+        "units": "um"
+    },
+    "calibrated_center": {
+        "description": ("2 element tuple defining the (x y) center of the "
+                        "detector in pixels"),
+        "type": tuple,
+        "units": "pixel",
+    },
+    "detector_size": {
+        "description": ("2 element tuple defining no. of pixels(size) in the "
+                        "detector X and Y direction"),
+        "type": tuple,
+        "units": "pixel",
+    },
+    "detector_tilt_angles": {
+        "description": "Detector tilt angle",
+        "type": tuple,
+        "units": " degrees",
+    },
+    "dist_sample": {
+        "description": "distance from the sample to the detector (mm)",
+        "type": float,
+        "units": "mm",
+    },
+    "wavelength": {
+        "description": "wavelength of incident radiation (Angstroms)",
+        "type": float,
+        "units": "angstrom",
+    },
+    "ub_mat": {
+        "description": "UB matrix(orientation matrix) 3x3 array",
+        "type": "ndarray",
+    },
+    "array_dimensions": {
+        "description": "axial lengths of the array (Pixels)",
+        "x_dimension": {
+            "description": "x-axis array length as int",
+            "type": int,
+            "units": "pixels"
+            },
+        "y_dimension": {
+            "description": "y-axis array length as int",
+            "type": int,
+            "units": "pixels"
+            },
+        "z_dimension": {
+            "description": "z-axis array length as int",
+            "type": int,
+            "units": "pixels"
+            }
         },
-     "detector_center": {
-        "description" : ("2 element tuple defining the (x y) center of the "
-                         "detector in pixels"),
-        "type" : tuple,
-        "units" : "pixel",
+    "bounding_box": {
+        "description": ("physical extents of the array: useful for " +
+                        "volume alignment, transformation, merge and " +
+                         "spatial comparison of multiple volumes"),
+        "x_min": {
+            "description": "minimum spatial coordinate along the x-axis",
+            "type": float,
+            "units": "um"
+            },
+        "x_max": {
+            "description": "maximum spatial coordinate along the x-axis",
+            "type": float,
+            "units": "um"
+            },
+        "y_min": {
+            "description": "minimum spatial coordinate along the y-axis",
+            "type": float,
+            "units": "um"
+            },
+        "y_max": {
+            "description": "maximum spatial coordinate along the y-axis",
+            "type": float,
+            "units": "um"
+            },
+        "z_min": {
+            "description": "minimum spatial coordinate along the z-axis",
+            "type": float,
+            "units": "um"
+            },
+        "z_max": {
+            "description": "maximum spatial coordinate along the z-axis",
+            "type": float,
+            "units": "um"
+            },
         },
-     "dist_sample": {
-        "description" : "distance from the sample to the detector (mm)",
-        "type" : float,
-        "units" : "mm",
-        },
-     "wavelength": {
-        "description" : "wavelength of incident radiation (Angstroms)",
-        "type" : float,
-        "units" : "angstrom",
-        },
-     "array_dimensions" : {
-         "description" : "axial lengths of the array (Pixels)",
-         "x_dimension" : {
-             "description" : "x-axis array length as int",
-             "type" : int,
-             "units" : "pixels"
-             },
-         "y_dimension" : {
-             "description" : "y-axis array length as int",
-             "type" : int,
-             "units" : "pixels"
-             },
-         "z_dimension" : {
-             "description" : "z-axis array length as int",
-             "type" : int,
-             "units" : "pixels"
-             }
-         },
-     "bounding_box" : {
-         "description" : ("physical extents of the array: useful for " + 
-                          "volume alignment, transformation, merge and " + 
-                          "spatial comparison of multiple volumes"),
-         "x_min" : {
-             "description" : "",
-             "type" : float,
-             "units" : "um"
-             },
-         "x_max" : {
-             "description" : "",
-             "type" : float,
-             "units" : "um"
-             },
-         "y_min" : {
-             "description" : "",
-             "type" : float,
-             "units" : "um"
-             },
-         "y_max" : {
-             "description" : "",
-             "type" : float,
-             "units" : "um"
-             },
-         "z_min" : {
-             "description" : "",
-             "type" : float,
-             "units" : "um"
-             },
-         "z_max" : {
-             "description" : "",
-             "type" : float,
-             "units" : "um"
-             },
-         },
-     }
+     },
+}
 
 
 def img_subtraction_pre(img_arr, is_reference):
@@ -388,7 +447,7 @@ def detector2D_to_1D(img, detector_center, **kwargs):
 
     # Caswell's incredible terse rewrite
     X, Y = np.meshgrid(np.arange(img.shape[0]) - detector_center[0],
-                        np.arange(img.shape[1]) - detector_center[1])
+                       np.arange(img.shape[1]) - detector_center[1])
 
     # return the x, y and z coordinates (as a tuple? or is this a list?)
     return X.ravel(), Y.ravel(), img.ravel()
@@ -400,26 +459,26 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
 
     Parameters
     ----------
-    x : 1D array-like
+    x : array
         position
-    y : 1D array-like
+    y : array
         intensity
-    nx : integer
+    nx : integer, optional
         number of bins to use
-    min_x : float
+    min_x : float, optional
         Left edge of first bin
-    max_x : float
+    max_x : float, optional
         Right edge of last bin
 
     Returns
     -------
-    edges : 1D array
+    edges : array
         edges of bins, length nx + 1
 
-    val : 1D array
+    val : array
         sum of values in each bin, length nx
 
-    count : ID
+    count : array
         The number of counts in each bin, length nx
     """
 
@@ -482,3 +541,238 @@ def wedge_integration(src_data, center, theta_start,
         The integrated intensity under the wedge
     """
     pass
+
+
+def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
+    """
+    Generate bin edges.  The last value is the returned array is
+    the right edge of the last bin, the rest of the values are the
+    left edges of each bin.
+
+    If `range_max` is specified all bin edges will be less than or
+    equal to it's value.
+
+    If `range_min` is specified all bin edges will be greater than
+    or equal to it's value
+
+    If `nbins` is specified then there will be than number of bins and
+    the returned array will have length `nbins + 1` (as the right most
+    edge is included)
+
+    If `step` is specified then bin width is approximately `step` (It is
+    not exact due to the nature of floats). The arrays generated by
+    `np.cumsum(np.ones(nbins) * step)` and `np.arange(nbins) * step` are
+    not identical.  This function uses the second method in all cases
+    where `step` is specified.
+
+    .. warning :: If the set :code:`(range_min, range_max, step)` is
+        given there is no guarantee that :code:`range_max - range_min`
+        is an integer multiple of :code:`step`.  In this case the left
+        most bin edge is :code:`range_min` and the right most bin edge
+        is less than :code:`range_max` and the distance between the
+        right most edge and :code:`range_max` is not greater than
+        :code:`step` (this is the same behavior as the built-in
+        :code:`range()`).  It is not recommended to specify bins in this
+        manner.
+
+    Parameters
+    ----------
+    range_min : float, optional
+        The minimum value that may be included as a bin edge
+
+    range_max : float, optional
+        The maximum value that may be included as a bin edge
+
+    nbins : int, optional
+        The number of bins, if specified the length of the returned
+        value will be nbins + 1
+
+    step : float, optional
+        The step between the bins
+
+    Returns
+    -------
+    np.array
+        An array of floats for the bin edges.  The last value is the
+        right edge of the last bin.
+    """
+    num_valid_args = sum((range_min is not None, range_max is not None,
+                          step is not None, nbins is not None))
+    if num_valid_args != 3:
+        raise ValueError("Exactly three of the arguments must be non-None "
+                         "not {}.".format(num_valid_args))
+
+    if range_min is not None and range_max is not None:
+        if range_max <= range_min:
+            raise ValueError("The minimum must be less than the maximum")
+
+    if nbins is not None:
+        if nbins <= 0:
+            raise ValueError("The number of bins must be positive")
+
+    # The easy case
+    if step is None:
+        return np.linspace(range_min, range_max, nbins + 1, endpoint=True)
+
+    # in this case, the user gave use min, max, and step
+    if nbins is None:
+        if step > (range_max - range_min):
+            raise ValueError("The step can not be greater than the difference "
+                             "between min and max")
+        nbins = int((range_max - range_min)//step)
+        ret = range_min + np.arange(nbins + 1) * step
+        # if the last value is greater than the max (should never happen)
+        if ret[-1] > range_max:
+            return ret[:-1]
+        if range_max - ret[-1] > 1e-10 * step:
+            logger.debug("Inconsistent "
+                         "(range_min, range_max, step) "
+                         "and step does not evenly divide "
+                         "(range_min - range_max). "
+                         "The bins has been truncated.\n"
+                         "min: %f max: %f step: %f gap: %f",
+                         range_min, range_max,
+                         step, range_max - ret[-1])
+        return ret
+
+    # in this case we got range_min, nbins, step
+    if range_max is None:
+        return range_min + np.arange(nbins + 1) * step
+
+    # in this case we got range_max, nbins, step
+    if range_min is None:
+        return range_max - np.arange(nbins + 1)[::-1] * step
+
+
+def grid3d(q, img_stack,
+           nx=None, ny=None, nz=None,
+           xmin=None, xmax=None, ymin=None,
+           ymax=None, zmin=None, zmax=None):
+    """Grid irregularly spaced data points onto a regular grid via histogramming
+
+    This function will process the set of reciprocal space values (q), the
+    image stack (img_stack) and grid the image data based on the bounds
+    provided, using defaults if none are provided.
+
+    Parameters
+    ----------
+    q : ndarray
+        (Qx, Qy, Qz) - HKL values - Nx3 array
+    img_stack : ndarray
+        Intensity array of the images
+        dimensions are: [num_img][num_rows][num_cols]
+    nx : int, optional
+        Number of voxels along x
+    ny : int, optional
+        Number of voxels along y
+    nz : int, optional
+        Number of voxels along z
+    xmin : float, optional
+        Minimum value along x. Defaults to smallest x value in q
+    ymin : float, optional
+        Minimum value along y. Defaults to smallest y value in q
+    zmin : float, optional
+        Minimum value along z. Defaults to smallest z value in q
+    xmax : float, optional
+        Maximum value along x. Defaults to largest x value in q
+    ymax : float, optional
+        Maximum value along y. Defaults to largest y value in q
+    zmax : float, optional
+        Maximum value along z. Defaults to largest z value in q
+
+    Returns
+    -------
+    mean : ndarray
+        intensity grid.  The values in this grid are the
+        mean of the values that fill with in the grid.
+    occupancy : ndarray
+        The number of data points that fell in the grid.
+    std_err : ndarray
+        This is the standard error of the value in the
+        grid box.
+    oob : int
+        Out Of Bounds. Number of data points that are outside of
+        the gridded region.
+    bounds : list
+        tuple of (min, max, step) for x, y, z in order: [x_bounds,
+        y_bounds, z_bounds]
+
+    """
+
+    q = np.atleast_2d(q)
+    q.shape
+    if q.ndim != 2:
+        raise ValueError("q.ndim must be a 2-D array of shape Nx3 array. "
+                         "You provided an array with {0} dimensions."
+                         "".format(q.ndim))
+    if q.shape[1] != 3:
+        raise ValueError("The shape of q must be an Nx3 array, not {0}X{1}"
+                         " which you provided.".format(*q.shape))
+
+    # set defaults for qmin, qmax, dq
+    qmin = np.min(q, axis=0)
+    qmax = np.max(q, axis=0)
+    dqn = [_defaults['nx'], _defaults['ny'], _defaults['nz']]
+
+    # pad the upper edge by just enough to ensure that all of the
+    # points are in-bounds with the binning rules: lo <= val < hi
+    qmax += np.spacing(qmax)
+
+    # check for non-default input
+    for target, input_vals in ((dqn, (nx, ny, nz)),
+                               (qmin, (xmin, ymin, zmin)),
+                               (qmax, (xmax, ymax, zmax))):
+        for j, in_val in enumerate(input_vals):
+            if in_val is not None:
+                target[j] = in_val
+
+    # format bounds
+    bounds = np.array([qmin, qmax, dqn]).T
+
+    # creating (Qx, Qy, Qz, I) Nx4 array - HKL values and Intensity
+    # getting the intensity value for each pixel
+    q = np.insert(q, 3, np.ravel(img_stack), axis=1)
+
+    #            3D grid of the data set
+    # starting time for gridding
+    t1 = time.time()
+
+    # call the c library
+    mean, occupancy, std_err, oob = ctrans.grid3d(q, qmin, qmax, dqn, norm=1)
+
+    # ending time for the gridding
+    t2 = time.time()
+    logger.info("Done processed in {0} seconds".format(t2-t1))
+
+    # No. of values zero in the grid
+    empt_nb = (occupancy == 0).sum()
+
+    # log some information about the grid at the debug level
+    if oob:
+        logger.debug("There are %.2e points outside the grid {0}".format(oob))
+    logger.debug("There are %2e bins in the grid {0}".format(mean.size))
+    if empt_nb:
+        logger.debug("There are %.2e values zero in the grid {0}"
+                     "".format(empt_nb))
+
+    return mean, occupancy, std_err, oob, bounds
+
+
+def bin_edges_to_centers(input_edges):
+    """
+    Helper function for turning a array of bin edges into
+    an array of bin centers
+
+    Parameters
+    ----------
+    input_edges : array-like
+        N + 1 values which are the left edges of N bins
+        and the right edge of the last bin
+
+    Returns
+    -------
+    ndarray
+        A length N array giving the centers of the bins
+    """
+    input_edges = np.asarray(input_edges)
+    return (input_edges[:-1] + input_edges[1:]) * 0.5

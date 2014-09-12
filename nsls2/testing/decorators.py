@@ -1,4 +1,4 @@
-# ######################################################################
+########################################################################
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
@@ -32,5 +32,51 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-import logging
-logger = logging.getLogger(__name__)
+"""
+This module is for decorators related to testing.
+
+Much of this code is inspired by the code in matplotlib.  Exact copies
+are noted.
+"""
+from nsls2.testing.noseclasses import (KnownFailureTest,
+                                       KnownFailureDidNotFailTest)
+
+from nose.tools import make_decorator
+
+
+def known_fail_if(cond):
+    """
+    Make sure a known failure fails.
+
+    This function is a decorator factory.
+    """
+    # make the decorator function
+    def dec(in_func):
+        # make the wrapper function
+        # if the condition is True
+        if cond:
+            def inner_wrap():
+                # try the test anywoy
+                try:
+                    in_func()
+                # when in fails, raises KnownFailureTest
+                # which is registered with nose and it will be marked
+                # as K in the results
+                except Exception:
+                    raise KnownFailureTest()
+                # if it does not fail, raise KnownFailureDidNotFailTest which
+                # is a normal exception.  This may seem counter-intuitive
+                # but knowing when tests that _should_ fail don't can be useful
+                else:
+                    raise KnownFailureDidNotFailTest()
+            # use `make_decorator` from nose to make sure that the meta-data on
+            # the function is forwarded properly (name, teardown, setup, etc)
+            return make_decorator(in_func)(inner_wrap)
+
+        # if the condition is false, don't make a wrapper function
+        # this is effectively a no-op
+        else:
+            return in_func
+
+    # return the decorator function
+    return dec

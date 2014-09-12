@@ -16,6 +16,25 @@ The docstrings must follow the `numpydoc
 <https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt>`_
 format.
 
+For the 'Returns' section of numpydoc, you must include the return
+variable name because this variable name is needed for automated vistrails
+wrapping (the return variable names are the output ports).  
+
+
+**THESE MUST BE IN THE ORDER THAT THE FUNCTION RETURNS THEM IN**
+
+Example: ::
+
+
+   Returns
+   -------
+   avg : float
+       The average
+   stdev : float
+       The standard deviation
+
+
+
 Sphinx
 ------
 

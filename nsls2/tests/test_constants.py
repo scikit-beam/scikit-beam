@@ -2,6 +2,9 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
+# @author: Li Li (lili@bnl.gov)                                        #
+# created on 08/19/2014                                                #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -32,5 +35,43 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-import logging
-logger = logging.getLogger(__name__)
+
+
+from __future__ import (absolute_import, division, unicode_literals, print_function)
+import six
+from numpy.testing import assert_array_equal
+from nose.tools import assert_equal
+
+from nsls2.constants import (Element, emission_line_search)
+
+
+def test_element_data():
+    """
+    smoke test of all elements
+    """
+
+    data1 = []
+    data2 = []
+
+    name_list = []
+    for i in range(100):
+        e = Element(i+1)
+        data1.append(e.cs(10)['Ka1'])
+        name_list.append(e.name)
+
+    for item in name_list:
+        e = Element(item)
+        data2.append(e.cs(10)['Ka1'])
+
+    assert_array_equal(data1, data2)
+
+    return
+
+
+def test_element_finder():
+
+    true_name = sorted(['Eu', 'Cu'])
+    out = emission_line_search(8, 0.05, 10)
+    found_name = sorted(list(six.iterkeys(out)))
+    assert_equal(true_name, found_name)
+    return
