@@ -92,7 +92,7 @@ def set_default(model_name, func_name):
             model_name.set_param_hint(name, value=my_dict['value'], vary=True,
                                       min=my_dict['min'], max=my_dict['max'])
         else:
-            raise TypeError("Boundary type %s can't be used" % (my_dict['bound_type']))
+            raise TypeError("Boundary type {0} can't be used".format(my_dict['bound_type']))
 
 
 class ElasticModel(Model):
