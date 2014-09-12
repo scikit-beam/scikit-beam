@@ -134,5 +134,6 @@ def get_para():
     """More to be added here.
        The para_dict will be updated
        based on different algorithms.
+       Use copy for dict.
     """
     return para_dict
