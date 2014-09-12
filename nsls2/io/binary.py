@@ -41,7 +41,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def read_binary(filename, nx, ny, nz, dsize, headersize):
+def read_binary(filename, nx, ny, nz, dtype_str, headersize):
     """
     docstring, woo!
 
@@ -55,8 +55,9 @@ def read_binary(filename, nx, ny, nz, dsize, headersize):
         The number of data elements in the y-direction
     nz : integer
         The number of data elements in the z-direction
-    dsize : numpy.dtype
-        The size of each element in the numpy array
+    dtype_str : str
+        A valid argument for np.dtype(some_str). See read_binary.dsize
+        attribute
     headersize : integer
         The size of the file header in bytes
 
@@ -71,13 +72,13 @@ def read_binary(filename, nx, ny, nz, dsize, headersize):
     """
 
     # open the file
-    opened_file = open(filename, "rb")
+    with open(filename, "rb") as opened_file:
+        # read the file header
+        header = opened_file.read(headersize)
 
-    # read the file header
-    header = opened_file.read(headersize)
-
-    # read the entire file in as 1D list
-    data = np.fromfile(file=opened_file, dtype=dsize, count=-1)
+        # read the entire file in as 1D list
+        data = np.fromfile(file=opened_file, dtype=np.dtype(dtype_str),
+                           count=-1)
 
     # reshape the array to 3D
     if nz is not 1:
@@ -89,3 +90,6 @@ def read_binary(filename, nx, ny, nz, dsize, headersize):
 
     # return the array and the header
     return data, header
+
+# set an attribute for the dsize params that are valid options
+read_binary.dtype_str = sorted(list(np.typeDict))
