@@ -410,7 +410,7 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
 
 def bin_image_to_1D(img,
                     calibrated_center,
-                    pixel_to_1D_func, warp_kwargs=None,
+                    pixel_to_1D_func, pixel_to_1D_kwarg=None,
                     bin_min=None, bin_max=None, bin_num=None):
     """Integrates an image to a 1D curve.
 
@@ -432,7 +432,7 @@ def bin_image_to_1D(img,
         filled with a scalar for that pixel position (R2 -> R1 mapping).
         The function must have the following signature ::
 
-            output = func(img.shape, calibrated_center, **warp_kwargs)
+            output = func(img.shape, calibrated_center, **pixel_to_1D_kwarg)
 
         such that ::
 
@@ -441,7 +441,7 @@ def bin_image_to_1D(img,
         and output[i, j] corresponds to img[i, j]
 
 
-    warp_kwargs : dict, optional
+    pixel_to_1D_kwargs : dict, optional
         Any additional keyword arguments to pass through to the warp function
 
     bin_min : float, optional
@@ -464,11 +464,11 @@ def bin_image_to_1D(img,
     bin_count : array
         The number of pixels in each bin
     """
-    if warp_kwargs is None:
-        warp_kwargs = {}
+    if pixel_to_1D_kwarg is None:
+        pixel_to_1D_kwarg = {}
 
     values_1D = pixel_to_1D_func(img.shape, calibrated_center,
-                             **warp_kwargs)
+                             **pixel_to_1D_kwarg)
 
     return bin_1D(values_1D.ravel(), img.ravel(), min_x=bin_min,
                   max_x=bin_max, nx=bin_num)
