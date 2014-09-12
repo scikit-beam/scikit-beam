@@ -193,7 +193,7 @@ class verbosedict(dict):
                            "are {num} extant keys, which is too many to "
                            "show you").format(
                                key=key, num=len(self))
-            six.reraise(KeyError, new_msg, sys.exc_info()[2])
+            six.reraise(KeyError, KeyError(new_msg), sys.exc_info()[2])
         return v
 
 
