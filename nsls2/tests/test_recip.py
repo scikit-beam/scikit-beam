@@ -1,11 +1,24 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-import numpy as np
-import nsls2.recip as recip
-import numpy.testing as npt
-import six
-from nsls2.testing.decorators import known_fail_if
 
+import six
+
+import numpy as np
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_almost_equal)
+
+from nose.tools import assert_equal, assert_true, raises
+
+import nsls2.core as core
+
+from nsls2.testing.decorators import known_fail_if
+import numpy.testing as npt
+from nsls2 import recip
+
+
+@raises(ValueError, KeyError)
+def _process_to_q_exception(param_dict, frame_mode):
+    hkl = recip.process_to_q(frame_mode=frame_mode, **param_dict)
 
 @known_fail_if(six.PY3)
 def test_process_to_q():
@@ -26,10 +39,27 @@ def test_process_to_q():
     setting_angles = np.array([[40., 15., 30., 25., 10., 5.],
                               [90., 60., 0., 30., 10., 5.]])
     # delta=40, theta=15, chi = 90, phi = 30, mu = 10.0, gamma=5.0
+    pdict = {}
+    pdict['setting_angles'] = setting_angles
+    pdict['detector_size'] = detector_size
+    pdict['pixel_size'] = pixel_size
+    pdict['calibrated_center'] = calibrated_center
+    pdict['dist_sample'] = dist_sample
+    pdict['wavelength'] = wavelength
+    pdict['ub'] = ub_mat
+    # ensure invalid entries for frame_mode actually fail
+    for fails in [0, 5, 'cat']:
+        yield _process_to_q_exception, pdict, fails
+    frame_mode_passes = recip.process_to_q.frame_mode
+    for _ in range(len(frame_mode_passes)):
+        frame_mode_passes.append(_+1)
+    # smoketest the frame_mode variable
+    for passes in frame_mode_passes:
+        recip.process_to_q(frame_mode=passes, **pdict)
 
-    tot_set = recip.process_to_q(setting_angles, detector_size,
-                                 pixel_size, calibrated_center,
-                                dist_sample, wavelength, ub_mat)
+    #todo test frame_modes 1, 2, and 3
+    # test that the values are coming back as expected for frame_mode=4
+    hkl = recip.process_to_q(**pdict)
 
     # Known HKL values for the given six angles)
     # each entry in list is (pixel_number, known hkl value)
@@ -37,4 +67,4 @@ def test_process_to_q():
                  (98432, np.array([0.10205953,  0.45624416, -0.27200778]))]
 
     for pixel, kn_hkl in known_hkl:
-        npt.assert_array_almost_equal(tot_set[pixel], kn_hkl, decimal=8)
+        npt.assert_array_almost_equal(hkl[pixel], kn_hkl, decimal=8)

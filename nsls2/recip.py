@@ -45,6 +45,7 @@ from __future__ import (absolute_import, division, print_function,
 import six
 import numpy as np
 import logging
+import sys
 logger = logging.getLogger(__name__)
 import time
 try:
@@ -171,49 +172,56 @@ def project_to_sphere(img, dist_sample, calibrated_center, pixel_size,
 
 
 def process_to_q(setting_angles, detector_size, pixel_size,
-                 calibrated_center, dist_sample, wavelength, ub_mat):
+                 calibrated_center, dist_sample, wavelength, ub,
+                 frame_mode=None):
     """
-    This will procees the given images (certain scan) of
-    the full set into receiprocal(Q) space, (Qx, Qy, Qz)
+    This will compute the hkl values for all pixels in a shape specified by
+    detector_size.
 
     Parameters
     ----------
     setting_angles : ndarray
-        six angles of all the images - Nx6 array
-        delta, theta, chi, phi, mu, gamma (degrees)
+        six angles of all the images - Required shape is [num_images][6] and
+        required type is something that can be cast to a 2D numpy array
+        Angle order: delta, theta, chi, phi, mu, gamma (degrees)
 
     detector_size : tuple
-        2 element tuple defining no. of pixels(size) in the
-        detector X and Y direction(mm)
+        2 element tuple defining the number of pixels in the detector. Order is
+        (num_columns, num_rows)
 
     pixel_size : tuple
-        2 element tuple defining the (x y) dimensions of the
-        pixel (mm)
+        2 element tuple defining the size of each pixel in mm. Order is
+        (column_pixel_size, row_pixel_size).  If not in mm, must be in the same
+        units as `dist_sample`
 
     calibrated_center : tuple
-        2 element tuple defining the (x y) center of the
-        detector (mm)
+        2 element tuple defining the center of the detector in pixels. Order
+        is (column_center, row_center)(x y)
 
     dist_sample : float
-        distance from the sample to the detector (mm)
+        distance from the sample to the detector (mm). If not in mm, must be
+        in the same units as `pixel_size`
 
     wavelength : float
         wavelength of incident radiation (Angstroms)
 
-    ub_mat : ndarray
+    ub : ndarray
         UB matrix (orientation matrix) 3x3 matrix
+
+    frame_mode : str
+        Frame mode defines the data collection mode and thus the desired
+        output from this function. Defaults to hkl mode (frame_mode=4)
+        1 : 'theta'    : Theta axis frame.
+        2 : 'phi'      : Phi axis frame.
+        3 : 'cart'     : Crystal cartesian frame.
+        4 : 'hkl'      : Reciprocal lattice units frame.
+        Any of the above integers are also valid input parameters
 
     Returns
     -------
-    tot_set : ndarray
-        (Qx, Qy, Qz) - HKL values - Nx3 matrix
-
-    Raises
-    ------
-    ValueError
-        Possible causes:
-            Raised when the diffractometer six angles of
-            the images are not specified
+    hkl : ndarray
+        (Qx, Qy, Qz) - HKL values
+        shape is [num_images * num_rows * num_columns][3]
 
     Notes
     -----
@@ -231,41 +239,63 @@ def process_to_q(setting_angles, detector_size, pixel_size,
        1998.
 
     """
-    ccdToQkwArgs = {}
-
-    tot_set = None
-
-    # frame_mode = 1 : 'theta'    : Theta axis frame.
-    # frame_mode = 2 : 'phi'      : Phi axis frame.
-    # frame_mode = 3 : 'cart'     : Crystal cartesian frame.
-    # frame_mode = 4 : 'hkl'      : Reciprocal lattice units frame.
-    frame_mode = 4
-
+    # set default frame_mode
+    if frame_mode is None:
+        frame_mode = 4
+    try:
+        # check to see if frame mode is an integer
+        frame_mode = int(frame_mode)
+        if frame_mode < 1 or frame_mode > 4:
+            raise ValueError('frame_mode must be an integer between 1 and 4 '
+                             '(inclusive), representing one of the following '
+                             ': {0}'.format(process_to_q.frame_mode))
+    except ValueError:
+        # frame node is hopefully a string
+        frame_mode = str(frame_mode).lower()
+        try:
+            frame_mode = process_to_q.frame_mode.index(frame_mode)
+        except ValueError:
+            # str(frame_mode) is not a valid option
+            err_msg = ('str(frame_mode) = {0} which is not in the list of '
+                       'valid options: {1}'.format(frame_mode,
+                                                   process_to_q.frame_mode))
+            six.reraise(KeyError, KeyError(err_msg), sys.exc_info()[2])
+    # ensure the ub matrix is an array
+    ub = np.asarray(ub)
+    # ensure setting angles is a 2-D
     setting_angles = np.atleast_2d(setting_angles)
-    setting_angles.shape
     if setting_angles.ndim != 2:
-        raise ValueError()
+        raise ValueError('setting_angles is expected to be a 2-D array with'
+                         ' dimensions [num_images][num_angles]. You provided '
+                         'an array with dimensions {0}'
+                         ''.format(setting_angles.shape))
     if setting_angles.shape[1] != 6:
-        raise ValueError()
-
+        raise ValueError('It is expected that there should be six angles in '
+                         'the setting_angles parameter. You provided {0}'
+                         ' angles.'.format(setting_angles.shape[1]))
     #  *********** Converting to Q   **************
 
     # starting time for the process
     t1 = time.time()
 
     # ctrans - c routines for fast data analysis
-    tot_set = ctrans.ccdToQ(angles=setting_angles * np.pi / 180.0,
-                            mode=frame_mode,
-                            ccd_size=(detector_size),
-                            ccd_pixsize=(pixel_size),
-                            ccd_cen=(calibrated_center),
-                            dist=dist_sample,
-                            wavelength=wavelength,
-                            UBinv=np.matrix(ub_mat).I,
-                            **ccdToQkwArgs)
+    hkl = ctrans.ccdToQ(angles=setting_angles * np.pi / 180.0,
+                        mode=frame_mode,
+                        ccd_size=(detector_size),
+                        ccd_pixsize=(pixel_size),
+                        ccd_cen=(calibrated_center),
+                        dist=dist_sample,
+                        wavelength=wavelength,
+                        UBinv=np.matrix(ub).I)
+                        # **kwargs)
 
     # ending time for the process
     t2 = time.time()
-    logger.info("--- Done processed in %f seconds", (t2-t1))
+    logger.info("--- Processing time for {0} {1} x {2} images took {3} seconds."
+                "".format(setting_angles.shape[0], detector_size[0],
+                          detector_size[1], (t2-t1)))
+    return hkl[:, :3]
 
-    return tot_set[:, :3]
+# Assign frame_mode as an attribute to the process_to_q function so that the
+# autowrapping knows what the valid options are
+process_to_q.frame_mode = ['theta', 'phi', 'cart', 'hkl']
