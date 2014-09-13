@@ -49,6 +49,15 @@ import numpy as np
 import sys
 import inspect
 
+
+import logging
+logger = logging.getLogger(__name__)
+
+from skxray.fitting.model.physics_peak import (elastic_peak, compton_peak,
+                                              gauss_peak)
+from skxray.fitting.base.parameter_data import get_para
+from skxray.constants import Element
+
 from lmfit import Model
 from lmfit.models import GaussianModel as LmGaussianModel
 from lmfit.models import LorentzianModel as LmLorentzianModel
@@ -63,6 +72,24 @@ from skxray.fitting.lineshapes import (elastic, compton, gaussian,
                                        lorentzian, lorentzian2)
 
 from skxray.fitting.base.parameter_data import get_para
+
+
+
+kele = ['Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr',
+        'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se',
+        'Br', 'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd',
+        'In', 'Sn', 'Sb', 'Te', 'I', 'dummy', 'dummy']
+
+#lele = ['Mo_L', 'Ag_L', 'Sn_L', 'Cd_L', 'I_L', 'Cs_L', 'Ba_L', 'Eu_L', 'Gd_L', 'W_L', 'Pt_L', 'Au_L',
+#        'Hg_L', 'Pb_L', 'U_L', 'Pu_L', 'Sm_L', 'Y_L', 'Pr_L', 'Ce_L', 'Zr_L', 'Os_L', 'Rb_L', 'Ru_L']
+
+lele = ['Mo_L', 'Tc_L', 'Ru_L', 'Rh_L', 'Pd_L', 'Ag_L', 'Cd_L', 'In_L', 'Sn_L', 'Sb_L', 'Te_L', 'I_L', 'Xe_L', 'Cs_L', 'Ba_L', 'La_L', 'Ce_L', 'Pr_L', 'Nd_L', 'Pm_L', 'Sm_L',
+        'Eu_L', 'Gd_L', 'Tb_L', 'Dy_L', 'Ho_L', 'Er_L', 'Tm_L', 'Yb_L', 'Lu_L', 'Hf_L', 'Ta_L', 'W_L', 'Re_L', 'Os_L', 'Ir_L', 'Pt_L', 'Au_L', 'Hg_L', 'Tl_L',
+        'Pb_L', 'Bi_L', 'Po_L', 'At_L', 'Rn_L', 'Fr_L', 'Ac_L', 'Th_L', 'Pa_L', 'U_L', 'Np_L', 'Pu_L', 'Am_L', 'Br_L', 'Ga_L']
+
+
+
+mele = ['Au_M', 'Pb_M', 'U_M', 'noise', 'Pt_M', 'Ti_M', 'Gd_M', 'dummy', 'dummy']
 
 
 def set_default(model_name, func_name):
@@ -154,5 +181,70 @@ class Lorentzian2Model(Model):
 
     def __init__(self, *args, **kwargs):
         super(Lorentzian2Model, self).__init__(lorentzian2, *args, **kwargs)
+
+
+
+
+class ModelSpectrum(object):
+
+    def __init__(self, incident_energy):
+        self.incident_energy = incident_energy
+        return
+
+
+    def setComptonModel(self):
+        """
+        need to read input file to setup parameters
+        """
+        compton = ComptonModel()
+        # parameters not sensitive
+        compton.set _param_hint(name='compton_hi_gamma', value=0.25, vary=False)#min=0.0, max=4.0)
+        compton.set_param_hint(name='fwhm_offset', value=0.1, vary=True, expr='e_fwhm_offset')
+
+        # parameters with boundary
+        compton.set_param_hint(name='coherent_sct_energy', value=11.78, vary=True)# min=11.77, max=11.79)
+        compton.set_param_hint(name='compton_gamma', value=5.2, vary=True, min=1, max=10.5)
+        compton.set_param_hint(name='compton_f_tail', value=0.5, vary=True, min=0, max=2.0)
+        compton.set_param_hint(name='compton_hi_gamma', value=0.2, min=1, max=2.5, vary=True)
+        compton.set_param_hint(name='compton_hi_f_tail', value=0.005, vary=False)#min=0, max=0.05)
+        compton.set_param_hint(name='compton_fwhm_corr', value=3.5, min=2.0, max=4.5)
+        compton.set_param_hint(name='compton_amplitude', value=80000)
+        compton.set_param_hint(name='compton_angle', value=90, vary=True)
+        compton.set_param_hint(name='matrix', value=True, vary=False)
+
+        return compton
+
+
+    def setElasticModel(self):
+        """
+        need to read input file to setup parameters
+        """
+        elastic = ElasticModel(prefix='e_')
+
+        # fwhm_offset is not a sensitive parameter, used as a fixed value
+        elastic.set_param_hint(name='fwhm_offset', value=0.1, vary=True)
+        elastic.set_param_hint(name='coherent_sct_energy', value=11.78, expr='coherent_sct_energy')# min=11.77, max=11.79)
+        elastic.set_param_hint(name='coherent_sct_amplitude', value=50000)
+
+        return elastic
+
+
+    def self.model_spectrum(element_list):
+
+        incident_energy = self.incident_energy
+
+        mod = compton + elastic
+
+        for item in element_list:
+            if item in kele:
+                e = Element(item)
+                if e.cs(incident_energy)['ka1'] == 0:
+                    logger.info('{0} Ka emission line is not activated '
+                                'at this energy {1}'.format(item, incident_energy))
+                    continue
+                for 
+
+
+
 
 
