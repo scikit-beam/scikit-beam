@@ -546,7 +546,8 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
 def grid3d(q, img_stack,
            nx=None, ny=None, nz=None,
            xmin=None, xmax=None, ymin=None,
-           ymax=None, zmin=None, zmax=None):
+           ymax=None, zmin=None, zmax=None,
+           binary_mask=None):
     """Grid irregularly spaced data points onto a regular grid via histogramming
 
     This function will process the set of reciprocal space values (q), the
@@ -578,6 +579,12 @@ def grid3d(q, img_stack,
         Maximum value along y. Defaults to largest y value in q
     zmax : float, optional
         Maximum value along z. Defaults to largest z value in q
+    binary_mask : ndarray, optional
+        The binary mask provides a mechanism to remove unwanted pixels
+        from the images.
+        Binary mask can be two different shapes.
+        - 1: 2-D with binary_mask.shape == np.asarray(img_stack[0]).shape
+        - 2: 3-D with binary_mask.shape == np.asarray(img_stack).shape
 
     Returns
     -------
@@ -597,9 +604,29 @@ def grid3d(q, img_stack,
         y_bounds, z_bounds]
 
     """
+    # validate input
+    img_stack = np.asarray(img_stack)
+    if binary_mask is None:
+        binary_mask = np.ones(img_stack.shape, 'Bool')
+
+    # check to see if the binary mask and the image stack are identical shapes
+    if binary_mask.shape == img_stack.shape:
+        # do a dance :)
+        pass
+    elif binary_mask.shape == img_stack[0].shape:
+        # this is still a valid mask, so make it the same dimensions
+        # as img_stack
+        binary_mask = np.asarray([binary_mask for _
+                                  in range(img_stack.shape[0])])
+
+    else:
+        raise ValueError("The binary mask must be the same shape as the"
+                         "img_stack ({0}) or a single image in the image "
+                         "stack ({1}).  The input binary mask is shaped ({2})"
+                         "".format(img_stack.shape, img_stack[0].shape,
+                                   binary_mask.shape))
 
     q = np.atleast_2d(q)
-    q.shape
     if q.ndim != 2:
         raise ValueError("q.ndim must be a 2-D array of shape Nx3 array. "
                          "You provided an array with {0} dimensions."
@@ -631,6 +658,7 @@ def grid3d(q, img_stack,
     # creating (Qx, Qy, Qz, I) Nx4 array - HKL values and Intensity
     # getting the intensity value for each pixel
     q = np.insert(q, 3, np.ravel(img_stack), axis=1)
+    q = (q * np.ravel(binary_mask)).nonzero()
 
     #            3D grid of the data set
     # starting time for gridding
