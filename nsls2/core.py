@@ -39,12 +39,15 @@ This module is for the 'core' data types.
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-
-import time
 import six
 from six.moves import zip
 from six import string_types
+
+import time
+import sys
+from itertools import tee
 from collections import namedtuple, MutableMapping
+
 import numpy as np
 
 import logging
@@ -68,76 +71,6 @@ _defaults = {
     'ny': 100,
     'nz': 100
 }
-
-
-class XR_data(object):
-    """
-    A class for wrapping up and carrying around data + unrelated
-    meta data.
-    """
-    def __init__(self, data, md=None, mutable=True):
-        """
-        Parameters
-        ----------
-        data : object
-            The 'data' object to be carried around
-
-        md : dict
-            The meta-data object, needs to support [] access
-
-
-        """
-        self._data = data
-        if md is None:
-            md = dict()
-        self._md = md
-        self.mutable = mutable
-
-    @property
-    def data(self):
-        """
-        Access to the data object we are carrying around
-        """
-        return self._data
-
-    @data.setter
-    def data(self, new_data):
-        if not self.mutable:
-            raise RuntimeError("Can't set data on immutable instance")
-        self._data = new_data
-
-    def __getitem__(self, key):
-        """
-        Over-ride the [] infrastructure to access the meta-data
-
-        Parameters
-        ----------
-        key : hashable object
-            The meta-data key to retrive
-        """
-        return self._md[key]
-
-    def __setitem__(self, key, val):
-        """
-        Over-ride the [] infrastructure to access the meta-data
-
-        Parameters
-        ----------
-        key : hashable object
-            The meta-data key to set
-
-        val : object
-            The new meta-data value to set
-        """
-        if not self.mutable:
-            raise RuntimeError("Can't set meta-data on immutable instance")
-        self._md[key] = val
-
-    def meta_data_keys(self):
-        """
-        Get a list of the meta-data keys that this object knows about
-        """
-        return list(six.iterkeys(self._md))
 
 
 class MD_dict(MutableMapping):
@@ -242,6 +175,26 @@ class MD_dict(MutableMapping):
 
     def __iter__(self):
         return _iter_helper([], self._split, self._dict)
+
+
+class verbosedict(dict):
+    def __getitem__(self, key):
+        try:
+            v = dict.__getitem__(self, key)
+        except KeyError:
+            if len(self) < 25:
+                new_msg = ("You tried to access the key '{key}' "
+                           "which does not exist.  The "
+                           "extant keys are: {valid_keys}").format(
+                               key=key, valid_keys=list(self))
+            else:
+                new_msg = ("You tried to access the key '{key}' "
+                           "which does not exist.  There "
+                           "are {num} extant keys, which is too many to "
+                           "show you").format(
+                               key=key, num=len(self))
+            six.reraise(KeyError, KeyError(new_msg), sys.exc_info()[2])
+        return v
 
 
 def _iter_helper(path_list, split, md_dict):
