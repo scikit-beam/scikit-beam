@@ -208,7 +208,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
     ub : ndarray
         UB matrix (orientation matrix) 3x3 matrix
 
-    frame_mode : str
+    frame_mode : str, optional
         Frame mode defines the data collection mode and thus the desired
         output from this function. Defaults to hkl mode (frame_mode=4)
         1 : 'theta'    : Theta axis frame.
