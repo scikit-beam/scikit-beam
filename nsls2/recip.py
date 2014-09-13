@@ -216,7 +216,6 @@ def process_to_q(setting_angles, detector_size, pixel_size,
         2 : 'phi'      : Phi axis frame.
         3 : 'cart'     : Crystal cartesian frame.
         4 : 'hkl'      : Reciprocal lattice units frame.
-        Any of the above integers are also valid input parameters
 
     Returns
     -------
@@ -247,26 +246,6 @@ def process_to_q(setting_angles, detector_size, pixel_size,
         str_to_int = verbosedict((k, j+1) for j, k
                                  in enumerate(process_to_q.frame_mode))
         frame_mode = str_to_int[frame_mode]
-    # try:
-    #     # check to see if frame mode is an integer
-    #     frame_mode = int(frame_mode)
-    # except ValueError:
-    #     # frame node is hopefully a string
-    #     frame_mode = str(frame_mode).lower()
-    #     try:
-    #         frame_mode = process_to_q.frame_mode.index(frame_mode)
-    #     except ValueError:
-    #         # str(frame_mode) is not a valid option
-    #         err_msg = ('str(frame_mode) = {0} which is not in the list of '
-    #                    'valid options: {1}'.format(frame_mode,
-    #                                                process_to_q.frame_mode))
-    #         six.reraise(KeyError, KeyError(err_msg), sys.exc_info()[2])
-    # if frame_mode < 1 or frame_mode > 4:
-    #     raise ValueError('frame_mode must be an integer between 1 and 4 '
-    #                      '(inclusive), representing one of the following '
-    #                      ': {0}.  The string or integer index of the '
-    #                      'arguments are both valid inputs'
-    #                      ''.format(process_to_q.frame_mode))
     # ensure the ub matrix is an array
     ub = np.asarray(ub)
     # ensure setting angles is a 2-D
