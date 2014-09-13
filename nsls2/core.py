@@ -616,7 +616,7 @@ def grid3d(q, img_stack,
     elif binary_mask.shape == img_stack[0].shape:
         # this is still a valid mask, so make it the same dimensions
         # as img_stack
-        binary_mask = np.tile(binary_mask, img_stack.shape[0])
+        binary_mask = np.tile(np.ravel(binary_mask), img_stack.shape[0])
 
     else:
         raise ValueError("The binary mask must be the same shape as the"
