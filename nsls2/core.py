@@ -658,7 +658,7 @@ def grid3d(q, img_stack,
     # creating (Qx, Qy, Qz, I) Nx4 array - HKL values and Intensity
     # getting the intensity value for each pixel
     q = np.insert(q, 3, np.ravel(img_stack), axis=1)
-    q = (q * np.ravel(binary_mask)).nonzero()
+    q = q[np.ravel(binary_mask)]
 
     #            3D grid of the data set
     # starting time for gridding
