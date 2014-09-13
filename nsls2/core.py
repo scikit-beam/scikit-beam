@@ -820,3 +820,55 @@ def pairwise(iterable):
     a, b = tee(iterable)
     next(b, None)
     return zip(a, b)
+
+
+def q_to_d(q):
+    """
+    Helper function to convert :math:`d` to :math:`q`.  The point
+    of this function is to prevent fat-fingered typos.
+
+    By definition the relationship is:
+
+    ..math ::
+
+        q = \\frac{2 \pi}{d}
+
+
+    Parameters
+    ----------
+    q : array
+        An array of q values
+
+    Returns
+    -------
+    d : array
+       An array of d (plane) spacing
+
+    """
+    return (2 * np.pi) / np.asarray(q)
+
+
+def d_to_q(d):
+    """
+    Helper function to convert :math:`d` to :math:`q`.
+    The point of this function is to prevent fat-fingered typos.
+
+    By definition the relationship is:
+
+    ..math ::
+
+        d = \\frac{2 \pi}{q}
+
+    Parameters
+    -------
+    d : array
+       An array of d (plane) spacing
+
+    Returns
+    ----------
+    q : array
+        An array of q values
+
+
+    """
+    return (2 * np.pi) / np.asarray(d)

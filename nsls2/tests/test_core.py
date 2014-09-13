@@ -314,3 +314,11 @@ def test_bin_image_to_1D_phi():
 
     for j, (a, b, c) in enumerate(zip(A, B, C)):
         assert b == c * (j + 1)
+
+
+def test_d_q_conversion():
+    assert_equal(2 * np.pi, core.d_to_q(1))
+    assert_equal(2 * np.pi, core.q_to_d(1))
+    test_data = np.linspace(.1, 5, 100)
+    assert_array_almost_equal(test_data, core.d_to_q(core.q_to_d(test_data)))
+    assert_array_almost_equal(test_data, core.q_to_d(core.d_to_q(test_data)))
