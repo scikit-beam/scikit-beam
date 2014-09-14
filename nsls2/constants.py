@@ -752,7 +752,7 @@ class PowderStandard(object):
 # https://www-s.nist.gov/srmors/certificates/640D.pdf?CFID=3219362&CFTOKEN=c031f50442c44e42-57C377F6-BC7A-395A-F39B8F6F2E4D0246&jsessionid=f030c7ded9b463332819566354567a698744
 calibration_standards = {'Si':
                          PowderStandard.from_lambda_2theta_hkl(name='Si',
-                                           wavelength=0.15405929,
+                                           wavelength=1.5405929,
                                            two_theta=np.deg2rad([
                                                28.441, 47.3,
                                                56.119, 69.126,
