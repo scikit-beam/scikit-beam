@@ -61,10 +61,11 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
     For the peaks found the detector-sample distance is estimated via
     .. math ::
 
-        d = \\frac{m}{\\tan 2\\theta}
+        D = \\frac{m}{\\tan 2\\theta}
 
     where :math:`m` is the distance in mm from the calibrated center
-    to the ring on the detector.
+    to the ring on the detector and :math:`D` is the distance from
+    the sample to the detector.
 
     Parameters
     ----------

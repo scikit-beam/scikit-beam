@@ -143,7 +143,7 @@ def peak_refinement(x, y, cands, window, refine_function, refine_args=None):
 def refine_quadratic(x, y, Rval_thresh=None):
     """
     Attempts to refine the peaks by fitting to
-    a quadratic.
+    a quadratic function.
 
     Parameters
     ----------
