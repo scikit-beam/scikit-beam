@@ -72,6 +72,7 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
     name : str
         The name of the calibration standard.  Used to look up the
         expected peak location
+        For valid options, see the name attribute on this function
 
     wavelength : float
         The wavelength of scattered x-ray in nm
@@ -126,6 +127,9 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
     d_array = (peaks_x[slc] / tan2theta[slc])
     return np.mean(d_array), np.std(d_array)
 
+# Set an attribute for the calibration names that are valid options.  This
+# attribute also aids in autowrapping into VisTrails
+estimate_d_blind.name = list(calibration_standards)
 
 def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
                   thresh, window_size,
