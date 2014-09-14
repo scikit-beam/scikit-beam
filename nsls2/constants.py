@@ -43,6 +43,7 @@ import six
 from collections import Mapping, namedtuple
 import functools
 from itertools import repeat
+from nsls2.core import q_to_d, d_to_q, twotheta_to_q, q_to_twotheta
 
 import xraylib
 xraylib.XRayInit()
@@ -678,16 +679,69 @@ class PowderStandard(object):
         two_theta : array
             The new 2theta values in radians
         """
-
         q = np.array([_.q for _ in self])
-        pre_factor = wavelength / (4 * np.pi)
-        return 2 * np.arcsin(q * pre_factor)
+        return q_to_twotheta(q, wavelength)
 
     @classmethod
-    def from_lambda_2theta_hkl(cls, name, wavelength, two_theta, hkl):
-        two_theta = np.asarray(two_theta)
-        q = ((4 * np.pi) / wavelength) * np.sin(two_theta / 2)
-        d = 2 * np.pi / q
+    def from_lambda_2theta_hkl(cls, name, wavelength, two_theta, hkl=None):
+        """
+        Method to construct a PowderStandard object from calibrated
+        :math:`2\\theata` values.
+
+        Parameters
+        ----------
+        name : str
+            The name of the standard
+
+        wavelength : float
+            The wavelength that the calibration data was taken at
+
+        two_theta : array
+            The calibrated :math:`2\\theta` values
+
+        hkl : list, optional
+            List of (h, k, l) tuples of the Miller indicies that go
+            with each measured :math:`2\\theta`.  If not given then
+            all of the miller indicies are stored as (0, 0, 0).
+
+        Returns
+        -------
+        standard : PowderStandard
+            The standard object
+        """
+        q = twotheta_to_q(two_theta, wavelength)
+        d = q_to_d(q)
+        if hkl is None:
+            hkl = repeat((0, 0, 0))
+        return cls(name, zip(d, hkl, q))
+
+    @classmethod
+    def from_d(cls, name, d, hkl=None):
+        """
+        Method to construct a PowderStandard object from known
+        :math:`d` values.
+
+        Parameters
+        ----------
+        name : str
+            The name of the standard
+
+        d : array
+            The known plane spacings
+
+        hkl : list, optional
+            List of (h, k, l) tuples of the Miller indicies that go
+            with each measured :math:`2\\theta`.  If not given then
+            all of the miller indicies are stored as (0, 0, 0).
+
+        Returns
+        -------
+        standard : PowderStandard
+            The standard object
+        """
+        q = d_to_q(d)
+        if hkl is None:
+            hkl = repeat((0, 0, 0))
         return cls(name, zip(d, hkl, q))
 
     def __len__(self):
