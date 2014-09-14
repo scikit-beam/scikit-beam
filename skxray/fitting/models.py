@@ -87,8 +87,6 @@ lele = ['Mo_L', 'Tc_L', 'Ru_L', 'Rh_L', 'Pd_L', 'Ag_L', 'Cd_L', 'In_L', 'Sn_L', 
         'Eu_L', 'Gd_L', 'Tb_L', 'Dy_L', 'Ho_L', 'Er_L', 'Tm_L', 'Yb_L', 'Lu_L', 'Hf_L', 'Ta_L', 'W_L', 'Re_L', 'Os_L', 'Ir_L', 'Pt_L', 'Au_L', 'Hg_L', 'Tl_L',
         'Pb_L', 'Bi_L', 'Po_L', 'At_L', 'Rn_L', 'Fr_L', 'Ac_L', 'Th_L', 'Pa_L', 'U_L', 'Np_L', 'Pu_L', 'Am_L', 'Br_L', 'Ga_L']
 
-
-
 mele = ['Au_M', 'Pb_M', 'U_M', 'noise', 'Pt_M', 'Ti_M', 'Gd_M', 'dummy', 'dummy']
 
 
@@ -187,8 +185,9 @@ class Lorentzian2Model(Model):
 
 class ModelSpectrum(object):
 
-    def __init__(self, incident_energy):
+    def __init__(self, incident_energy, element_list):
         self.incident_energy = incident_energy
+        self.element_list = element_list
         return
 
 
@@ -198,11 +197,11 @@ class ModelSpectrum(object):
         """
         compton = ComptonModel()
         # parameters not sensitive
-        compton.set _param_hint(name='compton_hi_gamma', value=0.25, vary=False)#min=0.0, max=4.0)
+        compton.set_param_hint(name='compton_hi_gamma', value=0.25, vary=False)#min=0.0, max=4.0)
         compton.set_param_hint(name='fwhm_offset', value=0.1, vary=True, expr='e_fwhm_offset')
 
         # parameters with boundary
-        compton.set_param_hint(name='coherent_sct_energy', value=11.78, vary=True)# min=11.77, max=11.79)
+        compton.set_param_hint(name='coherent_sct_energy', value=11.78, vary=True, min=11.77, max=11.79)
         compton.set_param_hint(name='compton_gamma', value=5.2, vary=True, min=1, max=10.5)
         compton.set_param_hint(name='compton_f_tail', value=0.5, vary=True, min=0, max=2.0)
         compton.set_param_hint(name='compton_hi_gamma', value=0.2, min=1, max=2.5, vary=True)
@@ -229,21 +228,45 @@ class ModelSpectrum(object):
         return elastic
 
 
-    def self.model_spectrum(element_list):
+    def model_spectrum(self):
 
         incident_energy = self.incident_energy
+        element_list = self.element_list
 
-        mod = compton + elastic
+        mod = self.setComptonModel() + self.setElasticModel()
 
-        for item in element_list:
-            if item in kele:
-                e = Element(item)
-                if e.cs(incident_energy)['ka1'] == 0:
-                    logger.info('{0} Ka emission line is not activated '
-                                'at this energy {1}'.format(item, incident_energy))
-                    continue
-                for 
 
+        #e = Element('Si')
+
+        for ename in element_list:
+            if ename not in kele:
+                continue
+            #print (ename)
+            e = Element(ename)
+            if e.cs(incident_energy)['ka1'] == 0:
+                logger.info('{0} Ka emission line is not activated '
+                            'at this energy {1}'.format(ename, incident_energy))
+                continue
+
+            # k lines
+            #for i in np.arange(1): #e.emission_line.all[:4]:
+            val = e.emission_line['ka1']
+            gauss_mod = GaussModel(prefix=str(ename) + '_')
+            gauss_mod.set_param_hint('area', value=100, vary=True)
+            gauss_mod.set_param_hint('center', value=val, vary=False)
+            gauss_mod.set_param_hint('sigma', value=0.05, vary=False)
+            mod = mod + gauss_mod
+
+        self.mod = mod
+        return
+
+
+    def model_fit(self, x, y):
+        self.model_spectrum()
+        #print (self.mod.param_names)
+        #p = self.mod.make_params()
+        result = self.mod.fit(y, x=x)
+        return result
 
 
 
