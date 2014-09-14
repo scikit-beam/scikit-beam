@@ -606,6 +606,7 @@ def grid3d(q, img_stack,
     """
     # validate input
     img_stack = np.asarray(img_stack)
+    # todo determine if we're going to support masked arrays
     if binary_mask is None:
         binary_mask = np.ones(img_stack.shape, 'Bool')
 
@@ -615,7 +616,9 @@ def grid3d(q, img_stack,
         pass
     elif binary_mask.shape == img_stack[0].shape:
         # this is still a valid mask, so make it the same dimensions
-        # as img_stack
+        # as img_stack.
+        # should probably change this to use something similar to:
+        # todo http://stackoverflow.com/questions/5564098/
         binary_mask = np.tile(np.ravel(binary_mask), img_stack.shape[0])
 
     else:
