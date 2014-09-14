@@ -166,8 +166,7 @@ def test_bin_edges():
                    'nbins': 0},  # nbins == 0
                 ]
 
-    for param_dict in fail_dicts:
-        yield _bin_edges_exceptions, param_dict
+
 
 
 @known_fail_if(six.PY3)
@@ -212,6 +211,54 @@ def test_grid3d():
     npt.assert_equal(oob, 0)
     npt.assert_array_equal(occupancy, np.ones_like(occupancy))
     npt.assert_array_equal(std_err, 0)
+
+
+@known_fail_if(six.PY3)
+def test_process_grid_std():
+    size = 10
+    q_max = np.array([1.0, 1.0, 1.0])
+    q_min = np.array([-1.0, -1.0, -1.0])
+    dqn = np.array([size, size, size])
+    param_dict = {'nx': dqn[0],
+                  'ny': dqn[1],
+                  'nz': dqn[2],
+                  'xmin': q_min[0],
+                  'ymin': q_min[1],
+                  'zmin': q_min[2],
+                  'xmax': q_max[0],
+                  'ymax': q_max[1],
+                  'zmax': q_max[2]}
+    # slice tricks
+    # this make a list of slices, the imaginary value in the
+    # step is interpreted as meaning 'this many values'
+    slc = [slice(_min + (_max - _min)/(s * 2),
+                 _max - (_max - _min)/(s * 2),
+                 1j * s)
+           for _min, _max, s in zip(q_min, q_max, dqn)]
+    # use the numpy slice magic to make X, Y, Z these are dense meshes with
+    # points in the center of each bin
+    X, Y, Z = np.mgrid[slc]
+
+    # make and ravel the image data (which is all ones)
+    I = np.hstack([j * np.ones_like(X).ravel() for j in range(1, 6)])
+
+    # make input data (N*5x3)
+    data = np.vstack([np.tile(_, 5)
+                      for _ in (np.ravel(X), np.ravel(Y), np.ravel(Z))]).T
+    (mean, occupancy,
+     std_err, oob, bounds) = core.grid3d(data, I, **param_dict)
+
+    # check the values are as expected
+    npt.assert_array_equal(mean,
+                           np.ones_like(X) * np.mean(np.arange(1, 6)))
+    npt.assert_equal(oob, 0)
+    npt.assert_array_equal(occupancy, np.ones_like(occupancy)*5)
+    # need to convert std -> ste (standard error)
+    # according to wikipedia ste = std/sqrt(n), but experimentally, this is
+    # implemented as ste = std / srt(n - 1)
+    npt.assert_array_equal(std_err,
+                           (np.ones_like(occupancy) *
+                            np.std(np.arange(1, 6))/np.sqrt(5 - 1)))
 
 
 def test_bin_edge2center():
