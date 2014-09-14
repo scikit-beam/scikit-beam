@@ -131,6 +131,7 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
 # attribute also aids in autowrapping into VisTrails
 estimate_d_blind.name = list(calibration_standards)
 
+
 def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
                   thresh, window_size,
                   nx=None, min_x=None, max_x=None):
@@ -167,7 +168,7 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
         The refined calibrated center.
     """
     if nx is None:
-        nx = int(np.mean(image.shape) * 8)
+        nx = int(np.mean(image.shape) * 2)
 
     phi = pixel_to_phi(image.shape, calibrated_center, pixel_size).ravel()
     r = pixel_to_radius(image.shape, calibrated_center, pixel_size).ravel()
