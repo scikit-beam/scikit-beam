@@ -324,3 +324,20 @@ def test_d_q_conversion():
                               decimal=12)
     assert_array_almost_equal(test_data, core.q_to_d(core.d_to_q(test_data)),
                               decimal=12)
+
+
+def test_q_twotheta_conversion():
+    wavelength = 1
+    q = np.linspace(0, 4 * np.pi, 100)
+    assert_array_almost_equal(q,
+                              core.twotheta_to_q(
+                                  core.q_to_twotheta(q, wavelength),
+                                  wavelength),
+                              decimal=12)
+    two_theta = np.linspace(0, np.pi, 100)
+    assert_array_almost_equal(two_theta,
+                              core.q_to_twotheta(
+                                  core.twotheta_to_q(two_theta,
+                                                     wavelength),
+                                  wavelength),
+                              decimal=12)
