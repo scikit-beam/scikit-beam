@@ -51,7 +51,7 @@ from nsls2.core import (pixel_to_phi, pixel_to_radius,
 
 
 def estimate_d_blind(name, wavelength, bin_centers, ring_average,
-               window_size, threshold, max_peak_count=None):
+               window_size, max_peak_count, thresh):
     """ Estimate the sample-detector distance
 
     Given a radially integrated calibration image return an estimate for
@@ -89,14 +89,11 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
         as a relative maximum in a window sized (2*window_size + 1) and
         the same window is used for fitting the peaks to refine the location.
 
-    threshold : float
-        The minimum range a peak needs to have in the window to be accepted
-        as a real peak.  This is used to filter out the (many) spurious local
-        maximum which can be found.
-
-    max_peak_count : int, optional
+    max_peak_count : int
         Use at most this many peaks
 
+    thresh : float
+        Fraction of maximum peak height
     Returns
     -------
     dist_sample : float
@@ -107,9 +104,6 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
         The standard deviation of d computed from the peaks used.
 
     """
-    if max_peak_count is None:
-        max_peak_count = np.iinfo(int).max
-    # TODO come up with way to estimate threshold blind, maybe otsu
 
     # get the calibration standard
     cal = calibration_standards[name]
@@ -117,10 +111,9 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
     cands = scipy.signal.argrelmax(ring_average, order=window_size)[0]
     # filter local maximums by size
     cands = filter_peak_height(ring_average, cands,
-                               threshold, window=window_size)
+                               thresh*np.max(ring_average), window=window_size)
     # TODO insert peak identification validation.  This might be better than
     # improving the threshold value.
-
     # refine the locations of the peaks
     peaks_x, peaks_y = peak_refinement(bin_centers, ring_average, cands,
                                        window_size, refine_log_quadratic)
@@ -130,13 +123,12 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
     slc = slice(0, np.min([len(tan2theta), len(peaks_x), max_peak_count]))
     # estimate the sample-detector distance for each of the peaks
     d_array = (peaks_x[slc] / tan2theta[slc])
-
     return np.mean(d_array), np.std(d_array)
 
 
-def refine_center(image, calibrated_center, pixel_size, phi_steps,
-                  nx=750, min_x=10, max_x=60, window_size=5,
-                  threshold=17000, max_peaks=7):
+def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
+                  thresh, window_size,
+                  nx=None, min_x=None, max_x=None):
     """Refines the location of the center of the beam.
 
     This relies on being able to see the whole powder pattern.
@@ -151,24 +143,27 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps,
         (pixel_height, pixel_width)
     phi_steps : int
         How many regions to split the ring into, should be >10
-    nx : int
-        Number of bins to use for radial binning
-    min_x : float
-        The minimum radius to use for radial binning
-    max_x : float
-        The maximum radius to use for radial binning
-    window_size : int
-        The window size to use (in bins) to use when refining peaks
-    threshold : float
-        Minimum peaks size
     max_peaks : int
         Number of rings to look it
+    thresh : float
+        Fraction of maximum peak height
+    window_size : int, optional
+        The window size to use (in bins) to use when refining peaks
+    nx : int, optional
+        Number of bins to use for radial binning
+    min_x : float, optional
+        The minimum radius to use for radial binning
+    max_x : float, optional
+        The maximum radius to use for radial binning
 
     Returns
     -------
     calibrated_center : tuple
         The refined calibrated center.
     """
+    if nx is None:
+        nx = int(np.mean(image.shape) * 8)
+
     phi = pixel_to_phi(image.shape, calibrated_center, pixel_size).ravel()
     r = pixel_to_radius(image.shape, calibrated_center, pixel_size).ravel()
     I = image.ravel()
@@ -183,18 +178,19 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps,
 
     ring_trace = []
     for bins, b_sum, b_count in out:
-        mask = b_sum > 0
+        mask = b_sum > 10
         avg = b_sum[mask] / b_count[mask]
         bin_centers = bin_edges_to_centers(bins)[mask]
 
         cands = scipy.signal.argrelmax(avg, order=window_size)[0]
         # filter local maximums by size
-        cands = filter_peak_height(avg, cands,
-                                   threshold, window=window_size)
+        cands = filter_peak_height(avg, cands, thresh*np.max(avg),
+                                           window=window_size)
         ring_trace.append(bin_centers[cands[:max_peaks]])
 
-    print([len(_) for _ in ring_trace])
-    ring_trace = np.vstack(ring_trace).T
+    tr_len = [len(rt) for rt in ring_trace]
+    mm = np.min(tr_len)
+    ring_trace = np.vstack([rt[:mm] for rt in ring_trace]).T
 
     mean_dr = np.mean(ring_trace - np.mean(ring_trace, axis=1, keepdims=True),
                       axis=0)
