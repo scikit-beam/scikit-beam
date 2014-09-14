@@ -65,7 +65,7 @@ def test_refine_center():
     out = calibration.refine_center(I, center+1, (1, 1),
                                     phi_steps=20, nx=300, min_x=10,
                                     max_x=300, window_size=5,
-                                    threshold=0, max_peaks=4)
+                                    thresh=0, max_peaks=4)
 
     assert np.all(np.abs(center - out) < .1)
 
@@ -74,9 +74,9 @@ def test_blind_d():
     gaus = lambda x, center, height, width: (
                           height * np.exp(-((x-center) / width)**2))
     name = 'Si'
-    wavelength = .018
+    wavelength = .18
     window_size = 5
-    threshold = 0
+    threshold = .1
     cal = calibration.calibration_standards[name]
 
     tan2theta = np.tan(cal.convert_2theta(wavelength))
@@ -87,9 +87,8 @@ def test_blind_d():
     bin_centers = np.linspace(0, 50, 2000)
     I = np.zeros_like(bin_centers)
     for r in expected_r:
-        I += gaus(bin_centers, r, 100, 5)
-
+        I += gaus(bin_centers, r, 100, .2)
     d, dstd = calibration.estimate_d_blind(name, wavelength, bin_centers,
-                                     I, window_size, threshold)
-
-    assert np.abs(d - D) < 1e4
+                                     I, window_size, len(expected_r),
+                                     threshold)
+    assert np.abs(d - D) < 1e-6
