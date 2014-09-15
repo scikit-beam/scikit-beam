@@ -1,4 +1,5 @@
 [![Coverage Status](https://img.shields.io/coveralls/Nikea/NSLS2.svg)](https://coveralls.io/r/Nikea/NSLS2)
+[![Coverage Status](https://coveralls.io/repos/Nikea/NSLS2/badge.png)](https://coveralls.io/r/Nikea/NSLS2)
 [![Build Status](https://travis-ci.org/Nikea/NSLS2.svg?branch=master)](https://travis-ci.org/Nikea/NSLS2)
 
 [![Issues not currently under active development](https://badge.waffle.io/Nikea/NSLS2.png?label=DEV:%20Inactive&title=Not%20Under%20Active%20Development)](https://waffle.io/Nikea/NSLS2)
