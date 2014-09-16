@@ -47,8 +47,35 @@ REL   related to releasing numpy
 WIP   Commit that is a work in progress
 ====  ===
 
+Style
+-----
 
-We should try to conform to pep8.
+We will conform to the sensible rules in `PEP8
+<http://legacy.python.org/dev/peps/pep-0008/>`_.
+
+
+Some handy tools are :
+
+  - the `pep8 checker <https://pypi.python.org/pypi/pep8>`_ which will
+    report and violations in your code.  Most decent editors will have
+    a way to run this on the fly and highlight your code (ex emacs, vi, pycharm,
+    pydev, kate, and sublime)
+  - flake8
+
+if-statements
+~~~~~~~~~~~~~
+
+Don't write one-liner if statements as ::
+
+  if foo: bar
+
+write them as ::
+
+  if foo:
+      bar
+
+Lines are free, but the confusion that can be caused by missing
+logic when scanning code can be expensive.
 
 Example
 -------

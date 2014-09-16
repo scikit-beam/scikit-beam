@@ -271,3 +271,15 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/': None}
+
+
+# The reST default role (used for this markup: `text`) to use for all
+# documents.
+# This sets the default-role for strings in back-ticks and comes from
+# sphinx.ext.autosummary:
+#
+#    The autolink role functions as ``:obj:`` when the name referred can be
+#    resolved to a Python object, and otherwise it becomes simple emphasis.
+#    This can be used as the default role to make links 'smart'.
+#
+default_role = "autolink"

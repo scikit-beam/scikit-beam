@@ -1,0 +1,11 @@
+#
+# PYSPEC setup.cfg file
+#
+# $Id: setup.cfg.macosx 82 2010-10-28 01:39:46Z stuwilkins $
+#
+[global]
+verbose=1
+
+[ctrans]
+build = True
+
