@@ -166,6 +166,9 @@ def test_bin_edges():
                    'nbins': 0},  # nbins == 0
                 ]
 
+    for param_dict in fail_dicts:
+        yield _bin_edges_exceptions, param_dict
+
 
 
 
