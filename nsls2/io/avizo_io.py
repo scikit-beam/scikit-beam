@@ -24,13 +24,13 @@ def _read_amira(src_file):
     
     Parameters
     ----------
-    src_file : string
+    src_file : str
         The path and file name pointing to the AmiraMesh file to be loaded.
     
     
     Returns
     -------
-    am_header : List of strings
+    am_header : list of strings
         This list contains all of the raw information contained in the AmiraMesh
         file header. Each line of the original header has been read and stored
         directly from the source file, and will need some additional processing
@@ -75,7 +75,7 @@ def _amira_data_to_numpy(am_data, header_dict, flip_z=True):
             ushort
             byte
     
-    header_dict : dictionary
+    header_dict : dict
         Metadata dictionary containing all relevant attributes pertaining to the
         image array. This metadata dictionary is the output from the function 
         "_create_md_dict."
@@ -263,7 +263,7 @@ def _create_md_dict(clean_header):
     return md_dict
 
 
-def load_amiramesh_as_np(file_path):
+def load_amiramesh(file_path):
     """
     This function will load and convert an AmiraMesh binary file to a numpy 
     array. All pertinent information contained in the .am header file is written
@@ -277,11 +277,11 @@ def load_amiramesh_as_np(file_path):
     
     Returns
     -------
-    md_dict : dictionary
+    md_dict : dict
         Dictionary containing all pertinent header information associated with 
         the data set.
     
-    np_array : float ndarray
+    np_array : ndarray
         An ndarray containing the image data set to be loaded. Values contained 
         in the resulting volume are set to be of float data type by default.
     """
