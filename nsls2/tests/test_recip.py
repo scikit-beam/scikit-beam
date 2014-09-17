@@ -2,9 +2,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import six
-
 import numpy as np
-
 from nose.tools import raises
 
 from nsls2.testing.decorators import known_fail_if
@@ -41,10 +39,6 @@ def test_process_to_q():
     pdict['ub'] = ub_mat
     # ensure invalid entries for frame_mode actually fail
 
-    # smoketest the frame_mode variable
-    for passes in recip.process_to_q.frame_mode:
-        recip.process_to_q(frame_mode=passes, **pdict)
-
     # todo test frame_modes 1, 2, and 3
     # test that the values are coming back as expected for frame_mode=4
     hkl = recip.process_to_q(**pdict)
@@ -56,6 +50,12 @@ def test_process_to_q():
 
     for pixel, kn_hkl in known_hkl:
         npt.assert_array_almost_equal(hkl[pixel], kn_hkl, decimal=8)
+
+    # smoketest the frame_mode variable
+    pass_list = recip.process_to_q.frame_mode
+    pass_list.append(None)
+    for passes in pass_list:
+        recip.process_to_q(frame_mode=passes, **pdict)
 
 
 @raises(KeyError)
