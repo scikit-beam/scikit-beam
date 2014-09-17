@@ -212,10 +212,12 @@ def process_to_q(setting_angles, detector_size, pixel_size,
     frame_mode : str, optional
         Frame mode defines the data collection mode and thus the desired
         output from this function. Defaults to hkl mode (frame_mode=4)
-        1 : 'theta'    : Theta axis frame.
-        2 : 'phi'      : Phi axis frame.
-        3 : 'cart'     : Crystal cartesian frame.
-        4 : 'hkl'      : Reciprocal lattice units frame.
+        'theta'    : Theta axis frame.
+        'phi'      : Phi axis frame.
+        'cart'     : Crystal cartesian frame.
+        'hkl'      : Reciprocal lattice units frame.
+        See the `process_to_q.frame_mode` attribute for an exact list of
+        valid options.
 
     Returns
     -------
