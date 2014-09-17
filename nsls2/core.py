@@ -39,12 +39,15 @@ This module is for the 'core' data types.
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-
-import time
 import six
 from six.moves import zip
 from six import string_types
+
+import time
+import sys
+from itertools import tee
 from collections import namedtuple, MutableMapping
+
 import numpy as np
 
 import logging
@@ -242,6 +245,26 @@ class MD_dict(MutableMapping):
 
     def __iter__(self):
         return _iter_helper([], self._split, self._dict)
+
+
+class verbosedict(dict):
+    def __getitem__(self, key):
+        try:
+            v = dict.__getitem__(self, key)
+        except KeyError:
+            if len(self) < 25:
+                new_msg = ("You tried to access the key '{key}' "
+                           "which does not exist.  The "
+                           "extant keys are: {valid_keys}").format(
+                               key=key, valid_keys=list(self))
+            else:
+                new_msg = ("You tried to access the key '{key}' "
+                           "which does not exist.  There "
+                           "are {num} extant keys, which is too many to "
+                           "show you").format(
+                               key=key, num=len(self))
+            six.reraise(KeyError, KeyError(new_msg), sys.exc_info()[2])
+        return v
 
 
 def _iter_helper(path_list, split, md_dict):

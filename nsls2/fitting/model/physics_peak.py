@@ -152,7 +152,7 @@ def gauss_tail(x, area, center, sigma, gamma):
 
 def elastic_peak(x, coherent_sct_energy,
                  fwhm_offset, fwhm_fanoprime,
-                 area, epsilon=2.96):
+                 coherent_sct_amplitude, epsilon=2.96):
     """
     Use gaussian function to model elastic peak
     
@@ -166,7 +166,7 @@ def elastic_peak(x, coherent_sct_energy,
         global fitting parameter for peak width
     fwhm_fanoprime : float
         global fitting parameter for peak width
-    area : float
+    coherent_sct_amplitude : float
         area of gaussian peak
     epsilon : float
         energy to create a hole-electron pair
@@ -177,8 +177,6 @@ def elastic_peak(x, coherent_sct_energy,
     -------
     value : array
         elastic peak
-    sigma : float
-        peak width
                      
     """
     
@@ -186,16 +184,16 @@ def elastic_peak(x, coherent_sct_energy,
     sigma = np.sqrt((fwhm_offset / temp_val)**2 +
                     coherent_sct_energy * epsilon * fwhm_fanoprime)
 
-    value = gauss_peak(x, area, coherent_sct_energy, sigma)
+    value = gauss_peak(x, coherent_sct_amplitude, coherent_sct_energy, sigma)
     
-    return value, sigma
+    return value
 
 
 def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
                  compton_angle, compton_fwhm_corr, compton_amplitude,
                  compton_f_step, compton_f_tail, compton_gamma,
                  compton_hi_f_tail, compton_hi_gamma,
-                 area, epsilon=2.96, matrix=False):
+                 epsilon=2.96, matrix=False):
     """
     Model compton peak, which is generated as an inelastic peak and always
     stays to the left of elastic peak on the spectrum.
@@ -215,7 +213,7 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     compton_fwhm_corr : float 
         correction factor on peak width
     compton_amplitude : float
-        amplitude of compton peak
+        area for gaussian peak, gaussian step and gaussian tail functions
     compton_f_step : float
         weight factor of the gaussian step function
     compton_f_tail : float
@@ -226,8 +224,6 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
         weight factor of gaussian tail on higher side
     compton_hi_gamma : float
         normalization factor of gaussian tail on higher side
-    area : float
-        area for gaussian peak, gaussian step and gaussian tail functions
     epsilon : float
         energy to create a hole-electron pair
         for Ge 2.96, for Si 3.61 at 300K
@@ -239,10 +235,6 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     -------
     counts : array
         compton peak
-    sigma : float
-        standard deviation
-    factor : float
-        weight factor of gaussian peak
 
      References
     -----------
@@ -262,23 +254,23 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     if matrix is False:
         factor = factor * (10.**compton_amplitude)
         
-    value = factor * gauss_peak(x, area, compton_e, sigma*compton_fwhm_corr)
+    value = factor * gauss_peak(x, compton_amplitude, compton_e, sigma*compton_fwhm_corr)
     counts += value
 
     # compton peak, step
     if compton_f_step > 0.:
         value = factor * compton_f_step
-        value *= gauss_step(x, area, compton_e, sigma, compton_e)
+        value *= gauss_step(x, compton_amplitude, compton_e, sigma, compton_e)
         counts += value
     
     # compton peak, tail on the low side
     value = factor * compton_f_tail
-    value *= gauss_tail(x, area, compton_e, sigma, compton_gamma)
+    value *= gauss_tail(x, compton_amplitude, compton_e, sigma, compton_gamma)
     counts += value
 
     # compton peak, tail on the high side
     value = factor * compton_hi_f_tail
-    value *= gauss_tail(-1 * x, area, -1 * compton_e, sigma, compton_hi_gamma)
+    value *= gauss_tail(-1 * x, compton_amplitude, -1 * compton_e, sigma, compton_hi_gamma)
     counts += value
 
-    return counts, sigma, factor
+    return counts
