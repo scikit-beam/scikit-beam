@@ -217,7 +217,7 @@ def test_grid3d():
 
 
 @known_fail_if(six.PY3)
-def test_process_grid_std():
+def test_process_grid_std_err():
     size = 10
     q_max = np.array([1.0, 1.0, 1.0])
     q_min = np.array([-1.0, -1.0, -1.0])
