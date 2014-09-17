@@ -46,6 +46,9 @@ from numpy.testing import (assert_allclose, assert_array_almost_equal)
 from nsls2.fitting.model.physics_peak import (gauss_peak, gauss_step, gauss_tail,
                                               elastic_peak, compton_peak)
 
+from nsls2.fitting.model.physics_model import (ComptonModel, ElasticModel,
+                                               GaussModel)
+
 
 def test_gauss_peak():
     """
@@ -128,8 +131,8 @@ def test_elastic_peak():
     fanoprime = 0.01
 
     ev = np.arange(8, 12, 0.1)
-    out, sigma = elastic_peak(ev, energy, offset,
-                              fanoprime, area)
+    out = elastic_peak(ev, energy, offset,
+                       fanoprime, area)
 
     assert_array_almost_equal(y_true, out)
     return
@@ -160,12 +163,106 @@ def test_compton_peak():
     gamma = 10
     hi_f_tail = 0.1
     hi_gamma = 1
-    area = 1
     ev = np.arange(8, 12, 0.1)
 
-    out, sigma, factor = compton_peak(ev, energy, offset, fano, angle,
-                                      fwhm_corr, amp, f_step, f_tail,
-                                      gamma, hi_f_tail, hi_gamma, area)
+    out = compton_peak(ev, energy, offset, fano, angle,
+                       fwhm_corr, amp, f_step, f_tail,
+                       gamma, hi_f_tail, hi_gamma)
 
     assert_array_almost_equal(y_true, out)
+    return
+
+
+def test_gauss_model():
+
+    area = 1
+    cen  = 0
+    std = 1
+    x = np.arange(-3, 3, 0.5)
+    true_param = [area, cen, std]
+
+    out = gauss_peak(x, area, cen, std)
+
+    gauss = GaussModel()
+    result = gauss.fit(out, x=x,
+                       area=1, center=2, sigma=5)
+
+    fitted_val = [result.values['area'], result.values['center'], result.values['sigma']]
+    assert_array_almost_equal(true_param, fitted_val, decimal=2)
+
+    return
+
+
+def test_elastic_model():
+
+    area = 1
+    energy = 10
+    offset = 0.02
+    fanoprime = 0.01
+    eps = 2.96
+
+    true_param = [fanoprime, area, energy]
+
+    x = np.arange(8, 12, 0.1)
+    out = elastic_peak(x, energy, offset,
+                       fanoprime, area)
+
+    elastic = ElasticModel()
+
+    # fwhm_offset is not a sensitive parameter, used as a fixed value
+    elastic.set_param_hint(name='fwhm_offset', value=0.02, vary=False)
+
+    result = elastic.fit(out, x=x, coherent_sct_energy=10,
+                         fwhm_offset=0.02, fwhm_fanoprime=0.03,
+                         coherent_sct_amplitude=10)
+
+    fitted_val = [result.values['fwhm_fanoprime'], result.values['coherent_sct_amplitude'],
+                  result.values['coherent_sct_energy']]
+
+    assert_array_almost_equal(true_param, fitted_val, decimal=2)
+
+    return
+
+
+def test_compton_model():
+
+    energy = 10
+    offset = 0.01
+    fano = 0.01
+    angle = 90
+    fwhm_corr = 1
+    amp = 1
+    f_step = 0.5
+    f_tail = 0.1
+    gamma = 2
+    hi_f_tail = 0.1
+    hi_gamma = 1
+    x = np.arange(8, 12, 0.1)
+
+    true_param = [energy, fano, angle, fwhm_corr, amp, f_step, f_tail, gamma, hi_f_tail]
+
+    out = compton_peak(x, energy, offset, fano, angle,
+                       fwhm_corr, amp, f_step, f_tail,
+                       gamma, hi_f_tail, hi_gamma)
+
+    compton = ComptonModel()
+    # parameters not sensitive
+    compton.set_param_hint(name='compton_hi_gamma', value=1, vary=False)
+    compton.set_param_hint(name='fwhm_offset', value=0.01, vary=False)
+
+    # parameters with boundary
+    compton.set_param_hint(name='coherent_sct_energy', value=10, min=9.5, max=10.5)
+    compton.set_param_hint(name='compton_gamma', value=2.2, min=1, max=3.5)
+    compton.set_param_hint(name='compton_hi_f_tail', value=0.2, min=0, max=1.0)
+    p = compton.make_params()
+    result = compton.fit(out, x=x, params=p, compton_amplitude=1.1)
+
+    fit_val = [result.values['coherent_sct_energy'], result.values['fwhm_fanoprime'],
+               result.values['compton_angle'], result.values['compton_fwhm_corr'],
+               result.values['compton_amplitude'], result.values['compton_f_step'],
+               result.values['compton_f_tail'], result.values['compton_gamma'],
+               result.values['compton_hi_f_tail']]
+
+    assert_array_almost_equal(true_param, fit_val, decimal=2)
+
     return

@@ -39,12 +39,15 @@ This module is for the 'core' data types.
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-
-import time
 import six
 from six.moves import zip
 from six import string_types
+
+import time
+import sys
+from itertools import tee
 from collections import namedtuple, MutableMapping
+
 import numpy as np
 
 import logging
@@ -244,6 +247,26 @@ class MD_dict(MutableMapping):
         return _iter_helper([], self._split, self._dict)
 
 
+class verbosedict(dict):
+    def __getitem__(self, key):
+        try:
+            v = dict.__getitem__(self, key)
+        except KeyError:
+            if len(self) < 25:
+                new_msg = ("You tried to access the key '{key}' "
+                           "which does not exist.  The "
+                           "extant keys are: {valid_keys}").format(
+                               key=key, valid_keys=list(self))
+            else:
+                new_msg = ("You tried to access the key '{key}' "
+                           "which does not exist.  There "
+                           "are {num} extant keys, which is too many to "
+                           "show you").format(
+                               key=key, num=len(self))
+            six.reraise(KeyError, KeyError(new_msg), sys.exc_info()[2])
+        return v
+
+
 def _iter_helper(path_list, split, md_dict):
     """
     Recursively walk the tree and return the names of the leaves
@@ -305,24 +328,23 @@ keys_core = {
         "type": float,
         "units": "keV",
     },
-
     "array_dimensions": {
         "description": "axial lengths of the array (Pixels)",
         "x_dimension": {
             "description": "x-axis array length as int",
             "type": int,
             "units": "pixels"
-            },
+        },
         "y_dimension": {
             "description": "y-axis array length as int",
             "type": int,
             "units": "pixels"
-            },
+        },
         "z_dimension": {
             "description": "z-axis array length as int",
             "type": int,
             "units": "pixels"
-            }
+        }
     },
     "bounding_box": {
         "description": ("physical extents of the array: useful for " +
@@ -332,32 +354,32 @@ keys_core = {
             "description": "minimum spatial coordinate along the x-axis",
             "type": float,
             "units": "um"
-            },
+        },
         "x_max": {
             "description": "maximum spatial coordinate along the x-axis",
             "type": float,
             "units": "um"
-            },
+        },
         "y_min": {
             "description": "minimum spatial coordinate along the y-axis",
             "type": float,
             "units": "um"
-            },
+        },
         "y_max": {
             "description": "maximum spatial coordinate along the y-axis",
             "type": float,
             "units": "um"
-            },
+        },
         "z_min": {
             "description": "minimum spatial coordinate along the z-axis",
             "type": float,
             "units": "um"
-            },
+        },
         "z_max": {
             "description": "maximum spatial coordinate along the z-axis",
             "type": float,
             "units": "um"
-            },
+        },
     },
 }
 
