@@ -607,11 +607,10 @@ def grid3d(q, img_stack,
     # validate input
     img_stack = np.asarray(img_stack)
     # todo determine if we're going to support masked arrays
-    if binary_mask is None:
-        binary_mask = np.ones(img_stack.shape, 'Bool')
+    # todo masked arrays seemed to have been punted to `process_to_q`
 
     # check to see if the binary mask and the image stack are identical shapes
-    if binary_mask.shape == img_stack.shape:
+    if binary_mask is None or binary_mask.shape == img_stack.shape:
         # do a dance :)
         pass
     elif binary_mask.shape == img_stack[0].shape:
@@ -660,7 +659,8 @@ def grid3d(q, img_stack,
     # creating (Qx, Qy, Qz, I) Nx4 array - HKL values and Intensity
     # getting the intensity value for each pixel
     q = np.insert(q, 3, np.ravel(img_stack), axis=1)
-    q = q[np.ravel(binary_mask)]
+    if binary_mask is not None:
+        q = q[np.ravel(binary_mask)]
 
     #            3D grid of the data set
     # starting time for gridding
