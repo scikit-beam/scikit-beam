@@ -246,13 +246,20 @@ class ModelSpectrum(object):
                     continue
 
                 # k lines
-                #for i in np.arange(1): #e.emission_line.all[:4]:
-                val = e.emission_line['ka1']
-                gauss_mod = GaussModel(prefix=str(ename) + '_')
-                gauss_mod.set_param_hint('area', value=100, vary=True, min=0.0)
-                gauss_mod.set_param_hint('center', value=val, vary=False)
-                gauss_mod.set_param_hint('sigma', value=0.05, vary=False)
-                mod = mod + gauss_mod
+                for item in e.emission_line.all[:4]:
+
+                    #val = e.emission_line['ka1']
+                    line_name = item[0]
+                    val = item[1]
+
+                    gauss_mod = GaussModel(prefix=str(ename)+'_'+str(line_name)+'_')
+                    #gauss_mod.set_param_hint('label_val', )
+                    if line_name != ename:
+                        gauss_mod.set_param_hint('area', value=100, vary=True,
+                                                 min=0.0, expr='ratio_val*')
+                    gauss_mod.set_param_hint('center', value=val, vary=False)
+                    gauss_mod.set_param_hint('sigma', value=0.05, vary=False)
+                    mod = mod + gauss_mod
 
             elif ename in l_line:
                 e = Element(ename[:-2])
