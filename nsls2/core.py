@@ -40,6 +40,7 @@ This module is for the 'core' data types.
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import six
+
 from six.moves import zip
 from six import string_types
 
@@ -49,6 +50,7 @@ from itertools import tee
 from collections import namedtuple, MutableMapping
 
 import numpy as np
+from itertools import tee
 
 import logging
 logger = logging.getLogger(__name__)
@@ -316,7 +318,8 @@ def img_subtraction_pre(img_arr, is_reference):
     return corrected_image
 
 
-def detector2D_to_1D(img, detector_center, **kwargs):
+def detector2D_to_1D(img, calibrated_center, pixel_size=None,
+                     **kwargs):
     """
     Convert the 2D image to a list of x y I coordinates where
     x == x_img - detector_center[0] and
@@ -324,29 +327,36 @@ def detector2D_to_1D(img, detector_center, **kwargs):
 
     Parameters
     ----------
-    img: ndarray
+    img: `ndarray`
         2D detector image
-    detector_center: 2 element array
-        see keys_core["detector_center"]["description"]
+
+    calibrated_center : tuple
+        see keys_core["calibrated_center"]["description"]
+
+    pixel_size : tuple, optional
+        conversion between pixels and real units
+
+        see keys_core["pixel_size"]["description"]
     **kwargs: dict
         Bucket for extra parameters in an unpacked dictionary
 
     Returns
     -------
-    X : numpy.ndarray
-        1 x N
-        x-coordinate of pixel
-    Y : numpy.ndarray
-        1 x N
-        y-coordinate of pixel
-    I : numpy.ndarray
-        1 x N
-        intensity of pixel
+    X : `ndarray`
+        x-coordinate of pixel. shape (N, )
+    Y : `ndarray`
+        y-coordinate of pixel. shape (N, )
+    I : `ndarray`
+        intensity of pixel. shape (N, )
     """
+    if pixel_size is None:
+        pixel_size = (1, 1)
 
     # Caswell's incredible terse rewrite
-    X, Y = np.meshgrid(np.arange(img.shape[0]) - detector_center[0],
-                       np.arange(img.shape[1]) - detector_center[1])
+    X, Y = np.meshgrid(pixel_size[0] * (np.arange(img.shape[0]) -
+                                        calibrated_center[0]),
+                       pixel_size[1] * (np.arange(img.shape[1]) -
+                                        calibrated_center[1]))
 
     # return the x, y and z coordinates (as a tuple? or is this a list?)
     return X.ravel(), Y.ravel(), img.ravel()
@@ -398,12 +408,139 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     return bins, val, count
 
 
-def radial_integration(img, detector_center, sample_to_detector_distance,
-                       pixel_size, wavelength):
+def bin_image_to_1D(img,
+                    calibrated_center,
+                    pixel_to_1D_func, pixel_to_1D_kwarg=None,
+                    bin_min=None, bin_max=None, bin_num=None):
+    """Integrates an image to a 1D curve.
+
+    The first step is use the `pixel_to_1D_func` to convert
+    each pixel location to a scalar.  Example of this would be
+    distance from the center in mm, azimuthal angle, or converting to q.
+
+    Parameters
+    ----------
+    img : ndarray
+        The image to integrate
+
+    calibrated_center : tuple
+        The center of the image (row, col)
+
+    pixel_to_1D_func : function
+        A function that takes in an image shape, calibrated_center
+        and a dict of kwargs and returns an array of the same shape
+        filled with a scalar for that pixel position (R2 -> R1 mapping).
+        The function must have the following signature ::
+
+            output = func(img.shape, calibrated_center, **pixel_to_1D_kwarg)
+
+        such that ::
+
+            output.shape == img.shape
+
+        and output[i, j] corresponds to img[i, j]
+
+
+    pixel_to_1D_kwargs : dict, optional
+        Any additional keyword arguments to pass through to the warp function
+
+    bin_min : float, optional
+        The lower limit of the binning
+
+    bin_max : float, optional
+        The upper limit of binning
+
+    bin_num : int, optional
+        The number of bins
+
+    Returns
+    -------
+    bin_edges : array
+        The bin edges, length N+1
+
+    bin_sum : array
+        The sum of the pixels that fell in each bin
+
+    bin_count : array
+        The number of pixels in each bin
     """
-    docstring!
+    if pixel_to_1D_kwarg is None:
+        pixel_to_1D_kwarg = {}
+
+    values_1D = pixel_to_1D_func(img.shape, calibrated_center,
+                             **pixel_to_1D_kwarg)
+
+    return bin_1D(values_1D.ravel(), img.ravel(), min_x=bin_min,
+                  max_x=bin_max, nx=bin_num)
+
+
+def pixel_to_radius(shape, calibrated_center, pixel_size=None):
     """
-    pass
+    Converts pixel positions to radius from the calibrated center
+
+    Parameters
+    ----------
+    shape : tuple
+        The shape of the image (nrow, ncol) to warp
+        the coordinates of
+
+    calibrated_center : tuple
+        The center in pixels-units (row, col)
+
+    pixel_size : tuple, optional
+        The size of a pixel (really the pitch) in real units. (height, width).
+
+        Defaults to 1 pixel/pixel if not specified.
+
+    Returns
+    -------
+    R : array
+        The L2 norm of the distance of each pixel from the calibrated center.
+    """
+
+    if pixel_size is None:
+        pixel_size = (1, 1)
+
+    X, Y = np.meshgrid(pixel_size[1] * (np.arange(shape[1]) -
+                                        calibrated_center[1]),
+                       pixel_size[0] * (np.arange(shape[0]) -
+                                        calibrated_center[0]))
+    return np.sqrt(X*X + Y*Y)
+
+
+def pixel_to_phi(shape, calibrated_center, pixel_size=None):
+    """
+    Converts pixel positions to :math:`\\phi`, the angle from vertical.
+
+    Parameters
+    ----------
+    shape : tuple
+        The shape of the image (nrow, ncol) to warp
+        the coordinates of
+
+    calibrated_center : tuple
+        The center in pixels-units (row, col)
+
+    pixel_size : tuple, optional
+        The size of a pixel (really the pitch) in real units. (height, width).
+
+        Defaults to 1 pixel/pixel if not specified.
+
+    Returns
+    -------
+    phi : array
+        :math:`\\phi`, the angle from the vertical axis.
+        :math:`\\phi \\el [-\pi, \pi]`
+    """
+
+    if pixel_size is None:
+        pixel_size = (1, 1)
+
+    X, Y = np.meshgrid(pixel_size[1] * (np.arange(shape[1]) -
+                                        calibrated_center[1]),
+                       pixel_size[0] * (np.arange(shape[0]) -
+                                        calibrated_center[0]))
+    return np.arctan2(X, Y)
 
 
 def wedge_integration(src_data, center, theta_start,
@@ -705,3 +842,137 @@ def bin_edges_to_centers(input_edges):
     """
     input_edges = np.asarray(input_edges)
     return (input_edges[:-1] + input_edges[1:]) * 0.5
+
+
+# https://docs.python.org/2/library/itertools.html#recipes
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
+
+
+def q_to_d(q):
+    """
+    Helper function to convert :math:`d` to :math:`q`.  The point
+    of this function is to prevent fat-fingered typos.
+
+    By definition the relationship is:
+
+    ..math ::
+
+        q = \\frac{2 \pi}{d}
+
+
+    Parameters
+    ----------
+    q : array
+        An array of q values
+
+    Returns
+    -------
+    d : array
+       An array of d (plane) spacing
+
+    """
+    return (2 * np.pi) / np.asarray(q)
+
+
+def d_to_q(d):
+    """
+    Helper function to convert :math:`d` to :math:`q`.
+    The point of this function is to prevent fat-fingered typos.
+
+    By definition the relationship is:
+
+    ..math ::
+
+        d = \\frac{2 \pi}{q}
+
+    Parameters
+    -------
+    d : array
+       An array of d (plane) spacing
+
+    Returns
+    ----------
+    q : array
+        An array of q values
+
+
+    """
+    return (2 * np.pi) / np.asarray(d)
+
+
+def q_to_twotheta(q, wavelength):
+    """
+    Helper function to convert :math:`q` + :math:`\\lambda` to :math:`2\\theta`.
+    The point of this function is to prevent fat-fingered typos.
+
+    By definition the relationship is:
+
+    ..math ::
+
+        \\sin\\left(\\frac{2\\theta}{2}\right) = \\frac{\\lambda q}{4 \\pi}
+
+    thus
+
+    ..math ::
+
+        2\\theta_n = 2 \\arcsin\\left(\\frac{\\lambda q}{4 \\pi}\\right
+
+    Parameters
+    ----------
+    q : array
+        An array of :math:`q` values
+
+    wavelength : float
+        Wavelength of the incoming x-rays
+
+    Returns
+    -------
+    two_theta : array
+        An array of :math:`2\\theta` values
+
+
+    """
+    q = np.asarray(q)
+    wavelength = float(wavelength)
+    pre_factor = wavelength / (4 * np.pi)
+    return 2 * np.arcsin(q * pre_factor)
+
+
+def twotheta_to_q(two_theta, wavelength):
+    """
+    Helper function to convert :math:`2\\theta` + :math:`\\lambda` to :math:`q`.
+    The point of this function is to prevent fat-fingered typos.
+
+    By definition the relationship is:
+
+    ..math ::
+
+        \\sin\\left(\\frac{2\\theta}{2}\right) = \\frac{\\lambda q}{4 \\pi}
+
+    thus
+
+    ..math ::
+
+        q = \\frac{4 \\pi \\sin\\left(\\frac{2\\theta}{2}\right)}{\\lambda}
+
+    Parameters
+    ----------
+    two_theta : array
+        An array of :math:`2\\theta` values
+
+    wavelength : float
+        Wavelength of the incoming x-rays
+
+    Returns
+    -------
+    q : array
+        An array of :math:`q` values
+    """
+    two_theta = np.asarray(two_theta)
+    wavelength = float(wavelength)
+    pre_factor = ((4 * np.pi) / wavelength)
+    return pre_factor * np.sin(two_theta / 2)
