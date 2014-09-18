@@ -700,9 +700,9 @@ class HKL(namedtuple('HKL', 'h k l')):
     @property
     def length(self):
         """
-        The L2 norm of the hkl vector.
+        The L2 norm (length) of the hkl vector.
         """
-        return np.sqrt(np.sum(np.array(self)**2))
+        return np.linalg.norm(self)
 
 
 class Reflection(namedtuple('Reflection', ('d', 'hkl', 'q'))):
