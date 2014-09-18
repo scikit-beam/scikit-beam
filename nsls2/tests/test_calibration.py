@@ -2,6 +2,9 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
+# @author: Li Li (lili@bnl.gov)                                        #
+# created on 08/19/2014                                                #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -32,71 +35,60 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-"""
-This is the module for putting advanced/x-ray specific image
-processing tools.  These should be interesting compositions of existing
-tools, not just straight wrapping of np/scipy/scikit images.
-"""
-
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
+from __future__ import (absolute_import, division,
+                        unicode_literals, print_function)
 import six
-import logging
-logger = logging.getLogger(__name__)
 import numpy as np
+from numpy.testing import assert_array_almost_equal
+
+import nsls2.calibration as calibration
+import nsls2.calibration as core
+from nose.tools import assert_raises
 
 
-def find_ring_center_acorr_1D(input_image):
-    """
-    Find the pixel-resolution center of a set of concentric rings.
+def _draw_gaussian_rings(shape, calibrated_center, r_list, r_width):
+    R = core.pixel_to_radius(shape, calibrated_center)
+    I = np.zeros_like(R)
 
-    This function uses correlation between the image and it's mirror
-    to find the approximate center of  a single set of concentric rings.
-    It is assumed that there is only one set of rings in the image.  For
-    this method to work well the image must have significant mirror-symmetry
-    in both dimensions.
+    for r in r_list:
+        tmp = 100 * np.exp(-((R - r)/r_width)**2)
+        I += tmp
 
-    Parameters
-    ----------
-    input_image : ndarray
-        A single image.
-
-    Returns
-    -------
-    calibrated_center : tuple
-        Returns the index (row, col) of the pixel that rings
-        are centered on.  Accurate to pixel resolution.
-    """
-    return tuple(bins[np.argmax(vals)] for vals, bins in
-                  (_corr_ax1(_im) for _im in (input_image.T, input_image)))
+    return I
 
 
-def _corr_ax1(input_image):
-    """
-    Internal helper function that finds the best estimate for the
-    location of the vertical mirror plane.  For each row the maximum
-    of the correlating with it's mirror is found.  The most common value
-    is reported back as the location of the mirror plane.
+def test_refine_center():
+    center = np.array((500, 550))
+    I = _draw_gaussian_rings((1000, 1001), center,
+                             [50, 75, 100, 250, 500], 5)
 
-    Parameters
-    ----------
-    input_image : ndarray
-        The input image
+    out = calibration.refine_center(I, center+1, (1, 1),
+                                    phi_steps=20, nx=300, min_x=10,
+                                    max_x=300, window_size=5,
+                                    thresh=0, max_peaks=4)
 
-    Returns
-    -------
-    vals : ndarray
-        histogram of what pixel has the highest correlation
+    assert np.all(np.abs(center - out) < .1)
 
-    bins : ndarray
-        Bin edges for the vals histogram
-    """
-    dim = input_image.shape[1]
-    m_ones = np.ones(dim)
-    norm_mask = np.correlate(m_ones, m_ones, mode='full')
-    # not sure that the /2 is the correct correction
-    est_by_row = [np.argmax(np.correlate(v, v[::-1],
-                                         mode='full')/norm_mask) / 2
-             for v in input_image]
-    return np.histogram(est_by_row, bins=np.arange(0, dim + 1))
+
+def test_blind_d():
+    gaus = lambda x, center, height, width: (
+                          height * np.exp(-((x-center) / width)**2))
+    name = 'Si'
+    wavelength = .18
+    window_size = 5
+    threshold = .1
+    cal = calibration.calibration_standards[name]
+
+    tan2theta = np.tan(cal.convert_2theta(wavelength))
+
+    D = 200
+    expected_r = D * tan2theta
+
+    bin_centers = np.linspace(0, 50, 2000)
+    I = np.zeros_like(bin_centers)
+    for r in expected_r:
+        I += gaus(bin_centers, r, 100, .2)
+    d, dstd = calibration.estimate_d_blind(name, wavelength, bin_centers,
+                                     I, window_size, len(expected_r),
+                                     threshold)
+    assert np.abs(d - D) < 1e-6

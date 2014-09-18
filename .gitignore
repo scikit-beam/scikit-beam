@@ -65,3 +65,11 @@ docs/_build/
 
 #vim swap files
 *.swp
+
+#Binary data files
+*.volume
+*.am
+*.tiff
+*.tif
+*.dat
+*.DAT

@@ -36,11 +36,14 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 
-from __future__ import (absolute_import, division, unicode_literals, print_function)
+from __future__ import (absolute_import, division,
+                        unicode_literals, print_function)
 import numpy as np
 import six
-from collections import Mapping
+from collections import Mapping, namedtuple
 import functools
+from itertools import repeat
+from nsls2.core import q_to_d, d_to_q, twotheta_to_q, q_to_twotheta
 
 import xraylib
 xraylib.XRayInit()
@@ -559,6 +562,7 @@ class XrayLibWrap_Energy(XrayLibWrap):
                           self._map[key.lower()],
                           self._incident_energy)
 
+
 def emission_line_search(line_e, delta_e,
                          incident_energy, element_list=None):
     """
@@ -585,7 +589,8 @@ def emission_line_search(line_e, delta_e,
 
     search_list = [Element(item) for item in element_list]
 
-    cand_lines = [e.line_near(line_e, delta_e, incident_energy) for e in search_list]
+    cand_lines = [e.line_near(line_e, delta_e, incident_energy)
+                  for e in search_list]
 
     out_dict = dict()
     for e, lines in zip(search_list, cand_lines):
@@ -593,3 +598,198 @@ def emission_line_search(line_e, delta_e,
             out_dict[e.name] = lines
 
     return out_dict
+
+
+# http://stackoverflow.com/questions/3624753/how-to-provide-additional-initialization-for-a-subclass-of-namedtuple
+class HKL(namedtuple('HKL', 'h k l')):
+    '''
+    Class for carrying around hkl values
+    for rings/peaks.
+
+    This class also enforces that the values are
+    integers.
+    '''
+    __slots__ = ()
+
+    def __new__(cls, *args, **kwargs):
+        args = [int(_) for _ in args]
+        for k in list(kwargs):
+            kwargs[k] = int(kwargs[k])
+
+        return super(HKL, cls).__new__(cls, *args, **kwargs)
+
+    @property
+    def length(self):
+        """
+        The L2 length of the hkl vector.
+        """
+        return np.sqrt(np.sum(np.array(self)**2))
+
+
+Reflection = namedtuple('Reflection', ('d', 'hkl', 'q'))
+
+
+class PowderStandard(object):
+    """
+    Class for providing safe access to powder calibration standards
+    data.
+
+    Parameters
+    ----------
+    name : str
+        Name of the standard
+
+    reflections : list
+        A list of (d, (h, k, l), q) values.
+    """
+    def __init__(self, name, reflections):
+        self._reflections = [Reflection(d, HKL(*hkl), q)
+                             for d, hkl, q in reflections]
+        self._reflections.sort(key=lambda x: x[-1])
+        self._name = name
+
+    @property
+    def name(self):
+        """
+        Name of the calibration standard
+        """
+        return self._name
+
+    @property
+    def reflections(self):
+        """
+        List of the known reflections
+        """
+        return self._reflections
+
+    def __iter__(self):
+        return iter(self._reflections)
+
+    def convert_2theta(self, wavelength):
+        """
+        Convert the measured 2theta values to a different wavelength
+
+        Parameters
+        ----------
+        wavelength : float
+            The new lambda in Angstroms
+
+        Returns
+        -------
+        two_theta : array
+            The new 2theta values in radians
+        """
+        q = np.array([_.q for _ in self])
+        return q_to_twotheta(q, wavelength)
+
+    @classmethod
+    def from_lambda_2theta_hkl(cls, name, wavelength, two_theta, hkl=None):
+        """
+        Method to construct a PowderStandard object from calibrated
+        :math:`2\\theata` values.
+
+        Parameters
+        ----------
+        name : str
+            The name of the standard
+
+        wavelength : float
+            The wavelength that the calibration data was taken at
+
+        two_theta : array
+            The calibrated :math:`2\\theta` values
+
+        hkl : list, optional
+            List of (h, k, l) tuples of the Miller indicies that go
+            with each measured :math:`2\\theta`.  If not given then
+            all of the miller indicies are stored as (0, 0, 0).
+
+        Returns
+        -------
+        standard : PowderStandard
+            The standard object
+        """
+        q = twotheta_to_q(two_theta, wavelength)
+        d = q_to_d(q)
+        if hkl is None:
+            hkl = repeat((0, 0, 0))
+        return cls(name, zip(d, hkl, q))
+
+    @classmethod
+    def from_d(cls, name, d, hkl=None):
+        """
+        Method to construct a PowderStandard object from known
+        :math:`d` values.
+
+        Parameters
+        ----------
+        name : str
+            The name of the standard
+
+        d : array
+            The known plane spacings
+
+        hkl : list, optional
+            List of (h, k, l) tuples of the Miller indicies that go
+            with each measured :math:`2\\theta`.  If not given then
+            all of the miller indicies are stored as (0, 0, 0).
+
+        Returns
+        -------
+        standard : PowderStandard
+            The standard object
+        """
+        q = d_to_q(d)
+        if hkl is None:
+            hkl = repeat((0, 0, 0))
+        return cls(name, zip(d, hkl, q))
+
+    def __len__(self):
+        return len(self._reflections)
+
+
+# Si data taken from
+# https://www-s.nist.gov/srmors/certificates/640D.pdf?CFID=3219362&CFTOKEN=c031f50442c44e42-57C377F6-BC7A-395A-F39B8F6F2E4D0246&jsessionid=f030c7ded9b463332819566354567a698744
+calibration_standards = {'Si':
+                         PowderStandard.from_lambda_2theta_hkl(name='Si',
+                                           wavelength=1.5405929,
+                                           two_theta=np.deg2rad([
+                                               28.441, 47.3,
+                                               56.119, 69.126,
+                                               76.371, 88.024,
+                                               94.946, 106.7,
+                                               114.082, 127.532,
+                                               136.877]),
+                                           hkl=(
+                                               (1, 1, 1), (2, 2, 0),
+                                               (3, 1, 1), (4, 0, 0),
+                                               (3, 3, 1), (4, 2, 2),
+                                               (5, 1, 1), (4, 4, 0),
+                                               (5, 3, 1), (6, 2, 0),
+                                               (5, 3, 3))),
+                            'LaB6':
+                            PowderStandard.from_d(name='LaB6',
+                                                  d=[4.156,
+                                                     2.939,
+                                                     2.399,
+                                                     2.078,
+                                                     1.859,
+                                                     1.697,
+                                                     1.469,
+                                                     1.385,
+                                                     1.314,
+                                                     1.253,
+                                                     1.200,
+                                                     1.153,
+                                                     1.111,
+                                                     1.039,
+                                                     1.008,
+                                                     0.980,
+                                                     0.953,
+                                                     0.929,
+                                                     0.907,
+                                                     0.886,
+                                                     0.848,
+                                                     0.831,
+                                                     0.815,
+                                                     0.800])}
