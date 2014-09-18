@@ -41,6 +41,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import six
 import numpy as np
+from numpy import sin, cos
 import scipy.signal
 from collections import deque
 from nsls2.constants import calibration_standards
@@ -293,3 +294,116 @@ def powder_auto_calibrate(img, name, wavelength, pixel_size):
     return d_mean, d_std, center, center_error, tilt, tilt_error
 
 powder_auto_calibrate.name = list(calibration_standards)
+
+
+def tilt_coords(phi1, phi2, row, col):
+    """
+    Returns the measured coordinates on the detector if it is tilted
+    by an angle phi2 against the axis which is perpendicular to
+    the line given by phi1 for a set of true coordinates.
+
+    The tilt axis goes through the origin.  The input data must be shifted
+    so that the center is at (0, 0) prior to calling this function.
+
+    Parameters
+    ----------
+    phi1 : float
+        Rotation of the tilt axis.  The tilt angle is about
+        the axis perpendicular to the line given by phi1.
+
+        Put another way, this vector points along the minor axis
+        if the ellipse.
+
+        In radians
+
+    phi2 : float
+        The angle of the tilt about the line perpendicular to the
+        vector defined by phi1.
+
+        In radians
+
+    row : array
+       True row positions to tilt
+
+    col : array
+       True column positions to tilt
+
+    Returns
+    -------
+    row : array
+       The deformed row positions
+
+    col : array
+       The deformed column positions
+
+
+    See Also
+    --------
+    untilt_coords : inverse function
+    """
+    row = np.asarray(row)
+    col = np.asarray(col)
+
+    c1 = cos(phi1)
+    c2 = cos(phi2)
+    s1 = sin(phi1)
+
+    new_row = (c1*c1/c2 + s1*s1) * row + (-c1*s1/c2 + s1*c1) * col
+    new_col = (-c1*s1/c2 + c1*s1) * row + (s1*s1/c2 + c1*c1) * col
+
+    return new_row, new_col
+
+
+def untilt_coords(phi1, phi2, row, col):
+    """
+    Returns the True coordinates on the detector if it is tilted
+    by an angle phi2 against the axis which is perpendicular to
+    the line given by phi1 for a set of measured coordinates.
+
+    The tilt axis goes through the origin.  The input data must be shifted
+    so that the center is at (0, 0) prior to calling this function.
+
+    Parameters
+    ----------
+    phi1 : float
+        Rotation of the tilt axis.  The tilt angle is about
+        the axis perpendicular to the line given by phi1.
+
+        Put another way, this vector points along the minor axis
+        if the ellipse.
+
+        In radians
+
+    phi2 : float
+        The angle of the tilt about the line perpendicular to the
+        vector defined by phi1.
+
+        In radians
+
+    row : array
+       The row positions to tilt
+
+    col : array
+       The column positions to tilt
+
+    Returns
+    -------
+    row : array
+       The deformed row positions
+
+    col : array
+       The deformed column positions
+
+    See Also
+    --------
+    tilt_coords : inverse function
+
+    """
+    c1 = cos(phi1)
+    c2 = cos(phi2)
+    s1 = sin(phi1)
+
+    new_row = (c1*c1*c2 + s1*s1) * row + (-c1*s1*c2 + s1*c1) * col
+    new_col = (-c1*s1*c2 + c1*s1) * row + (s1*s1*c2 + c1*c1) * col
+
+    return new_row, new_col

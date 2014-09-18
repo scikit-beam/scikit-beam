@@ -116,3 +116,20 @@ def test_full_auto_calibration():
     # 1/10 pixel accuracy
     assert_array_almost_equal(center, m_center, decimal=1)
 
+
+def test_tilt_roundtrip():
+
+    phi1 = .4
+    phi2 = .3
+    r0 = 5
+
+    theta = np.linspace(0, 2*np.pi, 2500, endpoint=False)
+    row = r0 * np.sin(theta)
+    col = r0 * np.cos(theta)
+
+    a, b = calibration.tilt_coords(phi1, phi2, row, col)
+
+    r, c = calibration.untilt_coords(phi1, phi2, a, b)
+
+    assert_array_almost_equal(row, r)
+    assert_array_almost_equal(col, c)
