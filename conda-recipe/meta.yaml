@@ -22,7 +22,7 @@ requirements:
     - xraylib
     - scikit-image
     - lmfit
-
+    - netcdf4
 test:
   requires:
     - nose
