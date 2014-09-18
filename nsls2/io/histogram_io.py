@@ -21,16 +21,16 @@ import csv
 import time
 
 
-def hist_save_H5 (hist,
-                  bin_edges,
-                  bin_avg,
-                  src_file,
-                  src_dataset_name,
-                  dSet_append=''):
+def hist_save_H5(hist,
+                 bin_edges,
+                 bin_avg,
+                 src_file,
+                 src_dataset_name,
+                 dSet_append=''):
     """
-    This function evaluates the histogram of the source data set and returns the
-    result as a zipped object containing two lists corresponding to "bin" values
-    and "count" values.
+    This function evaluates the histogram of the source data set and returns
+    the result as a zipped object containing two lists corresponding to "bin"
+    values and "count" values.
 
     Parameters
     ----------
@@ -70,11 +70,11 @@ def hist_save_H5 (hist,
         The two arrays are contained within a GROUP named after the source data
         set
     """
-    bin_size = (bin_edges[1]-bin_edges[0])
+    bin_size = (bin_edges[1] - bin_edges[0])
     num_bins = len(hist)
     voxel_units = src_file["exchange"]["voxel_size"].attrs["Units"]
     grp_measure = src_file["measurements"]
-    src_dataset_name = src_dataset_name + dSet_append
+    src_dataset_name += dSet_append
     if 'histogram' in grp_measure:
         grp_measure["histogram"]
     else:
@@ -86,7 +86,7 @@ def hist_save_H5 (hist,
 
     hist_grp = grp_measure["histogram"][src_dataset_name]
     if 'hist' in hist_grp:
-        raise ValueError ("Histogram Data already exists.")
+        raise ValueError("Histogram Data already exists.")
     else:
         hist_grp.create_dataset("hist",
                                 data=hist,
@@ -102,13 +102,13 @@ def hist_save_H5 (hist,
         hist_grp.attrs.create("bin count",
                               num_bins)
         hist_grp["bins_avg"].attrs.create("bin size",
-                                      bin_size)
+                                          bin_size)
         hist_grp["bins_avg"].attrs.create("Units",
-                                      voxel_units)
+                                          voxel_units)
         hist_grp["bin_edges"].attrs.create("bin size",
-                                      bin_size)
+                                           bin_size)
         hist_grp["bin_edges"].attrs.create("Units",
-                                      voxel_units)
+                                           voxel_units)
     if np.amax(hist) <= 1:
         hist_grp["hist"].attrs.create("Units",
                                       "Normalized Probability Density")
@@ -117,9 +117,9 @@ def hist_save_H5 (hist,
                                       "Voxel Count")
 
 
-def hist_save_CSV (write_file_name,
-                   hist,
-                   bin_avg):
+def hist_save_CSV(write_file_name,
+                  hist,
+                  bin_avg):
     """
     This function saves histogram data as a CSV file saved to the file name
     specified as an input.
@@ -141,11 +141,10 @@ def hist_save_CSV (write_file_name,
     -------
     output : CSV text file (2xN)
         Function returns a 2xN comma separated text file where the first column
-        contains the average bin intensity value, and the second column contains
+        contains the average bin intensity value, and the second column
+        contains
         the voxel count information.
     """
-
-
     temp_hist_combine = np.vstack((bin_avg, hist))
     hist_combine = np.transpose(temp_hist_combine)
     if np.amax(hist) <= 1:
@@ -158,7 +157,7 @@ def hist_save_CSV (write_file_name,
                header=column_titles)
 
 
-def hist_load (src_file, file_type):
+def hist_load(src_file, file_type):
     """
     This function loads histogram data previously saved to either an hdf5 file
     or csv file.
@@ -189,9 +188,8 @@ def hist_load (src_file, file_type):
     """
 
 
-    #TODO Finish writing this function after other tools have been updated
+    # TODO Finish writing this function after other tools have been updated
     # this function should enable loading from CSV files and from HDF5,
     # or there should be two separate functions. One for HDF5 and one for
     # CSV...
     pass
-
