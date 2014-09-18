@@ -57,11 +57,11 @@ def rescale_intensity_values(src_data,
     src_data : ndarray
         Specifies the data set you want to rescale
     
-    new_max : flt
+    new_max : float
         Specify the new maximum value for the data set. Default 
         value is 254
 
-    new_min : flt
+    new_min : float
         Specify the new minimum value for the data set. Default 
         value is 0
 
