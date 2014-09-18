@@ -59,3 +59,9 @@ docs/_build/
 
 #pycharm
 .idea/*
+
+#dolphin config files
+.directory
+
+#vim swap files
+*.swp
