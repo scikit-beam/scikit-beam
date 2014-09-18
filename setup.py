@@ -15,7 +15,8 @@ setup(
               "nsls2.fitting.model",
               "nsls2.fitting.base",
               "nsls2.io",
-              ],
+              "nsls2.img_proc",
+    ],
     include_dirs=[np.get_include()],
-    ext_modules=ext_modules
-    )
+    ext_modules=ext_modules, requires=[]
+)
