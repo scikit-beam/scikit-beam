@@ -38,7 +38,12 @@ Types of data that is currently able to be loaded:
     Binary data (highlighting a particular phase, or material)
     Labeled data (e.g. after segmentation, and prior to surface generation)
 
+
 """
+#TODO: The reader functions are complete. Writer functions still need to be
+#   Added to the am-IO function set. As soon as that is complete a series of
+#   read --> write --> read test functions will be added to this file.
+#TODO: this will be address after addition of img_proc functions to vistrails
 def test_read_amira():
     pass
 
