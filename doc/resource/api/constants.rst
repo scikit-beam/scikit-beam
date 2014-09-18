@@ -23,7 +23,7 @@ X-ray fluorescence data
 The c library `xraylib <https://github.com/tschoonj/xraylib/wiki>`__
 provides a programmatic interface to x-ray fluorescence constants.  We
 provide dictionary-like wrapping classes to provide easy access to the
-data.  For the post part users should access this data through the
+data.  For the most part users should access this data through the
 `Element` object which manages the creation and access to these objects.
 
 .. autosummary::
