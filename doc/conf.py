@@ -283,3 +283,7 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 #    This can be used as the default role to make links 'smart'.
 #
 default_role = "autolink"
+
+autosummary_generate = True
+
+#numpydoc_show_class_members = False
