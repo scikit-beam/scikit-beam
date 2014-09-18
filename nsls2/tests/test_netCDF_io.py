@@ -29,7 +29,10 @@ def test_net_cdf_io():
     -------
 
     """
-    #TODO: Write test function for netCDF loader. But, requires access to binary data files.
+    #TODO: The reader functions are complete. Writer functions still need to be
+    #   Added to the am-IO function set. As soon as that is complete a series of
+    #   read --> write --> read test functions will be added to this file.
+    #TODO: this will be address after addition of img_proc functions to vistrails
     #data, md_dict = ncd.load_netCDF(test_data)
     #eq_(md_dict['operator'], 'Iltis')
     #eq_(data.shape, (470, 695, 695))
