@@ -285,5 +285,3 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 default_role = "autolink"
 
 autosummary_generate = True
-
-#numpydoc_show_class_members = False

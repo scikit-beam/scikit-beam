@@ -626,7 +626,12 @@ class XrayLibWrap_Energy(XrayLibWrap):
 
 def emission_line_search(line_e, delta_e,
                          incident_energy, element_list=None):
-    """
+    """Find elements which have an emission line near an energy
+
+    This function returns a dict keyed on element type of all
+    elements that have an emission line with in `delta_e` of
+    `line_e` at the given x-ray energy.
+
     Parameters
     ----------
     line_e : float
@@ -635,9 +640,11 @@ def emission_line_search(line_e, delta_e,
          difference compared to energy in KeV
     incident_energy : float
         incident x-ray energy in KeV
-    element_list : list
-         List of elements to search for. Element abbreviations can be
-         any mix of upper and lower case, e.g., Hg, hG, hg, HG
+    element_list : list, optional
+         List of elements to restrict search to.
+
+         Element abbreviations can be any mix of upper and
+         lower case, e.g., Hg, hG, hg, HG
 
     Returns
     -------
@@ -664,11 +671,22 @@ def emission_line_search(line_e, delta_e,
 # http://stackoverflow.com/questions/3624753/how-to-provide-additional-initialization-for-a-subclass-of-namedtuple
 class HKL(namedtuple('HKL', 'h k l')):
     '''
-    Class for carrying around hkl values
-    for rings/peaks.
+    Namedtuple sub-class miller indicies (HKL)
 
-    This class also enforces that the values are
-    integers.
+    This class enforces that the values are integers.
+
+    Parameters
+    ----------
+    h : int
+    k : int
+    l : int
+
+    Attributes
+    ----------
+    length
+    h
+    k
+    l
     '''
     __slots__ = ()
 
@@ -682,12 +700,33 @@ class HKL(namedtuple('HKL', 'h k l')):
     @property
     def length(self):
         """
-        The L2 length of the hkl vector.
+        The L2 norm of the hkl vector.
         """
         return np.sqrt(np.sum(np.array(self)**2))
 
 
-Reflection = namedtuple('Reflection', ('d', 'hkl', 'q'))
+class Reflection(namedtuple('Reflection', ('d', 'hkl', 'q'))):
+    """
+    Namedtuple sub-class for scattering reflection information
+
+    Parameters
+    ----------
+    d : float
+        Plane-spacing
+
+    HKL : `HKL`
+        miller indicies
+
+    q : float
+        q-value of the reflection
+
+    Attributes
+    ----------
+    d
+    HKL
+    q
+    """
+    __slots__ = ()
 
 
 class PowderStandard(object):
@@ -708,6 +747,11 @@ class PowderStandard(object):
                              for d, hkl, q in reflections]
         self._reflections.sort(key=lambda x: x[-1])
         self._name = name
+
+    def __str__(self):
+        return "Calibration standard: {}".format(self.name)
+
+    __repr__ = __str__
 
     @property
     def name(self):
@@ -854,3 +898,8 @@ calibration_standards = {'Si':
                                                      0.831,
                                                      0.815,
                                                      0.800])}
+"""
+Calibration standards
+
+A dictionary holding known powder-pattern calibration standards
+"""
