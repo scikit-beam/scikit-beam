@@ -37,12 +37,16 @@
 ########################################################################
 
 
-from __future__ import (absolute_import, division, unicode_literals, print_function)
+from __future__ import (absolute_import, division,
+                        unicode_literals, print_function)
 import six
-from numpy.testing import assert_array_equal
+import numpy as np
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 from nose.tools import assert_equal
 
-from nsls2.constants import (Element, emission_line_search)
+from nsls2.constants import (Element, emission_line_search,
+                             calibration_standards, HKL)
+from nsls2.core import (q_to_d, d_to_q)
 
 
 def test_element_data():
@@ -75,3 +79,27 @@ def test_element_finder():
     found_name = sorted(list(six.iterkeys(out)))
     assert_equal(true_name, found_name)
     return
+
+
+def smoke_test_powder_standard():
+    name = 'Si'
+    cal = calibration_standards[name]
+    assert(name == cal.name)
+
+    for d, hkl, q in cal:
+        assert_array_almost_equal(d_to_q(d), q)
+        assert_array_almost_equal(q_to_d(q), d)
+        assert_array_equal(np.linalg.norm(hkl), hkl.length)
+
+    assert_equal(str(cal), "Calibration standard: Si")
+    assert_equal(len(cal), 11)
+
+
+def test_hkl():
+    a = HKL(1, 1, 1)
+    b = HKL('1', '1', '1')
+    c = HKL(h='1', k='1', l='1')
+    d = HKL(1.5, 1.5, 1.75)
+    assert_equal(a, b)
+    assert_equal(a, c)
+    assert_equal(a, d)
