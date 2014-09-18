@@ -219,10 +219,10 @@ keys_core = {
         "units": "um",
     },
     "voxel_size": {
-        "description": ("3 element tuple defining the (x y z) dimensions of "
-                        "the voxel"),
+        "description": ("3 element tuple defining the (x y z) dimensions of the "
+                         "voxel"),
         "type": tuple,
-        "units": "um",
+        "units": "um"
     },
     "calibrated_center": {
         "description": ("2 element tuple defining the (x y) center of the "
@@ -254,6 +254,64 @@ keys_core = {
     "ub_mat": {
         "description": "UB matrix(orientation matrix) 3x3 array",
         "type": "ndarray",
+    },
+    "energy": {
+        "description": "scanning energy for data collection",
+        "type": float,
+        "units": "keV",
+    },
+    "array_dimensions": {
+        "description": "axial lengths of the array (Pixels)",
+        "x_dimension": {
+            "description": "x-axis array length as int",
+            "type": int,
+            "units": "pixels"
+        },
+        "y_dimension": {
+            "description": "y-axis array length as int",
+            "type": int,
+            "units": "pixels"
+        },
+        "z_dimension": {
+            "description": "z-axis array length as int",
+            "type": int,
+            "units": "pixels"
+        }
+    },
+    "bounding_box": {
+        "description": ("physical extents of the array: useful for " +
+                        "volume alignment, transformation, merge and " +
+                         "spatial comparison of multiple volumes"),
+        "x_min": {
+            "description": "minimum spatial coordinate along the x-axis",
+            "type": float,
+            "units": "um"
+        },
+        "x_max": {
+            "description": "maximum spatial coordinate along the x-axis",
+            "type": float,
+            "units": "um"
+        },
+        "y_min": {
+            "description": "minimum spatial coordinate along the y-axis",
+            "type": float,
+            "units": "um"
+        },
+        "y_max": {
+            "description": "maximum spatial coordinate along the y-axis",
+            "type": float,
+            "units": "um"
+        },
+        "z_min": {
+            "description": "minimum spatial coordinate along the z-axis",
+            "type": float,
+            "units": "um"
+        },
+        "z_max": {
+            "description": "maximum spatial coordinate along the z-axis",
+            "type": float,
+            "units": "um"
+        },
     },
 }
 
