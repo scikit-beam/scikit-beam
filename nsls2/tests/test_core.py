@@ -314,3 +314,80 @@ def test_large_verbosedict():
     else:
         # did not raise a KeyError
         assert(False)
+
+
+def test_bin_image_to_1D_radius():
+    shape = (256, 300)
+    center = (120, 150)
+    R = core.pixel_to_radius(shape, center)
+
+    I = np.zeros_like(R, dtype='int')
+
+    ring_width = 2
+
+    ring_locs = [10, 50, 76]
+    for r in ring_locs:
+        I += ((R >= r) * (R < (r + ring_width))) * r
+
+    A, B, C = core.bin_image_to_1D(I, center,
+                    core.pixel_to_radius,
+                    bin_min=0, bin_max=100,
+                    bin_num=50)
+
+    for j, (a, b, c) in enumerate(zip(A, B, C)):
+        if j*2 in ring_locs:
+            assert b == j * 2 * c
+        else:
+            assert b == 0
+
+
+def test_bin_image_to_1D_phi():
+    shape = (256, 300)
+    center = (120, 150)
+    phi = core.pixel_to_phi(shape, center)
+
+    nphi_steps = 25
+
+    I = np.zeros_like(phi, dtype='int')
+
+    phi_steps = np.linspace(-np.pi, np.pi + np.spacing(np.pi),
+                            nphi_steps + 1,
+                            endpoint=True)
+    for j, (bot, top) in enumerate(core.pairwise(phi_steps)):
+        mask = (phi >= bot) * (phi < top)
+        I[mask] = j + 1
+
+    A, B, C = core.bin_image_to_1D(I, center,
+                    core.pixel_to_phi,
+                    bin_min=-np.pi, bin_max=np.pi,
+                    bin_num=nphi_steps)
+
+    for j, (a, b, c) in enumerate(zip(A, B, C)):
+        assert b == c * (j + 1)
+
+
+def test_d_q_conversion():
+    assert_equal(2 * np.pi, core.d_to_q(1))
+    assert_equal(2 * np.pi, core.q_to_d(1))
+    test_data = np.linspace(.1, 5, 100)
+    assert_array_almost_equal(test_data, core.d_to_q(core.q_to_d(test_data)),
+                              decimal=12)
+    assert_array_almost_equal(test_data, core.q_to_d(core.d_to_q(test_data)),
+                              decimal=12)
+
+
+def test_q_twotheta_conversion():
+    wavelength = 1
+    q = np.linspace(0, 4 * np.pi, 100)
+    assert_array_almost_equal(q,
+                              core.twotheta_to_q(
+                                  core.q_to_twotheta(q, wavelength),
+                                  wavelength),
+                              decimal=12)
+    two_theta = np.linspace(0, np.pi, 100)
+    assert_array_almost_equal(two_theta,
+                              core.q_to_twotheta(
+                                  core.twotheta_to_q(two_theta,
+                                                     wavelength),
+                                  wavelength),
+                              decimal=12)
