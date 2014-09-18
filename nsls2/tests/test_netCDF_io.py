@@ -17,7 +17,7 @@ import nsls2.io.net_cdf_io as ncd
 
 test_data = '../../../test_data/file_io/netCDF/tst_netCDF_recon.volume'
 
-def test_net_cdf_io(test_data):
+def test_net_cdf_io():
     """
     Test function for netCDF read function load_netCDF()
 
