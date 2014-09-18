@@ -92,3 +92,27 @@ def test_blind_d():
                                      I, window_size, len(expected_r),
                                      threshold)
     assert np.abs(d - D) < 1e-6
+
+
+def test_full_auto_calibration():
+    name = 'Si'
+    wavelength = .18
+    pixel_size = (.1, .1)
+    cal = calibration.calibration_standards[name]
+    center = (501.25, 515.75)
+    tan2theta = np.tan(cal.convert_2theta(wavelength))
+
+    D = 200
+    expected_r = D * tan2theta / pixel_size[0]
+
+    I = _draw_gaussian_rings((1000, 1010), center, expected_r, 2)
+
+    res = calibration.powder_auto_calibrate(I, name, wavelength, pixel_size)
+    d, d_std, m_center, center_error, tilt, tilt_error = res
+    print(center, m_center)
+
+    # assert within error
+    assert np.abs(d - D) < d_std
+    # 1/10 pixel accuracy
+    assert_array_almost_equal(center, m_center, decimal=1)
+

@@ -47,7 +47,9 @@ from nsls2.constants import calibration_standards
 from nsls2.feature import (filter_peak_height, peak_refinement,
                            refine_log_quadratic)
 from nsls2.core import (pixel_to_phi, pixel_to_radius,
-                        pairwise, bin_edges_to_centers, bin_1D)
+                        pairwise, bin_edges_to_centers, bin_1D,
+                        bin_image_to_1D)
+from nsls2.image import find_ring_center_acorr_1D
 
 
 def estimate_d_blind(name, wavelength, bin_centers, ring_average,
@@ -59,6 +61,7 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
     rough estimate of what d should be.
 
     For the peaks found the detector-sample distance is estimated via
+
     .. math ::
 
         D = \\frac{r}{\\tan 2\\theta}
@@ -214,3 +217,79 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
 
     return tuple(np.array(calibrated_center) +
                  np.array([row_shift, col_shift]))
+
+
+def powder_auto_calibrate(img, name, wavelength, pixel_size):
+    """
+    Automatically find the beam center, detector tilt, and sample distance
+
+    .. warning:: This function is not finished and the API may change
+
+    .. note:: Currently the *full* rings need to be visible.
+
+    Parameters
+    ----------
+    img : ndarray
+        The calibration image.
+
+    name : str
+        The name of the calibration sample.  The known standards are
+        stored in `nsls2.constants.calibration_standards`.
+
+    wavelength : float
+        x-ray wave length in angstroms
+
+    pixel_size : tuple
+        The (height, width) pitch of the detector pixels in mm
+
+    Returns
+    -------
+    D : float
+       The sample-to-detector distance in mm
+       (more accuratly, same units as `pixel_size`)
+
+    D_error : float
+       Estimate of error in D
+
+    center : tuple
+        (row, col) calibrated beam center in pixels
+
+    center_error : tuple
+        Estimated error in the center location.
+
+    tilt : tuple
+        (phi1, phi2) in radians giving the direction of the tilt and
+        the degree of tilt.  See `tilt_detector` and `untilt_detector`
+
+    tilt_error : tupel
+        Estimated error in the tilt angles
+
+
+
+
+    """
+
+    res = find_ring_center_acorr_1D(img)
+    center = refine_center(img, res, pixel_size, 25, 5,
+                         thresh=0.1, window_size=5)
+    bins, sums, counts = bin_image_to_1D(img,
+                                         center,
+                                         pixel_to_radius,
+                                         pixel_to_1D_kwarg={'pixel_size':
+                                                            pixel_size},
+                                         bin_num=5000)
+
+    mask = counts > 10
+    bin_centers = bin_edges_to_centers(bins)[mask]
+    ring_averages = sums[mask] / counts[mask]
+
+    d_mean, d_std = estimate_d_blind(name, wavelength, bin_centers,
+                                 ring_averages, 5, 7, thresh=0.03)
+
+    tilt = None
+    center_error = None
+    tilt = None
+    tilt_error = None
+    return d_mean, d_std, center, center_error, tilt, tilt_error
+
+powder_auto_calibrate.name = list(calibration_standards)
