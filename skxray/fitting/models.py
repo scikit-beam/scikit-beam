@@ -183,6 +183,27 @@ class Lorentzian2Model(Model):
 
 
 
+def gausspeak_k_lines(x, area,
+                      center1, sigma1, ratio1,
+                      center2, sigma2, ratio2,
+                      center3, sigma3, ratio3,
+                      center4, sigma4, ratio4):
+
+    g1 = gauss_peak(x, area, center1, sigma1) * ratio1
+    g2 = gauss_peak(x, area, center2, sigma2) * ratio2
+    g3 = gauss_peak(x, area, center3, sigma3) * ratio3
+    g4 = gauss_peak(x, area, center4, sigma4) * ratio4
+
+    return g1 + g2 + g3 + g4
+
+
+class GaussModel_Klines(Model):
+
+    #__doc__ = _gen_class_docs(gausspeak_k_lines)
+
+    def __init__(self, *args, **kwargs):
+        super(GaussModel_Klines, self).__init__(gausspeak_k_lines, *args, **kwargs)
+
 
 class ModelSpectrum(object):
 
@@ -199,7 +220,7 @@ class ModelSpectrum(object):
         compton = ComptonModel()
         # parameters not sensitive
         compton.set_param_hint(name='compton_hi_gamma', value=0.25, vary=False)#min=0.0, max=4.0)
-        compton.set_param_hint(name='fwhm_offset', value=0.1, vary=True, expr='e_fwhm_offset')
+        compton.set_param_hint(name='fwhm_offset', value=0.1, vary=True)
 
         # parameters with boundary
         compton.set_param_hint(name='coherent_sct_energy', value=11.78, vary=True, min=11.77, max=11.79)
@@ -222,7 +243,7 @@ class ModelSpectrum(object):
         elastic = ElasticModel(prefix='e_')
 
         # fwhm_offset is not a sensitive parameter, used as a fixed value
-        elastic.set_param_hint(name='fwhm_offset', value=0.1, vary=True)
+        elastic.set_param_hint(name='fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
         elastic.set_param_hint(name='coherent_sct_energy', value=11.78, expr='coherent_sct_energy')# min=11.77, max=11.79)
         elastic.set_param_hint(name='coherent_sct_amplitude', value=50000)
 
@@ -245,23 +266,40 @@ class ModelSpectrum(object):
                                 'at this energy {1}'.format(ename, incident_energy))
                     continue
 
-                # k lines
-                for item in e.emission_line.all[:4]:
+                # K lines
+                # It is much faster to construct only one model
+                # to construct four gauss models with constrains
+                # relating each other.
+                gauss_mod = GaussModel_Klines(prefix=str(ename)+'_k_line_')
 
+                gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
+                for num, item in enumerate(e.emission_line.all[:4]):
+                    print (num)
                     #val = e.emission_line['ka1']
                     line_name = item[0]
                     val = item[1]
 
-                    gauss_mod = GaussModel(prefix=str(ename)+'_'+str(line_name)+'_')
-                    #gauss_mod.set_param_hint('label_val', )
-                    gauss_mod.set_param_hint('ratio_val',
-                                             value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1'])
+                    #gauss_mod = GaussModel(prefix=str(ename)+'_'+str(line_name)+'_')
+                    #gauss_mod.set_param_hint('ratio_val',
+                    #                         value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1'])
+
                     #if line_name != ename:
-                    gauss_mod.set_param_hint('area', value=100, vary=True,
-                                             min=0.0, expr=gauss_mod.prefix+'ratio_val*'+str(ename)+'_ka1_'+'area')
-                    gauss_mod.set_param_hint('center', value=val, vary=False)
-                    gauss_mod.set_param_hint('sigma', value=0.05, vary=False)
-                    mod = mod + gauss_mod
+                    #if line_name == 'ka1':
+                    #    gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
+                    #else:
+                    #    gauss_mod.set_param_hint('area', value=100, vary=True, min=0,
+                    #                             expr=str(ename)+'_ka1_'+'area')
+
+                    #gauss_mod.set_param_hint('center', value=val, vary=False)
+                    #gauss_mod.set_param_hint('sigma', value=0.05, vary=False)
+
+                    gauss_mod.set_param_hint('center'+str(num+1), value=val, vary=False)
+                    gauss_mod.set_param_hint('sigma'+str(num+1), value=0.05, vary=False)
+                    gauss_mod.set_param_hint('ratio'+str(num+1),
+                                             value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1'],
+                                             vary=False)
+
+                mod = mod + gauss_mod
 
             elif ename in l_line:
                 ename = ename[:-2]
@@ -271,22 +309,36 @@ class ModelSpectrum(object):
                                 'at this energy {1}'.format(ename, incident_energy))
                     continue
 
-                # k lines
+                # L lines
                 for item in e.emission_line.all[4:-4]:
+
                     line_name = item[0]
                     val = item[1]
 
-                    #val = e.emission_line['la1']
-                    gauss_mod = GaussModel(prefix=str(ename)+'_'+str(line_name)+'_')
-                    gauss_mod.set_param_hint('ratio_val',
-                                             value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1'])
+                    if e.cs(incident_energy)[line_name] == 0:
+                        continue
 
-                    gauss_mod.set_param_hint('area', value=100, vary=True,
-                                             min=0.0)#, expr=gauss_mod.prefix+'ratio_val*'+str(ename)+'_la1_'+'area')
+                    gauss_mod = GaussModel(prefix=str(ename)+'_'+str(line_name)+'_')
+                    #gauss_mod.set_param_hint('ratio_val',
+                    #                         value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1'])
+
+                    if line_name == 'la1':
+                        gauss_mod.set_param_hint('area', value=100, vary=True)
+                                             #expr=gauss_mod.prefix+'ratio_val * '+str(ename)+'_la1_'+'area')
+                    else:
+                        gauss_mod.set_param_hint('area', value=100, vary=True,
+                                                 expr=str(ename)+'_la1_'+'area')
+
+                    #    gauss_mod.set_param_hint('area', value=100, vary=True,
+                    #                             expr=gauss_mod.prefix+'ratio_val * '+str(ename)+'_la1_'+'area')
 
                     #gauss_mod.set_param_hint('area', value=100, vary=True, min=0.0)
                     gauss_mod.set_param_hint('center', value=val, vary=False)
                     gauss_mod.set_param_hint('sigma', value=0.05, vary=False)
+                    gauss_mod.set_param_hint('ratio',
+                                             value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1'],
+                                             vary=False)
+
                     mod = mod + gauss_mod
 
         self.mod = mod
