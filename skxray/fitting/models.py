@@ -184,15 +184,20 @@ class Lorentzian2Model(Model):
 
 
 def gausspeak_k_lines(x, area,
+                      fwhm_offset,
+                      fwhm_fanoprime,
                       center1, sigma1, ratio1,
                       center2, sigma2, ratio2,
                       center3, sigma3, ratio3,
                       center4, sigma4, ratio4):
 
-    g1 = gauss_peak(x, area, center1, sigma1) * ratio1
-    g2 = gauss_peak(x, area, center2, sigma2) * ratio2
-    g3 = gauss_peak(x, area, center3, sigma3) * ratio3
-    g4 = gauss_peak(x, area, center4, sigma4) * ratio4
+    def get_sigma(center):
+        return np.sqrt((fwhm_offset/2.3548)**2 + center*2.96*fwhm_fanoprime)
+
+    g1 = gauss_peak(x, area, center1, sigma1*get_sigma(center1)) * ratio1
+    g2 = gauss_peak(x, area, center2, sigma2*get_sigma(center2)) * ratio2
+    g3 = gauss_peak(x, area, center3, sigma3*get_sigma(center3)) * ratio3
+    g4 = gauss_peak(x, area, center4, sigma4*get_sigma(center4)) * ratio4
 
     return g1 + g2 + g3 + g4
 
@@ -220,17 +225,19 @@ class ModelSpectrum(object):
         compton = ComptonModel()
         # parameters not sensitive
         compton.set_param_hint(name='compton_hi_gamma', value=0.25, vary=False)#min=0.0, max=4.0)
-        compton.set_param_hint(name='fwhm_offset', value=0.1, vary=True)
+        compton.set_param_hint(name='fwhm_offset', value=0.07, vary=True)
+        compton.set_param_hint(name='fwhm_fanoprime', value=0.0, vary=True, min=0.0, max=0.001)
 
         # parameters with boundary
         compton.set_param_hint(name='coherent_sct_energy', value=11.78, vary=True, min=11.77, max=11.79)
-        compton.set_param_hint(name='compton_gamma', value=1.2, vary=False, min=1, max=10.5)
-        compton.set_param_hint(name='compton_f_tail', value=0.5, vary=True, min=0, max=2.0)
-        compton.set_param_hint(name='compton_hi_gamma', value=0.2, min=1, max=2.5, vary=True)
+        compton.set_param_hint(name='compton_gamma', value=0.02, vary=True, min=0.1, max=10.5)
+        compton.set_param_hint(name='compton_f_tail', value=1.0, vary=True, min=0.5, max=1.5)
+        compton.set_param_hint(name='compton_f_step', value=0.0, vary=False, min=0, max=2.0)
+        compton.set_param_hint(name='compton_hi_gamma', value=2.2, vary=True, min=1, max=2.5)
         compton.set_param_hint(name='compton_hi_f_tail', value=0.005, vary=False)#min=0, max=0.05)
-        compton.set_param_hint(name='compton_fwhm_corr', value=3.5, min=2.0, max=4.5)
+        compton.set_param_hint(name='compton_fwhm_corr', value=1.5, vary=False)# min=2.0, max=4.5)
         compton.set_param_hint(name='compton_amplitude', value=80000)
-        compton.set_param_hint(name='compton_angle', value=90, vary=True)
+        compton.set_param_hint(name='compton_angle', value=90, vary=False)
         compton.set_param_hint(name='matrix', value=True, vary=False)
 
         return compton
@@ -244,6 +251,7 @@ class ModelSpectrum(object):
 
         # fwhm_offset is not a sensitive parameter, used as a fixed value
         elastic.set_param_hint(name='fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
+        elastic.set_param_hint(name='fwhm_fanoprime', value=0.0, vary=True, expr='fwhm_fanoprime')
         elastic.set_param_hint(name='coherent_sct_energy', value=11.78, expr='coherent_sct_energy')# min=11.77, max=11.79)
         elastic.set_param_hint(name='coherent_sct_amplitude', value=50000)
 
@@ -273,8 +281,10 @@ class ModelSpectrum(object):
                 gauss_mod = GaussModel_Klines(prefix=str(ename)+'_k_line_')
 
                 gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
+                gauss_mod.set_param_hint('fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
+                gauss_mod.set_param_hint('fwhm_fanoprime', value=0.1, vary=True, expr='fwhm_fanoprime')
+
                 for num, item in enumerate(e.emission_line.all[:4]):
-                    print (num)
                     #val = e.emission_line['ka1']
                     line_name = item[0]
                     val = item[1]
@@ -294,10 +304,17 @@ class ModelSpectrum(object):
                     #gauss_mod.set_param_hint('sigma', value=0.05, vary=False)
 
                     gauss_mod.set_param_hint('center'+str(num+1), value=val, vary=False)
-                    gauss_mod.set_param_hint('sigma'+str(num+1), value=0.05, vary=False)
-                    gauss_mod.set_param_hint('ratio'+str(num+1),
-                                             value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1'],
-                                             vary=False)
+                    gauss_mod.set_param_hint('sigma'+str(num+1), value=1, vary=False)
+                    #print ("value is", e.cs(incident_energy)['ka1'])
+                    ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
+                    #print ("ratio is", ratio_v)
+                    if ratio_v == 0 or ratio_v == 1:
+                        gauss_mod.set_param_hint('ratio'+str(num+1),
+                                                 value=ratio_v, vary=False)
+                    else:
+                        gauss_mod.set_param_hint('ratio'+str(num+1),
+                                                 value=ratio_v, vary=True,
+                                                 min=ratio_v*0.8, max=ratio_v*1.2)
 
                 mod = mod + gauss_mod
 
@@ -345,12 +362,9 @@ class ModelSpectrum(object):
         return
 
 
-    def model_fit(self, x, y):
+    def model_fit(self, x, y, w=None):
         self.model_spectrum()
-        #print (self.mod.param_names)
-        #p = self.mod.make_params()
-        #bg = self.get_bg(y)
-        result = self.mod.fit(y, x=x)
+        result = self.mod.fit(y, x=x, weights=w)
         return result
 
     def get_bg(self, y):
