@@ -309,7 +309,7 @@ def tilt_coords(phi1, phi2, row, col):
     ----------
     phi1 : float
         Rotation of the tilt axis.  The tilt angle is about
-        the axis perpendicular to the line given by phi1.
+        the line given by phi1.
 
         Put another way, this vector points along the minor axis
         if the ellipse.
@@ -317,8 +317,7 @@ def tilt_coords(phi1, phi2, row, col):
         In radians
 
     phi2 : float
-        The angle of the tilt about the line perpendicular to the
-        vector defined by phi1.
+        The angle of the tilt around the line defined by phi1.
 
         In radians
 
@@ -407,3 +406,153 @@ def untilt_coords(phi1, phi2, row, col):
     new_col = (-c1*s1*c2 + c1*s1) * row + (s1*s1*c2 + c1*c1) * col
 
     return new_row, new_col
+
+
+def tilt_angles_to_coefs(r, phi1, phi2):
+    """
+    Compute the coefficients for the Fourier expansion of a
+    circle on a tilted detector.
+
+    This is mostly useful for testing
+
+    Parameters
+    ----------
+    r : float
+        The radius of the un-distorted circle
+
+    phi1 : float
+        The first tilt angle in radians.  See `tilt_coords`
+
+    phi2 : float
+        The second tilt angle
+
+    Returns
+    -------
+    r0 : float
+        The constant coefficient in the Fourier expansion of r*r
+
+    a1 : float
+        The coefficent on the `cos(2 * chi)` in the Fourier expansion
+
+    a2 : float
+        The coefficent on the `sin(2 * chi)` in the Fourier expansion
+    """
+    c2 = cos(phi2)
+    pre_factor = (1 - 1 / (c2 * c2))
+    r0 = r*r * .5 * ((1 / (c2*c2) + 1))
+    a1 = - r*r * .5 * cos(phi1 * 2) * pre_factor
+    a2 = r*r * .5 * sin(phi1 * 2) * pre_factor
+    return r0, a1, a2
+
+
+def data_to_coefs(chi, r_sq):
+    """
+    Given `r^2(\chi)` compute the Fourier coefficients for a ring.
+
+    Parameters
+    ----------
+    chi : array
+        The angles at which the ring radius is sampled
+
+    r_sq : array
+        The radius squared of the ring
+
+    Returns
+    -------
+    r0 : float
+        The constant term in the Fourier series
+
+    a1 : float
+        The coefficient on cos(2*chi) in the Fourier series
+
+    a2 : float
+        The coefficient on sin(2*chi) in the Fourier series
+    """
+    # make sure everything really is an array
+    chi = np.asarray(chi)
+    r_sq = np.asarray(r_sq)
+    # compute the mean (constant term)
+    r0 = np.mean(r_sq)
+
+    # compute the 2chi coefficients
+    # TODO replace this with more accurate integration
+    delta = np.mean(np.diff(chi))
+    a1 = np.sum(cos(2 * chi) * r_sq) * delta / np.pi
+    a2 = np.sum(sin(2 * chi) * r_sq) * delta / np.pi
+
+    return r0, a1, a2
+
+
+def coefs_to_phi1(a1, a2):
+    """
+    Given the coefficients on the 2chi terms of the
+    Fourier series compute the first tilt angle.
+
+    Parameters
+    ----------
+    a1 : float
+        The coefficient on cos(2*chi) in the Fourier series
+
+    a2 : float
+        The coefficient on sin(2*chi) in the Fourier series
+
+    Returns
+    -------
+    phi1 : float
+        The first tilt angle (the direction of the minor axis)
+    """
+    return - 0.5 * np.arctan2(a2, a1)
+
+
+def coefs_to_phi2_1(a1, r0, phi1):
+    """
+    Given the constant and cos(2chi) coefficients and
+    the first tilt angle, compute the second tilt angle
+
+    Parameters
+    ----------
+    a1 : float
+        The coefficient on cos(2*chi) in the Fourier series
+
+    r0 : float
+        The constant term in the Fourier series
+
+    phi1 : float
+        The first tilt angle
+
+    Returns
+    -------
+    phi2 : float
+        The second tilt angle
+    """
+    P = -a1 / (r0 * cos(2 * phi1))
+    return np.arccos(np.sqrt((1 + P) / (1 - P)))
+
+
+def compute_phi2_a2(a2, r0, phi1):
+    """
+
+    .. warning this return nan if phi1 == 0 due to a `1/sin(phi1)` term
+    """
+    P = a2 / (r0 * sin(2 * phi1))
+    return np.arccos(np.sqrt((1 + P) / (1 - P)))
+
+
+def coefs_to_r(r0, phi2):
+
+    c2 = cos(phi2)
+    return np.sqrt(r0 / (.5 * ((1 / (c2*c2) + 1))))
+
+
+
+def coefs_to_params(r0, a1, a2):
+    """
+
+    """
+    pass
+
+
+def coefs_to_rc(thetas, coefs):
+    # todo correct for theta vs chi difference
+    r = np.sqrt(coefs.r0 + cos(2 * thetas) * coefs.a1 + sin(2 * thetas) * coefs.a2)
+    return r * cos(thetas), r*sin(thetas)
