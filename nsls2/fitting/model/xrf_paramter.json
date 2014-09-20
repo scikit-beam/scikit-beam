@@ -1,0 +1,46 @@
+{"element_list": "Ar K Ca Ti Cr Mn Fe Ni Cu Zn",
+
+ "coherent_sct_amplitude": {"bound_type": "none", "min": 1.0, "max": 1.0e7, "value": 1.0e5},
+
+ "coherent_sct_energy": {"bound_type": "lohi", "min": 10.9, "max": 11.1, "value": 11.0},
+ 
+ "compton_amplitude": {"bound_type": "none", "min": 0.0, "max": 1.0e7, "value": 1.0e5},
+
+ "fwhm_offset": {"bound_type": "lohi", "min": 0.005, "max": 1.5, "value": 0.07},
+
+ "fwhm_fanoprime": {"bound_type": "fixed", "min": 0.0, "max": 0.001, "value": 0.00},
+
+ "compton_angle": {"bound_type": "fixed", "min": 75.0, "max": 100.0, "value": 90.0},
+
+ "compton_gamma": {"bound_type": "lohi", "min": 4.0, "max": 5.5, "value": 5.0},
+
+ "compton_f_tail": {"bound_type": "fixed", "min": 0.1, "max": 0.6, "value": 0.37},
+
+ "compton_f_step": {"bound_type": "fixed", "min": 0.0, "max": 0.001, "value": 0.000},
+
+ "compton_fwhm_corr": {"bound_type": "lohi", "min": 0.5, "max": 2.5, "value": 1.5},
+
+ "compton_hi_f_tail": {"bound_type": "lohi", "min": 1e-06, "max": 1.0, "value": 0.01},
+
+ "compton_hi_gamma": {"bound_type": "fixed", "min": 0.10, "max": 2.0, "value": 1.0},
+
+ "element":
+    [
+     {"name":"Fe", "width":0.0, "position":0.0},
+     {"name":"Cu", "width":0.0, "position":0.0}
+    ],
+ "set_branch_ratio":
+    [
+     {"name":"Fe", "ka1":1, "ka2":1, "kb1":1, "kb2":1},
+     {"name":"Cu", "ka1":1, "ka2":1, "kb1":1, "kb2":1},
+     {"name":"Gd_L", "la1":1, "la2":1, "lb1":1, "lb2":1, "lb3":1, "lb4":1, "lb5":1,
+                     "lg1":1, "lg2":1, "lg3":1, "lg4":1, "ll":1, "ln":1}
+    ],
+ "fit_branch_ratio":
+    [
+     {"name":"Fe", "ka1":0.05, "ka2":0, "kb1":0, "kb2":0},
+     {"name":"Cu", "ka1":0, "ka2":0.1, "kb1":0.1, "kb2":0},
+     {"name":"Gd_L", "la1":0.1, "la2":0.0, "lb1":0.05}
+    ]
+}
+
