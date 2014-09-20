@@ -210,6 +210,67 @@ class GaussModel_Klines(Model):
         super(GaussModel_Klines, self).__init__(gausspeak_k_lines, *args, **kwargs)
 
 
+def gausspeak_l_lines(x, area,
+                      fwhm_offset,
+                      fwhm_fanoprime,
+                      center1, sigma1, ratio1,
+                      center2, sigma2, ratio2,
+                      center3, sigma3, ratio3,
+                      center4, sigma4, ratio4,
+                      center5, sigma5, ratio5,
+                      center6, sigma6, ratio6,
+                      center7, sigma7, ratio7,
+                      center8, sigma8, ratio8,
+                      center9, sigma9, ratio9,
+                      center10, sigma10, ratio10,
+                      center11, sigma11, ratio11,
+                      center12, sigma12, ratio12,
+                      center13, sigma13, ratio13):
+
+    def get_sigma(center):
+        return np.sqrt((fwhm_offset/2.3548)**2 + center*2.96*fwhm_fanoprime)
+
+    g1 = gauss_peak(x, area, center1, sigma1*get_sigma(center1)) * ratio1
+    g2 = gauss_peak(x, area, center2, sigma2*get_sigma(center2)) * ratio2
+    g3 = gauss_peak(x, area, center3, sigma3*get_sigma(center3)) * ratio3
+    g4 = gauss_peak(x, area, center4, sigma4*get_sigma(center4)) * ratio4
+    g5 = gauss_peak(x, area, center5, sigma5*get_sigma(center5)) * ratio5
+    g6 = gauss_peak(x, area, center6, sigma6*get_sigma(center6)) * ratio6
+    g7 = gauss_peak(x, area, center7, sigma7*get_sigma(center7)) * ratio7
+    g8 = gauss_peak(x, area, center8, sigma8*get_sigma(center8)) * ratio8
+    g9 = gauss_peak(x, area, center9, sigma9*get_sigma(center9)) * ratio9
+    g10 = gauss_peak(x, area, center10, sigma10*get_sigma(center10)) * ratio10
+    g11 = gauss_peak(x, area, center11, sigma11*get_sigma(center11)) * ratio11
+    g12 = gauss_peak(x, area, center12, sigma12*get_sigma(center12)) * ratio12
+    g13 = gauss_peak(x, area, center13, sigma13*get_sigma(center13)) * ratio13
+
+    return g1 + g2 + g3 + g4 + g5 + g6 + g7 + g8 + g9 + g10 + g11 + g12 + g13
+
+
+class GaussModel_Llines(Model):
+
+    #__doc__ = _gen_class_docs(gausspeak_k_lines)
+
+    def __init__(self, *args, **kwargs):
+        super(GaussModel_Llines, self).__init__(gausspeak_l_lines, *args, **kwargs)
+
+
+def gauss_peak_xrf(x, area, center, sigma, ratio, fwhm_offset, fwhm_fanoprime):
+
+    def get_sigma(center):
+        return np.sqrt((fwhm_offset/2.3548)**2 + center*2.96*fwhm_fanoprime)
+
+    return gauss_peak(x, area, center, sigma*get_sigma(center)) * ratio
+
+
+class GaussModel_xrf(Model):
+
+    #__doc__ = _gen_class_docs(gausspeak_k_lines)
+
+    def __init__(self, *args, **kwargs):
+        super(GaussModel_xrf, self).__init__(gauss_peak_xrf, *args, **kwargs)
+
+
 class ModelSpectrum(object):
 
     def __init__(self, incident_energy, element_list):
@@ -278,45 +339,53 @@ class ModelSpectrum(object):
                 # It is much faster to construct only one model
                 # to construct four gauss models with constrains
                 # relating each other.
-                gauss_mod = GaussModel_Klines(prefix=str(ename)+'_k_line_')
+                #gauss_mod = GaussModel_Klines(prefix=str(ename)+'_k_line_')
 
-                gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
-                gauss_mod.set_param_hint('fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
-                gauss_mod.set_param_hint('fwhm_fanoprime', value=0.1, vary=True, expr='fwhm_fanoprime')
+                #gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
+                #gauss_mod.set_param_hint('fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
+                #gauss_mod.set_param_hint('fwhm_fanoprime', value=0.1, vary=True, expr='fwhm_fanoprime')
 
                 for num, item in enumerate(e.emission_line.all[:4]):
                     #val = e.emission_line['ka1']
                     line_name = item[0]
                     val = item[1]
 
-                    #gauss_mod = GaussModel(prefix=str(ename)+'_'+str(line_name)+'_')
+                    if e.cs(incident_energy)[line_name] == 0:
+                        continue
+
+                    gauss_mod = GaussModel_xrf(prefix=str(ename)+'_'+str(line_name)+'_')
+                    gauss_mod.set_param_hint('fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
+                    gauss_mod.set_param_hint('fwhm_fanoprime', value=0.1, vary=True, expr='fwhm_fanoprime')
                     #gauss_mod.set_param_hint('ratio_val',
                     #                         value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1'])
 
-                    #if line_name != ename:
-                    #if line_name == 'ka1':
-                    #    gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
-                    #else:
-                    #    gauss_mod.set_param_hint('area', value=100, vary=True, min=0,
-                    #                             expr=str(ename)+'_ka1_'+'area')
-
-                    #gauss_mod.set_param_hint('center', value=val, vary=False)
-                    #gauss_mod.set_param_hint('sigma', value=0.05, vary=False)
-
-                    gauss_mod.set_param_hint('center'+str(num+1), value=val, vary=False)
-                    gauss_mod.set_param_hint('sigma'+str(num+1), value=1, vary=False)
-                    #print ("value is", e.cs(incident_energy)['ka1'])
-                    ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
-                    #print ("ratio is", ratio_v)
-                    if ratio_v == 0 or ratio_v == 1:
-                        gauss_mod.set_param_hint('ratio'+str(num+1),
-                                                 value=ratio_v, vary=False)
+                    if line_name == 'ka1':
+                        gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
                     else:
-                        gauss_mod.set_param_hint('ratio'+str(num+1),
-                                                 value=ratio_v, vary=True,
-                                                 min=ratio_v*0.8, max=ratio_v*1.2)
+                        gauss_mod.set_param_hint('area', value=100, vary=True, min=0,
+                                                 expr=str(ename)+'_ka1_'+'area')
 
-                mod = mod + gauss_mod
+                    gauss_mod.set_param_hint('center', value=val, vary=False)
+                    gauss_mod.set_param_hint('sigma', value=1, vary=False)
+
+                    ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
+                    gauss_mod.set_param_hint('ratio',
+                                             value=ratio_v, vary=False)
+
+                    #gauss_mod.set_param_hint('center'+str(num+1), value=val, vary=False)
+                    #gauss_mod.set_param_hint('sigma'+str(num+1), value=1, vary=False)
+                    #print ("value is", e.cs(incident_energy)['ka1'])
+                    #ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
+                    #print ("ratio is", ratio_v)
+                    #if ratio_v == 0 or ratio_v == 1:
+                    #    gauss_mod.set_param_hint('ratio'+str(num+1),
+                    #                             value=ratio_v, vary=False)
+                    #else:
+                    #    gauss_mod.set_param_hint('ratio'+str(num+1),
+                    #                             value=ratio_v, vary=False)
+                                                 #min=ratio_v*0.8, max=ratio_v*1.2)
+
+                    mod = mod + gauss_mod
 
             elif ename in l_line:
                 ename = ename[:-2]
@@ -327,7 +396,13 @@ class ModelSpectrum(object):
                     continue
 
                 # L lines
-                for item in e.emission_line.all[4:-4]:
+                #gauss_mod = GaussModel_Llines(prefix=str(ename)+'_l_line_')
+
+                #gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
+                #gauss_mod.set_param_hint('fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
+                #gauss_mod.set_param_hint('fwhm_fanoprime', value=0.1, vary=True, expr='fwhm_fanoprime')
+
+                for num, item in enumerate(e.emission_line.all[4:-4]):
 
                     line_name = item[0]
                     val = item[1]
@@ -335,7 +410,10 @@ class ModelSpectrum(object):
                     if e.cs(incident_energy)[line_name] == 0:
                         continue
 
-                    gauss_mod = GaussModel(prefix=str(ename)+'_'+str(line_name)+'_')
+                    gauss_mod = GaussModel_xrf(prefix=str(ename)+'_'+str(line_name)+'_')
+
+                    gauss_mod.set_param_hint('fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
+                    gauss_mod.set_param_hint('fwhm_fanoprime', value=0.1, vary=True, expr='fwhm_fanoprime')
                     #gauss_mod.set_param_hint('ratio_val',
                     #                         value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1'])
 
@@ -351,10 +429,23 @@ class ModelSpectrum(object):
 
                     #gauss_mod.set_param_hint('area', value=100, vary=True, min=0.0)
                     gauss_mod.set_param_hint('center', value=val, vary=False)
-                    gauss_mod.set_param_hint('sigma', value=0.05, vary=False)
+                    gauss_mod.set_param_hint('sigma', value=1, vary=False)
                     gauss_mod.set_param_hint('ratio',
                                              value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1'],
                                              vary=False)
+
+                    #gauss_mod.set_param_hint('center'+str(num+1), value=val, vary=False)
+                    #gauss_mod.set_param_hint('sigma'+str(num+1), value=1, vary=False)
+                    #print ("value is", e.cs(incident_energy)['ka1'])
+                    #ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1']
+                    #print ("ratio is", ratio_v)
+                    #if ratio_v == 0 or ratio_v == 1:
+                    #    gauss_mod.set_param_hint('ratio'+str(num+1),
+                    #                             value=ratio_v, vary=False)
+                    #else:
+                    #    gauss_mod.set_param_hint('ratio'+str(num+1),
+                    #                             value=ratio_v, vary=False)
+                                                 #min=ratio_v*0.8, max=ratio_v*1.2)
 
                     mod = mod + gauss_mod
 
