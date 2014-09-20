@@ -48,6 +48,8 @@ import six
 import numpy as np
 import sys
 import inspect
+import json
+import os
 
 
 import logging
@@ -171,7 +173,6 @@ class ComptonModel(Model):
         super(ComptonModel, self).__init__(compton, *args, **kwargs)
         set_default(self, compton)
         self.set_param_hint('epsilon', value=2.96, vary=False)
-        self.set_param_hint('matrix', value=False, vary=False)
 
 
 class Lorentzian2Model(Model):
@@ -271,37 +272,62 @@ class GaussModel_xrf(Model):
         super(GaussModel_xrf, self).__init__(gauss_peak_xrf, *args, **kwargs)
 
 
+def _set_value(para_name, input_dict, model_name):
+
+    if input_dict['bound_type'] == 'none':
+        model_name.set_param_hint(name=para_name, value=input_dict['value'], vary=True)
+    elif input_dict['bound_type'] == 'fixed':
+        model_name.set_param_hint(name=para_name, value=input_dict['value'], vary=False)
+    elif input_dict['bound_type'] == 'lohi':
+        model_name.set_param_hint(name=para_name, value=input_dict['value'], vary=True,
+                                  min=input_dict['min'], max=input_dict['max'])
+    elif input_dict['bound_type'] == 'lo':
+        model_name.set_param_hint(name=para_name, value=input_dict['value'], vary=True,
+                                  min=input_dict['min'])
+    elif input_dict['bound_type'] == 'hi':
+        model_name.set_param_hint(name=para_name, value=input_dict['value'], vary=True,
+                                  min=input_dict['max'])
+    else:
+        raise ValueError("could not set values for {0}".format(para_name))
+    return
+
 class ModelSpectrum(object):
 
-    def __init__(self, incident_energy, element_list):
-        self.incident_energy = incident_energy
-        self.element_list = element_list
+    def __init__(self, config_file='xrf_paramter.json'):
+
+        file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                 config_file)
+
+        json_data = open(file_path, 'r')
+        self.parameter = json.load(json_data)
+
+        self.element_list = self.parameter['element_list'].split()
+        self.incident_energy = self.parameter['coherent_sct_energy']['value']
+
+        self.parameter_default = get_para()
+
         return
 
     def setComptonModel(self):
         """
         need to read input file to setup parameters
         """
-        incident_energy = self.incident_energy
         compton = ComptonModel()
-        # parameters not sensitive
-        compton.set_param_hint(name='compton_hi_gamma', value=0.25, vary=False)#min=0.0, max=4.0)
-        compton.set_param_hint(name='fwhm_offset', value=0.07, vary=True)
-        compton.set_param_hint(name='fwhm_fanoprime', value=0.0, vary=True, min=0.0, max=0.001)
+
+        compton_list = ['coherent_sct_energy','compton_amplitude',
+                        'compton_angle', 'fwhm_offset', 'fwhm_fanoprime',
+                        'compton_gamma', 'compton_f_tail',
+                        'compton_f_step', 'compton_fwhm_corr',
+                        'compton_hi_gamma', 'compton_hi_f_tail']
+
+        for name in compton_list:
+            if name in self.parameter.keys():
+                _set_value(name, self.parameter[name], compton)
+            else:
+                _set_value(name, self.parameter_default[name], compton)
 
         # parameters with boundary
-        compton.set_param_hint(name='coherent_sct_energy', value=incident_energy,
-                               vary=True, min=incident_energy*0.95, max=incident_energy*1.05)
-
-        compton.set_param_hint(name='compton_gamma', value=2.0, vary=True, min=0.1, max=10.5)
-        compton.set_param_hint(name='compton_f_tail', value=0.50, vary=False, min=0.1, max=1.5)
-        compton.set_param_hint(name='compton_f_step', value=0.0000, vary=False, min=0, max=0.001)
-        compton.set_param_hint(name='compton_hi_gamma', value=2.2, vary=True, min=1, max=2.5)
-        compton.set_param_hint(name='compton_hi_f_tail', value=0.005, vary=False)#min=0, max=0.05)
-        compton.set_param_hint(name='compton_fwhm_corr', value=1.5, vary=False)# min=2.0, max=4.5)
-        compton.set_param_hint(name='compton_amplitude', value=80000)
-        compton.set_param_hint(name='compton_angle', value=90, vary=False)
-        compton.set_param_hint(name='matrix', value=True, vary=False)
+        #compton.set_param_hint(name='compton_hi_gamma', value=0.00, vary=False)
 
         return compton
 
@@ -311,12 +337,19 @@ class ModelSpectrum(object):
         """
         elastic = ElasticModel(prefix='e_')
 
-        # fwhm_offset is not a sensitive parameter, used as a fixed value
+        item = 'coherent_sct_amplitude'
+        if item in self.parameter.keys():
+            _set_value(item, self.parameter[item], elastic)
+        else:
+            _set_value(item, self.parameter_default[item], elastic)
+
+        #elastic.set_param_hint(name=, value=50000)
+
+        # set constrains for the following global parameters
         elastic.set_param_hint(name='fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
         elastic.set_param_hint(name='fwhm_fanoprime', value=0.0, vary=True, expr='fwhm_fanoprime')
         elastic.set_param_hint(name='coherent_sct_energy', value=self.incident_energy,
                                expr='coherent_sct_energy')
-        elastic.set_param_hint(name='coherent_sct_amplitude', value=50000)
 
         return elastic
 
