@@ -278,11 +278,11 @@ class ModelSpectrum(object):
         self.element_list = element_list
         return
 
-
     def setComptonModel(self):
         """
         need to read input file to setup parameters
         """
+        incident_energy = self.incident_energy
         compton = ComptonModel()
         # parameters not sensitive
         compton.set_param_hint(name='compton_hi_gamma', value=0.25, vary=False)#min=0.0, max=4.0)
@@ -290,10 +290,12 @@ class ModelSpectrum(object):
         compton.set_param_hint(name='fwhm_fanoprime', value=0.0, vary=True, min=0.0, max=0.001)
 
         # parameters with boundary
-        compton.set_param_hint(name='coherent_sct_energy', value=11.78, vary=True, min=11.77, max=11.79)
-        compton.set_param_hint(name='compton_gamma', value=0.02, vary=True, min=0.1, max=10.5)
-        compton.set_param_hint(name='compton_f_tail', value=1.0, vary=True, min=0.5, max=1.5)
-        compton.set_param_hint(name='compton_f_step', value=0.0, vary=False, min=0, max=2.0)
+        compton.set_param_hint(name='coherent_sct_energy', value=incident_energy,
+                               vary=True, min=incident_energy*0.95, max=incident_energy*1.05)
+
+        compton.set_param_hint(name='compton_gamma', value=2.0, vary=True, min=0.1, max=10.5)
+        compton.set_param_hint(name='compton_f_tail', value=0.50, vary=False, min=0.1, max=1.5)
+        compton.set_param_hint(name='compton_f_step', value=0.0000, vary=False, min=0, max=0.001)
         compton.set_param_hint(name='compton_hi_gamma', value=2.2, vary=True, min=1, max=2.5)
         compton.set_param_hint(name='compton_hi_f_tail', value=0.005, vary=False)#min=0, max=0.05)
         compton.set_param_hint(name='compton_fwhm_corr', value=1.5, vary=False)# min=2.0, max=4.5)
@@ -302,7 +304,6 @@ class ModelSpectrum(object):
         compton.set_param_hint(name='matrix', value=True, vary=False)
 
         return compton
-
 
     def setElasticModel(self):
         """
@@ -313,11 +314,11 @@ class ModelSpectrum(object):
         # fwhm_offset is not a sensitive parameter, used as a fixed value
         elastic.set_param_hint(name='fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
         elastic.set_param_hint(name='fwhm_fanoprime', value=0.0, vary=True, expr='fwhm_fanoprime')
-        elastic.set_param_hint(name='coherent_sct_energy', value=11.78, expr='coherent_sct_energy')# min=11.77, max=11.79)
+        elastic.set_param_hint(name='coherent_sct_energy', value=self.incident_energy,
+                               expr='coherent_sct_energy')
         elastic.set_param_hint(name='coherent_sct_amplitude', value=50000)
 
         return elastic
-
 
     def model_spectrum(self):
 
@@ -356,8 +357,6 @@ class ModelSpectrum(object):
                     gauss_mod = GaussModel_xrf(prefix=str(ename)+'_'+str(line_name)+'_')
                     gauss_mod.set_param_hint('fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
                     gauss_mod.set_param_hint('fwhm_fanoprime', value=0.1, vary=True, expr='fwhm_fanoprime')
-                    #gauss_mod.set_param_hint('ratio_val',
-                    #                         value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1'])
 
                     if line_name == 'ka1':
                         gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
@@ -427,7 +426,6 @@ class ModelSpectrum(object):
                     #    gauss_mod.set_param_hint('area', value=100, vary=True,
                     #                             expr=gauss_mod.prefix+'ratio_val * '+str(ename)+'_la1_'+'area')
 
-                    #gauss_mod.set_param_hint('area', value=100, vary=True, min=0.0)
                     gauss_mod.set_param_hint('center', value=val, vary=False)
                     gauss_mod.set_param_hint('sigma', value=1, vary=False)
                     gauss_mod.set_param_hint('ratio',
