@@ -45,9 +45,6 @@ import numpy as np
 from scipy.optimize import minimize
 
 
-_rss_cache = {}
-
-
 def image_reduction(im, roi=None, bad_pixels=None):
     """ 
     Sum the image data along one dimension
@@ -112,39 +109,7 @@ def ifft1D(data):
 
 
 
-def _cache(data, _rss_cache):
-    """ 
-    Internal function used by fit()
-    Cache calculation results
-    
-    Parameters
-    ----------
-    data : 1-D numpy array
-        The length of data will be checked in a dictionary
-
-    _rss_cache : dict
-        dict[int] = int
-        
-    Returns
-    ----------
-    beta : complex integer
-        beta is only dependent on the data length
-    
-    """
-        
-    length = len(data)
-    
-    try:
-        beta = _rss_cache[length]
-    except:
-        beta = 1j * (np.arange(length) - np.floor(length / 2.0))
-        _rss_cache[length] = beta
-            
-    return beta
-
-
-
-def _rss(v, xdata, ydata, beta):
+def _rss(v, xdata, ydata):
     """ 
     Internal function used by fit()
     Cost function to be minimized in nonlinear fitting
@@ -163,9 +128,6 @@ def _rss(v, xdata, ydata, beta):
     ydata : 1-D complex numpy array
         auxiliary data in nonlinear fitting
         returning result of ifft1D()
-    
-    beta : complex integer
-        returning value of _cache()
         
     Returns
     --------
@@ -173,6 +135,9 @@ def _rss(v, xdata, ydata, beta):
         residue value
     
     """
+    
+    length = len(xdata)
+    beta = 1j * (np.arange(length) - np.floor(length / 2.0))
     
     fitted_curve = xdata * v[0] * np.exp(v[1] * beta)
     residue = np.sum(np.abs(ydata - fitted_curve) ** 2)
@@ -220,13 +185,10 @@ def fit(ref_f, f, start_point=[1, 0], solver='Nelder-Mead', tol=1e-8,
     _rss() : function
         objective function to be minimized in the fitting algorithm
     
-    _cache() : function
-        use dictionary to cache some calculation results
-    
     """
         
-    res = minimize(_rss, start_point, args=(ref_f, f, _cache(ref_f, _rss_cache)),
-                    method=solver, tol=tol, options=dict(maxiter=max_iters))
+    res = minimize(_rss, start_point, args=(ref_f, f), method=solver, tol=tol, 
+                   options=dict(maxiter=max_iters))
                     
     vx = res.x
     a = vx[0]
