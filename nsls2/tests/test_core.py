@@ -40,8 +40,11 @@ import six
 import numpy as np
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
+import sys
 
 from nose.tools import assert_equal, assert_true, raises
+
+from nose import tools
 
 import nsls2.core as core
 
@@ -404,3 +407,76 @@ def test_multi_tau_lags():
 
     assert_array_equal(16, tot_channels)
     assert_array_equal(delay_steps, lag_steps)
+
+
+@raises(NotImplementedError)
+def test_wedge_integration():
+    core.wedge_integration(src_data=None, center=None, theta_start=None,
+                           delta_theta=None, r_inner=None, delta_r=None)
+
+
+def test_subtract_reference_images():
+    num_images = 10
+    img_dims = 200
+    ones = np.ones((img_dims, img_dims))
+    img_lst = [ones * _ for _ in range(num_images)]
+    img_arr = np.asarray(img_lst)
+    is_dark_lst = [True]
+    is_dark = False
+    was_dark = True
+    while len(is_dark_lst) < num_images:
+        if was_dark:
+            is_dark = False
+        else:
+            is_dark = np.random.rand() > 0.5
+        was_dark = is_dark
+        is_dark_lst.append(is_dark)
+
+    is_dark_arr = np.asarray(is_dark_lst)
+    # make sure that a list of 2d images can be passed in
+    core.subtract_reference_images(img_arr=img_lst, is_reference_arr=is_dark_arr)
+    # make sure that the reference arr can actually be a list
+    core.subtract_reference_images(img_arr=img_arr, is_reference_arr=is_dark_lst)
+    # make sure that both input arrays can actually be lists
+    core.subtract_reference_images(img_arr=img_arr, is_reference_arr=is_dark_lst)
+
+    # test that the number of returned images is equal to the expected number
+    # of returned images
+    num_expected_images = is_dark_lst.count(False)
+    # subtract an additional value if the last image is a reference image
+    # num_expected_images -= is_dark_lst[len(is_dark_lst)-1]
+    subtracted = core.subtract_reference_images(img_lst, is_dark_lst)
+    try:
+        assert_equal(num_expected_images, len(subtracted))
+    except AssertionError as ae:
+        print('is_dark_lst: {0}'.format(is_dark_lst))
+        print('num_expected_images: {0}'.format(num_expected_images))
+        print('len(subtracted): {0}'.format(len(subtracted)))
+        six.reraise(AssertionError, ae, sys.exc_info()[2])
+    # test that the image subtraction values are behaving as expected
+    img_sum_lst = [img_dims * img_dims * val for val in range(num_images)]
+    total_val = sum(img_sum_lst)
+    expected_return_val = 0
+    dark_val = 0
+    for idx, (is_dark, img_val) in enumerate(zip(is_dark_lst, img_sum_lst)):
+        if is_dark:
+            dark_val = img_val
+        else:
+            expected_return_val = expected_return_val - dark_val + img_val
+    # test that the image subtraction was actually processed correctly
+    return_sum = sum(subtracted)
+    try:
+        while True:
+            return_sum = sum(return_sum)
+    except TypeError:
+        # thrown when return_sum is a single number
+        pass
+
+    try:
+        assert_equal(expected_return_val, return_sum)
+    except AssertionError as ae:
+        print('is_dark_lst: {0}'.format(is_dark_lst))
+        print('expected_return_val: {0}'.format(expected_return_val))
+        print('return_sum: {0}'.format(return_sum))
+        six.reraise(AssertionError, ae, sys.exc_info()[2])
+        

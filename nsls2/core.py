@@ -440,7 +440,7 @@ keys_core = {
 }
 
 
-def img_subtraction_pre(img_arr, is_reference):
+def subtract_reference_images(img_arr, is_reference_arr):
     """
     Function to subtract a series of measured images from
     background/dark current/reference images.  The nearest reference
@@ -472,29 +472,26 @@ def img_subtraction_pre(img_arr, is_reference):
 
     """
     # an array of 1, 0, 1,.. should work too
-    if not is_reference[0]:
+    if not is_reference_arr[0]:
         # use ValueError because the user passed in invalid data
         raise ValueError("The first image is not a reference image")
+    # cast to arrays
+    img_arr = np.asarray(img_arr)
+    is_reference_arr = np.asarray(is_reference_arr)
     # grab the first image
     ref_imge = img_arr[0]
     # just sum the bool array to get count
-    ref_count = np.sum(is_reference)
+    ref_count = np.sum(is_reference_arr)
     # make an array of zeros of the correct type
-    corrected_image = np.zeros(
-        (len(img_arr) - ref_count,) + img_arr.shape[1:],
-        dtype=img_arr.dtype)
-    # local loop counter
-    count = 0
+    corrected_image = []
     # zip together (lazy like this is really izip), images and flags
-    for img, ref in zip(img_arr[1:], is_reference[1:]):
+    for img, ref in zip(img_arr[1:], is_reference_arr[1:]):
         # if this is a ref image, save it and move on
         if ref:
             ref_imge = img
             continue
         # else, do the subtraction
-        corrected_image[count] = img - ref_imge
-        # and increment the counter
-        count += 1
+        corrected_image.append(img - ref_imge)
 
     # return the output
     return corrected_image
@@ -758,7 +755,7 @@ def wedge_integration(src_data, center, theta_start,
     float
         The integrated intensity under the wedge
     """
-    pass
+    raise NotImplementedError()
 
 
 def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
