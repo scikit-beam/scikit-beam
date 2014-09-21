@@ -42,7 +42,7 @@ from __future__ import (absolute_import, division,
 import six
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_not_equal
 
 from nsls2.constants import (Element, emission_line_search,
                              calibration_standards, HKL)
@@ -79,6 +79,79 @@ def test_element_finder():
     found_name = sorted(list(six.iterkeys(out)))
     assert_equal(true_name, found_name)
     return
+
+
+def test_XrayLibWrap():
+    from nsls2.constants import XrayLibWrap, XrayLibWrap_Energy
+    for Z in range(1, 101):
+        for infotype in XrayLibWrap.info_type:
+            xlw = XrayLibWrap(Z, infotype)
+            assert_not_equal(xlw.all, None)
+            for key in xlw:
+                assert_not_equal(xlw[key], None)
+        for infotype in XrayLibWrap_Energy.info_type:
+            incident_energy = 10
+            xlwe = XrayLibWrap_Energy(element=Z,
+                                      info_type=infotype,
+                                      incident_energy=incident_energy)
+            incident_energy *= 2
+            xlwe.incident_energy = incident_energy
+            assert_equal(xlwe.incident_energy, incident_energy)
+
+def smoke_test_element_creation():
+    from nsls2.constants import elm_data_list
+
+    for elem_info in elm_data_list:
+        Z = elem_info['Z']
+        mass = elem_info['mass']
+        rho = elem_info['rho']
+        sym = elem_info['sym']
+        inits = [Z, sym, sym.upper(), sym.lower(), sym.swapcase()]
+        prev_element=None
+        for init in inits:
+            element = Element(init)
+            # obtain the next four attributes to make sure the XrayLibWrap is
+            # working
+            element.bind_energy
+            element.fluor_yield
+            element.jump_factor
+            element.emission_line.all
+            assert_equal(element.Z, Z)
+            assert_equal(element.mass, mass)
+            desc = six.text_type(element)
+            assert_equal(desc, "Element name " + six.text_type(sym) +
+                         " with atomic Z " + six.text_type(Z))
+            if not np.isnan(rho):
+                # shield the assertion from any elements whose density is
+                # unknown
+                assert_equal(element.density, rho)
+            assert_equal(element.name, sym)
+            if prev_element is not None:
+                assert_equal(prev_element.__lt__(element), True)
+                assert_equal(prev_element < element, True)
+                # assert_equal(prev_element <= element, True)
+                assert_equal(prev_element.__eq__(element), False)
+                assert_equal(element.__eq__(prev_element), False)
+                assert_equal(prev_element == element, False)
+                # assert_equal(prev_element >= element, False)
+                # assert_equal(prev_element > element, False)
+                # assert_equal(element < prev_element, True)
+                # assert_equal(element <= prev_element, True)
+                # assert_equal(element == prev_element, False)
+                # assert_equal(element >= prev_element, False)
+                # assert_equal(element > prev_element, False)
+                # element_2 = Element(element.Z)
+                # assert_equal(element < element_2, False)
+                # assert_equal(element <= element_2, True)
+                # assert_equal(element == element_2, True)
+                # assert_equal(element >= element_2, True)
+                # assert_equal(element_2 > element, False)
+                # assert_equal(element_2 < element, False)
+                # assert_equal(element_2 <= element, True)
+                # assert_equal(element_2 == element, True)
+                # assert_equal(element_2 >= element, True)
+                # assert_equal(element_2 > element, False)
+        prev_element = element
 
 
 def smoke_test_powder_standard():

@@ -44,7 +44,7 @@ import six
 from collections import Mapping, namedtuple
 import functools
 from itertools import repeat
-from nsls2.core import q_to_d, d_to_q, twotheta_to_q, q_to_twotheta
+from nsls2.core import q_to_d, d_to_q, twotheta_to_q, q_to_twotheta, verbosedict
 
 import xraylib
 xraylib.XRayInit()
@@ -62,7 +62,7 @@ line_list = [xraylib.KA1_LINE, xraylib.KA2_LINE, xraylib.KB1_LINE,
              xraylib.LL_LINE, xraylib.LE_LINE, xraylib.MA1_LINE,
              xraylib.MA2_LINE, xraylib.MB_LINE, xraylib.MG_LINE]
 
-line_dict = dict((k.lower(), v) for k, v in zip(line_name, line_list))
+line_dict = verbosedict((k.lower(), v) for k, v in zip(line_name, line_list))
 
 
 bindingE = ['K', 'L1', 'L2', 'L3', 'M1', 'M2', 'M3', 'M4', 'M5', 'N1',
@@ -78,15 +78,15 @@ shell_list = [xraylib.K_SHELL, xraylib.L1_SHELL, xraylib.L2_SHELL,
               xraylib.O3_SHELL, xraylib.O4_SHELL, xraylib.O5_SHELL,
               xraylib.P1_SHELL, xraylib.P2_SHELL, xraylib.P3_SHELL]
 
-shell_dict = dict((k.lower(), v) for k, v in zip(bindingE, shell_list))
+shell_dict = verbosedict((k.lower(), v) for k, v in zip(bindingE, shell_list))
 
 
-XRAYLIB_MAP = {'lines': (line_dict, xraylib.LineEnergy),
-               'cs': (line_dict, xraylib.CS_FluorLine),
-               'binding_e': (shell_dict, xraylib.EdgeEnergy),
-               'jump': (shell_dict, xraylib.JumpFactor),
-               'yield': (shell_dict, xraylib.FluorYield),
-               }
+XRAYLIB_MAP = verbosedict({'lines': (line_dict, xraylib.LineEnergy),
+                           'cs': (line_dict, xraylib.CS_FluorLine),
+                           'binding_e': (shell_dict, xraylib.EdgeEnergy),
+                           'jump': (shell_dict, xraylib.JumpFactor),
+                           'yield': (shell_dict, xraylib.FluorYield),
+                           })
 
 elm_data_list = [{'Z': 1, 'mass': 1.01, 'rho': 9e-05, 'sym': 'H'},
                  {'Z': 2, 'mass': 4.0, 'rho': 0.00017, 'sym': 'He'},
@@ -462,8 +462,6 @@ class XrayLibWrap(Mapping):
 
     This class exposes various functions in xraylib
 
-
-
     This is an interface to wrap xraylib to perform calculation related
     to xray fluorescence.
 
@@ -478,10 +476,12 @@ class XrayLibWrap(Mapping):
         option to choose which physics quantity to calculate as follows:
 
         :lines: emission lines
-        :bind_e: binding energy
+        :binding_e: binding energy
         :jump: absorption jump factor
         :yield: fluorescence yield
 
+    Attributes
+    ----------
 
 
     Examples
@@ -520,9 +520,12 @@ class XrayLibWrap(Mapping):
      (u'mb', 0.0),
      (u'mg', 0.0)]
     """
+    # valid options for the info_type input parameter for the init method
+    info_type = ['lines', 'binding_e', 'jump', 'yield']
+
     def __init__(self, element, info_type):
         self._element = element
-        self.info_type = info_type
+        self._info_type = info_type
         self._map, self._func = XRAYLIB_MAP[info_type]
         self._keys = sorted(list(six.iterkeys(self._map)))
 
@@ -589,6 +592,8 @@ class XrayLibWrap_Energy(XrayLibWrap):
     >>> x['Ka1'] # cross section for Ka1, unit in cm2/g
     34.44424057006836
     """
+    info_type = ['cs']
+
     def __init__(self, element, info_type, incident_energy):
         super(XrayLibWrap_Energy, self).__init__(element, info_type)
         self._incident_energy = incident_energy
