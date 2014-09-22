@@ -203,7 +203,7 @@ def q_values(detector_size, pixel_size, dist_sample,
     q_inds : ndarray
         indices of the q values for the required rings
 
-    no_pixels : ndarray
+    num_pixels : ndarray
         number of pixels in certain q ring
         1*[num_qs]
 
@@ -233,7 +233,6 @@ def q_values(detector_size, pixel_size, dist_sample,
     q_values = np.ravel(q_values)
     q_inds = np.digitize(np.ravel(q_values), np.array(q_ring_val))
 
-    no_pixels = np.bincount(q_inds)
+    num_pixels = np.bincount(q_inds)
 
-    return q_values, q_inds, no_pixels
-
+    return q_values, q_inds, num_pixels
