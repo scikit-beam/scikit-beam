@@ -299,8 +299,12 @@ class ModelSpectrum(object):
         file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                  config_file)
 
-        json_data = open(file_path, 'r')
-        self.parameter = json.load(json_data)
+        if not os.path.exists(file_path):
+            logger.critical('No configuration file can be found.')
+        else:
+            with open(file_path, 'r') as json_data:
+                self.parameter = json.load(json_data)
+                logger.info('Read data from configuration file {0}.'.format(file_path))
 
         self.element_list = self.parameter['element_list'].split()
         self.incident_energy = self.parameter['coherent_sct_energy']['value']
@@ -315,18 +319,19 @@ class ModelSpectrum(object):
         """
         compton = ComptonModel()
 
-        compton_list = ['coherent_sct_energy','compton_amplitude',
+        compton_list = ['coherent_sct_energy', 'compton_amplitude',
                         'compton_angle', 'fwhm_offset', 'fwhm_fanoprime',
                         'compton_gamma', 'compton_f_tail',
                         'compton_f_step', 'compton_fwhm_corr',
                         'compton_hi_gamma', 'compton_hi_f_tail']
 
+        logger.debug('Set up paramters for compton model')
         for name in compton_list:
             if name in self.parameter.keys():
                 _set_value(name, self.parameter[name], compton)
             else:
                 _set_value(name, self.parameter_default[name], compton)
-
+        logger.debug('Finish setting up paramters for compton model')
         return compton
 
     def setElasticModel(self):
@@ -341,11 +346,13 @@ class ModelSpectrum(object):
         else:
             _set_value(item, self.parameter_default[item], elastic)
 
+        logger.debug('Set up paramters for elastic model')
         # set constrains for the following global parameters
         elastic.set_param_hint(name='fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
         elastic.set_param_hint(name='fwhm_fanoprime', value=0.0, vary=True, expr='fwhm_fanoprime')
         elastic.set_param_hint(name='coherent_sct_energy', value=self.incident_energy,
                                expr='coherent_sct_energy')
+        logger.debug('Finish setting up paramters for elastic model')
 
         return elastic
 
@@ -358,8 +365,10 @@ class ModelSpectrum(object):
         mod = self.setComptonModel() + self.setElasticModel()
         #mod = self.setElasticModel()
 
+        element_adjust = []
         if parameter.has_key('element'):
-            element_adjust = [item['name'] for item in parameter['element']]
+            element_adjust = parameter['element'].keys()
+            logger.info('Those elements need to be adjusted {0}'.format(element_adjust))
         else:
             logger.info('No adjustment needs to be considered '
                         'on the position and width of element peak.')
@@ -372,15 +381,7 @@ class ModelSpectrum(object):
                                 'at this energy {1}'.format(ename, incident_energy))
                     continue
 
-                # K lines
-                # It is much faster to construct only one model
-                # to construct four gauss models with constrains
-                # relating each other.
-                #gauss_mod = GaussModel_Klines(prefix=str(ename)+'_k_line_')
-
-                #gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
-                #gauss_mod.set_param_hint('fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
-                #gauss_mod.set_param_hint('fwhm_fanoprime', value=0.1, vary=True, expr='fwhm_fanoprime')
+                logger.debug('Started building element peak for {0}'.format(ename))
 
                 for num, item in enumerate(e.emission_line.all[:4]):
                     #val = e.emission_line['ka1']
@@ -396,31 +397,35 @@ class ModelSpectrum(object):
 
                     if line_name == 'ka1':
                         gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
+
                     else:
                         gauss_mod.set_param_hint('area', value=100, vary=True, min=0,
                                                  expr=str(ename)+'_ka1_'+'area')
-                    print (self.parameter['element'])
                     gauss_mod.set_param_hint('center', value=val, vary=False)
                     gauss_mod.set_param_hint('sigma', value=1, vary=False)
-
                     ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
                     gauss_mod.set_param_hint('ratio',
                                              value=ratio_v, vary=False)
 
-                    #gauss_mod.set_param_hint('center'+str(num+1), value=val, vary=False)
-                    #gauss_mod.set_param_hint('sigma'+str(num+1), value=1, vary=False)
-                    #print ("value is", e.cs(incident_energy)['ka1'])
-                    #ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
-                    #print ("ratio is", ratio_v)
-                    #if ratio_v == 0 or ratio_v == 1:
-                    #    gauss_mod.set_param_hint('ratio'+str(num+1),
-                    #                             value=ratio_v, vary=False)
-                    #else:
-                    #    gauss_mod.set_param_hint('ratio'+str(num+1),
-                    #                             value=ratio_v, vary=False)
-                                                 #min=ratio_v*0.8, max=ratio_v*1.2)
+                    if ename in element_adjust:
+                        if parameter['element'][ename].has_key(line_name.lower()+'_position'):
+                            pos_val = parameter['element'][ename][line_name.lower()+'_position']
+                            if pos_val != 0:
+                                gauss_mod.set_param_hint('center', value=val, vary=True,
+                                                         min=val*(1-pos_val), max=val*(1+pos_val))
+                                logger.warning('change element {0} {1} postion '
+                                               'within range {2}'.format(ename, line_name, [-pos_val, pos_val]))
+
+                        if parameter['element'][ename].has_key(line_name.lower()+'_width'):
+                            width_val = parameter['element'][ename][line_name.lower()+'_width']
+                            if width_val != 0:
+                                gauss_mod.set_param_hint('sigma', value=1, vary=True,
+                                                         min=1-width_val, max=1+width_val)
+                                logger.warning('change element {0} {1} peak width '
+                                               'within range {2}'.format(ename, line_name, [-width_val, width_val]))
 
                     mod = mod + gauss_mod
+                logger.debug('Finished building element peak for {0}'.format(ename))
 
             elif ename in l_line:
                 ename = ename[:-2]
@@ -449,8 +454,6 @@ class ModelSpectrum(object):
 
                     gauss_mod.set_param_hint('fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
                     gauss_mod.set_param_hint('fwhm_fanoprime', value=0.1, vary=True, expr='fwhm_fanoprime')
-                    #gauss_mod.set_param_hint('ratio_val',
-                    #                         value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1'])
 
                     if line_name == 'la1':
                         gauss_mod.set_param_hint('area', value=100, vary=True)
@@ -459,27 +462,11 @@ class ModelSpectrum(object):
                         gauss_mod.set_param_hint('area', value=100, vary=True,
                                                  expr=str(ename)+'_la1_'+'area')
 
-                    #    gauss_mod.set_param_hint('area', value=100, vary=True,
-                    #                             expr=gauss_mod.prefix+'ratio_val * '+str(ename)+'_la1_'+'area')
-
                     gauss_mod.set_param_hint('center', value=val, vary=False)
                     gauss_mod.set_param_hint('sigma', value=1, vary=False)
                     gauss_mod.set_param_hint('ratio',
                                              value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1'],
                                              vary=False)
-
-                    #gauss_mod.set_param_hint('center'+str(num+1), value=val, vary=False)
-                    #gauss_mod.set_param_hint('sigma'+str(num+1), value=1, vary=False)
-                    #print ("value is", e.cs(incident_energy)['ka1'])
-                    #ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1']
-                    #print ("ratio is", ratio_v)
-                    #if ratio_v == 0 or ratio_v == 1:
-                    #    gauss_mod.set_param_hint('ratio'+str(num+1),
-                    #                             value=ratio_v, vary=False)
-                    #else:
-                    #    gauss_mod.set_param_hint('ratio'+str(num+1),
-                    #                             value=ratio_v, vary=False)
-                                                 #min=ratio_v*0.8, max=ratio_v*1.2)
 
                     mod = mod + gauss_mod
 
