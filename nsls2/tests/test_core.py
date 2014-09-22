@@ -36,15 +36,14 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import six
-
 import numpy as np
+import logging
+logger = logging.getLogger(__name__)
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
 import sys
 
 from nose.tools import assert_equal, assert_true, raises
-
-from nose import tools
 
 import nsls2.core as core
 
@@ -479,4 +478,66 @@ def test_subtract_reference_images():
         print('expected_return_val: {0}'.format(expected_return_val))
         print('return_sum: {0}'.format(return_sum))
         six.reraise(AssertionError, ae, sys.exc_info()[2])
-        
+
+
+def test_img_to_relative_xyi(random_seed=None):
+    from nsls2.core import img_to_relative_xyi
+    # make the RNG deterministic
+    if random_seed is not None:
+        np.random.seed(42)
+    # set the maximum image dims
+    maxx = 2000
+    maxy = 2000
+    # create a randomly sized image
+    nx = int(np.random.rand() * maxx)
+    ny = int(np.random.rand() * maxy)
+    # create a randomly located center
+    cx = np.random.rand() * nx
+    cy = np.random.rand() * ny
+    # generate the image
+    img = np.ones((nx, ny))
+    # generate options for the x center to test edge conditions
+    cx_lst = [0, cx, nx]
+    # generate options for the y center to test edge conditions
+    cy_lst = [0, cy, ny]
+    for cx, cy in zip(cx_lst, cy_lst):
+        # call the function
+        x, y, i = img_to_relative_xyi(img=img, cx=cx, cy=cy)
+        logger.debug('y {0}'.format(y))
+        logger.debug('sum(y) {0}'.format(sum(y)))
+        expected_total_y = sum(np.arange(ny, dtype=np.int64) - cy) * nx
+        logger.debug('expected_total_y {0}'.format(expected_total_y))
+        logger.debug('x {0}'.format(x))
+        logger.debug('sum(x) {0}'.format(sum(x)))
+        expected_total_x = sum(np.arange(nx, dtype=np.int64) - cx) * ny
+        logger.debug('expected_total_x {0}'.format(expected_total_x))
+        expected_total_intensity = nx * ny
+        try:
+            assert_almost_equal(sum(x), expected_total_x, decimal=0)
+            assert_almost_equal(sum(y), expected_total_y, decimal=0)
+            assert_equal(sum(i), expected_total_intensity)
+        except AssertionError as ae:
+            logger.error('img dims: ({0}, {1})'.format(nx, ny))
+            logger.error('img center: ({0}, {1})'.format(cx, cy))
+            logger.error('sum(returned_x): {0}'.format(sum(x)))
+            logger.error('expected_x: {0}'.format(expected_total_x))
+            logger.error('sum(returned_y): {0}'.format(sum(y)))
+            logger.error('expected_y: {0}'.format(expected_total_y))
+            logger.error('sum(returned_i): {0}'.format(sum(i)))
+            logger.error('expected_x: {0}'.format(expected_total_intensity))
+            six.reraise(AssertionError, ae, sys.exc_info()[2])
+
+
+if __name__ == "__main__":
+    level = logging.ERROR
+    ch = logging.StreamHandler()
+    ch.setLevel(level)
+    logger.addHandler(ch)
+    logger.setLevel(level)
+
+    num_calls = 0
+    while True:
+        test_img_to_relative_xyi()
+        num_calls += 1
+        if num_calls % 10 == 0:
+            print('{0} calls successful'.format(num_calls))

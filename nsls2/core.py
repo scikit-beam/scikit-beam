@@ -497,8 +497,7 @@ def subtract_reference_images(img_arr, is_reference_arr):
     return corrected_image
 
 
-def detector2D_to_1D(img, calibrated_center, pixel_size=None,
-                     **kwargs):
+def img_to_relative_xyi(img, cx, cy, size_x=None, size_y=None):
     """
     Convert the 2D image to a list of x y I coordinates where
     x == x_img - detector_center[0] and
@@ -507,38 +506,48 @@ def detector2D_to_1D(img, calibrated_center, pixel_size=None,
     Parameters
     ----------
     img: `ndarray`
-        2D detector image
-
-    calibrated_center : tuple
-        see keys_core["calibrated_center"]["description"]
-
-    pixel_size : tuple, optional
-        conversion between pixels and real units
-
-        see keys_core["pixel_size"]["description"]
+        2D image
+    cx : float
+        Image center in the x direction
+    cy : float
+        Image center in the y direction
+    sizex : float, optional
+        Pixel size in x
+    sizey : float, optional
+        Pixel size in y
     **kwargs: dict
         Bucket for extra parameters in an unpacked dictionary
 
     Returns
     -------
-    X : `ndarray`
+    x : `ndarray`
         x-coordinate of pixel. shape (N, )
-    Y : `ndarray`
+    y : `ndarray`
         y-coordinate of pixel. shape (N, )
-    I : `ndarray`
+    i : `ndarray`
         intensity of pixel. shape (N, )
     """
-    if pixel_size is None:
-        pixel_size = (1, 1)
+    if size_x is not None and size_y is not None:
+        if size_x <= 0:
+            raise ValueError('Input parameter sizex must be greater than 0. '
+                             'Your value was ' + size_x)
+        if size_y <= 0:
+            raise ValueError('Input parameter sizex must be greater than 0. '
+                             'Your value was ' + size_y)
+    elif size_x is None and size_y is None:
+        size_x = 1
+        size_y = 1
+    else:
+        raise ValueError('sizex and sizey must both be None or greater than '
+                         'zero. You passed in values for sizex of {0} and '
+                         'sizey of {1]'.format(size_x, size_y))
 
     # Caswell's incredible terse rewrite
-    X, Y = np.meshgrid(pixel_size[0] * (np.arange(img.shape[0]) -
-                                        calibrated_center[0]),
-                       pixel_size[1] * (np.arange(img.shape[1]) -
-                                        calibrated_center[1]))
+    x, y = np.meshgrid(size_x * (np.arange(img.shape[0]) - cx),
+                       size_y * (np.arange(img.shape[1]) - cy))
 
-    # return the x, y and z coordinates (as a tuple? or is this a list?)
-    return X.ravel(), Y.ravel(), img.ravel()
+    # return x, y and intensity as 1D arrays
+    return x.ravel(), y.ravel(), img.ravel()
 
 
 def bin_1D(x, y, nx=None, min_x=None, max_x=None):
