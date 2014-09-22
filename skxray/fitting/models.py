@@ -291,6 +291,7 @@ def _set_value(para_name, input_dict, model_name):
         raise ValueError("could not set values for {0}".format(para_name))
     return
 
+
 class ModelSpectrum(object):
 
     def __init__(self, config_file='xrf_paramter.json'):
@@ -310,7 +311,7 @@ class ModelSpectrum(object):
 
     def setComptonModel(self):
         """
-        need to read input file to setup parameters
+        setup parameters related to Compton model
         """
         compton = ComptonModel()
 
@@ -326,14 +327,11 @@ class ModelSpectrum(object):
             else:
                 _set_value(name, self.parameter_default[name], compton)
 
-        # parameters with boundary
-        #compton.set_param_hint(name='compton_hi_gamma', value=0.00, vary=False)
-
         return compton
 
     def setElasticModel(self):
         """
-        need to read input file to setup parameters
+        setup parameters related to Elastic model
         """
         elastic = ElasticModel(prefix='e_')
 
@@ -342,8 +340,6 @@ class ModelSpectrum(object):
             _set_value(item, self.parameter[item], elastic)
         else:
             _set_value(item, self.parameter_default[item], elastic)
-
-        #elastic.set_param_hint(name=, value=50000)
 
         # set constrains for the following global parameters
         elastic.set_param_hint(name='fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
@@ -357,9 +353,16 @@ class ModelSpectrum(object):
 
         incident_energy = self.incident_energy
         element_list = self.element_list
+        parameter = self.parameter
 
         mod = self.setComptonModel() + self.setElasticModel()
         #mod = self.setElasticModel()
+
+        if parameter.has_key('element'):
+            element_adjust = [item['name'] for item in parameter['element']]
+        else:
+            logger.info('No adjustment needs to be considered '
+                        'on the position and width of element peak.')
 
         for ename in element_list:
             if ename in k_line:
@@ -396,7 +399,7 @@ class ModelSpectrum(object):
                     else:
                         gauss_mod.set_param_hint('area', value=100, vary=True, min=0,
                                                  expr=str(ename)+'_ka1_'+'area')
-
+                    print (self.parameter['element'])
                     gauss_mod.set_param_hint('center', value=val, vary=False)
                     gauss_mod.set_param_hint('sigma', value=1, vary=False)
 
