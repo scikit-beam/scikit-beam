@@ -65,13 +65,10 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, pixel_list, q_ind
 
     img_stack : ndarray
 
-    pixel_list :
-
-    q_inds :
-
-
     Returns
     -------
+    g2 : ndarray
+        matrix of one-time correlation
 
     Note
     ----
@@ -159,19 +156,13 @@ def process(lev, buf_num, num_terms, imin, num_channels):
         IAF[ptr, ] +=
 
 
-def insert_img(n, img_stack, num_channels, pixel_list, q_inds, cur):
-    img = img_stack[n]
-    process(1,cur)
-    processing = 1
-    lev = 2
-    pass
-
-
-
-def iq_values(detector_size, pixel_size, calibrated_center,
-              wavelength, dist_sample, num_qs, first_q,
-              step_q, delta_q):
+def q_values(detector_size, pixel_size, dist_sample,
+             calibrated_center,wavelength, num_qs,
+             first_q, step_q, delta_q):
     """
+    This will compute the Q space values for all pixels in a
+    shape specified by detector_size. The
+
     Parameters
     ----------
     detector_size : tuple
@@ -190,8 +181,35 @@ def iq_values(detector_size, pixel_size, calibrated_center,
         detector (mm)
 
     wavelength : float
-    wavelength of incident radiation (Angstroms)
+        wavelength of incident radiation (Angstroms)
+
+    num_qs : int
+        number pf q rings
+
+    first_q : float
+        q value of the first q ring
+
+    step_q : float
+        step value for next q ring
+
+    delta_q : float
+        thickness of the q ring
+
+    Returns
+    -------
+    q_values : ndarray
+        hkl values
+
+    q_inds : ndarray
+        indices of the q values for the required rings
+
+    no_pixels : ndarray
+        number of pixels in certain q ring
+        1*[num_qs]
+
+
     """
+    # setting angles of the detector
     # delta=40, theta=15, chi = 90, phi = 30, mu = 10.0, gamma=5.0
     setting_angles = np.array([0., 0., 0., 0., 0., 0.])
 
@@ -213,8 +231,9 @@ def iq_values(detector_size, pixel_size, calibrated_center,
 
     q_ring_val = np.array(q_ring_val)
     q_values = np.ravel(q_values)
-    q_inds = np.digitize(q_values, q_ring_val)
-    
+    q_inds = np.digitize(np.ravel(q_values), np.array(q_ring_val))
 
-def pixelist():
+    no_pixels = np.bincount(q_inds)
+
+    return q_values, q_inds, no_pixels
 
