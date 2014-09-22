@@ -101,13 +101,14 @@ def test_XrayLibWrap():
 def smoke_test_element_creation():
     from nsls2.constants import elm_data_list
 
+    prev_element = None
     for elem_info in elm_data_list:
         Z = elem_info['Z']
         mass = elem_info['mass']
         rho = elem_info['rho']
         sym = elem_info['sym']
         inits = [Z, sym, sym.upper(), sym.lower(), sym.swapcase()]
-        prev_element=None
+        element = None
         for init in inits:
             element = Element(init)
             # obtain the next four attributes to make sure the XrayLibWrap is
@@ -126,6 +127,7 @@ def smoke_test_element_creation():
                 # unknown
                 assert_equal(element.density, rho)
             assert_equal(element.name, sym)
+            # assert_equal(element.__eq__(element), True)
             if prev_element is not None:
                 assert_equal(prev_element.__lt__(element), True)
                 assert_equal(prev_element < element, True)

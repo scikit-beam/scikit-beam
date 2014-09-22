@@ -479,6 +479,50 @@ def test_subtract_reference_images():
         print('return_sum: {0}'.format(return_sum))
         six.reraise(AssertionError, ae, sys.exc_info()[2])
 
+@raises(ValueError)
+def test_img_to_relative_xyi_fails1():
+    # invalid values of x and y
+    core.img_to_relative_xyi(img=np.ones((100, 100)),
+                             cx=50, cy=50, size_x=-1, size_y=-1)
+@raises(ValueError)
+def test_img_to_relative_xyi_fails2():
+    # valid value of x, no value for y
+    core.img_to_relative_xyi(img=np.ones((100, 100)),
+                             cx=50, cy=50, size_x=1)
+@raises(ValueError)
+def test_img_to_relative_xyi_fails3():
+    # valid value of y, no value for x
+    core.img_to_relative_xyi(img=np.ones((100, 100)),
+                             cx=50, cy=50, size_y=1)
+@raises(ValueError)
+def test_img_to_relative_xyi_fails4():
+    # valid value of y, invalid value for x
+    core.img_to_relative_xyi(img=np.ones((100, 100)),
+                             cx=50, cy=50, size_y=1, size_x=-1)
+@raises(ValueError)
+def test_img_to_relative_xyi_fails5():
+    # valid value of x, invalid value for y
+    core.img_to_relative_xyi(img=np.ones((100, 100)),
+                             cx=50, cy=50, size_y=-1, size_x=1)
+@raises(ValueError)
+def test_img_to_relative_xyi_fails6():
+    # invalid value of x, no value for y
+    core.img_to_relative_xyi(img=np.ones((100, 100)),
+                             cx=50, cy=50, size_x=-1)
+@raises(ValueError)
+def test_img_to_relative_xyi_fails7():
+    # invalid value of y, no value for x
+    core.img_to_relative_xyi(img=np.ones((100, 100)),
+                             cx=50, cy=50, size_y=-1)
+
+    nx = 100
+    ny = 100
+    img = np.ones((nx, ny))
+    cx = 50
+    cy = 50
+    pix_x = [-1, 1, 0]
+    pix_y = [-1, 0, 1]
+
 
 def test_img_to_relative_xyi(random_seed=None):
     from nsls2.core import img_to_relative_xyi

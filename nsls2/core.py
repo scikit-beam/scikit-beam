@@ -440,7 +440,7 @@ keys_core = {
 }
 
 
-def subtract_reference_images(img_arr, is_reference_arr):
+def subtract_reference_images(imgs, is_reference):
     """
     Function to subtract a series of measured images from
     background/dark current/reference images.  The nearest reference
@@ -449,7 +449,7 @@ def subtract_reference_images(img_arr, is_reference_arr):
 
     Parameters
     ----------
-    img_arr : numpy.ndarray
+    imgs : numpy.ndarray
         Array of 2-D images
 
     is_reference : 1-D boolean array
@@ -472,26 +472,23 @@ def subtract_reference_images(img_arr, is_reference_arr):
 
     """
     # an array of 1, 0, 1,.. should work too
-    if not is_reference_arr[0]:
+    if not is_reference[0]:
         # use ValueError because the user passed in invalid data
         raise ValueError("The first image is not a reference image")
-    # cast to arrays
-    img_arr = np.asarray(img_arr)
-    is_reference_arr = np.asarray(is_reference_arr)
     # grab the first image
-    ref_imge = img_arr[0]
+    ref_imge = imgs[0]
     # just sum the bool array to get count
-    ref_count = np.sum(is_reference_arr)
+    ref_count = np.sum(is_reference)
     # make an array of zeros of the correct type
     corrected_image = []
     # zip together (lazy like this is really izip), images and flags
-    for img, ref in zip(img_arr[1:], is_reference_arr[1:]):
+    for imgs, ref in zip(imgs[1:], is_reference[1:]):
         # if this is a ref image, save it and move on
         if ref:
-            ref_imge = img
+            ref_imge = imgs
             continue
         # else, do the subtraction
-        corrected_image.append(img - ref_imge)
+        corrected_image.append(imgs - ref_imge)
 
     # return the output
     return corrected_image
@@ -530,10 +527,10 @@ def img_to_relative_xyi(img, cx, cy, size_x=None, size_y=None):
     if size_x is not None and size_y is not None:
         if size_x <= 0:
             raise ValueError('Input parameter sizex must be greater than 0. '
-                             'Your value was ' + size_x)
+                             'Your value was ' + six.text_type(size_x))
         if size_y <= 0:
             raise ValueError('Input parameter sizex must be greater than 0. '
-                             'Your value was ' + size_y)
+                             'Your value was ' + six.text_type(size_y))
     elif size_x is None and size_y is None:
         size_x = 1
         size_y = 1

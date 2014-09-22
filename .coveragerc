@@ -4,6 +4,8 @@ source=nsls2
 omit =
     */python?.?/*
     */site-packages/nose/*
-
+    
 exclude_lines =
     def set_default
+    /nsls2/tests
+    /nsls2/testing
