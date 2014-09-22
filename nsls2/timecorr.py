@@ -47,9 +47,8 @@ import six
 import numpy as np
 import logging
 logger = logging.getLogger(__name__)
-from core import bin_1D
+import nsls2.recip as recip
 import time
-
 
 def one_time_corr(num_levels, num_channels, num_qs, img_stack, pixel_list, q_inds):
     """
@@ -62,17 +61,26 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, pixel_list, q_ind
         number of channels or number of buffers in auto-correlators
         normalizations (must be even)
 
+    num_qs : int
+
+    img_stack : ndarray
+
+    pixel_list :
+
+    q_inds :
+
+
     Returns
     -------
 
     Note
     ----
-    To evaluate an estimator for the correlation function separately for
-    each pixel of the exposed detector area needed before analysis.
-    Therefore, standard normalization scheme which leads to noise level
-    lower than those obtained used for that purpose. (Reference 1)
-
-    Multi-tau
+    Standard multiple-tau algorithm is used for one-time intensity
+    auto-correlation functions. To evaluate an estimator for the
+    correlation function separately for each pixel of the exposed
+    detector area needed before analysis. Therefore, standard
+    normalization scheme which leads to noise level lower than
+    those obtained used for that purpose. (Reference 1)
 
     References: text [1]_
 
@@ -80,9 +88,6 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, pixel_list, q_ind
        based photon correlation in the egime of short data batches:
        Data reduction for dynamic x-ray scattering," Rev. Sci. Instr.,
        vol 71, pp 3274-3289, 2000.
-
-    ..[2]
-
 
     """
 
@@ -99,16 +104,6 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, pixel_list, q_ind
         lag = np.array([4, 5, 6, 7])*(2**(i-1))
         lag_times.append(lag)
 
-    #
-    # G=array(0.0,(nolev+1)*nobuf/2,noqs)
-	# IAP=array(0.0,(nolev+1)*nobuf/2,noqs)
-	# IAF=array(0.0,(nolev+1)*nobuf/2,noqs)
-	# num=array(0,nolev)
-    #buf=array(0.0,nolev,nobuf,nopixels) // matrix of buffers
-	#cts=array(0,nolev)
-	#cur=array(nobuf,nolev)
-
-
     # matrix of cross-correlations
     G = np.zeros((tot_channels, num_qs), dtype = np.float64)
     # matrix of past intensity normalizations
@@ -120,7 +115,6 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, pixel_list, q_ind
 
     # matrix of one-time correlation
     g2 = np.zeros((tot_channels, num_qs), dtype = np.float64)
-    #
 
     # matrix of buffers
     buf = np.zeros((num_levels, num_channels, no_pixels), dtype = np.float64)
@@ -128,11 +122,10 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, pixel_list, q_ind
     cts = np.zeros(num_levels)
 
     num_imgs = img_stack.shape[0]
-    #cur = 0
     for i in range(0, num_imgs):
         cur[1] = 1 + cur[1]%num_channels
         insert_img(i, img_stack, num_channels, pixel_list, q_inds, cur)
-        img = img_stack[n]
+        img = img_stack[i]
         imin = (1 + num_channels/2)
         process(1, cur[1], num_terms, imin, num_channels)
         processing =1
@@ -157,7 +150,7 @@ def process(lev, buf_num, num_terms, imin, num_channels):
 
     for i in range(imin, min(num_terms(lev), num_channels): # loop over delays
         ptr = (lev - 1)* num_channels/2 + i
-        delay_num = 1 + (buf_num - (i -1)-1 + buf_num)%buf_num
+        delay_num = 1 + (buf_num - (i -1)-1 + num_channels)%buf_num
 
         IP = buf[lev, delay_num, ]
         IF = buf[lev, buf_num, ]
@@ -175,5 +168,53 @@ def insert_img(n, img_stack, num_channels, pixel_list, q_inds, cur):
 
 
 
+def iq_values(detector_size, pixel_size, calibrated_center,
+              wavelength, dist_sample, num_qs, first_q,
+              step_q, delta_q):
+    """
+    Parameters
+    ----------
+    detector_size : tuple
+        2 element tuple defining no. of pixels(size) in the
+        detector X and Y direction(mm)
+
+    pixel_size : tuple
+       2 element tuple defining the (x y) dimensions of the
+       pixel (mm)
+
+    dist_sample : float
+       distance from the sample to the detector (mm)
+
+    calibrated_center : tuple
+        2 element tuple defining the (x y) center of the
+        detector (mm)
+
+    wavelength : float
+    wavelength of incident radiation (Angstroms)
+    """
+    # delta=40, theta=15, chi = 90, phi = 30, mu = 10.0, gamma=5.0
+    setting_angles = np.array([0., 0., 0., 0., 0., 0.])
+
+    # UB matrix (orientation matrix) 3x3 matrix
+    ub_mat = np.identity(3)
+
+    hkl_val = recip.process_to_q(setting_angles, detector_size,
+                                 pixel_size, calibrated_center,
+                                 dist_sample, wavelength, ub_mat)
+    q_val = np.sqrt(hkl_val[:,0]**2 + hkl_val[:,1]**2 + hkl_val[:,2]**2)
+    q_values = q_val.reshape(detector_size[0], detector_size[1])
+
+    q_ring_val = []
+    q = first_q
+    q_ring_val.append(first_q)
+    for i in range(1,num_qs):
+        q += (step_q + delta_q)
+        q_ring_val.append(q)
+
+    q_ring_val = np.array(q_ring_val)
+    q_values = np.ravel(q_values)
+    q_inds = np.digitize(q_values, q_ring_val)
+    
+
 def pixelist():
-    pass
+
