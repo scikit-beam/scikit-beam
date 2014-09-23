@@ -14,11 +14,9 @@ before_install:
 install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
   - conda update conda --yes
-  - conda install conda-build jinja2 --yes
-  - conda build ./conda-recipe
-  - conda create -n testenv --yes pip nose python=$TRAVIS_PYTHON_VERSION
+  - conda create -n testenv --yes pip nose python=$TRAVIS_PYTHON_VERSION lmfit xraylib numpy scipy scikit-image netcdf4 six
   - source activate testenv
-  - conda install nsls2 --use-local --yes
+  - python setup.py install
   - pip install coveralls
 
 script:
