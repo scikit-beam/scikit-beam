@@ -12,12 +12,13 @@ before_install:
   - wget https://gist.githubusercontent.com/tacaswell/128bb482f845feb024eb/raw/5cf21dc03a354fc87140d4a75e17cb5c076a0517/.condarc -O /home/travis/.condarc
 
 install:
+  - export GIT_FULL_HASH=`git rev-parse HEAD`
   - conda update conda --yes
   - conda install conda-build jinja2 --yes
   - conda build ./conda-recipe
-  - conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
+  - conda create -n testenv --yes pip nose python=$TRAVIS_PYTHON_VERSION
   - source activate testenv
-  - conda install nose nsls2 --use-local --yes
+  - conda install nsls2 --use-local --yes
   - pip install coveralls
 
 script:
