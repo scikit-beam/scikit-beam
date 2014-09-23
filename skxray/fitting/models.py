@@ -80,7 +80,6 @@ from skxray.fitting.base.parameter_data import get_para
 from lmfit import Model
 
 
-
 k_line = ['Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr',
           'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se',
           'Br', 'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd',
@@ -94,7 +93,8 @@ m_line = ['Au_M', 'Pb_M', 'U_M', 'noise', 'Pt_M', 'Ti_M', 'Gd_M', 'dummy', 'dumm
 
 
 def set_default(model_name, func_name):
-    """set values and bounds to Model parameters in lmfit
+    """
+    Set values and bounds to Model parameters in lmfit.
 
     Parameters
     ----------
@@ -135,6 +135,17 @@ def set_default(model_name, func_name):
 
 
 def _gen_class_docs(func):
+    """
+    Parameters
+    ----------
+    func : function
+        function of peak profile
+
+    Returns
+    -------
+    str :
+        documentation of the function
+    """
     return ("Wrap the {} function for fitting within lmfit framework\n".format(func.__name__) +
             func.__doc__)
 
@@ -170,6 +181,7 @@ class ComptonModel(Model):
     __doc__ = _gen_class_docs(compton)
 
     def __init__(self, *args, **kwargs):
+
         super(ComptonModel, self).__init__(compton, *args, **kwargs)
         set_default(self, compton)
         self.set_param_hint('epsilon', value=2.96, vary=False)
@@ -184,95 +196,61 @@ class Lorentzian2Model(Model):
 
 
 
-def gausspeak_k_lines(x, area,
-                      fwhm_offset,
-                      fwhm_fanoprime,
-                      center1, sigma1, ratio1,
-                      center2, sigma2, ratio2,
-                      center3, sigma3, ratio3,
-                      center4, sigma4, ratio4):
+def gauss_peak_xrf(x, area, center, sigma,
+                   ratio, fwhm_offset, fwhm_fanoprime,
+                   epsilon=2.96):
+    """
+    Parameters
+    ----------
+    x : array
+        independent variable
+    area : float
+        area of gaussian function
+    center : float
+        center position
+    sigma : float
+        standard deviation
+    ratio : float
+        value used to adjust peak height
+    fwhm_offset : float
+        global fitting parameter for peak width
+    fwhm_fanoprime : float
+        global fitting parameter for peak width
 
+    Returns
+    -------
+    array:
+        gaussian peak profile
+    """
     def get_sigma(center):
-        return np.sqrt((fwhm_offset/2.3548)**2 + center*2.96*fwhm_fanoprime)
-
-    g1 = gauss_peak(x, area, center1, sigma1*get_sigma(center1)) * ratio1
-    g2 = gauss_peak(x, area, center2, sigma2*get_sigma(center2)) * ratio2
-    g3 = gauss_peak(x, area, center3, sigma3*get_sigma(center3)) * ratio3
-    g4 = gauss_peak(x, area, center4, sigma4*get_sigma(center4)) * ratio4
-
-    return g1 + g2 + g3 + g4
-
-
-class GaussModel_Klines(Model):
-
-    #__doc__ = _gen_class_docs(gausspeak_k_lines)
-
-    def __init__(self, *args, **kwargs):
-        super(GaussModel_Klines, self).__init__(gausspeak_k_lines, *args, **kwargs)
-
-
-def gausspeak_l_lines(x, area,
-                      fwhm_offset,
-                      fwhm_fanoprime,
-                      center1, sigma1, ratio1,
-                      center2, sigma2, ratio2,
-                      center3, sigma3, ratio3,
-                      center4, sigma4, ratio4,
-                      center5, sigma5, ratio5,
-                      center6, sigma6, ratio6,
-                      center7, sigma7, ratio7,
-                      center8, sigma8, ratio8,
-                      center9, sigma9, ratio9,
-                      center10, sigma10, ratio10,
-                      center11, sigma11, ratio11,
-                      center12, sigma12, ratio12,
-                      center13, sigma13, ratio13):
-
-    def get_sigma(center):
-        return np.sqrt((fwhm_offset/2.3548)**2 + center*2.96*fwhm_fanoprime)
-
-    g1 = gauss_peak(x, area, center1, sigma1*get_sigma(center1)) * ratio1
-    g2 = gauss_peak(x, area, center2, sigma2*get_sigma(center2)) * ratio2
-    g3 = gauss_peak(x, area, center3, sigma3*get_sigma(center3)) * ratio3
-    g4 = gauss_peak(x, area, center4, sigma4*get_sigma(center4)) * ratio4
-    g5 = gauss_peak(x, area, center5, sigma5*get_sigma(center5)) * ratio5
-    g6 = gauss_peak(x, area, center6, sigma6*get_sigma(center6)) * ratio6
-    g7 = gauss_peak(x, area, center7, sigma7*get_sigma(center7)) * ratio7
-    g8 = gauss_peak(x, area, center8, sigma8*get_sigma(center8)) * ratio8
-    g9 = gauss_peak(x, area, center9, sigma9*get_sigma(center9)) * ratio9
-    g10 = gauss_peak(x, area, center10, sigma10*get_sigma(center10)) * ratio10
-    g11 = gauss_peak(x, area, center11, sigma11*get_sigma(center11)) * ratio11
-    g12 = gauss_peak(x, area, center12, sigma12*get_sigma(center12)) * ratio12
-    g13 = gauss_peak(x, area, center13, sigma13*get_sigma(center13)) * ratio13
-
-    return g1 + g2 + g3 + g4 + g5 + g6 + g7 + g8 + g9 + g10 + g11 + g12 + g13
-
-
-class GaussModel_Llines(Model):
-
-    #__doc__ = _gen_class_docs(gausspeak_k_lines)
-
-    def __init__(self, *args, **kwargs):
-        super(GaussModel_Llines, self).__init__(gausspeak_l_lines, *args, **kwargs)
-
-
-def gauss_peak_xrf(x, area, center, sigma, ratio, fwhm_offset, fwhm_fanoprime):
-
-    def get_sigma(center):
-        return np.sqrt((fwhm_offset/2.3548)**2 + center*2.96*fwhm_fanoprime)
+        temp_val = 2 * np.sqrt(2 * np.log(2))
+        return np.sqrt((fwhm_offset/temp_val)**2 + center*epsilon*fwhm_fanoprime)
 
     return gauss_peak(x, area, center, sigma*get_sigma(center)) * ratio
 
 
 class GaussModel_xrf(Model):
 
-    #__doc__ = _gen_class_docs(gausspeak_k_lines)
+    __doc__ = _gen_class_docs(gauss_peak_xrf)
 
     def __init__(self, *args, **kwargs):
         super(GaussModel_xrf, self).__init__(gauss_peak_xrf, *args, **kwargs)
+        self.set_param_hint('epsilon', value=2.96, vary=False)
 
 
 def _set_value(para_name, input_dict, model_name):
+    """
+    Set parameter information to a given model
+
+    Parameter
+    ---------
+    para_name : str
+        parameter used for fitting
+    input_dict : dict
+        all the initial values and constraints for given parameters
+    model_name : object
+        model object used in lmfit
+    """
 
     if input_dict['bound_type'] == 'none':
         model_name.set_param_hint(name=para_name, value=input_dict['value'], vary=True)
@@ -295,7 +273,12 @@ def _set_value(para_name, input_dict, model_name):
 class ModelSpectrum(object):
 
     def __init__(self, config_file='xrf_paramter.json'):
-
+        """
+        Parameter
+        ---------
+        config_file : str
+            file save all the fitting parameters
+        """
         file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                  config_file)
 
@@ -310,7 +293,6 @@ class ModelSpectrum(object):
         self.incident_energy = self.parameter['coherent_sct_energy']['value']
 
         self.parameter_default = get_para()
-
         return
 
     def setComptonModel(self):
@@ -337,6 +319,8 @@ class ModelSpectrum(object):
     def setElasticModel(self):
         """
         setup parameters related to Elastic model
+
+
         """
         elastic = ElasticModel(prefix='e_')
 
@@ -347,7 +331,8 @@ class ModelSpectrum(object):
             _set_value(item, self.parameter_default[item], elastic)
 
         logger.debug('Set up paramters for elastic model')
-        # set constrains for the following global parameters
+
+        # set constraints for the following global parameters
         elastic.set_param_hint(name='fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
         elastic.set_param_hint(name='fwhm_fanoprime', value=0.0, vary=True, expr='fwhm_fanoprime')
         elastic.set_param_hint(name='coherent_sct_energy', value=self.incident_energy,
@@ -357,13 +342,14 @@ class ModelSpectrum(object):
         return elastic
 
     def model_spectrum(self):
-
+        """
+        Add all element peaks to the model.
+        """
         incident_energy = self.incident_energy
         element_list = self.element_list
         parameter = self.parameter
 
         mod = self.setComptonModel() + self.setElasticModel()
-        #mod = self.setElasticModel()
 
         element_adjust = []
         if parameter.has_key('element'):
@@ -384,7 +370,6 @@ class ModelSpectrum(object):
                 logger.debug('Started building element peak for {0}'.format(ename))
 
                 for num, item in enumerate(e.emission_line.all[:4]):
-                    #val = e.emission_line['ka1']
                     line_name = item[0]
                     val = item[1]
 
@@ -473,13 +458,13 @@ class ModelSpectrum(object):
         self.mod = mod
         return
 
-
     def model_fit(self, x, y, w=None):
+        """
+        Parameter
+        ---------
+
+
+        """
         self.model_spectrum()
         result = self.mod.fit(y, x=x, weights=w)
         return result
-
-    def get_bg(self, y):
-        """snip method to get background"""
-        return snip_method(y, 0, 0.01, 0)
-
