@@ -40,11 +40,11 @@ def swap_axes(src_data, select_axes):
     output : ndarray
         Return operation result to specified variable
     """
-    if select_axes == "XY":
+    if select_axes == 'XY':
         output = np.swapaxes(src_data, 2, 1)
-    elif select_axes == "YZ":
+    elif select_axes == 'YZ':
         output = np.swapaxes(src_data, 1, 0)
-    elif select_axes == "XZ":
+    elif select_axes == 'XZ':
         output = np.swapaxes(src_data, 2, 0)
     return output
 
@@ -59,27 +59,24 @@ def flip_axis(src_data, flip_direction):
     src_data : ndarray
         Identify source data for modification
     
-    select_axes : string
+    flip_direction : string
         Identify the axis along which to flip.
         Options:
-            "Flip_X" -- Flip X and Y axes
-            "Flip_Y" -- Swap Y and Z axes
-            "Flip_Z" -- Swap X and Z axes
+            "Flip X" -- Flip X and Y axes
+            "Flip Y" -- Swap Y and Z axes
+            "Flip Z" -- Swap X and Z axes
       
     Returns
     -------
     output : ndarray
         Return operation result to specified variable
     """
-    if flip_direction == "Flip_X":
+    if flip_direction == "Flip X":
         output = src_data[..., ..., ::-1]
-        axis_ID = "X-axis"
-    elif flip_direction == "Flip_Y":
+    elif flip_direction == "Flip Y":
         output = src_data[..., ::-1, ...]
-        axis_ID = "Y-axis"
-    elif flip_direction == "Flip_Z":
+    elif flip_direction == "Flip Z":
         output = src_data[::-1, ..., ...]
-        axis_ID = "Z-axis"
     return output
 
 
@@ -144,27 +141,35 @@ def rotate_volume(src_data, rotation_axis, rotate_degrees, fill_value):
     rotate_degrees : int
         Enter the number of degrees for the rotation
     
-    fill_value : same dtype as source array
+    fill_value : float
         identify a value to be assigned to all new voxels created to fill empty 
         space generated when the array is expanded as a result of the rotation.
     
     Returns
     -------
-    output : numpy array
+    output : ndarray
         Return operation result to specified variable
 """
-    if rotation_axis == "Z-axis":
+    if rotation_axis == 'Z-axis':
         select_axis = (2,1)
-    elif rotation_axis == "Y-axis":
+    elif rotation_axis == 'Y-axis':
         select_axis = (2,0)
-    elif rotation_axis == "X-axis":
+    elif rotation_axis == 'X-axis':
         select_axis = (1,0)
-    output = ndimage.rotate(src_data, rotate_degrees, select_axis, reshape=True,
+    output = ndimage.rotate(src_data,
+                            rotate_degrees,
+                            select_axis,
+                            reshape=True,
                             cval=fill_value)
-    print 'Volume Rotation Operation successful.'
     return output
 
 
 def resize_volume():
     pass
 
+
+# Assign selectable options as an attribute to the appropriate
+# functions so that the autowrapping knows what the valid options are
+swap_axes.select_axes = ['XY', 'YZ', 'XZ']
+flip_axis.flip_direction = ['Flip Z', 'Flip Y', 'Flip X']
+rotate_volume.rotate_axis = ['Z-axis', 'Y-axis', 'X-axis']

@@ -130,10 +130,10 @@ binary_dilation.__doc__ = (
     
     struct_size : tuple
         Define the 2D or 3D structure size for the operation. Note that for a 
-    cube-type structuring element containing all ones, only the directly 
-    connected voxels will be altered. Diagonally connected voxels will remain 
-    unchanged unless they become directly connected during an iterative erosion 
-    or dilation operation.
+        cube-type structuring element containing all ones, only the directly
+        connected voxels will be altered. Diagonally connected voxels will
+        remain unchanged unless they become directly connected during an
+        iterative erosion or dilation operation.
     
     Returns
     -------
@@ -217,7 +217,7 @@ grey_opening.__doc__ = (
     src_data : ndarray
         Identify source data for modification
     
-    struct_size : int tuple
+    struct_size : tuple
         Define the 2D or 3D structure size for the erosion and dilation 
         operations. Note that for a cube-type structuring element containing 
         all ones, only the directly connected voxels will be altered. 
