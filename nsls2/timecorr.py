@@ -50,7 +50,7 @@ logger = logging.getLogger(__name__)
 import nsls2.recip as recip
 import time
 
-def one_time_corr(num_levels, num_channels, num_qs, img_stack, pixel_list, q_inds):
+def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds):
     """
     Parameters
     ----------
@@ -62,8 +62,18 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, pixel_list, q_ind
         normalizations (must be even)
 
     num_qs : int
+        number of Q rings
 
     img_stack : ndarray
+        Intensity array of the images
+        dimensions are: [num_img][num_rows][num_cols]
+
+    q_inds : ndarray
+        indices of the Q values for the required rings
+
+    num_pixels : ndarray
+        number of pixels in certain Q ring
+        dimensions are : [num_qs]X1
 
     Returns
     -------
@@ -81,10 +91,10 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, pixel_list, q_ind
 
     References: text [1]_
 
-    .. [1] D. Lumma,L.B. Lurio, S.G.J. Mochrie, and M Sutton, "Area detector
-       based photon correlation in the egime of short data batches:
-       Data reduction for dynamic x-ray scattering," Rev. Sci. Instr.,
-       vol 71, pp 3274-3289, 2000.
+    .. [1] D. Lumma, L.B. Lurio, S.G.J. Mochrie, and M Sutton,
+       "Area detector based photon correlation in the egime of
+       short data batches: Data reduction for dynamic x-ray
+       scattering," Rev. Sci. Instr., vol 71, pp 3274-3289, 2000.
 
     """
 
@@ -92,8 +102,8 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, pixel_list, q_ind
         raise ValueError(" Number of channels(buffers) must be even ")
 
     # total number of channels ( or total number of delay times)
-    tot_channels = (num_levels +1 )*num_channels
-    # num_channels + 4*(num_levels-1)
+    tot_channels = (num_levels +1 )*num_channels/2
+
     lag_times =[] # delay ( or lag times)
     lag = np.arange(num_channels)
     lag_times.append(lag)
@@ -118,10 +128,9 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, pixel_list, q_ind
     cur = np.zeros((num_channels, num_levels), dtype = np.float64)
     cts = np.zeros(num_levels)
 
-    num_imgs = img_stack.shape[0]
+    num_imgs = img_stack.shape[0] # number of images(frames)
     for i in range(0, num_imgs):
         cur[1] = 1 + cur[1]%num_channels
-        insert_img(i, img_stack, num_channels, pixel_list, q_inds, cur)
         img = img_stack[i]
         imin = (1 + num_channels/2)
         process(1, cur[1], num_terms, imin, num_channels)
@@ -198,15 +207,13 @@ def q_values(detector_size, pixel_size, dist_sample,
     Returns
     -------
     q_values : ndarray
-        hkl values
+        hkl values ( Q values)
 
     q_inds : ndarray
-        indices of the q values for the required rings
+        indices of the Q values for the required rings
 
     num_pixels : ndarray
-        number of pixels in certain q ring
-        1*[num_qs]
-
+        number of pixels in certain Q ring 1X[num_qs]
 
     """
     # setting angles of the detector
@@ -229,10 +236,10 @@ def q_values(detector_size, pixel_size, dist_sample,
         q += (step_q + delta_q)
         q_ring_val.append(q)
 
-    q_ring_val = np.array(q_ring_val)
-    q_values = np.ravel(q_values)
+    # indices of Q rings
     q_inds = np.digitize(np.ravel(q_values), np.array(q_ring_val))
 
+    # number of pixels in each  Q ring
     num_pixels = np.bincount(q_inds)
 
     return q_values, q_inds, num_pixels
