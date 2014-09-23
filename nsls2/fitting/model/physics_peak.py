@@ -274,3 +274,22 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     counts += value
 
     return counts
+
+
+def lorentzian_peak(x, area, center, sigma):
+    """
+    1-d lorentzian profile
+
+    Parameters
+    ----------
+    x : array
+        independent variable
+    area : float
+        area of lorentian peak
+    center : float
+        center position
+    sigma : float
+        standard deviation
+    """
+
+    return (area/(1 + ((x - center) / sigma)**2)) / (np.pi * sigma)
