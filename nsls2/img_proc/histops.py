@@ -108,7 +108,7 @@ def rescale_intensity_values(src_data,
 
 def hist_make(src_data,
               num_bins,
-              pd_function):
+              pd_function=False):
     """
     This function evaluates the histogram of the source data set
 
@@ -122,7 +122,7 @@ def hist_make(src_data,
     num_bins : int
         Specify the number of bins to include in the histogram as an integer.
         
-    pd_function : bool
+    pd_function : bool, optional
         Identify whether the histogram data should be normalized as a
         probability density histogram or not.
         Options:

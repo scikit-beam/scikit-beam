@@ -22,7 +22,6 @@ necessary in order to fit the autowrap format conventions required for
 incorporation into VisTrails
 """
 
-#import scipy.ndimage.filters as fltr
 
 from scipy.ndimage.filters import gaussian_filter
 from scipy.ndimage.filters import median_filter

@@ -25,7 +25,7 @@ def swap_axes(src_data, select_axes):
     
     Parameters
     ----------
-    src_data : numpy array
+    src_data : ndarray
         Identify source data for modification
     
     select_axes : string
@@ -37,7 +37,7 @@ def swap_axes(src_data, select_axes):
 
     Returns
     -------
-    output : numpy array
+    output : ndarray
         Return operation result to specified variable
     """
     if select_axes == "XY":
@@ -46,8 +46,6 @@ def swap_axes(src_data, select_axes):
         output = np.swapaxes(src_data, 1, 0)
     elif select_axes == "XZ":
         output = np.swapaxes(src_data, 2, 0)
-    print 'Volume Transformation Operation successful:'
-    print "Swapped axes: " + select_axes
     return output
 
 
@@ -58,7 +56,7 @@ def flip_axis(src_data, flip_direction):
     
     Parameters
     ----------
-    src_data : numpy array
+    src_data : ndarray
         Identify source data for modification
     
     select_axes : string
@@ -70,7 +68,7 @@ def flip_axis(src_data, flip_direction):
       
     Returns
     -------
-    output : numpy array
+    output : ndarray
         Return operation result to specified variable
     """
     if flip_direction == "Flip_X":
@@ -82,8 +80,6 @@ def flip_axis(src_data, flip_direction):
     elif flip_direction == "Flip_Z":
         output = src_data[::-1, ..., ...]
         axis_ID = "Z-axis"
-    print 'Volume Transformation Operation successful:'
-    print axis_ID + " flipped successfully."
     return output
 
 
@@ -95,7 +91,7 @@ def crop_volume(src_data, x_MIN, x_MAX, y_MIN, y_MAX, z_MIN, z_MAX):
     
     Parameters
     ----------
-    src_data : numpy array
+    src_data : ndarray
         Identify source data for modification
     
     x_MIN : int
@@ -118,14 +114,14 @@ def crop_volume(src_data, x_MIN, x_MAX, y_MIN, y_MAX, z_MIN, z_MAX):
     
     Returns
     -------
-    output : numpy array
+    output : ndarray
         Return operation result to specified variable
 """
     output = src_data[z_MAX:z_MIN, y_MAX:y_MIN, x_MAX:x_MIN]
     return output
 
 
-def rotate_volume(self, src_data, rotation_axis, rotate_degrees, fill_value):
+def rotate_volume(src_data, rotation_axis, rotate_degrees, fill_value):
     """
     This function allows for volume adjustment and rearrangement by rotating a 
     data set along a given axix by a fixed number of degrees. After executing 
@@ -135,7 +131,7 @@ def rotate_volume(self, src_data, rotation_axis, rotate_degrees, fill_value):
     
     Parameters
     ----------
-    src_data : numpy array
+    src_data : ndarray
         Identify source data for modification
     
     rotation_axis : string
@@ -169,5 +165,6 @@ def rotate_volume(self, src_data, rotation_axis, rotate_degrees, fill_value):
     return output
 
 
-#def resize_volume():
+def resize_volume():
+    pass
 

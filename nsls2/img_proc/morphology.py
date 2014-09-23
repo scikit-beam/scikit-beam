@@ -22,11 +22,18 @@ GCI: 3/5/2014 -- Removed the importation of the display module. Tool revisions
     and calls.
 """
 
-import scipy.ndimage.morphology as morph
+from scipy.ndimage.morphology import binary_opening
+from scipy.ndimage.morphology import binary_closing
+from scipy.ndimage.morphology import binary_erosion
+from scipy.ndimage.morphology import binary_dilation
+from scipy.ndimage.morphology import grey_opening
+from scipy.ndimage.morphology import grey_closing
+from scipy.ndimage.morphology import grey_erosion
+from scipy.ndimage.morphology import grey_dilation
+from scipy.ndimage.morphology import binary_fill_holes
+from scipy.ndimage.morphology import binary_propagation
 
-
-def img_Open_binary(src_vol, 
-                    struct_size):
+binary_opening.__doc__ = (
     """
     This function executes a morphological opening operation on binary data 
     sets. Morphological opening couples erosion (first operation) and dilation 
@@ -35,10 +42,10 @@ def img_Open_binary(src_vol,
     
     Parameters
     ----------
-    src_data : numpy array
+    src_data : ndarray
         Identify source data for modification
 
-    struct_size : int tuple 
+    struct_size : tuple
         Define the 2D or 3D structure size for the erosion and dilation 
         operations. Note that for a cube-type structuring element containing 
         all ones, only the directly connected voxels will be altered. 
@@ -47,15 +54,13 @@ def img_Open_binary(src_vol,
 
     Returns
     -------
-    output : numpy array
+    output : ndarray
         Return operation result to specified variable
     """
-    output = morph.binary_opening(src_vol, structure=struct_size)
-    return output
+)
 
 
-def img_Close_binary(src_vol, 
-                     struct_size):
+binary_closing.__doc__ = (
     """
     This function executes a morphological closing operation on binary data 
     sets. Morphological closing couples dilation (first operation) and erosion 
@@ -64,10 +69,10 @@ def img_Close_binary(src_vol,
     
     Parameters
     ----------
-    src_data : numpy array
+    src_data : ndarray
         Identify source data for modification
     
-    struct_size : int tuple
+    struct_size : tuple
         Define the 2D or 3D structure size for the erosion and dilation 
         operations. Note that for a cube-type structuring element containing 
         all ones, only the directly connected voxels will be altered. 
@@ -76,15 +81,13 @@ def img_Close_binary(src_vol,
     
     Returns
     -------
-    output : numpy array
+    output : ndarray
         Return operation result to specified variable
-"""
-    output = morph.binary_closing(src_vol, structure=struct_size)
-    return output
+    """
+)
 
 
-def img_Erode_binary(src_vol, 
-                     struct_size):
+binary_erosion.__doc__ = (
     """
     This function executes a morphological erosion operation on binary data 
     sets. Morphological erosion removes the outer layer of voxels from 
@@ -94,10 +97,10 @@ def img_Erode_binary(src_vol,
 
     Parameters
     ----------
-    src_data : numpy array
+    src_data : ndarray
         Identify source data for modification
     
-    struct_size: int tuple
+    struct_size: tuple
         Define the 2D or 3D structure size for the operation. Note that for a 
     cube-type structuring element containing all ones, only the directly 
     connected voxels will be altered. Diagonally connected voxels will remain 
@@ -106,15 +109,13 @@ def img_Erode_binary(src_vol,
     
     Parameters
     ----------
-    output : numpy array
+    output : ndarray
         Return operation result to specified variable
-"""
-    output = morph.binary_erosion(src_vol, structure=struct_size)
-    return output
+    """
+)
 
 
-def img_Dilate_binary(src_vol, 
-                      struct_size):
+binary_dilation.__doc__ = (
     """
     This function executes a morphological dilation operation on binary data 
     sets. Morphological dilation expands the outer layer of voxels in 
@@ -124,10 +125,10 @@ def img_Dilate_binary(src_vol,
     
     Parameters
     ----------
-    src_data : numpy array
+    src_data : ndarray
         Identify source data for modification
     
-    struct_size : int tuple
+    struct_size : tuple
         Define the 2D or 3D structure size for the operation. Note that for a 
     cube-type structuring element containing all ones, only the directly 
     connected voxels will be altered. Diagonally connected voxels will remain 
@@ -136,15 +137,13 @@ def img_Dilate_binary(src_vol,
     
     Returns
     -------
-    output : numpy array
+    output : ndarray
         Return operation result to specified variable
-"""
-    output = morph.binary_dilation(src_vol, structure=struct_size)
-    return output
+    """
+)
 
 
-def img_Erode_gray(src_vol, 
-                   struct_size):
+grey_erosion.__doc__ = (
     """
     This function executes a morphological erosion operation on grayscale data 
     sets. Morphological erosion removes the outer layer of voxels from 
@@ -156,10 +155,10 @@ def img_Erode_gray(src_vol,
     
     Parameters
     ----------
-    src_data : numpy array
+    src_data : ndarray
         Identify source data for modification
     
-    struct_size : int tuple
+    struct_size : tuple
         Define the 2D or 3D structure size for the operation. Note that for a 
         cube-type structuring element containing all ones, only the directly 
         connected voxels will be altered. Diagonally connected voxels will 
@@ -168,15 +167,13 @@ def img_Erode_gray(src_vol,
     
     Returns
     -------
-    output : numpy array
+    output : ndarray
         Return operation result to specified variable
     """
-    output = morph.grey_erosion(src_vol, structure=struct_size)
-    return output
+)
 
 
-def img_Dilate_gray(src_vol, 
-                    struct_size):
+grey_dilation.__doc__ = (
     """
     This function executes a morphological dilation operation on grayscale data 
     sets. Morphological dilation expands the outer layer of voxels in 
@@ -188,10 +185,10 @@ def img_Dilate_gray(src_vol,
 
     Parameters
     ----------
-    src_data : numpy array
+    src_data : ndarray
         Identify source data for modification
     
-    struct_size : int tuple
+    struct_size : tuple
         Define the 2D or 3D structure size for the operation. Note that for a 
         cube-type structuring element containing all ones, only the directly 
         connected voxels will be altered. Diagonally connected voxels will 
@@ -200,15 +197,13 @@ def img_Dilate_gray(src_vol,
 
     Returns
     -------
-    output : numpy array
+    output : ndarray
         Return operation result to specified variable
     """
-    output = morph.grey_dilation(src_vol, structure=struct_size)
-    return output
+)
 
 
-def img_Open_gray(src_vol, 
-                  struct_size):
+grey_opening.__doc__ = (
     """
     This function executes a morphological opening operation on grayscale data 
     sets. Morphological opening couples erosion (first operation) and dilation 
@@ -219,7 +214,7 @@ def img_Open_gray(src_vol,
 
     Parameters
     ----------
-    src_data : numpy array
+    src_data : ndarray
         Identify source data for modification
     
     struct_size : int tuple
@@ -231,15 +226,13 @@ def img_Open_gray(src_vol,
     
     Returns
     -------
-    output : numpy array
+    output : ndarray
         Return operation result to specified variable
-"""
-    output = morph.grey_opening(src_vol, structure=struct_size)
-    return output
+    """
+)
 
 
-def img_Close_gray(src_vol, 
-                   struct_size):
+grey_closing.__doc__ = (
     """
     This function executes a morphological closing operation on grayscale data 
     sets. Morphological closing couples dilation (first operation) and erosion 
@@ -250,10 +243,10 @@ def img_Close_gray(src_vol,
     
     Parameters
     ----------
-    src_data : numpy array
+    src_data : ndarray
         Identify source data for modification
     
-    struct_size : int tuple
+    struct_size : tuple
         Define the 2D or 3D structure size for the erosion and dilation 
         operations. Note that for a cube-type structuring element containing 
         all ones, only the directly connected voxels will be altered. 
@@ -262,15 +255,13 @@ def img_Close_gray(src_vol,
     
     Returns
     -------
-    output : numpy array
+    output : ndarray
         Return operation result to specified variable
     """
-    output = morph.grey_closing(src_vol, structure=struct_size)
-    return output
+)
 
 
-def img_holeFill_binary(src_vol, 
-                        struct_size):
+binary_fill_holes.__doc__ = (
     """
     This function executes a morphological opening operation on binary data 
     sets. Morphological opening couples erosion (first operation) and dilation 
@@ -279,10 +270,10 @@ def img_holeFill_binary(src_vol,
     
     Parameters
     ----------
-    src_data : numpy array
+    src_data : ndarray
         Identify source data for modification
     
-    struct_size : int tuple
+    struct_size : tuple
         Define the 2D or 3D structure size for the erosion and dilation 
         operations. Note that for a cube-type structuring element containing 
         all ones, only the directly connected voxels will be altered. 
@@ -291,17 +282,13 @@ def img_holeFill_binary(src_vol,
     
     Returns
     -------
-    output : numpy array
+    output : ndarray
         Return operation result to specified variable
     """
-    output = morph.binary_fill_holes(src_vol, structure=struct_size)
-    return output
+)
 
 
-def propagate_binary(src_vol, 
-                     struct_size, 
-                     mask_region=None, 
-                     point_origin=None):
+binary_propagation.__doc__ = (
     """
     This function allows for dilation of foreground objects within a binary data 
     set upto boundaries defined using the mask_region operator. Morphological 
@@ -312,31 +299,27 @@ def propagate_binary(src_vol,
     
     Parameters
     ----------
-    src_data : numpy array
+    src_data : ndarray
         Identify source data for modification
     
-    struct_size : int tuple
+    struct_size : tuple
         Define the 2D or 3D structure size for the erosion and dilation 
         operations. Note that for a cube-type structuring element containing 
         all ones, only the directly connected voxels will be altered. 
         Diagonally connected voxels will remain unchanged unless they become 
         directly connected during an iterative erosion/dilation.
         
-    mask_region : numpy array
+    mask_region : ndarray
         Binary mask array which defines the regions into which regions can grow 
         during propagation.
     
-    point_origin : int tuple
+    point_origin : tuple
         Defines the location where the operation should begin within the source 
         array.
     
     Returns
     -------
-    output : numpy array
+    output : ndarray
         Return operation result to specified variable
-"""
-    output = morph.binary_propagation(src_vol, 
-                                      structure=struct_size, 
-                                      mask=mask_region, 
-                                      origin=point_origin)
-    return output
+    """
+)
