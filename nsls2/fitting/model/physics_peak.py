@@ -59,7 +59,8 @@ def gauss_peak(x, area, center, sigma):
     x : array
         data in x coordinate
     area : float
-        area of gaussian function
+        area of gaussian function,
+        the total integrated area under the peak equals to area
     center : float
         center position
     sigma : float
@@ -285,7 +286,8 @@ def lorentzian_peak(x, area, center, sigma):
     x : array
         independent variable
     area : float
-        area of lorentian peak
+        area of lorentzian peak,
+        the total integrated area under the peak equals to area
     center : float
         center position
     sigma : float
@@ -293,3 +295,23 @@ def lorentzian_peak(x, area, center, sigma):
     """
 
     return (area/(1 + ((x - center) / sigma)**2)) / (np.pi * sigma)
+
+
+def lorentzian_squared_peak(x, area, center, sigma):
+    """
+    1-d lorentzian squared profile
+
+    Parameters
+    ----------
+    x : array
+        independent variable
+    area : float
+        area of lorentzian peak,
+        the total integrated area under the peak equals to area
+    center : float
+        center position
+    sigma : float
+        standard deviation
+    """
+
+    return (area/(1 + ((x - center) / sigma)**2)**2) / (np.pi * sigma)
