@@ -127,3 +127,86 @@ class GaussModel(Model):
     def __init__(self, *args, **kwargs):
         super(GaussModel, self).__init__(gauss_peak, *args, **kwargs)
 
+
+def gauss_fit(input_data,
+              area, area_vary, area_range,
+              center, center_vary, center_range,
+              sigma, sigma_vary, sigma_range,):
+    """
+    wrapper of gaussian fit for vistrails.
+
+    Parameters
+    ----------
+    input_data : array
+        input data of x and y
+    area : float
+        area of gaussian
+    area_vary : str
+        fixed, free or bounded
+    area_range : list
+        range for bounded fitting
+    center : float
+        center position
+    center_vary : str
+        fixed, free or bounded
+    center_range : list
+        range for bounded fitting
+    sigma : float
+        standard deviation
+    sigma_vary : str
+        fixed, free or bounded
+    sigma_range : list
+        range for bounded fitting
+
+    Returns
+    -------
+    param : dict
+        fitting results
+    x_data : array
+        independent variable x
+    y_data : array
+        experimental data
+    y_fit : array
+        fitted y
+    """
+
+    x_data, y_data = input_data
+
+    g = GaussModel()
+    if area_vary == 'fixed':
+        g.set_param_hint('area', value=area, vary=False)
+    elif area_vary == 'free':
+        g.set_param_hint('area', value=area)
+    elif area_vary == 'bounded':
+        g.set_param_hint('area', value=area, min=area_range[0], max=area_range[1])
+    else:
+        raise ModuleError(self, "unrecognized value {0}".format(area_vary))
+
+    if center_vary == 'fixed':
+        g.set_param_hint('center', value=center, vary=False)
+    elif center_vary == 'free':
+        g.set_param_hint('center', value=center)
+    elif center_vary == 'bounded':
+        g.set_param_hint('center', value=center, min=center_range[0], max=center_range[1])
+    else:
+        raise ModuleError(self, "unrecognized value {0}".format(center_vary))
+
+    if sigma_vary == 'fixed':
+        g.set_param_hint('sigma', value=sigma, vary=False)
+    elif sigma_vary == 'free':
+        g.set_param_hint('sigma', value=sigma)
+    elif sigma_vary == 'bounded':
+        g.set_param_hint('sigma', value=sigma, min=sigma_range[0], max=sigma_range[1])
+    else:
+        raise ModuleError(self, "unrecognized value {0}".format(sigma_vary))
+
+    result = g.fit(y_data, x=x_data)
+    param = result.values
+    y_fit = result.best_fit
+
+    return param, x_data, y_data, y_fit
+
+    #self.set_output("param", result.values)
+    #self.set_output("x", x_data)
+    #self.set_output("y_exp", y_data)
+    #self.set_output("y_fit", result.best_fit)
