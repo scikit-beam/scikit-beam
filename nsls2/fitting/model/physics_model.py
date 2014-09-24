@@ -49,7 +49,8 @@ import numpy as np
 import inspect
 
 from nsls2.fitting.model.physics_peak import (elastic_peak, compton_peak,
-                                              gauss_peak)
+                                              gauss_peak, lorentzian_peak,
+                                              lorentzian_squared_peak)
 from nsls2.fitting.base.parameter_data import get_para
 from lmfit import Model
 
@@ -128,35 +129,79 @@ class GaussModel(Model):
         super(GaussModel, self).__init__(gauss_peak, *args, **kwargs)
 
 
+class LorentzianModel(Model):
+
+    __doc__ = _gen_class_docs(lorentzian_peak)
+
+    def __init__(self, *args, **kwargs):
+        super(LorentzianModel, self).__init__(lorentzian_peak, *args, **kwargs)
+
+
+class Lorentzian2Model(Model):
+
+    __doc__ = _gen_class_docs(lorentzian_peak)
+
+    def __init__(self, *args, **kwargs):
+        super(Lorentzian2Model, self).__init__(lorentzian_squared_peak, *args, **kwargs)
+
+
+def set_range(model_name,
+              parameter_name, parameter_value,
+              parameter_vary, parameter_range):
+    """
+    set up fitting parameters in lmfit model
+
+    Parameters
+    ----------
+    model_name : class object
+        Model class object from lmfit
+    parameter_name : str
+    parameter_value : value
+    parameter_vary : str
+        fixed, free or bounded
+    parameter_range : list
+        [min, max]
+    """
+    if parameter_vary == 'fixed':
+        model_name.set_param_hint(parameter_name, value=parameter_value, vary=False)
+    elif parameter_vary == 'free':
+        model_name.set_param_hint(parameter_name, value=parameter_value)
+    elif parameter_vary == 'bounded':
+        model_name.set_param_hint(parameter_name, value=parameter_value,
+                                  min=parameter_range[0], max=parameter_range[1])
+    else:
+        raise ValueError("unrecognized value {0}".format(parameter_vary))
+
+
 def gauss_fit(input_data,
               area, area_vary, area_range,
               center, center_vary, center_range,
               sigma, sigma_vary, sigma_range,):
     """
-    wrapper of gaussian fit for vistrails.
+    wrapper of gaussian fitting model for vistrails.
 
     Parameters
     ----------
     input_data : array
         input data of x and y
     area : float
-        area of gaussian
+        area under peak profile
     area_vary : str
         fixed, free or bounded
     area_range : list
-        range for bounded fitting
+        bounded range
     center : float
         center position
     center_vary : str
         fixed, free or bounded
     center_range : list
-        range for bounded fitting
+        bounded range
     sigma : float
         standard deviation
     sigma_vary : str
         fixed, free or bounded
     sigma_range : list
-        range for bounded fitting
+        bounded range
 
     Returns
     -------
@@ -173,32 +218,9 @@ def gauss_fit(input_data,
     x_data, y_data = input_data
 
     g = GaussModel()
-    if area_vary == 'fixed':
-        g.set_param_hint('area', value=area, vary=False)
-    elif area_vary == 'free':
-        g.set_param_hint('area', value=area)
-    elif area_vary == 'bounded':
-        g.set_param_hint('area', value=area, min=area_range[0], max=area_range[1])
-    else:
-        raise ModuleError(self, "unrecognized value {0}".format(area_vary))
-
-    if center_vary == 'fixed':
-        g.set_param_hint('center', value=center, vary=False)
-    elif center_vary == 'free':
-        g.set_param_hint('center', value=center)
-    elif center_vary == 'bounded':
-        g.set_param_hint('center', value=center, min=center_range[0], max=center_range[1])
-    else:
-        raise ModuleError(self, "unrecognized value {0}".format(center_vary))
-
-    if sigma_vary == 'fixed':
-        g.set_param_hint('sigma', value=sigma, vary=False)
-    elif sigma_vary == 'free':
-        g.set_param_hint('sigma', value=sigma)
-    elif sigma_vary == 'bounded':
-        g.set_param_hint('sigma', value=sigma, min=sigma_range[0], max=sigma_range[1])
-    else:
-        raise ModuleError(self, "unrecognized value {0}".format(sigma_vary))
+    set_range(g, 'area', area, area_vary, area_range)
+    set_range(g, 'center', center, center_vary, center_range)
+    set_range(g, 'sigma', sigma, sigma_vary, sigma_range)
 
     result = g.fit(y_data, x=x_data)
     param = result.values
@@ -206,7 +228,115 @@ def gauss_fit(input_data,
 
     return param, x_data, y_data, y_fit
 
-    #self.set_output("param", result.values)
-    #self.set_output("x", x_data)
-    #self.set_output("y_exp", y_data)
-    #self.set_output("y_fit", result.best_fit)
+
+def lorentzian_fit(input_data,
+                   area, area_vary, area_range,
+                   center, center_vary, center_range,
+                   sigma, sigma_vary, sigma_range,):
+    """
+    wrapper of lorentzian fitting model for vistrails.
+
+    Parameters
+    ----------
+    input_data : array
+        input data of x and y
+    area : float
+        area under peak profile
+    area_vary : str
+        fixed, free or bounded
+    area_range : list
+        bounded range
+    center : float
+        center position
+    center_vary : str
+        fixed, free or bounded
+    center_range : list
+        bounded range
+    sigma : float
+        standard deviation
+    sigma_vary : str
+        fixed, free or bounded
+    sigma_range : list
+        bounded range
+
+    Returns
+    -------
+    param : dict
+        fitting results
+    x_data : array
+        independent variable x
+    y_data : array
+        experimental data
+    y_fit : array
+        fitted y
+    """
+
+    x_data, y_data = input_data
+
+    g = LorentzianModel()
+    set_range(g, 'area', area, area_vary, area_range)
+    set_range(g, 'center', center, center_vary, center_range)
+    set_range(g, 'sigma', sigma, sigma_vary, sigma_range)
+
+    result = g.fit(y_data, x=x_data)
+    param = result.values
+    y_fit = result.best_fit
+
+    return param, x_data, y_data, y_fit
+
+
+def lorentzian2_fit(input_data,
+                    area, area_vary, area_range,
+                    center, center_vary, center_range,
+                    sigma, sigma_vary, sigma_range):
+    """
+    wrapper of lorentzian squared fitting model for vistrails.
+
+    Parameters
+    ----------
+    input_data : array
+        input data of x and y
+    area : float
+        area under peak profile
+    area_vary : str
+        fixed, free or bounded
+    area_range : list
+        bounded range
+    center : float
+        center position
+    center_vary : str
+        fixed, free or bounded
+    center_range : list
+        bounded range
+    sigma : float
+        standard deviation
+    sigma_vary : str
+        fixed, free or bounded
+    sigma_range : list
+        bounded range
+
+    Returns
+    -------
+    param : dict
+        fitting results
+    x_data : array
+        independent variable x
+    y_data : array
+        experimental data
+    y_fit : array
+        fitted y
+    """
+
+    x_data, y_data = input_data
+
+    g = Lorentzian2Model()
+    set_range(g, 'area', area, area_vary, area_range)
+    set_range(g, 'center', center, center_vary, center_range)
+    set_range(g, 'sigma', sigma, sigma_vary, sigma_range)
+
+    result = g.fit(y_data, x=x_data)
+    param = result.values
+    y_fit = result.best_fit
+
+    return param, x_data, y_data, y_fit
+
