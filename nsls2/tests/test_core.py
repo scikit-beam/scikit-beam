@@ -433,11 +433,11 @@ def test_subtract_reference_images():
 
     is_dark_arr = np.asarray(is_dark_lst)
     # make sure that a list of 2d images can be passed in
-    core.subtract_reference_images(img_arr=img_lst, is_reference_arr=is_dark_arr)
+    core.subtract_reference_images(imgs=img_lst, is_reference=is_dark_arr)
     # make sure that the reference arr can actually be a list
-    core.subtract_reference_images(img_arr=img_arr, is_reference_arr=is_dark_lst)
+    core.subtract_reference_images(imgs=img_arr, is_reference=is_dark_lst)
     # make sure that both input arrays can actually be lists
-    core.subtract_reference_images(img_arr=img_arr, is_reference_arr=is_dark_lst)
+    core.subtract_reference_images(imgs=img_arr, is_reference=is_dark_lst)
 
     # test that the number of returned images is equal to the expected number
     # of returned images

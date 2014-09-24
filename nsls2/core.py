@@ -48,8 +48,7 @@ from six import string_types
 import time
 import sys
 from itertools import tee
-from collections import namedtuple, MutableMapping, defaultdict
-
+from collections import namedtuple, MutableMapping, defaultdict, deque
 import numpy as np
 from itertools import tee
 
@@ -480,7 +479,7 @@ def subtract_reference_images(imgs, is_reference):
     # just sum the bool array to get count
     ref_count = np.sum(is_reference)
     # make an array of zeros of the correct type
-    corrected_image = []
+    corrected_image = deque()
     # zip together (lazy like this is really izip), images and flags
     for imgs, ref in zip(imgs[1:], is_reference[1:]):
         # if this is a ref image, save it and move on
@@ -490,8 +489,8 @@ def subtract_reference_images(imgs, is_reference):
         # else, do the subtraction
         corrected_image.append(imgs - ref_imge)
 
-    # return the output
-    return corrected_image
+    # return the output as a list
+    return list(corrected_image)
 
 
 def img_to_relative_xyi(img, cx, cy, size_x=None, size_y=None):
