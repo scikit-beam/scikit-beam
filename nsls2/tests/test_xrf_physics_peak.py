@@ -44,7 +44,8 @@ import numpy as np
 from numpy.testing import (assert_allclose, assert_array_almost_equal)
 
 from nsls2.fitting.model.physics_peak import (gauss_peak, gauss_step, gauss_tail,
-                                              elastic_peak, compton_peak)
+                                              elastic_peak, compton_peak,
+                                              lorentzian_peak, lorentzian_squared_peak)
 
 from nsls2.fitting.model.physics_model import (ComptonModel, ElasticModel,
                                                GaussModel)
@@ -170,6 +171,45 @@ def test_compton_peak():
                        gamma, hi_f_tail, hi_gamma)
 
     assert_array_almost_equal(y_true, out)
+    return
+
+
+def test_lorentzian_peak():
+
+    y_true = [ 0.03151583,  0.03881828,  0.04897075,  0.06366198,  0.0860297 ,
+               0.12242688,  0.18724111,  0.31830989,  0.63661977,  1.59154943,
+               3.18309886,  1.59154943,  0.63661977,  0.31830989,  0.18724111,
+               0.12242688,  0.0860297 ,  0.06366198,  0.04897075,  0.03881828]
+
+    x = np.arange(-1, 1, 0.1)
+    a = 1
+    cen = 0
+    std = 0.1
+    out = lorentzian_peak(x, a, cen, std)
+
+    assert_array_almost_equal(y_true, out)
+
+    return
+
+
+def test_lorentzian_squared_peak():
+
+    y_true = [3.12037924e-04,   4.73393644e-04,   7.53396180e-04,
+              1.27323954e-03,   2.32512700e-03,   4.70872613e-03,
+              1.10141829e-02,   3.18309886e-02,   1.27323954e-01,
+              7.95774715e-01,   3.18309886e+00,   7.95774715e-01,
+              1.27323954e-01,   3.18309886e-02,   1.10141829e-02,
+              4.70872613e-03,   2.32512700e-03,   1.27323954e-03,
+              7.53396180e-04,   4.73393644e-04]
+
+    x = np.arange(-1, 1, 0.1)
+    a = 1
+    cen = 0
+    std = 0.1
+    out = lorentzian_squared_peak(x, a, cen, std)
+
+    assert_array_almost_equal(y_true, out)
+
     return
 
 
