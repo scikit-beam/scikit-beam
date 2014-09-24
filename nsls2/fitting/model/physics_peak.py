@@ -60,7 +60,7 @@ def gauss_peak(x, area, center, sigma):
         data in x coordinate
     area : float
         area of gaussian function,
-        the total integrated area under the peak equals to area
+        If area is set as 1, the integral is unity.
     center : float
         center position
     sigma : float
@@ -123,6 +123,7 @@ def gauss_tail(x, area, center, sigma, gamma):
         data in x coordinate
     area : float
         area of gauss tail function
+        If area is set as 1, the integral is unity.
     center : float
         center position
     sigma : float
@@ -287,7 +288,7 @@ def lorentzian_peak(x, area, center, sigma):
         independent variable
     area : float
         area of lorentzian peak,
-        the total integrated area under the peak equals to area
+        If area is set as 1, the integral is unity.
     center : float
         center position
     sigma : float
@@ -307,7 +308,7 @@ def lorentzian_squared_peak(x, area, center, sigma):
         independent variable
     area : float
         area of lorentzian peak,
-        the total integrated area under the peak equals to area
+        If area is set as 1, the integral is unity.
     center : float
         center position
     sigma : float
