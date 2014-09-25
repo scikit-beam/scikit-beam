@@ -12,6 +12,8 @@ GCI: 2/20/2014 -- Updating documentation to docstring format
     Converted back to simple module containing definitions from class structure.
     This needs to be carried through all dependent pyLight executables.
     Changed module name from C6_transform.py to transform.py
+GCI: 9/23/14 -- Modified existing functions so that they can be directly
+    auto-wrapped and incorporated into the vistrails image processing library.
 """
 
 import numpy as np

@@ -12,7 +12,13 @@ import numpy as np
 import scipy.ndimage.measurements as measure
 
 
-def Vol_trial_1(src_labelField, 
+results_dict = {}
+def create_label_field(binary_vol_list,
+                       material_names_list,
+                       md_dict):
+    #md_dict should be optional input. If present then add to it.
+    return result_lblfield, mislabeled_voxel_vol, md_dict
+def Vol_trial_1(src_labelField,
                 num_bins, 
                 pd_function):
     """
@@ -30,7 +36,7 @@ def Vol_trial_1(src_labelField,
     src_labelField : ndarray
          The segmented data set converted to a label field
 
-    num_bins : int
+    num_bins : integer
          number of bins in histogram
 
     pd_function : bool
@@ -38,7 +44,7 @@ def Vol_trial_1(src_labelField,
 
     Returns
     -------
-    output : 2xN ndarray
+    output : array
         Currently returns an array containing material number
         (bin_edges) and quantified volume (voxel count).
     """
@@ -52,7 +58,7 @@ def Vol_trial_1(src_labelField,
     return output
 
 
-def Q_VOL(src_labelField):
+def Q_VOL(src_labelField, md_dict=None):
     """
     This function quantifies the volume of each material or object
     contained in the parent label field, and returns a dictionary
@@ -63,6 +69,11 @@ def Q_VOL(src_labelField):
     ----------
     src_labelField : ndarray
         The segmented data set converted to a label field
+
+    md_dict : dict, optional
+        Metadata dictionary associated with the labeled data set.
+        If the dictionary is included, then the material names are extracted
+        from the dictionary as the results are computed.
 
     Returns
     -------

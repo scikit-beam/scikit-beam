@@ -22,7 +22,6 @@ necessary in order to fit the autowrap format conventions required for
 incorporation into VisTrails
 """
 
-
 from scipy.ndimage.filters import gaussian_filter
 from scipy.ndimage.filters import median_filter
 from scipy.ndimage.filters import minimum_filter
@@ -64,29 +63,53 @@ gaussian_filter.__doc__ = (
         The function returns the array containing the filtered result to the
         specified variable.
     """
-    )
-
+)
 
 median_filter.__doc__ = (
-     """
+    """
     This function applies a multi-dimensional median filter to the source data
     set.
-
     Parameters
     ----------
-    src_data : ndarray
-        Specify the volume to be filtered
+    input : array_like
+        Input array to filter.
 
-    kernel_size : tuple
-        Specify the kernel size to be utilized in the filtering operation
+    size : tuple, optional
+        See footprint, below
 
+    footprint : array, optional
+        Either size or footprint must be defined. size gives the shape that is
+        taken from the input array, at every element position, to define the
+        input to the filter function. footprint is a boolean array that
+        specifies (implicitly) a shape, but also which of the elements within
+        this shape will get passed to the filter function. Thus size=(n,m) is
+        equivalent to footprint=np.ones((n,m)). We adjust size to the number
+        of dimensions of the input array, so that, if the input array is
+        shape (10,10,10), and size is 2, then the actual size used is (2,2,2).
+
+    output : array, optional
+        The output parameter passes an array in which to store the filter
+        output.
+
+    mode : string, optional
+        Options
+            'reflect', 'constant', 'nearest', 'mirror', 'wrap'
+        The mode parameter determines how the array borders are handled, where
+        cval is the value when mode is equal to 'constant'.
+        Default is 'reflect'
+
+    cval : float, optional
+        Value to fill past edges of input if mode is 'constant'.
+        Default is 0.0
+    origin : scalar, optional
+        The origin parameter controls the placement of the filter.
+        Default 0.0.
     Returns
     -------
-    output : ndarray
+    median_filter : ndarray
         The function returns the array containing the filtered result to the
         specified variable.
-    """
-    )
+    """)
 
 minimum_filter.__doc__ = (
     """
@@ -107,8 +130,7 @@ minimum_filter.__doc__ = (
         The function returns the array containing the filtered result to the
         specified variable.
     """
-    )
-
+)
 
 maximum_filter.__doc__ = (
     """
@@ -129,7 +151,7 @@ maximum_filter.__doc__ = (
         The function returns the array containing the filtered result to the
         specified variable.
     """
-    )
+)
 
 gaussian_gradient_magnitude.__doc__ = (
     """
@@ -153,8 +175,7 @@ gaussian_gradient_magnitude.__doc__ = (
         The function returns the array containing the filtered result to the
         specified variable.
     """
-    )
-
+)
 
 gaussian_laplace.__doc__ = (
     """
@@ -178,8 +199,7 @@ gaussian_laplace.__doc__ = (
         The function returns the array containing the filtered result to the
         specified variable.
     """
-    )
-
+)
 
 laplace.__doc__ = (
     """
@@ -197,8 +217,7 @@ laplace.__doc__ = (
         The function returns the array containing the filtered result to the
         specified variable.
     """
-    )
-
+)
 
 percentile_filter.__doc__ = (
     """
@@ -225,8 +244,7 @@ percentile_filter.__doc__ = (
         The function returns the array containing the filtered result to the
         specified variable.
     """
-    )
-
+)
 
 sobel.__doc__ = (
     """
@@ -244,7 +262,7 @@ sobel.__doc__ = (
         The function returns the array containing the filtered result to the
         specified variable.
     """
-    )
+)
 
 
 def TV_fltr():
@@ -254,9 +272,9 @@ def TV_fltr():
 def NLmeans():
     pass
 
-
 # def fltr_obj_dict_create (fltr_mod_name):
-#     filter_ops_dict = {"kernel based" : {"median" : fltr_mod_name.median_fltr, "minimum" : fltr_mod_name.min_fltr, "maximum" : fltr_mod_name.max_fltr},
+# filter_ops_dict = {"kernel based" : {"median" : fltr_mod_name.median_fltr,
+# "minimum" : fltr_mod_name.min_fltr, "maximum" : fltr_mod_name.max_fltr},
 #                        "percentile" : fltr_mod_name.percent_fltr,
 #                        "gaussian" : fltr_mod_name.gauss_fltr,
 #                        "gradient magnitude: gaussian" : fltr_mod_name.gradMag_gauss_fltr,
