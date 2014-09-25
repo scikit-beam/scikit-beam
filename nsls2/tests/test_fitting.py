@@ -49,7 +49,7 @@ def test_fit_quad_to_peak():
     assert(False)
 
 
-def gauss_fit_test():
+def test_gauss_fit():
     x = np.arange(-1, 1, 0.01)
     area = 1
     cen = 0
@@ -57,17 +57,18 @@ def gauss_fit_test():
     true_val = [area, cen, std]
     y = area / np.sqrt(2 * np.pi) / std * np.exp(-(x - cen)**2 / 2 / std**2)
 
-    out = gauss_fit([x,y],
+    out = gauss_fit([x, y],
                     0.8, 'free', [0, 1],
                     0.1, 'free', [0, 0.5],
                     0.5, 'free', [0, 1])
 
-    assert_array_almost_equal(true_val, list(out[0].values()))
+    fitted_val = (out[0]['area'], out[0]['center'], out[0]['sigma'])
+    assert_array_almost_equal(true_val, fitted_val)
 
     return
 
 
-def lorentzian_fit_test():
+def test_lorentzian_fit():
     x = np.arange(-1, 1, 0.01)
     area = 1
     center = 0
@@ -76,18 +77,18 @@ def lorentzian_fit_test():
 
     y = (area/(1 + ((x - center) / sigma)**2)) / (np.pi * sigma)
 
-    out = lorentzian_fit([x,y],
+    out = lorentzian_fit([x, y],
                          0.8, 'free', [0, 1],
                          0.1, 'free', [0, 0.5],
                          0.5, 'free', [0, 1])
 
-    assert_array_almost_equal(true_val, list(out[0].values()))
+    fitted_val = (out[0]['area'], out[0]['center'], out[0]['sigma'])
+    assert_array_almost_equal(true_val, fitted_val)
 
     return
 
 
-
-def lorentzian2_fit_test():
+def test_lorentzian2_fit():
     x = np.arange(-1, 1, 0.01)
     area = 1
     center = 0
@@ -96,11 +97,11 @@ def lorentzian2_fit_test():
 
     y = (area/(1 + ((x - center) / sigma)**2)**2) / (np.pi * sigma)
 
-    out = lorentzian2_fit([x,y],
+    out = lorentzian2_fit([x, y],
                           0.8, 'free', [0, 1],
                           0.1, 'free', [0, 0.5],
                           0.5, 'free', [0, 1])
-
-    assert_array_almost_equal(true_val, list(out[0].values()))
+    fitted_val = (out[0]['area'], out[0]['center'], out[0]['sigma'])
+    assert_array_almost_equal(true_val, fitted_val)
 
     return
