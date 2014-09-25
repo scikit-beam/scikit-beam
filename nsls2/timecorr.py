@@ -105,13 +105,13 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds):
     tot_channels = (num_levels +1 )*num_channels/2
 
     lag_times =[] # delay ( or lag times)
-    lag = np.arange(num_channels)
-    lag_times.append(lag)
+    lag = np.arange(1, num_channels + 1)
+    lag_times.extend(lag)
     for i in range(2, num_levels+1):
-        lag = np.array([4, 5, 6, 7])*(2**(i-1))
-        lag_times.append(lag)
+        lag = np.array([5, 6, 7, 8])*(2**(i-1))
+        lag_times.extend(lag)
 
-    # matrix of cross-correlations
+    # matrix of auto-correlation function without normalizations
     G = np.zeros((tot_channels, num_qs), dtype = np.float64)
     # matrix of past intensity normalizations
     IAP = np.zeros((tot_channels, num_qs), dtype = np.float64)
@@ -124,45 +124,33 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds):
     g2 = np.zeros((tot_channels, num_qs), dtype = np.float64)
 
     # matrix of buffers
-    buf = np.zeros((num_levels, num_channels, no_pixels), dtype = np.float64)
+    buf = np.zeros((num_levels, num_channels, no_pixels),
+                   dtype = np.float64)
     cur = np.zeros((num_channels, num_levels), dtype = np.float64)
     cts = np.zeros(num_levels)
 
     num_imgs = img_stack.shape[0] # number of images(frames)
-    for i in range(0, num_imgs):
-        cur[1] = 1 + cur[1]%num_channels
-        img = img_stack[i]
-        imin = (1 + num_channels/2)
-        process(1, cur[1], num_terms, imin, num_channels)
-        processing =1
-        lev = 2
-        while(processing == 1):
-            if cts[lev]:
-                prev = 1 + (cur(lev - 1) -1 -1 + num_channels)%num_channels
-                cur[lev] = 1 + cur[lev]%num_channels
-                buf()
-                cts[lev] = 0
-                process(lev, cur[lev], num_terms, imin, num_channels)
-                lev += 1
-                if (lev > num_levels):
-                    processing = 0
-            else:
-                cts[lev] = 1
-                processing = 0
+    for i in range(1, num_imgs):
+
+        # delay times for each image
+        delay_nums = [x for x in (i - np.array(lag_times)) if x > 0]
+        delay_nums.pop(0)
+
+        # buffer numbers
+        past_nums = [x for x in (i - np.array(lag_times)) if x > -1]
+        past_nums.pop()
+        # updating future intensities
+        IF = img_stack[delay_nums]
+        # updating past intensities
+        IP = img_stack[past_nums]
+        IFP = IF*IP
+        #for j in range (0, len(delay_nums)):
+          #  G[j] += np.histogram(np.ravel(IF*IP[j]), q_inds)
+
+    return IFP
 
 
-def process(lev, buf_num, num_terms, imin, num_channels):
-    num_terms[lev] +=1
 
-    for i in range(imin, min(num_terms(lev), num_channels): # loop over delays
-        ptr = (lev - 1)* num_channels/2 + i
-        delay_num = 1 + (buf_num - (i -1)-1 + num_channels)%buf_num
-
-        IP = buf[lev, delay_num, ]
-        IF = buf[lev, buf_num, ]
-        G[ptr, ] +=
-        IAP[ptr, ] +=
-        IAF[ptr, ] +=
 
 
 def q_values(detector_size, pixel_size, dist_sample,
@@ -226,13 +214,13 @@ def q_values(detector_size, pixel_size, dist_sample,
     hkl_val = recip.process_to_q(setting_angles, detector_size,
                                  pixel_size, calibrated_center,
                                  dist_sample, wavelength, ub_mat)
-    q_val = np.sqrt(hkl_val[:,0]**2 + hkl_val[:,1]**2 + hkl_val[:,2]**2)
+    q_val = np.sqrt(hkl_val[:, 0]**2 + hkl_val[:, 1]**2 + hkl_val[:, 2]**2)
     q_values = q_val.reshape(detector_size[0], detector_size[1])
 
     q_ring_val = []
     q = first_q
     q_ring_val.append(first_q)
-    for i in range(1,num_qs):
+    for i in range(1, num_qs):
         q += (step_q + delta_q)
         q_ring_val.append(q)
 
