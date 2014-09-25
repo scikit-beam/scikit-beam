@@ -173,10 +173,10 @@ def set_range(model_name,
         raise ValueError("unrecognized value {0}".format(parameter_vary))
 
 
-def gauss_fit(input_data,
-              area, area_vary, area_range,
-              center, center_vary, center_range,
-              sigma, sigma_vary, sigma_range,):
+#def gauss_fit(input_data,
+#              area, area_vary, area_range,
+#              center, center_vary, center_range,
+#              sigma, sigma_vary, sigma_range,):
     """
     wrapper of gaussian fitting model for vistrails.
 
@@ -215,24 +215,24 @@ def gauss_fit(input_data,
         fitted y
     """
 
-    x_data, y_data = input_data
+  #  x_data, y_data = input_data
 
-    g = GaussModel()
-    set_range(g, 'area', area, area_vary, area_range)
-    set_range(g, 'center', center, center_vary, center_range)
-    set_range(g, 'sigma', sigma, sigma_vary, sigma_range)
+  #  g = GaussModel()
+  #  set_range(g, 'area', area, area_vary, area_range)
+  #  set_range(g, 'center', center, center_vary, center_range)
+  #  set_range(g, 'sigma', sigma, sigma_vary, sigma_range)
 
-    result = g.fit(y_data, x=x_data)
-    param = result.values
-    y_fit = result.best_fit
+  #  result = g.fit(y_data, x=x_data)
+  #  param = result.values
+  #  y_fit = result.best_fit
 
-    return param, x_data, y_data, y_fit
+  #  return param, x_data, y_data, y_fit
 
 
-def lorentzian_fit(input_data,
-                   area, area_vary, area_range,
-                   center, center_vary, center_range,
-                   sigma, sigma_vary, sigma_range,):
+#def lorentzian_fit(input_data,
+#                   area, area_vary, area_range,
+#                   center, center_vary, center_range,
+#                   sigma, sigma_vary, sigma_range,):
     """
     wrapper of lorentzian fitting model for vistrails.
 
@@ -271,24 +271,24 @@ def lorentzian_fit(input_data,
         fitted y
     """
 
-    x_data, y_data = input_data
+#    x_data, y_data = input_data
 
-    g = LorentzianModel()
-    set_range(g, 'area', area, area_vary, area_range)
-    set_range(g, 'center', center, center_vary, center_range)
-    set_range(g, 'sigma', sigma, sigma_vary, sigma_range)
+#    g = LorentzianModel()
+#    set_range(g, 'area', area, area_vary, area_range)
+#    set_range(g, 'center', center, center_vary, center_range)
+#    set_range(g, 'sigma', sigma, sigma_vary, sigma_range)
 
-    result = g.fit(y_data, x=x_data)
-    param = result.values
-    y_fit = result.best_fit
+#    result = g.fit(y_data, x=x_data)
+#    param = result.values
+#    y_fit = result.best_fit
 
-    return param, x_data, y_data, y_fit
+#    return param, x_data, y_data, y_fit
 
 
-def lorentzian2_fit(input_data,
-                    area, area_vary, area_range,
-                    center, center_vary, center_range,
-                    sigma, sigma_vary, sigma_range):
+#def lorentzian2_fit(input_data,
+#                    area, area_vary, area_range,
+#                    center, center_vary, center_range,
+#                    sigma, sigma_vary, sigma_range):
     """
     wrapper of lorentzian squared fitting model for vistrails.
 
@@ -327,16 +327,99 @@ def lorentzian2_fit(input_data,
         fitted y
     """
 
-    x_data, y_data = input_data
+#    x_data, y_data = input_data
 
-    g = Lorentzian2Model()
-    set_range(g, 'area', area, area_vary, area_range)
-    set_range(g, 'center', center, center_vary, center_range)
-    set_range(g, 'sigma', sigma, sigma_vary, sigma_range)
+#    g = Lorentzian2Model()
+#    set_range(g, 'area', area, area_vary, area_range)
+#    set_range(g, 'center', center, center_vary, center_range)
+#    set_range(g, 'sigma', sigma, sigma_vary, sigma_range)
 
-    result = g.fit(y_data, x=x_data)
-    param = result.values
-    y_fit = result.best_fit
+#    result = g.fit(y_data, x=x_data)
+#    param = result.values
+#    y_fit = result.best_fit
 
-    return param, x_data, y_data, y_fit
+#    return param, x_data, y_data, y_fit
 
+
+doc_template = """
+    wrapper of {0} fitting model for vistrails.
+
+    Parameters
+    ----------
+    input_data : array
+        input data of x and y
+    area : float
+        area under peak profile
+    area_vary : str
+        fixed, free or bounded
+    area_range : list
+        bounded range
+    center : float
+        center position
+    center_vary : str
+        fixed, free or bounded
+    center_range : list
+        bounded range
+    sigma : float
+        standard deviation
+    sigma_vary : str
+        fixed, free or bounded
+    sigma_range : list
+        bounded range
+
+    Returns
+    -------
+    param : dict
+        fitting results
+    x_data : array
+        independent variable x
+    y_data : array
+        experimental data
+    y_fit : array
+        fitted y
+    """
+
+
+def _three_param_fit_factory(model):
+    """
+    Fit factory is used to include three functions, gauss, lorentzian
+    and lorentzian, which have similar arguments and outputs.
+
+    Parameters
+    ----------
+    model : class object
+        A model object defined in lmfit
+
+    Returns
+    -------
+    function
+        The main task of th function is to do the fitting.
+    """
+    def inner(input_data,
+              area, area_vary, area_range,
+              center, center_vary, center_range,
+              sigma, sigma_vary, sigma_range):
+        x_data, y_data = input_data
+
+        g = model()
+        set_range(g, 'area', area, area_vary, area_range)
+        set_range(g, 'center', center, center_vary, center_range)
+        set_range(g, 'sigma', sigma, sigma_vary, sigma_range)
+
+        result = g.fit(y_data, x=x_data)
+        param = result.values
+        y_fit = result.best_fit
+
+        return param, x_data, y_data, y_fit
+
+    inner.__doc__ = doc_template.format(model.__name__)
+    inner.__name__ = model.__name__.lower()[:-5] + str("_fit")
+    return inner
+
+ModelList = [GaussModel, LorentzianModel, Lorentzian2Model]
+
+import sys
+mod = sys.modules[__name__]
+for m in ModelList:
+    func = _three_param_fit_factory(m)
+    setattr(mod, func.__name__, func)
