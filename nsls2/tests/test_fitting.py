@@ -62,7 +62,7 @@ def gauss_fit_test():
                     0.1, 'free', [0, 0.5],
                     0.5, 'free', [0, 1])
 
-    assert_array_almost_equal(true_val, out[0].values())
+    assert_array_almost_equal(true_val, list(out[0].values()))
 
     return
 
@@ -81,7 +81,7 @@ def lorentzian_fit_test():
                          0.1, 'free', [0, 0.5],
                          0.5, 'free', [0, 1])
 
-    assert_array_almost_equal(true_val, out[0].values())
+    assert_array_almost_equal(true_val, list(out[0].values()))
 
     return
 
@@ -101,6 +101,6 @@ def lorentzian2_fit_test():
                           0.1, 'free', [0, 0.5],
                           0.5, 'free', [0, 1])
 
-    assert_array_almost_equal(true_val, out[0].values())
+    assert_array_almost_equal(true_val, list(out[0].values()))
 
     return
