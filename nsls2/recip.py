@@ -287,3 +287,60 @@ def process_to_q(setting_angles, detector_size, pixel_size,
 # Assign frame_mode as an attribute to the process_to_q function so that the
 # autowrapping knows what the valid options are
 process_to_q.frame_mode = ['theta', 'phi', 'cart', 'hkl']
+
+
+def q_data(hkl_val, num_qs, first_q, step_q, delta_q, detector_size):
+    """
+    This will compute the Q values for all pixels in a shape specified by
+    detector_size and find the indices of the required Q rings. Count the
+    number of pixels in each Q ring.
+
+    Parameters
+    ----------
+    hkl : ndarray
+        (Qx, Qy, Qz) - HKL values
+
+    num_qs : int
+        number pf q rings
+
+    first_q : float
+        q value of the first q ring
+
+    step_q : float
+        step value for next q ring
+
+    delta_q : float
+        thickness of the q ring
+
+    detector_size : tuple
+        2 element tuple defining the number of pixels in the detector. Order is
+        (num_columns, num_rows)
+
+    Returns
+    -------
+    q_values : ndarray
+        hkl values ( Q values)
+
+    q_inds : ndarray
+        indices of the Q values for the required rings
+
+    num_pixels : ndarray
+        number of pixels in certain Q ring 1X[num_qs]
+    """
+    q_val = np.sqrt(hkl_val[:, 0]**2 + hkl_val[:, 1]**2 + hkl_val[:, 2]**2)
+    q_values = q_val.reshape(detector_size[0], detector_size[1])
+
+    q_ring_val = []
+    q = first_q
+    q_ring_val.append(first_q)
+    for i in range(1, num_qs):
+        q += (step_q + delta_q)
+        q_ring_val.append(q)
+
+    # indices of Q rings
+    q_inds = np.digitize(np.ravel(q_values), np.array(q_ring_val))
+
+    # number of pixels in each  Q ring
+    num_pixels = np.bincount(q_inds)
+
+    return q_values, q_inds, q_ring_val, num_pixels

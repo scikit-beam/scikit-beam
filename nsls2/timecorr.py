@@ -150,6 +150,24 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds):
     return IFP
 
 
+def correlation(img_stack, lag_times, q_inds, num_pixels):
+    num_imgs = img_stack.shape[0] # number of images(frames)
+    for i in range(1, num_imgs):
+
+        # delay times for each image
+        delay_nums = [x for x in (i - np.array(lag_times)) if x > 0]
+        delay_nums.pop(0)
+
+        # buffer numbers
+        past_nums = [x for x in (i - np.array(lag_times)) if x > -1]
+        past_nums.pop()
+        # updating future intensities
+        IF = img_stack[delay_nums]
+        # updating past intensities
+        IP = img_stack[past_nums]
+        IFP = IF*IP
+        for j in range (0, len(delay_nums)):
+            G[j] += np.histogram(np.ravel(IF*IP[j]), q_inds)
 
 
 
@@ -158,7 +176,7 @@ def q_values(detector_size, pixel_size, dist_sample,
              first_q, step_q, delta_q):
     """
     This will compute the Q space values for all pixels in a
-    shape specified by detector_size. The
+    shape specified by detector_size and the required Q rings
 
     Parameters
     ----------
