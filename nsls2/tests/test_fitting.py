@@ -35,11 +35,72 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import numpy as np
 import six
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_almost_equal)
 
 from nsls2.testing.decorators import known_fail_if
-
+from nsls2.fitting.model.physics_model import (gauss_fit, lorentzian_fit,
+                                               lorentzian2_fit)
 
 @known_fail_if(True)
 def test_fit_quad_to_peak():
     assert(False)
+
+
+def gauss_fit_test():
+    x = np.arange(-1, 1, 0.01)
+    area = 1
+    cen = 0
+    std = 1
+    true_val = [area, cen, std]
+    y = area / np.sqrt(2 * np.pi) / std * np.exp(-(x - cen)**2 / 2 / std**2)
+
+    out = gauss_fit([x,y],
+                    0.8, 'free', [0, 1],
+                    0.1, 'free', [0, 0.5],
+                    0.5, 'free', [0, 1])
+
+    assert_array_almost_equal(true_val, out[0].values())
+
+    return
+
+
+def lorentzian_fit_test():
+    x = np.arange(-1, 1, 0.01)
+    area = 1
+    center = 0
+    sigma = 1
+    true_val = [area, center, sigma]
+
+    y = (area/(1 + ((x - center) / sigma)**2)) / (np.pi * sigma)
+
+    out = lorentzian_fit([x,y],
+                         0.8, 'free', [0, 1],
+                         0.1, 'free', [0, 0.5],
+                         0.5, 'free', [0, 1])
+
+    assert_array_almost_equal(true_val, out[0].values())
+
+    return
+
+
+
+def lorentzian2_fit_test():
+    x = np.arange(-1, 1, 0.01)
+    area = 1
+    center = 0
+    sigma = 1
+    true_val = [area, center, sigma]
+
+    y = (area/(1 + ((x - center) / sigma)**2)**2) / (np.pi * sigma)
+
+    out = lorentzian2_fit([x,y],
+                          0.8, 'free', [0, 1],
+                          0.1, 'free', [0, 0.5],
+                          0.5, 'free', [0, 1])
+
+    assert_array_almost_equal(true_val, out[0].values())
+
+    return
