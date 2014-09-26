@@ -43,6 +43,7 @@ from numpy.testing import (assert_array_equal, assert_array_almost_equal,
 from nsls2.testing.decorators import known_fail_if
 from nsls2.fitting.model.physics_model import (gauss_fit, lorentzian_fit,
                                                lorentzian2_fit)
+from nose.tools import (assert_equal, assert_true, raises)
 
 @known_fail_if(True)
 def test_fit_quad_to_peak():
@@ -58,7 +59,7 @@ def test_gauss_fit():
     y = area / np.sqrt(2 * np.pi) / std * np.exp(-(x - cen)**2 / 2 / std**2)
 
     out = gauss_fit([x, y],
-                    0.8, 'free', [0, 1],
+                    1, 'fixed', [0, 1],
                     0.1, 'free', [0, 0.5],
                     0.5, 'free', [0, 1])
 
@@ -80,7 +81,7 @@ def test_lorentzian_fit():
     out = lorentzian_fit([x, y],
                          0.8, 'free', [0, 1],
                          0.1, 'free', [0, 0.5],
-                         0.5, 'free', [0, 1])
+                         0.8, 'bounded', [0, 2])
 
     fitted_val = (out[0]['area'], out[0]['center'], out[0]['sigma'])
     assert_array_almost_equal(true_val, fitted_val)
@@ -88,6 +89,7 @@ def test_lorentzian_fit():
     return
 
 
+@raises(ValueError)
 def test_lorentzian2_fit():
     x = np.arange(-1, 1, 0.01)
     area = 1
@@ -98,7 +100,7 @@ def test_lorentzian2_fit():
     y = (area/(1 + ((x - center) / sigma)**2)**2) / (np.pi * sigma)
 
     out = lorentzian2_fit([x, y],
-                          0.8, 'free', [0, 1],
+                          0.8, 'wrong', [0, 1],
                           0.1, 'free', [0, 0.5],
                           0.5, 'free', [0, 1])
     fitted_val = (out[0]['area'], out[0]['center'], out[0]['sigma'])
