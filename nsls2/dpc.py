@@ -146,7 +146,7 @@ def _rss(v, xdata, ydata):
 
 
 
-def nonlinear_fit(ref_f, f, start_point=[1, 0], solver='Nelder-Mead', tol=1e-8, 
+def dpc_fit(ref_f, f, start_point=[1, 0], solver='Nelder-Mead', tol=1e-8, 
         max_iters=2000):
     """ 
     Nonlinear fitting for 2 points 
