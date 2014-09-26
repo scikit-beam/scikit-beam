@@ -32,237 +32,238 @@ from scipy.ndimage.filters import laplace
 from scipy.ndimage.filters import percentile_filter
 from scipy.ndimage.filters import sobel
 #
-gaussian_filter.__doc__ = (
-    """
-    This function applies a multi-dimensional gaussian filter to the source
-    data set.
 
-    Parameters
-    ----------
-    src_data : ndarray
-        Specify the volume to be filtered
+#gaussian_filter.__doc__ = (
+    # """
+    # This function applies a multi-dimensional gaussian filter to the source
+    # data set.
+    #
+    # Parameters
+    # ----------
+    # src_data : ndarray
+    #     Specify the volume to be filtered
+    #
+    # sigma : tuple
+    #     This value specifies the standard deviation for the gaussian filter and
+    #     can be entered as a single value, or for anisotropic filtering this
+    #     parameter can contain a sequence of values associated with each axis
+    #     of the source data.
+    #
+    # order : int
+    #     This value specifies the derivative order of the gaussian kernel which
+    #     will be used to convolve the source data. Four options are available,
+    #     including:
+    #         0 -- Convolution with a Gaussian kernel
+    #         1 -- Convolution with the first derivative of the Gaussian kernel
+    #         2 -- Convolution with the second derivative of the Gaussian kernel
+    #         3 -- Convolution with the third derivative of the Gaussian kernel
+    #
+    # Returns
+    # -------
+    # output : ndarray
+    #     The function returns the array containing the filtered result to the
+    #     specified variable.
+    # """
+#)
 
-    sigma : tuple
-        This value specifies the standard deviation for the gaussian filter and
-        can be entered as a single value, or for anisotropic filtering this
-        parameter can contain a sequence of values associated with each axis
-        of the source data.
+#median_filter.__doc__ = (
+    # """
+    # This function applies a multi-dimensional median filter to the source data
+    # set.
+    # Parameters
+    # ----------
+    # input : array_like
+    #     Input array to filter.
+    #
+    # size : tuple, optional
+    #     See footprint, below
+    #
+    # footprint : array, optional
+    #     Either size or footprint must be defined. size gives the shape that is
+    #     taken from the input array, at every element position, to define the
+    #     input to the filter function. footprint is a boolean array that
+    #     specifies (implicitly) a shape, but also which of the elements within
+    #     this shape will get passed to the filter function. Thus size=(n,m) is
+    #     equivalent to footprint=np.ones((n,m)). We adjust size to the number
+    #     of dimensions of the input array, so that, if the input array is
+    #     shape (10,10,10), and size is 2, then the actual size used is (2,2,2).
+    #
+    # output : array, optional
+    #     The output parameter passes an array in which to store the filter
+    #     output.
+    #
+    # mode : string, optional
+    #     Options
+    #         'reflect', 'constant', 'nearest', 'mirror', 'wrap'
+    #     The mode parameter determines how the array borders are handled, where
+    #     cval is the value when mode is equal to 'constant'.
+    #     Default is 'reflect'
+    #
+    # cval : float, optional
+    #     Value to fill past edges of input if mode is 'constant'.
+    #     Default is 0.0
+    # origin : scalar, optional
+    #     The origin parameter controls the placement of the filter.
+    #     Default 0.0.
+    # Returns
+    # -------
+    # median_filter : ndarray
+    #     The function returns the array containing the filtered result to the
+    #     specified variable.
+    # """)
 
-    order : int
-        This value specifies the derivative order of the gaussian kernel which
-        will be used to convolve the source data. Four options are available,
-        including:
-            0 -- Convolution with a Gaussian kernel
-            1 -- Convolution with the first derivative of the Gaussian kernel
-            2 -- Convolution with the second derivative of the Gaussian kernel
-            3 -- Convolution with the third derivative of the Gaussian kernel
+#minimum_filter.__doc__ = (
+    # """
+    # This function applies a multi-dimensional minimum filter to the source data
+    # set.
+    #
+    # Parameters
+    # ----------
+    # src_data : ndarray
+    #     Specify the volume to be filtered
+    #
+    # kernel_size : tuple
+    #     Specify the kernel size to be utilized in the filtering operation
+    #
+    # Returns
+    # -------
+    # output : ndarray
+    #     The function returns the array containing the filtered result to the
+    #     specified variable.
+    # """
+#)
 
-    Returns
-    -------
-    output : ndarray
-        The function returns the array containing the filtered result to the
-        specified variable.
-    """
-)
+#maximum_filter.__doc__ = (
+#     """
+#     This function applies a multi-dimensional maximum filter to the source data
+#     set.
+#
+#     Parameters
+#     ----------
+#     src_data : ndarray
+#         Specify the volume to be filtered
+#
+#     kernel_size : tuple
+#         Specify the kernel size to be utilized in the filtering operation
+#
+#     Returns
+#     -------
+#     output : ndarray
+#         The function returns the array containing the filtered result to the
+#         specified variable.
+#     """
+# )
 
-median_filter.__doc__ = (
-    """
-    This function applies a multi-dimensional median filter to the source data
-    set.
-    Parameters
-    ----------
-    input : array_like
-        Input array to filter.
+#gaussian_gradient_magnitude.__doc__ = (
+    # """
+    # This function applies a multi-dimensional gradient magnitude filter using
+    # Gaussian derivatives on the source data set.
+    #
+    # Parameters
+    # ----------
+    # src_data : ndarray
+    #     Specify the volume to be filtered
+    #
+    # sigma : tuple
+    #     This value specifies the standard deviation for the gaussian filter and
+    #     can be entered as a single value, or for anisotropic filtering this
+    #     parameter can contain a sequence of values associated with each axis of
+    #     the source data.
+    #
+    # Returns
+    # -------
+    # output : ndarray
+    #     The function returns the array containing the filtered result to the
+    #     specified variable.
+    # """
+#)
 
-    size : tuple, optional
-        See footprint, below
+#gaussian_laplace.__doc__ = (
+    # """
+    # This function applies a multi-dimensional Laplace filter using Gaussian
+    # second derivatives on the source data set.
+    #
+    # Parameters
+    # ----------
+    # src_data : ndarray
+    #     Specify the volume to be filtered
+    #
+    # sigma : int
+    #     This value specifies the standard deviation for the gaussian filter and
+    #     can be entered as a single value, or for anisotropic filtering this
+    #     parameter can contain a sequence of values associated with each axis of
+    #     the source data.
+    #
+    # Returns
+    # -------
+    # output : ndarray
+    #     The function returns the array containing the filtered result to the
+    #     specified variable.
+    # """
+#)
 
-    footprint : array, optional
-        Either size or footprint must be defined. size gives the shape that is
-        taken from the input array, at every element position, to define the
-        input to the filter function. footprint is a boolean array that
-        specifies (implicitly) a shape, but also which of the elements within
-        this shape will get passed to the filter function. Thus size=(n,m) is
-        equivalent to footprint=np.ones((n,m)). We adjust size to the number
-        of dimensions of the input array, so that, if the input array is
-        shape (10,10,10), and size is 2, then the actual size used is (2,2,2).
+#laplace.__doc__ = (
+    # """
+    # This function applies a multi-dimensional Laplace filter using approximate
+    # second derivatives of the source data set.
+    #
+    # Parameters
+    # ----------
+    # src_data : ndarray
+    #     Specify the volume to be filtered
+    #
+    # Returns
+    # -------
+    # output : ndarray
+    #     The function returns the array containing the filtered result to the
+    #     specified variable.
+    # """
+#)
 
-    output : array, optional
-        The output parameter passes an array in which to store the filter
-        output.
+#percentile_filter.__doc__ = (
+    # """
+    # This function applies a multi-dimensional percentile filter to the source
+    # data set. The percentile filter replaces the value of the central voxel with
+    # a percentile of all voxels included in the kernel.
+    # NOTE: that application of the percentile filter using the 50th percentile
+    # (percentile = 50) is equivalent to the median filter.
+    #
+    # Parameters
+    # ----------
+    # src_data : ndarray
+    #     Specify the volume to be filtered
+    #
+    # percentile : int
+    #     Specify percentile value (range of -99 to 100)
+    #
+    # kernel_size : tuple
+    #     Specify the kernel size to be utilized in the filtering operation
+    #
+    # Returns
+    # -------
+    # output : ndarray
+    #     The function returns the array containing the filtered result to the
+    #     specified variable.
+    # """
+#)
 
-    mode : string, optional
-        Options
-            'reflect', 'constant', 'nearest', 'mirror', 'wrap'
-        The mode parameter determines how the array borders are handled, where
-        cval is the value when mode is equal to 'constant'.
-        Default is 'reflect'
-
-    cval : float, optional
-        Value to fill past edges of input if mode is 'constant'.
-        Default is 0.0
-    origin : scalar, optional
-        The origin parameter controls the placement of the filter.
-        Default 0.0.
-    Returns
-    -------
-    median_filter : ndarray
-        The function returns the array containing the filtered result to the
-        specified variable.
-    """)
-
-minimum_filter.__doc__ = (
-    """
-    This function applies a multi-dimensional minimum filter to the source data
-    set.
-
-    Parameters
-    ----------
-    src_data : ndarray
-        Specify the volume to be filtered
-
-    kernel_size : tuple
-        Specify the kernel size to be utilized in the filtering operation
-
-    Returns
-    -------
-    output : ndarray
-        The function returns the array containing the filtered result to the
-        specified variable.
-    """
-)
-
-maximum_filter.__doc__ = (
-    """
-    This function applies a multi-dimensional maximum filter to the source data
-    set.
-
-    Parameters
-    ----------
-    src_data : ndarray
-        Specify the volume to be filtered
-
-    kernel_size : tuple
-        Specify the kernel size to be utilized in the filtering operation
-
-    Returns
-    -------
-    output : ndarray
-        The function returns the array containing the filtered result to the
-        specified variable.
-    """
-)
-
-gaussian_gradient_magnitude.__doc__ = (
-    """
-    This function applies a multi-dimensional gradient magnitude filter using
-    Gaussian derivatives on the source data set.
-
-    Parameters
-    ----------
-    src_data : ndarray
-        Specify the volume to be filtered
-
-    sigma : tuple
-        This value specifies the standard deviation for the gaussian filter and
-        can be entered as a single value, or for anisotropic filtering this
-        parameter can contain a sequence of values associated with each axis of
-        the source data.
-
-    Returns
-    -------
-    output : ndarray
-        The function returns the array containing the filtered result to the
-        specified variable.
-    """
-)
-
-gaussian_laplace.__doc__ = (
-    """
-    This function applies a multi-dimensional Laplace filter using Gaussian
-    second derivatives on the source data set.
-
-    Parameters
-    ----------
-    src_data : ndarray
-        Specify the volume to be filtered
-
-    sigma : int
-        This value specifies the standard deviation for the gaussian filter and
-        can be entered as a single value, or for anisotropic filtering this
-        parameter can contain a sequence of values associated with each axis of
-        the source data.
-
-    Returns
-    -------
-    output : ndarray
-        The function returns the array containing the filtered result to the
-        specified variable.
-    """
-)
-
-laplace.__doc__ = (
-    """
-    This function applies a multi-dimensional Laplace filter using approximate
-    second derivatives of the source data set.
-
-    Parameters
-    ----------
-    src_data : ndarray
-        Specify the volume to be filtered
-
-    Returns
-    -------
-    output : ndarray
-        The function returns the array containing the filtered result to the
-        specified variable.
-    """
-)
-
-percentile_filter.__doc__ = (
-    """
-    This function applies a multi-dimensional percentile filter to the source
-    data set. The percentile filter replaces the value of the central voxel with
-    a percentile of all voxels included in the kernel.
-    NOTE: that application of the percentile filter using the 50th percentile
-    (percentile = 50) is equivalent to the median filter.
-
-    Parameters
-    ----------
-    src_data : ndarray
-        Specify the volume to be filtered
-
-    percentile : int
-        Specify percentile value (range of -99 to 100)
-
-    kernel_size : tuple
-        Specify the kernel size to be utilized in the filtering operation
-
-    Returns
-    -------
-    output : ndarray
-        The function returns the array containing the filtered result to the
-        specified variable.
-    """
-)
-
-sobel.__doc__ = (
-    """
-    This function computes a basic Sobel filter on the source data set. The
-    Sobel filter can be used to aid in edge, and boundary region detection.
-
-    Parameters
-    ----------
-    src_data : ndarray
-        Specify the volume to be filtered
-
-    Returns
-    -------
-    output : ndarray
-        The function returns the array containing the filtered result to the
-        specified variable.
-    """
-)
+#sobel.__doc__ = (
+    # """
+    # This function computes a basic Sobel filter on the source data set. The
+    # Sobel filter can be used to aid in edge, and boundary region detection.
+    #
+    # Parameters
+    # ----------
+    # src_data : ndarray
+    #     Specify the volume to be filtered
+    #
+    # Returns
+    # -------
+    # output : ndarray
+    #     The function returns the array containing the filtered result to the
+    #     specified variable.
+    # """
+#)
 
 
 def TV_fltr():
