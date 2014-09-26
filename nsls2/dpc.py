@@ -56,7 +56,7 @@ def image_reduction(im, roi=None, bad_pixels=None):
     
     roi : tuple
         store the top-left and bottom-right coordinates of an rectangular ROI
-        roi = (11, 22, 33, 44) --> (11, 22) - (33, 44)
+        roi = (11, 22, 33, 44) --> (11, 21) - (33, 43)
         
     bad_pixels : list
         store the coordinates of bad pixels
@@ -78,7 +78,7 @@ def image_reduction(im, roi=None, bad_pixels=None):
                 
     if roi is not None:
         x1, y1, x2, y2 = roi
-        im = im[x1 : x2 + 1, y1 : y2 + 1]
+        im = im[x1:x2, y1:y2]
         
     xline = np.sum(im, axis=0)
     yline = np.sum(im, axis=1)
@@ -87,9 +87,9 @@ def image_reduction(im, roi=None, bad_pixels=None):
 
 
 
-def ifft1D(data):
+def ifft1D_shift(data):
     """ 
-    1D inverse IFFT 
+    shifted 1D inverse IFFT 
         
     Parameters
     ----------
@@ -137,7 +137,7 @@ def _rss(v, xdata, ydata):
     """
     
     length = len(xdata)
-    beta = 1j * (np.arange(length) - np.floor(length / 2.0))
+    beta = 1j * (np.linspace(-(length-1)//2, (length-1)//2, length))
     
     fitted_curve = xdata * v[0] * np.exp(v[1] * beta)
     residue = np.sum(np.abs(ydata - fitted_curve) ** 2)
@@ -146,10 +146,10 @@ def _rss(v, xdata, ydata):
 
 
 
-def fit(ref_f, f, start_point=[1, 0], solver='Nelder-Mead', tol=1e-8, 
+def nonlinear_fit(ref_f, f, start_point=[1, 0], solver='Nelder-Mead', tol=1e-8, 
         max_iters=2000):
     """ 
-    Nonlinear fitting 
+    Nonlinear fitting for 2 points 
     
     Parameters
     ----------
