@@ -314,8 +314,8 @@ def q_data(hkl_val, num_qs, first_q, step_q, delta_q, detector_size):
         thickness of the Q ring
 
     detector_size : tuple
-        2 element tuple defining the number of pixels in the detector. Order is
-        (num_columns, num_rows)
+        2 element tuple defining the number of pixels in the detector.
+        Order is (num_columns, num_rows)
 
     Returns
     -------

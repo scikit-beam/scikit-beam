@@ -54,6 +54,9 @@ import time
 def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
                   num_pixels):
     """
+    Standard multiple-tau algorithm is used for one-time intensity
+    auto-correlation functions.
+
     Parameters
     ----------
     num_levels: int
@@ -97,7 +100,6 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
        "Area detector based photon correlation in the egime of
        short data batches: Data reduction for dynamic x-ray
        scattering," Rev. Sci. Instr., vol 71, pp 3274-3289, 2000.
-
     """
 
     if (num_channels % 2 != 0):
@@ -121,17 +123,14 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
     IAF = np.zeros((tot_channels, num_qs), dtype=np.float64)
 
     # matrices of G, IAF and IAP with all pixels
-    GD = np.zeros((tot_channels, num_qs+2), dtype=np.float64)
-    IAPD = np.zeros((tot_channels, num_qs+2), dtype=np.float64)
-    IAFD = np.zeros((tot_channels, num_qs+2), dtype=np.float64)
+    GD = np.zeros((tot_channels, num_qs + 2), dtype=np.float64)
+    IAPD = np.zeros((tot_channels, num_qs + 2), dtype=np.float64)
+    IAFD = np.zeros((tot_channels, num_qs + 2), dtype=np.float64)
 
     # matrices of G, IAF and IAP after deleting unwanted pixels
     G_del = np.zeros((tot_channels, num_qs), dtype=np.float64)
     IAP_del = np.zeros((tot_channels, num_qs), dtype=np.float64)
     IAF_del = np.zeros((tot_channels, num_qs), dtype=np.float64)
-
-    # keeps track of number of terms for averaging
-    num_terms = np.zeros(num_levels, dtype=np.float64)
 
     # matrix of one-time correlation
     g2 = np.zeros((tot_channels, num_qs+1), dtype=np.float64)
@@ -140,9 +139,11 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
     num_imgs = img_stack.shape[0]  # number of images(frames)
 
     for i in range(2, num_imgs):
-
         # delay times for each image
         delay_nums = [x for x in (i - np.array(lag_times)) if x > 0]
+
+        # number of terms for averaging
+        num_terms = num_imgs - len(delay_nums)
 
         # buffer numbers for each correlation
         buf_nums = [x for x in (i - np.array(lag_times)) if x > 0]
@@ -163,9 +164,9 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
             IAPD[j, :] = np.bincount(q_inds, weights=np.ravel(IP[j, :]))
             IAP_del[j, :] = np.delete(IAPD[j, :], [0, num_qs + 1])
 
-        G += (G_del/num_pixels - G)/len(delay_nums)
-        IAF += (IAF_del/num_pixels - IAF)/len(delay_nums)
-        IAP += (IAP_del/num_pixels - IAP)/len(delay_nums)
+        G += (G_del/num_pixels - G)/(num_terms)
+        IAF += (IAF_del/num_pixels - IAF)/(num_terms)
+        IAP += (IAP_del/num_pixels - IAP)/(num_terms)
 
     g2 = G/(IAF*IAP)
 
