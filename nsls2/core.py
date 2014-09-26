@@ -493,7 +493,7 @@ def subtract_reference_images(imgs, is_reference):
     return list(corrected_image)
 
 
-def img_to_relative_xyi(img, cx, cy, size_x=None, size_y=None):
+def img_to_relative_xyi(img, cx, cy, pixel_size_x=None, pixel_size_y=None):
     """
     Convert the 2D image to a list of x y I coordinates where
     x == x_img - detector_center[0] and
@@ -507,9 +507,9 @@ def img_to_relative_xyi(img, cx, cy, size_x=None, size_y=None):
         Image center in the x direction
     cy : float
         Image center in the y direction
-    sizex : float, optional
+    pixel_size_x : float, optional
         Pixel size in x
-    sizey : float, optional
+    pixel_size_y : float, optional
         Pixel size in y
     **kwargs: dict
         Bucket for extra parameters in an unpacked dictionary
@@ -520,27 +520,30 @@ def img_to_relative_xyi(img, cx, cy, size_x=None, size_y=None):
         x-coordinate of pixel. shape (N, )
     y : `ndarray`
         y-coordinate of pixel. shape (N, )
-    i : `ndarray`
+    I : `ndarray`
         intensity of pixel. shape (N, )
     """
-    if size_x is not None and size_y is not None:
-        if size_x <= 0:
-            raise ValueError('Input parameter sizex must be greater than 0. '
-                             'Your value was ' + six.text_type(size_x))
-        if size_y <= 0:
-            raise ValueError('Input parameter sizex must be greater than 0. '
-                             'Your value was ' + six.text_type(size_y))
-    elif size_x is None and size_y is None:
-        size_x = 1
-        size_y = 1
+    if pixel_size_x is not None and pixel_size_y is not None:
+        if pixel_size_x <= 0:
+            raise ValueError('Input parameter pixel_size_x must be greater '
+                             'than 0. Your value was ' +
+                             six.text_type(pixel_size_x))
+        if pixel_size_y <= 0:
+            raise ValueError('Input parameter pixel_size_y must be greater '
+                             'than 0. Your value was ' +
+                             six.text_type(pixel_size_y))
+    elif pixel_size_x is None and pixel_size_y is None:
+        pixel_size_x = 1
+        pixel_size_y = 1
     else:
-        raise ValueError('sizex and sizey must both be None or greater than '
-                         'zero. You passed in values for sizex of {0} and '
-                         'sizey of {1]'.format(size_x, size_y))
+        raise ValueError('pixel_size_x and pixel_size_y must both be None or '
+                         'greater than zero. You passed in values for '
+                         'pixel_size_x of {0} and pixel_size_y of {1]'
+                         ''.format(pixel_size_x, pixel_size_y))
 
     # Caswell's incredible terse rewrite
-    x, y = np.meshgrid(size_x * (np.arange(img.shape[0]) - cx),
-                       size_y * (np.arange(img.shape[1]) - cy))
+    x, y = np.meshgrid(pixel_size_x * (np.arange(img.shape[0]) - cx),
+                       pixel_size_y * (np.arange(img.shape[1]) - cy))
 
     # return x, y and intensity as 1D arrays
     return x.ravel(), y.ravel(), img.ravel()

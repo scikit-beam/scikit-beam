@@ -472,9 +472,8 @@ class XrayLibWrap(Mapping):
     ----------
     element : int
         atomic number
-    info_type : str
+    info_type : {'lines',  'binding_e', 'jump', 'yield'}
         option to choose which physics quantity to calculate as follows:
-
         :lines: emission lines
         :binding_e: binding energy
         :jump: absorption jump factor
@@ -521,11 +520,10 @@ class XrayLibWrap(Mapping):
      (u'mg', 0.0)]
     """
     # valid options for the info_type input parameter for the init method
-    info_type = ['lines', 'binding_e', 'jump', 'yield']
+    opts_info_type = ['lines', 'binding_e', 'jump', 'yield']
 
     def __init__(self, element, info_type):
         self._element = element
-        self._info_type = info_type
         self._map, self._func = XRAYLIB_MAP[info_type]
         self._keys = sorted(list(six.iterkeys(self._map)))
 
@@ -572,7 +570,7 @@ class XrayLibWrap_Energy(XrayLibWrap):
     ----------
     element : int
         atomic number
-    info_type : str
+    info_type : {'cs'}
         option to calculate physics quantities which depend on
         incident energy.  Valid values are
 
@@ -592,7 +590,7 @@ class XrayLibWrap_Energy(XrayLibWrap):
     >>> x['Ka1'] # cross section for Ka1, unit in cm2/g
     34.44424057006836
     """
-    info_type = ['cs']
+    opts_info_type = ['cs']
 
     def __init__(self, element, info_type, incident_energy):
         super(XrayLibWrap_Energy, self).__init__(element, info_type)
