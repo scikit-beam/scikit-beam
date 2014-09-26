@@ -458,13 +458,14 @@ class ModelSpectrum(object):
         self.mod = mod
         return
 
-    def model_fit(self, x, y, w=None):
+    def model_fit(self, x, y, w=None, method='leastsq'):
         """
         Parameter
         ---------
 
-
         """
+
         self.model_spectrum()
         result = self.mod.fit(y, x=x, weights=w)
         return result
+

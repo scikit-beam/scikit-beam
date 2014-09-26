@@ -1,4 +1,4 @@
-{"element_list": "Ar K Ca Ti Cr Mn Fe Ni Cu Zn",
+{"element_list": " ",
 
  "coherent_sct_amplitude": {"bound_type": "none", "min": 1.0, "max": 1.0e7, "value": 1.0e5},
 
@@ -10,7 +10,7 @@
 
  "fwhm_fanoprime": {"bound_type": "fixed", "min": 0.0, "max": 0.001, "value": 0.00},
 
- "compton_angle": {"bound_type": "fixed", "min": 75.0, "max": 100.0, "value": 90.0},
+ "compton_angle": {"bound_type": "lohi", "min": 75.0, "max": 100.0, "value": 90.0},
 
  "compton_gamma": {"bound_type": "lohi", "min": 4.0, "max": 5.5, "value": 5.0},
 
