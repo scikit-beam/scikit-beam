@@ -223,7 +223,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
     -------
     hkl : ndarray
         (Qx, Qy, Qz) - HKL values
-        shape is [num_images * num_rows * num_columns][3]
+        shape is [detector_size[0]*detector_size[1]][3]
 
     Notes
     -----
@@ -299,18 +299,19 @@ def q_data(hkl_val, num_qs, first_q, step_q, delta_q, detector_size):
     ----------
     hkl : ndarray
         (Qx, Qy, Qz) - HKL values
+        shape is [detector_size[0]*detector_size[1]][3]
 
     num_qs : int
-        number pf q rings
+        number pf Q rings
 
     first_q : float
-        q value of the first q ring
+        Q value of the first Q ring
 
     step_q : float
-        step value for next q ring
+        step value for the next Q ring
 
     delta_q : float
-        thickness of the q ring
+        thickness of the Q ring
 
     detector_size : tuple
         2 element tuple defining the number of pixels in the detector. Order is
@@ -319,24 +320,25 @@ def q_data(hkl_val, num_qs, first_q, step_q, delta_q, detector_size):
     Returns
     -------
     q_values : ndarray
-        hkl values ( Q values)
+        Q values of all the pixels
 
     q_inds : ndarray
         indices of the Q values for the required rings
 
+    q_ring_val : ndarray
+        edge values of each Q ring
+
     num_pixels : ndarray
         number of pixels in certain Q ring 1X[num_qs]
+
     """
     q_val = np.sqrt(hkl_val[:, 0]**2 + hkl_val[:, 1]**2 + hkl_val[:, 2]**2)
     q_values = q_val.reshape(detector_size[0], detector_size[1])
 
-    # q_ring_val = np.linspace(first_q, last_q, num=num_qs)
-    q_ring_val = []
-    q = first_q
-    q_ring_val.append(first_q)
-    for i in range(0, num_qs):
-        q += (step_q + delta_q)
-        q_ring_val.append(q)
+    # last Q ring edge value
+    last_q = first_q + num_qs*(step_q + delta_q)
+    # Edge values of Q rings
+    q_ring_val = np.linspace(first_q, last_q, num=(num_qs+1))
 
     # indices of Q rings
     q_inds = np.digitize(np.ravel(q_values), np.array(q_ring_val))

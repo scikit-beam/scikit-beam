@@ -50,7 +50,9 @@ logger = logging.getLogger(__name__)
 import nsls2.recip as recip
 import time
 
-def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds):
+
+def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
+                  num_pixels):
     """
     Parameters
     ----------
@@ -98,13 +100,13 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds):
 
     """
 
-    if (num_channels% 2 == 0):
+    if (num_channels % 2 != 0):
         raise ValueError(" Number of channels(buffers) must be even ")
 
     # total number of channels ( or total number of delay times)
-    tot_channels = (num_levels +1 )*num_channels/2
+    tot_channels = (num_levels + 1)*num_channels/2
 
-    lag_times =[] # delay ( or lag times)
+    lag_times = []  # delay ( or lag times)
     lag = np.arange(1, num_channels + 1)
     lag_times.extend(lag)
     for i in range(2, num_levels+1):
@@ -112,59 +114,59 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds):
         lag_times.extend(lag)
 
     # matrix of auto-correlation function without normalizations
-    G = np.zeros((tot_channels, num_qs), dtype = np.float64)
+    G = np.zeros((tot_channels, num_qs), dtype=np.float64)
     # matrix of past intensity normalizations
-    IAP = np.zeros((tot_channels, num_qs), dtype = np.float64)
+    IAP = np.zeros((tot_channels, num_qs), dtype=np.float64)
     # matrix of future intensity normalizations
-    IAF = np.zeros((tot_channels, num_qs), dtype = np.float64)
+    IAF = np.zeros((tot_channels, num_qs), dtype=np.float64)
+
+    # matrices of G, IAF and IAP with all pixels
+    GD = np.zeros((tot_channels, num_qs+2), dtype=np.float64)
+    IAPD = np.zeros((tot_channels, num_qs+2), dtype=np.float64)
+    IAFD = np.zeros((tot_channels, num_qs+2), dtype=np.float64)
+
+    # matrices of G, IAF and IAP after deleting unwanted pixels
+    G_del = np.zeros((tot_channels, num_qs), dtype=np.float64)
+    IAP_del = np.zeros((tot_channels, num_qs), dtype=np.float64)
+    IAF_del = np.zeros((tot_channels, num_qs), dtype=np.float64)
+
     # keeps track of number of terms for averaging
-    num_terms = np.zeros(num_levels, dtype = np.float64)
+    num_terms = np.zeros(num_levels, dtype=np.float64)
 
     # matrix of one-time correlation
-    g2 = np.zeros((tot_channels, num_qs), dtype = np.float64)
+    g2 = np.zeros((tot_channels, num_qs+1), dtype=np.float64)
 
-    # matrix of buffers
-    buf = np.zeros((num_levels, num_channels, no_pixels),
-                   dtype = np.float64)
-    cur = np.zeros((num_channels, num_levels), dtype = np.float64)
-    cts = np.zeros(num_levels)
+    num_pixels = np.delete(num_pixels, [0, num_qs+1])
+    num_imgs = img_stack.shape[0]  # number of images(frames)
 
-    num_imgs = img_stack.shape[0] # number of images(frames)
-    for i in range(1, num_imgs):
+    for i in range(2, num_imgs):
 
         # delay times for each image
         delay_nums = [x for x in (i - np.array(lag_times)) if x > 0]
-        delay_nums.pop(0)
 
-        # buffer numbers
-        past_nums = [x for x in (i - np.array(lag_times)) if x > -1]
-        past_nums.pop()
+        # buffer numbers for each correlation
+        buf_nums = [x for x in (i - np.array(lag_times)) if x > 0]
+        buf_nums.pop()
+        buf_nums.insert(0, i)
+
         # updating future intensities
-        IF = img_stack[delay_nums]
+        IF = img_stack[buf_nums]
         # updating past intensities
-        IP = img_stack[past_nums]
-        IFP = IF*IP
-        #for j in range (0, len(delay_nums)):
-          #  G[j] += np.histogram(np.ravel(IF*IP[j]), q_inds)
+        IP = img_stack[delay_nums]
+        IFP = (IF*IP)
 
-    return IFP
-
-
-def correlation(img_stack, lag_times, q_inds, num_pixels):
-    num_imgs = img_stack.shape[0] # number of images(frames)
-    for i in range(1, num_imgs):
-
-        # delay times for each image
-        delay_nums = [x for x in (i - np.array(lag_times)) if x > 0]
-        delay_nums.pop(0)
-
-        # buffer numbers
-        past_nums = [x for x in (i - np.array(lag_times)) if x > -1]
-        past_nums.pop()
-        # updating future intensities
-        IF = img_stack[delay_nums]
-        # updating past intensities
-        IP = img_stack[past_nums]
-        IFP = IF*IP
         for j in range (0, len(delay_nums)):
-            G[j] += np.histogram(np.ravel(IF*IP[j]), q_inds)
+            GD[j, :] = np.bincount(q_inds, weights=np.ravel(IFP[j, :]))
+            G_del[j, :] = np.delete(GD[j, :], [0, num_qs + 1])
+            IAFD[j, :] = np.bincount(q_inds, weights=np.ravel(IF[j, :]))
+            IAF_del[j, :] = np.delete(IAFD[j,:], [0, num_qs +1])
+            IAPD[j, :] = np.bincount(q_inds, weights=np.ravel(IP[j, :]))
+            IAP_del[j, :] = np.delete(IAPD[j, :], [0, num_qs + 1])
+
+        G += (G_del/num_pixels - G)/len(delay_nums)
+        IAF += (IAF_del/num_pixels - IAF)/len(delay_nums)
+        IAP += (IAP_del/num_pixels - IAP)/len(delay_nums)
+
+    g2 = G/(IAF*IAP)
+
+    return g2
