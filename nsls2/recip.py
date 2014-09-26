@@ -330,10 +330,11 @@ def q_data(hkl_val, num_qs, first_q, step_q, delta_q, detector_size):
     q_val = np.sqrt(hkl_val[:, 0]**2 + hkl_val[:, 1]**2 + hkl_val[:, 2]**2)
     q_values = q_val.reshape(detector_size[0], detector_size[1])
 
+    # q_ring_val = np.linspace(first_q, last_q, num=num_qs)
     q_ring_val = []
     q = first_q
     q_ring_val.append(first_q)
-    for i in range(1, num_qs):
+    for i in range(0, num_qs):
         q += (step_q + delta_q)
         q_ring_val.append(q)
 
