@@ -184,19 +184,31 @@ doc_template = """
     area : float
         area under peak profile
     area_vary : str
-        fixed, free or bounded
+        variance method
+        Options:
+            fixed,
+            free,
+            bounded
     area_range : list
         bounded range
     center : float
         center position
     center_vary : str
-        fixed, free or bounded
+        variance method
+        Options:
+            fixed,
+            free,
+            bounded
     center_range : list
         bounded range
     sigma : float
         standard deviation
     sigma_vary : str
-        fixed, free or bounded
+        variance method
+        Options:
+            fixed,
+            free,
+            bounded
     sigma_range : list
         bounded range
 
@@ -251,3 +263,8 @@ mod = sys.modules[__name__]
 for m in ModelList:
     func = _three_param_fit_factory(m)
     setattr(mod, func.__name__, func)
+
+for func_name in [gauss_fit, lorentzian2_fit, lorentzian_fit]:
+    func_name.area_vary = ['fixed', 'free', 'bounded']
+    func_name.center_vary = ['fixed', 'free', 'bounded']
+    func_name.sigma_vary = ['fixed', 'free', 'bounded']
