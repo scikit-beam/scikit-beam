@@ -54,7 +54,8 @@ import time
 def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
                   num_pixels):
     """
-    Standard multiple-tau algorithm is used for one-time intensity
+    Standard multiple-tau algorithm for finding the lag times and
+    standard normalization scheme are used for one-time intensity
     auto-correlation functions.
 
     Parameters
@@ -87,12 +88,21 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
 
     Note
     ----
+    One time intensity auto-correlation functions
+
+    ..math ::
+
+        g_{2}(Q, t ) =
+        \frac{<< I(Q, t_{0})I(Q, t_{0} + t)>_{t0}>_{pixels}}{<< I(Q, t_{0})>^{2}_{t_{0}}>_{pixels}
+
     Standard multiple-tau algorithm is used for one-time intensity
-    auto-correlation functions. To evaluate an estimator for the
-    correlation function separately for each pixel of the exposed
-    detector area needed before analysis. Therefore, standard
-    normalization scheme which leads to noise level lower than
-    those obtained used for that purpose. (Reference 1)
+    auto-correlation functions. All time- averaged correlation functions
+    are calculated for individual pixels and subsequently averaged over
+    coarse grained rings of pixels on similar Q values.  To evaluate an
+    estimator for the correlation function separately for each pixel of
+    the exposed detector area needed before analysis. Therefore, standard
+    normalization scheme which leads to noise level lower than those
+    obtained used for that purpose. (Reference 1)
 
     References: text [1]_
 
