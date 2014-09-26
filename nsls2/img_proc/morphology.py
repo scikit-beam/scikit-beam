@@ -107,7 +107,7 @@ binary_erosion.__doc__ = (
     unchanged unless they become directly connected during an iterative erosion 
     or dilation operation.
     
-    Parameters
+    Returns
     ----------
     output : ndarray
         Return operation result to specified variable
