@@ -46,7 +46,7 @@ import scipy.io
 import os
 
 
-def save_chi(tth, intensity, err, filename, dir_path=None):
+def save_chi(tth, intensity,  filename, err=None, dir_path=None):
     """
     Save output diffraction intensities into .chi file format
 
@@ -58,11 +58,11 @@ def save_chi(tth, intensity, err, filename, dir_path=None):
     intensity : ndarray
         intensity values 1XN array
 
-    err : ndarray
-        uncertainty 1XN array
-
     filename : str
         filename of the .tif file
+
+    err : ndarray, optional
+        uncertainty
 
     dir_path : str, optional
         new directory path to save the output data files
@@ -72,6 +72,9 @@ def save_chi(tth, intensity, err, filename, dir_path=None):
     output : str
              saved file of diffraction intensities in .chi file format
     """
+    if len(tth) != len(intensity):
+        raise ValueError("Number of intensities and the number of Q or"
+                         " two theta values are different ")
 
     file_base = os.path.splitext(os.path.split(filename)[1])[0]
 
@@ -81,16 +84,28 @@ def save_chi(tth, intensity, err, filename, dir_path=None):
         print 'Creating image: ' + os.path.join(os.getcwd(), dir_path, filename)
         file_path = dir_path + file_base + '.chi'
     else:
-        #print 'Creating image: ' + os.path.join(dir_path, filename)
+        print 'Creating image: ' + os.path.join(dir_path, filename)
         file_path = file_base + '.chi'
 
+
     f = open(file_path, 'wb')
-    np.savetxt(f, (tth, intensity, err), newline='\n')
+    f.write(filename)
+    f.write("This file contains integrated powder x-ray diffraction "
+            "intensities.")
+    f.write("First two columns represents Q(reciprocal space) or 2(theta)"
+            " values and second column represents intensities and if there"
+            " is third column it represents  intensities error")
+    f.write("############################################################\n")
+
+    if (err==None):
+        np.savetxt(f, (tth, intensity), newline='\n')
+    else:
+        np.savetxt(f, (tth, intensity, err), newline='\n')
     f.close()
     return
 
 
-def save_dat(tth, intensity, err, filename, dir_path=None):
+def save_dat(tth, intensity, filename, err=None, dir_path=None):
     '''
     Save output diffraction intensities into .dat file format
 
@@ -102,11 +117,11 @@ def save_dat(tth, intensity, err, filename, dir_path=None):
     intensity : ndarray
         intensity values
 
-    err : ndarray
-        uncertainty
-
     filename : str
         filename(could be full path) of the .tif file
+
+    err : ndarray, optional
+        uncertainty
 
     dir_path : str, optional
         name of the new directory to save the output data files
@@ -116,13 +131,32 @@ def save_dat(tth, intensity, err, filename, dir_path=None):
     output : file
         Saved file of diffraction intensities in .dat file format
     '''
+    if len(tth) != len(intensity):
+        raise ValueError("Number of intensities and the number of Q or"
+                         " two theta values are different ")
 
     file_base = os.path.splitext(os.path.split(filename)[1])[0]
     file_path = file_base + '.dat'
 
     f = open(file_path, 'wb')
-    np.savetxt(f, (tth, intensity, err), newline='\n')
+    f.write(filename)
+    f.write(filename)
+    f.write("This file contains integrated powder x-ray diffraction "
+            "intensities.")
+    f.write("First two columns represents Q(reciprocal space) or 2(theta)"
+            " values and second column represents intensities and if there"
+            " is third column it represents  intensities error")
+    f.write("#############################################################\n")
+
+    if (err==None):
+        np.savetxt(f, (tth, intensity), newline='\n')
+    else:
+        if len(tth)==len(err):
+            np.savetxt(f, (tth, intensity, err), newline='\n')
+        else:
+            raise ValueError("")
     f.close()
+
     return
 
 
@@ -152,18 +186,29 @@ def save_xye(tth, intensity, err, filename, dir_name=None):
     output : file
              Saved file of diffraction intensities in .xye file format
     """
+    if len(tth) != len(intensity):
+        raise ValueError("Number of intensities and the number of Q or"
+                         " two theta values are different ")
 
     file_base = os.path.splitext(os.path.split(filename)[1])[0]
     file_path = file_base + '.xye'
 
     f = open(file_path, 'wb')
+    f.write(filename)
+    f.write("This file contains integrated powder x-ray diffraction"
+            " intensities.")
+    f.write("First two columns represents Q(reciprocal space) "
+            "or 2(th eta) values, second column represents"
+            " intensities and third column represents intensities error")
+    f.write("#########################################################\n")
+
     np.savetxt(f, (tth, intensity, err), newline='\n')
     f.close()
 
-    pass
+    return
 
 
-def save_gsas(tth, intensity, filename, err=None dir_name=None):
+def save_gsas(tth, intensity, filename, err=None, dir_name=None):
     """
     Save diffraction intensities into .gsas file format
 
@@ -202,6 +247,10 @@ def save_gsas(tth, intensity, filename, err=None dir_name=None):
         :param xrd: 2d array with shape (2,len of intensity) or (3, len of intensity), [tthorq, intensity, (unceratinty)]
         :param filename: str, base file name
         '''
+        if len(tth) != len(intensity):
+            raise ValueError("Number of intensities and the number of Q or"
+                         " two theta values are different ")
+
         filepath = self.getFilePathWithoutExt(filename) + '.gsas'
         f = open(filepath, 'wb')
         f.write(self.config.getHeader(mode='short'))
