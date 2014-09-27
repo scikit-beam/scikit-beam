@@ -118,12 +118,14 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
     # total number of channels ( or total number of delay times)
     tot_channels = (num_levels + 1)*num_channels/2
 
-    lag_times = []  # delay ( or lag times)
+    lag_steps = []  # delay ( or lag times)
     lag = np.arange(1, num_channels + 1)
-    lag_times.extend(lag)
+    lag_steps.extend(lag)
     for i in range(2, num_levels+1):
         lag = np.array([5, 6, 7, 8])*(2**(i-1))
-        lag_times.extend(lag)
+        lag_steps.extend(lag)
+
+    lag_steps = sorted(lag_steps, reverse=True)
 
     # matrix of auto-correlation function without normalizations
     G = np.zeros((tot_channels, num_qs), dtype=np.float64)
@@ -145,18 +147,18 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
     # matrix of one-time correlation
     g2 = np.zeros((tot_channels, num_qs+1), dtype=np.float64)
 
-    num_pixels = np.delete(num_pixels, [0, num_qs+1])
+    num_pixels = np.delete(num_pixels, [0, num_qs + 1])
     num_imgs = img_stack.shape[0]  # number of images(frames)
 
     for i in range(2, num_imgs):
         # delay times for each image
-        delay_nums = [x for x in (i - np.array(lag_times)) if x > 0]
+        delay_nums = [x for x in (i - np.array(lag_steps)) if x > 0]
 
         # number of terms for averaging
         num_terms = num_imgs - len(delay_nums)
 
         # buffer numbers for each correlation
-        buf_nums = [x for x in (i - np.array(lag_times)) if x > 0]
+        buf_nums = [x for x in (i - np.array(lag_steps)) if x > 0]
         buf_nums.pop()
         buf_nums.insert(0, i)
 
