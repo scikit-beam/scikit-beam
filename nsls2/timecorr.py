@@ -183,3 +183,8 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
     g2 = G/(IAF*IAP)
 
     return g2
+
+def correlation(lag_steps, num_pixels, img_stack, num_qs):
+    pass
+
+
