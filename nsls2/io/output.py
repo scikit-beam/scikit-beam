@@ -40,7 +40,6 @@
 
 """
 
-
 import numpy as np
 import scipy.io
 import os
@@ -59,7 +58,8 @@ def save_chi(tth, intensity,  filename, err=None, dir_path=None):
         intensity values 1XN array
 
     filename : str
-        filename of the .tif file
+        filename(could be full path) of the .tif file
+        eg: /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504.tif
 
     err : ndarray, optional
          error value of intensity
@@ -79,10 +79,8 @@ def save_chi(tth, intensity,  filename, err=None, dir_path=None):
     file_base = os.path.splitext(os.path.split(filename)[1])[0]
 
     if (dir_path)== None:
-        print 'Creating image: ' + os.path.join(filename)
         file_path = file_base + '.chi'
     elif os.path.isabs(dir_path):
-        print 'Creating image: ' + dir_path + file_base + '.dat'
         file_path = dir_path + file_base + '.chi'
     else:
         raise ValueError('The given path does not exist.')
@@ -120,6 +118,7 @@ def save_dat(tth, intensity, filename, err=None, dir_path=None):
 
     filename : str
         filename(could be full path) of the .tif file
+        eg: /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504.tif
 
     err : ndarray, optional
         error value of intensity
@@ -140,10 +139,8 @@ def save_dat(tth, intensity, filename, err=None, dir_path=None):
     file_path = file_base + '.dat'
 
     if (dir_path)== None:
-        print 'Creating image: ' + os.path.join(filename)
         file_path = file_base + '.dat'
     elif os.path.isabs(dir_path):
-        print 'Creating image: ' + dir_path + file_base + '.dat'
         file_path = dir_path + file_base + '.dat'
     else:
         #elif len(dir_path) > 0 and not os.path.exists(dir_path):
@@ -185,14 +182,18 @@ def save_xye(tth, intensity, filename, err, dir_path=None):
 
     filename : str
         filename(could be full path) of the .tif file
+        eg: /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504.tif
 
     dir_path : str, optional
         new directory path to save the output data files
+        eg: /Volumes/Data/experiments/data/
+
 
     Returns
     -------
     Saved file of diffraction intensities in .xye file format
     """
+
     if len(tth) != len(intensity):
         raise ValueError("Number of intensities and the number of Q or"
                          " two theta values are different ")
@@ -201,16 +202,15 @@ def save_xye(tth, intensity, filename, err, dir_path=None):
     file_path = file_base + '.xye'
 
     if (dir_path)== None:
-        print 'Creating image: ' + os.path.join(filename)
         file_path = file_base + '.xye'
     elif os.path.isabs(dir_path):
-        print 'Creating image: ' + dir_path + file_base + '.xye'
         file_path = dir_path + file_base + '.xye'
     else:
         raise ValueError('The given path does not exist.')
 
     f = open(file_path, 'wb')
     f.write(filename)
+
     f.write("\n This file contains integrated powder x-ray diffraction "
             "intensities.\n\n")
     f.write("Number of data points in the file {0} \n".format(len(tth)))
@@ -225,7 +225,7 @@ def save_xye(tth, intensity, filename, err, dir_path=None):
     return
 
 
-def save_gsas(tth, intensity, filename, mode, err=None, dir_path=None):
+def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
     """
     Save diffraction intensities into .gsas file format
 
@@ -237,13 +237,11 @@ def save_gsas(tth, intensity, filename, mode, err=None, dir_path=None):
     intensity : ndarray
         intensity values
 
-    path : str
-        directory to save the chi files
-
     filename : str
         filename(could be full path) of the .tif file
+        eg: /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504.tif
 
-    mode : str
+    mode : str, optional
         gsas file type, could be 'std', 'esd', 'fxye' (gsas format)
 
     err : ndarray, optional
@@ -251,6 +249,7 @@ def save_gsas(tth, intensity, filename, mode, err=None, dir_path=None):
 
      dir_path : str, optional
         new directory path to save the output data files
+        eg: /Data/experiments/data/
 
     Returns
     -------
@@ -258,17 +257,15 @@ def save_gsas(tth, intensity, filename, mode, err=None, dir_path=None):
 
     """
     if len(tth) != len(intensity):
-        raise ValueError("Number of intensities and the number of Q or"
+        raise ValueError("Number of intensities and the number of"
                          " two theta values are different ")
 
     file_base = os.path.splitext(os.path.split(filename)[1])[0]
     file_path = file_base + '.xye'
 
     if (dir_path)== None:
-        print 'Creating image: ' + os.path.join(filename)
         file_path = file_base + '.xye'
     elif os.path.isabs(dir_path):
-        print 'Creating image: ' + dir_path + file_base + '.xye'
         file_path = dir_path + file_base + '.xye'
     else:
         raise ValueError('The given path does not exist.')
@@ -330,60 +327,3 @@ def save_gsas(tth, intensity, filename, mode, err=None, dir_path=None):
 
     f.close()
     return
-
-
-
-def writeGSASStr(name, mode, tth, iobs, esd=None):
-    """
-    Return string of integrated intensities in GSAS format.
-    :param mode: string, gsas file type, could be 'std', 'esd', 'fxye' (gsas format)
-    :param tth: ndarray, two theta angle
-    :param iobs: ndarray, Xrd intensity
-    :param esd: ndarray, optional error value of intensity
-
-    :return:  string, a string to be saved to file
-    """
-    maxintensity = 999999
-    logscale = numpy.floor(numpy.log10(maxintensity / numpy.max(iobs)))
-    logscale = min(logscale, 0)
-    scale = 10 ** int(logscale)
-    lines = []
-    ltitle = 'Angular Profile'
-    ltitle += ': %s' % name
-    ltitle += ' scale=%g' % scale
-    if len(ltitle) > 80:    ltitle = ltitle[:80]
-    lines.append("%-80s" % ltitle)
-    ibank = 1
-    nchan = len(iobs)
-    # two-theta0 and dtwo-theta in centidegrees
-    tth0_cdg = tth[0] * 100
-    dtth_cdg = (tth[-1] - tth[0]) / (len(tth) - 1) * 100
-    if esd == None: mode = 'std'
-    if mode == 'std':
-        nrec = int(numpy.ceil(nchan / 10.0))
-        lbank = "BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f STD" % \
-                (ibank, nchan, nrec, tth0_cdg, dtth_cdg, 0, 0)
-        lines.append("%-80s" % lbank)
-        lrecs = [ "%2i%6.0f" % (1, ii * scale) for ii in iobs ]
-        for i in range(0, len(lrecs), 10):
-            lines.append("".join(lrecs[i:i + 10]))
-    if mode == 'esd':
-        nrec = int(numpy.ceil(nchan / 5.0))
-        lbank = "BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f ESD" % \
-                (ibank, nchan, nrec, tth0_cdg, dtth_cdg, 0, 0)
-        lines.append("%-80s" % lbank)
-        lrecs = [ "%8.0f%8.0f" % (ii, ee * scale) for ii, ee in zip(iobs, esd) ]
-        for i in range(0, len(lrecs), 5):
-            lines.append("".join(lrecs[i:i + 5]))
-    if mode == 'fxye':
-        nrec = nchan
-        lbank = "BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f FXYE" % \
-                (ibank, nchan, nrec, tth0_cdg, dtth_cdg, 0, 0)
-        lines.append("%-80s" % lbank)
-        lrecs = [ "%22.10f%22.10f%24.10f" % (xx * scale, yy * scale,
-                                             ee * scale) for xx, yy, ee in zip(tth, iobs, esd) ]
-        for i in range(len(lrecs)):
-            lines.append("%-80s" % lrecs[i])
-    lines[-1] = "%-80s" % lines[-1]
-    rv = "\r\n".join(lines) + "\r\n"
-    return rv
