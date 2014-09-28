@@ -225,8 +225,8 @@ def recon(gx, gy, dx=0.1, dy=0.1, pad=1, w=1.):
     
     c = np.zeros((pad * rows, pad * cols), dtype=complex)
     
-    mid_col = (np.floor((pad * cols) / 2.0) + 1)
-    mid_row = (np.floor((pad * rows) / 2.0) + 1)
+    mid_col = pad * cols // 2.0 + 1
+    mid_row = pad * rows // 2.0 + 1
      
     for i in range(pad * rows):
         for j in range(pad * cols):
