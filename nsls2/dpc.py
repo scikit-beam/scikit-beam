@@ -86,29 +86,6 @@ def image_reduction(im, roi=None, bad_pixels=None):
     return xline, yline
 
 
-
-def ifft1D_shift(data):
-    """ 
-    shifted 1D inverse IFFT 
-        
-    Parameters
-    ----------
-    data : 1-D numpy array
-     
-    Returns
-    ----------
-    f : 1-D complex numpy array
-        IFFT result
-        zero-frequency component is shifted to the center
-         
-    """
-    
-    f = np.fft.fftshift(np.fft.ifft(data))
-        
-    return f
-
-
-
 def _rss(v, xdata, ydata):
     """ 
     Internal function used by fit()
@@ -233,10 +210,8 @@ def recon(gx, gy, dx=0.1, dy=0.1, pad=1, w=1.):
         
     """
     
-    shape = gx.shape
-    rows = shape[0]
-    cols = shape[1]
-    
+    rows, cols = gx.shape
+
     gx_padding = np.zeros((pad * rows, pad * cols), dtype='d')
     gy_padding = np.zeros((pad * rows, pad * cols), dtype='d')
     
