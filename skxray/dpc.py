@@ -74,39 +74,22 @@ def image_reduction(im, roi=None, bad_pixels=None):
       
     if bad_pixels is not None:
         for x, y in bad_pixels:
-            im[x, y] = 0
+            try:
+                im[x, y] = 0
+            except IndexError:
+                print("Bad pixel indexes are out of range.")
                 
     if roi is not None:
         x1, y1, x2, y2 = roi
-        im = im[x1:x2, y1:y2]
+        try:
+            im = im[x1:x2, y1:y2]
+        except IndexError:
+            print("The ROI is out of range.")
         
     xline = np.sum(im, axis=0)
     yline = np.sum(im, axis=1)
         
     return xline, yline
-
-
-
-def ifft1D_shift(data):
-    """ 
-    shifted 1D inverse IFFT 
-        
-    Parameters
-    ----------
-    data : 1-D numpy array
-     
-    Returns
-    ----------
-    f : 1-D complex numpy array
-        IFFT result
-        zero-frequency component is shifted to the center
-         
-    """
-    
-    f = np.fft.fftshift(np.fft.ifft(data))
-        
-    return f
-
 
 
 def _rss(v, xdata, ydata):
@@ -201,7 +184,7 @@ def dpc_fit(ref_f, f, start_point=[1, 0], solver='Nelder-Mead', tol=1e-8,
 def recon(gx, gy, dx=0.1, dy=0.1, pad=1, w=1.):
     """ 
     Reconstruct the final phase image 
-    
+
     Parameters
     ----------
     gx : 2-D numpy array
@@ -216,7 +199,7 @@ def recon(gx, gy, dx=0.1, dy=0.1, pad=1, w=1.):
     dy : float
         scanning step size in y direction (in micro-meter)
     
-    pad : integer
+    pad : float
         padding parameter
         default value, pad = 1 --> no padding
                     p p p
@@ -224,19 +207,25 @@ def recon(gx, gy, dx=0.1, dy=0.1, pad=1, w=1.):
                     p p p
                     
     w : float
-        weighting parameter
+        weighting parameter for the phase gradient along x and y direction when
+        constructing the final phase image
         
     Returns
     ----------
     phi : 2-D numpy array
         final phase image
         
+    References
+    ----------
+    [1] Yan, Hanfei, Yong S. Chu, Jorg Maser, Evgeny Nazaretski, Jungdae Kim,
+    Hyon Chol Kang, Jeffrey J. Lombardo, and Wilson KS Chiu, "Quantitative
+    x-ray phase imaging at the nanoscale by multilayer Laue lenses," Scientific 
+    reports 3 (2013).
+        
     """
     
-    shape = gx.shape
-    rows = shape[0]
-    cols = shape[1]
-    
+    rows, cols = gx.shape
+
     gx_padding = np.zeros((pad * rows, pad * cols), dtype='d')
     gy_padding = np.zeros((pad * rows, pad * cols), dtype='d')
     
@@ -250,17 +239,19 @@ def recon(gx, gy, dx=0.1, dy=0.1, pad=1, w=1.):
     
     c = np.zeros((pad * rows, pad * cols), dtype=complex)
     
-    mid_col = (np.floor((pad * cols) / 2.0) + 1)
-    mid_row = (np.floor((pad * rows) / 2.0) + 1)
-     
-    for i in range(pad * rows):
-        for j in range(pad * cols):
-            kappax = 2 * np.pi * (j + 1 - mid_col) / (pad * cols * dx)
-            kappay = 2 * np.pi * (i + 1 - mid_row) / (pad * rows * dy)
-            if kappax == 0 and kappay == 0:
-                c[i, j] = 0
-            else:
-                c[i, j] = -1j * (kappax * tx[i][j] + w * kappay * ty[i][j]) / (kappax ** 2 + w * kappay ** 2)
+    mid_col = pad * cols // 2.0 + 1
+    mid_row = pad * rows // 2.0 + 1
+
+    ax = 2 * np.pi * (np.arange(pad * cols) + 1 - mid_col) / (pad * cols * dx)
+    ay = 2 * np.pi * (np.arange(pad * rows) + 1 - mid_row) / (pad * rows * dy)
+
+    kappax, kappay = np.meshgrid(ax, ay)
+
+    c = -1j * (kappax * tx + w * kappay * ty)
+
+    c = np.ma.masked_values(c, 0)
+    c /= (kappax**2 + w * kappay**2)
+    c = np.ma.filled(c, 0)
 
     c = np.fft.ifftshift(c)
     phi_padding = np.fft.ifft2(c)
@@ -273,4 +264,112 @@ def recon(gx, gy, dx=0.1, dy=0.1, pad=1, w=1.):
 
 
 
+def dpc_runner(start_point = [1, 0], pixel_size = 55, focus_to_det = 1.46e6, 
+               rows = 121, cols = 121, energy = 19.5, roi = None, pad = 1., 
+               w = 1., bad_pixels = None, solver = 'Nelder-Mead', 
+               image_size = (61, 91), ref = None, image_sequence = None):
+    """
+    Controller function to run the whole DPC
+    
+    Parameters
+    ----------
+    start_point : 2-element list
+        start_point[0], start-searching point for the intensity attenuation
+        start_point[1], start-searching point for the phase gradient
+        
+    pixel_size : integer
+        pixel size of the detector
+    
+    focus_to_det : integer
+        focus to detector distance
+    
+    rows : integer
+        number of scanned rows 
+    
+    cols : integer
+        number of scanned columns
+    
+    energy : float
+        energy of the scanning x-ray
+    
+    roi : tuple
+        store the top-left and bottom-right coordinates of an rectangular ROI
+        roi = (11, 22, 33, 44) --> (11, 21) - (33, 43)
+        
+    pad : float
+        padding parameter
+        default value, pad = 1 --> no padding
+                    p p p
+        pad = 3 --> p v p
+                    p p p
+    
+    w : float
+        weighting parameter for the phase gradient along x and y direction when
+        constructing the final phase image
+    
+    bad_pixels : list
+        store the coordinates of bad pixels
+        [(1, 5), (2, 6)] --> 2 bad pixels --> (1, 5) and (2, 6)
+    
+    solver : string
+        method to solve the nonlinear fitting problem
+    
+    image_size : tuple
+        image_size[0], the number of rows for each scanned image
+        image_size[1], the number of columns for each scanned image
+    
+    ref : 2-D numpy array
+        store the reference image
+        
+    image_sequence : 3-D numpy array
+        store the set of scanned images
+        
+    Returns
+    -------
+    phi : 2-D numpy array
+        the final reconstructed phase image
+    
+    """
+    
+    # Initialize a, gx, gy and phi
+    a = np.zeros((rows, cols), dtype='d')
+    gx = np.zeros((rows, cols), dtype='d')
+    gy = np.zeros((rows, cols), dtype='d')
+    phi = np.zeros((rows, cols), dtype='d')
 
+    # Dimension reduction along x and y direction
+    refx, refy = image_reduction(ref, roi=roi)
+
+    # 1-D IFFT
+    ref_fx = np.fft.fftshift(np.fft.ifft(refx))
+    ref_fy = np.fft.fftshift(np.fft.ifft(refy))
+
+    # Same calculation on each diffraction pattern
+    for index, im in enumerate(image_sequence):
+        i, j = np.unravel_index(index, (rows, cols))
+        print(index)
+        # Dimension reduction along x and y direction
+        imx, imy = image_reduction(im, roi=roi)
+                
+        # 1-D IFFT
+        fx = np.fft.fftshift(np.fft.ifft(imx))
+        fy = np.fft.fftshift(np.fft.ifft(imy))
+                
+        # Nonlinear fitting
+        _a, _gx = dpc_fit(ref_fx, fx)
+        _a, _gy = dpc_fit(ref_fy, fy)
+                            
+        # Store one-point intermediate results
+        gx[i, j] = _gx
+        gy[i, j] = _gy
+        a[i, j] = _a
+        
+    # Scale gx and gy. Not necessary all the time
+    lambda_ = 12.4e-4 / energy
+    gx *= - len(ref_fx) * pixel_size / (lambda_ * focus_to_det)
+    gy *= len(ref_fy) * pixel_size / (lambda_ * focus_to_det)
+
+    # Reconstruct the final phase image
+    phi = recon(gx, gy)
+    
+    return phi

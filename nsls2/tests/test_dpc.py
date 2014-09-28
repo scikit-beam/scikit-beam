@@ -37,20 +37,6 @@
 This is a unit/integrated testing script for dpc.py, which conducts 
 Differential Phase Contrast (DPC) imaging based on Fourier-shift fitting.
     
-DPC calculation steps
----------------------
-1. Set parameters
-2. Load the reference image
-3. Dimension reduction along x and y direction
-4. 1-D IFFT
-5. Same calculation on each diffraction pattern
-    5.1. Read a diffraction pattern
-    5.2. Dimension reduction along x and y direction
-    5.3. 1-D IFFT
-    5.4. Nonlinear fitting
-6. Reconstruct the final phase image
-7. Save intermediate and final results
-    
 """
   
 from __future__ import (absolute_import, division, print_function,
@@ -109,24 +95,6 @@ def test_image_reduction():
     assert_array_equal(xline, xsum)
     
     assert_array_equal(yline, ysum)
-        
-
-def test_ifft1D_shift():
-    """
-    Test 1D shifted IFFT
-    
-    """
-    
-    input = np.arange(10)
-    
-    output = dpc.ifft1D_shift(input)
-    
-    expected = [-0.5 + 0.j, -0.5 + 0.16245985j, -0.5 + 0.36327126j, 
-                -0.5 + 0.68819096j, -0.5 + 1.53884177j, 4.5 + 0.j, 
-                -0.5 - 1.53884177j, -0.5 - 0.68819096j, -0.5 - 0.36327126j, 
-                -0.5 - 0.16245985j]
-    
-    assert_array_almost_equal(output, expected)
     
     
 def test_rss():
@@ -184,91 +152,26 @@ def test_dpc_fit():
     """    
    
 
-def test_dpc_end_to_end():
+def test_dpc_end_to_end(rows = 32, cols = 32, img_size = (40, 40)):
     """
-    Integrated test for DPC
+    Integrated test for DPC based on dpc_runner
     
     """
     
-    # 1. Set parameters
-    
-    start_point=[1, 0]
-    pixel_size=55
-    focus_to_det=1.46e6
-    rows = 32
-    cols = 32
-    energy=19.5
-    roi=None
-    pad=1
-    w=1.
-    bad_pixels=None
-    solver='Nelder-Mead'
-    img_size = (40, 40)
+    ref_image = np.ones(img_size)
+    image_sequence = np.ones((rows * cols, img_size[0], img_size[1]))
 
-    # Initialize a, gx, gy and phi
-    a = np.zeros((rows, cols), dtype='d')
-    gx = np.zeros((rows, cols), dtype='d')
-    gy = np.zeros((rows, cols), dtype='d')
-    phi = np.zeros((rows, cols), dtype='d')
-
-    # 2. Load the reference image
-    ref = np.ones(img_size)
-
-    # 3. Dimension reduction along x and y direction
-    refx, refy = dpc.image_reduction(ref, roi=roi)
-
-    # 4. 1-D IFFT
-    ref_fx = np.fft.fftshift(np.fft.ifft(refx))
-    ref_fy = np.fft.fftshift(np.fft.ifft(refy))
-
-    # 5. Same calculation on each diffraction pattern
-    for i in range(rows):
-        print(i)
-        for j in range(cols):
-                
-            try:
-                # 5.1. Read a diffraction pattern
-                im = np.ones(img_size)
-                   
-                # 5.2. Dimension reduction along x and y direction
-                imx, imy = dpc.image_reduction(im, roi=roi)
-            
-                # 5.3. 1-D IFFT
-                fx = np.fft.fftshift(np.fft.ifft(imx))
-                fy = np.fft.fftshift(np.fft.ifft(imy))
-                
-                # 5.4. Nonlinear fitting
-                _a, _gx = dpc.dpc_fit(ref_fx, fx)
-                _a, _gy = dpc.dpc_fit(ref_fy, fy)
-                            
-                # Store one-point intermediate results
-                gx[i, j] = _gx
-                gy[i, j] = _gy
-                a[i, j] = _a
-        
-            except Exception as ex:
-                print('Failed to calculate %s: %s' % (filename, ex))
-                gx[i, j] = 0
-                gy[i, j] = 0
-                a[i, j] = 0
-    
-    # Scale gx and gy. Not necessary all the time
-    lambda_ = 12.4e-4 / energy
-    gx *= - len(ref_fx) * pixel_size / (lambda_ * focus_to_det)
-    gy *= len(ref_fy) * pixel_size / (lambda_ * focus_to_det)
-
-    # 6. Reconstruct the final phase image
-    phi = dpc.recon(gx, gy)
+    phi = dpc.dpc_runner(rows = rows, cols = cols, image_size = img_size, 
+                         ref = ref_image, image_sequence = image_sequence)
     
     assert_array_almost_equal(phi, np.zeros((rows, cols)))
 
-
+   
 
 if __name__ == "__main__":
 
     test_image_reduction_default()
     test_image_reduction()
-    test_ifft1D_shift()
     test_rss()
     test_dpc_fit()
     
