@@ -52,7 +52,7 @@ import time
 
 
 def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
-                  num_pixels):
+                  num_pixels, lag_time):
     """
     Standard multiple-tau algorithm for finding the lag times and
     standard normalization scheme are used for one-time intensity
@@ -144,6 +144,9 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
     IAP_del = np.zeros((tot_channels, num_qs), dtype=np.float64)
     IAF_del = np.zeros((tot_channels, num_qs), dtype=np.float64)
 
+    # lag time values for averaging
+    lags = np.zeros((num_qs), dtype= np.float64)
+
     # matrix of one-time correlation
     g2 = np.zeros((tot_channels, num_qs+1), dtype=np.float64)
 
@@ -153,6 +156,7 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
     for i in range(2, num_imgs):
         # delay times for each image
         delay_nums = [x for x in (i - np.array(lag_steps)) if x > 0]
+        lags = [x*lag_time for  x in delay_nums]
 
         # number of terms for averaging
         num_terms = num_imgs - len(delay_nums)
@@ -166,7 +170,8 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
         IF = img_stack[buf_nums]
         # updating past intensities
         IP = img_stack[delay_nums]
-        IFP = (IF*IP)
+        #IFP = (IF*IP)
+        IFP = (img_stack[i]*IP)
 
         for j in range (0, len(delay_nums)):
             GD[j, :] = np.bincount(q_inds, weights=np.ravel(IFP[j, :]))
@@ -176,6 +181,12 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
             IAPD[j, :] = np.bincount(q_inds, weights=np.ravel(IP[j, :]))
             IAP_del[j, :] = np.delete(IAPD[j, :], [0, num_qs + 1])
 
+
+        for k in range (0, num_qs):
+            G_del[:, k] = G_del[:, k]/lags
+            IAF_del[:, k] = IAF_del[:, k]/lags
+            IAP_del[:, k] = IAP_del[:, k]/lags
+
         G += (G_del/num_pixels - G)/(num_terms)
         IAF += (IAF_del/num_pixels - IAF)/(num_terms)
         IAP += (IAP_del/num_pixels - IAP)/(num_terms)
@@ -183,8 +194,3 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
     g2 = G/(IAF*IAP)
 
     return g2
-
-def correlation(lag_steps, num_pixels, img_stack, num_qs):
-    pass
-
-
