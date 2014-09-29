@@ -504,7 +504,7 @@ def coefs_to_phi1(a1, a2):
     return - 0.5 * np.arctan2(a2, a1)
 
 
-def coefs_to_phi2_1(a1, r0, phi1):
+def coefs_to_phi2_cos(a1, r0, phi1):
     """
     Given the constant and cos(2chi) coefficients and
     the first tilt angle, compute the second tilt angle
@@ -529,7 +529,7 @@ def coefs_to_phi2_1(a1, r0, phi1):
     return np.arccos(np.sqrt((1 + P) / (1 - P)))
 
 
-def compute_phi2_2(a2, r0, phi1):
+def compute_phi2_sin(a2, r0, phi1):
     """
     Given the constant and cos(2chi) coefficients and
     the first tilt angle, compute the second tilt angle
@@ -613,7 +613,7 @@ def coefs_to_params(r0, a1, a2):
     `tilt_angles_to_coefs`
     """
     phi1 = coefs_to_phi1(a1, a2)
-    phi2 = coefs_to_phi2_1(a1, r0, phi1)
+    phi2 = coefs_to_phi2_cos(a1, r0, phi1)
     r = coefs_to_r(r0, phi2)
 
     return r, phi1, phi2
