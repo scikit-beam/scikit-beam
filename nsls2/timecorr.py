@@ -107,7 +107,7 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
     References: text [1]_
 
     .. [1] D. Lumma, L.B. Lurio, S.G.J. Mochrie, and M Sutton,
-       "Area detector based photon correlation in the egime of
+       "Area detector based photon correlation in the regime of
        short data batches: Data reduction for dynamic x-ray
        scattering," Rev. Sci. Instr., vol 71, pp 3274-3289, 2000.
     """
