@@ -46,10 +46,12 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import numpy as np
+import sys
 import inspect
 
 from nsls2.fitting.model.physics_peak import (elastic_peak, compton_peak,
-                                              gauss_peak)
+                                              gauss_peak, lorentzian_peak,
+                                              lorentzian_squared_peak)
 from nsls2.fitting.base.parameter_data import get_para
 from lmfit import Model
 
@@ -127,3 +129,142 @@ class GaussModel(Model):
     def __init__(self, *args, **kwargs):
         super(GaussModel, self).__init__(gauss_peak, *args, **kwargs)
 
+
+class LorentzianModel(Model):
+
+    __doc__ = _gen_class_docs(lorentzian_peak)
+
+    def __init__(self, *args, **kwargs):
+        super(LorentzianModel, self).__init__(lorentzian_peak, *args, **kwargs)
+
+
+class Lorentzian2Model(Model):
+
+    __doc__ = _gen_class_docs(lorentzian_peak)
+
+    def __init__(self, *args, **kwargs):
+        super(Lorentzian2Model, self).__init__(lorentzian_squared_peak, *args, **kwargs)
+
+
+def set_range(model_name,
+              parameter_name, parameter_value,
+              parameter_vary, parameter_range):
+    """
+    set up fitting parameters in lmfit model
+
+    Parameters
+    ----------
+    model_name : class object
+        Model class object from lmfit
+    parameter_name : str
+    parameter_value : value
+    parameter_vary : str
+        fixed, free or bounded
+    parameter_range : list
+        [min, max]
+    """
+    if parameter_vary == 'fixed':
+        model_name.set_param_hint(parameter_name, value=parameter_value, vary=False)
+    elif parameter_vary == 'free':
+        model_name.set_param_hint(parameter_name, value=parameter_value)
+    elif parameter_vary == 'bounded':
+        model_name.set_param_hint(parameter_name, value=parameter_value,
+                                  min=parameter_range[0], max=parameter_range[1])
+    else:
+        raise ValueError("unrecognized value {0}".format(parameter_vary))
+
+
+doc_template = """
+    wrapper of {0} fitting model for vistrails.
+
+    Parameters
+    ----------
+    input_data : array
+        input data of x and y
+    area : float
+        area under peak profile
+    area_vary : str
+        variance method
+        Options:
+            fixed,
+            free,
+            bounded
+    area_range : list
+        bounded range
+    center : float
+        center position
+    center_vary : str
+        variance method
+        Options:
+            fixed,
+            free,
+            bounded
+    center_range : list
+        bounded range
+    sigma : float
+        standard deviation
+    sigma_vary : str
+        variance method
+        Options:
+            fixed,
+            free,
+            bounded
+    sigma_range : list
+        bounded range
+
+    Returns
+    -------
+    param : dict
+        fitting results
+    y_fit : array
+        fitted y
+    """
+
+
+def _three_param_fit_factory(model):
+    """
+    Fit factory is used to include three functions, gauss, lorentzian
+    and lorentzian, which have similar arguments and outputs.
+
+    Parameters
+    ----------
+    model : class object
+        A model object defined in lmfit
+
+    Returns
+    -------
+    function
+        The main task of th function is to do the fitting.
+    """
+    def inner(input_data,
+              area, area_vary, area_range,
+              center, center_vary, center_range,
+              sigma, sigma_vary, sigma_range):
+        x_data, y_data = input_data
+
+        g = model()
+        set_range(g, 'area', area, area_vary, area_range)
+        set_range(g, 'center', center, center_vary, center_range)
+        set_range(g, 'sigma', sigma, sigma_vary, sigma_range)
+
+        result = g.fit(y_data, x=x_data)
+        param = result.values
+        y_fit = result.best_fit
+
+        return param, y_fit
+
+    inner.__doc__ = doc_template.format(model.__name__)
+    inner.__name__ = model.__name__.lower()[:-5] + str("_fit")
+    return inner
+
+ModelList = [GaussModel, LorentzianModel, Lorentzian2Model]
+
+mod = sys.modules[__name__]
+for m in ModelList:
+    func = _three_param_fit_factory(m)
+    setattr(mod, func.__name__, func)
+
+for func_name in [gauss_fit, lorentzian2_fit, lorentzian_fit]:
+    func_name.area_vary = ['fixed', 'free', 'bounded']
+    func_name.center_vary = ['fixed', 'free', 'bounded']
+    func_name.sigma_vary = ['fixed', 'free', 'bounded']

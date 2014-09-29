@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ######################################################################
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
@@ -202,63 +203,65 @@ class Element(object):
     Object to return all the elemental information
     related to fluorescence
 
-    Attributes
-    ----------
-    name : str
-        element name, such as Fe, Cu
-    Z : int
-        atomic number
-    mass : float
-        atomic mass in g/mol
-    density : float
-        element density in g/cm3
-    emission_line : `XrayLibWrap`
-        Emission line can be used as a unique characteristic
-        for qualitative identification of the element.
-        line is string type and defined as 'Ka1', 'Kb1'.
-        unit in KeV `XrayLibWrap`
-    cs : function
-        Fluorescence cross section
-        energy is incident energy
-        line is string type and defined as 'Ka1', 'Kb1'.
-        unit in cm2/g
-    bind_energy : `XrayLibWrap`
-        Binding energy is a measure of the energy required
-        to free electrons from their atomic orbits.
-        shell is string type and defined as "K", "L1".
-        unit in KeV
-    jump_factor : `XrayLibWrap`
-        Absorption jump factor is defined as the fraction
-        of the total absorption that is associated with
-        a given shell rather than for any other shell.
-        shell is string type and defined as "K", "L1".
-    fluor_yield : `XrayLibWrap`
-        The fluorescence quantum yield gives the efficiency
-        of the fluorescence process, and is defined as the ratio of the
-        number of photons emitted to the number of photons absorbed.
-        shell is string type and defined as "K", "L1".
 
     Parameters
     ----------
     element : str or int
         Element symbol or element atomic Z
 
+
+    Attributes
+    ----------
+    name : str
+    Z : int
+    mass : float
+    density : float
+    emission_line : `XrayLibWrap`
+    cs : function
+    bind_energy : `XrayLibWrap`
+    jump_factor : `XrayLibWrap`
+    fluor_yield : `XrayLibWrap`
+
+
     Examples
     --------
+    Create an `Element` object
+
     >>> e = Element('Zn') # or e = Element(30), 30 is atomic number
-    >>> e.emission_line['Ka1'] # energy for emission line Ka1
+
+    Get the emmission energy for the Kα1 line.
+
+    >>> e.emission_line['Ka1'] #
     8.638900756835938
-    >>> e.cs(10)['Ka1'] # cross section for emission line Ka1, 10 is incident energy
+
+    Cross section for emission line Kα1 with 10 keV incident energy
+
+    >>> e.cs(10)['Ka1']
     54.756561279296875
-    >>> e.fluor_yield['K'] # fluorescence yield for K shell
+
+    fluorescence yield for K shell
+
+    >>> e.fluor_yield['K']
     0.46936899423599243
-    >>> e.mass #atomic mass
+
+    atomic mass
+
+    >>> e.mass
     65.37
-    >>> e.density #density
+
+    density
+
+    >>> e.density
     7.14
-    >>> e.find(10, 0.5, 12) #emission lines within range(10 - 0.5, 10 + 0.5) at incident 12 KeV
+
+    Find all emission lines within with in the range [9.5, 10.5] keV with
+    an incident energy of 12 KeV.
+
+    >>> e.find(10, 0.5, 12)
     {'kb1': 9.571999549865723}
-    #########################   useful command   ###########################
+
+    List all of the known emission lines
+
     >>> e.emission_line.all # list all the emission lines
     [('ka1', 8.638900756835938),
      ('ka2', 8.615799903869629),
@@ -281,7 +284,10 @@ class Element(object):
      ('ma2', 0.0),
      ('mb', 0.0),
      ('mg', 0.0)]
-    >>> e.cs(10).all # list all the emission lines
+
+    List all of the known cross sections
+
+    >>> e.cs(10).all
     [('ka1', 54.756561279296875),
      ('ka2', 28.13692855834961),
      ('kb1', 7.509212970733643),
@@ -323,26 +329,59 @@ class Element(object):
 
     @property
     def name(self):
+        """
+        Atomic symbol, `str`
+
+        such as Fe, Cu
+        """
         return self._name
 
     @property
     def Z(self):
+        """
+        atomic number, `int`
+        """
         return self._z
 
     @property
     def mass(self):
+        """
+        atomic mass in g/mol, `float`
+        """
         return self._mass
 
     @property
     def density(self):
+        """
+        element density in g/cm3, `float`
+        """
         return self._density
 
     @property
     def emission_line(self):
+        """Emission line information, `XrayLibWrap`
+
+        Emission line can be used as a unique characteristic
+        for qualitative identification of the element.
+        line is string type and defined as 'Ka1', 'Kb1'.
+        unit in KeV
+        """
         return self._emission_line
 
     @property
     def cs(self):
+        """Fluorescence cross section function, `function`
+
+        Returns a function of energy which returns the
+        elemental cross section in cm2/g
+
+        The signature of the function is ::
+
+           x_section = func(enery)
+
+        where `energy` in in keV and `x_section` is in
+        cm²/g
+        """
         def myfunc(incident_energy):
             return XrayLibWrap_Energy(self._z, 'cs',
                                       incident_energy)
@@ -350,14 +389,35 @@ class Element(object):
 
     @property
     def bind_energy(self):
+        """Binding energy, `XrayLibWrap`
+
+        Binding energy is a measure of the energy required
+        to free electrons from their atomic orbits.
+        shell is string type and defined as "K", "L1".
+        unit in KeV
+        """
         return self._bind_energy
 
     @property
     def jump_factor(self):
+        """Jump Factor, `XrayLibWrap`
+
+        Absorption jump factor is defined as the fraction
+        of the total absorption that is associated with
+        a given shell rather than for any other shell.
+        shell is string type and defined as "K", "L1".
+        """
         return self._jump_factor
 
     @property
     def fluor_yield(self):
+        """fluorescence quantum yield, `XrayLibWrap`
+
+        The fluorescence quantum yield gives the efficiency
+        of the fluorescence process, and is defined as the ratio of the
+        number of photons emitted to the number of photons absorbed.
+        shell is string type and defined as "K", "L1".
+        """
         return self._fluor_yield
 
     def __repr__(self):
@@ -398,34 +458,45 @@ class Element(object):
 
 
 class XrayLibWrap(Mapping):
-    """
-    This is an interface to wrap xraylib to perform calculation related
-    to xray fluorescence. The code does one to one map between user options,
-    such as emission line, or binding energy, to xraylib function calls. Objects
-    of this class are read-only dicts and have all the expected methods.
+    """High-level interface to xraylib.
 
-    Attributes
-    ----------
-    all : list
-        List the physics quantity for
-        all the lines or all the shells.
+    This class exposes various functions in xraylib
+
+
+
+    This is an interface to wrap xraylib to perform calculation related
+    to xray fluorescence.
+
+    The code does one to one map between user options,
+    such as emission line, or binding energy, to xraylib function calls.
 
     Parameters
     ----------
     element : int
         atomic number
     info_type : str
-        option to choose which physics quantity to calculate as follows
-        lines : emission lines
-        bind_e : binding energy
-        jump : absorption jump factor
-        yield : fluorescence yield
+        option to choose which physics quantity to calculate as follows:
+
+        :lines: emission lines
+        :bind_e: binding energy
+        :jump: absorption jump factor
+        :yield: fluorescence yield
+
+
 
     Examples
     --------
+    Access the lines for zinc
+
     >>> x = XrayLibWrap(30, 'lines') # 30 is atomic number for element Zn
+
+    Access the energy of the Kα1 line.
+
     >>> x['Ka1'] # energy of emission line Ka1
     8.047800064086914
+
+    List all of the lines and their energies
+
     >>> x.all  # list energy of all the lines
     [(u'ka1', 8.047800064086914),
      (u'ka2', 8.027899742126465),
@@ -457,12 +528,14 @@ class XrayLibWrap(Mapping):
 
     @property
     def all(self):
-        """List the physics quantity for all the lines or all the shells. """
+        """List the physics quantity for all the lines or shells.
+        """
         return list(six.iteritems(self))
 
     def __getitem__(self, key):
         """
-        Call xraylib function to calculate physics quantity.
+        Call xraylib function to calculate physics quantity.  A return
+        value of 0 means that the quantity not valid.
 
         Parameters
         ----------
@@ -490,46 +563,31 @@ class XrayLibWrap_Energy(XrayLibWrap):
     Attributes
     ----------
     incident_energy : float
-        incident energy for fluorescence in KeV
+
 
     Parameters
     ----------
     element : int
         atomic number
     info_type : str
-        option to calculate physics quantity
-        related to incident energy, such as
-        cs : cross section, unit in cm2/g
+        option to calculate physics quantities which depend on
+        incident energy.  Valid values are
+
+        :cs: cross section, unit in cm2/g
+
     incident_energy : float
         incident energy for fluorescence in KeV
 
     Examples
     --------
-    >>> x = XrayLibWrap_Energy(30, 'cs', 12) # 30 is atomic number for element Zn, incident X-ray at 12 KeV
+    Cross section of zinc with an incident X-ray at 12 KeV
+
+    >>> x = XrayLibWrap_Energy(30, 'cs', 12)
+
+    Compute the cross sec of the Kα1 line.
+
     >>> x['Ka1'] # cross section for Ka1, unit in cm2/g
     34.44424057006836
-    >>> x.all  # list cross section for all the lines
-    [(u'ka1', 34.44424057006836),
-     (u'ka2', 17.699342727661133),
-     (u'kb1', 4.72361946105957),
-     (u'kb2', 0.0),
-     (u'la1', 0.08742962032556534),
-     (u'la2', 0.00986157264560461),
-     (u'lb1', 0.04976911097764969),
-     (u'lb2', 0.0),
-     (u'lb3', 0.0026036009658128023),
-     (u'lb4', 0.0014215140836313367),
-     (u'lb5', 0.0),
-     (u'lg1', 0.0),
-     (u'lg2', 0.0),
-     (u'lg3', 0.0),
-     (u'lg4', 0.0),
-     (u'll', 0.005490143783390522),
-     (u'ln', 0.0025618337094783783),
-     (u'ma1', 0.0),
-     (u'ma2', 0.0),
-     (u'mb', 0.0),
-     (u'mg', 0.0)]
     """
     def __init__(self, element, info_type, incident_energy):
         super(XrayLibWrap_Energy, self).__init__(element, info_type)
@@ -537,6 +595,9 @@ class XrayLibWrap_Energy(XrayLibWrap):
 
     @property
     def incident_energy(self):
+        """
+        Incident x-ray energy in keV, float
+        """
         return self._incident_energy
 
     @incident_energy.setter
@@ -545,7 +606,7 @@ class XrayLibWrap_Energy(XrayLibWrap):
         Parameters
         ----------
         val : float
-            new energy value
+            new incident x-ray energy in keV
         """
         self._incident_energy = val
 
@@ -565,7 +626,12 @@ class XrayLibWrap_Energy(XrayLibWrap):
 
 def emission_line_search(line_e, delta_e,
                          incident_energy, element_list=None):
-    """
+    """Find elements which have an emission line near an energy
+
+    This function returns a dict keyed on element type of all
+    elements that have an emission line with in `delta_e` of
+    `line_e` at the given x-ray energy.
+
     Parameters
     ----------
     line_e : float
@@ -574,9 +640,11 @@ def emission_line_search(line_e, delta_e,
          difference compared to energy in KeV
     incident_energy : float
         incident x-ray energy in KeV
-    element_list : list
-         List of elements to search for. Element abbreviations can be
-         any mix of upper and lower case, e.g., Hg, hG, hg, HG
+    element_list : list, optional
+         List of elements to restrict search to.
+
+         Element abbreviations can be any mix of upper and
+         lower case, e.g., Hg, hG, hg, HG
 
     Returns
     -------
@@ -603,11 +671,22 @@ def emission_line_search(line_e, delta_e,
 # http://stackoverflow.com/questions/3624753/how-to-provide-additional-initialization-for-a-subclass-of-namedtuple
 class HKL(namedtuple('HKL', 'h k l')):
     '''
-    Class for carrying around hkl values
-    for rings/peaks.
+    Namedtuple sub-class miller indicies (HKL)
 
-    This class also enforces that the values are
-    integers.
+    This class enforces that the values are integers.
+
+    Parameters
+    ----------
+    h : int
+    k : int
+    l : int
+
+    Attributes
+    ----------
+    length
+    h
+    k
+    l
     '''
     __slots__ = ()
 
@@ -621,12 +700,33 @@ class HKL(namedtuple('HKL', 'h k l')):
     @property
     def length(self):
         """
-        The L2 length of the hkl vector.
+        The L2 norm (length) of the hkl vector.
         """
-        return np.sqrt(np.sum(np.array(self)**2))
+        return np.linalg.norm(self)
 
 
-Reflection = namedtuple('Reflection', ('d', 'hkl', 'q'))
+class Reflection(namedtuple('Reflection', ('d', 'hkl', 'q'))):
+    """
+    Namedtuple sub-class for scattering reflection information
+
+    Parameters
+    ----------
+    d : float
+        Plane-spacing
+
+    HKL : `HKL`
+        miller indicies
+
+    q : float
+        q-value of the reflection
+
+    Attributes
+    ----------
+    d
+    HKL
+    q
+    """
+    __slots__ = ()
 
 
 class PowderStandard(object):
@@ -647,6 +747,11 @@ class PowderStandard(object):
                              for d, hkl, q in reflections]
         self._reflections.sort(key=lambda x: x[-1])
         self._name = name
+
+    def __str__(self):
+        return "Calibration standard: {}".format(self.name)
+
+    __repr__ = __str__
 
     @property
     def name(self):
@@ -793,3 +898,8 @@ calibration_standards = {'Si':
                                                      0.831,
                                                      0.815,
                                                      0.800])}
+"""
+Calibration standards
+
+A dictionary holding known powder-pattern calibration standards
+"""

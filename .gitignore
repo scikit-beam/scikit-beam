@@ -34,6 +34,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+cover/
 
 # Translations
 *.mo
@@ -59,3 +60,15 @@ docs/_build/
 
 #pycharm
 .idea/*
+
+#Dolphin browser files
+.directory/
+.directory
+
+#Binary data files
+*.volume
+*.am
+*.tiff
+*.tif
+*.dat
+*.DAT
