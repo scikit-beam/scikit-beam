@@ -529,7 +529,7 @@ def coefs_to_phi2_cos(a1, r0, phi1):
     return np.arccos(np.sqrt((1 + P) / (1 - P)))
 
 
-def compute_phi2_sin(a2, r0, phi1):
+def coefs_to_phi2_sin(a2, r0, phi1):
     """
     Given the constant and cos(2chi) coefficients and
     the first tilt angle, compute the second tilt angle
