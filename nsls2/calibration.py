@@ -529,8 +529,26 @@ def coefs_to_phi2_1(a1, r0, phi1):
     return np.arccos(np.sqrt((1 + P) / (1 - P)))
 
 
-def compute_phi2_a2(a2, r0, phi1):
+def compute_phi2_2(a2, r0, phi1):
     """
+    Given the constant and cos(2chi) coefficients and
+    the first tilt angle, compute the second tilt angle
+
+    Parameters
+    ----------
+    a2 : float
+        The coefficient on sin(2*chi) in the Fourier series
+
+    r0 : float
+        The constant term in the Fourier series
+
+    phi1 : float
+        The first tilt angle
+
+    Returns
+    -------
+    phi2 : float
+        The second tilt angle
 
     .. warning this return nan if phi1 == 0 due to a `1/sin(phi1)` term
     """
@@ -539,20 +557,63 @@ def compute_phi2_a2(a2, r0, phi1):
 
 
 def coefs_to_r(r0, phi2):
+    """
 
+    Given the constant term and phi2 value, compute the radius of the
+    un-tilted circle (which is also the minor-axis)
+
+    Parameters
+    ----------
+    r0 : float
+        The constant term in the Fourier series
+
+    phi2 : float
+        The second tilt angle
+
+    Returns
+    -------
+    r : float
+        The radius of the un-tilted circle/the minor axis
+
+    """
     c2 = cos(phi2)
     return np.sqrt(r0 / (.5 * ((1 / (c2*c2) + 1))))
 
 
-
 def coefs_to_params(r0, a1, a2):
+    """Fourier series coefficients to tilt angles
+
+    Given the coefficients from the Fourier series compute the
+    tilt angles.
+
+    Parameters
+    ----------
+    r0 : float
+        The constant coefficient in the Fourier expansion of r*r
+
+    a1 : float
+        The coefficent on the `cos(2 * chi)` in the Fourier expansion
+
+    a2 : float
+        The coefficent on the `sin(2 * chi)` in the Fourier expansion
+
+    Returns
+    -------
+    r : float
+        The radius of the un-distorted circle
+
+    phi1 : float
+        The first tilt angle in radians.  See `tilt_coords`
+
+    phi2 : float
+        The second tilt angle
+
+    See Also
+    --------
+    `tilt_angles_to_coefs`
     """
+    phi1 = coefs_to_phi1(a1, a2)
+    phi2 = coefs_to_phi2_1(a1, r0, phi1)
+    r = coefs_to_r(r0, phi2)
 
-    """
-    pass
-
-
-def coefs_to_rc(thetas, coefs):
-    # todo correct for theta vs chi difference
-    r = np.sqrt(coefs.r0 + cos(2 * thetas) * coefs.a1 + sin(2 * thetas) * coefs.a2)
-    return r * cos(thetas), r*sin(thetas)
+    return r, phi1, phi2
