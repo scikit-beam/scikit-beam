@@ -43,7 +43,7 @@ from numpy.testing import assert_array_almost_equal
 
 import nsls2.calibration as calibration
 import nsls2.calibration as core
-from nose.tools import assert_raises
+from nose.tools import assert_true
 
 
 def _draw_gaussian_rings(shape, calibrated_center, r_list, r_width):
@@ -133,3 +133,39 @@ def test_tilt_roundtrip():
 
     assert_array_almost_equal(row, r)
     assert_array_almost_equal(col, c)
+
+
+def _tilt_test_helper(tilts):
+    """
+    tilt -> coef -> tilt
+    """
+    coefs = calibration.tilt_angles_to_coefs(*tilts)
+    new_tilts = calibration.coefs_to_params(*coefs)
+    assert_array_almost_equal(tilts, new_tilts)
+
+
+def _phi2_tests(tilts):
+    r0, a1, a2 = calibration.tilt_angles_to_coefs(*tilts)
+    phi1 = calibration.coefs_to_phi1(a1, a2)
+    phi2_cos = calibration.coefs_to_phi2_cos(a1, r0, phi1)
+    phi2_sin = calibration.coefs_to_phi2_sin(a2, r0, phi1)
+
+    assert_true(np.abs(phi2_sin - phi2_cos) < 1e-7)
+
+
+def test_tilts_round_trip():
+    test_tilts = tuple((r, phi1, phi2)
+                  for r in (10, 300, 1000)
+                  for phi1 in np.linspace(0, np.pi/2, 10)
+                  for phi2 in np.linspace(0.0001, np.pi/4, 10))
+    for tilt in test_tilts:
+        yield _tilt_test_helper, tilt
+
+
+def test_phi2():
+    test_tilts = tuple((r, phi1, phi2)
+                  for r in (10, 300, 1000)
+                  for phi1 in np.linspace(0.1, np.pi/2, 10)
+                  for phi2 in np.linspace(0.0001, np.pi/4, 10))
+    for tilt in test_tilts:
+        yield _phi2_tests, tilt
