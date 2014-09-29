@@ -200,6 +200,9 @@ def gauss_peak_xrf(x, area, center, sigma,
                    ratio, fwhm_offset, fwhm_fanoprime,
                    epsilon=2.96):
     """
+    This is a function to construct xrf element peak, which is based on gauss_peak,
+    but more specific requirements need to be considered.
+
     Parameters
     ----------
     x : array
@@ -319,8 +322,6 @@ class ModelSpectrum(object):
     def setElasticModel(self):
         """
         setup parameters related to Elastic model
-
-
         """
         elastic = ElasticModel(prefix='e_')
 
@@ -382,7 +383,6 @@ class ModelSpectrum(object):
 
                     if line_name == 'ka1':
                         gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
-
                     else:
                         gauss_mod.set_param_hint('area', value=100, vary=True, min=0,
                                                  expr=str(ename)+'_ka1_'+'area')
@@ -458,7 +458,7 @@ class ModelSpectrum(object):
         self.mod = mod
         return
 
-    def model_fit(self, x, y, w=None, method='leastsq'):
+    def model_fit(self, x, y, w=None, method='leastsq', **kws):
         """
         Parameter
         ---------

@@ -20,9 +20,9 @@
 
  "compton_fwhm_corr": {"bound_type": "lohi", "min": 0.5, "max": 2.5, "value": 1.5},
 
- "compton_hi_f_tail": {"bound_type": "lohi", "min": 1e-06, "max": 1.0, "value": 0.01},
+ "compton_hi_f_tail": {"bound_type": "fixed", "min": 1e-06, "max": 1.0, "value": 0.01},
 
- "compton_hi_gamma": {"bound_type": "fixed", "min": 0.10, "max": 2.0, "value": 1.0},
+ "compton_hi_gamma": {"bound_type": "fixed", "min": 0.10, "max": 2.0, "value": 2.0},
 
  "element":
     {
