@@ -191,13 +191,13 @@ class ModelSpectrum(object):
                         'compton_f_step', 'compton_fwhm_corr',
                         'compton_hi_gamma', 'compton_hi_f_tail']
 
-        logger.debug('Set up parameters for compton model')
+        logger.debug('Started setting up parameters for compton model.')
         for name in compton_list:
             if name in self.parameter.keys():
                 _set_value(name, self.parameter[name], compton)
             else:
                 _set_value(name, self.parameter_default[name], compton)
-        logger.debug('Finish setting up paramters for compton model')
+        logger.debug('Finished setting up paramters for compton model.')
         return compton
 
     def setElasticModel(self):
@@ -212,14 +212,14 @@ class ModelSpectrum(object):
         else:
             _set_value(item, self.parameter_default[item], elastic)
 
-        logger.debug('Set up paramters for elastic model')
+        logger.debug('Started setting up parameters for elastic model.')
 
         # set constraints for the following global parameters
         elastic.set_param_hint(name='fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
         elastic.set_param_hint(name='fwhm_fanoprime', value=0.0, vary=True, expr='fwhm_fanoprime')
         elastic.set_param_hint(name='coherent_sct_energy', value=self.incident_energy,
                                expr='coherent_sct_energy')
-        logger.debug('Finish setting up paramters for elastic model')
+        logger.debug('Finished setting up parameters for elastic model.')
 
         return elastic
 
@@ -236,7 +236,7 @@ class ModelSpectrum(object):
         element_adjust = []
         if parameter.has_key('element'):
             element_adjust = parameter['element'].keys()
-            logger.info('Those elements need to be adjusted {0}'.format(element_adjust))
+            logger.info('Those elements need to be adjusted {0}.'.format(element_adjust))
         else:
             logger.info('No adjustment needs to be considered '
                         'on the position and width of element peak.')
@@ -249,7 +249,7 @@ class ModelSpectrum(object):
                                 'at this energy {1}'.format(ename, incident_energy))
                     continue
 
-                logger.debug('Started building element peak for {0}'.format(ename))
+                logger.debug('Started building {0} peak.'.format(ename))
 
                 for num, item in enumerate(e.emission_line.all[:4]):
                     line_name = item[0]
@@ -273,6 +273,7 @@ class ModelSpectrum(object):
                     gauss_mod.set_param_hint('ratio',
                                              value=ratio_v, vary=False)
 
+                    # position or width need to be adjusted
                     if ename in element_adjust:
                         if parameter['element'][ename].has_key(line_name.lower()+'_position'):
                             pos_val = parameter['element'][ename][line_name.lower()+'_position']
@@ -289,6 +290,9 @@ class ModelSpectrum(object):
                                                          min=1-width_val, max=1+width_val)
                                 logger.warning('change element {0} {1} peak width '
                                                'within range {2}'.format(ename, line_name, [-width_val, width_val]))
+
+                    # set branching ratio
+
 
                     mod = mod + gauss_mod
                 logger.debug('Finished building element peak for {0}'.format(ename))
