@@ -52,11 +52,24 @@ import os
 import logging
 logger = logging.getLogger(__name__)
 
+from nsls2.constants import Element
 from nsls2.fitting.model.physics_peak import (gauss_peak)
 from nsls2.fitting.model.physics_model import (ComptonModel, ElasticModel,
                                                _gen_class_docs)
 from nsls2.fitting.base.parameter_data import get_para
 from lmfit import Model
+
+
+k_line = ['Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr',
+          'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se',
+          'Br', 'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd',
+          'In', 'Sn', 'Sb', 'Te', 'I', 'dummy', 'dummy']
+
+l_line = ['Mo_L', 'Tc_L', 'Ru_L', 'Rh_L', 'Pd_L', 'Ag_L', 'Cd_L', 'In_L', 'Sn_L', 'Sb_L', 'Te_L', 'I_L', 'Xe_L', 'Cs_L', 'Ba_L', 'La_L', 'Ce_L', 'Pr_L', 'Nd_L', 'Pm_L', 'Sm_L',
+          'Eu_L', 'Gd_L', 'Tb_L', 'Dy_L', 'Ho_L', 'Er_L', 'Tm_L', 'Yb_L', 'Lu_L', 'Hf_L', 'Ta_L', 'W_L', 'Re_L', 'Os_L', 'Ir_L', 'Pt_L', 'Au_L', 'Hg_L', 'Tl_L',
+          'Pb_L', 'Bi_L', 'Po_L', 'At_L', 'Rn_L', 'Fr_L', 'Ac_L', 'Th_L', 'Pa_L', 'U_L', 'Np_L', 'Pu_L', 'Am_L', 'Br_L', 'Ga_L']
+
+m_line = ['Au_M', 'Pb_M', 'U_M', 'noise', 'Pt_M', 'Ti_M', 'Gd_M', 'dummy', 'dummy']
 
 
 def gauss_peak_xrf(x, area, center, sigma,
@@ -155,7 +168,12 @@ class ModelSpectrum(object):
                 self.parameter = json.load(json_data)
                 logger.info('Read data from configuration file {0}.'.format(file_path))
 
-        self.element_list = self.parameter['element_list'].split()
+        if ',' in self.parameter['element_list']:
+            self.element_list = self.parameter['element_list'].split(', ')
+        else:
+            self.element_list = self.parameter['element_list'].split()
+        self.element_list = [item.strip() for item in self.element_list]
+
         self.incident_energy = self.parameter['coherent_sct_energy']['value']
 
         self.parameter_default = get_para()
