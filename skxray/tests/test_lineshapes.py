@@ -348,7 +348,6 @@ def test_compton_model():
 
     assert_array_almost_equal(true_param, fit_val, decimal=1)
 
-
 if __name__ == '__main__':
     import nose
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

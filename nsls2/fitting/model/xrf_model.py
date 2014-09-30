@@ -108,8 +108,8 @@ def _set_value(para_name, input_dict, model_name):
     """
     Set parameter information to a given model
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     para_name : str
         parameter used for fitting
     input_dict : dict
@@ -140,8 +140,8 @@ class ModelSpectrum(object):
 
     def __init__(self, config_file='xrf_paramter.json'):
         """
-        Parameter
-        ---------
+        Parameters
+        ----------
         config_file : str
             file save all the fitting parameters
         """
@@ -173,7 +173,7 @@ class ModelSpectrum(object):
                         'compton_f_step', 'compton_fwhm_corr',
                         'compton_hi_gamma', 'compton_hi_f_tail']
 
-        logger.debug('Set up paramters for compton model')
+        logger.debug('Set up parameters for compton model')
         for name in compton_list:
             if name in self.parameter.keys():
                 _set_value(name, self.parameter[name], compton)
@@ -323,9 +323,9 @@ class ModelSpectrum(object):
 
     def model_fit(self, x, y, w=None, method='leastsq', **kws):
         """
-        Parameter
-        ---------
-
+        Parameters
+        ----------
+        
         """
 
         self.model_spectrum()
