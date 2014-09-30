@@ -243,6 +243,7 @@ def test_pvoigt_peak():
 
     out = pvoigt(x, a, cen, std, fraction)
 
+
     assert_array_almost_equal(y_true, out)
 
 

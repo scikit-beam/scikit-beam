@@ -52,9 +52,10 @@ import os
 import logging
 logger = logging.getLogger(__name__)
 
-from nsls2.fitting.model.physics_peak import (elastic_peak, compton_peak,
-                                              gauss_peak)
-
+from nsls2.fitting.model.physics_peak import (gauss_peak)
+from nsls2.fitting.model.physics_model import (ComptonModel, ElasticModel,
+                                               _gen_class_docs)
+from nsls2.fitting.base.parameter_data import get_para
 from lmfit import Model
 
 
@@ -62,7 +63,7 @@ def gauss_peak_xrf(x, area, center, sigma,
                    ratio, fwhm_offset, fwhm_fanoprime,
                    epsilon=2.96):
     """
-    This is a function to construct xrf element peak, which is based on gauss_peak,
+    This is a function to construct xrf element peak, which is based on gauss profile,
     but more specific requirements need to be considered.
 
     Parameters

@@ -70,7 +70,6 @@ from skxray.fitting.lineshapes import (elastic, compton, gaussian,
 
 from skxray.fitting.base.parameter_data import get_para
 
-
 from lmfit import Model
 
 
