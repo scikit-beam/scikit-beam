@@ -401,5 +401,5 @@ def test_multi_tau_lags():
 
     tot_channels, lag_steps = core.multi_tau_lags(multi_tau_levels, multi_tau_channels)
 
-    assert_almost_equal(16, tot_channels)
-    assert_array_almost_equal(delay_steps, lag_steps)
+    assert_array_equal(16, tot_channels)
+    assert_array_equal(delay_steps, lag_steps)
