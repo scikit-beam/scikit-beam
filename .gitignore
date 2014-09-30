@@ -72,3 +72,6 @@ docs/_build/
 *.tif
 *.dat
 *.DAT
+
+#generated documntation files
+doc/resource/api/generated/
