@@ -948,12 +948,12 @@ def d_to_q(d):
         d = \\frac{2 \pi}{q}
 
     Parameters
-    -------
+    ----------
     d : array
        An array of d (plane) spacing
 
     Returns
-    ----------
+    -------
     q : array
         An array of q values
 
