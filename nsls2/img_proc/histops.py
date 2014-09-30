@@ -84,7 +84,7 @@ def rescale_intensity_values(src_data,
     Returns
     -------
     result : ndarray
-        Output array can be an MxN (2D) or MxNxO (3D) numpy array
+        Output array can be an JxK (2D) or IxJxK (3D) numpy array
         Returns the resulting array to the designated variable
     """
     src_float = np.float32(src_data)
@@ -115,7 +115,7 @@ def hist_make(src_data,
     Parameters
     ----------
     src_data : ndarray
-        Can be MxN or MxNxO
+        Can be JxK or IxJxK
         Specifies the source data set from which you want to evaluate the
         histogram.
 
