@@ -1,3 +1,4 @@
+#! encoding: utf-8
 # ######################################################################
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
@@ -1034,3 +1035,55 @@ def twotheta_to_q(two_theta, wavelength):
     wavelength = float(wavelength)
     pre_factor = ((4 * np.pi) / wavelength)
     return pre_factor * np.sin(two_theta / 2)
+
+
+def multi_tau_lags(multitau_levels, multitau_channels):
+    """
+    Standard multiple-tau algorithm for finding the lag times (delay
+    times).
+
+    Parameters
+   ----------
+    multitau_levels : ndarray
+        number of levels of multiple-taus
+
+    multitau_channels : ndarray
+        number of channels or number of buffers in auto-correlators
+        normalizations (must be even)
+
+    Returns
+    -------
+    total_channels : int
+        total number of channels ( or total number of delay times)
+
+    lag_steps : ndarray
+        delay or lag steps for the multiple tau analysis
+
+    Notes
+    -----
+    The multi-tau correlation scheme was used for finding the lag times
+    (delay times).
+
+    References: text [1]_
+
+    .. [1] K. Schätzela, M. Drewela and  S. Stimaca, "Photon correlation
+       measurements at large lag times: Improving statistical accuracy,"
+       J. Mod. Opt., vol 35, p 711–718, 1988.
+    """
+
+    if (multitau_channels % 2 != 0):
+        raise ValueError(" Number of  multiple tau channels(buffers)"
+                         " must be even ")
+
+    # total number of channels ( or total number of delay times)
+    tot_channels = (multitau_levels + 1)*multitau_channels//2
+
+    lag = []
+    lag_steps = np.arange(1, multitau_channels + 1)
+    for i in range(2, multitau_levels + 1):
+        for j in range(1, multitau_channels//2 + 1):
+            lag.append((multitau_channels//2 + j)*(2**(i - 1)))
+
+    lag_steps = np.append(lag_steps, np.array(lag))
+
+    return tot_channels, lag_steps
