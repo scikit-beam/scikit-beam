@@ -468,4 +468,3 @@ class ModelSpectrum(object):
         self.model_spectrum()
         result = self.mod.fit(y, x=x, weights=w)
         return result
-
