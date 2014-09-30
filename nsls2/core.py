@@ -180,6 +180,10 @@ class MD_dict(MutableMapping):
 
 
 class verbosedict(dict):
+    """
+    A sub-class of dict which raises more verbose errors if
+    a key is not found.
+    """
     def __getitem__(self, key):
         try:
             v = dict.__getitem__(self, key)
