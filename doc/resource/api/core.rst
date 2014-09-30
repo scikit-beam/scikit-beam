@@ -16,6 +16,7 @@ Dictionary-like classes
 
    MD_dict
    verbosedict
+   RCParamDict
 
 Image warping functions
 -----------------------
