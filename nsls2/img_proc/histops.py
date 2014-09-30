@@ -48,8 +48,7 @@ def rescale_intensity_values(src_data,
     """
     The purpose of this function is to allow easy conversion, scaling, or 
     expansion of data set intensity ranges for additional histogram analysis
-    or
-    data manipulation.
+    or data manipulation.
 
 
     Parameters
@@ -87,7 +86,7 @@ def rescale_intensity_values(src_data,
         Output array can be an JxK (2D) or IxJxK (3D) numpy array
         Returns the resulting array to the designated variable
     """
-    src_float = np.float32(src_data)
+    src_float = np.asarray(src_data, dtype='float64')
     max_value = np.amax(src_float)
     min_value = np.amin(src_float)
     if min_value < 0:
@@ -101,7 +100,8 @@ def rescale_intensity_values(src_data,
     scale_factor = new_max - new_min + 1
     result = normalized_data * scale_factor
     result += new_min
-    result = np.around(result)
+    if 'int' in out_dType:
+        result = np.around(result)
     result = result.astype(out_dType)
     return result
 
