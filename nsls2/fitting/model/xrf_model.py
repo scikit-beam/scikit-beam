@@ -117,7 +117,7 @@ class GaussModel_xrf(Model):
         self.set_param_hint('epsilon', value=2.96, vary=False)
 
 
-def _set_value(para_name, input_dict, input_model):
+def _set_value_hint(para_name, input_dict, input_model):
     """
     Set parameter information to a given model
 
@@ -161,12 +161,9 @@ class ModelSpectrum(object):
         file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                  config_file)
 
-        if not os.path.exists(file_path):
-            logger.critical('No configuration file can be found.')
-        else:
-            with open(file_path, 'r') as json_data:
-                self.parameter = json.load(json_data)
-                logger.info('Read data from configuration file {0}.'.format(file_path))
+        with open(file_path, 'r') as json_data:
+            self.parameter = json.load(json_data)
+            logger.info('Read data from configuration file {0}.'.format(file_path))
 
         if ',' in self.parameter['element_list']:
             self.element_list = self.parameter['element_list'].split(', ')
@@ -194,9 +191,9 @@ class ModelSpectrum(object):
         logger.debug('Started setting up parameters for compton model.')
         for name in compton_list:
             if name in self.parameter.keys():
-                _set_value(name, self.parameter[name], compton)
+                _set_value_hint(name, self.parameter[name], compton)
             else:
-                _set_value(name, self.parameter_default[name], compton)
+                _set_value_hint(name, self.parameter_default[name], compton)
         logger.debug('Finished setting up paramters for compton model.')
         return compton
 
@@ -208,9 +205,9 @@ class ModelSpectrum(object):
 
         item = 'coherent_sct_amplitude'
         if item in self.parameter.keys():
-            _set_value(item, self.parameter[item], elastic)
+            _set_value_hint(item, self.parameter[item], elastic)
         else:
-            _set_value(item, self.parameter_default[item], elastic)
+            _set_value_hint(item, self.parameter_default[item], elastic)
 
         logger.debug('Started setting up parameters for elastic model.')
 
@@ -275,8 +272,10 @@ class ModelSpectrum(object):
                         continue
 
                     gauss_mod = GaussModel_xrf(prefix=str(ename)+'_'+str(line_name)+'_')
-                    gauss_mod.set_param_hint('fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
-                    gauss_mod.set_param_hint('fwhm_fanoprime', value=0.1, vary=True, expr='fwhm_fanoprime')
+                    gauss_mod.set_param_hint('fwhm_offset', value=0.1, vary=True,
+                                             expr='fwhm_offset')
+                    gauss_mod.set_param_hint('fwhm_fanoprime', value=0.1, vary=True,
+                                             expr='fwhm_fanoprime')
 
                     if line_name == 'ka1':
                         gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
@@ -313,7 +312,6 @@ class ModelSpectrum(object):
                     if ename in ratio_adjust:
                         if parameter['fit_branch_ratio'][ename].has_key(line_name.lower()):
                             ratio_change = parameter['fit_branch_ratio'][ename][line_name.lower()]
-                            print (ratio_change)
                             if ratio_change != 0:
                                 gauss_mod.set_param_hint('ratio', value=ratio_v, vary=True,
                                                          min=ratio_v*ratio_change[0],

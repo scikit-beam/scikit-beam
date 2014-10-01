@@ -5,6 +5,12 @@
 # @author: Li Li (lili@bnl.gov)                                        #
 # created on 09/10/2014                                                #
 #                                                                      #
+# Original code:                                                       #
+# @author: Mirna Lerotic, 2nd Look Consulting                          #
+#         http://www.2ndlookconsulting.com/                            #
+# Copyright (c) 2013, Stefan Vogt, Argonne National Laboratory         #
+# All rights reserved.                                                 #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
