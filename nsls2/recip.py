@@ -198,14 +198,13 @@ def hkl_to_q(hkl_arr):
 
 def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
     """
-    This will compute the Q values for all pixels in a shape specified by
-    detector_size and find the indices of the required Q rings. Count the
-    number of pixels in each Q ring.
+    This module will find the indices of the required Q rings, find the bin
+    edges of the Q rings, and count the number of pixels in each Q ring.
 
     Parameters
     ----------
     num_qs : int
-        number pf Q rings
+        number of Q rings
 
     first_q : float
         Q value of the first Q ring
@@ -214,7 +213,7 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
         thickness of the Q ring
 
     step_q : float, optional
-        step value for the next Q ring
+        step value for the next Q ring from the end of the previous Q ring
 
     q_val : ndarray
         Q space values for each pixel in the detector
@@ -234,30 +233,38 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
         edge values of each Q ring
 
     num_pixels : ndarray
-        number of pixels in certain Q ring 1X[num_qs]
+        number of pixels in certain Q ring
     """
 
-    if (q_val.shape[1] == 3):
+    if (q_val.ndim == 1):
+        q_values = q_val
+    elif (q_val.ndim == 3):
         q_values = np.sqrt(q_val[:, 0]**2 + q_val[:, 1]**2 + q_val[:, 2]**2)
+    else:
+        raise ValueError("Either HKL values(Qx, Qy, Qz) or Q space values"
+                              " for each pixel in the detector has to be specified")
 
     if (step_q==None):
         # last Q ring edge value
         last_q = first_q + num_qs*(delta_q)
         q_ring_val = np.linspace(first_q, last_q, num=(num_qs+1))
+
+        # indices of Q rings
+        q_inds = np.digitize(q_values, np.array(q_ring_val))
     else:
         q_ring_val = np.zeros(num_qs*2)
         q_rings = first_q
         q_ring_val[0] = q_rings
         for i in range(1, num_qs*2):
-            if (i/2 == 0):
+            if (i%2 == 0):
                q_rings += step_q
                q_ring_val[i] = q_rings
             else:
                 q_rings += delta_q
                 q_ring_val[i] = q_rings
 
-    # indices of Q rings
-    q_inds = np.digitize(q_values, np.array(q_ring_val))
+        # indices of Q rings
+        q_inds = np.digitize(q_values, np.array(q_ring_val))
 
     # number of pixels in each  Q ring
     num_pixels = np.bincount(q_inds)

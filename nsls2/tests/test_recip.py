@@ -161,28 +161,39 @@ def test_q_data():
     q_inds, q_ring_val, num_pixels = recip.q_rings(num_qs, first_q, delta_q,
                                                    cir_val)
 
-    q_inds, q_ring_val, num_pixels = recip.q_rings(num_qs, first_q, delta_q,
-                                                   cir_val)
-
     q_ring_val_m = [ 1.,  2.,  3.,  4.,  5.]
     num_pixels_m = [ 1,  4,  4,  0,  4, 87]
-    q_inds_m = [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-                5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5,
-                5, 5, 5, 5, 2, 1,2, 5, 5, 5, 5, 5, 5, 4, 1, 0, 1, 4, 5, 5,
-                5, 5, 5, 5, 2, 1, 2, 5, 5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5,
-                5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+    q_inds_m = ([5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+               [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+               [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+               [5, 5, 5, 5, 5, 4, 5, 5, 5, 5],
+               [5, 5, 5, 5, 2, 1, 2, 5, 5, 5],
+               [5, 5, 5, 4, 1, 0, 1, 4, 5, 5],
+               [5, 5, 5, 5, 2, 1, 2, 5, 5, 5],
+               [5, 5, 5, 5, 5, 4, 5, 5, 5, 5],
+               [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+               [5, 5, 5, 5, 5, 5, 5, 5, 5, 5])
 
     assert_array_almost_equal(q_ring_val_m, q_ring_val)
     assert_array_equal(num_pixels, num_pixels_m)
-    assert_array_equal(q_inds, q_inds_m)
+    assert_array_equal(q_inds, np.ravel(q_inds_m))
 
-    qstep_inds, qstep_ring_val,\
-    numstep_pixels = recip.q_rings(num_qs, first_q,delta_q, cir_val, step_q)
+    (qstep_inds, qstep_ring_val,
+     numstep_pixels) = recip.q_rings(num_qs, first_q,delta_q, cir_val, step_q)
 
     qstep_ring_val_m = [ 1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.]
     numstep_pixels_m = [ 1,  4,  4,  0,  4,  8,  0,  0, 79]
+    qstep_inds_m = ([8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+                   [8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+                   [8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+                   [8, 8, 8, 8, 5, 4, 5, 8, 8, 8],
+                   [8, 8, 8, 5, 2, 1, 2, 5, 8, 8],
+                   [8, 8, 8, 4, 1, 0, 1, 4, 8, 8],
+                   [8, 8, 8, 5, 2, 1, 2, 5, 8, 8],
+                   [8, 8, 8, 8, 5, 4, 5, 8, 8, 8],
+                   [8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+                   [8, 8, 8, 8, 8, 8, 8, 8, 8, 8])
 
     assert_almost_equal(qstep_ring_val, qstep_ring_val_m)
     assert_array_equal(numstep_pixels, numstep_pixels_m)
-    assert_array_equal(q_inds, qstep_inds)
-
+    assert_array_equal(qstep_inds, np.ravel(qstep_inds_m))
