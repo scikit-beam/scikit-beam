@@ -289,7 +289,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
 process_to_q.frame_mode = ['theta', 'phi', 'cart', 'hkl']
 
 
-def q_roi(num_rois, co_or, q_val):
+def q_roi(num_rois, roi_data, q_val, detector_size):
     """
     This module will find the indices of the required Q shape and count the
      number of pixels in that shape
@@ -309,6 +309,8 @@ def q_roi(num_rois, co_or, q_val):
         (Qx, Qy, Qz) - HKL values
         shape is [detector_size[0]*detector_size[1]][3]
 
+    detector_size:
+
     Returns
     -------
     q_inds : ndarray
@@ -327,5 +329,19 @@ def q_roi(num_rois, co_or, q_val):
         raise ValueError("Either HKL values(Qx, Qy, Qz) or Q space values"
                             " for each pixel in the detector has to be specified")
 
-    
+    q_mesh = np.zeros((detector_size[0], detector_size[1]))
+
+    for i in (0, num_rois):
+        x_coor, y_coor = roi_data[0], roi_data[1]
+        x_val = roi_data[3]
+        y_val = roi_data[4]
+        q_mesh[x_coor: x_coor + x_val, y_coor: y_coor + y_val] = np.ones((x_val, y_val))
+
+    wall = np.zeros((10,10),dtype=np.int)
+    block = np.arange(1,7).reshape(2,3)
+
+    x = 2
+    y = 3
+    wall[x:x+block.shape[0], y:y+block.shape[1]] = block
+
 
