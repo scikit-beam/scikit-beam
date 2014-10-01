@@ -92,3 +92,6 @@ def test_frame_mode_fail():
 
     for fails in [0, 5, 'cat']:
         yield _process_to_q_exception, pdict, fails
+
+
+def test_q_roi():
