@@ -399,7 +399,8 @@ def test_multi_tau_lags():
 
     delay_steps = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 28, 32]
 
-    tot_channels, lag_steps = core.multi_tau_lags(multi_tau_levels, multi_tau_channels)
+    tot_channels, lag_steps = core.multi_tau_lags(multi_tau_levels,
+                                                  multi_tau_channels)
 
     assert_array_equal(16, tot_channels)
     assert_array_equal(delay_steps, lag_steps)
