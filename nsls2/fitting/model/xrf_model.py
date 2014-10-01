@@ -117,7 +117,7 @@ class GaussModel_xrf(Model):
         self.set_param_hint('epsilon', value=2.96, vary=False)
 
 
-def _set_value(para_name, input_dict, model_name):
+def _set_value(para_name, input_dict, input_model):
     """
     Set parameter information to a given model
 
@@ -127,23 +127,23 @@ def _set_value(para_name, input_dict, model_name):
         parameter used for fitting
     input_dict : dict
         all the initial values and constraints for given parameters
-    model_name : object
+    input_model : object
         model object used in lmfit
     """
 
     if input_dict['bound_type'] == 'none':
-        model_name.set_param_hint(name=para_name, value=input_dict['value'], vary=True)
+        input_model.set_param_hint(name=para_name, value=input_dict['value'], vary=True)
     elif input_dict['bound_type'] == 'fixed':
-        model_name.set_param_hint(name=para_name, value=input_dict['value'], vary=False)
+        input_model.set_param_hint(name=para_name, value=input_dict['value'], vary=False)
     elif input_dict['bound_type'] == 'lohi':
-        model_name.set_param_hint(name=para_name, value=input_dict['value'], vary=True,
-                                  min=input_dict['min'], max=input_dict['max'])
+        input_model.set_param_hint(name=para_name, value=input_dict['value'], vary=True,
+                                   min=input_dict['min'], max=input_dict['max'])
     elif input_dict['bound_type'] == 'lo':
-        model_name.set_param_hint(name=para_name, value=input_dict['value'], vary=True,
-                                  min=input_dict['min'])
+        input_model.set_param_hint(name=para_name, value=input_dict['value'], vary=True,
+                                   min=input_dict['min'])
     elif input_dict['bound_type'] == 'hi':
-        model_name.set_param_hint(name=para_name, value=input_dict['value'], vary=True,
-                                  min=input_dict['max'])
+        input_model.set_param_hint(name=para_name, value=input_dict['value'], vary=True,
+                                   min=input_dict['max'])
     else:
         raise ValueError("could not set values for {0}".format(para_name))
     return
@@ -236,10 +236,26 @@ class ModelSpectrum(object):
         element_adjust = []
         if parameter.has_key('element'):
             element_adjust = parameter['element'].keys()
-            logger.info('Those elements need to be adjusted {0}.'.format(element_adjust))
+            logger.info('Those elements need to be adjusted: {0}.'.format(element_adjust))
         else:
             logger.info('No adjustment needs to be considered '
                         'on the position and width of element peak.')
+
+        ratio_adjust = []
+        if parameter.has_key('fit_branch_ratio'):
+            ratio_adjust = parameter['fit_branch_ratio'].keys()
+            logger.info('The branching ratio for those elements '
+                        'will be adjusted: {0}.'.format(ratio_adjust))
+        else:
+            logger.info('No fitting adjustment on branching ratio needs to be considered.')
+
+        ratio_set = []
+        if parameter.has_key('set_branch_ratio'):
+            ratio_set = parameter['set_branch_ratio'].keys()
+            logger.info('The branching ratio for those elements '
+                        'will be reset by users: {0}.'.format(ratio_adjust))
+        else:
+            logger.info('No adjustment on branching ratio needs to be considered.')
 
         for ename in element_list:
             if ename in k_line:
@@ -272,6 +288,8 @@ class ModelSpectrum(object):
                     ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
                     gauss_mod.set_param_hint('ratio',
                                              value=ratio_v, vary=False)
+                    logger.info('Element {0} {1} peak is at energy {2} with '
+                                'branching ratio {3}.'. format(ename, line_name, val, ratio_v))
 
                     # position or width need to be adjusted
                     if ename in element_adjust:
@@ -291,8 +309,27 @@ class ModelSpectrum(object):
                                 logger.warning('change element {0} {1} peak width '
                                                'within range {2}'.format(ename, line_name, [-width_val, width_val]))
 
-                    # set branching ratio
+                    # fit branching ratio
+                    if ename in ratio_adjust:
+                        if parameter['fit_branch_ratio'][ename].has_key(line_name.lower()):
+                            ratio_change = parameter['fit_branch_ratio'][ename][line_name.lower()]
+                            print (ratio_change)
+                            if ratio_change != 0:
+                                gauss_mod.set_param_hint('ratio', value=ratio_v, vary=True,
+                                                         min=ratio_v*ratio_change[0],
+                                                         max=ratio_v*ratio_change[1])
+                                logger.warning('Fit element {0} {1} branching ratio '
+                                               'within range {2}.'.format(ename, line_name,
+                                                                          [ratio_change[0]*ratio_v,
+                                                                           ratio_change[1]*ratio_v]))
 
+                    # set branching ratio
+                    if ename in ratio_set:
+                        if parameter['set_branch_ratio'][ename].has_key(line_name.lower()):
+                            ratio_new = parameter['set_branch_ratio'][ename][line_name.lower()]
+                            gauss_mod.set_param_hint('ratio', value=ratio_v*ratio_new, vary=False)
+                            logger.warning('Set element {0} {1} branching ratio as '
+                                           '{2}.'.format(ename, line_name, ratio_v*ratio_new))
 
                     mod = mod + gauss_mod
                 logger.debug('Finished building element peak for {0}'.format(ename))
@@ -351,8 +388,6 @@ class ModelSpectrum(object):
         """
 
         self.model_spectrum()
-
-        print ("fitting params: ", kws)
 
         pars = self.mod.make_params()
         result = self.mod.fit(y, pars, x=x, weights=w,

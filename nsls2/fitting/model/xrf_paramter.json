@@ -6,9 +6,9 @@
  
  "compton_amplitude": {"bound_type": "none", "min": 0.0, "max": 1.0e7, "value": 1.0e5},
 
- "fwhm_offset": {"bound_type": "lohi", "min": 0.005, "max": 1.5, "value": 0.07},
+ "fwhm_offset": {"bound_type": "lohi", "min": 0.005, "max": 0.5, "value": 0.07},
 
- "fwhm_fanoprime": {"bound_type": "fixed", "min": 0.0, "max": 0.001, "value": 0.00},
+ "fwhm_fanoprime": {"bound_type": "lohi", "min": 0.0, "max": 0.00001, "value": 0.00},
 
  "compton_angle": {"bound_type": "lohi", "min": 75.0, "max": 100.0, "value": 90.0},
 
@@ -32,6 +32,7 @@
 
  "set_branch_ratio":
     {
+     "Ca": {"ka1":1.0, "ka2":1.0},
      "Fe": {"ka1":1, "ka2":1, "kb1":1, "kb2":1},
      "Cu": {"ka1":1, "ka2":1, "kb1":1, "kb2":1},
      "Gd_L": {"la1":1, "la2":1, "lb1":1, "lb2":1, "lb3":1, "lb4":1, "lb5":1,
@@ -40,8 +41,6 @@
 
  "fit_branch_ratio":
     {
-     "Fe": {"ka1":0.05, "ka2":0, "kb1":0, "kb2":0},
-     "Cu": {"ka1":0, "ka2":0.1, "kb1":0.1, "kb2":0},
-     "Gd_L": {"la1":0.1, "la2":0.0, "lb1":0.05}
+     "Ca": {"ka1":[0.5, 1.2], "ka2":[0.8, 1,2], "kb1":[1.0, 5.5]}
     }
 }
