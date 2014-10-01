@@ -1044,10 +1044,10 @@ def multi_tau_lags(multitau_levels, multitau_channels):
 
     Parameters
     ----------
-    multitau_levels : ndarray
+    multitau_levels : int
         number of levels of multiple-taus
 
-    multitau_channels : ndarray
+    multitau_channels : int
         number of channels or number of buffers in auto-correlators
         normalizations (must be even)
 
