@@ -353,9 +353,8 @@ def compton(x, compton_amplitude, coherent_sct_energy,
 
     x = e_offset + x * e_linear + x**2 * e_quadratic
 
-    compton_e = (coherent_sct_energy
-                 / (1 + (coherent_sct_energy / 511)
-                    * (1 - np.cos(compton_angle * np.pi / 180))))
+    compton_e = coherent_sct_energy / (1 + (coherent_sct_energy / 511) *
+                                       (1 - np.cos(compton_angle * np.pi / 180)))
     
     temp_val = 2 * np.sqrt(2 * np.log(2))
     sigma = np.sqrt((fwhm_offset / temp_val)**2 +

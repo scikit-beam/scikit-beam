@@ -73,8 +73,8 @@ m_line = ['Au_M', 'Pb_M', 'U_M', 'noise', 'Pt_M', 'Ti_M', 'Gd_M', 'dummy', 'dumm
 
 
 def gauss_peak_xrf(x, area, center, sigma, ratio,
-                   e_linear, e_offset, e_quadratic,
                    fwhm_offset, fwhm_fanoprime,
+                   e_offset, e_linear, e_quadratic,
                    epsilon=2.96):
     """
     This is a function to construct xrf element peak, which is based on gauss profile,
@@ -96,6 +96,12 @@ def gauss_peak_xrf(x, area, center, sigma, ratio,
         global fitting parameter for peak width
     fwhm_fanoprime : float
         global fitting parameter for peak width
+    e_offset : float
+        offset of energy calibration
+    e_linear : float
+        linear coefficient in energy calibration
+    e_quadratic : float
+        quadratic coefficient in energy calibration
 
     Returns
     -------
@@ -187,10 +193,10 @@ class ModelSpectrum(object):
 
         compton_list = ['coherent_sct_energy', 'compton_amplitude',
                         'compton_angle', 'fwhm_offset', 'fwhm_fanoprime',
+                        'e_offset', 'e_linear', 'e_quadratic',
                         'compton_gamma', 'compton_f_tail',
                         'compton_f_step', 'compton_fwhm_corr',
-                        'compton_hi_gamma', 'compton_hi_f_tail',
-                        'e_linear', 'e_offset', 'e_quadratic']
+                        'compton_hi_gamma', 'compton_hi_f_tail']
 
         logger.debug('Started setting up parameters for compton model.')
         for name in compton_list:
@@ -205,7 +211,7 @@ class ModelSpectrum(object):
         """
         setup parameters related to Elastic model
         """
-        elastic = ElasticModel(prefix='e_')
+        elastic = ElasticModel(prefix='elastic_')
 
         item = 'coherent_sct_amplitude'
         if item in self.parameter.keys():
@@ -216,10 +222,12 @@ class ModelSpectrum(object):
         logger.debug('Started setting up parameters for elastic model.')
 
         # set constraints for the following global parameters
-        elastic.set_param_hint(name='fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
-        elastic.set_param_hint(name='fwhm_fanoprime', value=0.0, vary=True, expr='fwhm_fanoprime')
-        elastic.set_param_hint(name='coherent_sct_energy', value=self.incident_energy,
-                               expr='coherent_sct_energy')
+        elastic.set_param_hint('e_offset', expr='e_offset')
+        elastic.set_param_hint('e_linear', expr='e_linear')
+        elastic.set_param_hint('e_quadratic', expr='e_quadratic')
+        elastic.set_param_hint('fwhm_offset', expr='fwhm_offset')
+        elastic.set_param_hint('fwhm_fanoprime', expr='fwhm_fanoprime')
+        elastic.set_param_hint('coherent_sct_energy', expr='coherent_sct_energy')
         logger.debug('Finished setting up parameters for elastic model.')
 
         return elastic
@@ -276,16 +284,11 @@ class ModelSpectrum(object):
                         continue
 
                     gauss_mod = GaussModel_xrf(prefix=str(ename)+'_'+str(line_name)+'_')
-                    gauss_mod.set_param_hint('e_linear', value=1, vary=True,
-                                             expr='e_linear')
-                    gauss_mod.set_param_hint('e_offset', value=0.0, vary=True,
-                                             expr='e_offset')
-                    gauss_mod.set_param_hint('e_quadratic', value=0.001,
-                                             expr='e_quadratic')
-                    gauss_mod.set_param_hint('fwhm_offset', value=0.1, vary=True,
-                                             expr='fwhm_offset')
-                    gauss_mod.set_param_hint('fwhm_fanoprime', value=0.1, vary=True,
-                                             expr='fwhm_fanoprime')
+                    gauss_mod.set_param_hint('e_offset', expr='e_offset')
+                    gauss_mod.set_param_hint('e_linear', expr='e_linear')
+                    gauss_mod.set_param_hint('e_quadratic', expr='e_quadratic')
+                    gauss_mod.set_param_hint('fwhm_offset', expr='fwhm_offset')
+                    gauss_mod.set_param_hint('fwhm_fanoprime', expr='fwhm_fanoprime')
 
                     if line_name == 'ka1':
                         gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
@@ -367,8 +370,8 @@ class ModelSpectrum(object):
 
                     gauss_mod = GaussModel_xrf(prefix=str(ename)+'_'+str(line_name)+'_')
 
-                    gauss_mod.set_param_hint('fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
-                    gauss_mod.set_param_hint('fwhm_fanoprime', value=0.1, vary=True, expr='fwhm_fanoprime')
+                    gauss_mod.set_param_hint('fwhm_offset', expr='fwhm_offset')
+                    gauss_mod.set_param_hint('fwhm_fanoprime', expr='fwhm_fanoprime')
 
                     if line_name == 'la1':
                         gauss_mod.set_param_hint('area', value=100, vary=True)
