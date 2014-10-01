@@ -337,11 +337,5 @@ def q_roi(num_rois, roi_data, q_val, detector_size):
         y_val = roi_data[4]
         q_mesh[x_coor: x_coor + x_val, y_coor: y_coor + y_val] = np.ones((x_val, y_val))
 
-    wall = np.zeros((10,10),dtype=np.int)
-    block = np.arange(1,7).reshape(2,3)
-
-    x = 2
-    y = 3
-    wall[x:x+block.shape[0], y:y+block.shape[1]] = block
 
 
