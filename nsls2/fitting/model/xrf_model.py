@@ -72,8 +72,9 @@ l_line = ['Mo_L', 'Tc_L', 'Ru_L', 'Rh_L', 'Pd_L', 'Ag_L', 'Cd_L', 'In_L', 'Sn_L'
 m_line = ['Au_M', 'Pb_M', 'U_M', 'noise', 'Pt_M', 'Ti_M', 'Gd_M', 'dummy', 'dummy']
 
 
-def gauss_peak_xrf(x, area, center, sigma,
-                   ratio, fwhm_offset, fwhm_fanoprime,
+def gauss_peak_xrf(x, area, center, sigma, ratio,
+                   e_linear, e_offset, e_quadratic,
+                   fwhm_offset, fwhm_fanoprime,
                    epsilon=2.96):
     """
     This is a function to construct xrf element peak, which is based on gauss profile,
@@ -105,6 +106,8 @@ def gauss_peak_xrf(x, area, center, sigma,
         temp_val = 2 * np.sqrt(2 * np.log(2))
         return np.sqrt((fwhm_offset/temp_val)**2 + center*epsilon*fwhm_fanoprime)
 
+    x = e_offset + x * e_linear + x**2 * e_quadratic
+
     return gauss_peak(x, area, center, sigma*get_sigma(center)) * ratio
 
 
@@ -117,7 +120,7 @@ class GaussModel_xrf(Model):
         self.set_param_hint('epsilon', value=2.96, vary=False)
 
 
-def _set_value_hint(para_name, input_dict, input_model):
+def _set_parameter_hint(para_name, input_dict, input_model):
     """
     Set parameter information to a given model
 
@@ -186,14 +189,15 @@ class ModelSpectrum(object):
                         'compton_angle', 'fwhm_offset', 'fwhm_fanoprime',
                         'compton_gamma', 'compton_f_tail',
                         'compton_f_step', 'compton_fwhm_corr',
-                        'compton_hi_gamma', 'compton_hi_f_tail']
+                        'compton_hi_gamma', 'compton_hi_f_tail',
+                        'e_linear', 'e_offset', 'e_quadratic']
 
         logger.debug('Started setting up parameters for compton model.')
         for name in compton_list:
             if name in self.parameter.keys():
-                _set_value_hint(name, self.parameter[name], compton)
+                _set_parameter_hint(name, self.parameter[name], compton)
             else:
-                _set_value_hint(name, self.parameter_default[name], compton)
+                _set_parameter_hint(name, self.parameter_default[name], compton)
         logger.debug('Finished setting up paramters for compton model.')
         return compton
 
@@ -205,9 +209,9 @@ class ModelSpectrum(object):
 
         item = 'coherent_sct_amplitude'
         if item in self.parameter.keys():
-            _set_value_hint(item, self.parameter[item], elastic)
+            _set_parameter_hint(item, self.parameter[item], elastic)
         else:
-            _set_value_hint(item, self.parameter_default[item], elastic)
+            _set_parameter_hint(item, self.parameter_default[item], elastic)
 
         logger.debug('Started setting up parameters for elastic model.')
 
@@ -272,6 +276,12 @@ class ModelSpectrum(object):
                         continue
 
                     gauss_mod = GaussModel_xrf(prefix=str(ename)+'_'+str(line_name)+'_')
+                    gauss_mod.set_param_hint('e_linear', value=1, vary=True,
+                                             expr='e_linear')
+                    gauss_mod.set_param_hint('e_offset', value=0.0, vary=True,
+                                             expr='e_offset')
+                    gauss_mod.set_param_hint('e_quadratic', value=0.001,
+                                             expr='e_quadratic')
                     gauss_mod.set_param_hint('fwhm_offset', value=0.1, vary=True,
                                              expr='fwhm_offset')
                     gauss_mod.set_param_hint('fwhm_fanoprime', value=0.1, vary=True,

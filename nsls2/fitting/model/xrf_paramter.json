@@ -6,6 +6,12 @@
  
  "compton_amplitude": {"bound_type": "none", "min": 0.0, "max": 1.0e7, "value": 1.0e5},
 
+ "e_linear": {"bound_type": "none", "min": 0.001, "max": 2, "value": 1},
+
+ "e_offset": {"bound_type": "none", "min": 0.0, "max": 0.1, "value": 0.01},
+
+ "e_quadratic": {"bound_type": "fixed", "min": 0.0, "max": 0.0001, "value": 0.0},
+
  "fwhm_offset": {"bound_type": "lohi", "min": 0.005, "max": 0.5, "value": 0.07},
 
  "fwhm_fanoprime": {"bound_type": "lohi", "min": 0.0, "max": 0.00001, "value": 0.00},
@@ -33,7 +39,7 @@
  "set_branch_ratio":
     {
      "Ca": {"ka1":1.0, "ka2":1.0},
-     "Fe": {"ka1":1, "ka2":1, "kb1":1, "kb2":1},
+     "Fe": {"ka1":1, "ka2":1},
      "Cu": {"ka1":1, "ka2":1, "kb1":1, "kb2":1},
      "Gd_L": {"la1":1, "la2":1, "lb1":1, "lb2":1, "lb3":1, "lb4":1, "lb5":1,
               "lg1":1, "lg2":1, "lg3":1, "lg4":1, "ll":1, "ln":1}
