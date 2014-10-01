@@ -1043,7 +1043,7 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     times).
 
     Parameters
-   ----------
+    ----------
     multitau_levels : ndarray
         number of levels of multiple-taus
 
@@ -1073,7 +1073,8 @@ def multi_tau_lags(multitau_levels, multitau_channels):
 
     if (multitau_channels % 2 != 0):
         raise ValueError("Number of  multiple tau channels(buffers)"
-                         " must be even. You provided {0} ".format(multitau_channels))
+                         " must be even. You provided {0} "
+                         .format(multitau_channels))
 
     # total number of channels ( or total number of delay times)
     tot_channels = (multitau_levels + 1)*multitau_channels//2
