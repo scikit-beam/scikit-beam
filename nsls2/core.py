@@ -1118,30 +1118,31 @@ def xy_rectangles(num_rois, roi_data, detector_size):
         number of pixels in certain rectangle shape
     """
 
-    xy_mesh = np.zeros((detector_size[0], detector_size[1]))
+    mesh = np.zeros((detector_size[0], detector_size[1]), dtype=np.int64)
 
     for i in range(0, num_rois):
-        x_coor, y_coor = roi_data[i, 0], roi_data[i, 1]
-        x_val = roi_data[i, 2]
-        y_val = roi_data[i, 3]
-        if ((x_val + x_coor) < detector_size[0] and
-                    (y_val + y_coor) < detector_size[1]):
-            (xy_mesh[x_coor: x_coor + x_val, y_coor: y_coor +
-                                                     y_val]) =\
-                np.ones((x_val, y_val))*(i + 1)
+        col_coor, row_coor = roi_data[i, 0], roi_data[i, 1]
+        col_val = roi_data[i, 2]
+        row_val = roi_data[i, 3]
+        if ((col_val + col_coor) < detector_size[0] and
+                    (row_val + row_coor) < detector_size[1]):
+
+            slc1 = slice(np.max([col_coor, 0]), np.min([col_coor + col_val,
+                                                       detector_size[0]]))
+            slc2 = slice(np.max([row_coor, 0]), np.min([row_coor + row_val,
+                                                       detector_size[1]]))
+            # assign a different scalar for each roi
+            mesh[slc1, slc2] = (i + 1)
         else:
             raise ValueError("Could not broadcast input array"
                              " from shape ({0},{1}) into ({2},{3})"
-                             " ".format(x_val, y_val, (detector_size[0]
-                                                       - x_coor - x_val),
+                             " ".format(col_val, row_val, (detector_size[0]
+                                                       - col_coor - col_val),
                                                       (detector_size[1]
-                                                       - y_coor - y_val)))
-
-    # convert xy_mesh array into integer array
-    xy_inds = xy_mesh.astype(int)
+                                                       - row_coor - row_val)))
 
     # find the number of pixels in each roi
-    num_pixels = np.bincount(np.ravel(xy_inds))
+    num_pixels = np.bincount(np.ravel(mesh))
     num_pixels = np.delete(num_pixels, 0)
 
-    return np.ravel(xy_inds), num_pixels
+    return np.ravel(mesh), num_pixels
