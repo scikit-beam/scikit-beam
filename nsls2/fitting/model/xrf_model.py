@@ -78,7 +78,9 @@ def gauss_peak_xrf(x, area, center, sigma, ratio,
                    epsilon=2.96):
     """
     This is a function to construct xrf element peak, which is based on gauss profile,
-    but more specific requirements need to be considered.
+    but more specific requirements need to be considered. For instance, the standard
+    deviation is replaced by global fitting parameters, and energy calibration on x is
+    taken into account.
 
     Parameters
     ----------
@@ -170,11 +172,14 @@ class ModelSpectrum(object):
 
         self.parameter = xrf_parameter
 
-        if ',' in self.parameter['element_list']:
-            self.element_list = self.parameter['element_list'].split(', ')
+        if self.parameter.has_key('element_list'):
+            if ',' in self.parameter['element_list']:
+                self.element_list = self.parameter['element_list'].split(', ')
+            else:
+                self.element_list = self.parameter['element_list'].split()
+            self.element_list = [item.strip() for item in self.element_list]
         else:
-            self.element_list = self.parameter['element_list'].split()
-        self.element_list = [item.strip() for item in self.element_list]
+            logger.critical(' No element is selected for fitting!')
 
         self.incident_energy = self.parameter['coherent_sct_energy']['value']
 
@@ -406,7 +411,21 @@ class ModelSpectrum(object):
         """
         Parameters
         ----------
-        
+        x : array
+            independent variable
+        y : array
+            intensity
+        w : array, optional
+            weight for fitting
+        method : str
+            default as leastsq
+        kws : dict
+            fitting criteria, such as max number of iteration
+
+        Returns
+        -------
+        obj
+            saving all the fitting results
         """
 
         self.model_spectrum()
