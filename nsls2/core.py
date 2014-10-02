@@ -1124,22 +1124,13 @@ def xy_rectangles(num_rois, roi_data, detector_size):
         col_coor, row_coor = roi_data[i, 0], roi_data[i, 1]
         col_val = roi_data[i, 2]
         row_val = roi_data[i, 3]
-        if ((col_val + col_coor) < detector_size[0] and
-                    (row_val + row_coor) < detector_size[1]):
 
-            slc1 = slice(np.max([col_coor, 0]), np.min([col_coor + col_val,
+        slc1 = slice(np.max([col_coor, 0]), np.min([col_coor + col_val,
                                                        detector_size[0]]))
-            slc2 = slice(np.max([row_coor, 0]), np.min([row_coor + row_val,
+        slc2 = slice(np.max([row_coor, 0]), np.min([row_coor + row_val,
                                                        detector_size[1]]))
-            # assign a different scalar for each roi
-            mesh[slc1, slc2] = (i + 1)
-        else:
-            raise ValueError("Could not broadcast input array"
-                             " from shape ({0},{1}) into ({2},{3})"
-                             " ".format(col_val, row_val, (detector_size[0]
-                                                       - col_coor - col_val),
-                                                      (detector_size[1]
-                                                       - row_coor - row_val)))
+        # assign a different scalar for each roi
+        mesh[slc1, slc2] = (i + 1)
 
     # find the number of pixels in each roi
     num_pixels = np.bincount(np.ravel(mesh))
