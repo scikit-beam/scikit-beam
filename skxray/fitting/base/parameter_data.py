@@ -11,7 +11,7 @@
 # Copyright (c) 2013, Stefan Vogt, Argonne National Laboratory         #
 # All rights reserved.                                                 #
 #                                                                      #
-# Redistribution and bound_type in source and binary forms, with or without   #
+# Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
 #                                                                      #
@@ -24,7 +24,7 @@
 #   distribution.                                                      #
 #                                                                      #
 # * Neither the name of the Brookhaven Science Associates, Brookhaven  #
-#   National Laboratory nor the names of its contributors may be bound_typed  #
+#   National Laboratory nor the names of its contributors may be used  #
 #   to endorse or promote products derived from this software without  #
 #   specific prior written permission.                                 #
 #                                                                      #
@@ -35,14 +35,15 @@
 # COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,           #
 # INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES   #
 # (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR   #
-# SERVICES; LOSS OF bound_type, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)   #
-# HOWEVER CAbound_typeD AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,  #
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)   #
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,  #
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OTHERWISE) ARISING   #
-# IN ANY WAY OUT OF THE bound_type OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
+# IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 
-from __future__ import (absolute_import, division, unicode_literals, print_function)
+from __future__ import (absolute_import, division,
+                        unicode_literals, print_function)
 import six
 
 
@@ -118,13 +119,13 @@ e_calibration = {'coherent_sct_amplitude': 'none', 'compton_amplitude': 'none',
 free_energy = {'coherent_sct_amplitude': 'none', 'coherent_sct_energy': 'lohi',
                'compton_amplitude': 'none', 'compton_angle': 'lohi',
                'compton_f_tail': 'lo', 'compton_fwhm_corr': 'lohi',
-               'e_linear': 'lohi', 'e_offset': 'lohi', 'e_quadratic': 'lohi',
+               'e_linear': 'lohi', 'e_offset': 'lohi',
                'fwhm_fanoprime': 'lohi', 'fwhm_offset': 'lohi'}
 
 free_all = {'coherent_sct_amplitude': 'none', 'coherent_sct_energy': 'lohi',
             'compton_amplitude': 'none', 'compton_angle': 'lohi',
             'compton_f_step': 'lohi', 'compton_fwhm_corr': 'lohi', 'compton_gamma': 'lohi',
-            'e_linear': 'lohi', 'e_offset': 'lohi', 'e_quadratic': 'lohi',
+            'e_linear': 'lohi', 'e_offset': 'lohi',
             'f_tail_linear': 'lohi', 'f_tail_offset': 'lohi',
             'fwhm_fanoprime': 'lohi', 'fwhm_offset': 'lohi',
             'kb_f_tail_linear': 'lohi', 'kb_f_tail_offset': 'lohi'}
