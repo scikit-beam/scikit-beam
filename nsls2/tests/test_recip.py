@@ -99,7 +99,7 @@ def test_frame_mode_fail():
         yield _process_to_q_exception, pdict, fails
 
 
-def test_q_roi():
+def test_q_rectangles():
     detector_size = (10,10)
     num_rois = 2
     roi_data = np.array(([2, 2, 3, 3],[6, 7, 1,2]), dtype=np.int64)
