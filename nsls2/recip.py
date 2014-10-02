@@ -335,7 +335,9 @@ def q_roi(num_rois, roi_data, q_val, detector_size):
         x_coor, y_coor = roi_data[0], roi_data[1]
         x_val = roi_data[3]
         y_val = roi_data[4]
-        q_mesh[x_coor: x_coor + x_val, y_coor: y_coor + y_val] = np.ones((x_val, y_val))
-
-
-
+        if ((x_val + x_coor)< detector_size[0] and (y_val + y_coor) < detector_size[1]):
+            q_mesh[x_coor: x_coor + x_val, y_coor: y_coor + y_val] = np.ones((x_val, y_val))*i
+        else:
+            raise ValueError("Could not broadcast input array from shape ({0},{1}) into"
+                             " ({2},{3})".format(x_val, y_val,(detector_size[0] - x_coor - x_val),
+                                                (detector_size[1] - y_coor - y_val)))
