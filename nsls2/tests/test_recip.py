@@ -3,11 +3,16 @@ from __future__ import (absolute_import, division, print_function,
 
 import six
 import numpy as np
-from nose.tools import raises
+
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_almost_equal)
+
+from nose.tools import assert_equal, assert_true, raises
+
+import nsls2.recip as recip
 
 from nsls2.testing.decorators import known_fail_if
 import numpy.testing as npt
-from nsls2 import recip
 
 
 @known_fail_if(six.PY3)
@@ -100,3 +105,18 @@ def test_q_roi():
     roi_data = np.array(([2, 2, 3, 3],[6, 7, 1,2]), dtype=np.int64)
 
     xy_inds, num_pixels = recip.q_rectangles(num_rois, roi_data, detector_size)
+
+    xy_inds_m =([0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 2, 2, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    num_pixels_m = [9, 2]
+
+    assert_array_equal(num_pixels, num_pixels_m)
+    assert_array_equal(xy_inds, np.ravel(xy_inds_m))
