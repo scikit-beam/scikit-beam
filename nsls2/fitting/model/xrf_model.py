@@ -160,19 +160,15 @@ def _set_parameter_hint(para_name, input_dict, input_model):
 
 class ModelSpectrum(object):
 
-    def __init__(self, config_file='xrf_paramter.json'):
+    def __init__(self, xrf_parameter):
         """
         Parameters
         ----------
-        config_file : str
-            file save all the fitting parameters
+        xrf_parameter : dict
+            saving all the fitting values and their bounds
         """
-        file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                 config_file)
 
-        with open(file_path, 'r') as json_data:
-            self.parameter = json.load(json_data)
-            logger.info('Read data from configuration file {0}.'.format(file_path))
+        self.parameter = xrf_parameter
 
         if ',' in self.parameter['element_list']:
             self.element_list = self.parameter['element_list'].split(', ')
