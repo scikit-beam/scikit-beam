@@ -1095,8 +1095,8 @@ def xy_rectangles(num_rois, roi_data, detector_size):
     This module will find the indices of rectangle or square shape rois and
     count the number of pixels in that shape.
 
-    Parameter
-    --------
+    Parameters
+    ----------
     num_rois: int
         number of region of interests(roi)
 
@@ -1124,20 +1124,24 @@ def xy_rectangles(num_rois, roi_data, detector_size):
         x_coor, y_coor = roi_data[i, 0], roi_data[i, 1]
         x_val = roi_data[i, 2]
         y_val = roi_data[i, 3]
-        if ((x_val + x_coor)< detector_size[0] and (y_val + y_coor) < detector_size[1]):
-            (xy_mesh[x_coor: x_coor + x_val, y_coor:
-            y_coor + y_val]) = np.ones((x_val, y_val))*(i +1)
+        if ((x_val + x_coor) < detector_size[0] and
+                    (y_val + y_coor) < detector_size[1]):
+            (xy_mesh[x_coor: x_coor + x_val, y_coor: y_coor +
+                                                     y_val]) =\
+                np.ones((x_val, y_val))*(i + 1)
         else:
-            raise ValueError("Could not broadcast input array from shape ({0},{1})"
-                             " into ({2},{3})".format(x_val, y_val,
-                                                      (detector_size[0] - x_coor - x_val),
-                                                      (detector_size[1] - y_coor - y_val)))
+            raise ValueError("Could not broadcast input array"
+                             " from shape ({0},{1}) into ({2},{3})"
+                             " ".format(x_val, y_val, (detector_size[0]
+                                                       - x_coor - x_val),
+                                                      (detector_size[1]
+                                                       - y_coor - y_val)))
 
     # convert xy_mesh array into integer array
     xy_inds = xy_mesh.astype(int)
 
     # find the number of pixels in each roi
     num_pixels = np.bincount(np.ravel(xy_inds))
-    num_pixels = np.delete(num_pixels,0)
+    num_pixels = np.delete(num_pixels, 0)
 
     return np.ravel(xy_inds), num_pixels
