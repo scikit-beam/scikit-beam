@@ -198,13 +198,13 @@ class ModelSpectrum(object):
                         'compton_f_step', 'compton_fwhm_corr',
                         'compton_hi_gamma', 'compton_hi_f_tail']
 
-        logger.debug('Started setting up parameters for compton model.')
+        logger.debug(' ###### Started setting up parameters for compton model. ######')
         for name in compton_list:
             if name in self.parameter.keys():
                 _set_parameter_hint(name, self.parameter[name], compton)
             else:
                 _set_parameter_hint(name, self.parameter_default[name], compton)
-        logger.debug('Finished setting up paramters for compton model.')
+        logger.debug(' Finished setting up paramters for compton model.')
         return compton
 
     def setElasticModel(self):
@@ -219,7 +219,7 @@ class ModelSpectrum(object):
         else:
             _set_parameter_hint(item, self.parameter_default[item], elastic)
 
-        logger.debug('Started setting up parameters for elastic model.')
+        logger.debug(' ###### Started setting up parameters for elastic model. ######')
 
         # set constraints for the following global parameters
         elastic.set_param_hint('e_offset', expr='e_offset')
@@ -228,7 +228,7 @@ class ModelSpectrum(object):
         elastic.set_param_hint('fwhm_offset', expr='fwhm_offset')
         elastic.set_param_hint('fwhm_fanoprime', expr='fwhm_fanoprime')
         elastic.set_param_hint('coherent_sct_energy', expr='coherent_sct_energy')
-        logger.debug('Finished setting up parameters for elastic model.')
+        logger.debug(' Finished setting up parameters for elastic model.')
 
         return elastic
 
@@ -245,26 +245,27 @@ class ModelSpectrum(object):
         element_adjust = []
         if parameter.has_key('element'):
             element_adjust = parameter['element'].keys()
-            logger.info('Those elements need to be adjusted: {0}.'.format(element_adjust))
+            logger.info(' The position and width of the following elements'
+                        ' need to be adjusted: {0}.'.format(element_adjust))
         else:
-            logger.info('No adjustment needs to be considered '
-                        'on the position and width of element peak.')
+            logger.info(' No adjustment needs to be considered'
+                        ' on the position and width of element peak.')
 
         ratio_adjust = []
         if parameter.has_key('fit_branch_ratio'):
             ratio_adjust = parameter['fit_branch_ratio'].keys()
-            logger.info('The branching ratio for those elements '
-                        'will be adjusted: {0}.'.format(ratio_adjust))
+            logger.info(' The branching ratio for those elements'
+                        ' will be adjusted: {0}.'.format(ratio_adjust))
         else:
-            logger.info('No fitting adjustment on branching ratio needs to be considered.')
+            logger.info(' No fitting adjustment on branching ratio needs to be considered.')
 
         ratio_set = []
         if parameter.has_key('set_branch_ratio'):
             ratio_set = parameter['set_branch_ratio'].keys()
-            logger.info('The branching ratio for those elements '
-                        'will be reset by users: {0}.'.format(ratio_adjust))
+            logger.info(' The branching ratio for those elements'
+                        ' will be reset by users: {0}.'.format(ratio_adjust))
         else:
-            logger.info('No adjustment on branching ratio needs to be considered.')
+            logger.info(' No adjustment on branching ratio needs to be considered.')
 
         for ename in element_list:
             if ename in k_line:
@@ -274,7 +275,7 @@ class ModelSpectrum(object):
                                 'at this energy {1}'.format(ename, incident_energy))
                     continue
 
-                logger.debug('Started building {0} peak.'.format(ename))
+                logger.debug(' ###### Started building {0} peak. ###### '.format(ename))
 
                 for num, item in enumerate(e.emission_line.all[:4]):
                     line_name = item[0]
@@ -300,26 +301,40 @@ class ModelSpectrum(object):
                     ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
                     gauss_mod.set_param_hint('ratio',
                                              value=ratio_v, vary=False)
-                    logger.info('Element {0} {1} peak is at energy {2} with '
-                                'branching ratio {3}.'. format(ename, line_name, val, ratio_v))
+                    logger.info(' {0} {1} peak is at energy {2} with'
+                                ' branching ratio {3}.'. format(ename, line_name, val, ratio_v))
 
                     # position or width need to be adjusted
                     if ename in element_adjust:
                         if parameter['element'][ename].has_key(line_name.lower()+'_position'):
                             pos_val = parameter['element'][ename][line_name.lower()+'_position']
-                            if pos_val != 0:
+                            if pos_val[0] <= pos_val[1]:
+                                gauss_mod.set_param_hint('center', value=val*pos_val[0],
+                                                         vary=False)
+                                logger.warning(' No fitting for the position of {0} {1}.'
+                                               ' Set energy at {2}, compared to original value {3}'.
+                                               format(ename, line_name, val*pos_val[0], val))
+                            else:
                                 gauss_mod.set_param_hint('center', value=val, vary=True,
-                                                         min=val*(1-pos_val), max=val*(1+pos_val))
-                                logger.warning('change element {0} {1} postion '
-                                               'within range {2}'.format(ename, line_name, [-pos_val, pos_val]))
+                                                         min=val*pos_val[0], max=val*pos_val[1])
+                                logger.warning(' Fit position of {0} {1} within range {2}'.
+                                               format(ename, line_name,
+                                                      [val*pos_val[0], val*pos_val[1]]))
 
                         if parameter['element'][ename].has_key(line_name.lower()+'_width'):
                             width_val = parameter['element'][ename][line_name.lower()+'_width']
-                            if width_val != 0:
+                            if width_val[0] <= width_val[1]:
+                                gauss_mod.set_param_hint('sigma', value=width_val[0],
+                                                         vary=False)
+                                logger.warning(' No fitting for relative width of {0} {1} .'
+                                               ' Set relative width as {2}'.
+                                               format(ename, line_name, width_val[0]))
+                            else:
                                 gauss_mod.set_param_hint('sigma', value=1, vary=True,
-                                                         min=1-width_val, max=1+width_val)
-                                logger.warning('change element {0} {1} peak width '
-                                               'within range {2}'.format(ename, line_name, [-width_val, width_val]))
+                                                         min=width_val[0], max=width_val[1])
+                                logger.warning(' Change peak with of {0} {1}'
+                                               ' within range {2}'.format(ename, line_name,
+                                                                          [width_val[0], width_val[1]]))
 
                     # fit branching ratio
                     if ename in ratio_adjust:
@@ -329,21 +344,21 @@ class ModelSpectrum(object):
                                 gauss_mod.set_param_hint('ratio', value=ratio_v, vary=True,
                                                          min=ratio_v*ratio_change[0],
                                                          max=ratio_v*ratio_change[1])
-                                logger.warning('Fit element {0} {1} branching ratio '
-                                               'within range {2}.'.format(ename, line_name,
-                                                                          [ratio_change[0]*ratio_v,
-                                                                           ratio_change[1]*ratio_v]))
+                                logger.warning(' Fit branching ratio of {0} {1}'
+                                               ' within range {2}.'.format(ename, line_name,
+                                                                           [ratio_change[0]*ratio_v,
+                                                                            ratio_change[1]*ratio_v]))
 
                     # set branching ratio
                     if ename in ratio_set:
                         if parameter['set_branch_ratio'][ename].has_key(line_name.lower()):
                             ratio_new = parameter['set_branch_ratio'][ename][line_name.lower()]
                             gauss_mod.set_param_hint('ratio', value=ratio_v*ratio_new, vary=False)
-                            logger.warning('Set element {0} {1} branching ratio as '
-                                           '{2}.'.format(ename, line_name, ratio_v*ratio_new))
+                            logger.warning(' Set branching ratio of {0} {1} as {2}.'.
+                                           format(ename, line_name, ratio_v*ratio_new))
 
                     mod = mod + gauss_mod
-                logger.debug('Finished building element peak for {0}'.format(ename))
+                logger.debug(' Finished building element peak for {0}'.format(ename))
 
             elif ename in l_line:
                 ename = ename[:-2]
