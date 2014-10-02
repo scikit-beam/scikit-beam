@@ -95,3 +95,8 @@ def test_frame_mode_fail():
 
 
 def test_q_roi():
+    detector_size = (10,10)
+    num_rois = 2
+    roi_data = np.array(([2, 2, 3, 3],[6, 7, 1,2]), dtype=np.int64)
+
+    xy_inds, num_pixels = recip.q_rectangles(num_rois, roi_data, detector_size)
