@@ -119,4 +119,4 @@ def test_q_rectangles():
     num_pixels_m = [9, 2]
 
     assert_array_equal(num_pixels, num_pixels_m)
-    assert_array_equal(xy_inds, np.ravel(xy_inds_m))
+    assert_array_equal(xy_inds, xy_inds_m)
