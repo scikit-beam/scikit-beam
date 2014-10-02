@@ -130,9 +130,16 @@ def test_elastic_peak():
     e_quadratic = 0
 
     ev = np.arange(8, 12, 0.1)
+<<<<<<< HEAD:skxray/tests/test_lineshapes.py
     out = elastic(ev, area, energy,
                   offset, fanoprime,
                   e_offset, e_linear, e_quadratic)
+=======
+    out = elastic_peak(ev, area, energy,
+                       offset, fanoprime,
+                       e_offset, e_linear, e_quadratic)
+
+>>>>>>> update functions api:nsls2/tests/test_xrf_physics_peak.py
     assert_array_almost_equal(y_true, out)
 
 
@@ -160,6 +167,7 @@ def test_compton_peak():
     gamma = 10
     hi_f_tail = 0.1
     hi_gamma = 1
+<<<<<<< HEAD:skxray/tests/test_lineshapes.py
 
     e_offset = 0
     e_linear = 1
@@ -171,6 +179,18 @@ def test_compton_peak():
                   e_offset, e_linear, e_quadratic, angle,
                   fwhm_corr, f_step, f_tail,
                   gamma, hi_f_tail, hi_gamma)
+=======
+    e_offset = 0
+    e_linear = 1
+    e_quadratic = 0
+    ev = np.arange(8, 12, 0.1)
+
+    out = compton_peak(ev, amp, energy, offset, fano,
+                       e_offset, e_linear, e_quadratic, angle,
+                       fwhm_corr, f_step, f_tail,
+                       gamma, hi_f_tail, hi_gamma)
+
+>>>>>>> update functions api:nsls2/tests/test_xrf_physics_peak.py
     assert_array_almost_equal(y_true, out)
 
 
@@ -271,6 +291,10 @@ def test_elastic_model():
     energy = 10
     offset = 0.02
     fanoprime = 0.01
+<<<<<<< HEAD:skxray/tests/test_lineshapes.py
+=======
+    eps = 2.96
+>>>>>>> update functions api:nsls2/tests/test_xrf_physics_peak.py
     e_offset = 0
     e_linear = 1
     e_quadratic = 0
@@ -278,16 +302,28 @@ def test_elastic_model():
     true_param = [fanoprime, area, energy]
 
     x = np.arange(8, 12, 0.1)
+<<<<<<< HEAD:skxray/tests/test_lineshapes.py
     out = elastic(x, area, energy, offset, fanoprime,
                   e_offset, e_linear, e_quadratic)
+=======
+    out = elastic_peak(x, area, energy, offset,
+                       fanoprime, e_offset, e_linear, e_quadratic)
+>>>>>>> update functions api:nsls2/tests/test_xrf_physics_peak.py
 
     elastic_model = ElasticModel()
 
     # fwhm_offset is not a sensitive parameter, used as a fixed value
+<<<<<<< HEAD:skxray/tests/test_lineshapes.py
     elastic_model.set_param_hint(name='fwhm_offset', value=0.02, vary=False)
     elastic_model.set_param_hint(name='e_offset', value=0, vary=False)
     elastic_model.set_param_hint(name='e_linear', value=1, vary=False)
     elastic_model.set_param_hint(name='e_quadratic', value=0, vary=False)
+=======
+    elastic.set_param_hint(name='fwhm_offset', value=0.02, vary=False)
+    elastic.set_param_hint(name='e_offset', value=0, vary=False)
+    elastic.set_param_hint(name='e_linear', value=1, vary=False)
+    elastic.set_param_hint(name='e_quadratic', value=0, vary=False)
+>>>>>>> update functions api:nsls2/tests/test_xrf_physics_peak.py
 
     result = elastic_model.fit(out, x=x, coherent_sct_energy=10,
                                fwhm_offset=0.02, fwhm_fanoprime=0.03,
@@ -319,22 +355,24 @@ def test_compton_model():
 
     true_param = [energy, amp]
 
+
     out = compton(x, amp, energy, offset, fano,
                   e_offset, e_linear, e_quadratic, angle,
                   fwhm_corr, f_step, f_tail,
                   gamma, hi_f_tail, hi_gamma)
 
-    compton_model = ComptonModel()
+    compton = ComptonModel()
     # parameters not sensitive
-    compton_model.set_param_hint(name='compton_hi_gamma', value=1, vary=False)
-    compton_model.set_param_hint(name='fwhm_offset', value=0.01, vary=False)
-    compton_model.set_param_hint(name='compton_angle', value=90, vary=False)
-    compton_model.set_param_hint(name='e_offset', value=0, vary=False)
-    compton_model.set_param_hint(name='e_linear', value=1, vary=False)
-    compton_model.set_param_hint(name='e_quadratic', value=0, vary=False)
-    compton_model.set_param_hint(name='fwhm_fanoprime', value=0.01, vary=False)
-    compton_model.set_param_hint(name='compton_hi_f_tail', value=0.01, vary=False)
-    compton_model.set_param_hint(name='compton_f_step', value=0.05, vary=False)
+
+    compton.set_param_hint(name='compton_hi_gamma', value=1, vary=False)
+    compton.set_param_hint(name='fwhm_offset', value=0.01, vary=False)
+    compton.set_param_hint(name='compton_angle', value=90, vary=False)
+    compton.set_param_hint(name='e_offset', value=0, vary=False)
+    compton.set_param_hint(name='e_linear', value=1, vary=False)
+    compton.set_param_hint(name='e_quadratic', value=0, vary=False)
+    compton.set_param_hint(name='fwhm_fanoprime', value=0.01, vary=False)
+    compton.set_param_hint(name='compton_hi_f_tail', value=0.01, vary=False)
+    compton.set_param_hint(name='compton_f_step', value=0.05, vary=False)
 
     # parameters with boundary
     compton_model.set_param_hint(name='coherent_sct_energy', value=10, min=9.5, max=10.5)

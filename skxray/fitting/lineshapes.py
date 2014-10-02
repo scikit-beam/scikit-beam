@@ -260,7 +260,7 @@ def elastic(x, coherent_sct_amplitude,
     coherent_sct_amplitude : float
         area of elastic peak
     coherent_sct_energy : float
-        incident energy                         
+        incident energy
     fwhm_offset : float
         global fitting parameter for peak width
     fwhm_fanoprime : float
