@@ -1100,8 +1100,9 @@ def xy_rectangles(num_rois, roi_data, detector_size):
     num_rois: int
         number of region of interests(roi)
 
-    co_or: ndarray
-        co-ordinates of roi's
+    roi_data: ndarray
+        coordinates of roi's and the, length and width of roi's
+        shape is [num_rois][4]
 
     detector_size : tuple
         2 element tuple defining the number of pixels in the detector. Order is
@@ -1111,9 +1112,10 @@ def xy_rectangles(num_rois, roi_data, detector_size):
     -------
     q_inds : ndarray
         indices of the Q values for the required shape
+        shape [detector_size[0]*detector_size[1]][1]
 
     num_pixels : ndarray
-        number of pixels in certain Q shape
+        number of pixels in certain rectangle shape
     """
 
     xy_mesh = np.zeros((detector_size[0], detector_size[1]))
@@ -1138,4 +1140,4 @@ def xy_rectangles(num_rois, roi_data, detector_size):
     num_pixels = np.bincount(np.ravel(xy_inds))
     num_pixels = np.delete(num_pixels,0)
 
-    return xy_inds, num_pixels
+    return np.ravel(xy_inds), num_pixels
