@@ -289,27 +289,22 @@ def process_to_q(setting_angles, detector_size, pixel_size,
 process_to_q.frame_mode = ['theta', 'phi', 'cart', 'hkl']
 
 
-def q_roi(num_rois, roi_data, q_val, detector_size):
+def q_rectangles(num_rois, roi_data, q_val, detector_size):
     """
-    This module will find the indices of the required Q shape and count the
-     number of pixels in that shape
+    This module will find the indices of rectangle or square shape and count the
+    number of pixels in that shape.
 
-     Parameter
-     --------
-
+    Parameter
+    --------
     num_rois: int
         number of region of interests(roi)
 
     co_or: ndarray
         co-ordinates of roi's
 
-    q_val:
-        Q space values for each pixel in the detector
-        shape is [detector_size[0]*detector_size[1]][1] or
-        (Qx, Qy, Qz) - HKL values
-        shape is [detector_size[0]*detector_size[1]][3]
-
-    detector_size:
+    detector_size : tuple
+        2 element tuple defining the number of pixels in the detector. Order is
+        (num_columns, num_rows)
 
     Returns
     -------
@@ -318,7 +313,6 @@ def q_roi(num_rois, roi_data, q_val, detector_size):
 
     num_pixels : ndarray
         number of pixels in certain Q shape
-
     """
 
     if (q_val.ndim == 1):
@@ -329,15 +323,24 @@ def q_roi(num_rois, roi_data, q_val, detector_size):
         raise ValueError("Either HKL values(Qx, Qy, Qz) or Q space values"
                             " for each pixel in the detector has to be specified")
 
-    q_mesh = np.zeros((detector_size[0], detector_size[1]))
+    xy_mesh = np.zeros((detector_size[0], detector_size[1]))
 
     for i in (0, num_rois):
         x_coor, y_coor = roi_data[0], roi_data[1]
         x_val = roi_data[3]
         y_val = roi_data[4]
         if ((x_val + x_coor)< detector_size[0] and (y_val + y_coor) < detector_size[1]):
-            q_mesh[x_coor: x_coor + x_val, y_coor: y_coor + y_val] = np.ones((x_val, y_val))*i
+            xy_mesh[x_coor: x_coor + x_val, y_coor: y_coor + y_val] = np.ones((x_val, y_val))*i
         else:
             raise ValueError("Could not broadcast input array from shape ({0},{1}) into"
                              " ({2},{3})".format(x_val, y_val,(detector_size[0] - x_coor - x_val),
                                                 (detector_size[1] - y_coor - y_val)))
+
+    # convert q_mesh array into integer array
+    q_inds = xy_mesh.astype(int)
+
+    # find the number of pixels in each roi
+    num_pixels = np.bincount(np.ravel(q_inds))
+    num_pixels = np.delete(num_pixels,0)
+
+    return q_inds, num_pixels
