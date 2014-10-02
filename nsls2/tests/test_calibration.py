@@ -169,3 +169,24 @@ def test_phi2():
                   for phi2 in np.linspace(0.0001, np.pi/4, 10))
     for tilt in test_tilts:
         yield _phi2_tests, tilt
+
+
+def test_data_to_coef():
+
+    phi1 = .1
+    phi2 = .1
+    r = 5
+
+    theta = np.linspace(0, 2*np.pi, 500, endpoint=False)
+    row = r * np.sin(theta)
+    col = r * np.cos(theta)
+
+    a, b = calibration.tilt_coords(phi1, phi2, row, col)
+    r_sq = a*a + b*b
+    chi = np.arctan2(b, a)
+
+    coefs = calibration.data_to_coefs(chi, r_sq)
+
+    c_r, c_phi1, c_phi2 = calibration.coefs_to_params(*coefs)
+
+    assert_array_almost_equal((r, phi1, phi2), (c_r, c_phi1, c_phi2))

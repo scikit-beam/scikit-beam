@@ -471,14 +471,20 @@ def data_to_coefs(chi, r_sq):
     # make sure everything really is an array
     chi = np.asarray(chi)
     r_sq = np.asarray(r_sq)
+
+    # sort!
+    indx = np.argsort(chi)
+    chi = chi[indx]
+    r_sq = r_sq[indx]
+
     # compute the mean (constant term)
     r0 = np.mean(r_sq)
 
     # compute the 2chi coefficients
     # TODO replace this with more accurate integration
     delta = np.mean(np.diff(chi))
-    a1 = np.sum(cos(2 * chi) * r_sq) * delta / np.pi
-    a2 = np.sum(sin(2 * chi) * r_sq) * delta / np.pi
+    a1 = .5 * np.sum(cos(2 * chi) * r_sq) * delta / np.pi
+    a2 = .5 * np.sum(sin(2 * chi) * r_sq) * delta / np.pi
 
     return r0, a1, a2
 
