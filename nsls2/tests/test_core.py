@@ -36,10 +36,12 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import six
-
 import numpy as np
+import logging
+logger = logging.getLogger(__name__)
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
+import sys
 
 from nose.tools import assert_equal, assert_true, raises
 
@@ -404,3 +406,163 @@ def test_multi_tau_lags():
 
     assert_array_equal(16, tot_channels)
     assert_array_equal(delay_steps, lag_steps)
+
+
+@raises(NotImplementedError)
+def test_wedge_integration():
+    core.wedge_integration(src_data=None, center=None, theta_start=None,
+                           delta_theta=None, r_inner=None, delta_r=None)
+
+
+def test_subtract_reference_images():
+    num_images = 10
+    img_dims = 200
+    ones = np.ones((img_dims, img_dims))
+    img_lst = [ones * _ for _ in range(num_images)]
+    img_arr = np.asarray(img_lst)
+    is_dark_lst = [True]
+    is_dark = False
+    was_dark = True
+    while len(is_dark_lst) < num_images:
+        if was_dark:
+            is_dark = False
+        else:
+            is_dark = np.random.rand() > 0.5
+        was_dark = is_dark
+        is_dark_lst.append(is_dark)
+
+    is_dark_arr = np.asarray(is_dark_lst)
+    # make sure that a list of 2d images can be passed in
+    core.subtract_reference_images(imgs=img_lst, is_reference=is_dark_arr)
+    # make sure that the reference arr can actually be a list
+    core.subtract_reference_images(imgs=img_arr, is_reference=is_dark_lst)
+    # make sure that both input arrays can actually be lists
+    core.subtract_reference_images(imgs=img_arr, is_reference=is_dark_lst)
+
+    # test that the number of returned images is equal to the expected number
+    # of returned images
+    num_expected_images = is_dark_lst.count(False)
+    # subtract an additional value if the last image is a reference image
+    # num_expected_images -= is_dark_lst[len(is_dark_lst)-1]
+    subtracted = core.subtract_reference_images(img_lst, is_dark_lst)
+    try:
+        assert_equal(num_expected_images, len(subtracted))
+    except AssertionError as ae:
+        print('is_dark_lst: {0}'.format(is_dark_lst))
+        print('num_expected_images: {0}'.format(num_expected_images))
+        print('len(subtracted): {0}'.format(len(subtracted)))
+        six.reraise(AssertionError, ae, sys.exc_info()[2])
+    # test that the image subtraction values are behaving as expected
+    img_sum_lst = [img_dims * img_dims * val for val in range(num_images)]
+    total_val = sum(img_sum_lst)
+    expected_return_val = 0
+    dark_val = 0
+    for idx, (is_dark, img_val) in enumerate(zip(is_dark_lst, img_sum_lst)):
+        if is_dark:
+            dark_val = img_val
+        else:
+            expected_return_val = expected_return_val - dark_val + img_val
+    # test that the image subtraction was actually processed correctly
+    return_sum = sum(subtracted)
+    try:
+        while True:
+            return_sum = sum(return_sum)
+    except TypeError:
+        # thrown when return_sum is a single number
+        pass
+
+    try:
+        assert_equal(expected_return_val, return_sum)
+    except AssertionError as ae:
+        print('is_dark_lst: {0}'.format(is_dark_lst))
+        print('expected_return_val: {0}'.format(expected_return_val))
+        print('return_sum: {0}'.format(return_sum))
+        six.reraise(AssertionError, ae, sys.exc_info()[2])
+
+
+@raises(ValueError)
+def _fail_img_to_relative_xyi_helper(input_dict):
+    core.img_to_relative_xyi(**input_dict)
+
+def test_img_to_relative_fails():
+    fail_dicts = [
+        # invalid values of x and y
+        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_x': -1, 'pixel_size_y': -1},
+        # valid value of x, no value for y
+        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_x': 1},
+        # valid value of y, no value for x
+        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_y': 1},
+        # valid value of y, invalid value for x
+        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_x': -1, 'pixel_size_y': 1},
+        # valid value of x, invalid value for y
+        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_x': 1, 'pixel_size_y': -1},
+        # invalid value of x, no value for y
+        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_x': -1,},
+        # invalid value of y, no value for x
+        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_y': -1,},
+    ]
+    for failer in fail_dicts:
+        yield _fail_img_to_relative_xyi_helper, failer
+
+
+def test_img_to_relative_xyi(random_seed=None):
+    from nsls2.core import img_to_relative_xyi
+    # make the RNG deterministic
+    if random_seed is not None:
+        np.random.seed(42)
+    # set the maximum image dims
+    maxx = 2000
+    maxy = 2000
+    # create a randomly sized image
+    nx = int(np.random.rand() * maxx)
+    ny = int(np.random.rand() * maxy)
+    # create a randomly located center
+    cx = np.random.rand() * nx
+    cy = np.random.rand() * ny
+    # generate the image
+    img = np.ones((nx, ny))
+    # generate options for the x center to test edge conditions
+    cx_lst = [0, cx, nx]
+    # generate options for the y center to test edge conditions
+    cy_lst = [0, cy, ny]
+    for cx, cy in zip(cx_lst, cy_lst):
+        # call the function
+        x, y, i = img_to_relative_xyi(img=img, cx=cx, cy=cy)
+        logger.debug('y {0}'.format(y))
+        logger.debug('sum(y) {0}'.format(sum(y)))
+        expected_total_y = sum(np.arange(ny, dtype=np.int64) - cy) * nx
+        logger.debug('expected_total_y {0}'.format(expected_total_y))
+        logger.debug('x {0}'.format(x))
+        logger.debug('sum(x) {0}'.format(sum(x)))
+        expected_total_x = sum(np.arange(nx, dtype=np.int64) - cx) * ny
+        logger.debug('expected_total_x {0}'.format(expected_total_x))
+        expected_total_intensity = nx * ny
+        try:
+            assert_almost_equal(sum(x), expected_total_x, decimal=0)
+            assert_almost_equal(sum(y), expected_total_y, decimal=0)
+            assert_equal(sum(i), expected_total_intensity)
+        except AssertionError as ae:
+            logger.error('img dims: ({0}, {1})'.format(nx, ny))
+            logger.error('img center: ({0}, {1})'.format(cx, cy))
+            logger.error('sum(returned_x): {0}'.format(sum(x)))
+            logger.error('expected_x: {0}'.format(expected_total_x))
+            logger.error('sum(returned_y): {0}'.format(sum(y)))
+            logger.error('expected_y: {0}'.format(expected_total_y))
+            logger.error('sum(returned_i): {0}'.format(sum(i)))
+            logger.error('expected_x: {0}'.format(expected_total_intensity))
+            six.reraise(AssertionError, ae, sys.exc_info()[2])
+
+
+if __name__ == "__main__":
+    level = logging.ERROR
+    ch = logging.StreamHandler()
+    ch.setLevel(level)
+    logger.addHandler(ch)
+    logger.setLevel(level)
+
+    num_calls = 0
+    while True:
+        test_img_to_relative_xyi()
+        num_calls += 1
+        if num_calls % 10 == 0:
+            print('{0} calls successful'.format(num_calls))

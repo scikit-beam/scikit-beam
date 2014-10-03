@@ -48,8 +48,7 @@ from six import string_types
 import time
 import sys
 from itertools import tee
-from collections import namedtuple, MutableMapping, defaultdict
-
+from collections import namedtuple, MutableMapping, defaultdict, deque
 import numpy as np
 from itertools import tee
 
@@ -440,7 +439,7 @@ keys_core = {
 }
 
 
-def img_subtraction_pre(img_arr, is_reference):
+def subtract_reference_images(imgs, is_reference):
     """
     Function to subtract a series of measured images from
     background/dark current/reference images.  The nearest reference
@@ -449,7 +448,7 @@ def img_subtraction_pre(img_arr, is_reference):
 
     Parameters
     ----------
-    img_arr : numpy.ndarray
+    imgs : numpy.ndarray
         Array of 2-D images
 
     is_reference : 1-D boolean array
@@ -476,32 +475,25 @@ def img_subtraction_pre(img_arr, is_reference):
         # use ValueError because the user passed in invalid data
         raise ValueError("The first image is not a reference image")
     # grab the first image
-    ref_imge = img_arr[0]
+    ref_imge = imgs[0]
     # just sum the bool array to get count
     ref_count = np.sum(is_reference)
     # make an array of zeros of the correct type
-    corrected_image = np.zeros(
-        (len(img_arr) - ref_count,) + img_arr.shape[1:],
-        dtype=img_arr.dtype)
-    # local loop counter
-    count = 0
+    corrected_image = deque()
     # zip together (lazy like this is really izip), images and flags
-    for img, ref in zip(img_arr[1:], is_reference[1:]):
+    for imgs, ref in zip(imgs[1:], is_reference[1:]):
         # if this is a ref image, save it and move on
         if ref:
-            ref_imge = img
+            ref_imge = imgs
             continue
         # else, do the subtraction
-        corrected_image[count] = img - ref_imge
-        # and increment the counter
-        count += 1
+        corrected_image.append(imgs - ref_imge)
 
-    # return the output
-    return corrected_image
+    # return the output as a list
+    return list(corrected_image)
 
 
-def detector2D_to_1D(img, calibrated_center, pixel_size=None,
-                     **kwargs):
+def img_to_relative_xyi(img, cx, cy, pixel_size_x=None, pixel_size_y=None):
     """
     Convert the 2D image to a list of x y I coordinates where
     x == x_img - detector_center[0] and
@@ -510,38 +502,51 @@ def detector2D_to_1D(img, calibrated_center, pixel_size=None,
     Parameters
     ----------
     img: `ndarray`
-        2D detector image
-
-    calibrated_center : tuple
-        see keys_core["calibrated_center"]["description"]
-
-    pixel_size : tuple, optional
-        conversion between pixels and real units
-
-        see keys_core["pixel_size"]["description"]
+        2D image
+    cx : float
+        Image center in the x direction
+    cy : float
+        Image center in the y direction
+    pixel_size_x : float, optional
+        Pixel size in x
+    pixel_size_y : float, optional
+        Pixel size in y
     **kwargs: dict
         Bucket for extra parameters in an unpacked dictionary
 
     Returns
     -------
-    X : `ndarray`
+    x : `ndarray`
         x-coordinate of pixel. shape (N, )
-    Y : `ndarray`
+    y : `ndarray`
         y-coordinate of pixel. shape (N, )
     I : `ndarray`
         intensity of pixel. shape (N, )
     """
-    if pixel_size is None:
-        pixel_size = (1, 1)
+    if pixel_size_x is not None and pixel_size_y is not None:
+        if pixel_size_x <= 0:
+            raise ValueError('Input parameter pixel_size_x must be greater '
+                             'than 0. Your value was ' +
+                             six.text_type(pixel_size_x))
+        if pixel_size_y <= 0:
+            raise ValueError('Input parameter pixel_size_y must be greater '
+                             'than 0. Your value was ' +
+                             six.text_type(pixel_size_y))
+    elif pixel_size_x is None and pixel_size_y is None:
+        pixel_size_x = 1
+        pixel_size_y = 1
+    else:
+        raise ValueError('pixel_size_x and pixel_size_y must both be None or '
+                         'greater than zero. You passed in values for '
+                         'pixel_size_x of {0} and pixel_size_y of {1]'
+                         ''.format(pixel_size_x, pixel_size_y))
 
     # Caswell's incredible terse rewrite
-    X, Y = np.meshgrid(pixel_size[0] * (np.arange(img.shape[0]) -
-                                        calibrated_center[0]),
-                       pixel_size[1] * (np.arange(img.shape[1]) -
-                                        calibrated_center[1]))
+    x, y = np.meshgrid(pixel_size_x * (np.arange(img.shape[0]) - cx),
+                       pixel_size_y * (np.arange(img.shape[1]) - cy))
 
-    # return the x, y and z coordinates (as a tuple? or is this a list?)
-    return X.ravel(), Y.ravel(), img.ravel()
+    # return x, y and intensity as 1D arrays
+    return x.ravel(), y.ravel(), img.ravel()
 
 
 def bin_1D(x, y, nx=None, min_x=None, max_x=None):
@@ -758,7 +763,7 @@ def wedge_integration(src_data, center, theta_start,
     float
         The integrated intensity under the wedge
     """
-    pass
+    raise NotImplementedError()
 
 
 def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
