@@ -50,7 +50,6 @@ from itertools import tee
 from collections import namedtuple, MutableMapping
 
 import numpy as np
-from itertools import tee
 
 import logging
 logger = logging.getLogger(__name__)
