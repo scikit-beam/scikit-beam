@@ -1211,3 +1211,52 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     lag_steps = np.append(lag_steps, np.array(lag))
 
     return tot_channels, lag_steps
+
+
+def xy_rectangles(num_rois, roi_data, detector_size):
+    """
+    This module will find the indices of rectangle or square shape rois and
+    count the number of pixels in that shape.
+
+    Parameters
+    ----------
+    num_rois: int
+        number of region of interests(roi)
+
+    roi_data: ndarray
+        coordinates of roi's and the, length and width of roi's
+        shape is [num_rois][4]
+
+    detector_size : tuple
+        2 element tuple defining the number of pixels in the detector. Order is
+        (num_columns, num_rows)
+
+    Returns
+    -------
+    q_inds : ndarray
+        indices of the Q values for the required shape
+        shape [detector_size[0]*detector_size[1]][1]
+
+    num_pixels : ndarray
+        number of pixels in certain rectangle shape
+    """
+
+    mesh = np.zeros((detector_size[0], detector_size[1]), dtype=np.int64)
+
+    for i in range(0, num_rois):
+        col_coor, row_coor = roi_data[i, 0], roi_data[i, 1]
+        col_val = roi_data[i, 2]
+        row_val = roi_data[i, 3]
+
+        slc1 = slice(np.max([col_coor, 0]), np.min([col_coor + col_val,
+                                                       detector_size[0]]))
+        slc2 = slice(np.max([row_coor, 0]), np.min([row_coor + row_val,
+                                                       detector_size[1]]))
+        # assign a different scalar for each roi
+        mesh[slc1, slc2] = (i + 1)
+
+    # find the number of pixels in each roi
+    num_pixels = np.bincount(np.ravel(mesh))
+    num_pixels = np.delete(num_pixels, 0)
+
+    return np.ravel(mesh), num_pixels
