@@ -481,6 +481,7 @@ class XrayLibWrap(Mapping):
 
     Attributes
     ----------
+    info_type : str
 
 
     Examples
@@ -526,6 +527,7 @@ class XrayLibWrap(Mapping):
         self._element = element
         self._map, self._func = XRAYLIB_MAP[info_type]
         self._keys = sorted(list(six.iterkeys(self._map)))
+        self._info_type = info_type
 
     @property
     def all(self):
@@ -553,6 +555,14 @@ class XrayLibWrap(Mapping):
     def __len__(self):
         return len(self._keys)
 
+    @property
+    def info_type(self):
+        """
+        option to choose which physics quantity to calculate as follows:
+
+        """
+        return self._info_type
+
 
 class XrayLibWrap_Energy(XrayLibWrap):
     """
@@ -564,6 +574,7 @@ class XrayLibWrap_Energy(XrayLibWrap):
     Attributes
     ----------
     incident_energy : float
+    info_type : str
 
 
     Parameters
@@ -595,6 +606,7 @@ class XrayLibWrap_Energy(XrayLibWrap):
     def __init__(self, element, info_type, incident_energy):
         super(XrayLibWrap_Energy, self).__init__(element, info_type)
         self._incident_energy = incident_energy
+        self._info_type = info_type
 
     @property
     def incident_energy(self):
@@ -820,6 +832,7 @@ class PowderStandard(object):
         q = twotheta_to_q(two_theta, wavelength)
         d = q_to_d(q)
         if hkl is None:
+            # todo write test that hits this line
             hkl = repeat((0, 0, 0))
         return cls(name, zip(d, hkl, q))
 

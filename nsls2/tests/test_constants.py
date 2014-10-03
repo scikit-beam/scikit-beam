@@ -89,6 +89,9 @@ def test_XrayLibWrap():
             assert_not_equal(xlw.all, None)
             for key in xlw:
                 assert_not_equal(xlw[key], None)
+            assert_equal(xlw.info_type, infotype)
+            # make sure len doesn't break
+            len(xlw)
         for infotype in XrayLibWrap_Energy.opts_info_type:
             incident_energy = 10
             xlwe = XrayLibWrap_Energy(element=Z,
@@ -97,6 +100,7 @@ def test_XrayLibWrap():
             incident_energy *= 2
             xlwe.incident_energy = incident_energy
             assert_equal(xlwe.incident_energy, incident_energy)
+            assert_equal(xlwe.info_type, infotype)
 
 
 def smoke_test_element_creation():
