@@ -251,8 +251,9 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
 
         # indices of Q rings
         q_inds = np.digitize(q_values, np.array(q_ring_val))
-        # number of pixels in each  Q ring
-        num_pixels = np.bincount(q_inds)
+        for i, item in enumerate(q_inds):
+            if (item > num_qs):
+                q_inds[i] = 0
     else:
         q_ring_val = np.zeros(num_qs*2)
         q_rings = first_q
@@ -264,18 +265,19 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
             else:
                 q_rings += delta_q
                 q_ring_val[i] = q_rings
+
         # indices of Q rings
         q_inds = np.digitize(q_values, np.array(q_ring_val))
 
-        for i,item in enumerate(q_inds):
+        for i, item in enumerate(q_inds):
             if (item%2==0):
                 q_inds[i] = 0
             else:
                 if (q_inds[i]>1):
                     q_inds[i] = (item -1)
 
-        # number of pixels in each  Q ring
-        num_pixels = np.bincount(q_inds)
-        np.delete(num_pixels, 0)
+    # number of pixels in each  Q ring
+    num_pixels = np.bincount(q_inds)
+    num_pixels = np.delete(num_pixels, 0)
 
     return q_inds, q_ring_val, num_pixels
