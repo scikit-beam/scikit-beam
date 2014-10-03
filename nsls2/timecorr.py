@@ -49,10 +49,11 @@ import numpy as np
 import logging
 logger = logging.getLogger(__name__)
 import nsls2.recip as recip
+import nsls2.core as core
 import time
 
 
-def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
+def one_time_corr(multitau_levels, multitau_channels, num_qs, img_stack, q_inds,
                   num_pixels, lag_time):
     """
     Standard multiple-tau algorithm for finding the lag times and
@@ -61,10 +62,10 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
 
     Parameters
     ----------
-    num_levels: int
+    multitau_levels: int
         number of levels of multiple-taus
 
-    num_channels: int
+    mulitau_channels: int
         number of channels or number of buffers in auto-correlators
         normalizations (must be even)
 
@@ -113,20 +114,8 @@ def one_time_corr(num_levels, num_channels, num_qs, img_stack, q_inds,
        scattering," Rev. Sci. Instr., vol 71, pp 3274-3289, 2000.
     """
 
-    if (num_channels % 2 != 0):
-        raise ValueError(" Number of channels(buffers) must be even ")
-
-    # total number of channels ( or total number of delay times)
-    tot_channels = (num_levels + 1)*num_channels/2
-
-    lag_steps = []  # delay ( or lag times)
-    lag = np.arange(1, num_channels + 1)
-    lag_steps.extend(lag)
-    for i in range(2, num_levels+1):
-        lag = np.array([5, 6, 7, 8])*(2**(i-1))
-        lag_steps.extend(lag)
-
-    lag_steps = sorted(lag_steps, reverse=True)
+    tot_channels, lag_steps = core.multi_tau_lags(multitau_levels,
+                                                  multitau_channels)
 
     # matrix of auto-correlation function without normalizations
     G = np.zeros((tot_channels, num_qs), dtype=np.float64)
