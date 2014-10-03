@@ -161,7 +161,7 @@ def test_q_data():
     q_inds, q_ring_val, num_pixels = recip.q_rings(num_qs, first_q, delta_q,
                                                    cir_val)
 
-    q_ring_val_m = [ 1.,  2.,  3.,  4.,  5.]
+    q_ring_val_m = [ 1.,  2.,  3.,  4., 5.]
     num_pixels_m = [ 4,  4,  0,  4]
     q_inds_m = ([0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -181,7 +181,7 @@ def test_q_data():
     (qstep_inds, qstep_ring_val,
      numstep_pixels) = recip.q_rings(num_qs, first_q,delta_q, cir_val, step_q)
 
-    qstep_ring_val_m = [ 1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.]
+    qstep_ring_val_m = [ 1.,  2.,  3.,  4., 5., 6., 7., 8.]
     numstep_pixels_m = [ 4,  0,  0,  8]
     qstep_inds_m = ([0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],

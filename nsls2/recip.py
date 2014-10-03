@@ -231,6 +231,8 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
 
     q_ring_val : ndarray
         edge values of each Q ring
+        step_q None - shape is [num_qs+1][1]
+        else - shape is [2*num_qs][1]
 
     num_pixels : ndarray
         number of pixels in certain Q ring
@@ -269,6 +271,7 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
         # indices of Q rings
         q_inds = np.digitize(q_values, np.array(q_ring_val))
 
+        # to discard every-other bin and set the discarded bins indices to 0
         for i, item in enumerate(q_inds):
             if (item%2==0):
                 q_inds[i] = 0
