@@ -149,7 +149,7 @@ def test_hkl_to_q():
 def test_q_data():
     # creating a circle with center co-ordinates (5, 5)
     # in [10, 10] mesh grid
-    xx, yy = np.mgrid[:10, :10]
+    xx, yy = np.mgrid[:15, :10]
     circle = (xx - 5) ** 2 + (yy - 5) ** 2
     cir_val = np.ravel(circle)
 
@@ -161,8 +161,8 @@ def test_q_data():
     q_inds, q_ring_val, num_pixels = recip.q_rings(num_qs, first_q, delta_q,
                                                    cir_val)
 
-    q_ring_val_m = [ 1.,  2.,  3.,  4., 5.]
-    num_pixels_m = [ 4,  4,  0,  4]
+    q_ring_val_m = np.array([[1, 1], [2, 2], [3, 3], [4, 4]])
+    num_pixels_m = [4,  4,  0,  4]
     q_inds_m = ([0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -172,6 +172,11 @@ def test_q_data():
                 [0, 0, 0, 0, 2, 1, 2, 0, 0, 0],
                 [0, 0, 0, 0, 0, 4, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
     assert_array_almost_equal(q_ring_val_m, q_ring_val)
@@ -179,18 +184,23 @@ def test_q_data():
     assert_array_equal(q_inds, np.ravel(q_inds_m))
 
     (qstep_inds, qstep_ring_val,
-     numstep_pixels) = recip.q_rings(num_qs, first_q,delta_q, cir_val, step_q)
+     numstep_pixels) = recip.q_rings(num_qs, first_q, delta_q, cir_val, step_q)
 
-    qstep_ring_val_m = [ 1.,  2.,  3.,  4., 5., 6., 7., 8.]
-    numstep_pixels_m = [ 4,  0,  0,  8]
+    qstep_ring_val_m = np.array([[1, 2], [3, 4], [5, 6], [7, 8]])
+    numstep_pixels_m = [4,  0, 8]
     qstep_inds_m = ([0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 4, 0, 4, 0, 0, 0],
-                    [0, 0, 0, 4, 0, 1, 0, 4, 0, 0],
+                    [0, 0, 0, 0, 3, 0, 3, 0, 0, 0],
+                    [0, 0, 0, 3, 0, 1, 0, 3, 0, 0],
                     [0, 0, 0, 0, 1, 0, 1, 0, 0, 0],
-                    [0, 0, 0, 4, 0, 1, 0, 4, 0, 0],
-                    [0, 0, 0, 0, 4, 0, 4, 0, 0, 0],
+                    [0, 0, 0, 3, 0, 1, 0, 3, 0, 0],
+                    [0, 0, 0, 0, 3, 0, 3, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 

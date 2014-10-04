@@ -212,27 +212,23 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
     delta_q : float
         thickness of the Q ring
 
-    step_q : float, optional
-        step value for the next Q ring from the end of the previous Q ring
-
     q_val : ndarray
         Q space values for each pixel in the detector
         shape is [detector_size[0]*detector_size[1]][1] or
         (Qx, Qy, Qz) - HKL values
         shape is [detector_size[0]*detector_size[1]][3]
 
+    step_q : float, optional
+        step value for the next Q ring from the end of the previous Q ring
+
     Returns
     -------
-    q_values : ndarray
-        Q values of all the pixels
-
     q_inds : ndarray
         indices of the Q values for the required rings
 
     q_ring_val : ndarray
         edge values of each Q ring
-        step_q None - shape is [num_qs+1][1]
-        else - shape is [2*num_qs][1]
+        shape is [num_qs][2]
 
     num_pixels : ndarray
         number of pixels in certain Q ring
@@ -240,30 +236,48 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
 
     if (q_val.ndim == 1):
         q_values = q_val
-    elif (q_val.ndim == 3):
+    elif ((q_val.ndim == 2) & (q_val.shape[1] == 3)):
         q_values = np.sqrt(q_val[:, 0]**2 + q_val[:, 1]**2 + q_val[:, 2]**2)
     else:
         raise ValueError("Either HKL values(Qx, Qy, Qz) or Q space values"
-                              " for each pixel in the detector has to be specified")
+                         " for each pixel in the detector has to be specified")
 
-    if (step_q==None):
+    if (step_q == None):
         # last Q ring edge value
         last_q = first_q + num_qs*(delta_q)
-        q_ring_val = np.linspace(first_q, last_q, num=(num_qs+1))
+        # edges of all the Q rings
+        q_r = np.linspace(first_q, last_q, num=(num_qs+1))
 
         # indices of Q rings
-        q_inds = np.digitize(q_values, np.array(q_ring_val))
+        q_inds = np.digitize(q_values, np.array(q_r))
         for i, item in enumerate(q_inds):
             if (item > num_qs):
                 q_inds[i] = 0
+
+        # Edge values of each Q ring as [0., 1., 1., 2., 2.,...]
+        q_ring_val = []
+        count = 0
+        for i in range(0, num_qs):
+            if (i == 0):
+                q_ring_val.append(q_r[0])
+                q_ring_val.append(q_r[0])
+            elif (i < (num_qs)):
+                count += 1
+                q_ring_val.append(q_r[count])
+                q_ring_val.append(q_r[count])
+            else:
+                q_ring_val.append(q_r[num_qs-1])
+        q_ring_val = np.asarray(q_ring_val)
+
     else:
+        #  when there is a step between Q rings find the edge values of Q rings
         q_ring_val = np.zeros(num_qs*2)
         q_rings = first_q
         q_ring_val[0] = q_rings
         for i in range(1, num_qs*2):
-            if (i%2 == 0):
-               q_rings += step_q
-               q_ring_val[i] = q_rings
+            if (i % 2 == 0):
+                q_rings += step_q
+                q_ring_val[i] = q_rings
             else:
                 q_rings += delta_q
                 q_ring_val[i] = q_rings
@@ -273,14 +287,20 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
 
         # to discard every-other bin and set the discarded bins indices to 0
         for i, item in enumerate(q_inds):
-            if (item%2==0):
+            if (item % 2 == 0):
                 q_inds[i] = 0
-            else:
-                if (q_inds[i]>1):
-                    q_inds[i] = (item -1)
+
+        # change the indices of odd number of rings
+        out = 0
+        for i in range(3, 2*num_qs):
+            q_inds[q_inds == (i + out)] = i - 1
+            out += 1
+
+    q_ring_val = np.array(q_ring_val)
+    q_ring_val = q_ring_val.reshape(num_qs, 2)
 
     # number of pixels in each  Q ring
     num_pixels = np.bincount(q_inds)
-    num_pixels = np.delete(num_pixels, 0)
+    num_pixels = num_pixels[1 :]
 
     return q_inds, q_ring_val, num_pixels
