@@ -406,10 +406,10 @@ def test_multi_tau_lags():
     assert_array_equal(delay_steps, lag_steps)
 
 
-def test_xy_rectangles():
-    detector_size = (10,10)
+def test_roi_rectangles():
+    detector_size = (10, 10)
     num_rois = 2
-    roi_data = np.array(([2, 2, 3, 3],[6, 7, 1,2]), dtype=np.int64)
+    roi_data = np.array(([2, 2, 3, 3],[6, 7, 1, 2]), dtype=np.int64)
 
     xy_inds, num_pixels = core.xy_rectangles(num_rois, roi_data, detector_size)
 

@@ -1090,7 +1090,7 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     return tot_channels, lag_steps
 
 
-def xy_rectangles(num_rois, roi_data, detector_size):
+def roi_rectangles(num_rois, roi_data, detector_size):
     """
     This module will find the number of indices of rectangle(square) shape rois and
     count the number of pixels in that rectangle(square).
