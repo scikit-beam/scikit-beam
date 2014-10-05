@@ -72,7 +72,8 @@ l_line = ['Mo_L', 'Tc_L', 'Ru_L', 'Rh_L', 'Pd_L', 'Ag_L', 'Cd_L', 'In_L', 'Sn_L'
 m_line = ['Au_M', 'Pb_M', 'U_M', 'noise', 'Pt_M', 'Ti_M', 'Gd_M', 'dummy', 'dummy']
 
 
-def gauss_peak_xrf(x, area, center, delta_sigma, ratio,
+def gauss_peak_xrf(x, area, center, delta_sigma,
+                   ratio, ratio_adjust,
                    fwhm_offset, fwhm_fanoprime,
                    e_offset, e_linear, e_quadratic,
                    epsilon=2.96):
@@ -93,6 +94,8 @@ def gauss_peak_xrf(x, area, center, delta_sigma, ratio,
     delta_sigma : float
         adjustment to standard deviation
     ratio : float
+        branching ratio
+    ratio_adjust : float
         value used to adjust peak height
     fwhm_offset : float
         global fitting parameter for peak width
@@ -116,7 +119,7 @@ def gauss_peak_xrf(x, area, center, delta_sigma, ratio,
 
     x = e_offset + x * e_linear + x**2 * e_quadratic
 
-    return gauss_peak(x, area, center, delta_sigma+get_sigma(center)) * ratio
+    return gauss_peak(x, area, center, delta_sigma+get_sigma(center)) * ratio * (1 + ratio_adjust)
 
 
 class GaussModel_xrf(Model):
@@ -250,6 +253,7 @@ class ModelSpectrum(object):
 
         width_adjust = [item.split('-')[1] for item in list(parameter.keys()) if item.startswith('width')]
         pos_adjust = [item.split('-')[1] for item in list(parameter.keys()) if item.startswith('pos')]
+        ratio_adjust = [item.split('-')[1] for item in list(parameter.keys()) if item.startswith('ratio')]
 
         #if parameter.has_key('element'):
         #    element_adjust = parameter['element'].keys()
@@ -259,13 +263,12 @@ class ModelSpectrum(object):
         #    logger.info(' No adjustment needs to be considered'
         #                ' on the position and width of element peak.')
 
-        ratio_adjust = []
-        if parameter.has_key('fit_branch_ratio'):
-            ratio_adjust = parameter['fit_branch_ratio'].keys()
-            logger.info(' The branching ratio for those elements'
-                        ' will be adjusted: {0}.'.format(ratio_adjust))
-        else:
-            logger.info(' No fitting adjustment on branching ratio needs to be considered.')
+        #if parameter.has_key('fit_branch_ratio'):
+        #    ratio_adjust = parameter['fit_branch_ratio'].keys()
+        #    logger.info(' The branching ratio for those elements'
+        #                ' will be adjusted: {0}.'.format(ratio_adjust))
+        #else:
+        #    logger.info(' No fitting adjustment on branching ratio needs to be considered.')
 
         ratio_set = []
         if parameter.has_key('set_branch_ratio'):
@@ -307,66 +310,54 @@ class ModelSpectrum(object):
                     gauss_mod.set_param_hint('center', value=val, vary=False)
                     gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
                     ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
-                    gauss_mod.set_param_hint('ratio',
-                                             value=ratio_v, vary=False)
+                    gauss_mod.set_param_hint('ratio', value=ratio_v, vary=False)
+                    gauss_mod.set_param_hint('ratio_adjust', value=0, vary=False)
                     logger.info(' {0} {1} peak is at energy {2} with'
                                 ' branching ratio {3}.'. format(ename, line_name, val, ratio_v))
 
-                    # position or width need to be adjusted
+                    # position needs to be adjusted
                     if ename in pos_adjust:
                         pos_name = 'pos-'+ename+'-'+str(line_name)
                         if parameter.has_key(pos_name):
-                            pos_min = parameter[pos_name]['min']
-                            pos_max = parameter[pos_name]['max']
-                            gauss_mod.set_param_hint('center', value=val, vary=True,
-                                                     min=val*(1+pos_min), max=val*(1+pos_max))
-                            logger.warning(' Fit position of {0} {1} within range {2}'.
-                                           format(ename, line_name, [pos_min, pos_max]))
-                    #width_name = 'pos-'+ename+'-'+str(line_name)
-                        #if parameter.has_key(width_name):
-                        #    _set_parameter_hint('delta_sigma', parameter[width_name],
-                        #                        gauss_mod, log_option=True)
-                        #if parameter['element'][ename].has_key(line_name.lower()+'_position'):
-                        #    pos_val = parameter['element'][ename][line_name.lower()+'_position']
-                        #    if pos_val[0] == pos_val[1]:
-                        #        gauss_mod.set_param_hint('center', value=val*pos_val[0],
-                        #                                 vary=False)
-                        #        logger.warning(' No fitting for the position of {0} {1}.'
-                        #                       ' Set energy at {2}, compared to original value {3}'.
-                        #                       format(ename, line_name, val*pos_val[0], val))
-                        #    else:
-                        #        minp = min(pos_val)
-                        #        maxp = max(pos_val)
-                        #        gauss_mod.set_param_hint('center', value=val, vary=True,
-                        #                                 min=val*minp, max=val*maxp)
-                        #        logger.warning(' Fit position of {0} {1} within range {2}'.
-                        #                       format(ename, line_name,
-                        #                              [val*minp, val*maxp]))
+                            _set_parameter_hint('center', parameter[pos_name],
+                                                gauss_mod, log_option=True)
+
+                    # width needs to be adjusted
                     if ename in width_adjust:
                         width_name = 'width-'+ename+'-'+str(line_name)
                         if parameter.has_key(width_name):
                             _set_parameter_hint('delta_sigma', parameter[width_name],
                                                 gauss_mod, log_option=True)
 
-                    # fit branching ratio
+                    # branching ratio needs to be adjusted
                     if ename in ratio_adjust:
-                        if parameter['fit_branch_ratio'][ename].has_key(line_name.lower()):
-                            ratio_change = parameter['fit_branch_ratio'][ename][line_name.lower()]
-                            if ratio_change[0] == ratio_change[1]:
-                                gauss_mod.set_param_hint('ratio', value=ratio_v*ratio_change[0], vary=False)
-                                logger.warning(' Set branching ratio of {0} {1} as {2}.'.
-                                               format(ename, line_name, ratio_v*ratio_change[0]))
+                        ratio_name = 'ratio-'+ename+'-'+str(line_name)
+                        if parameter.has_key(ratio_name):
+                            #parameter[ratio_name]['value'] *= ratio_v
+                            #parameter[ratio_name]['min'] *= ratio_v
+                            #parameter[ratio_name]['max'] *= ratio_v
+                            _set_parameter_hint('ratio_adjust', parameter[ratio_name],
+                                                gauss_mod, log_option=True)
 
-                            else:
-                                minr = min(ratio_change)
-                                maxr = max(ratio_change)
-                                gauss_mod.set_param_hint('ratio', value=ratio_v, vary=True,
-                                                         min=ratio_v*minr,
-                                                         max=ratio_v*maxr)
-                                logger.warning(' Fit branching ratio of {0} {1}'
-                                               ' within range {2}.'.format(ename, line_name,
-                                                                           [minr*ratio_v,
-                                                                            maxr*ratio_v]))
+                    # fit branching ratio
+                    #if ename in ratio_adjust:
+                    #    if parameter['fit_branch_ratio'][ename].has_key(line_name.lower()):
+                    #        ratio_change = parameter['fit_branch_ratio'][ename][line_name.lower()]
+                    #        if ratio_change[0] == ratio_change[1]:
+                    #            gauss_mod.set_param_hint('ratio', value=ratio_v*ratio_change[0], vary=False)
+                    #            logger.warning(' Set branching ratio of {0} {1} as {2}.'.
+                    #                           format(ename, line_name, ratio_v*ratio_change[0]))
+
+                    #        else:
+                    #            minr = min(ratio_change)
+                    #            maxr = max(ratio_change)
+                    #            gauss_mod.set_param_hint('ratio', value=ratio_v, vary=True,
+                    #                                     min=ratio_v*minr,
+                    #                                     max=ratio_v*maxr)
+                    #            logger.warning(' Fit branching ratio of {0} {1}'
+                    #                           ' within range {2}.'.format(ename, line_name,
+                    #                                                       [minr*ratio_v,
+                    #                                                        maxr*ratio_v]))
 
                     # set branching ratio
                     if ename in ratio_set:
