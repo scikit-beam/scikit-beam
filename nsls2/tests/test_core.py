@@ -411,7 +411,7 @@ def test_roi_rectangles():
     num_rois = 2
     roi_data = np.array(([2, 2, 3, 3],[6, 7, 1, 2]), dtype=np.int64)
 
-    xy_inds, num_pixels = core.xy_rectangles(num_rois, roi_data, detector_size)
+    xy_inds, num_pixels = core.roi_rectangles(num_rois, roi_data, detector_size)
 
     xy_inds_m =([0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
