@@ -1092,8 +1092,8 @@ def multi_tau_lags(multitau_levels, multitau_channels):
 
 def xy_rectangles(num_rois, roi_data, detector_size):
     """
-    This module will find the indices of rectangle or square shape rois and
-    count the number of pixels in that shape.
+    This module will find the number of indices of rectangle(square) shape rois and
+    count the number of pixels in that rectangle(square).
 
     Parameters
     ----------
@@ -1120,20 +1120,36 @@ def xy_rectangles(num_rois, roi_data, detector_size):
 
     mesh = np.zeros((detector_size[0], detector_size[1]), dtype=np.int64)
 
+    num_pixels = []
     for i in range(0, num_rois):
         col_coor, row_coor = roi_data[i, 0], roi_data[i, 1]
         col_val = roi_data[i, 2]
         row_val = roi_data[i, 3]
 
-        slc1 = slice(np.max([col_coor, 0]), np.min([col_coor + col_val,
-                                                       detector_size[0]]))
-        slc2 = slice(np.max([row_coor, 0]), np.min([row_coor + row_val,
-                                                       detector_size[1]]))
+        left, right = np.max([col_coor, 0]), np.min([col_coor + col_val,
+                                                       detector_size[0]])
+        top, bottom = np.max([row_coor, 0]), np.min([row_coor + row_val,
+                                                       detector_size[1]])
+
+        area = (right - left) * (bottom - top)
+
+        # find the number of pixels in each roi
+        num_pixels.append(area)
+
+        slc1 = slice(left, right)
+        slc2 = slice(top, bottom)
+
         # assign a different scalar for each roi
         mesh[slc1, slc2] = (i + 1)
 
-    # find the number of pixels in each roi
-    num_pixels = np.bincount(np.ravel(mesh))
-    num_pixels = np.delete(num_pixels, 0)
+        # slc1 = slice(np.max([col_coor, 0]), np.min([col_coor + col_val,
+                                                     #  detector_size[0]]))
+        # slc2 = slice(np.max([row_coor, 0]), np.min([row_coor + row_val,
+                                                      # detector_size[1]]))
 
-    return np.ravel(mesh), num_pixels
+    q_inds = np.ravel(mesh)
+    # find the number of pixels in each roi
+    #num_pixels = np.bincount(np.ravel(mesh))
+    #num_pixels = np.delete(num_pixels, 0)
+
+    return q_inds, num_pixels
