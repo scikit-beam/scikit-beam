@@ -45,10 +45,4 @@ from scipy.ndimage.filters import rank_filter
 # from scipy.ndimage.fourier import fourier_shift
 # from scipy.ndimage.fourier import fourier_uniform
 
-def TV_fltr():
-    pass
-
-
-def NLmeans():
-    pass
 
