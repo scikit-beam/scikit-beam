@@ -230,30 +230,30 @@ def add_element_dict(xrf_parameter, element_list=None):
         if item in k_line:
             pos_add_ka1 = {"pos-"+str(item)+"-ka1":
                                {"bound_type": "fixed", "min": -0.005, "max": 0.005, "value": 0,
-                                "free_more": "fixed", "adjust_element": "lohi"}}
+                                "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed"}}
 
             width_add_ka1 = {"width-"+str(item)+"-ka1":
                                  {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
-                                  "free_more": "fixed", "adjust_element": "lohi"}}
+                                  "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed"}}
 
-            #pos_add_ka2 = {"pos-"+str(item)+"-ka2":
-            #                   {"bound_type": "fixed", "min": -0.01, "max": 0.01, "value": 0,
-            #                    "free_more": "fixed", "adjust_element": "lohi"}}
+            pos_add_ka2 = {"pos-"+str(item)+"-ka2":
+                               {"bound_type": "fixed", "min": -0.01, "max": 0.01, "value": 0,
+                                "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed"}}
 
-            #width_add_ka2 = {"width-"+str(item)+"-ka2":
-            #                     {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
-            #                      "free_more": "fixed", "adjust_element": "lohi"}}
+            width_add_ka2 = {"width-"+str(item)+"-ka2":
+                                 {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
+                                  "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed"}}
 
             pos_add_kb1 = {"pos-"+str(item)+"-kb1":
                                {"bound_type": "fixed", "min": -0.01, "max": 0.01, "value": 0,
-                                "free_more": "fixed", "adjust_element": "lohi"}}
+                                "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed"}}
 
             width_add_kb1 = {"width-"+str(item)+"-kb1":
                                  {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
-                                  "free_more": "fixed", "adjust_element": "lohi"}}
+                                  "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed"}}
 
             add_list = [pos_add_ka1, width_add_ka1,
-                        #pos_add_ka2, width_add_ka2,
+                        pos_add_ka2, width_add_ka2,
                         pos_add_kb1, width_add_kb1]
 
             for addv in add_list:
