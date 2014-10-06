@@ -46,8 +46,7 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 import numpy as np
-import json
-import os
+import six
 
 import logging
 logger = logging.getLogger(__name__)
@@ -72,7 +71,8 @@ l_line = ['Mo_L', 'Tc_L', 'Ru_L', 'Rh_L', 'Pd_L', 'Ag_L', 'Cd_L', 'In_L', 'Sn_L'
 m_line = ['Au_M', 'Pb_M', 'U_M', 'noise', 'Pt_M', 'Ti_M', 'Gd_M', 'dummy', 'dummy']
 
 
-def gauss_peak_xrf(x, area, center, delta_sigma,
+def gauss_peak_xrf(x, area, center,
+                   delta_center, delta_sigma,
                    ratio, ratio_adjust,
                    fwhm_offset, fwhm_fanoprime,
                    e_offset, e_linear, e_quadratic,
@@ -91,6 +91,8 @@ def gauss_peak_xrf(x, area, center, delta_sigma,
         area of gaussian function
     center : float
         center position
+    delta_center : float
+        adjustment to center position
     delta_sigma : float
         adjustment to standard deviation
     ratio : float
@@ -119,7 +121,8 @@ def gauss_peak_xrf(x, area, center, delta_sigma,
 
     x = e_offset + x * e_linear + x**2 * e_quadratic
 
-    return gauss_peak(x, area, center, delta_sigma+get_sigma(center)) * ratio * (1 + ratio_adjust)
+    return gauss_peak(x, area, center+delta_center,
+                      delta_sigma+get_sigma(center)) * ratio * (1 + ratio_adjust)
 
 
 class GaussModel_xrf(Model):
@@ -144,6 +147,8 @@ def _set_parameter_hint(para_name, input_dict, input_model,
         all the initial values and constraints for given parameters
     input_model : object
         model object used in lmfit
+    log_option : bool
+        option for logger
     """
 
     if input_dict['bound_type'] == 'none':
@@ -166,6 +171,48 @@ def _set_parameter_hint(para_name, input_dict, input_model,
                     format(para_name, input_dict['bound_type'], input_dict['value'],
                            [input_dict['min'], input_dict['max']]))
     return
+
+
+def update_parameter_dict(xrf_parameter, fit_results, bound_option):
+    """
+    Update fitting parameters according to previous fitting results.
+
+    Parameters
+    ----------
+    xrf_parameter : dict
+        saving all the fitting values and their bounds
+    fit_results : object
+        ModelFit object from lmfit
+    bound_option : str
+        define bound type
+
+    Returns
+    -------
+    dict
+        updated xrf parameters
+    """
+
+    new_parameter = xrf_parameter.copy()
+    for k, v in six.iteritems(new_parameter):
+        if k == 'element_list':
+            continue
+        if k.startswith('ratio'):
+            itemv = k.split('-')
+            k_new = itemv[1]+'_'+itemv[2]+'_ratio_adjust'
+        elif k.startswith('pos'):
+            itemv = k.split('-')
+            k_new = itemv[1]+'_'+itemv[2]+'_delta_center'
+        elif k.startswith('width'):
+            itemv = k.split('-')
+            k_new = itemv[1]+'_'+itemv[2]+'_delta_sigma'
+        else:
+            k_new = k
+
+        v['bound_type'] = v[str(bound_option)]
+
+        if k_new in list(fit_results.values.keys()):
+            v['value'] = fit_results.values[str(k_new)]
+    return new_parameter
 
 
 class ModelSpectrum(object):
@@ -255,21 +302,6 @@ class ModelSpectrum(object):
         pos_adjust = [item.split('-')[1] for item in list(parameter.keys()) if item.startswith('pos')]
         ratio_adjust = [item.split('-')[1] for item in list(parameter.keys()) if item.startswith('ratio')]
 
-        #if parameter.has_key('element'):
-        #    element_adjust = parameter['element'].keys()
-        #    logger.info(' The position and width of the following elements'
-        #                ' need to be adjusted: {0}.'.format(element_adjust))
-        #else:
-        #    logger.info(' No adjustment needs to be considered'
-        #                ' on the position and width of element peak.')
-
-        #if parameter.has_key('fit_branch_ratio'):
-        #    ratio_adjust = parameter['fit_branch_ratio'].keys()
-        #    logger.info(' The branching ratio for those elements'
-        #                ' will be adjusted: {0}.'.format(ratio_adjust))
-        #else:
-        #    logger.info(' No fitting adjustment on branching ratio needs to be considered.')
-
         ratio_set = []
         if parameter.has_key('set_branch_ratio'):
             ratio_set = parameter['set_branch_ratio'].keys()
@@ -282,7 +314,7 @@ class ModelSpectrum(object):
             if ename in k_line:
                 e = Element(ename)
                 if e.cs(incident_energy)['ka1'] == 0:
-                    logger.info('{0} Ka emission line is not activated '
+                    logger.info(' {0} Ka emission line is not activated '
                                 'at this energy {1}'.format(ename, incident_energy))
                     continue
 
@@ -309,6 +341,7 @@ class ModelSpectrum(object):
                                                  expr=str(ename)+'_ka1_'+'area')
                     gauss_mod.set_param_hint('center', value=val, vary=False)
                     gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
+                    gauss_mod.set_param_hint('delta_center', value=0, vary=False)
                     ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
                     gauss_mod.set_param_hint('ratio', value=ratio_v, vary=False)
                     gauss_mod.set_param_hint('ratio_adjust', value=0, vary=False)
@@ -319,7 +352,7 @@ class ModelSpectrum(object):
                     if ename in pos_adjust:
                         pos_name = 'pos-'+ename+'-'+str(line_name)
                         if parameter.has_key(pos_name):
-                            _set_parameter_hint('center', parameter[pos_name],
+                            _set_parameter_hint('delta_center', parameter[pos_name],
                                                 gauss_mod, log_option=True)
 
                     # width needs to be adjusted
