@@ -215,6 +215,52 @@ def update_parameter_dict(xrf_parameter, fit_results, bound_option):
     return new_parameter
 
 
+def add_element_dict(xrf_parameter, element_list=None):
+
+    new_parameter = xrf_parameter.copy()
+
+    if element_list is None:
+        if ',' in xrf_parameter['element_list']:
+            element_list = xrf_parameter['element_list'].split(', ')
+        else:
+            element_list = xrf_parameter['element_list'].split()
+        element_list = [item.strip() for item in element_list]
+
+    for item in element_list:
+        if item in k_line:
+            pos_add_ka1 = {"pos-"+str(item)+"-ka1":
+                               {"bound_type": "fixed", "min": -0.005, "max": 0.005, "value": 0,
+                                "free_more": "fixed", "adjust_element": "lohi"}}
+
+            width_add_ka1 = {"width-"+str(item)+"-ka1":
+                                 {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
+                                  "free_more": "fixed", "adjust_element": "lohi"}}
+
+            #pos_add_ka2 = {"pos-"+str(item)+"-ka2":
+            #                   {"bound_type": "fixed", "min": -0.01, "max": 0.01, "value": 0,
+            #                    "free_more": "fixed", "adjust_element": "lohi"}}
+
+            #width_add_ka2 = {"width-"+str(item)+"-ka2":
+            #                     {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
+            #                      "free_more": "fixed", "adjust_element": "lohi"}}
+
+            pos_add_kb1 = {"pos-"+str(item)+"-kb1":
+                               {"bound_type": "fixed", "min": -0.01, "max": 0.01, "value": 0,
+                                "free_more": "fixed", "adjust_element": "lohi"}}
+
+            width_add_kb1 = {"width-"+str(item)+"-kb1":
+                                 {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
+                                  "free_more": "fixed", "adjust_element": "lohi"}}
+
+            add_list = [pos_add_ka1, width_add_ka1,
+                        #pos_add_ka2, width_add_ka2,
+                        pos_add_kb1, width_add_kb1]
+
+            for addv in add_list:
+                new_parameter.update(addv)
+    return new_parameter
+
+
 class ModelSpectrum(object):
 
     def __init__(self, xrf_parameter):
