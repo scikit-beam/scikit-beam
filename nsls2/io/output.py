@@ -85,22 +85,21 @@ def save_chi(tth, intensity,  filename, err=None, dir_path=None):
     else:
         raise ValueError('The given path does not exist.')
 
-    f = open(file_path, 'wb')
-    f.write(filename)
-    f.write("\n This file contains integrated powder x-ray diffraction "
+    with open(file_path, 'wb') as f:
+        f.write(filename)
+        f.write("\n This file contains integrated powder x-ray diffraction "
             "intensities.\n\n")
-    f.write("Number of data points in the file {0} \n".format(len(tth)))
-    f.write("First two columns represents Q(reciprocal space) or 2(theta)"
+        f.write("Number of data points in the file {0} \n".format(len(tth)))
+        f.write("First column represents Q(reciprocal space) or 2(theta)"
             " values and second column represents intensities and if there"
-            " is third column it represents the error value of intensities\n")
-    f.write("#############################################################\n\n")
+            " is a third column it represents the error value of intensities\n")
+        f.write("#############################################################\n\n")
 
-    if (err==None):
-        np.savetxt(f, np.c_[tth, intensity], newline='\n')
-    else:
-        np.savetxt(f, np.c_[tth, intensity, err], newline='\n')
+        if (err==None):
+            np.savetxt(f, np.c_[tth, intensity], newline='\n')
+        else:
+            np.savetxt(f, np.c_[tth, intensity, err], newline='\n')
 
-    f.close()
     return
 
 
@@ -143,25 +142,23 @@ def save_dat(tth, intensity, filename, err=None, dir_path=None):
     elif os.path.isabs(dir_path):
         file_path = dir_path + file_base + '.dat'
     else:
-        #elif len(dir_path) > 0 and not os.path.exists(dir_path):
         raise ValueError('The given path does not exist.')
 
-    f = open(file_path, 'wb')
-    f.write(filename)
-    f.write("\n This file contains integrated powder x-ray diffraction "
+    with open(file_path, 'wb') as f:
+        f.write(filename)
+        f.write("\n This file contains integrated powder x-ray diffraction "
             "intensities.\n\n")
-    f.write("Number of data points in the file {0} \n".format(len(tth)))
-    f.write("First two columns represents Q(reciprocal space) or 2(theta)"
+        f.write("Number of data points in the file {0} \n".format(len(tth)))
+        f.write("First column represents Q(reciprocal space) or 2(theta)"
             " values and second column represents intensities and if there"
-            " is third column it represents error value of intensities\n")
-    f.write("#############################################################\n\n")
+            " is a third column it represents error value of intensities\n")
+        f.write("#############################################################\n\n")
 
-    if (err==None):
-        np.savetxt(f, np.c_[tth, intensity], newline='\n')
-    else:
-        np.savetxt(f, np.c_[tth, intensity, err], newline="\n")
+        if (err==None):
+            np.savetxt(f, np.c_[tth, intensity], newline='\n')
+        else:
+            np.savetxt(f, np.c_[tth, intensity, err], newline="\n")
 
-    f.close()
     return
 
 
@@ -208,21 +205,20 @@ def save_xye(tth, intensity, filename, err, dir_path=None):
     else:
         raise ValueError('The given path does not exist.')
 
-    f = open(file_path, 'wb')
-    f.write(filename)
+    with open(file_path, 'wb') as f:
+        f.write(filename)
 
-    f.write("\n This file contains integrated powder x-ray diffraction "
+        f.write("\n This file contains integrated powder x-ray diffraction "
             "intensities.\n\n")
-    f.write("Number of data points in the file {0} \n".format(len(tth)))
-    f.write("First two columns represents Q(reciprocal space) or 2(theta)"
-            " values and second column represents intensities and "
+        f.write("Number of data points in the file {0} \n".format(len(tth)))
+        f.write("First column represents Q(reciprocal space) or 2(theta)"
+            " values, second column represents intensities and "
             " the third column represents error value of intensities\n")
-    f.write("##########################################################\n\n")
+        f.write("##########################################################\n\n")
 
-    np.savetxt(f, np.c_[tth, intensity, err], newline = "\n")
+        np.savetxt(f, np.c_[tth, intensity, err], newline = "\n")
 
-    f.close()
-    return
+        return
 
 
 def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
@@ -276,7 +272,6 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
     scale = 10 ** int(log_scale)
     lines = []
 
-    f = open(file_path, 'wb')
     title = 'Angular Profile'
     title += ': %s' % filename
     title += ' scale=%g' % scale
@@ -285,6 +280,7 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
     lines.append("%-80s" % title)
     i_bank = 1
     n_chan = len(intensity)
+
     # two-theta0 and dtwo-theta in centidegrees
     tth0_cdg = tth[0] * 100
     dtth_cdg = (tth[-1] - tth[0]) / (len(tth) - 1) * 100
@@ -307,7 +303,7 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
         lines.append("%-80s" % l_bank)
         l_recs = [ "%8.0f%8.0f" % (ii, ee * scale) for ii, ee in zip(intensity, err)]
         for i in range(0, len(l_recs), 5):
-            lines.append("".join(l_recs[i:i + 5]))
+                lines.append("".join(l_recs[i:i + 5]))
     elif mode == 'fxye':
         n_rec = n_chan
         l_bank = "BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f FXYE" % \
@@ -323,7 +319,8 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
 
     lines[-1] = "%-80s" % lines[-1]
     rv = "\r\n".join(lines) + "\r\n"
-    f.write(rv)
 
-    f.close()
+    with open(file_path, 'wb') as f:
+        f.write(rv)
+
     return
