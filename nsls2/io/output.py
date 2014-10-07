@@ -71,6 +71,7 @@ def save_chi(tth, intensity,  filename, err=None, dir_path=None):
     Returns
     -------
     Saved file of diffraction intensities in .chi file format
+
     """
     if len(tth) != len(intensity):
         raise ValueError("Number of intensities and the number of Q or"
@@ -129,13 +130,13 @@ def save_dat(tth, intensity, filename, err=None, dir_path=None):
     Returns
     -------
     Saved file of diffraction intensities in .dat file format
+
     '''
     if len(tth) != len(intensity):
         raise ValueError("Number of intensities and the number of Q or"
                          " two theta values are different ")
 
     file_base = os.path.splitext(os.path.split(filename)[1])[0]
-    file_path = file_base + '.dat'
 
     if (dir_path)== None:
         file_path = file_base + '.dat'
@@ -185,18 +186,16 @@ def save_xye(tth, intensity, filename, err, dir_path=None):
         new directory path to save the output data files
         eg: /Volumes/Data/experiments/data/
 
-
     Returns
     -------
     Saved file of diffraction intensities in .xye file format
-    """
 
+    """
     if len(tth) != len(intensity):
         raise ValueError("Number of intensities and the number of Q or"
                          " two theta values are different ")
 
     file_base = os.path.splitext(os.path.split(filename)[1])[0]
-    file_path = file_base + '.xye'
 
     if (dir_path)== None:
         file_path = file_base + '.xye'
@@ -218,7 +217,7 @@ def save_xye(tth, intensity, filename, err, dir_path=None):
 
         np.savetxt(f, np.c_[tth, intensity, err], newline = "\n")
 
-        return
+    return
 
 
 def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
@@ -257,12 +256,11 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
                          " two theta values are different ")
 
     file_base = os.path.splitext(os.path.split(filename)[1])[0]
-    file_path = file_base + '.xye'
 
     if (dir_path)== None:
-        file_path = file_base + '.xye'
+        file_path = file_base + '.gsas'
     elif os.path.isabs(dir_path):
-        file_path = dir_path + file_base + '.xye'
+        file_path = dir_path + file_base + '.gsas'
     else:
         raise ValueError('The given path does not exist.')
 
