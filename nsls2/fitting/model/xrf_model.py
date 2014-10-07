@@ -175,7 +175,8 @@ def _set_parameter_hint(para_name, input_dict, input_model,
 
 def update_parameter_dict(xrf_parameter, fit_results, bound_option):
     """
-    Update fitting parameters according to previous fitting results.
+    Update fitting parameters dictionary according to given fitting results,
+    usually obtained from previous run.
 
     Parameters
     ----------
@@ -216,7 +217,21 @@ def update_parameter_dict(xrf_parameter, fit_results, bound_option):
 
 
 def add_element_dict(xrf_parameter, element_list=None):
+    """
+    Update element peak information in parameter dictionary.
 
+    Parameters
+    ----------
+    xrf_parameter : dict
+        saving all the fitting values and their bounds
+    element_list : list, optional
+        define which element to update
+
+    Returns
+    -------
+    dict
+        updated xrf parameters
+    """
     new_parameter = xrf_parameter.copy()
 
     if element_list is None:
@@ -230,35 +245,48 @@ def add_element_dict(xrf_parameter, element_list=None):
         if item in k_line:
             pos_add_ka1 = {"pos-"+str(item)+"-ka1":
                                {"bound_type": "fixed", "min": -0.005, "max": 0.005, "value": 0,
-                                "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed"}}
+                                "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"}}
 
             width_add_ka1 = {"width-"+str(item)+"-ka1":
                                  {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
-                                  "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed"}}
+                                  "free_more": "fixed", "adjust_element": "fixed", "e_calibration": "fixed", "linear": "fixed"}}
+
+            #ka1_area = {str(item)+"_ka1_area":
+            #                {"bound_type": "none", "min": 0, "max": 1e9, "value": 1e5,
+            #                 "free_more": "none", "adjust_element": "none", "e_calibration": "fixed", "linear": "none"}}
 
             pos_add_ka2 = {"pos-"+str(item)+"-ka2":
                                {"bound_type": "fixed", "min": -0.01, "max": 0.01, "value": 0,
-                                "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed"}}
+                                "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"}}
 
             width_add_ka2 = {"width-"+str(item)+"-ka2":
                                  {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
-                                  "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed"}}
+                                  "free_more": "fixed", "adjust_element": "fixed", "e_calibration": "fixed", "linear": "fixed"}}
 
             pos_add_kb1 = {"pos-"+str(item)+"-kb1":
-                               {"bound_type": "fixed", "min": -0.01, "max": 0.01, "value": 0,
-                                "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed"}}
+                               {"bound_type": "fixed", "min": -0.005, "max": 0.005, "value": 0,
+                                "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"}}
 
             width_add_kb1 = {"width-"+str(item)+"-kb1":
                                  {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
-                                  "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed"}}
+                                  "free_more": "fixed", "adjust_element": "fixed", "e_calibration": "fixed", "linear": "fixed"}}
 
             add_list = [pos_add_ka1, width_add_ka1,
+                        #ka1_area,
                         pos_add_ka2, width_add_ka2,
                         pos_add_kb1, width_add_kb1]
 
             for addv in add_list:
                 new_parameter.update(addv)
     return new_parameter
+
+
+def get_sum_area(element_name, result_val):
+    if element_name in k_line:
+        sum = result_val.values[str(element_name)+'_ka1_area'] + \
+              result_val.values[str(element_name)+'_ka2_area'] + \
+              result_val.values[str(element_name)+'_kb1_area']
+        return sum
 
 
 class ModelSpectrum(object):
@@ -382,12 +410,25 @@ class ModelSpectrum(object):
 
                     if line_name == 'ka1':
                         gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
+                        #gauss_mod.set_param_hint('delta_center', value=0, vary=False)
+                        #gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
                     else:
                         gauss_mod.set_param_hint('area', value=100, vary=True, min=0,
                                                  expr=str(ename)+'_ka1_'+'area')
-                    gauss_mod.set_param_hint('center', value=val, vary=False)
-                    gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
+                        #gauss_mod.set_param_hint('delta_sigma', value=0, vary=False,
+                        #                         expr=str(ename)+'_ka1_'+'delta_sigma')
+                        #gauss_mod.set_param_hint('delta_center', value=0, vary=False,
+                        #                         expr=str(ename)+'_ka1_'+'delta_center')
+
                     gauss_mod.set_param_hint('delta_center', value=0, vary=False)
+                    gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
+
+                    area_name = str(ename)+'_'+str(line_name)+'_area'
+                    if parameter.has_key(area_name):
+                        _set_parameter_hint(area_name, parameter[area_name],
+                                            gauss_mod, log_option=False)
+
+                    gauss_mod.set_param_hint('center', value=val, vary=False)
                     ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
                     gauss_mod.set_param_hint('ratio', value=ratio_v, vary=False)
                     gauss_mod.set_param_hint('ratio_adjust', value=0, vary=False)
