@@ -407,7 +407,7 @@ def test_multi_tau_lags():
 
 
 def test_roi_rectangles():
-    detector_size = (10, 10)
+    detector_size = (15, 10)
     num_rois = 2
     roi_data = np.array(([2, 2, 3, 3],[6, 7, 1, 2]), dtype=np.int64)
 

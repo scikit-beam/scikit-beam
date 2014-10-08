@@ -1101,18 +1101,19 @@ def roi_rectangles(num_rois, roi_data, detector_size):
         number of region of interests(roi)
 
     roi_data: ndarray
-        coordinates of roi's and the, length and width of roi's
+        upper left co-ordinates of roi's and the, length and width of roi's
+        from those co-ordinates
         shape is [num_rois][4]
 
     detector_size : tuple
         2 element tuple defining the number of pixels in the detector. Order is
-        (num_columns, num_rows)
+        (num_rows, num_columns)
 
     Returns
     -------
     q_inds : ndarray
         indices of the Q values for the required shape
-        shape [detector_size[0]*detector_size[1]][1]
+        shape ([detector_size[0]*detector_size[1]], )
 
     num_pixels : ndarray
         number of pixels in certain rectangle shape
