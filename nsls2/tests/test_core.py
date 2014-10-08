@@ -428,7 +428,7 @@ def test_roi_rectangles():
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-    num_pixels_m = [9, 2]
+    num_pixels_m = [9, 6]
 
     assert_array_equal(num_pixels, num_pixels_m)
     assert_array_equal(xy_inds, np.ravel(xy_inds_m))
