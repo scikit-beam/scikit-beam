@@ -173,7 +173,7 @@ def _set_parameter_hint(para_name, input_dict, input_model,
     return
 
 
-def update_parameter_dict(xrf_parameter, fit_results, bound_option):
+def update_parameter_dict(xrf_parameter, fit_results):
     """
     Update fitting parameters dictionary according to given fitting results,
     usually obtained from previous run.
@@ -184,8 +184,6 @@ def update_parameter_dict(xrf_parameter, fit_results, bound_option):
         saving all the fitting values and their bounds
     fit_results : object
         ModelFit object from lmfit
-    bound_option : str
-        define bound type
 
     Returns
     -------
@@ -209,11 +207,142 @@ def update_parameter_dict(xrf_parameter, fit_results, bound_option):
         else:
             k_new = k
 
+        if k_new in list(fit_results.values.keys()):
+            new_parameter[str(k)]['value'] = fit_results.values[str(k_new)]
+
+    return new_parameter
+
+
+def set_parameter_bound(xrf_parameter, bound_option):
+    """
+    Update the default value of bounds.
+
+    Parameters
+    ----------
+    xrf_parameter : dict
+        saving all the fitting values and their bounds
+    bound_option : str
+        define bound type
+
+    Returns
+    -------
+    dict
+        updated xrf parameters
+    """
+    for k, v in six.iteritems(xrf_parameter):
+        if k == 'element_list':
+            continue
         v['bound_type'] = v[str(bound_option)]
 
-        if k_new in list(fit_results.values.keys()):
-            v['value'] = fit_results.values[str(k_new)]
-    return new_parameter
+    return xrf_parameter
+
+
+element_dict = {
+    'pos': {"bound_type": "fixed", "min": -0.005, "max": 0.005, "value": 0,
+            "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"},
+    'width': {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
+              "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"},
+    'area': {"bound_type": "none", "min": 0, "max": 1e9, "value": 1000,
+             "free_more": "none", "adjust_element": "fixed", "e_calibration": "fixed", "linear": "none"}
+}
+
+
+class ElementController(object):
+
+    def __init__(self, xrf_parameter):
+        """
+        Update element peak information in parameter dictionary.
+
+        Parameters
+        ----------
+        xrf_parameter : dict
+            saving all the fitting values and their bounds
+
+        """
+        self.new_parameter = xrf_parameter.copy()
+
+    def set_val(self, element_list, **kws):
+        """
+        element_list : list
+            define which element to update
+        kws : dict
+            define which element parameter to change
+        """
+
+        for k, v in six.iteritems(kws):
+            if k == 'pos':
+                func = self.set_position
+            elif k == 'width':
+                func = self.set_width
+            elif k == 'area':
+                func = self.set_area
+            else:
+                raise ValueError('Please define either pos, width or area.')
+
+            for element in element_list:
+                func(element, v)
+        return self.new_parameter
+
+    def set_position(self, item, option=None):
+        """
+        Parameters
+        ----------
+        item : str
+            element name
+        option : str, optional
+            way to control position
+        """
+        if item in k_line:
+            pos_list = ["pos-"+str(item)+"-ka1",
+                        "pos-"+str(item)+"-ka2",
+                        "pos-"+str(item)+"-kb1"]
+            for linename in pos_list:
+                new_pos = element_dict['pos'].copy()
+                if option:
+                    new_pos['adjust_element'] = option
+                addv = {linename: new_pos}
+                self.new_parameter.update(addv)
+        return
+
+    def set_width(self, item, option):
+        """
+        Parameters
+        ----------
+        item : str
+            element name
+        option : str, optional
+            way to control position
+        """
+        if item in k_line:
+            width_list = ["width-"+str(item)+"-ka1",
+                          "width-"+str(item)+"-ka2",
+                          "width-"+str(item)+"-kb1"]
+            for linename in width_list:
+                new_width = element_dict['width'].copy()
+                if option:
+                    new_width['adjust_element'] = option
+                addv = {linename: new_width}
+                self.new_parameter.update(addv)
+        return
+
+    def set_area(self, item, option):
+        """
+        Parameters
+        ----------
+        item : str
+            element name
+        option : str, optional
+            way to control position
+        """
+        if item in k_line:
+            area_list = [str(item)+"_ka1_area"]
+            for linename in area_list:
+                new_area = element_dict['area'].copy()
+                if option:
+                    new_area['adjust_element'] = option
+                addv = {linename: new_area}
+                self.new_parameter.update(addv)
+        return
 
 
 def add_element_dict(xrf_parameter, element_list=None):
@@ -249,7 +378,7 @@ def add_element_dict(xrf_parameter, element_list=None):
 
             width_add_ka1 = {"width-"+str(item)+"-ka1":
                                  {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
-                                  "free_more": "fixed", "adjust_element": "fixed", "e_calibration": "fixed", "linear": "fixed"}}
+                                  "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"}}
 
             #ka1_area = {str(item)+"_ka1_area":
             #                {"bound_type": "none", "min": 0, "max": 1e9, "value": 1e5,
@@ -261,7 +390,7 @@ def add_element_dict(xrf_parameter, element_list=None):
 
             width_add_ka2 = {"width-"+str(item)+"-ka2":
                                  {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
-                                  "free_more": "fixed", "adjust_element": "fixed", "e_calibration": "fixed", "linear": "fixed"}}
+                                  "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"}}
 
             pos_add_kb1 = {"pos-"+str(item)+"-kb1":
                                {"bound_type": "fixed", "min": -0.005, "max": 0.005, "value": 0,
@@ -269,7 +398,7 @@ def add_element_dict(xrf_parameter, element_list=None):
 
             width_add_kb1 = {"width-"+str(item)+"-kb1":
                                  {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
-                                  "free_more": "fixed", "adjust_element": "fixed", "e_calibration": "fixed", "linear": "fixed"}}
+                                  "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"}}
 
             add_list = [pos_add_ka1, width_add_ka1,
                         #ka1_area,
@@ -426,7 +555,7 @@ class ModelSpectrum(object):
                     area_name = str(ename)+'_'+str(line_name)+'_area'
                     if parameter.has_key(area_name):
                         _set_parameter_hint(area_name, parameter[area_name],
-                                            gauss_mod, log_option=False)
+                                            gauss_mod, log_option=True)
 
                     gauss_mod.set_param_hint('center', value=val, vary=False)
                     ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
@@ -515,6 +644,9 @@ class ModelSpectrum(object):
 
                     gauss_mod = GaussModel_xrf(prefix=str(ename)+'_'+str(line_name)+'_')
 
+                    gauss_mod.set_param_hint('e_offset', expr='e_offset')
+                    gauss_mod.set_param_hint('e_linear', expr='e_linear')
+                    gauss_mod.set_param_hint('e_quadratic', expr='e_quadratic')
                     gauss_mod.set_param_hint('fwhm_offset', expr='fwhm_offset')
                     gauss_mod.set_param_hint('fwhm_fanoprime', expr='fwhm_fanoprime')
 
@@ -530,6 +662,10 @@ class ModelSpectrum(object):
                     gauss_mod.set_param_hint('ratio',
                                              value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1'],
                                              vary=False)
+
+                    gauss_mod.set_param_hint('delta_center', value=0, vary=False)
+                    gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
+                    gauss_mod.set_param_hint('ratio_adjust', value=0, vary=False)
 
                     mod = mod + gauss_mod
 
