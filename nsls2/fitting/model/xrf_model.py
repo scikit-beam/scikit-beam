@@ -122,7 +122,7 @@ def gauss_peak_xrf(x, area, center,
     x = e_offset + x * e_linear + x**2 * e_quadratic
 
     return gauss_peak(x, area, center+delta_center,
-                      delta_sigma+get_sigma(center)) * ratio * (1 + ratio_adjust)
+                      delta_sigma+get_sigma(center)) * ratio * ratio_adjust
 
 
 class GaussModel_xrf(Model):
@@ -184,15 +184,9 @@ def update_parameter_dict(xrf_parameter, fit_results):
         saving all the fitting values and their bounds
     fit_results : object
         ModelFit object from lmfit
-
-    Returns
-    -------
-    dict
-        updated xrf parameters
     """
 
-    new_parameter = xrf_parameter.copy()
-    for k, v in six.iteritems(new_parameter):
+    for k, v in six.iteritems(xrf_parameter):
         if k == 'element_list':
             continue
         if k.startswith('ratio'):
@@ -208,9 +202,8 @@ def update_parameter_dict(xrf_parameter, fit_results):
             k_new = k
 
         if k_new in list(fit_results.values.keys()):
-            new_parameter[str(k)]['value'] = fit_results.values[str(k_new)]
-
-    return new_parameter
+            xrf_parameter[str(k)]['value'] = fit_results.values[str(k_new)]
+    return
 
 
 def set_parameter_bound(xrf_parameter, bound_option):
@@ -223,18 +216,13 @@ def set_parameter_bound(xrf_parameter, bound_option):
         saving all the fitting values and their bounds
     bound_option : str
         define bound type
-
-    Returns
-    -------
-    dict
-        updated xrf parameters
     """
     for k, v in six.iteritems(xrf_parameter):
         if k == 'element_list':
             continue
         v['bound_type'] = v[str(bound_option)]
 
-    return xrf_parameter
+    return
 
 
 element_dict = {
@@ -243,7 +231,9 @@ element_dict = {
     'width': {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
               "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"},
     'area': {"bound_type": "none", "min": 0, "max": 1e9, "value": 1000,
-             "free_more": "none", "adjust_element": "fixed", "e_calibration": "fixed", "linear": "none"}
+             "free_more": "none", "adjust_element": "fixed", "e_calibration": "fixed", "linear": "none"},
+    'ratio': {"bound_type": "fixed", "min": 0.1, "max": 5.0, "value": 1.0,
+              "free_more": "fixed", "adjust_element": "lohi", "e_calibration":"fixed", "linear":"fixed"}
 }
 
 
@@ -276,6 +266,8 @@ class ElementController(object):
                 func = self.set_width
             elif k == 'area':
                 func = self.set_area
+            elif k == 'ratio':
+                func = self.set_ratio
             else:
                 raise ValueError('Please define either pos, width or area.')
 
@@ -311,7 +303,7 @@ class ElementController(object):
         item : str
             element name
         option : str, optional
-            way to control position
+            way to control width
         """
         if item in k_line:
             width_list = ["width-"+str(item)+"-ka1",
@@ -332,7 +324,7 @@ class ElementController(object):
         item : str
             element name
         option : str, optional
-            way to control position
+            way to control area
         """
         if item in k_line:
             area_list = [str(item)+"_ka1_area"]
@@ -343,6 +335,26 @@ class ElementController(object):
                 addv = {linename: new_area}
                 self.new_parameter.update(addv)
         return
+
+    def set_ratio(self, item, option):
+        """
+        Parameters
+        ----------
+        item : str
+            element name
+        option : str, optional
+            way to control branching ratio
+        """
+        if item in k_line:
+            ratio_list = ['ratio-'+str(item)+"-kb1"]
+            for linename in ratio_list:
+                new_ratio = element_dict['ratio'].copy()
+                if option:
+                    new_ratio['adjust_element'] = option
+                addv = {linename: new_ratio}
+                self.new_parameter.update(addv)
+        return
+
 
 
 def add_element_dict(xrf_parameter, element_list=None):
@@ -505,14 +517,6 @@ class ModelSpectrum(object):
         pos_adjust = [item.split('-')[1] for item in list(parameter.keys()) if item.startswith('pos')]
         ratio_adjust = [item.split('-')[1] for item in list(parameter.keys()) if item.startswith('ratio')]
 
-        ratio_set = []
-        if parameter.has_key('set_branch_ratio'):
-            ratio_set = parameter['set_branch_ratio'].keys()
-            logger.info(' The branching ratio for those elements'
-                        ' will be reset by users: {0}.'.format(ratio_adjust))
-        else:
-            logger.info(' No adjustment on branching ratio needs to be considered.')
-
         for ename in element_list:
             if ename in k_line:
                 e = Element(ename)
@@ -539,18 +543,23 @@ class ModelSpectrum(object):
 
                     if line_name == 'ka1':
                         gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
-                        #gauss_mod.set_param_hint('delta_center', value=0, vary=False)
-                        #gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
-                    else:
-                        gauss_mod.set_param_hint('area', value=100, vary=True, min=0,
+                        gauss_mod.set_param_hint('delta_center', value=0, vary=False)
+                        gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
+                    elif line_name == 'ka2':
+                        gauss_mod.set_param_hint('area', value=100, vary=True,
                                                  expr=str(ename)+'_ka1_'+'area')
-                        #gauss_mod.set_param_hint('delta_sigma', value=0, vary=False,
-                        #                         expr=str(ename)+'_ka1_'+'delta_sigma')
-                        #gauss_mod.set_param_hint('delta_center', value=0, vary=False,
-                        #                         expr=str(ename)+'_ka1_'+'delta_center')
+                        gauss_mod.set_param_hint('delta_sigma', value=0, vary=False,
+                                                 expr=str(ename)+'_ka1_'+'delta_sigma')
+                        gauss_mod.set_param_hint('delta_center', value=0, vary=False,
+                                                 expr=str(ename)+'_ka1_'+'delta_center')
+                    else:
+                        gauss_mod.set_param_hint('area', value=100, vary=True,
+                                                 expr=str(ename)+'_ka1_'+'area')
+                        gauss_mod.set_param_hint('delta_center', value=0, vary=False)
+                        gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
 
-                    gauss_mod.set_param_hint('delta_center', value=0, vary=False)
-                    gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
+                    #gauss_mod.set_param_hint('delta_center', value=0, vary=False)
+                    #gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
 
                     area_name = str(ename)+'_'+str(line_name)+'_area'
                     if parameter.has_key(area_name):
@@ -560,7 +569,7 @@ class ModelSpectrum(object):
                     gauss_mod.set_param_hint('center', value=val, vary=False)
                     ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
                     gauss_mod.set_param_hint('ratio', value=ratio_v, vary=False)
-                    gauss_mod.set_param_hint('ratio_adjust', value=0, vary=False)
+                    gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
                     logger.info(' {0} {1} peak is at energy {2} with'
                                 ' branching ratio {3}.'. format(ename, line_name, val, ratio_v))
 
@@ -582,9 +591,6 @@ class ModelSpectrum(object):
                     if ename in ratio_adjust:
                         ratio_name = 'ratio-'+ename+'-'+str(line_name)
                         if parameter.has_key(ratio_name):
-                            #parameter[ratio_name]['value'] *= ratio_v
-                            #parameter[ratio_name]['min'] *= ratio_v
-                            #parameter[ratio_name]['max'] *= ratio_v
                             _set_parameter_hint('ratio_adjust', parameter[ratio_name],
                                                 gauss_mod, log_option=True)
 
@@ -609,12 +615,6 @@ class ModelSpectrum(object):
                     #                                                        maxr*ratio_v]))
 
                     # set branching ratio
-                    if ename in ratio_set:
-                        if parameter['set_branch_ratio'][ename].has_key(line_name.lower()):
-                            ratio_new = parameter['set_branch_ratio'][ename][line_name.lower()]
-                            gauss_mod.set_param_hint('ratio', value=ratio_v*ratio_new, vary=False)
-                            logger.warning(' Set branching ratio of {0} {1} as {2}.'.
-                                           format(ename, line_name, ratio_v*ratio_new))
 
                     mod = mod + gauss_mod
                 logger.debug(' Finished building element peak for {0}'.format(ename))
@@ -665,7 +665,7 @@ class ModelSpectrum(object):
 
                     gauss_mod.set_param_hint('delta_center', value=0, vary=False)
                     gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
-                    gauss_mod.set_param_hint('ratio_adjust', value=0, vary=False)
+                    gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
 
                     mod = mod + gauss_mod
 
@@ -699,3 +699,17 @@ class ModelSpectrum(object):
         result = self.mod.fit(y, pars, x=x, weights=w,
                               method=method, fit_kws=kws)
         return result
+
+
+def construct_linear_model(x, energy, element_list):
+    """
+    Construct linear model for fluorescence analysis.
+
+    """
+
+    #for item in element_list:
+    #    if item in k_line:
+    return
+
+
+
