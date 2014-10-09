@@ -1220,22 +1220,20 @@ def multi_tau_lags(multitau_levels, multitau_channels):
 
 def roi_rectangles(num_rois, roi_data, detector_size):
     """
-    This module will find the number of indices of rectangle(square)
-    shape rois and count the number of pixels in that rectangle(square).
-
-    Parameters
+     Parameters
     ----------
     num_rois: int
         number of region of interests(roi)
 
     roi_data: ndarray
-        coordinates of roi's and the, length and width of roi's
+        upper left co-ordinates of roi's and the, length and width of roi's
+        from those co-ordinates
         shape is [num_rois][4]
 
     detector_size : tuple
-        2 element tuple defining the number of pixels in the detector. Order is
-        (num_columns, num_rows)
-
+        2 element tuple defining the number of pixels in the detector.
+        Order is (num_rows, num_columns)
+        
     Returns
     -------
     q_inds : ndarray

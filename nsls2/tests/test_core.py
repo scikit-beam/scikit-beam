@@ -407,9 +407,9 @@ def test_multi_tau_lags():
 
 
 def test_roi_rectangles():
-    detector_size = (10,10)
+    detector_size = (15, 10)
     num_rois = 2
-    roi_data = np.array(([2, 2, 3, 3],[6, 7, 1, 2]), dtype=np.int64)
+    roi_data = np.array(([2, 2, 3, 3],[6, 7, 3, 2]), dtype=np.int64)
 
     xy_inds, num_pixels = core.roi_rectangles(num_rois, roi_data, detector_size)
 
@@ -420,10 +420,15 @@ def test_roi_rectangles():
                 [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 2, 2, 0],
+                [0, 0, 0, 0, 0, 0, 0, 2, 2, 0],
+                [0, 0, 0, 0, 0, 0, 0, 2, 2, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-    num_pixels_m = [9, 2]
+    num_pixels_m = [9, 6]
 
     assert_array_equal(num_pixels, num_pixels_m)
     assert_array_equal(xy_inds, np.ravel(xy_inds_m))

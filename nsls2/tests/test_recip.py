@@ -92,11 +92,8 @@ def test_frame_mode_fail():
 
     for fails in [0, 5, 'cat']:
         yield _process_to_q_exception, pdict, fails
-<<<<<<< HEAD
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 def test_hkl_to_q():
     b = np.array([[-4, -3, -2],
                   [-1, 0, 1],
@@ -107,22 +104,14 @@ def test_hkl_to_q():
                        14.73091986])
 
     npt.assert_array_almost_equal(b_norm, recip.hkl_to_q(b))
-=======
-def test_q_roi():
-<<<<<<< HEAD
->>>>>>> c404bc7... WIP: Q indices and number of pixels - required Q shape
-=======
-=======
+
+
 def test_q_rectangles():
->>>>>>> 23b6979... TST: modified:   nsls2/tests/test_recip.py
     detector_size = (10,10)
     num_rois = 2
     roi_data = np.array(([2, 2, 3, 3],[6, 7, 1,2]), dtype=np.int64)
 
     xy_inds, num_pixels = recip.q_rectangles(num_rois, roi_data, detector_size)
-<<<<<<< HEAD
->>>>>>> 6ab521c... TST: modified:   nsls2/tests/test_recip.py
-=======
 
     xy_inds_m =([0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -137,11 +126,4 @@ def test_q_rectangles():
     num_pixels_m = [9, 2]
 
     assert_array_equal(num_pixels, num_pixels_m)
-<<<<<<< HEAD
     assert_array_equal(xy_inds, np.ravel(xy_inds_m))
->>>>>>> e5b2af6... TST: modified:   nsls2/tests/test_recip.py
-=======
-    assert_array_equal(xy_inds, xy_inds_m)
->>>>>>> 839f162... TST: modified:   nsls2/tests/test_recip.py
-=======
->>>>>>> 95ef4b7... DOC: nsls2/tests/test_core.py
