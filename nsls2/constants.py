@@ -871,6 +871,9 @@ class PowderStandard(object):
 
 # Si data taken from
 # https://www-s.nist.gov/srmors/certificates/640D.pdf?CFID=3219362&CFTOKEN=c031f50442c44e42-57C377F6-BC7A-395A-F39B8F6F2E4D0246&jsessionid=f030c7ded9b463332819566354567a698744
+
+# CeO2 data taken from
+# http://11bm.xray.aps.anl.gov/documents/NISTSRM/NIST_SRM_676b_%5BZnO,TiO2,Cr2O3,CeO2%5D.pdf
 calibration_standards = {'Si':
                          PowderStandard.from_lambda_2theta_hkl(name='Si',
                                            wavelength=1.5405929,
@@ -888,6 +891,17 @@ calibration_standards = {'Si':
                                                (5, 1, 1), (4, 4, 0),
                                                (5, 3, 1), (6, 2, 0),
                                                (5, 3, 3))),
+                            'CeO2':
+                            PowderStandard.from_lambda_2theta_hkl(name='CeO2',
+                                           wavelength=1.5405929,
+                                           two_theta=np.deg2rad([
+                                               28.61, 33.14,
+                                               47.54, 56.39,
+                                               59.14, 69.46]),
+                                           hkl=(
+                                               (1, 1, 1), (2, 0, 0),
+                                               (2, 2, 0), (3, 1, 1),
+                                               (2, 2, 2), (4, 0, 0))),
                             'LaB6':
                             PowderStandard.from_d(name='LaB6',
                                                   d=[4.156,
