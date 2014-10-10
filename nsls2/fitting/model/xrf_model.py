@@ -238,8 +238,10 @@ element_dict = {
 
 
 def get_L_line(prop_name, element):
-    l_list = ['la1', 'la2', 'lb1', 'lb2', 'lb3', 'lb4', 'lb5',
-              'lg1', 'lg2', 'lg3', 'lg4', 'll', 'ln']
+    #l_list = ['la1', 'la2', 'lb1', 'lb2', 'lb3', 'lb4', 'lb5',
+    #          'lg1', 'lg2', 'lg3', 'lg4', 'll', 'ln']
+    l_list = ['la1', 'la2', 'lb1', 'lb2', 'lb3',
+              'lg1', 'lg2', 'll']
     return [str(prop_name)+'-'+str(element)+'-'+str(item)
             for item in l_list]
 
@@ -415,72 +417,6 @@ class ElementController(object):
                 addv = {linename: new_val}
                 self.new_parameter.update(addv)
         return
-
-
-
-def add_element_dict(xrf_parameter, element_list=None):
-    """
-    Update element peak information in parameter dictionary.
-
-    Parameters
-    ----------
-    xrf_parameter : dict
-        saving all the fitting values and their bounds
-    element_list : list, optional
-        define which element to update
-
-    Returns
-    -------
-    dict
-        updated xrf parameters
-    """
-    new_parameter = xrf_parameter.copy()
-
-    if element_list is None:
-        if ',' in xrf_parameter['element_list']:
-            element_list = xrf_parameter['element_list'].split(', ')
-        else:
-            element_list = xrf_parameter['element_list'].split()
-        element_list = [item.strip() for item in element_list]
-
-    for item in element_list:
-        if item in k_line:
-            pos_add_ka1 = {"pos-"+str(item)+"-ka1":
-                               {"bound_type": "fixed", "min": -0.005, "max": 0.005, "value": 0,
-                                "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"}}
-
-            width_add_ka1 = {"width-"+str(item)+"-ka1":
-                                 {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
-                                  "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"}}
-
-            #ka1_area = {str(item)+"_ka1_area":
-            #                {"bound_type": "none", "min": 0, "max": 1e9, "value": 1e5,
-            #                 "free_more": "none", "adjust_element": "none", "e_calibration": "fixed", "linear": "none"}}
-
-            pos_add_ka2 = {"pos-"+str(item)+"-ka2":
-                               {"bound_type": "fixed", "min": -0.01, "max": 0.01, "value": 0,
-                                "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"}}
-
-            width_add_ka2 = {"width-"+str(item)+"-ka2":
-                                 {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
-                                  "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"}}
-
-            pos_add_kb1 = {"pos-"+str(item)+"-kb1":
-                               {"bound_type": "fixed", "min": -0.005, "max": 0.005, "value": 0,
-                                "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"}}
-
-            width_add_kb1 = {"width-"+str(item)+"-kb1":
-                                 {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
-                                  "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"}}
-
-            add_list = [pos_add_ka1, width_add_ka1,
-                        #ka1_area,
-                        pos_add_ka2, width_add_ka2,
-                        pos_add_kb1, width_add_kb1]
-
-            for addv in add_list:
-                new_parameter.update(addv)
-    return new_parameter
 
 
 def get_sum_area(element_name, result_val):
