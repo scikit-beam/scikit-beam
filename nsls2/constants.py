@@ -869,8 +869,14 @@ class PowderStandard(object):
         return len(self._reflections)
 
 
-# Si data taken from
+# Si (Standard Reference Material 640d) data taken from
 # https://www-s.nist.gov/srmors/certificates/640D.pdf?CFID=3219362&CFTOKEN=c031f50442c44e42-57C377F6-BC7A-395A-F39B8F6F2E4D0246&jsessionid=f030c7ded9b463332819566354567a698744
+
+# CeO2 (Standard Reference Material 674b) data taken from
+# http://11bm.xray.aps.anl.gov/documents/NISTSRM/NIST_SRM_676b_%5BZnO,TiO2,Cr2O3,CeO2%5D.pdf
+
+# Alumina (Al2O3), (Standard Reference Material 676a) taken from
+# https://www-s.nist.gov/srmors/certificates/676a.pdf?CFID=3259108&CFTOKEN=fa5bb0075f99948c-FA6ABBDA-9691-7A6B-FBE24BE35748DC08&jsessionid=f030e1751fc5365cac74417053f2c344f675
 calibration_standards = {'Si':
                          PowderStandard.from_lambda_2theta_hkl(name='Si',
                                            wavelength=1.5405929,
@@ -888,6 +894,52 @@ calibration_standards = {'Si':
                                                (5, 1, 1), (4, 4, 0),
                                                (5, 3, 1), (6, 2, 0),
                                                (5, 3, 3))),
+                            'CeO2':
+                            PowderStandard.from_lambda_2theta_hkl(name='CeO2',
+                                           wavelength=1.5405929,
+                                           two_theta=np.deg2rad([
+                                               28.61, 33.14,
+                                               47.54, 56.39,
+                                               59.14, 69.46]),
+                                           hkl=(
+                                               (1, 1, 1), (2, 0, 0),
+                                               (2, 2, 0), (3, 1, 1),
+                                               (2, 2, 2), (4, 0, 0))),
+                            'Al2O3':
+                            PowderStandard.from_lambda_2theta_hkl(name='Al2O3',
+                                           wavelength=1.5405929,
+                                           two_theta=np.deg2rad([
+                                               25.574, 35.149,
+                                               37.773, 43.351,
+                                               52.548, 57.497,
+                                               66.513, 68.203,
+                                               76.873, 77.233,
+                                               84.348, 88.994,
+                                               91.179, 95.240,
+                                               101.070, 116.085,
+                                               116.602, 117.835,
+                                               122.019, 127.671,
+                                               129.870, 131.098,
+                                               136.056, 142.314,
+                                               145.153, 149.185,
+                                               150.102, 150.413,
+                                               152.380]),
+                                           hkl=(
+                                               (0, 1, 2), (1, 0, 4),
+                                               (1, 1, 0), (1, 1, 3),
+                                               (0, 2, 4), (1, 1, 6),
+                                               (2, 1, 4), (3, 0, 0),
+                                               (1, 0, 10), (1, 1, 9),
+                                               (2, 2, 3), (0, 2, 10),
+                                               (1, 3, 4), (2, 2, 6),
+                                               (2, 1, 10), (3, 2, 4),
+                                               (0, 1, 14), (4, 1, 0),
+                                               (4, 1, 3), (1, 3, 10),
+                                               (3, 0, 12), (2, 0, 14),
+                                               (1, 4, 6), (1, 1, 15),
+                                               (4, 0, 10), (0, 5, 4),
+                                               (1, 2, 14), (1, 0, 16),
+                                               (3, 3, 0))),
                             'LaB6':
                             PowderStandard.from_d(name='LaB6',
                                                   d=[4.156,
@@ -913,7 +965,33 @@ calibration_standards = {'Si':
                                                      0.848,
                                                      0.831,
                                                      0.815,
-                                                     0.800])}
+                                                     0.800]),
+                            'Ni':
+                             PowderStandard.from_d(name='Ni',
+                                                   d=[2.03458234862,
+                                                     1.762,
+                                                     1.24592214845,
+                                                     1.06252597829,
+                                                     1.01729117431,
+                                                     0.881,
+                                                     0.80846104616,
+                                                     0.787990355271,
+                                                     0.719333487797,
+                                                     0.678194116208,
+                                                     0.622961074225,
+                                                     0.595664718733,
+                                                     0.587333333333,
+                                                     0.557193323722,
+                                                     0.537404961852,
+                                                     0.531262989146,
+                                                     0.508645587156,
+                                                     0.493458701611,
+                                                     0.488690872874,
+                                                     0.47091430825,
+                                                     0.458785722296,
+                                                     0.4405,
+                                                     0.430525121912,
+                                                     0.427347771314])}
 """
 Calibration standards
 
