@@ -869,11 +869,14 @@ class PowderStandard(object):
         return len(self._reflections)
 
 
-# Si data taken from
+# Si (Standard Reference Material 640d) data taken from
 # https://www-s.nist.gov/srmors/certificates/640D.pdf?CFID=3219362&CFTOKEN=c031f50442c44e42-57C377F6-BC7A-395A-F39B8F6F2E4D0246&jsessionid=f030c7ded9b463332819566354567a698744
 
-# CeO2 data taken from
+# CeO2 (Standard Reference Material 674b) data taken from
 # http://11bm.xray.aps.anl.gov/documents/NISTSRM/NIST_SRM_676b_%5BZnO,TiO2,Cr2O3,CeO2%5D.pdf
+
+# Alumina (Al2O3), (Standard Reference Material 676a) taken from
+# https://www-s.nist.gov/srmors/certificates/676a.pdf?CFID=3259108&CFTOKEN=fa5bb0075f99948c-FA6ABBDA-9691-7A6B-FBE24BE35748DC08&jsessionid=f030e1751fc5365cac74417053f2c344f675
 calibration_standards = {'Si':
                          PowderStandard.from_lambda_2theta_hkl(name='Si',
                                            wavelength=1.5405929,
