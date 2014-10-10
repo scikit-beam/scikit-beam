@@ -237,9 +237,16 @@ element_dict = {
 }
 
 
+def get_L_line(prop_name, element):
+    l_list = ['la1', 'la2', 'lb1', 'lb2', 'lb3', 'lb4', 'lb5',
+              'lg1', 'lg2', 'lg3', 'lg4', 'll', 'ln']
+    return [str(prop_name)+'-'+str(element)+'-'+str(item)
+            for item in l_list]
+
+
 class ElementController(object):
 
-    def __init__(self, xrf_parameter):
+    def __init__(self, xrf_parameter, fit_name):
         """
         Update element peak information in parameter dictionary.
 
@@ -250,8 +257,10 @@ class ElementController(object):
 
         """
         self.new_parameter = xrf_parameter.copy()
+        self.element_name = [item[0:-5] for item in fit_name if 'area' in item]
 
-    def set_val(self, element_list, **kws):
+    def set_val(self, element_list,
+                **kws):
         """
         element_list : list
             define which element to update
@@ -272,7 +281,8 @@ class ElementController(object):
                 raise ValueError('Please define either pos, width or area.')
 
             for element in element_list:
-                func(element, v)
+                func(element, option=v)
+
         return self.new_parameter
 
     def set_position(self, item, option=None):
@@ -284,6 +294,7 @@ class ElementController(object):
         option : str, optional
             way to control position
         """
+
         if item in k_line:
             pos_list = ["pos-"+str(item)+"-ka1",
                         "pos-"+str(item)+"-ka2",
@@ -294,9 +305,23 @@ class ElementController(object):
                     new_pos['adjust_element'] = option
                 addv = {linename: new_pos}
                 self.new_parameter.update(addv)
+
+        elif item in l_line:
+            item = item[0:-2]
+            pos_list = get_L_line('pos', item)
+            for linename in pos_list:
+                linev = linename.split('-')[1]+'_'+linename.split('-')[2]
+                if linev not in self.element_name:
+                    continue
+                new_pos = element_dict['pos'].copy()
+                if option:
+                    new_pos['adjust_element'] = option
+                addv = {linename: new_pos}
+                self.new_parameter.update(addv)
+
         return
 
-    def set_width(self, item, option):
+    def set_width(self, item, option=None):
         """
         Parameters
         ----------
@@ -315,9 +340,21 @@ class ElementController(object):
                     new_width['adjust_element'] = option
                 addv = {linename: new_width}
                 self.new_parameter.update(addv)
+        elif item in l_line:
+            item = item[0:-2]
+            data_list = get_L_line('width', item)
+            for linename in data_list:
+                linev = linename.split('-')[1]+'_'+linename.split('-')[2]
+                if linev not in self.element_name:
+                    continue
+                new_val = element_dict['width'].copy()
+                if option:
+                    new_val['adjust_element'] = option
+                addv = {linename: new_val}
+                self.new_parameter.update(addv)
         return
 
-    def set_area(self, item, option):
+    def set_area(self, item, option=None):
         """
         Parameters
         ----------
@@ -334,9 +371,21 @@ class ElementController(object):
                     new_area['adjust_element'] = option
                 addv = {linename: new_area}
                 self.new_parameter.update(addv)
+        elif item in l_line:
+            item = item[0:-2]
+            data_list = get_L_line('area', item)
+            for linename in data_list:
+                linev = linename.split('-')[1]+'_'+linename.split('-')[2]
+                if linev not in self.element_name:
+                    continue
+                new_val = element_dict['area'].copy()
+                if option:
+                    new_val['adjust_element'] = option
+                addv = {linename: new_val}
+                self.new_parameter.update(addv)
         return
 
-    def set_ratio(self, item, option):
+    def set_ratio(self, item, option=None):
         """
         Parameters
         ----------
@@ -346,12 +395,24 @@ class ElementController(object):
             way to control branching ratio
         """
         if item in k_line:
-            ratio_list = ['ratio-'+str(item)+"-kb1"]
-            for linename in ratio_list:
-                new_ratio = element_dict['ratio'].copy()
+            data_list = ['ratio-'+str(item)+"-kb1"]
+            for linename in data_list:
+                new_val = element_dict['ratio'].copy()
                 if option:
-                    new_ratio['adjust_element'] = option
-                addv = {linename: new_ratio}
+                    new_val['adjust_element'] = option
+                addv = {linename: new_val}
+                self.new_parameter.update(addv)
+        elif item in l_line:
+            item = item[0:-2]
+            data_list = get_L_line('ratio', item)
+            for linename in data_list:
+                linev = linename.split('-')[1]+'_'+linename.split('-')[2]
+                if linev not in self.element_name:
+                    continue
+                new_val = element_dict['ratio'].copy()
+                if option:
+                    new_val['adjust_element'] = option
+                addv = {linename: new_val}
                 self.new_parameter.update(addv)
         return
 
@@ -594,28 +655,6 @@ class ModelSpectrum(object):
                             _set_parameter_hint('ratio_adjust', parameter[ratio_name],
                                                 gauss_mod, log_option=True)
 
-                    # fit branching ratio
-                    #if ename in ratio_adjust:
-                    #    if parameter['fit_branch_ratio'][ename].has_key(line_name.lower()):
-                    #        ratio_change = parameter['fit_branch_ratio'][ename][line_name.lower()]
-                    #        if ratio_change[0] == ratio_change[1]:
-                    #            gauss_mod.set_param_hint('ratio', value=ratio_v*ratio_change[0], vary=False)
-                    #            logger.warning(' Set branching ratio of {0} {1} as {2}.'.
-                    #                           format(ename, line_name, ratio_v*ratio_change[0]))
-
-                    #        else:
-                    #            minr = min(ratio_change)
-                    #            maxr = max(ratio_change)
-                    #            gauss_mod.set_param_hint('ratio', value=ratio_v, vary=True,
-                    #                                     min=ratio_v*minr,
-                    #                                     max=ratio_v*maxr)
-                    #            logger.warning(' Fit branching ratio of {0} {1}'
-                    #                           ' within range {2}.'.format(ename, line_name,
-                    #                                                       [minr*ratio_v,
-                    #                                                        maxr*ratio_v]))
-
-                    # set branching ratio
-
                     mod = mod + gauss_mod
                 logger.debug(' Finished building element peak for {0}'.format(ename))
 
@@ -626,13 +665,6 @@ class ModelSpectrum(object):
                     logger.info('{0} La1 emission line is not activated '
                                 'at this energy {1}'.format(ename, incident_energy))
                     continue
-
-                # L lines
-                #gauss_mod = GaussModel_Llines(prefix=str(ename)+'_l_line_')
-
-                #gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
-                #gauss_mod.set_param_hint('fwhm_offset', value=0.1, vary=True, expr='fwhm_offset')
-                #gauss_mod.set_param_hint('fwhm_fanoprime', value=0.1, vary=True, expr='fwhm_fanoprime')
 
                 for num, item in enumerate(e.emission_line.all[4:-4]):
 
@@ -667,7 +699,72 @@ class ModelSpectrum(object):
                     gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
                     gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
 
+                    # position needs to be adjusted
+                    if ename in pos_adjust:
+                        pos_name = 'pos-'+ename+'-'+str(line_name)
+                        if parameter.has_key(pos_name):
+                            _set_parameter_hint('delta_center', parameter[pos_name],
+                                                gauss_mod, log_option=True)
+
+                    # width needs to be adjusted
+                    if ename in width_adjust:
+                        width_name = 'width-'+ename+'-'+str(line_name)
+                        if parameter.has_key(width_name):
+                            _set_parameter_hint('delta_sigma', parameter[width_name],
+                                                gauss_mod, log_option=True)
+
+
+                    # branching ratio needs to be adjusted
+                    if ename in ratio_adjust:
+                        ratio_name = 'ratio-'+ename+'-'+str(line_name)
+                        if parameter.has_key(ratio_name):
+                            _set_parameter_hint('ratio_adjust', parameter[ratio_name],
+                                                gauss_mod, log_option=True)
+
                     mod = mod + gauss_mod
+
+            elif ename in m_line:
+                ename = ename[:-2]
+                e = Element(ename)
+                #if e.cs(incident_energy)['ma1'] == 0:
+                #    logger.info('{0} ma1 emission line is not activated '
+                #                'at this energy {1}'.format(ename, incident_energy))
+                #    continue
+
+                for num, item in enumerate(e.emission_line.all[-4:]):
+
+                    line_name = item[0]
+                    val = item[1]
+
+                    #if e.cs(incident_energy)[line_name] == 0:
+                    #    continue
+
+                    gauss_mod = GaussModel_xrf(prefix=str(ename)+'_'+str(line_name)+'_')
+
+                    gauss_mod.set_param_hint('e_offset', expr='e_offset')
+                    gauss_mod.set_param_hint('e_linear', expr='e_linear')
+                    gauss_mod.set_param_hint('e_quadratic', expr='e_quadratic')
+                    gauss_mod.set_param_hint('fwhm_offset', expr='fwhm_offset')
+                    gauss_mod.set_param_hint('fwhm_fanoprime', expr='fwhm_fanoprime')
+
+                    if line_name == 'ma1':
+                        gauss_mod.set_param_hint('area', value=100, vary=True)
+                    else:
+                        gauss_mod.set_param_hint('area', value=100, vary=True,
+                                                 expr=str(ename)+'_ma1_'+'area')
+
+                    gauss_mod.set_param_hint('center', value=val, vary=False)
+                    gauss_mod.set_param_hint('sigma', value=1, vary=False)
+                    gauss_mod.set_param_hint('ratio',
+                                             value=0.1, #e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ma1'],
+                                             vary=False)
+
+                    gauss_mod.set_param_hint('delta_center', value=0, vary=False)
+                    gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
+                    gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
+
+                    mod = mod + gauss_mod
+
 
         self.mod = mod
         return
