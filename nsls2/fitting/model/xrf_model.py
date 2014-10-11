@@ -267,7 +267,7 @@ class ElementController(object):
         element_list : list
             define which element to update
         kws : dict
-            define which element parameter to change
+            define what kind of property to change
         """
 
         for k, v in six.iteritems(kws):
@@ -298,9 +298,9 @@ class ElementController(object):
         """
 
         if item in k_line:
-            pos_list = ["pos-"+str(item)+"-ka1",
-                        "pos-"+str(item)+"-ka2",
-                        "pos-"+str(item)+"-kb1"]
+            pos_list = [str(item)+"_ka1_delta_center",
+                        str(item)+"_ka2_delta_center",
+                        str(item)+"_kb1_delta_center"]
             for linename in pos_list:
                 new_pos = element_dict['pos'].copy()
                 if option:
@@ -333,9 +333,9 @@ class ElementController(object):
             way to control width
         """
         if item in k_line:
-            width_list = ["width-"+str(item)+"-ka1",
-                          "width-"+str(item)+"-ka2",
-                          "width-"+str(item)+"-kb1"]
+            width_list = [str(item)+"_ka1_delta_sigma",
+                          str(item)+"_ka2_delta_sigma",
+                          str(item)+"_kb1_delta_sigma"]
             for linename in width_list:
                 new_width = element_dict['width'].copy()
                 if option:
@@ -397,17 +397,20 @@ class ElementController(object):
             way to control branching ratio
         """
         if item in k_line:
-            data_list = ['ratio-'+str(item)+"-kb1"]
+            data_list = [str(item)+"_kb1_ratio_adjust"]
             for linename in data_list:
                 new_val = element_dict['ratio'].copy()
                 if option:
                     new_val['adjust_element'] = option
                 addv = {linename: new_val}
                 self.new_parameter.update(addv)
+
         elif item in l_line:
             item = item[0:-2]
             data_list = get_L_line('ratio', item)
             for linename in data_list:
+                if 'la1' in linename:
+                    continue
                 linev = linename.split('-')[1]+'_'+linename.split('-')[2]
                 if linev not in self.element_name:
                     continue
@@ -451,6 +454,9 @@ class ModelSpectrum(object):
         self.incident_energy = self.parameter['coherent_sct_energy']['value']
 
         self.parameter_default = get_para()
+
+        self.model_spectrum()
+
         return
 
     def setComptonModel(self):
@@ -472,7 +478,7 @@ class ModelSpectrum(object):
                 _set_parameter_hint(name, self.parameter[name], compton)
             else:
                 _set_parameter_hint(name, self.parameter_default[name], compton)
-        logger.debug(' Finished setting up paramters for compton model.')
+        logger.debug(' Finished setting up parameters for compton model.')
         return compton
 
     def setElasticModel(self):
@@ -509,10 +515,6 @@ class ModelSpectrum(object):
         parameter = self.parameter
 
         mod = self.setComptonModel() + self.setElasticModel()
-
-        width_adjust = [item.split('-')[1] for item in list(parameter.keys()) if item.startswith('width')]
-        pos_adjust = [item.split('-')[1] for item in list(parameter.keys()) if item.startswith('pos')]
-        ratio_adjust = [item.split('-')[1] for item in list(parameter.keys()) if item.startswith('ratio')]
 
         for ename in element_list:
             if ename in k_line:
@@ -571,25 +573,22 @@ class ModelSpectrum(object):
                                 ' branching ratio {3}.'. format(ename, line_name, val, ratio_v))
 
                     # position needs to be adjusted
-                    if ename in pos_adjust:
-                        pos_name = 'pos-'+ename+'-'+str(line_name)
-                        if parameter.has_key(pos_name):
-                            _set_parameter_hint('delta_center', parameter[pos_name],
-                                                gauss_mod, log_option=True)
+                    pos_name = ename+'_'+str(line_name)+'_delta_center'
+                    if parameter.has_key(pos_name):
+                        _set_parameter_hint('delta_center', parameter[pos_name],
+                                            gauss_mod, log_option=True)
 
                     # width needs to be adjusted
-                    if ename in width_adjust:
-                        width_name = 'width-'+ename+'-'+str(line_name)
-                        if parameter.has_key(width_name):
-                            _set_parameter_hint('delta_sigma', parameter[width_name],
-                                                gauss_mod, log_option=True)
+                    width_name = ename+'_'+str(line_name)+'_delta_sigma'
+                    if parameter.has_key(width_name):
+                        _set_parameter_hint('delta_sigma', parameter[width_name],
+                                            gauss_mod, log_option=True)
 
                     # branching ratio needs to be adjusted
-                    if ename in ratio_adjust:
-                        ratio_name = 'ratio-'+ename+'-'+str(line_name)
-                        if parameter.has_key(ratio_name):
-                            _set_parameter_hint('ratio_adjust', parameter[ratio_name],
-                                                gauss_mod, log_option=True)
+                    ratio_name = ename+'_'+str(line_name)+'_ratio_adjust'
+                    if parameter.has_key(ratio_name):
+                        _set_parameter_hint('ratio_adjust', parameter[ratio_name],
+                                            gauss_mod, log_option=True)
 
                     mod = mod + gauss_mod
                 logger.debug(' Finished building element peak for {0}'.format(ename))
@@ -725,8 +724,6 @@ class ModelSpectrum(object):
         obj
             saving all the fitting results
         """
-
-        self.model_spectrum()
 
         pars = self.mod.make_params()
         result = self.mod.fit(y, pars, x=x, weights=w,
