@@ -234,7 +234,10 @@ def recon(gx, gy, dx=0.1, dy=0.1, pad=1, w=1.):
     kappax, kappay = np.meshgrid(ax, ay)
 
     c = -1j * (kappax * tx + w * kappay * ty)
-    c[c != 0] /= (kappax[c != 0] ** 2 + w * kappay[c != 0] ** 2)
+
+    c = np.ma.masked_values(c, 0)
+    c /= (kappax**2 + w * kappay**2)
+    c = np.ma.filled(c, 0)
 
     c = np.fft.ifftshift(c)
     phi_padding = np.fft.ifft2(c)
