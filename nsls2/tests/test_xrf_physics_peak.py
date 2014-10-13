@@ -67,8 +67,6 @@ def test_gauss_peak():
 
     assert_array_almost_equal(y_true, out)
 
-    return
-
 
 def test_gauss_step():
     """
@@ -88,7 +86,6 @@ def test_gauss_step():
     out = gauss_step(x, area, cen, std, peak_e)
 
     assert_array_almost_equal(y_true, out)
-    return
 
 
 def test_gauss_tail():
@@ -109,8 +106,6 @@ def test_gauss_tail():
     out = gauss_tail(x, area, cen, std, gamma)
 
     assert_array_almost_equal(y_true, out)
-
-    return
 
 
 def test_elastic_peak():
@@ -137,7 +132,6 @@ def test_elastic_peak():
                        fanoprime, area)
 
     assert_array_almost_equal(y_true, out)
-    return
 
 
 def test_compton_peak():
@@ -172,7 +166,6 @@ def test_compton_peak():
                        gamma, hi_f_tail, hi_gamma)
 
     assert_array_almost_equal(y_true, out)
-    return
 
 
 def test_lorentzian_peak():
@@ -189,8 +182,6 @@ def test_lorentzian_peak():
     out = lorentzian_peak(x, a, cen, std)
 
     assert_array_almost_equal(y_true, out)
-
-    return
 
 
 def test_lorentzian_squared_peak():
@@ -211,8 +202,6 @@ def test_lorentzian_squared_peak():
 
     assert_array_almost_equal(y_true, out)
 
-    return
-
 
 def test_voigt_peak():
 
@@ -230,7 +219,6 @@ def test_voigt_peak():
     out = voigt_peak(x, a, cen, std, gamma)
 
     assert_array_almost_equal(y_true, out)
-    return
 
 
 def test_pvoigt_peak():
@@ -249,7 +237,6 @@ def test_pvoigt_peak():
     out = pvoigt_peak(x, a, cen, std, fraction)
 
     assert_array_almost_equal(y_true, out)
-    return
 
 
 def test_gauss_model():
@@ -268,8 +255,6 @@ def test_gauss_model():
 
     fitted_val = [result.values['area'], result.values['center'], result.values['sigma']]
     assert_array_almost_equal(true_param, fitted_val, decimal=2)
-
-    return
 
 
 def test_elastic_model():
@@ -299,8 +284,6 @@ def test_elastic_model():
                   result.values['coherent_sct_energy']]
 
     assert_array_almost_equal(true_param, fitted_val, decimal=2)
-
-    return
 
 
 def test_compton_model():
@@ -343,5 +326,3 @@ def test_compton_model():
                result.values['compton_hi_f_tail']]
 
     assert_array_almost_equal(true_param, fit_val, decimal=2)
-
-    return

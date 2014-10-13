@@ -354,7 +354,8 @@ def pvoigt_peak(x, area, center, sigma, fraction):
     sigma : float
         standard deviation
     fraction : float
-        weight for lorentzian peak in the linear combination
+        weight for lorentzian peak in the linear combination, and (1-fraction) is the weight
+        for gaussian peak.
     """
     return ((1 - fraction) * gauss_peak(x, area, center, sigma) +
             fraction * lorentzian_peak(x, area, center, sigma))
