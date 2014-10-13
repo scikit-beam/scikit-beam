@@ -320,7 +320,7 @@ def lorentzian_squared_peak(x, area, center, sigma):
 
 def voigt_peak(x, area, center, sigma, gamma):
     """
-    1 dimensional Voigt function, the convolution between Gaussian and Lorentzian curve.
+    1 dimensional voigt function, the convolution between gaussian and lorentzian curve.
 
     Parameters
     ----------
@@ -341,7 +341,7 @@ def voigt_peak(x, area, center, sigma, gamma):
 
 def pvoigt_peak(x, area, center, sigma, fraction):
     """
-    1 dimensional pseudo-voigt, linear combination of Gaussian and Lorentzian curve.
+    1 dimensional pseudo-voigt, linear combination of gaussian and lorentzian curve.
 
     Parameters
     ----------
@@ -353,6 +353,8 @@ def pvoigt_peak(x, area, center, sigma, fraction):
         center position
     sigma : float
         standard deviation
+    fraction : float
+        weight for lorentzian peak in the linear combination
     """
     return ((1 - fraction) * gauss_peak(x, area, center, sigma) +
             fraction * lorentzian_peak(x, area, center, sigma))

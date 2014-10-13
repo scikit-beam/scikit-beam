@@ -249,7 +249,7 @@ def test_pvoigt_peak():
     out = pvoigt_peak(x, a, cen, std, fraction)
 
     assert_array_almost_equal(y_true, out)
-    return out
+    return
 
 
 def test_gauss_model():
