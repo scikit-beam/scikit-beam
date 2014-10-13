@@ -316,3 +316,33 @@ def lorentzian_squared_peak(x, area, center, sigma):
     """
 
     return (area/(1 + ((x - center) / sigma)**2)**2) / (np.pi * sigma)
+
+
+def voigt_peak(x, area, center, sigma, gamma):
+    """
+    1 dimensional Voigt function, the convolution between Gaussian and Lorentzian curve.
+
+    Parameters
+    ----------
+    x : array
+        independent variable
+    area : float
+        area of voigt peak,
+    center : float
+        center position
+    sigma : float
+        standard deviation
+    gamma : float
+        half width at half maximum of lorentzian
+    """
+    z = (x - center + 1j * gamma) / (sigma * np.sqrt(2))
+    return area * scipy.special.wofz(z).real / (sigma * np.sqrt(2 * np.pi))
+
+
+def pvoigt_peak(x, area, center, sigma, fraction):
+    """
+    1 dimensional pseudo-voigt, linear combination of Gaussian curve and Lorentzian curve.
+    """
+    return ((1-fraction)*gaussian(x, amplitude, center, sigma) +
+            fraction*lorentzian(x, amplitude, center, sigma))
+
