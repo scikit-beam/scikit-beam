@@ -327,7 +327,7 @@ def voigt_peak(x, area, center, sigma, gamma):
     x : array
         independent variable
     area : float
-        area of voigt peak,
+        area of voigt peak
     center : float
         center position
     sigma : float
@@ -341,8 +341,18 @@ def voigt_peak(x, area, center, sigma, gamma):
 
 def pvoigt_peak(x, area, center, sigma, fraction):
     """
-    1 dimensional pseudo-voigt, linear combination of Gaussian curve and Lorentzian curve.
-    """
-    return ((1-fraction)*gaussian(x, amplitude, center, sigma) +
-            fraction*lorentzian(x, amplitude, center, sigma))
+    1 dimensional pseudo-voigt, linear combination of Gaussian and Lorentzian curve.
 
+    Parameters
+    ----------
+    x : array
+        independent variable
+    area : float
+        area of pvoigt peak
+    center : float
+        center position
+    sigma : float
+        standard deviation
+    """
+    return ((1 - fraction) * gauss_peak(x, area, center, sigma) +
+            fraction * lorentzian_peak(x, area, center, sigma))
