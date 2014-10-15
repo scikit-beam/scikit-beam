@@ -1,43 +1,45 @@
+# ######################################################################
 # Module for the BNL image processing project
 # Developed at the NSLS-II, Brookhaven National Laboratory
-# Developed by Gabriel Iltis, Oct. 2013
+# Developed by Gabriel C. Iltis, Oct. 2013
+#
+#  Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
+# National Laboratory. All rights reserved.                            #
+#                                                                      #
+# Redistribution and use in source and binary forms, with or without   #
+# modification, are permitted provided that the following conditions   #
+# are met:                                                             #
+#                                                                      #
+# * Redistributions of source code must retain the above copyright     #
+#   notice, this list of conditions and the following disclaimer.      #
+#                                                                      #
+# * Redistributions in binary form must reproduce the above copyright  #
+#   notice this list of conditions and the following disclaimer in     #
+#   the documentation and/or other materials provided with the         #
+#   distribution.                                                      #
+#                                                                      #
+# * Neither the name of the Brookhaven Science Associates, Brookhaven  #
+#   National Laboratory nor the names of its contributors may be used  #
+#   to endorse or promote products derived from this software without  #
+#   specific prior written permission.                                 #
+#                                                                      #
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS  #
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT    #
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS    #
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE       #
+# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,           #
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES   #
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR   #
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)   #
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,  #
+# STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OTHERWISE) ARISING   #
+# IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
+# POSSIBILITY OF SUCH DAMAGE.                                          #
+########################################################################
 """
-This class is designed to evaluate data set histograms by providing 
-functions for easily plotting, evaluating, saving, and modifiying histograms.
+This module provides tools for evaluating and modifying image and data set
+histograms.
 """
-"""
-REVISON LOG: (FORMAT: "PROGRAMMER INITIALS: DATE -- RECORD")
-GCI: 2/11/2014 -- Modifying documentation of the package functions for
-    inclusion in the bulk module pull to GITHUB
-GCI: 2/19/2014 -- Updating module to docstring format.
-    Changed filename from C3_histops.py to histops.py
-    TODO Finish Adding function for saving histogram data as a CSV file or
-    HDF5
-    data set.
-    TODO Finish adding function for loading previously saved histogram data.
-GCI: 2/28/2014 -- Added the functions:
-    hist_makeData: which writes histogram data to the HDF5 file
-    hist_makeCSV: which writes the histogram data to a CSV file
-GCI: 3/4/14 -- (1) Modified the hist_makeData function to include a keyword to
-    append the data set name so that it doesn't conflict with previously saved 
-    data. Currently this has been added to allow for custom histogram data
-    to be
-    saved in addition to standard histogram data, however, this will also
-    enable
-    the funciton to save multiple iterations or versions of the histogram
-    for a
-    single volume (e.g. for binsize evaluation, or filter evaluation).
-    (2) Created a new function specifically to generate histogram data. This 
-    function returns three numpy arrays corresponding to the bin voxel count 
-    (hist), average intensity value for each bin (bin_avg) and the edge value
-    for each bin (bin_edges). The results from this function are then used by 
-    the plotting funciton, as well as the two saving functions that are
-    included
-    for saving the data either to the H5 file, or to a separate CSV file.
-GCI: 9/18/14 -- Updating hist functions for incorporation into
-VisTrails
-"""
-
 import numpy as np
 
 
