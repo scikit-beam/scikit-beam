@@ -16,7 +16,8 @@ from nsls2.testing.noseclasses import KnownFailure
 
 plugins = [KnownFailure]
 env = {"NOSE_WITH_COVERAGE": 1,
-       'NOSE_COVER_PACKAGE': 'nsls2'}
+       'NOSE_COVER_PACKAGE': 'nsls2',
+       'NOSE_COVER_HTML': 1}
 # Nose doesn't automatically instantiate all of the plugins in the
 # child processes, so we have to provide the multiprocess plugin with
 # a list.

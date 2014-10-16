@@ -30,10 +30,12 @@ pip-delete-this-directory.txt
 # Unit test / coverage reports
 htmlcov/
 .tox/
+cover/
 .coverage
 .cache
 nosetests.xml
 coverage.xml
+cover/
 
 # Translations
 *.mo
@@ -73,3 +75,6 @@ docs/_build/
 *.tif
 *.dat
 *.DAT
+
+#generated documntation files
+doc/resource/api/generated/

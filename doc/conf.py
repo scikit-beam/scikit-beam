@@ -18,7 +18,7 @@ import os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('..'))
 
 # -- General configuration ------------------------------------------------
 
@@ -283,3 +283,30 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 #    This can be used as the default role to make links 'smart'.
 #
 default_role = "autolink"
+
+autosummary_generate = True
+
+
+# picked from http://read-the-docs.readthedocs.org/en/latest/faq.html#i-get-import-errors-on-libraries-that-depend-on-c-modules  # noqa
+class Mock(object):
+
+    __all__ = []
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return Mock()
+
+    @classmethod
+    def __getattr__(cls, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        elif name == 'c_byte':
+            return 0
+        else:
+            return Mock()
+
+MOCK_MODULES = ['six', 'scipy', 'scipy.signal', 'scipy.special', 'six.moves', 'scipy.integrate', 'xraylib']
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = Mock()
