@@ -3,7 +3,10 @@ package:
   version: 0.2.x
 
 source:
-  git_url: https://github.com/Nikea/NSLS2.git
+  git_url: ../
+  git_tag: {{ environ['GIT_FULL_HASH'] }}
+
+
 
 build:
   number: 1
@@ -23,6 +26,7 @@ requirements:
     - scikit-image
     - lmfit
     - netcdf4
+
 test:
   requires:
     - nose

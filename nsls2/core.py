@@ -1,3 +1,4 @@
+#! encoding: utf-8
 # ######################################################################
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
@@ -47,8 +48,7 @@ from six import string_types
 import time
 import sys
 from itertools import tee
-from collections import namedtuple, MutableMapping
-
+from collections import namedtuple, MutableMapping, defaultdict, deque
 import numpy as np
 from itertools import tee
 
@@ -179,7 +179,23 @@ class MD_dict(MutableMapping):
         return _iter_helper([], self._split, self._dict)
 
 
+def _iter_helper(path_list, split, md_dict):
+    """
+    Recursively walk the tree and return the names of the leaves
+    """
+    for k, v in six.iteritems(md_dict):
+        if isinstance(v, md_value):
+            yield split.join(path_list + [k])
+        else:
+            for inner_v in _iter_helper(path_list + [k], split, v._dict):
+                yield inner_v
+
+
 class verbosedict(dict):
+    """
+    A sub-class of dict which raises more verbose errors if
+    a key is not found.
+    """
     def __getitem__(self, key):
         try:
             v = dict.__getitem__(self, key)
@@ -199,16 +215,123 @@ class verbosedict(dict):
         return v
 
 
-def _iter_helper(path_list, split, md_dict):
+class RCParamDict(MutableMapping):
+    """A class to make dealing with storing default values easier.
+
+    RC params is a hold- over from the UNIX days where configuration
+    files are 'rc' files.  See
+    http://en.wikipedia.org/wiki/Configuration_file
+
+    Examples
+    --------
+    Getting and setting data by path is possible
+
+    >>> tt = RCParamDict()
+    >>> tt['name'] = 'test'
+    >>> tt['nested.a'] = 2
     """
-    Recursively walk the tree and return the names of the leaves
-    """
-    for k, v in six.iteritems(md_dict):
-        if isinstance(v, md_value):
-            yield split.join(path_list + [k])
+    _delim = '.'
+
+    def __init__(self):
+        # the dict to hold the keys at this level
+        self._dict = dict()
+        # the defaultdict (defaults to just accepting it) of
+        # validator functions
+        self._validators = defaultdict(lambda: lambda x: True)
+
+    # overload __setitem__ so dotted paths work
+    def __setitem__(self, key, val):
+        # try to split the key
+        splt_key = key.split(self._delim, 1)
+        # if more than one part, recurse
+        if len(splt_key) > 1:
+            try:
+                tmp = self._dict[splt_key[0]]
+            except KeyError:
+                tmp = RCParamDict()
+                self._dict[splt_key[0]] = tmp
+
+            if not isinstance(tmp, RCParamDict):
+                raise KeyError("name space is borked")
+
+            tmp[splt_key[1]] = val
         else:
-            for inner_v in _iter_helper(path_list + [k], split, v._dict):
-                yield inner_v
+            if not self._validators[key]:
+                # TODO improve the validation error
+                raise ValueError("fails to validate, improve this")
+            self._dict[key] = val
+
+    def __getitem__(self, key):
+        # try to split the key
+        splt_key = key.split(self._delim, 1)
+        if len(splt_key) > 1:
+            return self._dict[splt_key[0]][splt_key[1]]
+        else:
+            return self._dict[key]
+
+    def __delitem__(self, key):
+        splt_key = key.split(self._delim, 1)
+        if len(splt_key) > 1:
+            self._dict[splt_key[0]].__delitem__(splt_key[1])
+        else:
+            del self._dict[key]
+
+    def __len__(self):
+        return len(list(iter(self)))
+
+    def __iter__(self):
+        return self._iter_helper([])
+
+    def _iter_helper(self, path_list):
+        """
+        Recursively walk the tree and return the names of the leaves
+        """
+        for key, val in six.iteritems(self._dict):
+            if isinstance(val, RCParamDict):
+                for k in val._iter_helper(path_list + [key, ]):
+                    yield k
+            else:
+                yield self._delim.join(path_list + [key, ])
+
+    def __repr__(self):
+        # recursively get the formatted list of strings
+        str_list = self._repr_helper(0)
+        # return as a single string
+        return '\n'.join(str_list)
+
+    def _repr_helper(self, tab_level):
+        # to accumulate the strings into
+        str_list = []
+        # list of the elements at this level
+        elm_list = []
+        # list of sub-levels
+        nested_list = []
+        # loop over the local _dict and sort out which
+        # keys are nested and which are this level
+        for key, val in six.iteritems(self._dict):
+            if isinstance(val, RCParamDict):
+                nested_list.append(key)
+            else:
+                elm_list.append(key)
+
+        # sort the keys in both lists
+        elm_list.sort()
+        nested_list.sort()
+
+        # loop over and format the keys/vals at this level
+        for elm in elm_list:
+            str_list.append("    " * tab_level +
+                            "{key}: {val}".format(
+                                key=elm, val=self._dict[elm]))
+        # deal with the nested groups
+        for nested in nested_list:
+            # add the label for the group name
+            str_list.append("    " * tab_level +
+                            "{key}:".format(key=nested))
+            # add the strings from _all_ the nested groups
+            str_list.extend(
+                self._dict[nested]._repr_helper(tab_level + 1))
+        return str_list
 
 
 keys_core = {
@@ -316,7 +439,7 @@ keys_core = {
 }
 
 
-def img_subtraction_pre(img_arr, is_reference):
+def subtract_reference_images(imgs, is_reference):
     """
     Function to subtract a series of measured images from
     background/dark current/reference images.  The nearest reference
@@ -325,7 +448,7 @@ def img_subtraction_pre(img_arr, is_reference):
 
     Parameters
     ----------
-    img_arr : numpy.ndarray
+    imgs : numpy.ndarray
         Array of 2-D images
 
     is_reference : 1-D boolean array
@@ -352,32 +475,25 @@ def img_subtraction_pre(img_arr, is_reference):
         # use ValueError because the user passed in invalid data
         raise ValueError("The first image is not a reference image")
     # grab the first image
-    ref_imge = img_arr[0]
+    ref_imge = imgs[0]
     # just sum the bool array to get count
     ref_count = np.sum(is_reference)
     # make an array of zeros of the correct type
-    corrected_image = np.zeros(
-        (len(img_arr) - ref_count,) + img_arr.shape[1:],
-        dtype=img_arr.dtype)
-    # local loop counter
-    count = 0
+    corrected_image = deque()
     # zip together (lazy like this is really izip), images and flags
-    for img, ref in zip(img_arr[1:], is_reference[1:]):
+    for imgs, ref in zip(imgs[1:], is_reference[1:]):
         # if this is a ref image, save it and move on
         if ref:
-            ref_imge = img
+            ref_imge = imgs
             continue
         # else, do the subtraction
-        corrected_image[count] = img - ref_imge
-        # and increment the counter
-        count += 1
+        corrected_image.append(imgs - ref_imge)
 
-    # return the output
-    return corrected_image
+    # return the output as a list
+    return list(corrected_image)
 
 
-def detector2D_to_1D(img, calibrated_center, pixel_size=None,
-                     **kwargs):
+def img_to_relative_xyi(img, cx, cy, pixel_size_x=None, pixel_size_y=None):
     """
     Convert the 2D image to a list of x y I coordinates where
     x == x_img - detector_center[0] and
@@ -386,38 +502,51 @@ def detector2D_to_1D(img, calibrated_center, pixel_size=None,
     Parameters
     ----------
     img: `ndarray`
-        2D detector image
-
-    calibrated_center : tuple
-        see keys_core["calibrated_center"]["description"]
-
-    pixel_size : tuple, optional
-        conversion between pixels and real units
-
-        see keys_core["pixel_size"]["description"]
+        2D image
+    cx : float
+        Image center in the x direction
+    cy : float
+        Image center in the y direction
+    pixel_size_x : float, optional
+        Pixel size in x
+    pixel_size_y : float, optional
+        Pixel size in y
     **kwargs: dict
         Bucket for extra parameters in an unpacked dictionary
 
     Returns
     -------
-    X : `ndarray`
+    x : `ndarray`
         x-coordinate of pixel. shape (N, )
-    Y : `ndarray`
+    y : `ndarray`
         y-coordinate of pixel. shape (N, )
     I : `ndarray`
         intensity of pixel. shape (N, )
     """
-    if pixel_size is None:
-        pixel_size = (1, 1)
+    if pixel_size_x is not None and pixel_size_y is not None:
+        if pixel_size_x <= 0:
+            raise ValueError('Input parameter pixel_size_x must be greater '
+                             'than 0. Your value was ' +
+                             six.text_type(pixel_size_x))
+        if pixel_size_y <= 0:
+            raise ValueError('Input parameter pixel_size_y must be greater '
+                             'than 0. Your value was ' +
+                             six.text_type(pixel_size_y))
+    elif pixel_size_x is None and pixel_size_y is None:
+        pixel_size_x = 1
+        pixel_size_y = 1
+    else:
+        raise ValueError('pixel_size_x and pixel_size_y must both be None or '
+                         'greater than zero. You passed in values for '
+                         'pixel_size_x of {0} and pixel_size_y of {1]'
+                         ''.format(pixel_size_x, pixel_size_y))
 
     # Caswell's incredible terse rewrite
-    X, Y = np.meshgrid(pixel_size[0] * (np.arange(img.shape[0]) -
-                                        calibrated_center[0]),
-                       pixel_size[1] * (np.arange(img.shape[1]) -
-                                        calibrated_center[1]))
+    x, y = np.meshgrid(pixel_size_x * (np.arange(img.shape[0]) - cx),
+                       pixel_size_y * (np.arange(img.shape[1]) - cy))
 
-    # return the x, y and z coordinates (as a tuple? or is this a list?)
-    return X.ravel(), Y.ravel(), img.ravel()
+    # return x, y and intensity as 1D arrays
+    return x.ravel(), y.ravel(), img.ravel()
 
 
 def bin_1D(x, y, nx=None, min_x=None, max_x=None):
@@ -634,7 +763,7 @@ def wedge_integration(src_data, center, theta_start,
     float
         The integrated intensity under the wedge
     """
-    pass
+    raise NotImplementedError()
 
 
 def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
@@ -948,12 +1077,12 @@ def d_to_q(d):
         d = \\frac{2 \pi}{q}
 
     Parameters
-    -------
+    ----------
     d : array
        An array of d (plane) spacing
 
     Returns
-    ----------
+    -------
     q : array
         An array of q values
 
@@ -1034,3 +1163,56 @@ def twotheta_to_q(two_theta, wavelength):
     wavelength = float(wavelength)
     pre_factor = ((4 * np.pi) / wavelength)
     return pre_factor * np.sin(two_theta / 2)
+
+
+def multi_tau_lags(multitau_levels, multitau_channels):
+    """
+    Standard multiple-tau algorithm for finding the lag times (delay
+    times).
+
+    Parameters
+    ----------
+    multitau_levels : int
+        number of levels of multiple-taus
+
+    multitau_channels : int
+        number of channels or number of buffers in auto-correlators
+        normalizations (must be even)
+
+    Returns
+    -------
+    total_channels : int
+        total number of channels ( or total number of delay times)
+
+    lag_steps : ndarray
+        delay or lag steps for the multiple tau analysis
+
+    Notes
+    -----
+    The multi-tau correlation scheme was used for finding the lag times
+    (delay times).
+
+    References: text [1]_
+
+    .. [1] K. Schätzela, M. Drewela and  S. Stimaca, "Photon correlation
+       measurements at large lag times: Improving statistical accuracy,"
+       J. Mod. Opt., vol 35, p 711–718, 1988.
+    """
+
+    if (multitau_channels % 2 != 0):
+        raise ValueError("Number of  multiple tau channels(buffers)"
+                         " must be even. You provided {0} "
+                         .format(multitau_channels))
+
+    # total number of channels ( or total number of delay times)
+    tot_channels = (multitau_levels + 1)*multitau_channels//2
+
+    lag = []
+    lag_steps = np.arange(1, multitau_channels + 1)
+    for i in range(2, multitau_levels + 1):
+        for j in range(1, multitau_channels//2 + 1):
+            lag.append((multitau_channels//2 + j)*(2**(i - 1)))
+
+    lag_steps = np.append(lag_steps, np.array(lag))
+
+    return tot_channels, lag_steps

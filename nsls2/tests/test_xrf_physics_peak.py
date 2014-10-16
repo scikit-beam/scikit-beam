@@ -44,7 +44,9 @@ import numpy as np
 from numpy.testing import (assert_allclose, assert_array_almost_equal)
 
 from nsls2.fitting.model.physics_peak import (gauss_peak, gauss_step, gauss_tail,
-                                              elastic_peak, compton_peak)
+                                              elastic_peak, compton_peak,
+                                              lorentzian_peak, lorentzian_squared_peak,
+                                              voigt_peak, pvoigt_peak)
 
 from nsls2.fitting.model.physics_model import (ComptonModel, ElasticModel,
                                                GaussModel)
@@ -65,8 +67,6 @@ def test_gauss_peak():
 
     assert_array_almost_equal(y_true, out)
 
-    return
-
 
 def test_gauss_step():
     """
@@ -86,7 +86,6 @@ def test_gauss_step():
     out = gauss_step(x, area, cen, std, peak_e)
 
     assert_array_almost_equal(y_true, out)
-    return
 
 
 def test_gauss_tail():
@@ -107,8 +106,6 @@ def test_gauss_tail():
     out = gauss_tail(x, area, cen, std, gamma)
 
     assert_array_almost_equal(y_true, out)
-
-    return
 
 
 def test_elastic_peak():
@@ -135,7 +132,6 @@ def test_elastic_peak():
                        fanoprime, area)
 
     assert_array_almost_equal(y_true, out)
-    return
 
 
 def test_compton_peak():
@@ -170,7 +166,77 @@ def test_compton_peak():
                        gamma, hi_f_tail, hi_gamma)
 
     assert_array_almost_equal(y_true, out)
-    return
+
+
+def test_lorentzian_peak():
+
+    y_true = [ 0.03151583,  0.03881828,  0.04897075,  0.06366198,  0.0860297 ,
+               0.12242688,  0.18724111,  0.31830989,  0.63661977,  1.59154943,
+               3.18309886,  1.59154943,  0.63661977,  0.31830989,  0.18724111,
+               0.12242688,  0.0860297 ,  0.06366198,  0.04897075,  0.03881828]
+
+    x = np.arange(-1, 1, 0.1)
+    a = 1
+    cen = 0
+    std = 0.1
+    out = lorentzian_peak(x, a, cen, std)
+
+    assert_array_almost_equal(y_true, out)
+
+
+def test_lorentzian_squared_peak():
+
+    y_true = [3.12037924e-04,   4.73393644e-04,   7.53396180e-04,
+              1.27323954e-03,   2.32512700e-03,   4.70872613e-03,
+              1.10141829e-02,   3.18309886e-02,   1.27323954e-01,
+              7.95774715e-01,   3.18309886e+00,   7.95774715e-01,
+              1.27323954e-01,   3.18309886e-02,   1.10141829e-02,
+              4.70872613e-03,   2.32512700e-03,   1.27323954e-03,
+              7.53396180e-04,   4.73393644e-04]
+
+    x = np.arange(-1, 1, 0.1)
+    a = 1
+    cen = 0
+    std = 0.1
+    out = lorentzian_squared_peak(x, a, cen, std)
+
+    assert_array_almost_equal(y_true, out)
+
+
+def test_voigt_peak():
+
+    y_true = [0.03248735,  0.04030525,  0.05136683,  0.06778597,  0.09377683,
+              0.13884921,  0.22813635,  0.43385822,  0.90715199,  1.65795663,
+              2.08709281,  1.65795663,  0.90715199,  0.43385822,  0.22813635,
+              0.13884921,  0.09377683,  0.06778597,  0.05136683,  0.04030525]
+
+    x = np.arange(-1, 1, 0.1)
+    a = 1
+    cen = 0
+    std = 0.1
+    gamma = 0.1
+
+    out = voigt_peak(x, a, cen, std, gamma)
+
+    assert_array_almost_equal(y_true, out)
+
+
+def test_pvoigt_peak():
+
+    y_true = [0.01575792,  0.01940914,  0.02448538,  0.03183099,  0.04301488,
+              0.06122087,  0.09428971,  0.18131419,  0.58826472,  2.00562834,
+              3.58626083,  2.00562834,  0.58826472,  0.18131419,  0.09428971,
+              0.06122087,  0.04301488,  0.03183099,  0.02448538,  0.01940914]
+
+    x = np.arange(-1, 1, 0.1)
+    a = 1
+    cen = 0
+    std = 0.1
+    fraction = 0.5
+
+    out = pvoigt_peak(x, a, cen, std, fraction)
+
+    assert_array_almost_equal(y_true, out)
 
 
 def test_gauss_model():
@@ -189,8 +255,6 @@ def test_gauss_model():
 
     fitted_val = [result.values['area'], result.values['center'], result.values['sigma']]
     assert_array_almost_equal(true_param, fitted_val, decimal=2)
-
-    return
 
 
 def test_elastic_model():
@@ -220,8 +284,6 @@ def test_elastic_model():
                   result.values['coherent_sct_energy']]
 
     assert_array_almost_equal(true_param, fitted_val, decimal=2)
-
-    return
 
 
 def test_compton_model():
@@ -264,5 +326,3 @@ def test_compton_model():
                result.values['compton_hi_f_tail']]
 
     assert_array_almost_equal(true_param, fit_val, decimal=2)
-
-    return

@@ -62,12 +62,14 @@ def test_refine_center():
     I = _draw_gaussian_rings((1000, 1001), center,
                              [50, 75, 100, 250, 500], 5)
 
-    out = calibration.refine_center(I, center+1, (1, 1),
-                                    phi_steps=20, nx=300, min_x=10,
-                                    max_x=300, window_size=5,
-                                    thresh=0, max_peaks=4)
+    nx_opts = [None, 300]
+    for nx in nx_opts:
+        out = calibration.refine_center(I, center+1, (1, 1),
+                                        phi_steps=20, nx=nx, min_x=10,
+                                        max_x=300, window_size=5,
+                                        thresh=0, max_peaks=4)
 
-    assert np.all(np.abs(center - out) < .1)
+        assert np.all(np.abs(center - out) < .1)
 
 
 def test_blind_d():

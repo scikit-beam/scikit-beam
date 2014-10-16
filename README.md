@@ -1,3 +1,4 @@
+[coverage] (http://nikea-docs.github.io/nsls2-coverage/cover/index.html)
 [![Coverage Status](https://img.shields.io/coveralls/Nikea/NSLS2.svg)](https://coveralls.io/r/Nikea/NSLS2)
 
 [![Build Status](https://travis-ci.org/Nikea/NSLS2.svg?branch=master)](https://travis-ci.org/Nikea/NSLS2)
