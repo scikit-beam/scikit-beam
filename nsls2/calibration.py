@@ -52,8 +52,9 @@ from nsls2.core import (pixel_to_phi, pixel_to_radius,
 
 def estimate_d_blind(name, wavelength, bin_centers, ring_average,
                window_size, max_peak_count, thresh):
-    """ Estimate the sample-detector distance
-
+    """
+    Estimate the sample-detector distance
+    
     Given a radially integrated calibration image return an estimate for
     the sample-detector distance.  This function does not require a
     rough estimate of what d should be.
@@ -96,6 +97,7 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
 
     thresh : float
         Fraction of maximum peak height
+
     Returns
     -------
     dist_sample : float
@@ -104,7 +106,6 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
 
     std_dist_sample : float
         The standard deviation of d computed from the peaks used.
-
     """
 
     # get the calibration standard
@@ -135,7 +136,8 @@ estimate_d_blind.name = list(calibration_standards)
 def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
                   thresh, window_size,
                   nx=None, min_x=None, max_x=None):
-    """Refines the location of the center of the beam.
+    """
+    Refines the location of the center of the beam.
 
     This relies on being able to see the whole powder pattern.
 
@@ -143,22 +145,31 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
     ----------
     image : ndarray
         The image
+
     calibrated_center : tuple
         (row, column) the estimated center
+
     pixel_size : tuple
         (pixel_height, pixel_width)
+
     phi_steps : int
         How many regions to split the ring into, should be >10
+
     max_peaks : int
         Number of rings to look it
+
     thresh : float
         Fraction of maximum peak height
+
     window_size : int, optional
         The window size to use (in bins) to use when refining peaks
+
     nx : int, optional
         Number of bins to use for radial binning
+
     min_x : float, optional
         The minimum radius to use for radial binning
+
     max_x : float, optional
         The maximum radius to use for radial binning
 
