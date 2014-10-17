@@ -56,6 +56,7 @@ from nsls2.fitting.model.physics_peak import (gauss_peak)
 from nsls2.fitting.model.physics_model import (ComptonModel, ElasticModel,
                                                _gen_class_docs)
 from nsls2.fitting.base.parameter_data import get_para
+from nsls2.fitting.model.background import snip_method
 from lmfit import Model
 
 
@@ -185,25 +186,9 @@ def update_parameter_dict(xrf_parameter, fit_results):
     fit_results : object
         ModelFit object from lmfit
     """
-
     for k, v in six.iteritems(xrf_parameter):
-        if k == 'element_list':
-            continue
-        if k.startswith('ratio'):
-            itemv = k.split('-')
-            k_new = itemv[1]+'_'+itemv[2]+'_ratio_adjust'
-        elif k.startswith('pos'):
-            itemv = k.split('-')
-            k_new = itemv[1]+'_'+itemv[2]+'_delta_center'
-        elif k.startswith('width'):
-            itemv = k.split('-')
-            k_new = itemv[1]+'_'+itemv[2]+'_delta_sigma'
-        else:
-            k_new = k
-
-        if k_new in list(fit_results.values.keys()):
-            xrf_parameter[str(k)]['value'] = fit_results.values[str(k_new)]
-    return
+        if fit_results.values.has_key(k):
+            xrf_parameter[str(k)]['value'] = fit_results.values[str(k)]
 
 
 def set_parameter_bound(xrf_parameter, bound_option):
@@ -218,7 +203,7 @@ def set_parameter_bound(xrf_parameter, bound_option):
         define bound type
     """
     for k, v in six.iteritems(xrf_parameter):
-        if k == 'element_list':
+        if k == 'non_fitting_values':
             continue
         v['bound_type'] = v[str(bound_option)]
 
@@ -442,11 +427,12 @@ class ModelSpectrum(object):
 
         self.parameter = xrf_parameter
 
-        if self.parameter.has_key('element_list'):
-            if ',' in self.parameter['element_list']:
-                self.element_list = self.parameter['element_list'].split(', ')
+        non_fit = self.parameter['non_fitting_values']
+        if non_fit.has_key('element_list'):
+            if ',' in non_fit['element_list']:
+                self.element_list = non_fit['element_list'].split(', ')
             else:
-                self.element_list = self.parameter['element_list'].split()
+                self.element_list = non_fit['element_list'].split()
             self.element_list = [item.strip() for item in self.element_list]
         else:
             logger.critical(' No element is selected for fitting!')
@@ -731,15 +717,24 @@ class ModelSpectrum(object):
         return result
 
 
+def set_range(parameter, x1, y1):
+
+    lowv = parameter['non_fitting_values']['energy_bound_low']
+    highv = parameter['non_fitting_values']['energy_bound_high']
+
+    all = zip(x1, y1)
+
+    x0 = [item[0] for item in all if item[0] > lowv and item[0] < highv]
+    y0 = [item[1] for item in all if item[0] > lowv and item[0] < highv]
+    return np.array(x0), np.array(y0)
+
+
 def construct_linear_model(x, energy, element_list):
     """
     Construct linear model for fluorescence analysis.
 
     """
-
-    #for item in element_list:
-    #    if item in k_line:
-    return
+    pass
 
 
 
