@@ -177,8 +177,8 @@ process_to_q.frame_mode = ['theta', 'phi', 'cart', 'hkl']
 
 def hkl_to_q(hkl_val):
     """
-    This will compute the reciprocal values for each pixel of the
-    detector.
+    This will compute the reciprocal space values for each pixel of the
+    detector for all the images.
 
     Parameters
     ----------
@@ -195,4 +195,4 @@ def hkl_to_q(hkl_val):
 
     q_val = [np.linalg.norm(hkl) for hkl in hkl_val]
 
-    return q_val
+    return np.array(q_val)
