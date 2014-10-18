@@ -177,8 +177,8 @@ process_to_q.frame_mode = ['theta', 'phi', 'cart', 'hkl']
 
 def hkl_to_q(hkl_val):
     """
-    This will compute the reciprocal space values for each pixel of the
-    detector for all the images.
+    This module compute the reciprocal space (q) values from known HKL values
+    for each pixel of the detector for all the images
 
     Parameters
     ----------
@@ -189,7 +189,7 @@ def hkl_to_q(hkl_val):
     Returns
     -------
     q : ndarray
-        Reciprocal values for each pixel
+        Reciprocal values for each pixel for all images
         shape is [num_images * num_rows * num_columns]
     """
 
