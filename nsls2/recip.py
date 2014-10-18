@@ -193,6 +193,4 @@ def hkl_to_q(hkl_val):
         shape is [num_images * num_rows * num_columns]
     """
 
-    q_val = [np.linalg.norm(hkl) for hkl in hkl_val]
-
-    return np.array(q_val)
+    return [np.linalg.norm(hkl) for hkl in hkl_val]
