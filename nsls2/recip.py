@@ -173,3 +173,24 @@ def process_to_q(setting_angles, detector_size, pixel_size,
 # Assign frame_mode as an attribute to the process_to_q function so that the
 # autowrapping knows what the valid options are
 process_to_q.frame_mode = ['theta', 'phi', 'cart', 'hkl']
+
+
+def hkl_to_q(hkl_arr):
+    """
+    This module compute the reciprocal space (q) values from known HKL array
+    for each pixel of the detector for all the images
+
+    Parameters
+    ----------
+    hkl_arr : ndarray
+        (Qx, Qy, Qz) - HKL array
+        shape is [num_images * num_rows * num_columns][3]
+
+    Returns
+    -------
+    q_val : ndarray
+        Reciprocal values for each pixel for all images
+        shape is [num_images * num_rows * num_columns]
+    """
+
+    return np.linalg.norm(hkl_arr, axis=1)
