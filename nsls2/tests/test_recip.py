@@ -96,9 +96,10 @@ def test_frame_mode_fail():
 
 def test_hkl_to_q():
     b = np.arrayarray([[-4, -3, -2],
-                        [-1,  0,  1],
-                        [ 2,  3,  4]])
+                       [-1, 0, 1],
+                       [2, 3, 4]],
+                       [6, 9, 10])
 
-    B = recip.hkl_to_q(b)
-
-    print B
+    B = np.array([5.38516481, 1.41421356, 5.38516481, 14.73091986])
+    npt.assert_array_almost_equal(B, recip.hkl_to_q(b))
+    
