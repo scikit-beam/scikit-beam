@@ -92,3 +92,13 @@ def test_frame_mode_fail():
 
     for fails in [0, 5, 'cat']:
         yield _process_to_q_exception, pdict, fails
+
+
+def test_hkl_to_q():
+    b = np.arrayarray([[-4, -3, -2],
+                        [-1,  0,  1],
+                        [ 2,  3,  4]])
+
+    B = recip.hkl_to_q(b)
+
+    print B
