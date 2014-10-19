@@ -92,3 +92,15 @@ def test_frame_mode_fail():
 
     for fails in [0, 5, 'cat']:
         yield _process_to_q_exception, pdict, fails
+
+
+def test_hkl_to_q():
+    b = np.array([[-4, -3, -2],
+                  [-1, 0, 1],
+                  [2, 3, 4],
+                  [6, 9, 10]])
+
+    b_norm = np.array([5.38516481, 1.41421356, 5.38516481,
+                       14.73091986])
+
+    npt.assert_array_almost_equal(b_norm, recip.hkl_to_q(b))
