@@ -234,6 +234,18 @@ def q_roi(num_rois, co_or, q_val):
         raise ValueError("Either HKL values(Qx, Qy, Qz) or Q space values"
                             " for each pixel in the detector has to be specified")
 
+<<<<<<< HEAD
     
+=======
+    q_mesh = np.zeros((detector_size[0], detector_size[1]))
+
+    for i in (0, num_rois):
+        x_coor, y_coor = roi_data[0], roi_data[1]
+        x_val = roi_data[3]
+        y_val = roi_data[4]
+        q_mesh[x_coor: x_coor + x_val, y_coor: y_coor + y_val] = np.ones((x_val, y_val))
+
+
+>>>>>>> e50346b... ENH: modified:   nsls2/recip.py
 
 >>>>>>> c404bc7... WIP: Q indices and number of pixels - required Q shape
