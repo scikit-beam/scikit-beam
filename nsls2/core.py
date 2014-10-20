@@ -1216,3 +1216,61 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     lag_steps = np.append(lag_steps, np.array(lag))
 
     return tot_channels, lag_steps
+
+
+def roi_rectangles(num_rois, roi_data, detector_size):
+    """
+    This module will find the number of indices of rectangle(square)
+    shape rois and count the number of pixels in that rectangle(square).
+
+    Parameters
+    ----------
+    num_rois: int
+        number of region of interests(roi)
+
+    roi_data: ndarray
+        coordinates of roi's and the, length and width of roi's
+        shape is [num_rois][4]
+
+    detector_size : tuple
+        2 element tuple defining the number of pixels in the detector. Order is
+        (num_columns, num_rows)
+
+    Returns
+    -------
+    q_inds : ndarray
+        indices of the Q values for the required shape
+        shape [detector_size[0]*detector_size[1]][1]
+
+    num_pixels : ndarray
+        number of pixels in certain rectangle shape
+    """
+
+    mesh = np.zeros((detector_size[0], detector_size[1]), dtype=np.int64)
+
+    num_pixels = []
+    for i in range(0, num_rois):
+
+        col_coor, row_coor = roi_data[i, 0], roi_data[i, 1]
+        col_val = roi_data[i, 2]
+        row_val = roi_data[i, 3]
+
+        left, right = np.max([col_coor, 0]), np.min([col_coor + col_val,
+                                                     detector_size[0]])
+        top, bottom = np.max([row_coor, 0]), np.min([row_coor + row_val,
+                                                     detector_size[1]])
+
+        area = (right - left) * (bottom - top)
+
+        # find the number of pixels in each roi
+        num_pixels.append(area)
+
+        slc1 = slice(left, right)
+        slc2 = slice(top, bottom)
+
+        # assign a different scalar for each roi
+        mesh[slc1, slc2] = (i + 1)
+
+    q_inds = np.ravel(mesh)
+
+    return q_inds, num_pixels

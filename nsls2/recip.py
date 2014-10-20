@@ -173,6 +173,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
 # Assign frame_mode as an attribute to the process_to_q function so that the
 # autowrapping knows what the valid options are
 process_to_q.frame_mode = ['theta', 'phi', 'cart', 'hkl']
+<<<<<<< HEAD
 
 
 <<<<<<< HEAD
@@ -308,3 +309,5 @@ def q_rectangles(num_rois, roi_data, detector_size):
 =======
     return xy_inds, num_pixels
 >>>>>>> 6ab521c... TST: modified:   nsls2/tests/test_recip.py
+=======
+>>>>>>> 95ef4b7... DOC: nsls2/tests/test_core.py

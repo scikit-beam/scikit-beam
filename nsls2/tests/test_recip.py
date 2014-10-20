@@ -3,16 +3,11 @@ from __future__ import (absolute_import, division, print_function,
 
 import six
 import numpy as np
-
-from numpy.testing import (assert_array_equal, assert_array_almost_equal,
-                           assert_almost_equal)
-
-from nose.tools import assert_equal, assert_true, raises
-
-import nsls2.recip as recip
+from nose.tools import raises
 
 from nsls2.testing.decorators import known_fail_if
 import numpy.testing as npt
+from nsls2 import recip
 
 
 @known_fail_if(six.PY3)
@@ -97,6 +92,7 @@ def test_frame_mode_fail():
 
     for fails in [0, 5, 'cat']:
         yield _process_to_q_exception, pdict, fails
+<<<<<<< HEAD
 
 
 <<<<<<< HEAD
@@ -147,3 +143,5 @@ def test_q_rectangles():
 =======
     assert_array_equal(xy_inds, xy_inds_m)
 >>>>>>> 839f162... TST: modified:   nsls2/tests/test_recip.py
+=======
+>>>>>>> 95ef4b7... DOC: nsls2/tests/test_core.py
