@@ -290,10 +290,6 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
         # change the indices of odd number of rings
         indx = q_inds > 0
         q_inds[indx] = (q_inds[indx] + 1) // 2
-        #out = 0
-        #for i in range(3, 2*num_qs):
-            #q_inds[q_inds == (i + out)] = i - 1
-            #out += 1
 
     q_ring_val = np.array(q_ring_val)
     q_ring_val = q_ring_val.reshape(num_qs, 2)

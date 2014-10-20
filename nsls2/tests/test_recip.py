@@ -148,7 +148,6 @@ def test_hkl_to_q():
 
 def test_q_data():
     # creating a circle with center co-ordinates (5, 5)
-    # in [10, 10] mesh grid
     xx, yy = np.mgrid[:15, :10]
     circle = (xx - 5) ** 2 + (yy - 5) ** 2
     cir_val = np.ravel(circle)
