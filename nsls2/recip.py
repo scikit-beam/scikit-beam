@@ -58,6 +58,120 @@ except ImportError:
         ctrans = None
 
 
+def project_to_sphere(img, dist_sample, calibrated_center, pixel_size,
+                      wavelength, ROI=None, **kwargs):
+    """
+    Project the pixels on the 2D detector to the surface of a sphere.
+
+    Parameters
+    ----------
+    img : ndarray
+        2D detector image
+
+    dist_sample : float
+        see keys_core  (mm)
+
+    calibrated_center : 2 element float array
+        see keys_core (pixels)
+
+    pixel_size : 2 element float array
+        see keys_core (mm)
+
+    wavelength : float
+        see keys_core (Angstroms)
+
+    ROI : 4 element int array
+        ROI defines a rectangular ROI for img
+        ROI[0] == x_min
+        ROI[1] == x_max
+        ROI[2] == y_min
+        ROI[3] == y_max
+
+    **kwargs : dict
+        Bucket for extra parameters from an unpacked dictionary
+
+    Returns
+    -------
+    Bucket for extra parameters from an unpacked dictionary
+
+    qi : 4 x N array of the coordinates in Q space (A^-1)
+        Rows correspond to individual pixels
+        Columns are (Qx, Qy, Qz, I)
+
+    Raises
+    ------
+    ValueError
+        Possible causes:
+            Raised when the ROI is not a 4 element array
+
+    ValueError
+        Possible causes:
+            Raised when ROI is not specified
+    """
+
+    if ROI is not None:
+        if len(ROI) == 4:
+            # slice the image based on the desired ROI
+            img = np.meshgrid(img[ROI[0]:ROI[1]], img[ROI[2]:ROI[3]],
+                              sparse=True)
+        else:
+            raise ValueError(" ROI has to be 4 element array : len(ROI) = 4")
+    else:
+        raise ValueError(" No ROI is specified ")
+
+    # create the array of x indices
+    arr_2d_x = np.zeros((img.shape[0], img.shape[1]), dtype=np.float)
+    for x in range(img.shape[0]):
+        arr_2d_x[x:x + 1] = x + 1 + ROI[0]
+
+    # create the array of y indices
+    arr_2d_y = np.zeros((img.shape[0], img.shape[1]), dtype=np.float)
+    for y in range(img.shape[1]):
+        arr_2d_y[:, y:y + 1] = y + 1 + ROI[2]
+
+    # subtract the detector center
+    arr_2d_x -= calibrated_center[0]
+    arr_2d_y -= calibrated_center[1]
+
+    # convert the pixels into real-space dimensions
+    arr_2d_x *= pixel_size[0]
+    arr_2d_y *= pixel_size[1]
+
+    # define a new 4 x N array
+    qi = np.zeros((4,) + (img.shape[0] * img.shape[1],))
+    # fill in the x coordinates
+    qi[0] = arr_2d_x.flatten()
+    # fill in the y coordinates
+    qi[1] = arr_2d_y.flatten()
+    # set the z coordinate for all pixels to
+    # the distance from the sample to the detector
+    qi[2].fill(dist_sample)
+    # fill in the intensity values of the pixels
+    qi[3] = img.flatten()
+    # convert to an N x 4 array
+    qi = qi.transpose()
+    # compute the unit vector of each pixel
+    qi[:, 0:2] = qi[:, 0:2]/np.linalg.norm(qi[:, 0:2])
+    # convert the pixel positions from real space distances
+    # into the reciprocal space
+    # vector, Q
+    Q = 4 * np.pi / wavelength * np.sin(np.arctan(qi[:, 0:2]))
+    # project the pixel coordinates onto the surface of a sphere
+    # of radius dist_sample
+    qi[:, 0:2] *= dist_sample
+    # compute the vector from the center of the detector
+    # (i.e., the zero of reciprocal space) to each pixel
+    qi[:, 2] -= dist_sample
+    # compute the unit vector for each pixels position
+    # relative to the center of the detector,
+    #  but now on the surface of a sphere
+    qi[:, 0:2] = qi[:, 0:2]/np.linalg.norm(qi[:, 0:2])
+    # convert to reciprocal space
+    qi[:, 0:2] *= Q
+
+    return qi
+
+
 def process_to_q(setting_angles, detector_size, pixel_size,
                  calibrated_center, dist_sample, wavelength, ub,
                  frame_mode=None):
@@ -98,12 +212,10 @@ def process_to_q(setting_angles, detector_size, pixel_size,
     frame_mode : str, optional
         Frame mode defines the data collection mode and thus the desired
         output from this function. Defaults to hkl mode (frame_mode=4)
-        'theta'    : Theta axis frame.
-        'phi'      : Phi axis frame.
-        'cart'     : Crystal cartesian frame.
-        'hkl'      : Reciprocal lattice units frame.
-        See the `process_to_q.frame_mode` attribute for an exact list of
-        valid options.
+        1 : 'theta'    : Theta axis frame.
+        2 : 'phi'      : Phi axis frame.
+        3 : 'cart'     : Crystal cartesian frame.
+        4 : 'hkl'      : Reciprocal lattice units frame.
 
     Returns
     -------
@@ -173,141 +285,3 @@ def process_to_q(setting_angles, detector_size, pixel_size,
 # Assign frame_mode as an attribute to the process_to_q function so that the
 # autowrapping knows what the valid options are
 process_to_q.frame_mode = ['theta', 'phi', 'cart', 'hkl']
-<<<<<<< HEAD
-
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-def hkl_to_q(hkl_arr):
-    """
-    This module compute the reciprocal space (q) values from known HKL array
-    for each pixel of the detector for all the images
-
-    Parameters
-    ----------
-    hkl_arr : ndarray
-        (Qx, Qy, Qz) - HKL array
-        shape is [num_images * num_rows * num_columns][3]
-
-    Returns
-    -------
-    q_val : ndarray
-        Reciprocal values for each pixel for all images
-        shape is [num_images * num_rows * num_columns]
-    """
-
-    return np.linalg.norm(hkl_arr, axis=1)
-=======
-def q_roi(num_rois, co_or, q_val):
-=======
-def q_rectangles(num_rois, roi_data, q_val, detector_size):
->>>>>>> 01b616e... ENH:  modified:   nsls2/recip.py
-=======
-def q_rectangles(num_rois, roi_data, detector_size):
->>>>>>> 6ab521c... TST: modified:   nsls2/tests/test_recip.py
-    """
-    This module will find the indices of rectangle or square shape and count the
-    number of pixels in that shape.
-
-    Parameter
-    --------
-    num_rois: int
-        number of region of interests(roi)
-
-    co_or: ndarray
-        co-ordinates of roi's
-
-<<<<<<< HEAD
-    q_val:
-        Q space values for each pixel in the detector
-        shape is [detector_size[0]*detector_size[1]][1] or
-        (Qx, Qy, Qz) - HKL values
-        shape is [detector_size[0]*detector_size[1]][3]
-=======
-    detector_size : tuple
-        2 element tuple defining the number of pixels in the detector. Order is
-        (num_columns, num_rows)
->>>>>>> 01b616e... ENH:  modified:   nsls2/recip.py
-
-    Returns
-    -------
-    q_inds : ndarray
-        indices of the Q values for the required shape
-
-    num_pixels : ndarray
-        number of pixels in certain Q shape
-    """
-
-<<<<<<< HEAD
-    if (q_val.ndim == 1):
-        q_values = q_val
-    elif (q_val.ndim == 3):
-        q_values = np.sqrt(q_val[:, 0]**2 + q_val[:, 1]**2 + q_val[:, 2]**2)
-    else:
-        raise ValueError("Either HKL values(Qx, Qy, Qz) or Q space values"
-                            " for each pixel in the detector has to be specified")
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-    
-=======
-    q_mesh = np.zeros((detector_size[0], detector_size[1]))
-=======
-=======
->>>>>>> 6ab521c... TST: modified:   nsls2/tests/test_recip.py
-    xy_mesh = np.zeros((detector_size[0], detector_size[1]))
->>>>>>> 01b616e... ENH:  modified:   nsls2/recip.py
-
-<<<<<<< HEAD
-    for i in (0, num_rois):
-        x_coor, y_coor = roi_data[0], roi_data[1]
-        x_val = roi_data[3]
-        y_val = roi_data[4]
-<<<<<<< HEAD
-        q_mesh[x_coor: x_coor + x_val, y_coor: y_coor + y_val] = np.ones((x_val, y_val))
-
-
->>>>>>> e50346b... ENH: modified:   nsls2/recip.py
-
->>>>>>> c404bc7... WIP: Q indices and number of pixels - required Q shape
-=======
-=======
-    for i in range(0, num_rois):
-        x_coor, y_coor = roi_data[i, 0], roi_data[i, 1]
-        x_val = roi_data[i, 2]
-        y_val = roi_data[i, 3]
->>>>>>> 6ab521c... TST: modified:   nsls2/tests/test_recip.py
-        if ((x_val + x_coor)< detector_size[0] and (y_val + y_coor) < detector_size[1]):
-            (xy_mesh[x_coor: x_coor + x_val, y_coor:
-            y_coor + y_val]) = np.ones((x_val, y_val))*(i +1)
-        else:
-<<<<<<< HEAD
-            raise ValueError("Could not broadcast input array from shape ({0},{1}) into"
-                             " ({2},{3})".format(x_val, y_val,(detector_size[0] - x_coor - x_val),
-                                                (detector_size[1] - y_coor - y_val)))
-<<<<<<< HEAD
->>>>>>> ecd52ab... ENH: modified:   nsls2/recip.py making the Q_mesh
-=======
-=======
-            raise ValueError("Could not broadcast input array from shape ({0},{1})"
-                             " into ({2},{3})".format(x_val, y_val,
-                                                      (detector_size[0] - x_coor - x_val),
-                                                      (detector_size[1] - y_coor - y_val)))
->>>>>>> 6ab521c... TST: modified:   nsls2/tests/test_recip.py
-
-    # convert xy_mesh array into integer array
-    xy_inds = xy_mesh.astype(int)
-
-    # find the number of pixels in each roi
-    num_pixels = np.bincount(np.ravel(xy_inds))
-    num_pixels = np.delete(num_pixels,0)
-
-<<<<<<< HEAD
-    return q_inds, num_pixels
->>>>>>> 01b616e... ENH:  modified:   nsls2/recip.py
-=======
-    return xy_inds, num_pixels
->>>>>>> 6ab521c... TST: modified:   nsls2/tests/test_recip.py
-=======
->>>>>>> 95ef4b7... DOC: nsls2/tests/test_core.py
