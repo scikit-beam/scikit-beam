@@ -719,8 +719,8 @@ class ModelSpectrum(object):
 
 def set_range(parameter, x1, y1):
 
-    lowv = parameter['non_fitting_values']['energy_bound_low']
-    highv = parameter['non_fitting_values']['energy_bound_high']
+    lowv = parameter['non_fitting_values']['energy_bound_low'] * 100
+    highv = parameter['non_fitting_values']['energy_bound_high'] * 100
 
     all = zip(x1, y1)
 
