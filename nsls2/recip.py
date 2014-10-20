@@ -286,15 +286,14 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
         q_inds = np.digitize(q_values, np.array(q_ring_val))
 
         # to discard every-other bin and set the discarded bins indices to 0
-        for i, item in enumerate(q_inds):
-            if (item % 2 == 0):
-                q_inds[i] = 0
-
+        q_inds[q_inds % 2 == 0] = 0
         # change the indices of odd number of rings
-        out = 0
-        for i in range(3, 2*num_qs):
-            q_inds[q_inds == (i + out)] = i - 1
-            out += 1
+        indx = q_inds > 0
+        q_inds[indx] = (q_inds[indx] + 1) // 2
+        #out = 0
+        #for i in range(3, 2*num_qs):
+            #q_inds[q_inds == (i + out)] = i - 1
+            #out += 1
 
     q_ring_val = np.array(q_ring_val)
     q_ring_val = q_ring_val.reshape(num_qs, 2)
