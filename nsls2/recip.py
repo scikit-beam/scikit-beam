@@ -175,6 +175,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
 process_to_q.frame_mode = ['theta', 'phi', 'cart', 'hkl']
 
 
+<<<<<<< HEAD
 def hkl_to_q(hkl_arr):
     """
     This module compute the reciprocal space (q) values from known HKL array
@@ -194,3 +195,45 @@ def hkl_to_q(hkl_arr):
     """
 
     return np.linalg.norm(hkl_arr, axis=1)
+=======
+def q_roi(num_rois, co_or, q_val):
+    """
+    This module will find the indices of the required Q shape and count the
+     number of pixels in that shape
+
+     Parameter
+     --------
+
+    num_rois: int
+        number of region of interests(roi)
+
+    co_or: ndarray
+        co-ordinates of roi's
+
+    q_val:
+        Q space values for each pixel in the detector
+        shape is [detector_size[0]*detector_size[1]][1] or
+        (Qx, Qy, Qz) - HKL values
+        shape is [detector_size[0]*detector_size[1]][3]
+
+    Returns
+    -------
+    q_inds : ndarray
+        indices of the Q values for the required shape
+
+    num_pixels : ndarray
+        number of pixels in certain Q shape
+
+    """
+
+    if (q_val.ndim == 1):
+        q_values = q_val
+    elif (q_val.ndim == 3):
+        q_values = np.sqrt(q_val[:, 0]**2 + q_val[:, 1]**2 + q_val[:, 2]**2)
+    else:
+        raise ValueError("Either HKL values(Qx, Qy, Qz) or Q space values"
+                            " for each pixel in the detector has to be specified")
+
+    
+
+>>>>>>> c404bc7... WIP: Q indices and number of pixels - required Q shape

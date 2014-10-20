@@ -94,6 +94,7 @@ def test_frame_mode_fail():
         yield _process_to_q_exception, pdict, fails
 
 
+<<<<<<< HEAD
 def test_hkl_to_q():
     b = np.array([[-4, -3, -2],
                   [-1, 0, 1],
@@ -104,3 +105,6 @@ def test_hkl_to_q():
                        14.73091986])
 
     npt.assert_array_almost_equal(b_norm, recip.hkl_to_q(b))
+=======
+def test_q_roi():
+>>>>>>> c404bc7... WIP: Q indices and number of pixels - required Q shape
