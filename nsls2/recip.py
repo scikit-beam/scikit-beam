@@ -176,6 +176,8 @@ process_to_q.frame_mode = ['theta', 'phi', 'cart', 'hkl']
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
 def hkl_to_q(hkl_arr):
     """
     This module compute the reciprocal space (q) values from known HKL array
@@ -197,24 +199,35 @@ def hkl_to_q(hkl_arr):
     return np.linalg.norm(hkl_arr, axis=1)
 =======
 def q_roi(num_rois, co_or, q_val):
+=======
+def q_rectangles(num_rois, roi_data, q_val, detector_size):
+>>>>>>> 01b616e... ENH:  modified:   nsls2/recip.py
+=======
+def q_rectangles(num_rois, roi_data, detector_size):
+>>>>>>> 6ab521c... TST: modified:   nsls2/tests/test_recip.py
     """
-    This module will find the indices of the required Q shape and count the
-     number of pixels in that shape
+    This module will find the indices of rectangle or square shape and count the
+    number of pixels in that shape.
 
-     Parameter
-     --------
-
+    Parameter
+    --------
     num_rois: int
         number of region of interests(roi)
 
     co_or: ndarray
         co-ordinates of roi's
 
+<<<<<<< HEAD
     q_val:
         Q space values for each pixel in the detector
         shape is [detector_size[0]*detector_size[1]][1] or
         (Qx, Qy, Qz) - HKL values
         shape is [detector_size[0]*detector_size[1]][3]
+=======
+    detector_size : tuple
+        2 element tuple defining the number of pixels in the detector. Order is
+        (num_columns, num_rows)
+>>>>>>> 01b616e... ENH:  modified:   nsls2/recip.py
 
     Returns
     -------
@@ -223,9 +236,9 @@ def q_roi(num_rois, co_or, q_val):
 
     num_pixels : ndarray
         number of pixels in certain Q shape
-
     """
 
+<<<<<<< HEAD
     if (q_val.ndim == 1):
         q_values = q_val
     elif (q_val.ndim == 3):
@@ -235,17 +248,63 @@ def q_roi(num_rois, co_or, q_val):
                             " for each pixel in the detector has to be specified")
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     
 =======
     q_mesh = np.zeros((detector_size[0], detector_size[1]))
+=======
+=======
+>>>>>>> 6ab521c... TST: modified:   nsls2/tests/test_recip.py
+    xy_mesh = np.zeros((detector_size[0], detector_size[1]))
+>>>>>>> 01b616e... ENH:  modified:   nsls2/recip.py
 
+<<<<<<< HEAD
     for i in (0, num_rois):
         x_coor, y_coor = roi_data[0], roi_data[1]
         x_val = roi_data[3]
         y_val = roi_data[4]
+<<<<<<< HEAD
         q_mesh[x_coor: x_coor + x_val, y_coor: y_coor + y_val] = np.ones((x_val, y_val))
 
 
 >>>>>>> e50346b... ENH: modified:   nsls2/recip.py
 
 >>>>>>> c404bc7... WIP: Q indices and number of pixels - required Q shape
+=======
+=======
+    for i in range(0, num_rois):
+        x_coor, y_coor = roi_data[i, 0], roi_data[i, 1]
+        x_val = roi_data[i, 2]
+        y_val = roi_data[i, 3]
+>>>>>>> 6ab521c... TST: modified:   nsls2/tests/test_recip.py
+        if ((x_val + x_coor)< detector_size[0] and (y_val + y_coor) < detector_size[1]):
+            (xy_mesh[x_coor: x_coor + x_val, y_coor:
+            y_coor + y_val]) = np.ones((x_val, y_val))*(i +1)
+        else:
+<<<<<<< HEAD
+            raise ValueError("Could not broadcast input array from shape ({0},{1}) into"
+                             " ({2},{3})".format(x_val, y_val,(detector_size[0] - x_coor - x_val),
+                                                (detector_size[1] - y_coor - y_val)))
+<<<<<<< HEAD
+>>>>>>> ecd52ab... ENH: modified:   nsls2/recip.py making the Q_mesh
+=======
+=======
+            raise ValueError("Could not broadcast input array from shape ({0},{1})"
+                             " into ({2},{3})".format(x_val, y_val,
+                                                      (detector_size[0] - x_coor - x_val),
+                                                      (detector_size[1] - y_coor - y_val)))
+>>>>>>> 6ab521c... TST: modified:   nsls2/tests/test_recip.py
+
+    # convert xy_mesh array into integer array
+    xy_inds = xy_mesh.astype(int)
+
+    # find the number of pixels in each roi
+    num_pixels = np.bincount(np.ravel(xy_inds))
+    num_pixels = np.delete(num_pixels,0)
+
+<<<<<<< HEAD
+    return q_inds, num_pixels
+>>>>>>> 01b616e... ENH:  modified:   nsls2/recip.py
+=======
+    return xy_inds, num_pixels
+>>>>>>> 6ab521c... TST: modified:   nsls2/tests/test_recip.py
