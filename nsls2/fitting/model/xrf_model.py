@@ -465,6 +465,8 @@ class ModelSpectrum(object):
             else:
                 _set_parameter_hint(name, self.parameter_default[name], compton)
         logger.debug(' Finished setting up parameters for compton model.')
+
+        self.compton_param = compton.make_params()
         return compton
 
     def setElasticModel(self):
@@ -482,12 +484,19 @@ class ModelSpectrum(object):
         logger.debug(' ###### Started setting up parameters for elastic model. ######')
 
         # set constraints for the following global parameters
-        elastic.set_param_hint('e_offset', expr='e_offset')
-        elastic.set_param_hint('e_linear', expr='e_linear')
-        elastic.set_param_hint('e_quadratic', expr='e_quadratic')
-        elastic.set_param_hint('fwhm_offset', expr='fwhm_offset')
-        elastic.set_param_hint('fwhm_fanoprime', expr='fwhm_fanoprime')
-        elastic.set_param_hint('coherent_sct_energy', expr='coherent_sct_energy')
+        elastic.set_param_hint('e_offset', value=self.compton_param['e_offset'].value,
+                               expr='e_offset')
+        #elastic.set_param_hint('e_offset', expr='e_offset')
+        elastic.set_param_hint('e_linear', value=self.compton_param['e_linear'].value,
+                               expr='e_linear')
+        elastic.set_param_hint('e_quadratic', value=self.compton_param['e_quadratic'].value,
+                               expr='e_quadratic')
+        elastic.set_param_hint('fwhm_offset', value=self.compton_param['fwhm_offset'].value,
+                               expr='fwhm_offset')
+        elastic.set_param_hint('fwhm_fanoprime', value=self.compton_param['fwhm_fanoprime'].value,
+                               expr='fwhm_fanoprime')
+        elastic.set_param_hint('coherent_sct_energy', value=self.compton_param['coherent_sct_energy'].value,
+                               expr='coherent_sct_energy')
         logger.debug(' Finished setting up parameters for elastic model.')
 
         return elastic
@@ -520,25 +529,30 @@ class ModelSpectrum(object):
                         continue
 
                     gauss_mod = GaussModel_xrf(prefix=str(ename)+'_'+str(line_name)+'_')
-                    gauss_mod.set_param_hint('e_offset', expr='e_offset')
-                    gauss_mod.set_param_hint('e_linear', expr='e_linear')
-                    gauss_mod.set_param_hint('e_quadratic', expr='e_quadratic')
-                    gauss_mod.set_param_hint('fwhm_offset', expr='fwhm_offset')
-                    gauss_mod.set_param_hint('fwhm_fanoprime', expr='fwhm_fanoprime')
+                    gauss_mod.set_param_hint('e_offset', value=self.compton_param['e_offset'].value,
+                                             expr='e_offset')
+                    gauss_mod.set_param_hint('e_linear', value=self.compton_param['e_linear'].value,
+                                             expr='e_linear')
+                    gauss_mod.set_param_hint('e_quadratic', value=self.compton_param['e_quadratic'].value,
+                                             expr='e_quadratic')
+                    gauss_mod.set_param_hint('fwhm_offset', value=self.compton_param['fwhm_offset'].value,
+                                             expr='fwhm_offset')
+                    gauss_mod.set_param_hint('fwhm_fanoprime', value=self.compton_param['fwhm_fanoprime'].value,
+                                             expr='fwhm_fanoprime')
 
                     if line_name == 'ka1':
-                        gauss_mod.set_param_hint('area', value=100, vary=True, min=0)
+                        gauss_mod.set_param_hint('area', value=1e5, vary=True, min=0)
                         gauss_mod.set_param_hint('delta_center', value=0, vary=False)
                         gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
                     elif line_name == 'ka2':
-                        gauss_mod.set_param_hint('area', value=100, vary=True,
+                        gauss_mod.set_param_hint('area', value=1e5, vary=True,
                                                  expr=str(ename)+'_ka1_'+'area')
                         gauss_mod.set_param_hint('delta_sigma', value=0, vary=False,
                                                  expr=str(ename)+'_ka1_'+'delta_sigma')
                         gauss_mod.set_param_hint('delta_center', value=0, vary=False,
                                                  expr=str(ename)+'_ka1_'+'delta_center')
                     else:
-                        gauss_mod.set_param_hint('area', value=100, vary=True,
+                        gauss_mod.set_param_hint('area', value=1e5, vary=True,
                                                  expr=str(ename)+'_ka1_'+'area')
                         gauss_mod.set_param_hint('delta_center', value=0, vary=False)
                         gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
@@ -597,17 +611,22 @@ class ModelSpectrum(object):
 
                     gauss_mod = GaussModel_xrf(prefix=str(ename)+'_'+str(line_name)+'_')
 
-                    gauss_mod.set_param_hint('e_offset', expr='e_offset')
-                    gauss_mod.set_param_hint('e_linear', expr='e_linear')
-                    gauss_mod.set_param_hint('e_quadratic', expr='e_quadratic')
-                    gauss_mod.set_param_hint('fwhm_offset', expr='fwhm_offset')
-                    gauss_mod.set_param_hint('fwhm_fanoprime', expr='fwhm_fanoprime')
+                    gauss_mod.set_param_hint('e_offset', value=self.compton_param['e_offset'].value,
+                                             expr='e_offset')
+                    gauss_mod.set_param_hint('e_linear', value=self.compton_param['e_linear'].value,
+                                             expr='e_linear')
+                    gauss_mod.set_param_hint('e_quadratic', value=self.compton_param['e_quadratic'].value,
+                                             expr='e_quadratic')
+                    gauss_mod.set_param_hint('fwhm_offset', value=self.compton_param['fwhm_offset'].value,
+                                             expr='fwhm_offset')
+                    gauss_mod.set_param_hint('fwhm_fanoprime', value=self.compton_param['fwhm_fanoprime'].value,
+                                             expr='fwhm_fanoprime')
 
                     if line_name == 'la1':
-                        gauss_mod.set_param_hint('area', value=100, vary=True)
+                        gauss_mod.set_param_hint('area', value=1e5, vary=True)
                                              #expr=gauss_mod.prefix+'ratio_val * '+str(ename)+'_la1_'+'area')
                     else:
-                        gauss_mod.set_param_hint('area', value=100, vary=True,
+                        gauss_mod.set_param_hint('area', value=1e5, vary=True,
                                                  expr=str(ename)+'_la1_'+'area')
 
                     gauss_mod.set_param_hint('center', value=val, vary=False)
