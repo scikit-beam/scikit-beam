@@ -45,7 +45,7 @@ import scipy.io
 import os
 
 
-def save_chi(tth, intensity,  filename, err=None, dir_path=None):
+def save_output(tth, intensity,  filename, ext=None, err=None, dir_path=None):
     """
     Save output diffraction intensities into .chi file format
 
@@ -60,6 +60,11 @@ def save_chi(tth, intensity,  filename, err=None, dir_path=None):
     filename : str
         filename(could be full path) of the .tif file
         eg: /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504.tif
+
+    ext : str, optional
+        save output diffraction intensities into .chi or
+        .dat file. If the extension of the output file is not
+        selected it will be saved as a .chi file
 
     err : ndarray, optional
          error value of intensity
@@ -79,10 +84,15 @@ def save_chi(tth, intensity,  filename, err=None, dir_path=None):
 
     file_base = os.path.splitext(os.path.split(filename)[1])[0]
 
-    if (dir_path)== None:
-        file_path = file_base + '.chi'
+    # the extension of output file is not selected it will be
+    # saved as a .chi file
+    if ext == None:
+        ext = '.chi'
+
+    if (dir_path) == None:
+        file_path = file_base + ext
     elif os.path.isabs(dir_path):
-        file_path = dir_path + file_base + '.chi'
+        file_path = dir_path + file_base + ext
     else:
         raise ValueError('The given path does not exist.')
 
@@ -93,72 +103,14 @@ def save_chi(tth, intensity,  filename, err=None, dir_path=None):
         f.write("Number of data points in the file {0} \n".format(len(tth)))
         f.write("First column represents Q(reciprocal space) or 2(theta)"
             " values and second column represents intensities and if there"
-            " is a third column it represents the error value of intensities\n")
-        f.write("#############################################################\n\n")
+            " is a third column it represents the error value of"
+            " intensities\n")
+        f.write("#####################################################\n\n")
 
-        if (err==None):
+        if (err == None):
             np.savetxt(f, np.c_[tth, intensity], newline='\n')
         else:
             np.savetxt(f, np.c_[tth, intensity, err], newline='\n')
-
-    return
-
-
-def save_dat(tth, intensity, filename, err=None, dir_path=None):
-    '''
-    Save output diffraction intensities into .dat file format
-
-    Parameters
-    ----------
-    tth : ndarray
-        2(theta) values or (Q values)
-
-    intensity : ndarray
-        intensity values
-
-    filename : str
-        filename(could be full path) of the .tif file
-        eg: /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504.tif
-
-    err : ndarray, optional
-        error value of intensity
-
-    dir_path : str, optional
-        name of the new directory to save the output data files
-        eg: /Volumes/Data/experiments/data/
-
-    Returns
-    -------
-    Saved file of diffraction intensities in .dat file format
-
-    '''
-    if len(tth) != len(intensity):
-        raise ValueError("Number of intensities and the number of Q or"
-                         " two theta values are different ")
-
-    file_base = os.path.splitext(os.path.split(filename)[1])[0]
-
-    if (dir_path)== None:
-        file_path = file_base + '.dat'
-    elif os.path.isabs(dir_path):
-        file_path = dir_path + file_base + '.dat'
-    else:
-        raise ValueError('The given path does not exist.')
-
-    with open(file_path, 'wb') as f:
-        f.write(filename)
-        f.write("\n This file contains integrated powder x-ray diffraction "
-            "intensities.\n\n")
-        f.write("Number of data points in the file {0} \n".format(len(tth)))
-        f.write("First column represents Q(reciprocal space) or 2(theta)"
-            " values and second column represents intensities and if there"
-            " is a third column it represents error value of intensities\n")
-        f.write("#############################################################\n\n")
-
-        if (err==None):
-            np.savetxt(f, np.c_[tth, intensity], newline='\n')
-        else:
-            np.savetxt(f, np.c_[tth, intensity, err], newline="\n")
 
     return
 
@@ -197,7 +149,7 @@ def save_xye(tth, intensity, filename, err, dir_path=None):
 
     file_base = os.path.splitext(os.path.split(filename)[1])[0]
 
-    if (dir_path)== None:
+    if (dir_path) == None:
         file_path = file_base + '.xye'
     elif os.path.isabs(dir_path):
         file_path = dir_path + file_base + '.xye'
@@ -208,14 +160,14 @@ def save_xye(tth, intensity, filename, err, dir_path=None):
         f.write(filename)
 
         f.write("\n This file contains integrated powder x-ray diffraction "
-            "intensities.\n\n")
+                "intensities.\n\n")
         f.write("Number of data points in the file {0} \n".format(len(tth)))
         f.write("First column represents Q(reciprocal space) or 2(theta)"
             " values, second column represents intensities and "
             " the third column represents error value of intensities\n")
-        f.write("##########################################################\n\n")
+        f.write("####################################################\n\n")
 
-        np.savetxt(f, np.c_[tth, intensity, err], newline = "\n")
+        np.savetxt(f, np.c_[tth, intensity, err], newline="\n")
 
     return
 
@@ -257,7 +209,7 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
 
     file_base = os.path.splitext(os.path.split(filename)[1])[0]
 
-    if (dir_path)== None:
+    if (dir_path) == None:
         file_path = file_base + '.gsas'
     elif os.path.isabs(dir_path):
         file_path = dir_path + file_base + '.gsas'
@@ -291,7 +243,7 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
         l_bank = "BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f STD" % \
                 (i_bank, n_chan, n_rec, tth0_cdg, dtth_cdg, 0, 0)
         lines.append("%-80s" % l_bank)
-        lrecs = [ "%2i%6.0f" % (1, ii * scale) for ii in intensity ]
+        lrecs = ["%2i%6.0f" % (1, ii * scale) for ii in intensity]
         for i in range(0, len(lrecs), 10):
             lines.append("".join(lrecs[i:i + 10]))
     elif mode == 'esd':
@@ -299,7 +251,9 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
         l_bank = "BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f ESD" % \
                 (i_bank, n_chan, n_rec, tth0_cdg, dtth_cdg, 0, 0)
         lines.append("%-80s" % l_bank)
-        l_recs = [ "%8.0f%8.0f" % (ii, ee * scale) for ii, ee in zip(intensity, err)]
+        l_recs = ["%8.0f%8.0f" % (ii, ee * scale) for ii,
+                                                      ee in zip(intensity,
+                                                                err)]
         for i in range(0, len(l_recs), 5):
                 lines.append("".join(l_recs[i:i + 5]))
     elif mode == 'fxye':
@@ -307,9 +261,13 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
         l_bank = "BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f FXYE" % \
                 (i_bank, n_chan, n_rec, tth0_cdg, dtth_cdg, 0, 0)
         lines.append("%-80s" % l_bank)
-        l_recs = [ "%22.10f%22.10f%24.10f" % (xx * scale, yy * scale,
-                                             ee * scale) for xx, yy, ee in zip(tth,
-                                                                               intensity, err) ]
+        l_recs = ["%22.10f%22.10f%24.10f" % (xx * scale,
+                                              yy * scale,
+                                              ee * scale) for xx,
+                                                              yy,
+                                                              ee in zip(tth,
+                                                                        intensity,
+                                                                        err)]
         for i in range(len(l_recs)):
             lines.append("%-80s" % l_recs[i])
     else:
