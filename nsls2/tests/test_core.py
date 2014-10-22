@@ -553,6 +553,34 @@ def test_img_to_relative_xyi(random_seed=None):
             six.reraise(AssertionError, ae, sys.exc_info()[2])
 
 
+def test_roi_rectangles():
+    detector_size = (15, 10)
+    num_rois = 2
+    roi_data = np.array(([2, 2, 3, 3],[6, 7, 3, 2]), dtype=np.int64)
+
+    xy_inds, num_pixels = core.roi_rectangles(num_rois, roi_data, detector_size)
+
+    xy_inds_m =([0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 2, 2, 0],
+                [0, 0, 0, 0, 0, 0, 0, 2, 2, 0],
+                [0, 0, 0, 0, 0, 0, 0, 2, 2, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    num_pixels_m = [9, 6]
+
+    assert_array_equal(num_pixels, num_pixels_m)
+    assert_array_equal(xy_inds, np.ravel(xy_inds_m))
+
+
 if __name__ == "__main__":
     level = logging.ERROR
     ch = logging.StreamHandler()
