@@ -555,8 +555,9 @@ def test_img_to_relative_xyi(random_seed=None):
 
 def test_roi_rectangles():
     detector_size = (15, 10)
-    num_rois = 2
-    roi_data = np.array(([2, 2, 3, 3],[6, 7, 3, 2]), dtype=np.int64)
+    num_rois = 3
+    roi_data = np.array(([2, 2, 3, 3], [6, 7, 3, 2], [11, 8, 5, 2]),
+                        dtype=np.int64)
 
     xy_inds, num_pixels = core.roi_rectangles(num_rois, roi_data, detector_size)
 
@@ -571,11 +572,11 @@ def test_roi_rectangles():
                 [0, 0, 0, 0, 0, 0, 0, 2, 2, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-    num_pixels_m = [9, 6]
+                [0, 0, 0, 0, 0, 0, 0, 0, 3, 3],
+                [0, 0, 0, 0, 0, 0, 0, 0, 3, 3],
+                [0, 0, 0, 0, 0, 0, 0, 0, 3, 3],
+                [0, 0, 0, 0, 0, 0, 0, 0, 3, 3])
+    num_pixels_m = [9, 6, 8]
 
     assert_array_equal(num_pixels, num_pixels_m)
     assert_array_equal(xy_inds, np.ravel(xy_inds_m))
