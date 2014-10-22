@@ -45,26 +45,34 @@ import scipy.io
 import os
 
 
-def save_output(tth, intensity,  filename, ext=None, err=None, dir_path=None):
+def save_output(tth, intensity,  filename, q_or_2theta, ext=None, err=None, dir_path=None):
     """
-    Save output diffraction intensities into .chi file format
+    Save output diffraction intensities into .chi or .dat file formats.
+    If the extension(ext) of the output file is not selected it will be
+    saved as a .chi file
 
     Parameters
     ----------
     tth : ndarray
-        2(theta) values or (Q values) 1XN array
+        twotheta values in degrees or Q values in Angstrom
+        shape 1XN array
 
     intensity : ndarray
         intensity values 1XN array
 
     filename : str
-        filename(could be full path) of the .tif file
+        filename(could be full path) to the image data
         eg: /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504.tif
+        or /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504
+
+    q_or_2theta : str
+        twotheta or Q values
+        twotheta space = "2theta"
+        Q space = "Q"
 
     ext : str, optional
-        save output diffraction intensities into .chi or
-        .dat file. If the extension of the output file is not
-        selected it will be saved as a .chi file
+        save output diffraction intensities into .chi, .dat  or
+        .xye file formats.(enter ".chi", ".dat" or ".xye")
 
     err : ndarray, optional
          error value of intensity
@@ -101,10 +109,17 @@ def save_output(tth, intensity,  filename, ext=None, err=None, dir_path=None):
         f.write("\n This file contains integrated powder x-ray diffraction "
             "intensities.\n\n")
         f.write("Number of data points in the file {0} \n".format(len(tth)))
-        f.write("First column represents Q(reciprocal space) or 2(theta)"
-            " values and second column represents intensities and if there"
-            " is a third column it represents the error value of"
-            " intensities\n")
+        if q_or_2theta == "Q":
+            f.write("First column represents Q values (A)and second column"
+                    " represents intensities and if there is a third column it "
+                    "represents the error value of intensities\n")
+        elif q_or_2theta == "2theta":
+            f.write("First column represents two theta values (degrees) and"
+                    " second column represents intensities and if there is"
+                    " a third column it represents the error value of"
+                    " intensities\n")
+        else:
+           raise ValueError("")
         f.write("#####################################################\n\n")
 
         if (err == None):
@@ -115,7 +130,7 @@ def save_output(tth, intensity,  filename, ext=None, err=None, dir_path=None):
     return
 
 
-def save_xye(tth, intensity, filename, err, dir_path=None):
+def save_xye(tth, intensity, filename, q_or_2theta, err, dir_path=None):
     """
     Save diffraction intensities into .xye file format
 
@@ -126,6 +141,11 @@ def save_xye(tth, intensity, filename, err, dir_path=None):
 
     intensity : ndarray
         intensity values
+
+    q_or_2theta : str
+        twotheta or Q values
+        twotheta space = "2theta"
+        Q space = "Q"
 
     err : ndarray
         error value of intensity
@@ -150,25 +170,29 @@ def save_xye(tth, intensity, filename, err, dir_path=None):
     file_base = os.path.splitext(os.path.split(filename)[1])[0]
 
     if (dir_path) == None:
-        file_path = file_base + '.xye'
+        file_path = file_base +'.xye'
     elif os.path.isabs(dir_path):
-        file_path = dir_path + file_base + '.xye'
+        file_path = dir_path + file_base +'.xye'
     else:
         raise ValueError('The given path does not exist.')
 
     with open(file_path, 'wb') as f:
         f.write(filename)
-
         f.write("\n This file contains integrated powder x-ray diffraction "
-                "intensities.\n\n")
+            "intensities.\n\n")
         f.write("Number of data points in the file {0} \n".format(len(tth)))
-        f.write("First column represents Q(reciprocal space) or 2(theta)"
-            " values, second column represents intensities and "
-            " the third column represents error value of intensities\n")
-        f.write("####################################################\n\n")
+        if q_or_2theta == "Q":
+            f.write("First column represents Q values (A)and second column"
+                    " represents intensities and if there is a third column it "
+                    "represents the error value of intensities\n")
+        elif q_or_2theta == "2theta":
+            f.write("First column represents two theta values (degrees) and"
+                    " second column represents intensities and if there is"
+                    " a third column it represents the error value of"
+                    " intensities\n")
 
+        f.write("#####################################################\n\n")
         np.savetxt(f, np.c_[tth, intensity, err], newline="\n")
-
     return
 
 
