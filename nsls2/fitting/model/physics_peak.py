@@ -49,43 +49,17 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 import scipy.special
 
+from lmfit.models import GaussianModel, LorentzianModel
 
-def gauss_peak(x, area, center, sigma):
-    """
-    Use gaussian function to model fluorescence peak from each element
-    
-    Parameters
-    ----------
-    x : array
-        data in x coordinate
-    area : float
-        area of gaussian function,
-        If area is set as 1, the integral is unity.
-    center : float
-        center position
-    sigma : float
-        standard deviation
-        
-    Returns
-    -------
-    couunts : ndarray
-        gaussian peak
-
-    References
-    ----------
-    .. [1] Rene Van Grieken, "Handbook of X-Ray Spectrometry, Second Edition,
-           (Practical Spectroscopy)", CRC Press, 2 edition, pp. 182, 2007.
-    
-    """
-    
-    return area / (sigma * np.sqrt(2 * np.pi)) * np.exp(-0.5 * (((x-center) / sigma)**2))
+gauss_peak = GaussianModel().func
+lorentzian_peak = LorentzianModel().func
 
 
 def gauss_step(x, area, center, sigma, peak_e):
     """
     Gauss step function is an important component in modeling compton peak.
     Use scipy erfc function. Please note erfc = 1-erf.
-    
+
     Parameters
     ----------
     x : array
@@ -98,7 +72,7 @@ def gauss_step(x, area, center, sigma, peak_e):
         standard deviation
     peak_e : float
         emission energy
-    
+
     Returns
     -------
     counts : array
@@ -109,7 +83,7 @@ def gauss_step(x, area, center, sigma, peak_e):
     .. [1] Rene Van Grieken, "Handbook of X-Ray Spectrometry, Second Edition,
            (Practical Spectroscopy)", CRC Press, 2 edition, pp. 182, 2007.
     """
-    
+
     return area / 2. / peak_e * scipy.special.erfc((x - center) / (np.sqrt(2) * sigma))
 
 
@@ -276,26 +250,6 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     counts += value
 
     return counts
-
-
-def lorentzian_peak(x, area, center, sigma):
-    """
-    1-d lorentzian profile
-
-    Parameters
-    ----------
-    x : array
-        independent variable
-    area : float
-        area of lorentzian peak,
-        If area is set as 1, the integral is unity.
-    center : float
-        center position
-    sigma : float
-        standard deviation
-    """
-
-    return (area/(1 + ((x - center) / sigma)**2)) / (np.pi * sigma)
 
 
 def lorentzian_squared_peak(x, area, center, sigma):

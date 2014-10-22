@@ -49,11 +49,14 @@ import numpy as np
 import sys
 import inspect
 
+from lmfit import Model
+from lmfit.models import GaussianModel, LorentzianModel
+
 from nsls2.fitting.model.physics_peak import (elastic_peak, compton_peak,
                                               gauss_peak, lorentzian_peak,
                                               lorentzian_squared_peak)
+
 from nsls2.fitting.base.parameter_data import get_para
-from lmfit import Model
 
 
 def set_default(model_name, func_name):
@@ -122,12 +125,12 @@ class ComptonModel(Model):
         self.set_param_hint('matrix', value=False, vary=False)
 
 
-class GaussModel(Model):
+class GaussianModel(Model):
 
     __doc__ = _gen_class_docs(gauss_peak)
 
     def __init__(self, *args, **kwargs):
-        super(GaussModel, self).__init__(gauss_peak, *args, **kwargs)
+        super(GaussianModel, self).__init__(gauss_peak, *args, **kwargs)
 
 
 class LorentzianModel(Model):
@@ -257,14 +260,14 @@ def _three_param_fit_factory(model):
     inner.__name__ = model.__name__.lower()[:-5] + str("_fit")
     return inner
 
-ModelList = [GaussModel, LorentzianModel, Lorentzian2Model]
+ModelList = [GaussianModel, LorentzianModel, Lorentzian2Model]
 
 mod = sys.modules[__name__]
 for m in ModelList:
     func = _three_param_fit_factory(m)
     setattr(mod, func.__name__, func)
 
-for func_name in [gauss_fit, lorentzian2_fit, lorentzian_fit]:
+for func_name in [gaussian_fit, lorentzian2_fit, lorentzian_fit]:
     func_name.area_vary = ['fixed', 'free', 'bounded']
     func_name.center_vary = ['fixed', 'free', 'bounded']
     func_name.sigma_vary = ['fixed', 'free', 'bounded']

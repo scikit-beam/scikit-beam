@@ -49,7 +49,7 @@ from nsls2.fitting.model.physics_peak import (gauss_peak, gauss_step, gauss_tail
                                               voigt_peak, pvoigt_peak)
 
 from nsls2.fitting.model.physics_model import (ComptonModel, ElasticModel,
-                                               GaussModel)
+                                               GaussianModel)
 
 
 def test_gauss_peak():
@@ -241,19 +241,19 @@ def test_pvoigt_peak():
 
 def test_gauss_model():
 
-    area = 1
-    cen  = 0
-    std = 1
+    amplitude = 1
+    center  = 0
+    sigma = 1
     x = np.arange(-3, 3, 0.5)
-    true_param = [area, cen, std]
+    true_param = [amplitude, center, sigma]
 
-    out = gauss_peak(x, area, cen, std)
+    out = gauss_peak(x, amplitude, center, sigma)
 
-    gauss = GaussModel()
+    gauss = GaussianModel()
     result = gauss.fit(out, x=x,
                        area=1, center=2, sigma=5)
 
-    fitted_val = [result.values['area'], result.values['center'], result.values['sigma']]
+    fitted_val = [result.values['amplitude'], result.values['center'], result.values['sigma']]
     assert_array_almost_equal(true_param, fitted_val, decimal=2)
 
 
