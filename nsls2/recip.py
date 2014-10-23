@@ -295,7 +295,7 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
     q_ring_val = q_ring_val.reshape(num_qs, 2)
 
     # number of pixels in each  Q ring
-    num_pixels = np.bincount(q_inds)
+    num_pixels = np.bincount(q_inds, minlength= (num_qs+1))
     num_pixels = num_pixels[1 :]
 
     return q_inds, q_ring_val, num_pixels
