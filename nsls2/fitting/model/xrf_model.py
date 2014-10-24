@@ -61,15 +61,17 @@ from lmfit import Model
 
 
 k_line = ['Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr',
-          'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se',
-          'Br', 'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd',
-          'In', 'Sn', 'Sb', 'Te', 'I', 'dummy', 'dummy']
+          'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb',
+          'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd',
+          'In', 'Sn', 'Sb', 'Te', 'I']
 
-l_line = ['Mo_L', 'Tc_L', 'Ru_L', 'Rh_L', 'Pd_L', 'Ag_L', 'Cd_L', 'In_L', 'Sn_L', 'Sb_L', 'Te_L', 'I_L', 'Xe_L', 'Cs_L', 'Ba_L', 'La_L', 'Ce_L', 'Pr_L', 'Nd_L', 'Pm_L', 'Sm_L',
-          'Eu_L', 'Gd_L', 'Tb_L', 'Dy_L', 'Ho_L', 'Er_L', 'Tm_L', 'Yb_L', 'Lu_L', 'Hf_L', 'Ta_L', 'W_L', 'Re_L', 'Os_L', 'Ir_L', 'Pt_L', 'Au_L', 'Hg_L', 'Tl_L',
-          'Pb_L', 'Bi_L', 'Po_L', 'At_L', 'Rn_L', 'Fr_L', 'Ac_L', 'Th_L', 'Pa_L', 'U_L', 'Np_L', 'Pu_L', 'Am_L', 'Br_L', 'Ga_L']
+l_line = ['Mo_L', 'Tc_L', 'Ru_L', 'Rh_L', 'Pd_L', 'Ag_L', 'Cd_L', 'In_L', 'Sn_L', 'Sb_L', 'Te_L',
+          'I_L', 'Xe_L', 'Cs_L', 'Ba_L', 'La_L', 'Ce_L', 'Pr_L', 'Nd_L', 'Pm_L', 'Sm_L', 'Eu_L',
+          'Gd_L', 'Tb_L', 'Dy_L', 'Ho_L', 'Er_L', 'Tm_L', 'Yb_L', 'Lu_L', 'Hf_L', 'Ta_L', 'W_L',
+          'Re_L', 'Os_L', 'Ir_L', 'Pt_L', 'Au_L', 'Hg_L', 'Tl_L', 'Pb_L', 'Bi_L', 'Po_L', 'At_L',
+          'Rn_L', 'Fr_L', 'Ac_L', 'Th_L', 'Pa_L', 'U_L', 'Np_L', 'Pu_L', 'Am_L', 'Br_L', 'Ga_L']
 
-m_line = ['Au_M', 'Pb_M', 'U_M', 'noise', 'Pt_M', 'Ti_M', 'Gd_M', 'dummy', 'dummy']
+m_line = ['Au_M', 'Pb_M', 'U_M', 'Pt_M', 'Ti_M', 'Gd_M']
 
 
 def gauss_peak_xrf(x, area, center,
@@ -209,7 +211,8 @@ def set_parameter_bound(xrf_parameter, bound_option):
 
     return
 
-
+#This dict is used to update the current parameter dict to dynamically change the input data
+# and do the fitting. The user can adjust parameters such as position, width, area or branching ratio.
 element_dict = {
     'pos': {"bound_type": "fixed", "min": -0.005, "max": 0.005, "value": 0,
             "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"},
@@ -236,12 +239,14 @@ class ElementController(object):
     def __init__(self, xrf_parameter, fit_name):
         """
         Update element peak information in parameter dictionary.
+        This is an important step in dynamical fitting. The
 
         Parameters
         ----------
         xrf_parameter : dict
             saving all the fitting values and their bounds
-
+        fit_name : list
+            list of str for all the fitting parameters
         """
         self.new_parameter = xrf_parameter.copy()
         self.element_name = [item[0:-5] for item in fit_name if 'area' in item]
@@ -306,8 +311,6 @@ class ElementController(object):
                 addv = {linename: new_pos}
                 self.new_parameter.update(addv)
 
-        return
-
     def set_width(self, item, option=None):
         """
         Parameters
@@ -339,7 +342,6 @@ class ElementController(object):
                     new_val['adjust_element'] = option
                 addv = {linename: new_val}
                 self.new_parameter.update(addv)
-        return
 
     def set_area(self, item, option=None):
         """
@@ -370,7 +372,6 @@ class ElementController(object):
                     new_val['adjust_element'] = option
                 addv = {linename: new_val}
                 self.new_parameter.update(addv)
-        return
 
     def set_ratio(self, item, option=None):
         """
@@ -404,10 +405,24 @@ class ElementController(object):
                     new_val['adjust_element'] = option
                 addv = {linename: new_val}
                 self.new_parameter.update(addv)
-        return
 
 
 def get_sum_area(element_name, result_val):
+    """
+    Return the total area for given element.
+
+    Parameters
+    ----------
+    element_name : str
+        name of given element
+    result_val : obj
+        result obj from lmfit to save all the fitting results
+
+    Returns
+    -------
+    float
+        the total area
+    """
     if element_name in k_line:
         sum = result_val.values[str(element_name)+'_ka1_area'] + \
               result_val.values[str(element_name)+'_ka2_area'] + \
@@ -442,8 +457,6 @@ class ModelSpectrum(object):
         self.parameter_default = get_para()
 
         self.model_spectrum()
-
-        return
 
     def setComptonModel(self):
         """
@@ -653,7 +666,6 @@ class ModelSpectrum(object):
                             _set_parameter_hint('delta_sigma', parameter[width_name],
                                                 gauss_mod, log_option=True)
 
-
                     # branching ratio needs to be adjusted
                     if ename in ratio_adjust:
                         ratio_name = 'ratio-'+ename+'-'+str(line_name)
@@ -705,7 +717,6 @@ class ModelSpectrum(object):
 
                     mod = mod + gauss_mod
 
-
         self.mod = mod
         return
 
@@ -748,12 +759,29 @@ def set_range(parameter, x1, y1):
     return np.array(x0), np.array(y0)
 
 
-def construct_linear_model(x, energy, element_list):
+def get_linear_model(x, param_dict):
     """
     Construct linear model for fluorescence analysis.
-
     """
-    pass
+    MS = ModelSpectrum(param_dict)
+    p = MS.mod.make_params()
 
+    elist = MS.element_list
 
+    matv = np.zeros([len(x), len(elist)])
 
+    for i in range(len(elist)):
+        ename = elist[i]
+        if ename in k_line:
+            newname = ename+'_k'
+        else:
+            newname = ename
+        temp = np.zeros(len(x))
+        for comp in MS.mod.components:
+            if newname in comp.prefix:
+                #temp.append(comp)
+                y_temp = comp.eval(x=x, params=p)
+                matv[:, i] += y_temp
+
+    #y_init = MS.mod.eval(x=x, params=p)
+    return matv
