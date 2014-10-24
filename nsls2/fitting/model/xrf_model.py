@@ -46,6 +46,7 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 import numpy as np
+from scipy.optimize import nnls
 import six
 
 import logging
@@ -423,11 +424,18 @@ def get_sum_area(element_name, result_val):
     float
         the total area
     """
+    def get_value(result_val, element_name, line_name):
+        return result_val.values[str(element_name)+'_'+line_name+'_area'] * \
+               result_val.values[str(element_name)+'_'+line_name+'_ratio'] * \
+               result_val.values[str(element_name)+'_'+line_name+'_ratio_adjust']
+
     if element_name in k_line:
-        sum = result_val.values[str(element_name)+'_ka1_area'] + \
-              result_val.values[str(element_name)+'_ka2_area'] + \
-              result_val.values[str(element_name)+'_kb1_area']
-        return sum
+        sum = get_value(result_val, element_name, 'ka1') + \
+              get_value(result_val, element_name, 'ka2') + \
+              get_value(result_val, element_name, 'kb1')
+        if result_val.values.has_key(str(element_name)+'_kb2_area'):
+            sum += get_value(result_val, element_name, 'kb2')
+    return sum
 
 
 class ModelSpectrum(object):
@@ -653,26 +661,37 @@ class ModelSpectrum(object):
                     gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
 
                     # position needs to be adjusted
-                    if ename in pos_adjust:
-                        pos_name = 'pos-'+ename+'-'+str(line_name)
-                        if parameter.has_key(pos_name):
-                            _set_parameter_hint('delta_center', parameter[pos_name],
-                                                gauss_mod, log_option=True)
+                    #if ename in pos_adjust:
+                    #    pos_name = 'pos-'+ename+'-'+str(line_name)
+                    #    if parameter.has_key(pos_name):
+                    #        _set_parameter_hint('delta_center', parameter[pos_name],
+                    #                            gauss_mod, log_option=True)
+                    pos_name = ename+'_'+str(line_name)+'_delta_center'
+                    if parameter.has_key(pos_name):
+                        _set_parameter_hint('delta_center', parameter[pos_name],
+                                            gauss_mod, log_option=True)
 
                     # width needs to be adjusted
-                    if ename in width_adjust:
-                        width_name = 'width-'+ename+'-'+str(line_name)
-                        if parameter.has_key(width_name):
-                            _set_parameter_hint('delta_sigma', parameter[width_name],
-                                                gauss_mod, log_option=True)
+                    #if ename in width_adjust:
+                    #    width_name = 'width-'+ename+'-'+str(line_name)
+                    #    if parameter.has_key(width_name):
+                    #        _set_parameter_hint('delta_sigma', parameter[width_name],
+                    #                            gauss_mod, log_option=True)
+                    width_name = ename+'_'+str(line_name)+'_delta_sigma'
+                    if parameter.has_key(width_name):
+                        _set_parameter_hint('delta_sigma', parameter[width_name],
+                                            gauss_mod, log_option=True)
 
                     # branching ratio needs to be adjusted
-                    if ename in ratio_adjust:
-                        ratio_name = 'ratio-'+ename+'-'+str(line_name)
-                        if parameter.has_key(ratio_name):
-                            _set_parameter_hint('ratio_adjust', parameter[ratio_name],
-                                                gauss_mod, log_option=True)
-
+                    #if ename in ratio_adjust:
+                    #    ratio_name = 'ratio-'+ename+'-'+str(line_name)
+                    #    if parameter.has_key(ratio_name):
+                    #        _set_parameter_hint('ratio_adjust', parameter[ratio_name],
+                    #                            gauss_mod, log_option=True)
+                    ratio_name = ename+'_'+str(line_name)+'_ratio_adjust'
+                    if parameter.has_key(ratio_name):
+                        _set_parameter_hint('ratio_adjust', parameter[ratio_name],
+                                            gauss_mod, log_option=True)
                     mod = mod + gauss_mod
 
             elif ename in m_line:
@@ -785,3 +804,37 @@ def get_linear_model(x, param_dict):
 
     #y_init = MS.mod.eval(x=x, params=p)
     return matv
+
+
+class PreFitAnalysis(object):
+    """
+    It is used to automatic peak finding.
+    """
+    def __init__(self, experiments, standard):
+        self.experiments = np.asarray(experiments)
+        self.standard = np.asarray(standard)
+        return
+
+    def nnls_fit(self):
+        standard = self.standard
+        experiments = self.experiments
+
+        [results, residue] = nnls(standard, experiments)
+
+        return results, residue
+
+    def nnls_fit_weight(self):
+
+        standard = self.standard
+        experiments = self.experiments
+
+        weights = 1.0 / (1.0 + experiments)
+        weights = abs(weights)
+        weights = weights/max(weights)
+
+        a = np.transpose(np.multiply(np.transpose(standard),np.sqrt(weights)))
+        b = np.multiply(experiments,np.sqrt(weights))
+
+        [results, residue] = nnls(a, b)
+
+        return results, residue
