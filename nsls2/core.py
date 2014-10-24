@@ -732,11 +732,13 @@ def pixel_to_phi(shape, calibrated_center, pixel_size=None):
 
 def radius_to_twotheta(dist_sample, radius):
     """
-    Converts radius from the calibrated center to twotheta
-
+    Converts radius from the calibrated center to scattering angle
+    (2:math:`2\\theta`) with known detector to sample distance.
+    
     Parameters
     ----------
     dist_sample : float
+        distance from the sample to the detector (mm)
 
     radius : array
         The L2 norm of the distance of each pixel from the calibrated center.
