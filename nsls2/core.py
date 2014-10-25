@@ -730,6 +730,27 @@ def pixel_to_phi(shape, calibrated_center, pixel_size=None):
     return np.arctan2(X, Y)
 
 
+def radius_to_twotheta(dist_sample, radius):
+    """
+    Converts radius from the calibrated center to scattering angle
+    (2:math:`2\\theta`) with known detector to sample distance.
+    
+    Parameters
+    ----------
+    dist_sample : float
+        distance from the sample to the detector (mm)
+
+    radius : array
+        The L2 norm of the distance of each pixel from the calibrated center.
+
+    Returns
+    -------
+    two_theta : array
+        An array of :math:`2\\theta` values
+    """
+    return 2 * np.arctan(radius / dist_sample)
+
+
 def wedge_integration(src_data, center, theta_start,
                       delta_theta, r_inner, delta_r):
     """
