@@ -787,21 +787,24 @@ def get_linear_model(x, param_dict):
 
     elist = MS.element_list
 
-    matv = np.zeros([len(x), len(elist)])
+    matv = np.zeros([len(x), len(elist)+2])
 
     for i in range(len(elist)):
         ename = elist[i]
         if ename in k_line:
             newname = ename+'_k'
         else:
-            newname = ename
-        temp = np.zeros(len(x))
+            newname = ename[:-2]+'_l'
+        #temp = np.zeros(len(x))
         for comp in MS.mod.components:
             if newname in comp.prefix:
+                #print(comp.prefix)
                 #temp.append(comp)
                 y_temp = comp.eval(x=x, params=p)
                 matv[:, i] += y_temp
 
+    matv[:, -2] = MS.mod.components[0].eval(x=x, params=p)
+    matv[:, -1] = MS.mod.components[1].eval(x=x, params=p)
     #y_init = MS.mod.eval(x=x, params=p)
     return matv
 
