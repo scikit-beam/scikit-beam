@@ -79,9 +79,8 @@ def find_ring_center_acorr_1D(input_image, Ni_st_name=None):
     else:
         image = ndimage.gaussian_filter(input_image, sigma=2)
 
-
     return tuple(bins[np.argmax(vals)] for vals, bins in
-                  (_corr_ax1(_im) for _im in (image.T, image)))
+                 (_corr_ax1(_im) for _im in (image.T, image)))
 
 
 def _corr_ax1(input_image):

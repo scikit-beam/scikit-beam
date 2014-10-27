@@ -52,7 +52,7 @@ from nsls2.core import (pixel_to_phi, pixel_to_radius,
 
 
 def estimate_d_blind(name, wavelength, bin_centers, ring_average,
-               window_size, max_peak_count, thresh):
+                     window_size, max_peak_count, thresh):
     """
     Estimate the sample-detector distance
 
@@ -134,9 +134,9 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
 estimate_d_blind.name = list(calibration_standards)
 
 
-def refine_center(input_image, calibrated_center, pixel_size, phi_steps, max_peaks,
-                  thresh, window_size, nx=None, min_x=None, max_x=None,
-                  Ni_st_name=None):
+def refine_center(input_image, calibrated_center, pixel_size, phi_steps,
+                  max_peaks, thresh, window_size, nx=None, min_x=None,
+                  max_x=None, Ni_st_name=None):
     """
     Refines the location of the center of the beam.
 
@@ -213,7 +213,7 @@ def refine_center(input_image, calibrated_center, pixel_size, phi_steps, max_pea
         cands = scipy.signal.argrelmax(avg, order=window_size)[0]
         # filter local maximums by size
         cands = filter_peak_height(avg, cands, thresh*np.max(avg),
-                                           window=window_size)
+                                   window=window_size)
         ring_trace.append(bin_centers[cands[:max_peaks]])
 
     tr_len = [len(rt) for rt in ring_trace]
