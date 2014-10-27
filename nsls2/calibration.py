@@ -135,8 +135,8 @@ estimate_d_blind.name = list(calibration_standards)
 
 
 def refine_center(input_image, calibrated_center, pixel_size, phi_steps,
-                  max_peaks, thresh, window_size, nx=None, min_x=None,
-                  max_x=None, Ni_st_name=None):
+                  max_peaks, thresh, window_size, std_name, nx=None,
+                  min_x=None, max_x=None):
     """
     Refines the location of the center of the beam.
 
@@ -162,6 +162,9 @@ def refine_center(input_image, calibrated_center, pixel_size, phi_steps,
     thresh : float
         Fraction of maximum peak height
 
+    std_name : str
+        The name of the calibration standard.
+
     window_size : int, optional
         The window size to use (in bins) to use when refining peaks
 
@@ -174,20 +177,21 @@ def refine_center(input_image, calibrated_center, pixel_size, phi_steps,
     max_x : float, optional
         The maximum radius to use for radial binning
 
-    Ni_st_name : str, optional
-        If the name of the calibration standard is Ni have to use
-        a gauissan filter with sigma=2 all other samples gauissian
-        filter with sigma=0.5 is applied to remove detail and noise.
-
     Returns
     -------
     calibrated_center : tuple
         The refined calibrated center.
     """
-    if Ni_st_name is None:
-        image = ndimage.gaussian_filter(input_image, sigma=0.5)
-    else:
+
+    # A Gaussian filter is applied to an image to remove detail and
+    # noise. For the calibration standard Ni(Nickel) a gaussian
+    # filter with sigma = 2 is applied, all other samples
+    # sigma = 0.5 is used
+
+    if std_name=="Ni":
         image = ndimage.gaussian_filter(input_image, sigma=2)
+    else:
+        image = ndimage.gaussian_filter(input_image, sigma=0.5)
 
     if nx is None:
         nx = int(np.mean(image.shape) * 2)

@@ -48,7 +48,7 @@ import numpy as np
 from scipy import ndimage
 
 
-def find_ring_center_acorr_1D(input_image, Ni_st_name=None):
+def find_ring_center_acorr_1D(input_image, std_name):
     """
     Find the pixel-resolution center of a set of concentric rings.
 
@@ -62,10 +62,9 @@ def find_ring_center_acorr_1D(input_image, Ni_st_name=None):
     ----------
     input_image : ndarray
         A single image.
-    Ni_st_name : str, optional
-        If the name of the calibration standard is Ni have to use
-        a gauissan filter with sigma=2 all other samples gauissian
-        filter with sigma=0.5 is applied to remove detail and noise.
+        
+    std_name : str
+        The name of the calibration standard.
 
     Returns
     -------
@@ -73,14 +72,19 @@ def find_ring_center_acorr_1D(input_image, Ni_st_name=None):
         Returns the index (row, col) of the pixel that rings
         are centered on.  Accurate to pixel resolution.
     """
+    # A Gaussian filter is applied to an image to remove detail and
+    # noise. For the calibration standard Ni(Nickel) a gaussian
+    # filter with sigma = 2 is applied, all other samples
+    # sigma = 0.5 is used
 
-    if Ni_st_name is None:
-        image = ndimage.gaussian_filter(input_image, sigma=0.5)
+    if std_name=="Ni":
+        input_image = ndimage.gaussian_filter(input_image, sigma=2)
     else:
-        image = ndimage.gaussian_filter(input_image, sigma=2)
+        input_image = ndimage.gaussian_filter(input_image, sigma=0.5)
+
 
     return tuple(bins[np.argmax(vals)] for vals, bins in
-                 (_corr_ax1(_im) for _im in (image.T, image)))
+                 (_corr_ax1(_im) for _im in (input_image.T, input_image)))
 
 
 def _corr_ax1(input_image):
