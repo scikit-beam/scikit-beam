@@ -45,9 +45,10 @@ import six
 import logging
 logger = logging.getLogger(__name__)
 import numpy as np
+from scipy import ndimage
 
 
-def find_ring_center_acorr_1D(input_image):
+def find_ring_center_acorr_1D(input_image, Ni_st_name=None):
     """
     Find the pixel-resolution center of a set of concentric rings.
 
@@ -61,6 +62,10 @@ def find_ring_center_acorr_1D(input_image):
     ----------
     input_image : ndarray
         A single image.
+    Ni_st_name : str, optional
+        If the name of the calibration standard is Ni have to use
+        a gauissan filter with sigma=2 all other samples gauissian
+        filter with sigma=0.5 is applied to remove detail and noise.
 
     Returns
     -------
@@ -68,8 +73,15 @@ def find_ring_center_acorr_1D(input_image):
         Returns the index (row, col) of the pixel that rings
         are centered on.  Accurate to pixel resolution.
     """
+
+    if Ni_st_name is None:
+        image = ndimage.gaussian_filter(input_image, sigma=0.5)
+    else:
+        image = ndimage.gaussian_filter(input_image, sigma=2)
+
+
     return tuple(bins[np.argmax(vals)] for vals, bins in
-                  (_corr_ax1(_im) for _im in (input_image.T, input_image)))
+                  (_corr_ax1(_im) for _im in (image.T, image)))
 
 
 def _corr_ax1(input_image):
