@@ -42,6 +42,7 @@ from __future__ import (absolute_import, division, print_function,
 import six
 import numpy as np
 import scipy.signal
+from scipy import ndimage
 from collections import deque
 from nsls2.constants import calibration_standards
 from nsls2.feature import (filter_peak_height, peak_refinement,
@@ -135,7 +136,7 @@ estimate_d_blind.name = list(calibration_standards)
 
 def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
                   thresh, window_size,
-                  nx=None, min_x=None, max_x=None):
+                  nx=None, min_x=None, max_x=None, Ni_st_name=None):
     """
     Refines the location of the center of the beam.
 
@@ -173,6 +174,10 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
     max_x : float, optional
         The maximum radius to use for radial binning
 
+    Ni_st_name : str, optional
+        If the name of the calibration standard is Ni have to use
+        a gauissan filter.
+
     Returns
     -------
     calibrated_center : tuple
@@ -180,6 +185,9 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
     """
     if nx is None:
         nx = int(np.mean(image.shape) * 2)
+
+    if Ni_st_name is not None:
+        image = ndimage.gaussian_filter(image, sigma=2)
 
     phi = pixel_to_phi(image.shape, calibrated_center, pixel_size).ravel()
     r = pixel_to_radius(image.shape, calibrated_center, pixel_size).ravel()
