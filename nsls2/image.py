@@ -48,7 +48,7 @@ import numpy as np
 from scipy import ndimage
 
 
-def find_ring_center_acorr_1D(input_image, std_name):
+def find_ring_center_acorr_1D(input_image, std_name=None):
     """
     Find the pixel-resolution center of a set of concentric rings.
 
@@ -63,7 +63,7 @@ def find_ring_center_acorr_1D(input_image, std_name):
     input_image : ndarray
         A single image.
         
-    std_name : str
+    std_name : str, None
         The name of the calibration standard.
 
     Returns

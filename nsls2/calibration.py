@@ -135,7 +135,7 @@ estimate_d_blind.name = list(calibration_standards)
 
 
 def refine_center(input_image, calibrated_center, pixel_size, phi_steps,
-                  max_peaks, thresh, window_size, std_name, nx=None,
+                  max_peaks, thresh, window_size, std_name=None, nx=None,
                   min_x=None, max_x=None):
     """
     Refines the location of the center of the beam.
