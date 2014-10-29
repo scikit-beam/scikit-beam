@@ -41,6 +41,7 @@ are noted.
 from nsls2.testing.noseclasses import (KnownFailureTest,
                                        KnownFailureDidNotFailTest)
 
+import nose
 from nose.tools import make_decorator
 
 
@@ -79,4 +80,18 @@ def known_fail_if(cond):
             return in_func
 
     # return the decorator function
+    return dec
+
+
+def skip_if(cond, msg=''):
+    """
+    A decorator to skip a test if condition is met
+    """
+    def dec(in_func):
+        if cond:
+            def wrapper():
+                raise nose.SkipTest(msg)
+            return make_decorator(in_func)(wrapper)
+        else:
+            return in_func
     return dec
