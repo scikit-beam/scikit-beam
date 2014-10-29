@@ -209,6 +209,8 @@ doc_template = """
 
     Parameters
     ----------
+    prefix : str
+        prefix name
     area : float
         area under peak profile
     area_vary : str
@@ -262,12 +264,12 @@ def _three_param_fit_factory(model):
     function
         The main task of th function is to do the fitting.
     """
-    def inner(area, area_vary, area_range,
+    def inner(prefix, area, area_vary, area_range,
               center, center_vary, center_range,
               sigma, sigma_vary, sigma_range):
         #x_data, y_data = input_data
 
-        g = model()
+        g = model(prefix=prefix)
         set_range(g, 'area', area, area_vary, area_range)
         set_range(g, 'center', center, center_vary, center_range)
         set_range(g, 'sigma', sigma, sigma_vary, sigma_range)
