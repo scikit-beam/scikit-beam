@@ -149,6 +149,33 @@ class Lorentzian2Model(Model):
         super(Lorentzian2Model, self).__init__(lorentzian_squared_peak, *args, **kwargs)
 
 
+def fit_engine(g, x, y):
+    """
+    This function is to do fitting based on given x and y values.
+
+    Parameters
+    ----------
+    g : array_like
+        fitting object
+    x : array
+        independent variable
+    y : array
+        dependent variable
+
+    Returns
+    -------
+    param : dict
+        fitting results
+    y_fit : array
+        fitted y
+    """
+    result = g.fit(y, x=x)
+    param = result.values
+    y_fit = result.best_fit
+
+    return param, y_fit
+
+
 def set_range(model_name,
               parameter_name, parameter_value,
               parameter_vary, parameter_range):
@@ -182,8 +209,6 @@ doc_template = """
 
     Parameters
     ----------
-    input_data : array
-        input data of x and y
     area : float
         area under peak profile
     area_vary : str
@@ -217,10 +242,8 @@ doc_template = """
 
     Returns
     -------
-    param : dict
-        fitting results
-    y_fit : array
-        fitted y
+    g : array_like
+        fitting object
     """
 
 
@@ -239,22 +262,23 @@ def _three_param_fit_factory(model):
     function
         The main task of th function is to do the fitting.
     """
-    def inner(input_data,
-              area, area_vary, area_range,
+    def inner(area, area_vary, area_range,
               center, center_vary, center_range,
               sigma, sigma_vary, sigma_range):
-        x_data, y_data = input_data
+        #x_data, y_data = input_data
 
         g = model()
         set_range(g, 'area', area, area_vary, area_range)
         set_range(g, 'center', center, center_vary, center_range)
         set_range(g, 'sigma', sigma, sigma_vary, sigma_range)
 
-        result = g.fit(y_data, x=x_data)
-        param = result.values
-        y_fit = result.best_fit
+        #result = g.fit(y_data, x=x_data)
+        #param = result.values
+        #y_fit = result.best_fit
 
-        return param, y_fit
+        #return param, y_fit
+
+        return g
 
     inner.__doc__ = doc_template.format(model.__name__)
     inner.__name__ = model.__name__.lower()[:-5] + str("_fit")
@@ -266,6 +290,8 @@ mod = sys.modules[__name__]
 for m in ModelList:
     func = _three_param_fit_factory(m)
     setattr(mod, func.__name__, func)
+
+setattr(mod, fit_engine.__name__, fit_engine)
 
 for func_name in [gaussian_fit, lorentzian2_fit, lorentzian_fit]:
     func_name.area_vary = ['fixed', 'free', 'bounded']
