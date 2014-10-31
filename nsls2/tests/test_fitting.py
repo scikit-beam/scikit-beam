@@ -41,9 +41,10 @@ from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
 
 from nsls2.testing.decorators import known_fail_if
-from nsls2.fitting.model.physics_model import (gaussian_fit, lorentzian_fit,
-                                               lorentzian2_fit)
+from nsls2.fitting.model.physics_model import (gaussian_model, lorentzian_model,
+                                               lorentzian2_model, fit_engine)
 from nose.tools import (assert_equal, assert_true, raises)
+
 
 @known_fail_if(True)
 def test_fit_quad_to_peak():
@@ -58,15 +59,16 @@ def test_gauss_fit():
     true_val = [amplitude, center, sigma]
     y = amplitude / np.sqrt(2 * np.pi) / sigma * np.exp(-(x - center)**2 / 2 / sigma**2)
 
-    out = gaussian_fit([x, y],
-                    1, 'fixed', [0, 1],
-                    0.1, 'free', [0, 0.5],
-                    0.5, 'free', [0, 1])
+    g = gaussian_model('',
+                       1, 'fixed', [0, 1],
+                       0.1, 'free', [0, 0.5],
+                       0.5, 'free', [0, 1])
 
-    fitted_val = (out[0]['amplitude'], out[0]['center'], out[0]['sigma'])
+    result, yfit = fit_engine(g, x, y)
+
+    out = result.values
+    fitted_val = (out['amplitude'], out['center'], out['sigma'])
     assert_array_almost_equal(true_val, fitted_val)
-
-    return
 
 
 def test_lorentzian_fit():
@@ -78,15 +80,16 @@ def test_lorentzian_fit():
 
     y = (amplitude/(1 + ((x - center) / sigma)**2)) / (np.pi * sigma)
 
-    out = lorentzian_fit([x, y],
+    m = lorentzian_model('',
                          0.8, 'free', [0, 1],
                          0.1, 'free', [0, 0.5],
                          0.8, 'bounded', [0, 2])
 
-    fitted_val = (out[0]['amplitude'], out[0]['center'], out[0]['sigma'])
-    assert_array_almost_equal(true_val, fitted_val)
+    result, yfit = fit_engine(m, x, y)
+    out = result.values
 
-    return
+    fitted_val = (out['amplitude'], out['center'], out['sigma'])
+    assert_array_almost_equal(true_val, fitted_val)
 
 
 @raises(ValueError)
@@ -99,11 +102,13 @@ def test_lorentzian2_fit():
 
     y = (area/(1 + ((x - center) / sigma)**2)**2) / (np.pi * sigma)
 
-    out = lorentzian2_fit([x, y],
+    m = lorentzian2_model('',
                           0.8, 'wrong', [0, 1],
                           0.1, 'free', [0, 0.5],
                           0.5, 'free', [0, 1])
-    fitted_val = (out[0]['area'], out[0]['center'], out[0]['sigma'])
-    assert_array_almost_equal(true_val, fitted_val)
 
-    return
+    result, yfit = fit_engine(m, x, y)
+    out = result.values
+
+    fitted_val = (out['area'], out['center'], out['sigma'])
+    assert_array_almost_equal(true_val, fitted_val)
