@@ -99,9 +99,10 @@ def set_default(model_name, func_name):
         else:
             raise TypeError("Boundary type {0} can't be used".format(my_dict['bound_type']))
 
+
 def _gen_class_docs(func):
     return ("Wrap the {} function for fitting within lmfit framework\n".format(func.__name__) +
-           func.__doc__)
+            func.__doc__)
 
 
 class ElasticModel(Model):
@@ -123,22 +124,6 @@ class ComptonModel(Model):
         set_default(self, compton_peak)
         self.set_param_hint('epsilon', value=2.96, vary=False)
         self.set_param_hint('matrix', value=False, vary=False)
-
-
-class GaussianModel(Model):
-
-    __doc__ = _gen_class_docs(gauss_peak)
-
-    def __init__(self, *args, **kwargs):
-        super(GaussianModel, self).__init__(gauss_peak, *args, **kwargs)
-
-
-class LorentzianModel(Model):
-
-    __doc__ = _gen_class_docs(lorentzian_peak)
-
-    def __init__(self, *args, **kwargs):
-        super(LorentzianModel, self).__init__(lorentzian_peak, *args, **kwargs)
 
 
 class Lorentzian2Model(Model):
@@ -164,16 +149,15 @@ def fit_engine(g, x, y):
 
     Returns
     -------
-    param : dict
-        fitting results
+    result : array_like
+        object of fitting results
     y_fit : array
         fitted y
     """
     result = g.fit(y, x=x)
-    param = result.values
     y_fit = result.best_fit
 
-    return param, y_fit
+    return result, y_fit
 
 
 def set_range(model_name,
@@ -211,15 +195,15 @@ doc_template = """
     ----------
     prefix : str
         prefix name
-    area : float
+    amplitude : float
         area under peak profile
-    area_vary : str
+    amplitude_vary : str
         variance method
         Options:
             fixed,
             free,
             bounded
-    area_range : list
+    amplitude_range : list
         bounded range
     center : float
         center position
@@ -264,13 +248,13 @@ def _three_param_fit_factory(model):
     function
         The main task of th function is to do the fitting.
     """
-    def inner(prefix, area, area_vary, area_range,
+    def inner(prefix, amplitude, amplitude_vary, amplitude_range,
               center, center_vary, center_range,
               sigma, sigma_vary, sigma_range):
         #x_data, y_data = input_data
 
         g = model(prefix=prefix)
-        set_range(g, 'area', area, area_vary, area_range)
+        set_range(g, 'amplitude', amplitude, amplitude_vary, amplitude_range)
         set_range(g, 'center', center, center_vary, center_range)
         set_range(g, 'sigma', sigma, sigma_vary, sigma_range)
 
@@ -296,6 +280,6 @@ for m in ModelList:
 setattr(mod, fit_engine.__name__, fit_engine)
 
 for func_name in [gaussian_fit, lorentzian2_fit, lorentzian_fit]:
-    func_name.area_vary = ['fixed', 'free', 'bounded']
+    func_name.amplitude_vary = ['fixed', 'free', 'bounded']
     func_name.center_vary = ['fixed', 'free', 'bounded']
     func_name.sigma_vary = ['fixed', 'free', 'bounded']
