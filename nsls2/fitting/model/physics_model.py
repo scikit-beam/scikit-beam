@@ -50,7 +50,7 @@ import sys
 import inspect
 
 from lmfit import Model
-from lmfit.models import GaussianModel, LorentzianModel
+from lmfit.models import (GaussianModel, LorentzianModel, QuadraticModel)
 
 from nsls2.fitting.model.physics_peak import (elastic_peak, compton_peak,
                                               gauss_peak, lorentzian_peak,
@@ -132,6 +132,62 @@ class Lorentzian2Model(Model):
 
     def __init__(self, *args, **kwargs):
         super(Lorentzian2Model, self).__init__(lorentzian_squared_peak, *args, **kwargs)
+
+
+def quadratic_model(prefix,
+                    a, a_vary, a_range,
+                    b, b_vary, b_range,
+                    c, c_vary, c_range):
+    """
+    Quadratic Model for fitting.
+
+    Parameters
+    ----------
+    prefix : str
+        prefix name
+    a : float
+        x -> a * x**2 + b * x + c
+    a_vary : str
+        variance method
+        Options:
+            fixed,
+            free,
+            bounded
+    a_range : list
+        bounded range
+    b : float
+        x -> a * x**2 + b * x + c
+    b_vary : str
+        variance method
+        Options:
+            fixed,
+            free,
+            bounded
+    b_range : list
+        bounded range
+    c : float
+        x -> a * x**2 + b * x + c
+    c_vary : str
+        variance method
+        Options:
+            fixed,
+            free,
+            bounded
+    c_range : list
+        bounded range
+
+    Returns
+    -------
+    g : array_like
+        fitting object
+    """
+
+    g = QuadraticModel(prefix=prefix)
+    set_range(g, 'a', a, a_vary, a_range)
+    set_range(g, 'b', b, b_vary, b_range)
+    set_range(g, 'c', c, c_vary, c_range)
+
+    return g
 
 
 def fit_engine(g, x, y):
@@ -251,18 +307,11 @@ def _three_param_fit_factory(model):
     def inner(prefix, amplitude, amplitude_vary, amplitude_range,
               center, center_vary, center_range,
               sigma, sigma_vary, sigma_range):
-        #x_data, y_data = input_data
 
         g = model(prefix=prefix)
         set_range(g, 'amplitude', amplitude, amplitude_vary, amplitude_range)
         set_range(g, 'center', center, center_vary, center_range)
         set_range(g, 'sigma', sigma, sigma_vary, sigma_range)
-
-        #result = g.fit(y_data, x=x_data)
-        #param = result.values
-        #y_fit = result.best_fit
-
-        #return param, y_fit
 
         return g
 
@@ -278,6 +327,7 @@ for m in ModelList:
     setattr(mod, func.__name__, func)
 
 setattr(mod, fit_engine.__name__, fit_engine)
+setattr(mod, quadratic_model.__name__, quadratic_model)
 
 for func_name in [gaussian_fit, lorentzian2_fit, lorentzian_fit]:
     func_name.amplitude_vary = ['fixed', 'free', 'bounded']
