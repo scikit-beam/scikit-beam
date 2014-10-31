@@ -316,7 +316,7 @@ def _three_param_fit_factory(model):
         return g
 
     inner.__doc__ = doc_template.format(model.__name__)
-    inner.__name__ = model.__name__.lower()[:-5] + str("_fit")
+    inner.__name__ = model.__name__.lower()[:-5] + str("_model")
     return inner
 
 ModelList = [GaussianModel, LorentzianModel, Lorentzian2Model]
@@ -327,9 +327,14 @@ for m in ModelList:
     setattr(mod, func.__name__, func)
 
 setattr(mod, fit_engine.__name__, fit_engine)
-setattr(mod, quadratic_model.__name__, quadratic_model)
 
-for func_name in [gaussian_fit, lorentzian2_fit, lorentzian_fit]:
+setattr(mod, quadratic_model.__name__, quadratic_model)
+quadratic_model.a_vary = ['fixed', 'free', 'bounded']
+quadratic_model.b_vary = ['fixed', 'free', 'bounded']
+quadratic_model.c_vary = ['fixed', 'free', 'bounded']
+
+
+for func_name in [gaussian_model, lorentzian2_model, lorentzian_model]:
     func_name.amplitude_vary = ['fixed', 'free', 'bounded']
     func_name.center_vary = ['fixed', 'free', 'bounded']
     func_name.sigma_vary = ['fixed', 'free', 'bounded']
