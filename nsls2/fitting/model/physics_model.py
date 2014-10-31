@@ -189,6 +189,10 @@ def quadratic_model(prefix,
 
     return g
 
+quadratic_model.a_vary = ['fixed', 'free', 'bounded']
+quadratic_model.b_vary = ['fixed', 'free', 'bounded']
+quadratic_model.c_vary = ['fixed', 'free', 'bounded']
+
 
 def fit_engine(g, x, y):
     """
@@ -214,6 +218,29 @@ def fit_engine(g, x, y):
     y_fit = result.best_fit
 
     return result, y_fit
+
+
+def fit_engine_list(g, data):
+    """
+    This function is to do fitting on a list of x and y values.
+
+    Parameters
+    ----------
+    g : array_like
+        fitting object
+    data : array
+        list of (x,y)
+
+    Returns
+    -------
+    result : array_like
+        list of object saving fit results
+    """
+    result_list = []
+    for v in data:
+        result = g.fit(v[1], x=v[0])
+        result_list.append(result)
+    return result_list
 
 
 def set_range(model_name,
@@ -326,15 +353,14 @@ for m in ModelList:
     func = _three_param_fit_factory(m)
     setattr(mod, func.__name__, func)
 
-setattr(mod, fit_engine.__name__, fit_engine)
-
-setattr(mod, quadratic_model.__name__, quadratic_model)
-quadratic_model.a_vary = ['fixed', 'free', 'bounded']
-quadratic_model.b_vary = ['fixed', 'free', 'bounded']
-quadratic_model.c_vary = ['fixed', 'free', 'bounded']
-
 
 for func_name in [gaussian_model, lorentzian2_model, lorentzian_model]:
     func_name.amplitude_vary = ['fixed', 'free', 'bounded']
     func_name.center_vary = ['fixed', 'free', 'bounded']
     func_name.sigma_vary = ['fixed', 'free', 'bounded']
+
+
+function_list = [fit_engine, fit_engine_list, quadratic_model]
+
+for func_name in function_list:
+    setattr(mod, func_name.__name__, func_name)
