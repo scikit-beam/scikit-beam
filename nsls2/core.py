@@ -682,7 +682,7 @@ def radius_to_twotheta(dist_sample, radius):
     two_theta : array
         An array of :math:`2\\theta` values
     """
-    return 2 * np.arctan(radius / dist_sample)
+    return np.arctan(radius / dist_sample)
 
 
 def wedge_integration(src_data, center, theta_start,
