@@ -50,14 +50,12 @@ import sys
 import inspect
 
 from lmfit import Model
-from nsls2.fitting.model.physics_peak import (elastic_peak, compton_peak,
-                                              lorentzian_squared_peak)
 
 from nsls2.fitting.base.parameter_data import get_para
 from lmfit.models import (ConstantModel, LinearModel, QuadraticModel,
-                          ParabolicModel, PolynomialModel, GaussianModel,
-                          LorentzianModel, VoigtModel, PseudoVoigtModel,
-                          Pearson7Model, StudentsTModel, BreitWignerModel,
+                          ParabolicModel, PolynomialModel, VoigtModel,
+                          PseudoVoigtModel, Pearson7Model, StudentsTModel,
+                          BreitWignerModel,
                           LognormalModel, DampedOscillatorModel,
                           ExponentialGaussianModel, SkewedGaussianModel,
                           DonaichModel, PowerLawModel, ExponentialModel,
@@ -112,6 +110,14 @@ def _gen_class_docs(func):
             func.__doc__)
 
 
+class GaussianModel(Model):
+
+    __doc__ = _gen_class_docs(gaussian)
+
+    def __init__(self, *args, **kwargs):
+         super(GaussianModel, self).__init__(gaussian, *args, **kwargs)
+
+
 class ElasticModel(Model):
 
     __doc__ = _gen_class_docs(elastic_peak)
@@ -132,6 +138,12 @@ class ComptonModel(Model):
         self.set_param_hint('epsilon', value=2.96, vary=False)
         self.set_param_hint('matrix', value=False, vary=False)
 
+class LorentzianModel(Model):
+
+    __doc__ = _gen_class_docs(lorentzian)
+
+    def __init__(self, *args, **kwargs):
+        super(LorentzianModel, self).__init__(lorentzian, *args, **kwargs)
 
 class Lorentzian2Model(Model):
 
@@ -380,6 +392,4 @@ model_list = [ConstantModel, LinearModel, QuadraticModel, ParabolicModel,
               SkewedGaussianModel, DonaichModel, PowerLawModel,
               ExponentialModel, StepModel, RectangleModel, Lorentzian2Model,
               ComptonModel, ElasticModel]
-
-
-models = {model.__name__: model for model in model_list}
+model_list.sort()

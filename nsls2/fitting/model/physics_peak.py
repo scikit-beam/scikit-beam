@@ -49,7 +49,11 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 import scipy.special
 import six
-from lmfit.lineshapes import gaussian, lorentzian
+from lmfit.lineshapes import (gaussian, lorentzian, voigt, pvoigt, pearson7,
+                              breit_wigner, damped_oscillator, logistic,
+                              lognormal, students_t, expgaussian, donaich,
+                              skewed_gaussian, skewed_voigt, step, rectangle,
+                              exponential, powerlaw, linear, parabolic)
 
 def gauss_step(x, area, center, sigma, peak_e):
     """
@@ -309,3 +313,14 @@ def pvoigt_peak(x, area, center, sigma, fraction):
     """
     return ((1 - fraction) * gaussian(x, area, center, sigma) +
             fraction * lorentzian(x, area, center, sigma))
+
+
+lineshapes = [gaussian, lorentzian, voigt, pvoigt, pearson7,
+              breit_wigner, damped_oscillator, logistic,
+              lognormal, students_t, expgaussian, donaich,
+              skewed_gaussian, skewed_voigt, step, rectangle,
+              exponential, powerlaw, linear, parabolic,
+              lorentzian_squared_peak, compton_peak, elastic_peak, gauss_step,
+              gauss_tail]
+
+line_shapes_dict = {str(lineshape): lineshape for lineshape in lineshapes}
