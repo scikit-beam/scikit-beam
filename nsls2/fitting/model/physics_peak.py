@@ -48,12 +48,8 @@ from __future__ import (absolute_import, division, print_function,
 
 import numpy as np
 import scipy.special
-
-from lmfit.models import GaussianModel, LorentzianModel
-
-gauss_peak = GaussianModel().func
-lorentzian_peak = LorentzianModel().func
-
+import six
+from lmfit.lineshapes import gaussian, lorentzian
 
 def gauss_step(x, area, center, sigma, peak_e):
     """
@@ -160,7 +156,7 @@ def elastic_peak(x, coherent_sct_energy,
     sigma = np.sqrt((fwhm_offset / temp_val)**2 +
                     coherent_sct_energy * epsilon * fwhm_fanoprime)
 
-    value = gauss_peak(x, coherent_sct_amplitude, coherent_sct_energy, sigma)
+    value = gaussian(x, coherent_sct_amplitude, coherent_sct_energy, sigma)
     
     return value
 
@@ -230,7 +226,7 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     if matrix is False:
         factor = factor * (10.**compton_amplitude)
         
-    value = factor * gauss_peak(x, compton_amplitude, compton_e, sigma*compton_fwhm_corr)
+    value = factor * gaussian(x, compton_amplitude, compton_e, sigma*compton_fwhm_corr)
     counts += value
 
     # compton peak, step
@@ -311,5 +307,5 @@ def pvoigt_peak(x, area, center, sigma, fraction):
         weight for lorentzian peak in the linear combination, and (1-fraction) is the weight
         for gaussian peak.
     """
-    return ((1 - fraction) * gauss_peak(x, area, center, sigma) +
-            fraction * lorentzian_peak(x, area, center, sigma))
+    return ((1 - fraction) * gaussian(x, area, center, sigma) +
+            fraction * lorentzian(x, area, center, sigma))

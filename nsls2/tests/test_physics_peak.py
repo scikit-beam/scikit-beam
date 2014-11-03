@@ -43,9 +43,10 @@ from __future__ import (absolute_import, division,
 import numpy as np
 from numpy.testing import (assert_allclose, assert_array_almost_equal)
 
-from nsls2.fitting.model.physics_peak import (gauss_peak, gauss_step, gauss_tail,
+from nsls2.fitting.model.physics_peak import (gaussian, gauss_step, gauss_tail,
                                               elastic_peak, compton_peak,
-                                              lorentzian_peak, lorentzian_squared_peak,
+                                              lorentzian,
+                                              lorentzian_squared_peak,
                                               voigt_peak, pvoigt_peak)
 
 from nsls2.fitting.model.physics_model import (ComptonModel, ElasticModel,
@@ -60,10 +61,11 @@ def test_gauss_peak():
     cen  = 0
     std = 1
     x = np.arange(-3, 3, 0.5)
-    out = gauss_peak(x, area, cen, std)
+    out = gaussian(x, area, cen, std)
 
-    y_true = [0.00443185, 0.0175283, 0.05399097, 0.1295176, 0.24197072, 0.35206533,
-              0.39894228, 0.35206533, 0.24197072, 0.1295176, 0.05399097, 0.0175283]
+    y_true = [0.00443185, 0.0175283, 0.05399097, 0.1295176, 0.24197072,
+              0.35206533, 0.39894228, 0.35206533, 0.24197072, 0.1295176,
+              0.05399097, 0.0175283]
 
     assert_array_almost_equal(y_true, out)
 
@@ -179,7 +181,7 @@ def test_lorentzian_peak():
     a = 1
     cen = 0
     std = 0.1
-    out = lorentzian_peak(x, a, cen, std)
+    out = lorentzian(x, a, cen, std)
 
     assert_array_almost_equal(y_true, out)
 
@@ -247,7 +249,7 @@ def test_gauss_model():
     x = np.arange(-3, 3, 0.5)
     true_param = [amplitude, center, sigma]
 
-    out = gauss_peak(x, amplitude, center, sigma)
+    out = gaussian(x, amplitude, center, sigma)
 
     gauss = GaussianModel()
     result = gauss.fit(out, x=x,

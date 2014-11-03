@@ -44,19 +44,26 @@
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-
+import six
 import numpy as np
 import sys
 import inspect
 
 from lmfit import Model
-from lmfit.models import (GaussianModel, LorentzianModel, QuadraticModel)
-
 from nsls2.fitting.model.physics_peak import (elastic_peak, compton_peak,
-                                              gauss_peak, lorentzian_peak,
                                               lorentzian_squared_peak)
 
 from nsls2.fitting.base.parameter_data import get_para
+from lmfit.models import (ConstantModel, LinearModel, QuadraticModel,
+                          ParabolicModel, PolynomialModel, GaussianModel,
+                          LorentzianModel, VoigtModel, PseudoVoigtModel,
+                          Pearson7Model, StudentsTModel, BreitWignerModel,
+                          LognormalModel, DampedOscillatorModel,
+                          ExponentialGaussianModel, SkewedGaussianModel,
+                          DonaichModel, PowerLawModel, ExponentialModel,
+                          StepModel, RectangleModel)
+from .physics_peak import (elastic_peak, compton_peak, gauss_tail, gauss_step,
+                           lorentzian_squared_peak, gaussian, lorentzian)
 
 
 def set_default(model_name, func_name):
@@ -128,7 +135,7 @@ class ComptonModel(Model):
 
 class Lorentzian2Model(Model):
 
-    __doc__ = _gen_class_docs(lorentzian_peak)
+    __doc__ = _gen_class_docs(lorentzian)
 
     def __init__(self, *args, **kwargs):
         super(Lorentzian2Model, self).__init__(lorentzian_squared_peak, *args, **kwargs)
@@ -364,3 +371,15 @@ function_list = [fit_engine, fit_engine_list, quadratic_model]
 
 for func_name in function_list:
     setattr(mod, func_name.__name__, func_name)
+
+
+model_list = [ConstantModel, LinearModel, QuadraticModel, ParabolicModel,
+              PolynomialModel, GaussianModel, LorentzianModel, VoigtModel,
+              PseudoVoigtModel, Pearson7Model, StudentsTModel, BreitWignerModel,
+              LognormalModel, DampedOscillatorModel, ExponentialGaussianModel,
+              SkewedGaussianModel, DonaichModel, PowerLawModel,
+              ExponentialModel, StepModel, RectangleModel, Lorentzian2Model,
+              ComptonModel, ElasticModel]
+
+
+models = {model.__name__: model for model in model_list}
