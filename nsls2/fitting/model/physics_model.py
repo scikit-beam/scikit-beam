@@ -392,4 +392,5 @@ model_list = [ConstantModel, LinearModel, QuadraticModel, ParabolicModel,
               SkewedGaussianModel, DonaichModel, PowerLawModel,
               ExponentialModel, StepModel, RectangleModel, Lorentzian2Model,
               ComptonModel, ElasticModel]
-model_list.sort()
+
+model_list.sort(key=lambda s: str(s).split('.')[-1])
