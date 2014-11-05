@@ -47,7 +47,6 @@ Binning
    :toctree: generated/
 
    bin_1D
-   bin_image_to_1D
    wedge_integration
    grid3d
 

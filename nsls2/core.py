@@ -595,72 +595,6 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     return bins, val, count
 
 
-def bin_image_to_1D(img,
-                    calibrated_center,
-                    pixel_to_1D_func, pixel_to_1D_kwarg=None,
-                    bin_min=None, bin_max=None, bin_num=None):
-    """Integrates an image to a 1D curve.
-
-    The first step is use the `pixel_to_1D_func` to convert
-    each pixel location to a scalar.  Example of this would be
-    distance from the center in mm, azimuthal angle, or converting to q.
-
-    Parameters
-    ----------
-    img : ndarray
-        The image to integrate
-
-    calibrated_center : tuple
-        The center of the image (row, col)
-
-    pixel_to_1D_func : function
-        A function that takes in an image shape, calibrated_center
-        and a dict of kwargs and returns an array of the same shape
-        filled with a scalar for that pixel position (R2 -> R1 mapping).
-        The function must have the following signature ::
-
-            output = func(img.shape, calibrated_center, **pixel_to_1D_kwarg)
-
-        such that ::
-
-            output.shape == img.shape
-
-        and output[i, j] corresponds to img[i, j]
-
-
-    pixel_to_1D_kwargs : dict, optional
-        Any additional keyword arguments to pass through to the warp function
-
-    bin_min : float, optional
-        The lower limit of the binning
-
-    bin_max : float, optional
-        The upper limit of binning
-
-    bin_num : int, optional
-        The number of bins
-
-    Returns
-    -------
-    bin_edges : array
-        The bin edges, length N+1
-
-    bin_sum : array
-        The sum of the pixels that fell in each bin
-
-    bin_count : array
-        The number of pixels in each bin
-    """
-    if pixel_to_1D_kwarg is None:
-        pixel_to_1D_kwarg = {}
-
-    values_1D = pixel_to_1D_func(img.shape, calibrated_center,
-                             **pixel_to_1D_kwarg)
-
-    return bin_1D(values_1D.ravel(), img.ravel(), min_x=bin_min,
-                  max_x=bin_max, nx=bin_num)
-
-
 def pixel_to_radius(shape, calibrated_center, pixel_size=None):
     """
     Converts pixel positions to radius from the calibrated center
@@ -734,7 +668,7 @@ def radius_to_twotheta(dist_sample, radius):
     """
     Converts radius from the calibrated center to scattering angle
     (2:math:`2\\theta`) with known detector to sample distance.
-    
+
     Parameters
     ----------
     dist_sample : float
