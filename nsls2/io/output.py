@@ -45,9 +45,10 @@ import scipy.io
 import os
 
 
-def save_output(tth, intensity,  filename, q_or_2theta, ext=None, err=None, dir_path=None):
+def save_output(tth, intensity,  filename, q_or_2theta, ext=None, err=None,
+                dir_path=None):
     """
-    Save output diffraction intensities into .chi or .dat file formats.
+    Save output diffraction intensities into .chi, .dat or .xye file formats.
     If the extension(ext) of the output file is not selected it will be
     saved as a .chi file
 
@@ -66,13 +67,13 @@ def save_output(tth, intensity,  filename, q_or_2theta, ext=None, err=None, dir_
         or /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504
 
     q_or_2theta : str
-        twotheta or Q values
+        twotheta or Q values (enter "Q" or "2theta")
         twotheta space = "2theta"
         Q space = "Q"
 
     ext : str, optional
         save output diffraction intensities into .chi, .dat  or
-        .xye file formats.(enter ".chi", ".dat" or ".xye")
+        .xye file formats.(enter ".chi", ".dat", "xye")
 
     err : ndarray, optional
          error value of intensity
@@ -83,7 +84,8 @@ def save_output(tth, intensity,  filename, q_or_2theta, ext=None, err=None, dir_
 
     Returns
     -------
-    Saved file of diffraction intensities in .chi file format
+    Saved file of diffraction intensities in .chi, .dat or .xye
+     file formats
 
     """
     if len(tth) != len(intensity):
@@ -94,8 +96,14 @@ def save_output(tth, intensity,  filename, q_or_2theta, ext=None, err=None, dir_
 
     # the extension of output file is not selected it will be
     # saved as a .chi file
+
     if ext == None:
         ext = '.chi'
+
+    if ext == '.xye':
+        if err == None:
+            raise ValueError("Provide the Error value of intensity"
+                             " ( for .xye file format err != None )")
 
     if (dir_path) == None:
         file_path = file_base + ext
@@ -106,20 +114,27 @@ def save_output(tth, intensity,  filename, q_or_2theta, ext=None, err=None, dir_
 
     with open(file_path, 'wb') as f:
         f.write(filename)
+
         f.write("\n This file contains integrated powder x-ray diffraction "
             "intensities.\n\n")
+
         f.write("Number of data points in the file {0} \n".format(len(tth)))
+
         if q_or_2theta == "Q":
-            f.write("First column represents Q values (A)and second column"
-                    " represents intensities and if there is a third column it "
+            f.write("First column represents Q values (Angstroms) and second column \n"
+                    "represents intensities and if there is a third column it \n"
                     "represents the error value of intensities\n")
+
         elif q_or_2theta == "2theta":
-            f.write("First column represents two theta values (degrees) and"
-                    " second column represents intensities and if there is"
-                    " a third column it represents the error value of"
+            f.write("First column represents two theta values (degrees) and \n"
+                    "second column represents intensities and if there is \n"
+                    "a third column it represents the error value of "
                     " intensities\n")
+
         else:
-           raise ValueError("")
+           raise ValueError("It is expected to provide whether the data is"
+                          " Q values(enter Q) or two theta values"
+                          " (enter 2theta)")
         f.write("#####################################################\n\n")
 
         if (err == None):
@@ -127,72 +142,6 @@ def save_output(tth, intensity,  filename, q_or_2theta, ext=None, err=None, dir_
         else:
             np.savetxt(f, np.c_[tth, intensity, err], newline='\n')
 
-    return
-
-
-def save_xye(tth, intensity, filename, q_or_2theta, err, dir_path=None):
-    """
-    Save diffraction intensities into .xye file format
-
-    Parameters
-    ----------
-    tth : ndarray
-        2(theta) values or (Q values)
-
-    intensity : ndarray
-        intensity values
-
-    q_or_2theta : str
-        twotheta or Q values
-        twotheta space = "2theta"
-        Q space = "Q"
-
-    err : ndarray
-        error value of intensity
-
-    filename : str
-        filename(could be full path) of the .tif file
-        eg: /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504.tif
-
-    dir_path : str, optional
-        new directory path to save the output data files
-        eg: /Volumes/Data/experiments/data/
-
-    Returns
-    -------
-    Saved file of diffraction intensities in .xye file format
-
-    """
-    if len(tth) != len(intensity):
-        raise ValueError("Number of intensities and the number of Q or"
-                         " two theta values are different ")
-
-    file_base = os.path.splitext(os.path.split(filename)[1])[0]
-
-    if (dir_path) == None:
-        file_path = file_base +'.xye'
-    elif os.path.isabs(dir_path):
-        file_path = dir_path + file_base +'.xye'
-    else:
-        raise ValueError('The given path does not exist.')
-
-    with open(file_path, 'wb') as f:
-        f.write(filename)
-        f.write("\n This file contains integrated powder x-ray diffraction "
-            "intensities.\n\n")
-        f.write("Number of data points in the file {0} \n".format(len(tth)))
-        if q_or_2theta == "Q":
-            f.write("First column represents Q values (A)and second column"
-                    " represents intensities and if there is a third column it "
-                    "represents the error value of intensities\n")
-        elif q_or_2theta == "2theta":
-            f.write("First column represents two theta values (degrees) and"
-                    " second column represents intensities and if there is"
-                    " a third column it represents the error value of"
-                    " intensities\n")
-
-        f.write("#####################################################\n\n")
-        np.savetxt(f, np.c_[tth, intensity, err], newline="\n")
     return
 
 
@@ -234,9 +183,9 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
     file_base = os.path.splitext(os.path.split(filename)[1])[0]
 
     if (dir_path) == None:
-        file_path = file_base + '.gsas'
+        file_path = file_base +'.gsas'
     elif os.path.isabs(dir_path):
-        file_path = dir_path + file_base + '.gsas'
+        file_path = dir_path + file_base +'.gsas'
     else:
         raise ValueError('The given path does not exist.')
 
