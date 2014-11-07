@@ -147,7 +147,7 @@ def save_gsas(tth, intensity, output_name, mode=None, err=None, dir_path=None):
     output_name : str
         name for the saved output diffraction intensities
 
-    mode : {'std', 'esd', 'fxye'}, str, optional
+    mode : {'std', 'esd', 'fxye'}, optional
         gsas file formats, could be 'std', 'esd', 'fxye'
 
     err : ndarray, optional
@@ -167,7 +167,7 @@ def save_gsas(tth, intensity, output_name, mode=None, err=None, dir_path=None):
                          " two theta values are different ")
 
     if (dir_path) is None:
-        file_path = output_name +'.gsas'
+        file_path = os.getcwd() + "/" + output_name +'.gsas'
     elif os.path.isabs(dir_path):
         file_path = os.path.join(dir_path, output_name) +'.gsas'
     else:
@@ -182,6 +182,7 @@ def save_gsas(tth, intensity, output_name, mode=None, err=None, dir_path=None):
     title = 'Angular Profile'
     title += ': %s' % output_name
     title += ' scale=%g' % scale
+
     if len(title) > 80:
         title = title[:80]
     lines.append("%-80s" % title)
