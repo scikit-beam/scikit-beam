@@ -55,7 +55,7 @@ from nsls2.fitting.base.parameter_data import get_para
 from lmfit.models import (ConstantModel, LinearModel, QuadraticModel,
                           ParabolicModel, PolynomialModel, VoigtModel,
                           PseudoVoigtModel, Pearson7Model, StudentsTModel,
-                          BreitWignerModel,
+                          BreitWignerModel, GaussianModel, LorentzianModel,
                           LognormalModel, DampedOscillatorModel,
                           ExponentialGaussianModel, SkewedGaussianModel,
                           DonaichModel, PowerLawModel, ExponentialModel,
@@ -110,14 +110,6 @@ def _gen_class_docs(func):
             func.__doc__)
 
 
-class GaussianModel(Model):
-
-    __doc__ = _gen_class_docs(gaussian)
-
-    def __init__(self, *args, **kwargs):
-         super(GaussianModel, self).__init__(gaussian, *args, **kwargs)
-
-
 class ElasticModel(Model):
 
     __doc__ = _gen_class_docs(elastic_peak)
@@ -138,16 +130,10 @@ class ComptonModel(Model):
         self.set_param_hint('epsilon', value=2.96, vary=False)
         self.set_param_hint('matrix', value=False, vary=False)
 
-class LorentzianModel(Model):
-
-    __doc__ = _gen_class_docs(lorentzian)
-
-    def __init__(self, *args, **kwargs):
-        super(LorentzianModel, self).__init__(lorentzian, *args, **kwargs)
 
 class Lorentzian2Model(Model):
 
-    __doc__ = _gen_class_docs(lorentzian)
+    __doc__ = _gen_class_docs(lorentzian_squared_peak)
 
     def __init__(self, *args, **kwargs):
         super(Lorentzian2Model, self).__init__(lorentzian_squared_peak, *args, **kwargs)

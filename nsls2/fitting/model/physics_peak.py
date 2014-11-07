@@ -337,4 +337,4 @@ lineshapes_list = [gaussian, lorentzian, voigt, pvoigt, pearson7,
               lorentzian_squared_peak, compton_peak, elastic_peak, gauss_step,
               gauss_tail]
 
-lineshapes_list.sort()
+lineshapes_list.sort(key = lambda s: str(s))
