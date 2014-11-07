@@ -66,14 +66,12 @@ def save_output(tth, intensity,  filename, q_or_2theta, ext=None, err=None,
         eg: /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504.tif
         or /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504
 
-    q_or_2theta : str
-        twotheta or Q values (enter "Q" or "2theta")
-        twotheta space = "2theta"
-        Q space = "Q"
+    q_or_2theta : {'Q', '2theta'}, str
+        twotheta or Q values
 
-    ext : str, optional
+    ext : {'.chi', '.dat', '.xye'} str, optional
         save output diffraction intensities into .chi, .dat  or
-        .xye file formats.(enter ".chi", ".dat", "xye")
+        .xye file formats.
 
     err : ndarray, optional
          error value of intensity
@@ -97,18 +95,17 @@ def save_output(tth, intensity,  filename, q_or_2theta, ext=None, err=None,
     # the extension of output file is not selected it will be
     # saved as a .chi file
 
-    if ext == None:
+    if ext is None:
         ext = '.chi'
 
-    if ext == '.xye':
-        if err == None:
-            raise ValueError("Provide the Error value of intensity"
+    if ext == '.xye' and err is None:
+        raise ValueError("Provide the Error value of intensity"
                              " ( for .xye file format err != None )")
 
-    if (dir_path) == None:
+    if (dir_path) is None:
         file_path = file_base + ext
     elif os.path.isabs(dir_path):
-        file_path = dir_path + file_base + ext
+        file_path = os.path.join(dir_path, file_base) + ext
     else:
         raise ValueError('The given path does not exist.')
 
@@ -137,7 +134,7 @@ def save_output(tth, intensity,  filename, q_or_2theta, ext=None, err=None,
                           " (enter 2theta)")
         f.write("#####################################################\n\n")
 
-        if (err == None):
+        if (err is  None):
             np.savetxt(f, np.c_[tth, intensity], newline='\n')
         else:
             np.savetxt(f, np.c_[tth, intensity, err], newline='\n')
@@ -158,11 +155,12 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
         intensity values
 
     filename : str
-        filename(could be full path) of the .tif file
+        filename(could be full path) to the image data
         eg: /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504.tif
+        or /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504
 
-    mode : str, optional
-        gsas file type, could be 'std', 'esd', 'fxye' (gsas format)
+    mode : {'std', 'esd', 'fxye'}, str, optional
+        gsas file formats, could be 'std', 'esd', 'fxye'
 
     err : ndarray, optional
         error value of intensity
@@ -182,10 +180,10 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
 
     file_base = os.path.splitext(os.path.split(filename)[1])[0]
 
-    if (dir_path) == None:
+    if (dir_path) is None:
         file_path = file_base +'.gsas'
     elif os.path.isabs(dir_path):
-        file_path = dir_path + file_base +'.gsas'
+        file_path = os.path.join(dir_path, file_base) +'.gsas'
     else:
         raise ValueError('The given path does not exist.')
 
@@ -208,7 +206,7 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
     tth0_cdg = tth[0] * 100
     dtth_cdg = (tth[-1] - tth[0]) / (len(tth) - 1) * 100
 
-    if err == None:
+    if err is None:
         mode = 'std'
 
     if mode == 'std':
