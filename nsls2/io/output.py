@@ -45,7 +45,7 @@ import scipy.io
 import os
 
 
-def save_output(tth, intensity,  filename, q_or_2theta, ext='chi', err=None,
+def save_output(tth, intensity,  output_name, q_or_2theta, ext='.chi', err=None,
                 dir_path=None):
     """
     Save output diffraction intensities into .chi, .dat or .xye file formats.
@@ -61,14 +61,13 @@ def save_output(tth, intensity,  filename, q_or_2theta, ext='chi', err=None,
     intensity : ndarray
         intensity values 1XN array
 
-    filename : str
-        filename(could be full path) to the image data
-        eg : /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504
+    output_name : str
+        name for the saved output diffraction intensities
 
-    q_or_2theta : {'Q', '2theta'}, str
+    q_or_2theta : {'Q', '2theta'}
         twotheta (degrees) or Q (Angstroms) values
 
-    ext : {'.chi', '.dat', '.xye'} str, optional
+    ext : {'.chi', '.dat', '.xye'}, optional
         save output diffraction intensities into .chi, .dat  or
         .xye file formats. (If the extension of output file is not
         selected it will be saved as a .chi file)
@@ -90,53 +89,50 @@ def save_output(tth, intensity,  filename, q_or_2theta, ext='chi', err=None,
         raise ValueError("Number of intensities and the number of Q or"
                          " two theta values are different ")
 
-    file_base = os.path.splitext(os.path.split(filename)[1])[0]
-
     if ext == '.xye' and err is None:
         raise ValueError("Provide the Error value of intensity"
                              " ( for .xye file format err != None )")
 
     if (dir_path) is None:
-        file_path = file_base + ext
-    elif os.path.isabs(dir_path):
-        file_path = os.path.join(dir_path, file_base) + ext
+        file_path =  os.getcwd() + "/" + output_name + ext
+    elif os.path.exists(dir_path):
+        file_path = os.path.join(dir_path, output_name) + ext
     else:
         raise ValueError('The given path does not exist.')
 
     with open(file_path, 'wb') as f:
-        f.write(filename)
+        f.write(output_name)
 
         f.write("\n This file contains integrated powder x-ray diffraction "
             "intensities.\n\n")
 
         f.write("Number of data points in the file {0} \n".format(len(tth)))
 
-        if q_or_2theta == "Q":
+        if q_or_2theta not in set(['Q', '2theta']):
+            raise ValueError("It is expected to provide whether the data is"
+                             " Q values(enter Q) or two theta values"
+                             " (enter 2theta)")
+
+        elif q_or_2theta == "Q":
             f.write("First column represents Q values (Angstroms) and second column \n"
                     "represents intensities and if there is a third column it \n"
                     "represents the error value of intensities\n")
 
-        elif q_or_2theta == "2theta":
+        else:
             f.write("First column represents two theta values (degrees) and \n"
                     "second column represents intensities and if there is \n"
                     "a third column it represents the error value of "
                     " intensities\n")
 
-        else:
-           raise ValueError("It is expected to provide whether the data is"
-                          " Q values(enter Q) or two theta values"
-                          " (enter 2theta)")
         f.write("#####################################################\n\n")
 
-        if (err is  None):
+        if (err is None):
             np.savetxt(f, np.c_[tth, intensity], newline='\n')
         else:
             np.savetxt(f, np.c_[tth, intensity, err], newline='\n')
 
-    return
 
-
-def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
+def save_gsas(tth, intensity, output_name, mode=None, err=None, dir_path=None):
     """
     Save diffraction intensities into .gsas file format
 
@@ -148,9 +144,8 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
     intensity : ndarray
         intensity values
 
-    filename : str
-        filename(could be full path) to the image data
-        eg: /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504
+    output_name : str
+        name for the saved output diffraction intensities
 
     mode : {'std', 'esd', 'fxye'}, str, optional
         gsas file formats, could be 'std', 'esd', 'fxye'
@@ -158,7 +153,7 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
     err : ndarray, optional
         error value of intensity
 
-     dir_path : str, optional
+    dir_path : str, optional
         new directory path to save the output data files
         eg: /Data/experiments/data/
 
@@ -171,12 +166,10 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
         raise ValueError("Number of intensities and the number of"
                          " two theta values are different ")
 
-    file_base = os.path.splitext(os.path.split(filename)[1])[0]
-
     if (dir_path) is None:
-        file_path = file_base +'.gsas'
+        file_path = output_name +'.gsas'
     elif os.path.isabs(dir_path):
-        file_path = os.path.join(dir_path, file_base) +'.gsas'
+        file_path = os.path.join(dir_path, output_name) +'.gsas'
     else:
         raise ValueError('The given path does not exist.')
 
@@ -187,7 +180,7 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
     lines = []
 
     title = 'Angular Profile'
-    title += ': %s' % filename
+    title += ': %s' % output_name
     title += ' scale=%g' % scale
     if len(title) > 80:
         title = title[:80]
@@ -242,5 +235,3 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
 
     with open(file_path, 'wb') as f:
         f.write(rv)
-
-    return
