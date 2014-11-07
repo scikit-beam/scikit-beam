@@ -45,7 +45,7 @@ import scipy.io
 import os
 
 
-def save_output(tth, intensity,  filename, q_or_2theta, ext=None, err=None,
+def save_output(tth, intensity,  filename, q_or_2theta, ext='chi', err=None,
                 dir_path=None):
     """
     Save output diffraction intensities into .chi, .dat or .xye file formats.
@@ -55,7 +55,7 @@ def save_output(tth, intensity,  filename, q_or_2theta, ext=None, err=None,
     Parameters
     ----------
     tth : ndarray
-        twotheta values in degrees or Q values in Angstrom
+        twotheta values (degrees) or Q values (Angstroms)
         shape 1XN array
 
     intensity : ndarray
@@ -63,15 +63,15 @@ def save_output(tth, intensity,  filename, q_or_2theta, ext=None, err=None,
 
     filename : str
         filename(could be full path) to the image data
-        eg: /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504.tif
-        or /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504
+        eg : /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504
 
     q_or_2theta : {'Q', '2theta'}, str
-        twotheta or Q values
+        twotheta (degrees) or Q (Angstroms) values
 
     ext : {'.chi', '.dat', '.xye'} str, optional
         save output diffraction intensities into .chi, .dat  or
-        .xye file formats.
+        .xye file formats. (If the extension of output file is not
+        selected it will be saved as a .chi file)
 
     err : ndarray, optional
          error value of intensity
@@ -83,7 +83,7 @@ def save_output(tth, intensity,  filename, q_or_2theta, ext=None, err=None,
     Returns
     -------
     Saved file of diffraction intensities in .chi, .dat or .xye
-     file formats
+    file formats
 
     """
     if len(tth) != len(intensity):
@@ -91,12 +91,6 @@ def save_output(tth, intensity,  filename, q_or_2theta, ext=None, err=None,
                          " two theta values are different ")
 
     file_base = os.path.splitext(os.path.split(filename)[1])[0]
-
-    # the extension of output file is not selected it will be
-    # saved as a .chi file
-
-    if ext is None:
-        ext = '.chi'
 
     if ext == '.xye' and err is None:
         raise ValueError("Provide the Error value of intensity"
@@ -149,15 +143,14 @@ def save_gsas(tth, intensity, filename, mode=None, err=None, dir_path=None):
     Parameters
     ----------
     tth : ndarray
-        2(theta) values
+        twotheta values (degrees)
 
     intensity : ndarray
         intensity values
 
     filename : str
         filename(could be full path) to the image data
-        eg: /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504.tif
-        or /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504
+        eg: /Data/BeamLines/tiff_files/BCNS/BCNCS_260K-00504
 
     mode : {'std', 'esd', 'fxye'}, str, optional
         gsas file formats, could be 'std', 'esd', 'fxye'
