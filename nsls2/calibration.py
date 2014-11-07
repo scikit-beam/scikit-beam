@@ -42,6 +42,7 @@ from __future__ import (absolute_import, division, print_function,
 import six
 import numpy as np
 import scipy.signal
+from scipy import ndimage
 from collections import deque
 from nsls2.constants import calibration_standards
 from nsls2.feature import (filter_peak_height, peak_refinement,
@@ -51,7 +52,7 @@ from nsls2.core import (pixel_to_phi, pixel_to_radius,
 
 
 def estimate_d_blind(name, wavelength, bin_centers, ring_average,
-               window_size, max_peak_count, thresh):
+                     window_size, max_peak_count, thresh):
     """
     Estimate the sample-detector distance
 
@@ -133,9 +134,9 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
 estimate_d_blind.name = list(calibration_standards)
 
 
-def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
-                  thresh, window_size,
-                  nx=None, min_x=None, max_x=None):
+def refine_center(input_image, calibrated_center, pixel_size, phi_steps,
+                  max_peaks, thresh, window_size, std_name=None, nx=None,
+                  min_x=None, max_x=None):
     """
     Refines the location of the center of the beam.
 
@@ -161,6 +162,9 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
     thresh : float
         Fraction of maximum peak height
 
+    std_name : str
+        The name of the calibration standard.
+
     window_size : int, optional
         The window size to use (in bins) to use when refining peaks
 
@@ -178,6 +182,17 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
     calibrated_center : tuple
         The refined calibrated center.
     """
+
+    # A Gaussian filter is applied to an image to remove detail and
+    # noise. For the calibration standard Ni(Nickel) a gaussian
+    # filter with sigma = 2 is applied, all other samples
+    # sigma = 0.5 is used
+
+    if std_name=="Ni":
+        image = ndimage.gaussian_filter(input_image, sigma=2)
+    else:
+        image = ndimage.gaussian_filter(input_image, sigma=0.5)
+
     if nx is None:
         nx = int(np.mean(image.shape) * 2)
 
@@ -202,7 +217,7 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
         cands = scipy.signal.argrelmax(avg, order=window_size)[0]
         # filter local maximums by size
         cands = filter_peak_height(avg, cands, thresh*np.max(avg),
-                                           window=window_size)
+                                   window=window_size)
         ring_trace.append(bin_centers[cands[:max_peaks]])
 
     tr_len = [len(rt) for rt in ring_trace]
