@@ -315,7 +315,7 @@ def pvoigt_peak(x, area, center, sigma, fraction):
             fraction * lorentzian(x, area, center, sigma))
 
 
-lineshapes = [gaussian, lorentzian, voigt, pvoigt, pearson7,
+lineshapes_list = [gaussian, lorentzian, voigt, pvoigt, pearson7,
               breit_wigner, damped_oscillator, logistic,
               lognormal, students_t, expgaussian, donaich,
               skewed_gaussian, skewed_voigt, step, rectangle,
@@ -323,4 +323,4 @@ lineshapes = [gaussian, lorentzian, voigt, pvoigt, pearson7,
               lorentzian_squared_peak, compton_peak, elastic_peak, gauss_step,
               gauss_tail]
 
-line_shapes_dict = {str(lineshape): lineshape for lineshape in lineshapes}
+lineshapes_list.sort()
