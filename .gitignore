@@ -62,9 +62,11 @@ docs/_build/
 #pycharm
 .idea/*
 
-#Dolphin browser files
-.directory/
+#dolphin config files
 .directory
+
+#vim swap files
+*.swp
 
 #Binary data files
 *.volume
