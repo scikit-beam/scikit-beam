@@ -60,6 +60,8 @@ from lmfit.models import (ConstantModel, LinearModel, QuadraticModel,
                           ExponentialGaussianModel, SkewedGaussianModel,
                           DonaichModel, PowerLawModel, ExponentialModel,
                           StepModel, RectangleModel)
+from lmfit.models import GaussianModel as LmGaussianModel
+from lmfit.models import LorentzianModel as LmLorentzianModel
 from .physics_peak import (elastic_peak, compton_peak, gauss_tail, gauss_step,
                            lorentzian_squared_peak, gaussian, lorentzian)
 
@@ -109,15 +111,22 @@ def _gen_class_docs(func):
     return ("Wrap the {} function for fitting within lmfit framework\n".format(func.__name__) +
             func.__doc__)
 
-
-class GaussianModel(Model):
-
-    __doc__ = _gen_class_docs(gaussian)
+# SUBCLASS LMFIT MODELS TO REWRITE THE DOCS
+class GaussianModel(LmGaussianModel):
+    __doc__ = _gen_class_docs(LmGaussianModel().func)
 
     def __init__(self, *args, **kwargs):
-         super(GaussianModel, self).__init__(gaussian, *args, **kwargs)
+         super(GaussianModel, self).__init__(*args, **kwargs)
 
 
+class LorentzianModel(LmLorentzianModel):
+
+    __doc__ = _gen_class_docs(LmLorentzianModel().func)
+
+    def __init__(self, *args, **kwargs):
+        super(LorentzianModel, self).__init__(*args, **kwargs)
+
+# DEFINE NEW MODELS
 class ElasticModel(Model):
 
     __doc__ = _gen_class_docs(elastic_peak)
@@ -138,12 +147,6 @@ class ComptonModel(Model):
         self.set_param_hint('epsilon', value=2.96, vary=False)
         self.set_param_hint('matrix', value=False, vary=False)
 
-class LorentzianModel(Model):
-
-    __doc__ = _gen_class_docs(lorentzian)
-
-    def __init__(self, *args, **kwargs):
-        super(LorentzianModel, self).__init__(lorentzian, *args, **kwargs)
 
 class Lorentzian2Model(Model):
 
