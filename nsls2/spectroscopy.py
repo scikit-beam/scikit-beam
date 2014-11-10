@@ -87,7 +87,7 @@ def align_and_scale(energy_list, counts_list, pk_find_fun=None):
     return out_e, out_c
 
 
-def find_largest_peak(x, y, window=5):
+def find_largest_peak(x, y, window=None):
     """
     Finds and estimates the location, width, and height of
     the largest peak. Assumes the top of the peak can be
@@ -129,12 +129,15 @@ def find_largest_peak(x, y, window=5):
 
     # get the bin with the largest number of counts
     j = np.argmax(y)
-    roi = slice(np.max(j - window, 0),
+    if window is not None:
+        roi = slice(np.max(j - window, 0),
                 j + window + 1)
+    else:
+        roi = slice(0, -1)
 
     (w, x0, y0), r2 = fit_quad_to_peak(x[roi],
                                        np.log(y[roi]))
-
+    print('w, x0, y0: {}, {}, {}'.format(w, x0, y0))
     return x0, np.exp(y0), 1/np.sqrt(-2*w)
 
 
