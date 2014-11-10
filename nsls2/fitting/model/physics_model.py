@@ -55,7 +55,7 @@ from nsls2.fitting.base.parameter_data import get_para
 from lmfit.models import (ConstantModel, LinearModel, QuadraticModel,
                           ParabolicModel, PolynomialModel, VoigtModel,
                           PseudoVoigtModel, Pearson7Model, StudentsTModel,
-                          BreitWignerModel,
+                          BreitWignerModel, GaussianModel, LorentzianModel,
                           LognormalModel, DampedOscillatorModel,
                           ExponentialGaussianModel, SkewedGaussianModel,
                           DonaichModel, PowerLawModel, ExponentialModel,
@@ -150,7 +150,7 @@ class ComptonModel(Model):
 
 class Lorentzian2Model(Model):
 
-    __doc__ = _gen_class_docs(lorentzian)
+    __doc__ = _gen_class_docs(lorentzian_squared_peak)
 
     def __init__(self, *args, **kwargs):
         super(Lorentzian2Model, self).__init__(lorentzian_squared_peak, *args, **kwargs)

@@ -84,7 +84,9 @@ def gauss_step(x, area, center, sigma, peak_e):
            (Practical Spectroscopy)", CRC Press, 2 edition, pp. 182, 2007.
     """
 
-    return area / 2. / peak_e * scipy.special.erfc((x - center) / (np.sqrt(2) * sigma))
+    return (area
+            * scipy.special.erfc((x - center) / (np.sqrt(2) * sigma))
+            / (2. * peak_e ))
 
 
 def gauss_tail(x, area, center, sigma, gamma):
@@ -120,8 +122,12 @@ def gauss_tail(x, area, center, sigma, gamma):
     dx_neg[dx_neg > 0] = 0
     
     temp_a = np.exp(dx_neg / (gamma * sigma))
-    counts = area / (2 * gamma * sigma * np.exp(-0.5 / (gamma**2))) * \
-        temp_a * scipy.special.erfc((x - center) / (np.sqrt(2) * sigma) + (1 / (gamma * np.sqrt(2))))
+    counts = (area
+              / (2 * gamma * sigma * np.exp(-0.5 / (gamma**2)))
+              * temp_a
+              * scipy.special.erfc((x - center)
+                                   / (np.sqrt(2) * sigma)
+                                   + (1 / (gamma * np.sqrt(2)))))
 
     return counts
 
@@ -214,14 +220,17 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
 
      References
     -----------
-    .. [1] M. Van Gysel etc, "Description of Compton peaks in energy-dispersive x-ray fluorescence spectra",
+    .. [1] M. Van Gysel etc, "Description of Compton peaks in
+           energy-dispersive x-ray fluorescence spectra",
            X-Ray Spectrometry, vol. 32, pp. 139-147, 2003.
     """
-    compton_e = coherent_sct_energy / (1 + (coherent_sct_energy / 511) *
-                                       (1 - np.cos(compton_angle * np.pi / 180)))
+    compton_e = (coherent_sct_energy
+                 / (1 + (coherent_sct_energy / 511)
+                    * (1 - np.cos(compton_angle * np.pi / 180))))
     
     temp_val = 2 * np.sqrt(2 * np.log(2))
-    sigma = np.sqrt((fwhm_offset / temp_val)**2 + compton_e * epsilon * fwhm_fanoprime)
+    sigma = np.sqrt((fwhm_offset / temp_val)**2 +
+                    compton_e * epsilon * fwhm_fanoprime)
 
     counts = np.zeros_like(x)
 
@@ -230,7 +239,8 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     if matrix is False:
         factor = factor * (10.**compton_amplitude)
         
-    value = factor * gaussian(x, compton_amplitude, compton_e, sigma*compton_fwhm_corr)
+    value = factor * gaussian(x, compton_amplitude, compton_e,
+                              sigma*compton_fwhm_corr)
     counts += value
 
     # compton peak, step
@@ -246,7 +256,8 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
 
     # compton peak, tail on the high side
     value = factor * compton_hi_f_tail
-    value *= gauss_tail(-1 * x, compton_amplitude, -1 * compton_e, sigma, compton_hi_gamma)
+    value *= gauss_tail(-1 * x, compton_amplitude, -1 * compton_e, sigma,
+                        compton_hi_gamma)
     counts += value
 
     return counts
@@ -274,7 +285,8 @@ def lorentzian_squared_peak(x, area, center, sigma):
 
 def voigt_peak(x, area, center, sigma, gamma):
     """
-    1 dimensional voigt function, the convolution between gaussian and lorentzian curve.
+    1 dimensional voigt function, the convolution between gaussian and
+    lorentzian curve.
 
     Parameters
     ----------
@@ -295,7 +307,8 @@ def voigt_peak(x, area, center, sigma, gamma):
 
 def pvoigt_peak(x, area, center, sigma, fraction):
     """
-    1 dimensional pseudo-voigt, linear combination of gaussian and lorentzian curve.
+    1 dimensional pseudo-voigt, linear combination of gaussian and lorentzian
+    curve.
 
     Parameters
     ----------
@@ -308,14 +321,15 @@ def pvoigt_peak(x, area, center, sigma, fraction):
     sigma : float
         standard deviation
     fraction : float
-        weight for lorentzian peak in the linear combination, and (1-fraction) is the weight
+        weight for lorentzian peak in the linear combination, and (1-fraction)
+        is the weight
         for gaussian peak.
     """
     return ((1 - fraction) * gaussian(x, area, center, sigma) +
             fraction * lorentzian(x, area, center, sigma))
 
 
-lineshapes = [gaussian, lorentzian, voigt, pvoigt, pearson7,
+lineshapes_list = [gaussian, lorentzian, voigt, pvoigt, pearson7,
               breit_wigner, damped_oscillator, logistic,
               lognormal, students_t, expgaussian, donaich,
               skewed_gaussian, skewed_voigt, step, rectangle,
@@ -323,4 +337,4 @@ lineshapes = [gaussian, lorentzian, voigt, pvoigt, pearson7,
               lorentzian_squared_peak, compton_peak, elastic_peak, gauss_step,
               gauss_tail]
 
-line_shapes_dict = {str(lineshape): lineshape for lineshape in lineshapes}
+lineshapes_list.sort(key = lambda s: str(s))
