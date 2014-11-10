@@ -73,7 +73,7 @@ def test_image_reduction_default():
 def test_image_reduction():
     """
     Test image reduction when the following parameters are used:
-    roi = (3, 3, 8, 8);
+    roi = (3, 3, 5, 5);
     bad_pixels = [(0, 1), (4, 4), (7, 8)]
     
     """
@@ -82,7 +82,7 @@ def test_image_reduction():
     img = np.arange(100).reshape(10, 10)    
     
     # set up roi and bad_pixels
-    roi = (3, 3, 8, 8)
+    roi = (3, 3, 5, 5)
     bad_pixels = [(0, 1), (4, 4), (7, 8)]
     
     # Expected results
@@ -122,6 +122,9 @@ def test_dpc_fit():
     
     """
     
+    start_point = [1, 0]
+    solver = 'Nelder-Mead'
+    
     # Test 1 (succeeded): res = [1.34, 0.23]
     xdata = np.arange(10)
     ydata = [0, 0.81179901 - 1.06610617j, 2.06693932 - 1.70591965j,
@@ -129,7 +132,7 @@ def test_dpc_fit():
              6.70000000 + 0.j, 7.82827782 + 1.83293929j, 
              8.40497243 + 4.16423324j, 8.26775728 + 6.82367859j, 
              7.30619109 + 9.59495554j]
-    res = dpc.dpc_fit(xdata, ydata)
+    res = dpc.dpc_fit(xdata, ydata, start_point, solver)
     assert_array_almost_equal(res, [1.34, 0.23])
     
     # Test 2 (succeeded): res = [0.88, 0.28]
@@ -138,7 +141,7 @@ def test_dpc_fit():
              4.40000000 + 0.j, 5.07437271 + 1.45915782j, 
              5.21909148 + 3.27210698j, 4.69893829 + 5.24228756j,
              3.45060497 + 7.1287955j]
-    res = dpc.dpc_fit(xdata, ydata)
+    res = dpc.dpc_fit(xdata, ydata, start_point, solver)
     assert_array_almost_equal(res, [0.88, 0.28]) 
     
     """
@@ -147,22 +150,39 @@ def test_dpc_fit():
              0.48961848 - 2.28820317j, 2.42602688 - 1.96183423j, 3.9,
              3.63904032 + 2.94275135j, 1.14244312 + 5.33914073j, 
              -2.82157925 + 5.56563478j, -6.40531730+2.87268347j]
-    res = dpc.dpc_fit(xdata, ydata)
+    res = dpc.dpc_fit(xdata, ydata, start_point, solver)
     assert_array_almost_equal(res, [0.78, 0.68])    
     """    
    
 
-def test_dpc_end_to_end(rows = 32, cols = 32, img_size = (40, 40)):
+def test_dpc_end_to_end():
     """
     Integrated test for DPC based on dpc_runner
     
     """
     
+    start_point = [1, 0]
+    pixel_size = 55
+    focus_to_det = 1.46e6
+    rows = 32
+    cols = 32
+    dx = 0.1
+    dy = 0.1
+    energy = 19.5
+    roi = None
+    padding = 0
+    w = 1
+    bad_pixels = None
+    solver = 'Nelder-Mead'
+    img_size = (40, 40)
+    scale = True
+    
     ref_image = np.ones(img_size)
     image_sequence = np.ones((rows * cols, img_size[0], img_size[1]))
 
-    phi = dpc.dpc_runner(rows = rows, cols = cols, image_size = img_size, 
-                         ref = ref_image, image_sequence = image_sequence)
+    phi = dpc.dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, 
+                         dy, energy, roi, padding, w, bad_pixels, solver, ref_image, 
+                         image_sequence, scale)
     
     assert_array_almost_equal(phi, np.zeros((rows, cols)))
 
