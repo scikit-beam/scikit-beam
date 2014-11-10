@@ -41,13 +41,16 @@ from __future__ import (absolute_import, division, print_function,
 
 import six
 import numpy as np
+from numpy import sin, cos
 import scipy.signal
 from collections import deque
 from nsls2.constants import calibration_standards
 from nsls2.feature import (filter_peak_height, peak_refinement,
                            refine_log_quadratic)
 from nsls2.core import (pixel_to_phi, pixel_to_radius,
-                        pairwise, bin_edges_to_centers, bin_1D)
+                        pairwise, bin_edges_to_centers, bin_1D,
+                        bin_image_to_1D)
+from nsls2.image import find_ring_center_acorr_1D
 
 
 def estimate_d_blind(name, wavelength, bin_centers, ring_average,
@@ -60,6 +63,7 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
     rough estimate of what d should be.
 
     For the peaks found the detector-sample distance is estimated via
+
     .. math ::
 
         D = \\frac{r}{\\tan 2\\theta}
@@ -225,3 +229,408 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
 
     return tuple(np.array(calibrated_center) +
                  np.array([row_shift, col_shift]))
+
+
+def powder_auto_calibrate(img, name, wavelength, pixel_size):
+    """
+    Automatically find the beam center, detector tilt, and sample distance
+
+    .. warning:: This function is not finished and the API may change
+
+    .. note:: Currently the *full* rings need to be visible.
+
+    Parameters
+    ----------
+    img : ndarray
+        The calibration image.
+
+    name : str
+        The name of the calibration sample.  The known standards are
+        stored in `nsls2.constants.calibration_standards`.
+
+    wavelength : float
+        x-ray wave length in angstroms
+
+    pixel_size : tuple
+        The (height, width) pitch of the detector pixels in mm
+
+    Returns
+    -------
+    D : float
+       The sample-to-detector distance in mm
+       (more accuratly, same units as `pixel_size`)
+
+    D_error : float
+       Estimate of error in D
+
+    center : tuple
+        (row, col) calibrated beam center in pixels
+
+    center_error : tuple
+        Estimated error in the center location.
+
+    tilt : tuple
+        (phi1, phi2) in radians giving the direction of the tilt and
+        the degree of tilt.  See `tilt_detector` and `untilt_detector`
+
+    tilt_error : tupel
+        Estimated error in the tilt angles
+
+
+
+
+    """
+
+    res = find_ring_center_acorr_1D(img)
+    center = refine_center(img, res, pixel_size, 25, 5,
+                         thresh=0.1, window_size=5)
+    bins, sums, counts = bin_image_to_1D(img,
+                                         center,
+                                         pixel_to_radius,
+                                         pixel_to_1D_kwarg={'pixel_size':
+                                                            pixel_size},
+                                         bin_num=5000)
+
+    mask = counts > 10
+    bin_centers = bin_edges_to_centers(bins)[mask]
+    ring_averages = sums[mask] / counts[mask]
+
+    d_mean, d_std = estimate_d_blind(name, wavelength, bin_centers,
+                                 ring_averages, 5, 7, thresh=0.03)
+
+    tilt = None
+    center_error = None
+    tilt = None
+    tilt_error = None
+    return d_mean, d_std, center, center_error, tilt, tilt_error
+
+powder_auto_calibrate.name = list(calibration_standards)
+
+
+def tilt_coords(phi1, phi2, row, col):
+    """
+    Returns the measured coordinates on the detector if it is tilted
+    by an angle phi2 against the axis which is perpendicular to
+    the line given by phi1 for a set of true coordinates.
+
+    The tilt axis goes through the origin.  The input data must be shifted
+    so that the center is at (0, 0) prior to calling this function.
+
+    Parameters
+    ----------
+    phi1 : float
+        Rotation of the tilt axis.  The tilt angle is about
+        the line given by phi1.
+
+        Put another way, this vector points along the minor axis
+        if the ellipse.
+
+        In radians
+
+    phi2 : float
+        The angle of the tilt around the line defined by phi1.
+
+        In radians
+
+    row : array
+       True row positions to tilt
+
+    col : array
+       True column positions to tilt
+
+    Returns
+    -------
+    row : array
+       The deformed row positions
+
+    col : array
+       The deformed column positions
+
+
+    See Also
+    --------
+    untilt_coords : inverse function
+    """
+    row = np.asarray(row)
+    col = np.asarray(col)
+
+    c1 = cos(phi1)
+    c2 = cos(phi2)
+    s1 = sin(phi1)
+
+    new_row = (c1*c1/c2 + s1*s1) * row + (-c1*s1/c2 + s1*c1) * col
+    new_col = (-c1*s1/c2 + c1*s1) * row + (s1*s1/c2 + c1*c1) * col
+
+    return new_row, new_col
+
+
+def untilt_coords(phi1, phi2, row, col):
+    """
+    Returns the True coordinates on the detector if it is tilted
+    by an angle phi2 against the axis which is perpendicular to
+    the line given by phi1 for a set of measured coordinates.
+
+    The tilt axis goes through the origin.  The input data must be shifted
+    so that the center is at (0, 0) prior to calling this function.
+
+    Parameters
+    ----------
+    phi1 : float
+        Rotation of the tilt axis.  The tilt angle is about
+        the axis perpendicular to the line given by phi1.
+
+        Put another way, this vector points along the minor axis
+        if the ellipse.
+
+        In radians
+
+    phi2 : float
+        The angle of the tilt about the line perpendicular to the
+        vector defined by phi1.
+
+        In radians
+
+    row : array
+       The row positions to tilt
+
+    col : array
+       The column positions to tilt
+
+    Returns
+    -------
+    row : array
+       The deformed row positions
+
+    col : array
+       The deformed column positions
+
+    See Also
+    --------
+    tilt_coords : inverse function
+
+    """
+    c1 = cos(phi1)
+    c2 = cos(phi2)
+    s1 = sin(phi1)
+
+    new_row = (c1*c1*c2 + s1*s1) * row + (-c1*s1*c2 + s1*c1) * col
+    new_col = (-c1*s1*c2 + c1*s1) * row + (s1*s1*c2 + c1*c1) * col
+
+    return new_row, new_col
+
+
+def tilt_angles_to_coefs(r, phi1, phi2):
+    """
+    Compute the coefficients for the Fourier expansion of a
+    circle on a tilted detector.
+
+    This is mostly useful for testing
+
+    Parameters
+    ----------
+    r : float
+        The radius of the un-distorted circle
+
+    phi1 : float
+        The first tilt angle in radians.  See `tilt_coords`
+
+    phi2 : float
+        The second tilt angle
+
+    Returns
+    -------
+    r0 : float
+        The constant coefficient in the Fourier expansion of r*r
+
+    a1 : float
+        The coefficent on the `cos(2 * chi)` in the Fourier expansion
+
+    a2 : float
+        The coefficent on the `sin(2 * chi)` in the Fourier expansion
+    """
+    c2 = cos(phi2)
+    pre_factor = (1 - 1 / (c2 * c2))
+    r0 = r*r * .5 * ((1 / (c2*c2) + 1))
+    a1 = - r*r * .5 * cos(phi1 * 2) * pre_factor
+    a2 = r*r * .5 * sin(phi1 * 2) * pre_factor
+    return r0, a1, a2
+
+
+def data_to_coefs(chi, r_sq):
+    """
+    Given `r^2(\chi)` compute the Fourier coefficients for a ring.
+
+    Parameters
+    ----------
+    chi : array
+        The angles at which the ring radius is sampled
+
+    r_sq : array
+        The radius squared of the ring
+
+    Returns
+    -------
+    r0 : float
+        The constant term in the Fourier series
+
+    a1 : float
+        The coefficient on cos(2*chi) in the Fourier series
+
+    a2 : float
+        The coefficient on sin(2*chi) in the Fourier series
+    """
+    # make sure everything really is an array
+    chi = np.asarray(chi)
+    r_sq = np.asarray(r_sq)
+
+    # sort!
+    indx = np.argsort(chi)
+    chi = chi[indx]
+    r_sq = r_sq[indx]
+
+    # compute the mean (constant term)
+    r0 = np.mean(r_sq)
+
+    # compute the 2chi coefficients
+    # TODO replace this with more accurate integration
+    delta = np.mean(np.diff(chi))
+    a1 = .5 * np.sum(cos(2 * chi) * r_sq) * delta / np.pi
+    a2 = .5 * np.sum(sin(2 * chi) * r_sq) * delta / np.pi
+
+    return r0, a1, a2
+
+
+def coefs_to_phi1(a1, a2):
+    """
+    Given the coefficients on the 2chi terms of the
+    Fourier series compute the first tilt angle.
+
+    Parameters
+    ----------
+    a1 : float
+        The coefficient on cos(2*chi) in the Fourier series
+
+    a2 : float
+        The coefficient on sin(2*chi) in the Fourier series
+
+    Returns
+    -------
+    phi1 : float
+        The first tilt angle (the direction of the minor axis)
+    """
+    return - 0.5 * np.arctan2(a2, a1)
+
+
+def coefs_to_phi2_cos(a1, r0, phi1):
+    """
+    Given the constant and cos(2chi) coefficients and
+    the first tilt angle, compute the second tilt angle
+
+    Parameters
+    ----------
+    a1 : float
+        The coefficient on cos(2*chi) in the Fourier series
+
+    r0 : float
+        The constant term in the Fourier series
+
+    phi1 : float
+        The first tilt angle
+
+    Returns
+    -------
+    phi2 : float
+        The second tilt angle
+    """
+    P = -a1 / (r0 * cos(2 * phi1))
+    return np.arccos(np.sqrt((1 + P) / (1 - P)))
+
+
+def coefs_to_phi2_sin(a2, r0, phi1):
+    """
+    Given the constant and cos(2chi) coefficients and
+    the first tilt angle, compute the second tilt angle
+
+    Parameters
+    ----------
+    a2 : float
+        The coefficient on sin(2*chi) in the Fourier series
+
+    r0 : float
+        The constant term in the Fourier series
+
+    phi1 : float
+        The first tilt angle
+
+    Returns
+    -------
+    phi2 : float
+        The second tilt angle
+
+    .. warning this return nan if phi1 == 0 due to a `1/sin(phi1)` term
+    """
+    P = a2 / (r0 * sin(2 * phi1))
+    return np.arccos(np.sqrt((1 + P) / (1 - P)))
+
+
+def coefs_to_r(r0, phi2):
+    """
+
+    Given the constant term and phi2 value, compute the radius of the
+    un-tilted circle (which is also the minor-axis)
+
+    Parameters
+    ----------
+    r0 : float
+        The constant term in the Fourier series
+
+    phi2 : float
+        The second tilt angle
+
+    Returns
+    -------
+    r : float
+        The radius of the un-tilted circle/the minor axis
+
+    """
+    c2 = cos(phi2)
+    return np.sqrt(r0 / (.5 * ((1 / (c2*c2) + 1))))
+
+
+def coefs_to_params(r0, a1, a2):
+    """Fourier series coefficients to tilt angles
+
+    Given the coefficients from the Fourier series compute the
+    tilt angles.
+
+    Parameters
+    ----------
+    r0 : float
+        The constant coefficient in the Fourier expansion of r*r
+
+    a1 : float
+        The coefficent on the `cos(2 * chi)` in the Fourier expansion
+
+    a2 : float
+        The coefficent on the `sin(2 * chi)` in the Fourier expansion
+
+    Returns
+    -------
+    r : float
+        The radius of the un-distorted circle
+
+    phi1 : float
+        The first tilt angle in radians.  See `tilt_coords`
+
+    phi2 : float
+        The second tilt angle
+
+    See Also
+    --------
+    `tilt_angles_to_coefs`
+    """
+    phi1 = coefs_to_phi1(a1, a2)
+    phi2 = coefs_to_phi2_cos(a1, r0, phi1)
+    r = coefs_to_r(r0, phi2)
+
+    return r, phi1, phi2
