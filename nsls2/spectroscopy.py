@@ -137,7 +137,6 @@ def find_largest_peak(x, y, window=None):
 
     (w, x0, y0), r2 = fit_quad_to_peak(x[roi],
                                        np.log(y[roi]))
-    print('w, x0, y0: {}, {}, {}'.format(w, x0, y0))
     return x0, np.exp(y0), 1/np.sqrt(-2*w)
 
 
