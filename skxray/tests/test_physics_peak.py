@@ -43,12 +43,12 @@ from __future__ import (absolute_import, division,
 import numpy as np
 from numpy.testing import (assert_allclose, assert_array_almost_equal)
 
-from nsls2.fitting.model.physics_peak import (gauss_peak, gauss_step, gauss_tail,
+from skxray.fitting.model.physics_peak import (gauss_peak, gauss_step, gauss_tail,
                                               elastic_peak, compton_peak,
                                               lorentzian_peak, lorentzian_squared_peak,
                                               voigt_peak, pvoigt_peak)
 
-from nsls2.fitting.model.physics_model import (ComptonModel, ElasticModel,
+from skxray.fitting.model.physics_model import (ComptonModel, ElasticModel,
                                                GaussianModel)
 
 

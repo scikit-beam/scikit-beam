@@ -52,11 +52,11 @@ import inspect
 from lmfit import Model
 from lmfit.models import (GaussianModel, LorentzianModel, QuadraticModel)
 
-from nsls2.fitting.model.physics_peak import (elastic_peak, compton_peak,
+from skxray.fitting.model.physics_peak import (elastic_peak, compton_peak,
                                               gauss_peak, lorentzian_peak,
                                               lorentzian_squared_peak)
 
-from nsls2.fitting.base.parameter_data import get_para
+from skxray.fitting.base.parameter_data import get_para
 
 
 def set_default(model_name, func_name):

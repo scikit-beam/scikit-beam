@@ -45,9 +45,9 @@ import sys
 
 from nose.tools import assert_equal, assert_true, raises
 
-import nsls2.core as core
+import skxray.core as core
 
-from nsls2.testing.decorators import known_fail_if
+from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
 
 
@@ -476,7 +476,7 @@ def test_img_to_relative_fails():
 
 
 def test_img_to_relative_xyi(random_seed=None):
-    from nsls2.core import img_to_relative_xyi
+    from skxray.core import img_to_relative_xyi
     # make the RNG deterministic
     if random_seed is not None:
         np.random.seed(42)

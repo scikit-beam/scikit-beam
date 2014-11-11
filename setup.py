@@ -6,15 +6,15 @@ from setupext import ext_modules
 import numpy as np
 
 setup(
-    name='NSLS2',
+    name='skxray',
     version='0.0.x',
     author='Brookhaven National Lab',
-    packages=["nsls2",
-              "nsls2.testing",
-              "nsls2.fitting",
-              "nsls2.fitting.model",
-              "nsls2.fitting.base",
-              "nsls2.io",
+    packages=["skxray",
+              "skxray.testing",
+              "skxray.fitting",
+              "skxray.fitting.model",
+              "skxray.fitting.base",
+              "skxray.io",
               ],
     include_dirs=[np.get_include()],
     ext_modules=ext_modules

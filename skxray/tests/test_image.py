@@ -7,7 +7,7 @@ import numpy as np
 import numpy.random
 from nose.tools import assert_equal
 import skimage.draw as skd
-import nsls2.image as nimage
+import skxray.image as nimage
 from scipy.ndimage.morphology import binary_dilation
 
 

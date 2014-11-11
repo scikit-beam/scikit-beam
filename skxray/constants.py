@@ -44,7 +44,7 @@ import six
 from collections import Mapping, namedtuple
 import functools
 from itertools import repeat
-from nsls2.core import q_to_d, d_to_q, twotheta_to_q, q_to_twotheta, verbosedict
+from skxray.core import q_to_d, d_to_q, twotheta_to_q, q_to_twotheta, verbosedict
 
 import xraylib
 xraylib.XRayInit()

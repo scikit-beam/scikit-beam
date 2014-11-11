@@ -1,9 +1,6 @@
-# ######################################################################
+########################################################################
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
-#                                                                      #
-# @author: Li Li (lili@bnl.gov)                                        #
-# created on 09/03/2014                                                #
 #                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
@@ -35,94 +32,66 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
+"""
+This module is for decorators related to testing.
 
-from __future__ import (absolute_import, division, unicode_literals, print_function)
-import numpy as np
-import matplotlib.pyplot as plt
+Much of this code is inspired by the code in matplotlib.  Exact copies
+are noted.
+"""
+from skxray.testing.noseclasses import (KnownFailureTest,
+                                       KnownFailureDidNotFailTest)
 
-from nsls2.constants import Element
-from nsls2.fitting.model.physics_peak import gauss_peak
+import nose
+from nose.tools import make_decorator
 
 
-def get_line(name, incident_energy):
+def known_fail_if(cond):
     """
-    Plot emission lines for a given element.
+    Make sure a known failure fails.
 
-    Parameters
-    ----------
-    name : str or int
-        element name, or atomic number
-    incident_energy : float
-        xray incident energy for fluorescence emission
+    This function is a decorator factory.
     """
-    e = Element(name)
-    lines = e.emission_line.all
-    ratio = [val for val in e.cs(incident_energy).all if val[1] > 0]
+    # make the decorator function
+    def dec(in_func):
+        # make the wrapper function
+        # if the condition is True
+        if cond:
+            def inner_wrap():
+                # try the test anywoy
+                try:
+                    in_func()
+                # when in fails, raises KnownFailureTest
+                # which is registered with nose and it will be marked
+                # as K in the results
+                except Exception:
+                    raise KnownFailureTest()
+                # if it does not fail, raise KnownFailureDidNotFailTest which
+                # is a normal exception.  This may seem counter-intuitive
+                # but knowing when tests that _should_ fail don't can be useful
+                else:
+                    raise KnownFailureDidNotFailTest()
+            # use `make_decorator` from nose to make sure that the meta-data on
+            # the function is forwarded properly (name, teardown, setup, etc)
+            return make_decorator(in_func)(inner_wrap)
 
-    i_min = 1e-6
+        # if the condition is false, don't make a wrapper function
+        # this is effectively a no-op
+        else:
+            return in_func
 
-    plt.figure(figsize=(8, 6))
-
-    for item in ratio:
-        for data in lines:
-            if item[0] == data[0]:
-                plt.plot([data[1], data[1]],
-                         [i_min, item[1]], 'g-', linewidth=2.0)
-
-    plt.xlabel('Energy [KeV]')
-    plt.ylabel('Intensity')
-    plt.show()
-    plt.close()
-
-    return
+    # return the decorator function
+    return dec
 
 
-def get_spectrum(name, incident_energy, emax=15):
+def skip_if(cond, msg=''):
     """
-    Plot fluorescence spectrum for a given element.
-
-    Parameters
-    ----------
-    name : str or int
-        element name, or atomic number
-    incident_energy : float
-        xray incident energy for fluorescence emission
-    emax : float
-        max value on spectrum
-
+    A decorator to skip a test if condition is met
     """
-    e = Element(name)
-    lines = e.emission_line.all
-    ratio = [val for val in e.cs(incident_energy).all if val[1] > 0]
-
-    x = np.arange(0, emax, 0.01)
-
-    spec = np.zeros(len(x))
-
-    i_min = 1e-6
-
-    plt.figure(figsize=(8, 6))
-
-    for item in ratio:
-        for data in lines:
-            if item[0] == data[0]:
-
-                plt.plot([data[1], data[1]],
-                         [i_min, item[1]], 'g-', linewidth=2.0)
-
-    std = 0.1
-    area = std * np.sqrt(2 * np.pi)
-    for item in ratio:
-        for data in lines:
-            if item[0] == data[0]:
-                spec += gauss_peak(x, area, data[1], std) * item[1]
-
-    #plt.semilogy(x, spec)
-
-    plt.xlabel('Energy [KeV]')
-    plt.ylabel('Intensity')
-    plt.plot(x, spec)
-    plt.show()
-    plt.close()
-
-    return
+    def dec(in_func):
+        if cond:
+            def wrapper():
+                raise nose.SkipTest(msg)
+            return make_decorator(in_func)(wrapper)
+        else:
+            return in_func
+    return dec

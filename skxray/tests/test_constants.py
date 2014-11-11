@@ -44,9 +44,9 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 from nose.tools import assert_equal, assert_not_equal
 
-from nsls2.constants import (Element, emission_line_search,
+from skxray.constants import (Element, emission_line_search,
                              calibration_standards, HKL)
-from nsls2.core import (q_to_d, d_to_q)
+from skxray.core import (q_to_d, d_to_q)
 
 
 def test_element_data():
@@ -82,7 +82,7 @@ def test_element_finder():
 
 
 def test_XrayLibWrap():
-    from nsls2.constants import XrayLibWrap, XrayLibWrap_Energy
+    from skxray.constants import XrayLibWrap, XrayLibWrap_Energy
     for Z in range(1, 101):
         for infotype in XrayLibWrap.opts_info_type:
             xlw = XrayLibWrap(Z, infotype)
@@ -104,7 +104,7 @@ def test_XrayLibWrap():
 
 
 def smoke_test_element_creation():
-    from nsls2.constants import elm_data_list
+    from skxray.constants import elm_data_list
 
     prev_element = None
     for elem_info in elm_data_list:

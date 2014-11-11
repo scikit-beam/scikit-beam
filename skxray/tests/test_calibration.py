@@ -41,86 +41,56 @@ import six
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 
-import nsls2.feature as feature
+import skxray.calibration as calibration
+import skxray.calibration as core
 from nose.tools import assert_raises
 
 
-def _test_refine_helper(x_data, y_data, center, height,
-                        refine_method, refine_args):
-    """
-    helper function for testing
-    """
-    test_center, test_height = refine_method(x_data, y_data, **refine_args)
-    assert_array_almost_equal(np.array([test_center, test_height]),
-                              np.array([center, height]))
+def _draw_gaussian_rings(shape, calibrated_center, r_list, r_width):
+    R = core.pixel_to_radius(shape, calibrated_center)
+    I = np.zeros_like(R)
+
+    for r in r_list:
+        tmp = 100 * np.exp(-((R - r)/r_width)**2)
+        I += tmp
+
+    return I
 
 
-def test_refine_methods():
-    refine_methods = [feature.refine_quadratic,
-                      feature.refine_log_quadratic]
-    test_data_gens = [lambda x, center, height, width: (
-                          width * (x-center)**2 + height),
-                      lambda x, center, height, width: (
-                          height * np.exp(-((x-center) / width)**2))]
+def test_refine_center():
+    center = np.array((500, 550))
+    I = _draw_gaussian_rings((1000, 1001), center,
+                             [50, 75, 100, 250, 500], 5)
 
-    x = np.arange(128)
-    for center in (15, 75, 110):
-        for height in (5, 10, 100):
-            for rf, dm in zip(refine_methods, test_data_gens):
-                yield (_test_refine_helper,
-                       x, dm(x, center, height, 5), center, height, rf, {})
+    nx_opts = [None, 300]
+    for nx in nx_opts:
+        out = calibration.refine_center(I, center+1, (1, 1),
+                                        phi_steps=20, nx=nx, min_x=10,
+                                        max_x=300, window_size=5,
+                                        thresh=0, max_peaks=4)
+
+        assert np.all(np.abs(center - out) < .1)
 
 
-def test_filter_n_largest():
-    gauss_gen = lambda x, center, height, width: (
+def test_blind_d():
+    gaus = lambda x, center, height, width: (
                           height * np.exp(-((x-center) / width)**2))
+    name = 'Si'
+    wavelength = .18
+    window_size = 5
+    threshold = .1
+    cal = calibration.calibration_standards[name]
 
-    cands = np.array((10, 25, 50, 75, 100))
-    x = np.arange(128, dtype=float)
-    y = np.zeros_like(x)
-    for c, h in zip(cands,
-                    (10, 15, 25, 30, 35)):
-        y += gauss_gen(x, c, h, 3)
+    tan2theta = np.tan(cal.convert_2theta(wavelength))
 
-    for j in range(1, len(cands) + 2):
-        out = feature.filter_n_largest(y, cands, j)
-        assert(len(out) == np.min([len(cands), j]))
+    D = 200
+    expected_r = D * tan2theta
 
-    assert_raises(ValueError, feature.filter_n_largest, y, cands, 0)
-    assert_raises(ValueError, feature.filter_n_largest, y, cands, -1)
-
-
-def test_filter_peak_height():
-    gauss_gen = lambda x, center, height, width: (
-                          height * np.exp(-((x-center) / width)**2))
-
-    cands = np.array((10, 25, 50, 75, 100))
-    heights = (10, 20, 30, 40, 50)
-    x = np.arange(128, dtype=float)
-    y = np.zeros_like(x)
-    for c, h in zip(cands,
-                    heights):
-        y += gauss_gen(x, c, h, 3)
-
-    for j, h in enumerate(heights):
-        out = feature.filter_peak_height(y, cands, h - 5, window=5)
-        assert(len(out) == len(heights) - j)
-        out = feature.filter_peak_height(y, cands, h + 5, window=5)
-        assert(len(out) == len(heights) - j - 1)
-
-
-def test_peak_refinement():
-    gauss_gen = lambda x, center, height, width: (
-                          height * np.exp(-((x-center) / width)**2))
-
-    cands = np.array((10, 25, 50, 75, 100))
-    heights = (10, 20, 30, 40, 50)
-    x = np.arange(128, dtype=float)
-    y = np.zeros_like(x)
-    for c, h in zip(cands, heights):
-        y += gauss_gen(x, c+.5, h, 3)
-
-    loc, ht = feature.peak_refinement(x, y, cands, 5,
-                                      feature.refine_log_quadratic)
-    assert_array_almost_equal(loc, cands + .5, decimal=3)
-    assert_array_almost_equal(ht, heights, decimal=3)
+    bin_centers = np.linspace(0, 50, 2000)
+    I = np.zeros_like(bin_centers)
+    for r in expected_r:
+        I += gaus(bin_centers, r, 100, .2)
+    d, dstd = calibration.estimate_d_blind(name, wavelength, bin_centers,
+                                     I, window_size, len(expected_r),
+                                     threshold)
+    assert np.abs(d - D) < 1e-6
