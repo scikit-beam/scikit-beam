@@ -1,5 +1,5 @@
 package:
-  name: nsls2
+  name: skxray
   version: 0.2.x
 
 source:
@@ -32,5 +32,5 @@ test:
     - nose
 
 about:
-  home: http://Nikea.github.io/NSLS2/
+  home: http://Nikea.github.io/scikit-xray/
   license: 3-Clause BSD
