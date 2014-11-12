@@ -41,74 +41,9 @@ from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
 
 from skxray.testing.decorators import known_fail_if
-from skxray.fitting.model.physics_model import (gaussian_model, lorentzian_model,
-                                               lorentzian2_model, fit_engine)
 from nose.tools import (assert_equal, assert_true, raises)
 
 
 @known_fail_if(True)
 def test_fit_quad_to_peak():
     assert(False)
-
-
-def test_gauss_fit():
-    x = np.arange(-1, 1, 0.01)
-    amplitude = 1
-    center = 0
-    sigma = 1
-    true_val = [amplitude, center, sigma]
-    y = amplitude / np.sqrt(2 * np.pi) / sigma * np.exp(-(x - center)**2 / 2 / sigma**2)
-
-    g = gaussian_model('',
-                       1, 'fixed', [0, 1],
-                       0.1, 'free', [0, 0.5],
-                       0.5, 'free', [0, 1])
-
-    result, yfit = fit_engine(g, x, y)
-
-    out = result.values
-    fitted_val = (out['amplitude'], out['center'], out['sigma'])
-    assert_array_almost_equal(true_val, fitted_val)
-
-
-def test_lorentzian_fit():
-    x = np.arange(-1, 1, 0.01)
-    amplitude = 1
-    center = 0
-    sigma = 1
-    true_val = [amplitude, center, sigma]
-
-    y = (amplitude/(1 + ((x - center) / sigma)**2)) / (np.pi * sigma)
-
-    m = lorentzian_model('',
-                         0.8, 'free', [0, 1],
-                         0.1, 'free', [0, 0.5],
-                         0.8, 'bounded', [0, 2])
-
-    result, yfit = fit_engine(m, x, y)
-    out = result.values
-
-    fitted_val = (out['amplitude'], out['center'], out['sigma'])
-    assert_array_almost_equal(true_val, fitted_val)
-
-
-@raises(ValueError)
-def test_lorentzian2_fit():
-    x = np.arange(-1, 1, 0.01)
-    area = 1
-    center = 0
-    sigma = 1
-    true_val = [area, center, sigma]
-
-    y = (area/(1 + ((x - center) / sigma)**2)**2) / (np.pi * sigma)
-
-    m = lorentzian2_model('',
-                          0.8, 'wrong', [0, 1],
-                          0.1, 'free', [0, 0.5],
-                          0.5, 'free', [0, 1])
-
-    result, yfit = fit_engine(m, x, y)
-    out = result.values
-
-    fitted_val = (out['area'], out['center'], out['sigma'])
-    assert_array_almost_equal(true_val, fitted_val)

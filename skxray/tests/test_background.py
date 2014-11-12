@@ -43,7 +43,7 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 from numpy.testing import assert_allclose
 
-from skxray.fitting.model.background import snip_method
+from skxray.fitting.background import snip_method
 
 
 def test_snip_method():

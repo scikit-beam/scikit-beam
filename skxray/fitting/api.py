@@ -3,7 +3,13 @@
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
 # @author: Li Li (lili@bnl.gov)                                        #
-# created on 08/06/2014                                                #
+# created on 07/10/2014                                                #
+#                                                                      #
+# Original code:                                                       #
+# @author: Mirna Lerotic, 2nd Look Consulting                          #
+#         http://www.2ndlookconsulting.com/                            #
+# Copyright (c) 2013, Stefan Vogt, Argonne National Laboratory         #
+# All rights reserved.                                                 #
 #                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
@@ -38,8 +44,47 @@
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-
 import six
+import sys
 
-import logging
-logger = logging.getLogger(__name__)
+from lmfit.models import (ConstantModel, LinearModel, QuadraticModel,
+                          ParabolicModel, PolynomialModel, VoigtModel,
+                          PseudoVoigtModel, Pearson7Model, StudentsTModel,
+                          BreitWignerModel, GaussianModel, LorentzianModel,
+                          LognormalModel, DampedOscillatorModel,
+                          ExponentialGaussianModel, SkewedGaussianModel,
+                          DonaichModel, PowerLawModel, ExponentialModel,
+                          StepModel, RectangleModel)
+
+from .models import (GaussianModel, LorentzianModel, Lorentzian2Model,
+                     ComptonModel, ElasticModel)
+
+from lmfit.lineshapes import (pearson7, breit_wigner, damped_oscillator,
+                              logistic, lognormal, students_t, expgaussian,
+                              donaich, skewed_gaussian, skewed_voigt, step,
+                              rectangle, exponential, powerlaw, linear,
+                              parabolic)
+from .lineshapes import (gaussian, lorentzian, lorentzian2, voigt, pvoigt,
+                         gaussian_tail, gausssian_step, elastic, compton)
+
+# valid models
+model_list = [ConstantModel, LinearModel, QuadraticModel, ParabolicModel,
+              PolynomialModel, GaussianModel, LorentzianModel, VoigtModel,
+              PseudoVoigtModel, Pearson7Model, StudentsTModel, BreitWignerModel,
+              LognormalModel, DampedOscillatorModel, ExponentialGaussianModel,
+              SkewedGaussianModel, DonaichModel, PowerLawModel,
+              ExponentialModel, StepModel, RectangleModel, Lorentzian2Model,
+              ComptonModel, ElasticModel]
+
+model_list.sort(key=lambda s: str(s).split('.')[-1])
+
+
+lineshapes_list = [gaussian, lorentzian, voigt, pvoigt, pearson7,
+                   breit_wigner, damped_oscillator, logistic,
+                   lognormal, students_t, expgaussian, donaich,
+                   skewed_gaussian, skewed_voigt, step, rectangle,
+                   exponential, powerlaw, linear, parabolic,
+                   lorentzian2, compton, elastic, gausssian_step,
+                   gaussian_tail]
+
+lineshapes_list.sort(key = lambda s: str(s))
