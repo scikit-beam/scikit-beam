@@ -27,7 +27,7 @@ setup(
     include_dirs=[np.get_include()],
     ext_modules=ext_modules,
     url='http://github.com/Nikea/scikit-xray',
-    long_description=read('README.md'),
+    long_description=read('README.rst'),
     keywords='Xray Analysis',
     license='BSD',
     classifiers=['Development Status :: 3 - Alpha',
