@@ -109,9 +109,10 @@ def test_rss():
              10.00000000 + 0.j, -11.87990996 + 1.6934401j, 
              13.44238401 - 3.91181697j, -14.57808419 + 6.59389576j, 
              15.18937126 - 9.65831252j]
+    rss = dpc._rss_factory(len(xdata))
     v = [2, 3]
     
-    residue = dpc._rss(v, xdata, ydata)
+    residue = rss(v, xdata, ydata)
     
     assert_almost_equal(residue, 0)
     
@@ -132,7 +133,8 @@ def test_dpc_fit():
              6.70000000 + 0.j, 7.82827782 + 1.83293929j, 
              8.40497243 + 4.16423324j, 8.26775728 + 6.82367859j, 
              7.30619109 + 9.59495554j]
-    res = dpc.dpc_fit(xdata, ydata, start_point, solver)
+    rss = dpc._rss_factory(len(ydata))
+    res = dpc.dpc_fit(rss, xdata, ydata, start_point, solver)
     assert_array_almost_equal(res, [1.34, 0.23])
     
     # Test 2 (succeeded): res = [0.88, 0.28]
@@ -141,7 +143,7 @@ def test_dpc_fit():
              4.40000000 + 0.j, 5.07437271 + 1.45915782j, 
              5.21909148 + 3.27210698j, 4.69893829 + 5.24228756j,
              3.45060497 + 7.1287955j]
-    res = dpc.dpc_fit(xdata, ydata, start_point, solver)
+    res = dpc.dpc_fit(rss, xdata, ydata, start_point, solver)
     assert_array_almost_equal(res, [0.88, 0.28]) 
     
     """
@@ -164,8 +166,8 @@ def test_dpc_end_to_end():
     start_point = [1, 0]
     pixel_size = 55
     focus_to_det = 1.46e6
-    rows = 32
-    cols = 32
+    rows = 2
+    cols = 2
     dx = 0.1
     dy = 0.1
     energy = 19.5
@@ -181,13 +183,12 @@ def test_dpc_end_to_end():
     image_sequence = np.ones((rows * cols, img_size[0], img_size[1]))
 
     phi = dpc.dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, 
-                         dy, energy, roi, padding, w, bad_pixels, solver, ref_image, 
-                         image_sequence, scale)
+                         dy, energy, roi, bad_pixels, solver, ref_image, 
+                         image_sequence, padding, w, scale)
     
     assert_array_almost_equal(phi, np.zeros((rows, cols)))
 
    
-
 if __name__ == "__main__":
 
     test_image_reduction_default()
@@ -196,3 +197,4 @@ if __name__ == "__main__":
     test_dpc_fit()
     
     test_dpc_end_to_end()
+

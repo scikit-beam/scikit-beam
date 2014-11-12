@@ -49,7 +49,7 @@ from scipy.optimize import minimize
 def image_reduction(im, roi=None, bad_pixels=None):
     """ 
     Sum the image data along one dimension
-        
+    
     Parameters
     ----------
     im : 2-D numpy array
@@ -58,7 +58,7 @@ def image_reduction(im, roi=None, bad_pixels=None):
     roi : numpy.ndarray, optional
         upper left co-ordinates of roi's and the, length and width of roi's 
         from those co-ordinates
-        
+    
     bad_pixels : list, optional
         store the coordinates of bad pixels
         [(1, 5), (2, 6)] --> 2 bad pixels --> (1, 5) and (2, 6)
@@ -67,83 +67,105 @@ def image_reduction(im, roi=None, bad_pixels=None):
     ----------
     xline : 1-D numpu array
         the sum of the image data along x direction
-        
+    
     yline : 1-D numpy array
         the sum of the image data along y direction
-        
+    
     """
-      
+    
     if bad_pixels is not None:
         for x, y in bad_pixels:
             try:
                 im[x, y] = 0
             except IndexError:
                 logging.warning("Bad pixel indexes are out of range.")
-                
+    
     if roi is not None:
         x, y, w, l = roi
         try:
             im = im[x : x + w, y : y + l]
         except IndexError:
             logging.warning("The ROI is out of range.")
-        
+    
     xline = np.sum(im, axis=0)
     yline = np.sum(im, axis=1)
-        
-    return xline, yline
-
-
-
-def _rss(v, xdata, ydata):
-    """ 
-    Internal function used by fit()
-    Cost function to be minimized in nonlinear fitting
     
+    return xline, yline
+    
+    
+def _rss_factory(length):
+    """
+    A factory function for returning a residue function for use in dpc fitting.
+
+    The main reason to do this is to generate a closure over beta so that 
+    linspace is only called once.
+
     Parameters
     ----------
-    v : list
-        store the fitting value
-        v[0], intensity attenuation
-        v[1], phase gradient along x or y direction
-    
-    xdata : 1-D complex numpy array
-        auxiliary data in nonlinear fitting
-        returning result of ifft1D()
-    
-    ydata : 1-D complex numpy array
-        auxiliary data in nonlinear fitting
-        returning result of ifft1D()
-        
+    length : int
+        The length of the data vector that the returned function can deal with
+
     Returns
-    --------
-    residue : float
-        residue value
-    
+    -------
+    function
+        A function with signature f(v, xdata, ydata) which is suitable for use 
+        as a cost function for use with scipy.optimize.
+        
     """
     
-    length = len(xdata)
     beta = 1j * (np.linspace(-(length-1)//2, (length-1)//2, length))
     
-    fitted_curve = xdata * v[0] * np.exp(v[1] * beta)
-    residue = np.sum(np.abs(ydata - fitted_curve) ** 2)
-    
-    return residue
+    def _rss(v, xdata, ydata):
+        """ 
+        Internal function used by fit()
+        Cost function to be minimized in nonlinear fitting
+        
+        Parameters
+        ----------
+        v : list
+            store the fitting value
+            v[0], intensity attenuation
+            v[1], phase gradient along x or y direction
+	
+        xdata : 1-D complex numpy array
+            auxiliary data in nonlinear fitting
+            returning result of ifft1D()
+	
+        ydata : 1-D complex numpy array
+        auxiliary data in nonlinear fitting
+        returning result of ifft1D()
+	
+        Returns
+        --------
+        ret : float
+            residue value
+	
+	    """
+			
+        diff = ydata - xdata * v[0] * np.exp(v[1] * beta)
+        ret = np.sum((diff * np.conj(diff)).real)
+	
+        return ret
+	
+    return _rss
 
 
 
-def dpc_fit(ref_f, f, start_point=None, solver=None, tol=1e-6, 
-        max_iters=2000):
+def dpc_fit(rss, ref_f, f, start_point, solver, tol=1e-6, max_iters=2000):
     """ 
     Nonlinear fitting for 2 points 
     
     Parameters
     ----------
+    rss : function
+        objective function to be minimized in DPC fitting
+        
     ref_f : 1-D numpy array
         One of the two arrays used for nonlinear fitting
-     
+    
     f : 1-D numpy array
         One of the two arrays used for nonlinear fitting
-
+    
     start_point : 2-element list
         start_point[0], start-searching point for the intensity attenuation
         start_point[1], start-searching point for the phase gradient
@@ -165,26 +187,21 @@ def dpc_fit(ref_f, f, start_point=None, solver=None, tol=1e-6,
     
     tol : float, optional
         termination criteria of nonlinear fitting
-        
+    
     max_iters : integer, optional
         maximum iterations of nonlinear fitting
-        
+    
     Returns:
     ----------
     a : float
         fitting result: intensity attenuation
-
+    
     g : float
         fitting result: phase gradient
-    
-    See Also:
-    ---------    
-    _rss() : function
-        objective function to be minimized in the fitting algorithm
-    
-    """
         
-    res = minimize(_rss, start_point, args=(ref_f, f), method=solver, tol=tol, 
+    """
+    
+    res = minimize(rss, start_point, args=(ref_f, f), method=solver, tol=tol, 
                    options=dict(maxiter=max_iters))
                     
     vx = res.x
@@ -209,7 +226,7 @@ dpc_fit.solver = ['Nelder-Mead',
 
 
 
-def recon(gx, gy, dx=None, dy=None, padding=0, w=1.):
+def recon(gx, gy, dx, dy, padding=0, w=1.):
     """ 
     Reconstruct the final phase image 
     
@@ -233,13 +250,13 @@ def recon(gx, gy, dx=None, dy=None, padding=0, w=1.):
                         p p p
         padding = 1 --> p v p
                         p p p
-                    
+             
     w : float, optional
         weighting parameter for the phase gradient along x and y direction when
         constructing the final phase image
         default value = 0, which means that gx and gy equally contribute to
         the final phase image
-        
+    
     Returns
     ----------
     phi : 2-D numpy array
@@ -296,10 +313,9 @@ def recon(gx, gy, dx=None, dy=None, padding=0, w=1.):
 
 
 
-def dpc_runner(start_point=None, pixel_size=None, focus_to_det=None, 
-               rows=None, cols=None, dx=None, dy=None, energy=None, roi=None, 
-               padding=0, w=1., bad_pixels=None, solver=None, 
-               ref=None, image_sequence=None, scale=True):
+def dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, dy, 
+               energy, roi, bad_pixels, solver, ref, image_sequence, padding=0, 
+               w=1., scale=True):
     """
     Controller function to run the whole DPC
     
@@ -308,7 +324,7 @@ def dpc_runner(start_point=None, pixel_size=None, focus_to_det=None,
     start_point : 2-element list
         start_point[0], start-searching point for the intensity attenuation
         start_point[1], start-searching point for the phase gradient
-        
+    
     pixel_size : integer
         real physical pixel size of the detector in um
     
@@ -333,19 +349,6 @@ def dpc_runner(start_point=None, pixel_size=None, focus_to_det=None,
     roi : numpy.ndarray, optional
         upper left co-ordinates of roi's and the, length and width of roi's 
         from those co-ordinates
-        
-    padding : integer
-        padding parameter
-        default value, padding = 0 --> no padding
-                        p p p
-        padding = 1 --> p v p
-                        p p p
-    
-    w : float
-        weighting parameter for the phase gradient along x and y direction when
-        constructing the final phase image
-        default value = 0, which means that gx and gy equally contribute to
-        the final phase image
     
     bad_pixels : list
         store the coordinates of bad pixels
@@ -372,6 +375,19 @@ def dpc_runner(start_point=None, pixel_size=None, focus_to_det=None,
     image_sequence : iteratable image object
         return diffraction patterns (2D Numpy arrays) when iterated over
     
+    padding : integer, optional
+        padding parameter
+        default value, padding = 0 --> no padding
+                        p p p
+        padding = 1 --> p v p
+                        p p p
+    
+    w : float, optional
+        weighting parameter for the phase gradient along x and y direction when
+        constructing the final phase image
+        default value = 0, which means that gx and gy equally contribute to
+        the final phase image
+    
     scale : bool, optional
         if True, scale gx and gy according to the experiment set up
         if False, ignore pixel_size, focus_to_det, energy
@@ -388,19 +404,21 @@ def dpc_runner(start_point=None, pixel_size=None, focus_to_det=None,
     gx = np.zeros((rows, cols), dtype='d')
     gy = np.zeros((rows, cols), dtype='d')
     phi = np.zeros((rows, cols), dtype='d')
-
+    
     # Dimension reduction along x and y direction
     refx, refy = image_reduction(ref, roi, bad_pixels)
-
+    
     # 1-D IFFT
     ref_fx = np.fft.fftshift(np.fft.ifft(refx))
     ref_fy = np.fft.fftshift(np.fft.ifft(refy))
-
+    
+    ffx = _rss_factory(len(ref_fx))
+    ffy = _rss_factory(len(ref_fy))
+    
     # Same calculation on each diffraction pattern
     for index, im in enumerate(image_sequence):
         i, j = np.unravel_index(index, (rows, cols))
         
-        # print(index)
         # Dimension reduction along x and y direction
         imx, imy = image_reduction(im, roi, bad_pixels)
                 
@@ -409,8 +427,8 @@ def dpc_runner(start_point=None, pixel_size=None, focus_to_det=None,
         fy = np.fft.fftshift(np.fft.ifft(imy))
                 
         # Nonlinear fitting
-        _a, _gx = dpc_fit(ref_fx, fx, start_point, solver)
-        _a, _gy = dpc_fit(ref_fy, fy, start_point, solver)
+        _a, _gx = dpc_fit(ffx, ref_fx, fx, start_point, solver)
+        _a, _gy = dpc_fit(ffy, ref_fy, fy, start_point, solver)
                             
         # Store one-point intermediate results
         gx[i, j] = _gx
