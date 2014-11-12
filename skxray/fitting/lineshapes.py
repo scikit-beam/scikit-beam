@@ -49,13 +49,124 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 import scipy.special
 import six
-from lmfit.lineshapes import (gaussian, lorentzian, voigt, pvoigt, pearson7,
-                              breit_wigner, damped_oscillator, logistic,
-                              lognormal, students_t, expgaussian, donaich,
-                              skewed_gaussian, skewed_voigt, step, rectangle,
-                              exponential, powerlaw, linear, parabolic)
+from lmfit.lineshapes import gaussian
 
-def gauss_step(x, area, center, sigma, peak_e):
+
+log2 = np.log(2)
+s2pi = np.sqrt(2*np.pi)
+spi  = np.sqrt(np.pi)
+s2   = np.sqrt(2.0)
+
+
+def gaussian(x, area, center, sigma):
+    """1 dimensional gaussian:
+    gaussian(x, amplitude, center, sigma)
+
+    Parameters
+    ----------
+    x : array
+        independent variable
+    area : float
+        Area of the normally distributed peak
+    center : float
+        center position
+    sigma : float
+        standard deviation
+    """
+    return (area/(s2pi*sigma)) * np.exp(-(1.0*x-center)**2 /(2*sigma**2))
+
+def lorentzian(x, area, center, sigma):
+    """1 dimensional lorentzian
+    lorentzian(x, amplitude, center, sigma)
+
+    Parameters
+    ----------
+    x : array
+        independent variable
+    area : float
+        area of lorentzian peak,
+        If area is set as 1, the integral is unity.
+    center : float
+        center position
+    sigma : float
+        standard deviation
+    """
+    return (area/(1 + ((1.0*x-center)/sigma)**2) ) / (np.pi*sigma)
+
+
+def lorentzian2(x, area, center, sigma):
+    """
+    1-d lorentzian squared profile
+
+    Parameters
+    ----------
+    x : array
+        independent variable
+    area : float
+        area of lorentzian squared peak,
+        If area is set as 1, the integral is unity.
+    center : float
+        center position
+    sigma : float
+        standard deviation
+    """
+
+    return (area/(1 + ((x - center) / sigma)**2)**2) / (np.pi * sigma)
+
+
+def voigt(x, area, center, sigma, gamma):
+    """1 dimensional voigt function.
+    see http://en.wikipedia.org/wiki/Voigt_profile
+    1 dimensional voigt function, the convolution between gaussian and
+    lorentzian curve.
+
+    Parameters
+    ----------
+    x : array
+        independent variable
+    area : float
+        area of voigt peak
+    center : float
+        center position
+    sigma : float
+        standard deviation
+    gamma : float
+        half width at half maximum of lorentzian
+    """
+    if gamma is None:
+        gamma = sigma
+    z = (x-center + 1j*gamma)/ (sigma*s2)
+    return area*scipy.special.wofz(z).real / (sigma*s2pi)
+
+def pvoigt(x, area, center, sigma, fraction):
+    """1 dimensional pseudo-voigt:
+    pvoigt(x, area, center, sigma, fraction)
+       = amplitude*(1-fraction)*gaussion(x, center,sigma) +
+         amplitude*fraction*lorentzian(x, center, sigma)
+
+    1 dimensional pseudo-voigt, linear combination of gaussian and lorentzian
+    curve.
+
+    Parameters
+    ----------
+    x : array
+        independent variable
+    area : float
+        area of pvoigt peak
+    center : float
+        center position
+    sigma : float
+        standard deviation
+    fraction : float
+        weight for lorentzian peak in the linear combination, and (1-fraction)
+        is the weight
+        for gaussian peak.
+    """
+    return ((1-fraction)*gaussian(x, area, center, sigma) +
+               fraction*lorentzian(x, area, center, sigma))
+
+
+def gausssian_step(x, area, center, sigma, peak_e):
     """
     Gauss step function is an important component in modeling compton peak.
     Use scipy erfc function. Please note erfc = 1-erf.
@@ -89,7 +200,7 @@ def gauss_step(x, area, center, sigma, peak_e):
             / (2. * peak_e ))
 
 
-def gauss_tail(x, area, center, sigma, gamma):
+def gaussian_tail(x, area, center, sigma, gamma):
     """
     Use a gaussian tail function to simulate compton peak
     
@@ -132,9 +243,8 @@ def gauss_tail(x, area, center, sigma, gamma):
     return counts
 
 
-def elastic_peak(x, coherent_sct_energy,
-                 fwhm_offset, fwhm_fanoprime,
-                 coherent_sct_amplitude, epsilon=2.96):
+def elastic(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
+            coherent_sct_amplitude, epsilon=2.96):
     """
     Use gaussian function to model elastic peak
     
@@ -171,11 +281,10 @@ def elastic_peak(x, coherent_sct_energy,
     return value
 
 
-def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
-                 compton_angle, compton_fwhm_corr, compton_amplitude,
-                 compton_f_step, compton_f_tail, compton_gamma,
-                 compton_hi_f_tail, compton_hi_gamma,
-                 epsilon=2.96, matrix=False):
+def compton(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime, compton_angle,
+            compton_fwhm_corr, compton_amplitude, compton_f_step,
+            compton_f_tail, compton_gamma, compton_hi_f_tail, compton_hi_gamma,
+            epsilon=2.96, matrix=False):
     """
     Model compton peak, which is generated as an inelastic peak and always
     stays to the left of elastic peak on the spectrum.
@@ -246,95 +355,18 @@ def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     # compton peak, step
     if compton_f_step > 0.:
         value = factor * compton_f_step
-        value *= gauss_step(x, compton_amplitude, compton_e, sigma, compton_e)
+        value *= gausssian_step(x, compton_amplitude, compton_e, sigma, compton_e)
         counts += value
     
     # compton peak, tail on the low side
     value = factor * compton_f_tail
-    value *= gauss_tail(x, compton_amplitude, compton_e, sigma, compton_gamma)
+    value *= gaussian_tail(x, compton_amplitude, compton_e, sigma, compton_gamma)
     counts += value
 
     # compton peak, tail on the high side
     value = factor * compton_hi_f_tail
-    value *= gauss_tail(-1 * x, compton_amplitude, -1 * compton_e, sigma,
+    value *= gaussian_tail(-1 * x, compton_amplitude, -1 * compton_e, sigma,
                         compton_hi_gamma)
     counts += value
 
     return counts
-
-
-def lorentzian_squared_peak(x, area, center, sigma):
-    """
-    1-d lorentzian squared profile
-
-    Parameters
-    ----------
-    x : array
-        independent variable
-    area : float
-        area of lorentzian peak,
-        If area is set as 1, the integral is unity.
-    center : float
-        center position
-    sigma : float
-        standard deviation
-    """
-
-    return (area/(1 + ((x - center) / sigma)**2)**2) / (np.pi * sigma)
-
-
-def voigt_peak(x, area, center, sigma, gamma):
-    """
-    1 dimensional voigt function, the convolution between gaussian and
-    lorentzian curve.
-
-    Parameters
-    ----------
-    x : array
-        independent variable
-    area : float
-        area of voigt peak
-    center : float
-        center position
-    sigma : float
-        standard deviation
-    gamma : float
-        half width at half maximum of lorentzian
-    """
-    z = (x - center + 1j * gamma) / (sigma * np.sqrt(2))
-    return area * scipy.special.wofz(z).real / (sigma * np.sqrt(2 * np.pi))
-
-
-def pvoigt_peak(x, area, center, sigma, fraction):
-    """
-    1 dimensional pseudo-voigt, linear combination of gaussian and lorentzian
-    curve.
-
-    Parameters
-    ----------
-    x : array
-        independent variable
-    area : float
-        area of pvoigt peak
-    center : float
-        center position
-    sigma : float
-        standard deviation
-    fraction : float
-        weight for lorentzian peak in the linear combination, and (1-fraction)
-        is the weight
-        for gaussian peak.
-    """
-    return ((1 - fraction) * gaussian(x, area, center, sigma) +
-            fraction * lorentzian(x, area, center, sigma))
-
-
-lineshapes_list = [gaussian, lorentzian, voigt, pvoigt, pearson7,
-              breit_wigner, damped_oscillator, logistic,
-              lognormal, students_t, expgaussian, donaich,
-              skewed_gaussian, skewed_voigt, step, rectangle,
-              exponential, powerlaw, linear, parabolic,
-              lorentzian_squared_peak, compton_peak, elastic_peak, gauss_step,
-              gauss_tail]
-
-lineshapes_list.sort(key = lambda s: str(s))

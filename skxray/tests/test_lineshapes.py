@@ -43,14 +43,11 @@ from __future__ import (absolute_import, division,
 import numpy as np
 from numpy.testing import (assert_allclose, assert_array_almost_equal)
 
-from skxray.fitting.model.physics_peak import (gaussian, gauss_step,
-                                               gauss_tail, elastic_peak,
-                                               compton_peak, lorentzian,
-                                               lorentzian_squared_peak,
-                                               voigt_peak, pvoigt_peak)
+from skxray.fitting.api import (gaussian, gausssian_step, gaussian_tail,
+                                elastic, compton, lorentzian, lorentzian2,
+                                voigt, pvoigt)
 
-from skxray.fitting.model.physics_model import (ComptonModel, ElasticModel,
-                                               GaussianModel)
+from skxray.fitting.api import (ComptonModel, ElasticModel, GaussianModel)
 
 
 def test_gauss_peak():
@@ -58,7 +55,7 @@ def test_gauss_peak():
     test of gauss function from xrf fit
     """
     area = 1
-    cen  = 0
+    cen = 0
     std = 1
     x = np.arange(-3, 3, 0.5)
     out = gaussian(x, area, cen, std)
@@ -85,7 +82,7 @@ def test_gauss_step():
     std = 1
     x = np.arange(-10, 5, 1)
     peak_e = 1.0
-    out = gauss_step(x, area, cen, std, peak_e)
+    out = gausssian_step(x, area, cen, std, peak_e)
 
     assert_array_almost_equal(y_true, out)
 
@@ -105,7 +102,7 @@ def test_gauss_tail():
     std = 1
     x = np.arange(-10, 5, 1)
     gamma = 1.0
-    out = gauss_tail(x, area, cen, std, gamma)
+    out = gaussian_tail(x, area, cen, std, gamma)
 
     assert_array_almost_equal(y_true, out)
 
@@ -130,7 +127,7 @@ def test_elastic_peak():
     fanoprime = 0.01
 
     ev = np.arange(8, 12, 0.1)
-    out = elastic_peak(ev, energy, offset,
+    out = elastic(ev, energy, offset,
                        fanoprime, area)
 
     assert_array_almost_equal(y_true, out)
@@ -163,7 +160,7 @@ def test_compton_peak():
     hi_gamma = 1
     ev = np.arange(8, 12, 0.1)
 
-    out = compton_peak(ev, energy, offset, fano, angle,
+    out = compton(ev, energy, offset, fano, angle,
                        fwhm_corr, amp, f_step, f_tail,
                        gamma, hi_f_tail, hi_gamma)
 
@@ -200,7 +197,7 @@ def test_lorentzian_squared_peak():
     a = 1
     cen = 0
     std = 0.1
-    out = lorentzian_squared_peak(x, a, cen, std)
+    out = lorentzian2(x, a, cen, std)
 
     assert_array_almost_equal(y_true, out)
 
@@ -218,7 +215,7 @@ def test_voigt_peak():
     std = 0.1
     gamma = 0.1
 
-    out = voigt_peak(x, a, cen, std, gamma)
+    out = voigt(x, a, cen, std, gamma)
 
     assert_array_almost_equal(y_true, out)
 
@@ -236,7 +233,7 @@ def test_pvoigt_peak():
     std = 0.1
     fraction = 0.5
 
-    out = pvoigt_peak(x, a, cen, std, fraction)
+    out = pvoigt(x, a, cen, std, fraction)
 
     assert_array_almost_equal(y_true, out)
 
@@ -270,15 +267,14 @@ def test_elastic_model():
     true_param = [fanoprime, area, energy]
 
     x = np.arange(8, 12, 0.1)
-    out = elastic_peak(x, energy, offset,
-                       fanoprime, area)
+    out = elastic(x, energy, offset, fanoprime, area)
 
-    elastic = ElasticModel()
+    elastic_model = ElasticModel()
 
     # fwhm_offset is not a sensitive parameter, used as a fixed value
-    elastic.set_param_hint(name='fwhm_offset', value=0.02, vary=False)
+    elastic_model.set_param_hint(name='fwhm_offset', value=0.02, vary=False)
 
-    result = elastic.fit(out, x=x, coherent_sct_energy=10,
+    result = elastic_model.fit(out, x=x, coherent_sct_energy=10,
                          fwhm_offset=0.02, fwhm_fanoprime=0.03,
                          coherent_sct_amplitude=10)
 
@@ -305,21 +301,21 @@ def test_compton_model():
 
     true_param = [energy, fano, angle, fwhm_corr, amp, f_step, f_tail, gamma, hi_f_tail]
 
-    out = compton_peak(x, energy, offset, fano, angle,
+    out = compton(x, energy, offset, fano, angle,
                        fwhm_corr, amp, f_step, f_tail,
                        gamma, hi_f_tail, hi_gamma)
 
-    compton = ComptonModel()
+    compton_model = ComptonModel()
     # parameters not sensitive
-    compton.set_param_hint(name='compton_hi_gamma', value=1, vary=False)
-    compton.set_param_hint(name='fwhm_offset', value=0.01, vary=False)
+    compton_model.set_param_hint(name='compton_hi_gamma', value=1, vary=False)
+    compton_model.set_param_hint(name='fwhm_offset', value=0.01, vary=False)
 
     # parameters with boundary
-    compton.set_param_hint(name='coherent_sct_energy', value=10, min=9.5, max=10.5)
-    compton.set_param_hint(name='compton_gamma', value=2.2, min=1, max=3.5)
-    compton.set_param_hint(name='compton_hi_f_tail', value=0.2, min=0, max=1.0)
-    p = compton.make_params()
-    result = compton.fit(out, x=x, params=p, compton_amplitude=1.1)
+    compton_model.set_param_hint(name='coherent_sct_energy', value=10, min=9.5, max=10.5)
+    compton_model.set_param_hint(name='compton_gamma', value=2.2, min=1, max=3.5)
+    compton_model.set_param_hint(name='compton_hi_f_tail', value=0.2, min=0, max=1.0)
+    p = compton_model.make_params()
+    result = compton_model.fit(out, x=x, params=p, compton_amplitude=1.1)
 
     fit_val = [result.values['coherent_sct_energy'], result.values['fwhm_fanoprime'],
                result.values['compton_angle'], result.values['compton_fwhm_corr'],

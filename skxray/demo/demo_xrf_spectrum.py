@@ -41,7 +41,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skxray.constants import Element
-from skxray.fitting.model.physics_peak import gauss_peak
+from skxray.fitting.api import gaussian
 
 
 def get_line(name, incident_energy):
@@ -115,7 +115,7 @@ def get_spectrum(name, incident_energy, emax=15):
     for item in ratio:
         for data in lines:
             if item[0] == data[0]:
-                spec += gauss_peak(x, area, data[1], std) * item[1]
+                spec += gaussian(x, area, data[1], std) * item[1]
 
     #plt.semilogy(x, spec)
 

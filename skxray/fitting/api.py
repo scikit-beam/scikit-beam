@@ -3,7 +3,7 @@
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
 # @author: Li Li (lili@bnl.gov)                                        #
-# created on 09/10/2014                                                #
+# created on 07/10/2014                                                #
 #                                                                      #
 # Original code:                                                       #
 # @author: Mirna Lerotic, 2nd Look Consulting                          #
@@ -45,11 +45,8 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import six
-import numpy as np
 import sys
-import inspect
 
-from lmfit import Model
 from lmfit.models import (ConstantModel, LinearModel, QuadraticModel,
                           ParabolicModel, PolynomialModel, VoigtModel,
                           PseudoVoigtModel, Pearson7Model, StudentsTModel,
@@ -58,110 +55,19 @@ from lmfit.models import (ConstantModel, LinearModel, QuadraticModel,
                           ExponentialGaussianModel, SkewedGaussianModel,
                           DonaichModel, PowerLawModel, ExponentialModel,
                           StepModel, RectangleModel)
-from lmfit.models import GaussianModel as LmGaussianModel
-from lmfit.models import LorentzianModel as LmLorentzianModel
-from .physics_peak import (elastic_peak, compton_peak, gauss_tail, gauss_step,
-                           lorentzian_squared_peak, gaussian, lorentzian)
 
-import logging
-logger = logging.getLogger(__name__)
+from .models import (GaussianModel, LorentzianModel, Lorentzian2Model,
+                     ComptonModel, ElasticModel)
 
-from skxray.fitting.model.physics_peak import (elastic_peak, compton_peak,
-                                              gauss_peak, lorentzian_peak,
-                                              lorentzian_squared_peak)
+from lmfit.lineshapes import (pearson7, breit_wigner, damped_oscillator,
+                              logistic, lognormal, students_t, expgaussian,
+                              donaich, skewed_gaussian, skewed_voigt, step,
+                              rectangle, exponential, powerlaw, linear,
+                              parabolic)
+from .lineshapes import (gaussian, lorentzian, lorentzian2, voigt, pvoigt,
+                         gaussian_tail, gausssian_step, elastic, compton)
 
-from skxray.fitting.base.parameter_data import get_para
-
-def set_default(model_name, func_name):
-    """set values and bounds to Model parameters in lmfit
-
-    Parameters
-    ----------
-    model_name : class object
-        Model class object from lmfit
-    func_name : function
-        function name of physics peak
-    """
-    paras = inspect.getargspec(func_name)
-    default_len = len(paras.defaults)
-
-    # the first argument is independent variable, also ignored
-    # default values are not considered for fitting in this function
-    my_args = paras.args[1:]
-    para_dict = get_para()
-
-    for name in my_args:
-
-        if name not in para_dict.keys():
-            continue
-
-        my_dict = para_dict[name]
-        if my_dict['bound_type'] == 'none':
-            model_name.set_param_hint(name, vary=True)
-        elif my_dict['bound_type'] == 'fixed':
-            model_name.set_param_hint(name, vary=False, value=my_dict['value'])
-        elif my_dict['bound_type'] == 'lo':
-            model_name.set_param_hint(name, value=my_dict['value'], vary=True,
-                                      min=my_dict['min'])
-        elif my_dict['bound_type'] == 'hi':
-            model_name.set_param_hint(name, value=my_dict['value'], vary=True,
-                                      max=my_dict['max'])
-        elif my_dict['bound_type'] == 'lohi':
-            model_name.set_param_hint(name, value=my_dict['value'], vary=True,
-                                      min=my_dict['min'], max=my_dict['max'])
-        else:
-            raise TypeError("Boundary type {0} can't be used".format(my_dict['bound_type']))
-
-
-def _gen_class_docs(func):
-    return ("Wrap the {} function for fitting within lmfit framework\n".format(func.__name__) +
-            func.__doc__)
-
-# SUBCLASS LMFIT MODELS TO REWRITE THE DOCS
-class GaussianModel(LmGaussianModel):
-    __doc__ = _gen_class_docs(LmGaussianModel().func)
-
-    def __init__(self, *args, **kwargs):
-         super(GaussianModel, self).__init__(*args, **kwargs)
-
-
-class LorentzianModel(LmLorentzianModel):
-
-    __doc__ = _gen_class_docs(LmLorentzianModel().func)
-
-    def __init__(self, *args, **kwargs):
-        super(LorentzianModel, self).__init__(*args, **kwargs)
-
-# DEFINE NEW MODELS
-class ElasticModel(Model):
-
-    __doc__ = _gen_class_docs(elastic_peak)
-
-    def __init__(self, *args, **kwargs):
-        super(ElasticModel, self).__init__(elastic_peak, *args, **kwargs)
-        set_default(self, elastic_peak)
-        self.set_param_hint('epsilon', value=2.96, vary=False)
-
-
-class ComptonModel(Model):
-
-    __doc__ = _gen_class_docs(compton_peak)
-
-    def __init__(self, *args, **kwargs):
-        super(ComptonModel, self).__init__(compton_peak, *args, **kwargs)
-        set_default(self, compton_peak)
-        self.set_param_hint('epsilon', value=2.96, vary=False)
-        self.set_param_hint('matrix', value=False, vary=False)
-
-
-class Lorentzian2Model(Model):
-
-    __doc__ = _gen_class_docs(lorentzian_squared_peak)
-
-    def __init__(self, *args, **kwargs):
-        super(Lorentzian2Model, self).__init__(lorentzian_squared_peak, *args, **kwargs)
-
-
+# valid models
 model_list = [ConstantModel, LinearModel, QuadraticModel, ParabolicModel,
               PolynomialModel, GaussianModel, LorentzianModel, VoigtModel,
               PseudoVoigtModel, Pearson7Model, StudentsTModel, BreitWignerModel,
@@ -171,3 +77,14 @@ model_list = [ConstantModel, LinearModel, QuadraticModel, ParabolicModel,
               ComptonModel, ElasticModel]
 
 model_list.sort(key=lambda s: str(s).split('.')[-1])
+
+
+lineshapes_list = [gaussian, lorentzian, voigt, pvoigt, pearson7,
+                   breit_wigner, damped_oscillator, logistic,
+                   lognormal, students_t, expgaussian, donaich,
+                   skewed_gaussian, skewed_voigt, step, rectangle,
+                   exponential, powerlaw, linear, parabolic,
+                   lorentzian2, compton, elastic, gausssian_step,
+                   gaussian_tail]
+
+lineshapes_list.sort(key = lambda s: str(s))

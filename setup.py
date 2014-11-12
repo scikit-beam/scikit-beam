@@ -12,7 +12,6 @@ setup(
     packages=["skxray",
               "skxray.testing",
               "skxray.fitting",
-              "skxray.fitting.model",
               "skxray.fitting.base",
               "skxray.io",
               ],
