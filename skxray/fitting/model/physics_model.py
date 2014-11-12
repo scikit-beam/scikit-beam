@@ -50,8 +50,6 @@ import sys
 import inspect
 
 from lmfit import Model
-
-from nsls2.fitting.base.parameter_data import get_para
 from lmfit.models import (ConstantModel, LinearModel, QuadraticModel,
                           ParabolicModel, PolynomialModel, VoigtModel,
                           PseudoVoigtModel, Pearson7Model, StudentsTModel,
@@ -67,6 +65,12 @@ from .physics_peak import (elastic_peak, compton_peak, gauss_tail, gauss_step,
 
 import logging
 logger = logging.getLogger(__name__)
+
+from skxray.fitting.model.physics_peak import (elastic_peak, compton_peak,
+                                              gauss_peak, lorentzian_peak,
+                                              lorentzian_squared_peak)
+
+from skxray.fitting.base.parameter_data import get_para
 
 def set_default(model_name, func_name):
     """set values and bounds to Model parameters in lmfit

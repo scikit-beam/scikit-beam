@@ -43,10 +43,10 @@ import six
 import numpy as np
 import scipy.signal
 from collections import deque
-from nsls2.constants import calibration_standards
-from nsls2.feature import (filter_peak_height, peak_refinement,
+from skxray.constants import calibration_standards
+from skxray.feature import (filter_peak_height, peak_refinement,
                            refine_log_quadratic)
-from nsls2.core import (pixel_to_phi, pixel_to_radius,
+from skxray.core import (pixel_to_phi, pixel_to_radius,
                         pairwise, bin_edges_to_centers, bin_1D)
 
 

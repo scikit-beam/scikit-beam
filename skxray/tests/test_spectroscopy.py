@@ -40,7 +40,7 @@ import numpy as np
 from nose.tools import assert_raises
 from numpy.testing import assert_array_almost_equal
 
-from nsls2.spectroscopy import (align_and_scale, integrate_ROI,
+from skxray.spectroscopy import (align_and_scale, integrate_ROI,
                                 integrate_ROI_spectrum)
 
 

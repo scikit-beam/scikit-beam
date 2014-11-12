@@ -2,6 +2,9 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
+# @author: Li Li (lili@bnl.gov)                                        #
+# created on 09/03/2014                                                #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -32,83 +35,94 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
+from __future__ import (absolute_import, division, unicode_literals, print_function)
 import numpy as np
-import six
-from numpy.testing import (assert_array_equal, assert_array_almost_equal,
-                           assert_almost_equal)
+import matplotlib.pyplot as plt
 
-from nsls2.testing.decorators import known_fail_if
-from nsls2.fitting.model.physics_model import (gaussian_model, lorentzian_model,
-                                               lorentzian2_model, fit_engine)
-from nose.tools import (assert_equal, assert_true, raises)
+from skxray.constants import Element
+from skxray.fitting.model.physics_peak import gauss_peak
 
 
-@known_fail_if(True)
-def test_fit_quad_to_peak():
-    assert(False)
+def get_line(name, incident_energy):
+    """
+    Plot emission lines for a given element.
+
+    Parameters
+    ----------
+    name : str or int
+        element name, or atomic number
+    incident_energy : float
+        xray incident energy for fluorescence emission
+    """
+    e = Element(name)
+    lines = e.emission_line.all
+    ratio = [val for val in e.cs(incident_energy).all if val[1] > 0]
+
+    i_min = 1e-6
+
+    plt.figure(figsize=(8, 6))
+
+    for item in ratio:
+        for data in lines:
+            if item[0] == data[0]:
+                plt.plot([data[1], data[1]],
+                         [i_min, item[1]], 'g-', linewidth=2.0)
+
+    plt.xlabel('Energy [KeV]')
+    plt.ylabel('Intensity')
+    plt.show()
+    plt.close()
+
+    return
 
 
-def test_gauss_fit():
-    x = np.arange(-1, 1, 0.01)
-    amplitude = 1
-    center = 0
-    sigma = 1
-    true_val = [amplitude, center, sigma]
-    y = amplitude / np.sqrt(2 * np.pi) / sigma * np.exp(-(x - center)**2 / 2 / sigma**2)
+def get_spectrum(name, incident_energy, emax=15):
+    """
+    Plot fluorescence spectrum for a given element.
 
-    g = gaussian_model('',
-                       1, 'fixed', [0, 1],
-                       0.1, 'free', [0, 0.5],
-                       0.5, 'free', [0, 1])
+    Parameters
+    ----------
+    name : str or int
+        element name, or atomic number
+    incident_energy : float
+        xray incident energy for fluorescence emission
+    emax : float
+        max value on spectrum
 
-    result, yfit = fit_engine(g, x, y)
+    """
+    e = Element(name)
+    lines = e.emission_line.all
+    ratio = [val for val in e.cs(incident_energy).all if val[1] > 0]
 
-    out = result.values
-    fitted_val = (out['amplitude'], out['center'], out['sigma'])
-    assert_array_almost_equal(true_val, fitted_val)
+    x = np.arange(0, emax, 0.01)
 
+    spec = np.zeros(len(x))
 
-def test_lorentzian_fit():
-    x = np.arange(-1, 1, 0.01)
-    amplitude = 1
-    center = 0
-    sigma = 1
-    true_val = [amplitude, center, sigma]
+    i_min = 1e-6
 
-    y = (amplitude/(1 + ((x - center) / sigma)**2)) / (np.pi * sigma)
+    plt.figure(figsize=(8, 6))
 
-    m = lorentzian_model('',
-                         0.8, 'free', [0, 1],
-                         0.1, 'free', [0, 0.5],
-                         0.8, 'bounded', [0, 2])
+    for item in ratio:
+        for data in lines:
+            if item[0] == data[0]:
 
-    result, yfit = fit_engine(m, x, y)
-    out = result.values
+                plt.plot([data[1], data[1]],
+                         [i_min, item[1]], 'g-', linewidth=2.0)
 
-    fitted_val = (out['amplitude'], out['center'], out['sigma'])
-    assert_array_almost_equal(true_val, fitted_val)
+    std = 0.1
+    area = std * np.sqrt(2 * np.pi)
+    for item in ratio:
+        for data in lines:
+            if item[0] == data[0]:
+                spec += gauss_peak(x, area, data[1], std) * item[1]
 
+    #plt.semilogy(x, spec)
 
-@raises(ValueError)
-def test_lorentzian2_fit():
-    x = np.arange(-1, 1, 0.01)
-    area = 1
-    center = 0
-    sigma = 1
-    true_val = [area, center, sigma]
+    plt.xlabel('Energy [KeV]')
+    plt.ylabel('Intensity')
+    plt.plot(x, spec)
+    plt.show()
+    plt.close()
 
-    y = (area/(1 + ((x - center) / sigma)**2)**2) / (np.pi * sigma)
-
-    m = lorentzian2_model('',
-                          0.8, 'wrong', [0, 1],
-                          0.1, 'free', [0, 0.5],
-                          0.5, 'free', [0, 1])
-
-    result, yfit = fit_engine(m, x, y)
-    out = result.values
-
-    fitted_val = (out['area'], out['center'], out['sigma'])
-    assert_array_almost_equal(true_val, fitted_val)
+    return

@@ -2,9 +2,6 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
-# @author: Li Li (lili@bnl.gov)                                        #
-# created on 08/16/2014                                                #
-#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -35,57 +32,83 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-
-
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import numpy as np
-from numpy.testing import assert_allclose
+import six
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_almost_equal)
 
-from nsls2.fitting.model.background import snip_method
+from skxray.testing.decorators import known_fail_if
+from skxray.fitting.model.physics_model import (gaussian_model, lorentzian_model,
+                                               lorentzian2_model, fit_engine)
+from nose.tools import (assert_equal, assert_true, raises)
 
 
-def test_snip_method():
-    """
-    test of background function from xrf fit
-    """
-    
-    xmin = 0
-    xmax = 3000
-    
-    # three gaussian peak
-    xval = np.arange(-20, 20, 0.1)
-    std = 0.01
-    yval1 = np.exp(-xval**2 / 2 / std**2)
-    yval2 = np.exp(-(xval - 10)**2 / 2 / std**2)
-    yval3 = np.exp(-(xval + 10)**2 / 2 / std**2)
-    
-    # background as exponential
-    a0 = 1.0
-    a1 = 0.1
-    a2 = 0.5
-    bg_true = a0 * np.exp(-xval * a1 + a2)
-    
-    yval = yval1 + yval2 + yval3 + bg_true
-    
-    bg = snip_method(yval, 
-                     0.0, 1.0, 0.0, 
-                     xmin=xmin, xmax=3000,
-                     spectral_binning=None, width=0.1)
-    
-    #plt.semilogy(xval, bg_true, xval, bg)
-    #plt.plot(xval, bg_true, xval, bg)
-    #plt.show()
-    
-    # ignore the boundary part
-    cutval = 15
-    bg_true_part = bg_true[cutval : -cutval]
-    bg_cal_part = bg[cutval : -cutval]
-    
+@known_fail_if(True)
+def test_fit_quad_to_peak():
+    assert(False)
 
-    #assert_array_almost_equal(bg_true_part, bg_cal_part, decimal=2)
-    assert_allclose(bg_true_part, bg_cal_part, rtol=1e-3, atol=1e-1)
-    
-    return
-    
+
+def test_gauss_fit():
+    x = np.arange(-1, 1, 0.01)
+    amplitude = 1
+    center = 0
+    sigma = 1
+    true_val = [amplitude, center, sigma]
+    y = amplitude / np.sqrt(2 * np.pi) / sigma * np.exp(-(x - center)**2 / 2 / sigma**2)
+
+    g = gaussian_model('',
+                       1, 'fixed', [0, 1],
+                       0.1, 'free', [0, 0.5],
+                       0.5, 'free', [0, 1])
+
+    result, yfit = fit_engine(g, x, y)
+
+    out = result.values
+    fitted_val = (out['amplitude'], out['center'], out['sigma'])
+    assert_array_almost_equal(true_val, fitted_val)
+
+
+def test_lorentzian_fit():
+    x = np.arange(-1, 1, 0.01)
+    amplitude = 1
+    center = 0
+    sigma = 1
+    true_val = [amplitude, center, sigma]
+
+    y = (amplitude/(1 + ((x - center) / sigma)**2)) / (np.pi * sigma)
+
+    m = lorentzian_model('',
+                         0.8, 'free', [0, 1],
+                         0.1, 'free', [0, 0.5],
+                         0.8, 'bounded', [0, 2])
+
+    result, yfit = fit_engine(m, x, y)
+    out = result.values
+
+    fitted_val = (out['amplitude'], out['center'], out['sigma'])
+    assert_array_almost_equal(true_val, fitted_val)
+
+
+@raises(ValueError)
+def test_lorentzian2_fit():
+    x = np.arange(-1, 1, 0.01)
+    area = 1
+    center = 0
+    sigma = 1
+    true_val = [area, center, sigma]
+
+    y = (area/(1 + ((x - center) / sigma)**2)**2) / (np.pi * sigma)
+
+    m = lorentzian2_model('',
+                          0.8, 'wrong', [0, 1],
+                          0.1, 'free', [0, 0.5],
+                          0.5, 'free', [0, 1])
+
+    result, yfit = fit_engine(m, x, y)
+    out = result.values
+
+    fitted_val = (out['area'], out['center'], out['sigma'])
+    assert_array_almost_equal(true_val, fitted_val)

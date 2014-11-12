@@ -38,8 +38,8 @@ Created on Jun 4, 2014
 
 import matplotlib as mpl
 import numpy as np
-from nsls2.io.binary import read_binary
-from nsls2.core import detector2D_to_1D
+from skxray.io.binary import read_binary
+from skxray.core import detector2D_to_1D
 
 def get_cbr4_sample_img():
     # define the 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# NSLS2 documentation build configuration file, created by
+# scikit-xray documentation build configuration file, created by
 # sphinx-quickstart on Wed May  7 15:11:18 2014.
 #
 # This file is execfile()d with the current directory set to its
@@ -54,7 +54,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'NSLS2'
+project = u'scikit-xray'
 copyright = u'2014, Brookhaven National Lab'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -207,7 +207,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'NSLS2.tex', u'NSLS2 Documentation',
+  ('index', 'scikit-xray.tex', u'scikit-xray Documentation',
    u'Brookhaven National Lab', 'manual'),
 ]
 
@@ -237,7 +237,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'nsls2', u'NSLS2 Documentation',
+    ('index', 'skxray', u'scikit-xray Documentation',
      [u'Brookhaven National Lab'], 1)
 ]
 
@@ -251,8 +251,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'NSLS2', u'NSLS2 Documentation',
-   u'Brookhaven National Lab', 'NSLS2', 'One line description of project.',
+  ('index', 'scikit-xray', u'scikit-xray Documentation',
+   u'Brookhaven National Lab', 'scikit-xray', 'One line description of project.',
    'Miscellaneous'),
 ]
 

@@ -3,7 +3,7 @@
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
 # @author: Li Li (lili@bnl.gov)                                        #
-# created on 08/19/2014                                                #
+# created on 08/16/2014                                                #
 #                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
@@ -35,62 +35,57 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-from __future__ import (absolute_import, division,
-                        unicode_literals, print_function)
-import six
+
+
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import numpy as np
-from numpy.testing import assert_array_almost_equal
+from numpy.testing import assert_allclose
 
-import nsls2.calibration as calibration
-import nsls2.calibration as core
-from nose.tools import assert_raises
+from skxray.fitting.model.background import snip_method
 
 
-def _draw_gaussian_rings(shape, calibrated_center, r_list, r_width):
-    R = core.pixel_to_radius(shape, calibrated_center)
-    I = np.zeros_like(R)
+def test_snip_method():
+    """
+    test of background function from xrf fit
+    """
+    
+    xmin = 0
+    xmax = 3000
+    
+    # three gaussian peak
+    xval = np.arange(-20, 20, 0.1)
+    std = 0.01
+    yval1 = np.exp(-xval**2 / 2 / std**2)
+    yval2 = np.exp(-(xval - 10)**2 / 2 / std**2)
+    yval3 = np.exp(-(xval + 10)**2 / 2 / std**2)
+    
+    # background as exponential
+    a0 = 1.0
+    a1 = 0.1
+    a2 = 0.5
+    bg_true = a0 * np.exp(-xval * a1 + a2)
+    
+    yval = yval1 + yval2 + yval3 + bg_true
+    
+    bg = snip_method(yval, 
+                     0.0, 1.0, 0.0, 
+                     xmin=xmin, xmax=3000,
+                     spectral_binning=None, width=0.1)
+    
+    #plt.semilogy(xval, bg_true, xval, bg)
+    #plt.plot(xval, bg_true, xval, bg)
+    #plt.show()
+    
+    # ignore the boundary part
+    cutval = 15
+    bg_true_part = bg_true[cutval : -cutval]
+    bg_cal_part = bg[cutval : -cutval]
+    
 
-    for r in r_list:
-        tmp = 100 * np.exp(-((R - r)/r_width)**2)
-        I += tmp
-
-    return I
-
-
-def test_refine_center():
-    center = np.array((500, 550))
-    I = _draw_gaussian_rings((1000, 1001), center,
-                             [50, 75, 100, 250, 500], 5)
-
-    nx_opts = [None, 300]
-    for nx in nx_opts:
-        out = calibration.refine_center(I, center+1, (1, 1),
-                                        phi_steps=20, nx=nx, min_x=10,
-                                        max_x=300, window_size=5,
-                                        thresh=0, max_peaks=4)
-
-        assert np.all(np.abs(center - out) < .1)
-
-
-def test_blind_d():
-    gaus = lambda x, center, height, width: (
-                          height * np.exp(-((x-center) / width)**2))
-    name = 'Si'
-    wavelength = .18
-    window_size = 5
-    threshold = .1
-    cal = calibration.calibration_standards[name]
-
-    tan2theta = np.tan(cal.convert_2theta(wavelength))
-
-    D = 200
-    expected_r = D * tan2theta
-
-    bin_centers = np.linspace(0, 50, 2000)
-    I = np.zeros_like(bin_centers)
-    for r in expected_r:
-        I += gaus(bin_centers, r, 100, .2)
-    d, dstd = calibration.estimate_d_blind(name, wavelength, bin_centers,
-                                     I, window_size, len(expected_r),
-                                     threshold)
-    assert np.abs(d - D) < 1e-6
+    #assert_array_almost_equal(bg_true_part, bg_cal_part, decimal=2)
+    assert_allclose(bg_true_part, bg_cal_part, rtol=1e-3, atol=1e-1)
+    
+    return
+    

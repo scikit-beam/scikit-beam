@@ -38,14 +38,14 @@ Created on May 29, 2014
 
 
 def run():
-    from nsls2.io.binary import read_binary
-    from nsls2.core import detector2D_to_1D
-    from nsls2.recip import project_to_sphere
+    from skxray.io.binary import read_binary
+    from skxray.core import detector2D_to_1D
+    from skxray.recip import project_to_sphere
     import numpy as np
     from matplotlib import pyplot
     import matplotlib
     from mpl_toolkits.mplot3d import Axes3D
-    fname = "nsls2/ex/data/recip_space_recon/cbr4_singlextal_rotate190_50deg_2s_90kev_203f.cor.042.cor"
+    fname = "skxray/ex/data/recip_space_recon/cbr4_singlextal_rotate190_50deg_2s_90kev_203f.cor.042.cor"
     params = {"filename": fname,
             "nx": 2048,
             "ny": 2048,

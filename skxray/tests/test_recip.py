@@ -5,9 +5,9 @@ import six
 import numpy as np
 from nose.tools import raises
 
-from nsls2.testing.decorators import known_fail_if
+from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
-from nsls2 import recip
+from skxray import recip
 
 
 @known_fail_if(six.PY3)
