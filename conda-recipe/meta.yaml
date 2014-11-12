@@ -40,6 +40,7 @@ test:
      - skxray.recip
      - skxray.spectroscopy
      - skxray.fitting
+     - skxray.fitting.api
 
 about:
   home: http://Nikea.github.io/scikit-xray/
