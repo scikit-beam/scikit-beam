@@ -75,6 +75,7 @@ def gaussian(x, area, center, sigma):
     """
     return (area/(s2pi*sigma)) * np.exp(-(1.0*x-center)**2 /(2*sigma**2))
 
+
 def lorentzian(x, area, center, sigma):
     """1 dimensional lorentzian
     lorentzian(x, amplitude, center, sigma)
@@ -135,8 +136,9 @@ def voigt(x, area, center, sigma, gamma):
     """
     if gamma is None:
         gamma = sigma
-    z = (x-center + 1j*gamma)/ (sigma*s2)
+    z = (x - center + 1j*gamma) / (sigma * s2)
     return area*scipy.special.wofz(z).real / (sigma*s2pi)
+
 
 def pvoigt(x, area, center, sigma, fraction):
     """1 dimensional pseudo-voigt:
@@ -162,8 +164,8 @@ def pvoigt(x, area, center, sigma, fraction):
         is the weight
         for gaussian peak.
     """
-    return ((1-fraction)*gaussian(x, area, center, sigma) +
-               fraction*lorentzian(x, area, center, sigma))
+    return ((1-fraction) * gaussian(x, area, center, sigma) +
+            fraction * lorentzian(x, area, center, sigma))
 
 
 def gausssian_step(x, area, center, sigma, peak_e):
@@ -197,7 +199,7 @@ def gausssian_step(x, area, center, sigma, peak_e):
 
     return (area
             * scipy.special.erfc((x - center) / (np.sqrt(2) * sigma))
-            / (2. * peak_e ))
+            / (2. * peak_e))
 
 
 def gaussian_tail(x, area, center, sigma, gamma):
@@ -243,8 +245,11 @@ def gaussian_tail(x, area, center, sigma, gamma):
     return counts
 
 
-def elastic(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
-            coherent_sct_amplitude, epsilon=2.96):
+def elastic(x, coherent_sct_amplitude,
+            coherent_sct_energy,
+            fwhm_offset, fwhm_fanoprime,
+            e_offset, e_linear, e_quadratic,
+            epsilon=2.96):
     """
     Use gaussian function to model elastic peak
     
@@ -252,14 +257,20 @@ def elastic(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     ----------
     x : array
         energy value
+    coherent_sct_amplitude : float
++        area of elastic peak
     coherent_sct_energy : float
         incident energy                         
     fwhm_offset : float
         global fitting parameter for peak width
     fwhm_fanoprime : float
         global fitting parameter for peak width
-    coherent_sct_amplitude : float
-        area of gaussian peak
+    e_offset : float
++        offset of energy calibration
++    e_linear : float
++        linear coefficient in energy calibration
++    e_quadratic : float
++        quadratic coefficient in energy calibration
     epsilon : float
         energy to create a hole-electron pair
         for Ge 2.96, for Si 3.61 at 300K
@@ -269,17 +280,16 @@ def elastic(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
     -------
     value : array
         elastic peak
-                     
     """
-    
+
+    x = e_offset + x * e_linear + x**2 * e_quadratic
+
     temp_val = 2 * np.sqrt(2 * np.log(2))
     sigma = np.sqrt((fwhm_offset / temp_val)**2 +
                     coherent_sct_energy * epsilon * fwhm_fanoprime)
 
-    value = gaussian(x, coherent_sct_amplitude, coherent_sct_energy, sigma)
+    return gaussian(x, coherent_sct_amplitude, coherent_sct_energy, sigma)
     
-    return value
-
 
 def compton(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime, compton_angle,
             compton_fwhm_corr, compton_amplitude, compton_f_step,
