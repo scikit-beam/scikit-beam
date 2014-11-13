@@ -291,10 +291,13 @@ def elastic(x, coherent_sct_amplitude,
     return gaussian(x, coherent_sct_amplitude, coherent_sct_energy, sigma)
     
 
-def compton(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime, compton_angle,
-            compton_fwhm_corr, compton_amplitude, compton_f_step,
-            compton_f_tail, compton_gamma, compton_hi_f_tail, compton_hi_gamma,
-            epsilon=2.96, matrix=False):
+def compton(x, compton_amplitude, coherent_sct_energy,
+            fwhm_offset, fwhm_fanoprime,
+            e_offset, e_linear, e_quadratic,
+            compton_angle, compton_fwhm_corr,
+            compton_f_step, compton_f_tail, compton_gamma,
+            compton_hi_f_tail, compton_hi_gamma,
+            epsilon=2.96):
     """
     Model compton peak, which is generated as an inelastic peak and always
     stays to the left of elastic peak on the spectrum.
@@ -303,18 +306,24 @@ def compton(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime, compton_angle,
     ----------
     x : array
         energy value
+    compton_amplitude : float
++        area for gaussian peak, gaussian step and gaussian tail functions
     coherent_sct_energy : float
         incident energy                         
     fwhm_offset : float
         global fitting parameter for peak width
     fwhm_fanoprime : float
         global fitting parameter for peak width
+    e_offset : float
++        offset of energy calibration
++    e_linear : float
++        linear coefficient in energy calibration
++    e_quadratic : float
++        quadratic coefficient in energy calibration
     compton_angle : float
         compton angle in degree
     compton_fwhm_corr : float 
         correction factor on peak width
-    compton_amplitude : float
-        area for gaussian peak, gaussian step and gaussian tail functions
     compton_f_step : float
         weight factor of the gaussian step function
     compton_f_tail : float
@@ -329,8 +338,6 @@ def compton(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime, compton_angle,
         energy to create a hole-electron pair
         for Ge 2.96, for Si 3.61 at 300K
         needs to double check this value
-    matrix : bool
-        to be updated
     
     Returns
     -------
@@ -343,6 +350,9 @@ def compton(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime, compton_angle,
            energy-dispersive x-ray fluorescence spectra",
            X-Ray Spectrometry, vol. 32, pp. 139-147, 2003.
     """
+
+    x = e_offset + x * e_linear + x**2 * e_quadratic
+
     compton_e = (coherent_sct_energy
                  / (1 + (coherent_sct_energy / 511)
                     * (1 - np.cos(compton_angle * np.pi / 180))))
@@ -354,10 +364,7 @@ def compton(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime, compton_angle,
     counts = np.zeros_like(x)
 
     factor = 1 / (1 + compton_f_step + compton_f_tail + compton_hi_f_tail)
-    
-    if matrix is False:
-        factor = factor * (10.**compton_amplitude)
-        
+
     value = factor * gaussian(x, compton_amplitude, compton_e,
                               sigma*compton_fwhm_corr)
     counts += value
@@ -376,7 +383,7 @@ def compton(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime, compton_angle,
     # compton peak, tail on the high side
     value = factor * compton_hi_f_tail
     value *= gaussian_tail(-1 * x, compton_amplitude, -1 * compton_e, sigma,
-                        compton_hi_gamma)
+                           compton_hi_gamma)
     counts += value
 
     return counts
