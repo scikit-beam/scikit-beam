@@ -4,8 +4,7 @@ source=scikit-xray
 omit =
     */python?.?/*
     */site-packages/nose/*
-    /nsls2/tests/*
-    /nsls2/testing/*
+    *test*
     
 exclude_lines =
     def set_default
