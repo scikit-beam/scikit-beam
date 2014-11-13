@@ -5,6 +5,7 @@ omit =
     */python?.?/*
     */site-packages/nose/*
     *test*
+    skxray/__init__.py
     
 exclude_lines =
     def set_default
