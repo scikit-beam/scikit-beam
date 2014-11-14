@@ -220,11 +220,12 @@ def test_voigt_peak():
     a = 1
     cen = 0
     std = 0.1
-    gamma = 0.1
 
-    out = voigt(x, a, cen, std, gamma)
+    out1 = voigt(x, a, cen, std, gamma=0.1)
+    out2 = voigt(x, a, cen, std)
 
-    assert_array_almost_equal(y_true, out)
+    assert_array_almost_equal(y_true, out1)
+    assert_array_almost_equal(y_true, out2)
 
 
 def test_pvoigt_peak():

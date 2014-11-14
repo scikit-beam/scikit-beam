@@ -115,7 +115,7 @@ def lorentzian2(x, area, center, sigma):
     return (area/(1 + ((x - center) / sigma)**2)**2) / (np.pi * sigma)
 
 
-def voigt(x, area, center, sigma, gamma):
+def voigt(x, area, center, sigma, gamma=None):
     """1 dimensional voigt function.
     see http://en.wikipedia.org/wiki/Voigt_profile
     1 dimensional voigt function, the convolution between gaussian and
@@ -131,7 +131,7 @@ def voigt(x, area, center, sigma, gamma):
         center position
     sigma : float
         standard deviation
-    gamma : float
+    gamma : float or option
         half width at half maximum of lorentzian
     """
     if gamma is None:
@@ -197,8 +197,7 @@ def gausssian_step(x, area, center, sigma, peak_e):
            (Practical Spectroscopy)", CRC Press, 2 edition, pp. 182, 2007.
     """
 
-    return (area
-            * scipy.special.erfc((x - center) / (np.sqrt(2) * sigma))
+    return (area * scipy.special.erfc((x - center) / (np.sqrt(2) * sigma))
             / (2. * peak_e))
 
 
@@ -266,11 +265,11 @@ def elastic(x, coherent_sct_amplitude,
     fwhm_fanoprime : float
         global fitting parameter for peak width
     e_offset : float
-+        offset of energy calibration
-+    e_linear : float
-+        linear coefficient in energy calibration
-+    e_quadratic : float
-+        quadratic coefficient in energy calibration
+        offset of energy calibration
+    e_linear : float
+        linear coefficient in energy calibration
+    e_quadratic : float
+        quadratic coefficient in energy calibration
     epsilon : float
         energy to create a hole-electron pair
         for Ge 2.96, for Si 3.61 at 300K
@@ -307,7 +306,7 @@ def compton(x, compton_amplitude, coherent_sct_energy,
     x : array
         energy value
     compton_amplitude : float
-+        area for gaussian peak, gaussian step and gaussian tail functions
+        area for gaussian peak, gaussian step and gaussian tail functions
     coherent_sct_energy : float
         incident energy                         
     fwhm_offset : float
@@ -315,11 +314,11 @@ def compton(x, compton_amplitude, coherent_sct_energy,
     fwhm_fanoprime : float
         global fitting parameter for peak width
     e_offset : float
-+        offset of energy calibration
-+    e_linear : float
-+        linear coefficient in energy calibration
-+    e_quadratic : float
-+        quadratic coefficient in energy calibration
+        offset of energy calibration
+    e_linear : float
+        linear coefficient in energy calibration
+    e_quadratic : float
+        quadratic coefficient in energy calibration
     compton_angle : float
         compton angle in degree
     compton_fwhm_corr : float 
