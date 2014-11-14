@@ -729,6 +729,69 @@ def wedge_integration(src_data, center, theta_start,
     raise NotImplementedError()
 
 
+def radial_integration(pixel_size, calibrated_center, image_array,
+                       dist_sample, detector_size, wavelength,
+                       q_or_twotheta="Q"):
+    """
+    Radial integration : taking the 2D image data and convert to 1D
+
+    Parameters
+    ----------
+    pixel_size : tuple, optional
+        The size of a pixel (really the pitch) in real units.
+        (height, width). (mm)
+
+    calibrated_center : tuple
+        The center in pixels-units (row, col)
+
+    dist_sample : float
+        distance from the sample to the detector (mm)
+
+    image_array : ndarray
+        input image
+
+    detector_size : tuple
+        2 element tuple defining the number of pixels in the detector.
+        Order is (num_rows, num_columns)
+
+    wavelength : float
+        wavelength of the incoming x-rays (Angstroms)
+
+    q_or_two_theta : {'Q', '2theta'}, optional
+        twotheta (degrees) or Q (Angstroms)
+
+    Returns
+    -------
+    bin_centers : ndarray
+       bin centers from bin edges
+
+    ring_average : ndarray
+        radial integration of intensity
+    """
+
+    # convert to pixels to radius
+    radius = pixel_to_radius(detector_size, calibrated_center, pixel_size)
+
+    # convert to radius to two theta
+    two_theta = radius_to_twotheta(dist_sample, radius)
+
+    if q_or_twotheta == 'Q':
+        # convert to Q space values from known two theta values
+        x_val = twotheta_to_q(two_theta, wavelength)
+    else:
+        x_val = two_theta
+
+    bins, sums, counts = bin_1D(np.ravel(x_val), np.ravel(image_array), nx=1500)
+
+    mask = counts > 10
+    # getting bin centers from bin edges
+    bin_centers = bin_edges_to_centers(bins)[mask]
+    # radial integration
+    ring_averages = sums[mask] / counts[mask]
+
+    return bin_centers, ring_averages
+
+
 def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
     """
     Generate bin edges.  The last value is the returned array is
