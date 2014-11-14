@@ -257,7 +257,7 @@ def elastic(x, coherent_sct_amplitude,
     x : array
         energy value
     coherent_sct_amplitude : float
-+        area of elastic peak
+        area of elastic peak
     coherent_sct_energy : float
         incident energy                         
     fwhm_offset : float
