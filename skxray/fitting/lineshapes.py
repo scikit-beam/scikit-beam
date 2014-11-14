@@ -131,8 +131,9 @@ def voigt(x, area, center, sigma, gamma=None):
         center position
     sigma : float
         standard deviation
-    gamma : float or option
-        half width at half maximum of lorentzian
+    gamma : float, optional
+        half width at half maximum of lorentzian.
+        If optional, `gamma` gets set to `sigma`
     """
     if gamma is None:
         gamma = sigma
