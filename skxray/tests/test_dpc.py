@@ -71,7 +71,6 @@ def test_image_reduction_default():
 
     dpc.image_reduction(img, bad_pixels=[(1, -1), (-1, 1)])
     dpc.image_reduction(img, roi=np.array([0, 0, 20, 20]))
-    #assert_raises(IndexError, dpc.image_reduction, img, bad_pixels=[(1, -1), (-1, 1)])
 
 
 def test_image_reduction():
