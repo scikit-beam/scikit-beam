@@ -44,6 +44,7 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
+from nose.tools import (raises, assert_raises)
 
 import skxray.dpc as dpc
 
@@ -67,6 +68,10 @@ def test_image_reduction_default():
     assert_array_equal(xline, xsum)
 
     assert_array_equal(yline, ysum)
+
+    dpc.image_reduction(img, bad_pixels=[(1, -1), (-1, 1)])
+    dpc.image_reduction(img, roi=np.array([0, 0, 20, 20]))
+    #assert_raises(IndexError, dpc.image_reduction, img, bad_pixels=[(1, -1), (-1, 1)])
 
 
 def test_image_reduction():

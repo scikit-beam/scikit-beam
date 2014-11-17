@@ -82,10 +82,7 @@ def image_reduction(im, roi=None, bad_pixels=None):
 
     if roi is not None:
         x, y, w, l = roi
-        try:
-            im = im[x : x + w, y : y + l]
-        except IndexError:
-            logging.warning("The ROI is out of range.")
+        im = im[x : x + w, y : y + l]
 
     xline = np.sum(im, axis=0)
     yline = np.sum(im, axis=1)
