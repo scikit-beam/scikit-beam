@@ -364,7 +364,7 @@ def test_radius_to_twotheta():
                               core.radius_to_twotheta(dist_sample,
                                                       radius), decimal=8)
 
-    
+
 def test_multi_tau_lags():
     multi_tau_levels = 3
     multi_tau_channels = 8
@@ -552,7 +552,7 @@ def test_roi_rectangles():
     assert_array_equal(xy_inds, np.ravel(xy_inds_m))
 
 
-if __name__ == "__main__":
+def run_image_to_relative_xyi_repeatedly():
     level = logging.ERROR
     ch = logging.StreamHandler()
     ch.setLevel(level)
@@ -565,3 +565,8 @@ if __name__ == "__main__":
         num_calls += 1
         if num_calls % 10 == 0:
             print('{0} calls successful'.format(num_calls))
+
+
+if __name__ == '__main__':
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

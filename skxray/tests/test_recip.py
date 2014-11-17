@@ -104,3 +104,9 @@ def test_hkl_to_q():
                        14.73091986])
 
     npt.assert_array_almost_equal(b_norm, recip.hkl_to_q(b))
+
+
+
+if __name__ == '__main__':
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
