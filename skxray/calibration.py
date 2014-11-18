@@ -133,6 +133,67 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
 estimate_d_blind.name = list(calibration_standards)
 
 
+def estimate_wavelength(name, dist_sample, bin_centers, ring_average,
+               window_size, max_peak_count, thresh):
+    """
+    Estimate the sample-detector distance
+
+    Given a radially integrated calibration image return an estimate for
+    the sample-detector distance.  This function does not require a
+    rough estimate of what d should be.
+
+    For the peaks found the detector-sample distance is estimated via
+    .. math ::
+
+        D = \\frac{r}{\\tan 2\\theta}
+
+    where :math:`r` is the distance in mm from the calibrated center
+    to the ring on the detector and :math:`D` is the distance from
+    the sample to the detector.
+
+    Parameters
+    ----------
+    name : str
+        The name of the calibration standard.  Used to look up the
+        expected peak location
+        For valid options, see the name attribute on this function
+
+    dist_sample : float
+        The detector-sample distance in mm.  This is the mean of the estimate
+        from all of the peaks used.
+
+    bin_centers : array
+        The distance from the calibrated center to the center of
+        the ring's annulus in mm
+
+    ring_average : array
+        The average intensity in the given ring of a azimuthally integrated
+        powder pattern.  In counts [arb]
+
+    window_size : int
+        The number of elements on either side of a local maximum to
+        use for locating and refining peaks.  Candidates are identified
+        as a relative maximum in a window sized (2*window_size + 1) and
+        the same window is used for fitting the peaks to refine the location.
+
+    max_peak_count : int
+        Use at most this many peaks
+
+    thresh : float
+        Fraction of maximum peak height
+
+    Returns
+    -------
+    wavelength : float
+        The wavelength of scattered x-ray in Angstroms
+
+    std_wavelength : float
+        The standard deviation of the wavelength of scattered
+        x-ray in Angstroms
+    """
+
+
+
 def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
                   thresh, window_size,
                   nx=None, min_x=None, max_x=None):
