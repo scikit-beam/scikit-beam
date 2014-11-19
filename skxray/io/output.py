@@ -99,7 +99,7 @@ def save_output(tth, intensity,  output_name, q_or_2theta, ext='.chi',
                "  second column represents intensities and if there is"
                " a third column it represents the error value of intensities")
 
-    file_path = create_filepath(tth, intensity,  output_name, ext, err,
+    file_path = _valid_inputs(tth, intensity,  output_name, ext, err,
                                 dir_path)
 
     with open(file_path, 'wb') as f:
@@ -151,7 +151,7 @@ def save_gsas(tth, intensity, output_name, ext='.gsas', mode=None,
     Saved file of diffraction intensities in .gsas file format
 
     """
-    file_path = create_filepath(tth, intensity,  output_name, ext,
+    file_path = _valid_inputs(tth, intensity, output_name, ext,
                                 err, dir_path)
 
     max_intensity = 999999
@@ -219,7 +219,7 @@ def save_gsas(tth, intensity, output_name, ext='.gsas', mode=None,
         f.write(rv)
 
 
-def create_filepath(tth, intensity,  output_name, ext, err, dir_path):
+def _valid_inputs(tth, intensity,  output_name, ext, err, dir_path):
     """
     Parameters
     ----------
@@ -257,7 +257,7 @@ def create_filepath(tth, intensity,  output_name, ext, err, dir_path):
                          " (for .xye file format err != None)")
 
     if (dir_path) is None:
-        file_path = os.getcwd() + "/" + output_name + ext
+        file_path = output_name + ext
     elif os.path.exists(dir_path):
         file_path = os.path.join(dir_path, output_name) + ext
     else:
