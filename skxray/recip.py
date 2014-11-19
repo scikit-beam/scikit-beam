@@ -242,7 +242,7 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
         raise ValueError("Either HKL values(Qx, Qy, Qz) or Q space values"
                          " for each pixel in the detector has to be specified")
 
-    if (step_q == None):
+    if (step_q is None):
         # last Q ring edge value
         last_q = first_q + num_qs*(delta_q)
         # edges of all the Q rings
@@ -293,7 +293,7 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
     q_ring_val = q_ring_val.reshape(num_qs, 2)
 
     # number of pixels in each  Q ring
-    num_pixels = np.bincount(q_inds, minlength= (num_qs+1))
-    num_pixels = num_pixels[1 :]
+    num_pixels = np.bincount(q_inds, minlength=(num_qs+1))
+    num_pixels = num_pixels[1:]
 
     return q_inds, q_ring_val, num_pixels
