@@ -198,7 +198,7 @@ def hkl_to_q(hkl_arr):
 
 def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
     """
-    This module will find the indices of the required Q rings, find the bin
+    This will find the indices of the required Q rings, find the bin
     edges of the Q rings, and count the number of pixels in each Q ring.
 
     Parameters
@@ -231,7 +231,7 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
         shape is [num_qs][2]
 
     num_pixels : ndarray
-        number of pixels in certain Q ring
+        number of pixels in each Q ring
     """
 
     if (q_val.ndim == 1):
