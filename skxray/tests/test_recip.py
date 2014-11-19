@@ -7,6 +7,10 @@ from nose.tools import raises
 
 from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_almost_equal)
+
+from nose.tools import assert_equal, assert_true, raises
 from skxray import recip
 
 
@@ -105,6 +109,108 @@ def test_hkl_to_q():
 
     npt.assert_array_almost_equal(b_norm, recip.hkl_to_q(b))
 
+
+def test_q_rings():
+    xx, yy = np.mgrid[:15, :12]
+    circle = (xx - 0.5) ** 2 + (yy - 0.5) ** 2
+    q_val = np.ravel(circle)
+
+    first_q = 2.5
+    delta_q = 2.5
+    step_q = 0.5
+    num_qs = 20 # number of Q rings
+
+    q_inds, q_ring_val, num_pixels = recip.q_rings(num_qs, first_q, delta_q, q_val)
+
+    q_inds_m = np.array([[ 0, 0, 1, 2, 5, 8, 12, 17, 0, 0, 0, 0],
+                        [ 0, 0, 1, 2, 5, 8, 12, 17, 0, 0, 0, 0],
+                        [ 1, 1, 1, 3, 5, 9, 13, 17, 0, 0, 0, 0],
+                        [ 2, 2, 3,  5, 7, 10, 14, 19, 0, 0, 0, 0],
+                        [ 5, 5, 5,  7, 9, 13, 17, 0, 0, 0, 0, 0],
+                        [ 8, 8, 9, 10, 13, 16, 20, 0, 0, 0, 0, 0],
+                        [12, 12, 13, 14, 17, 20, 0, 0, 0, 0, 0, 0],
+                        [17, 17, 17, 19, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+
+    q_ring_val_m = np.array([[2.5, 5.],
+                             [5., 7.5],
+                             [7.5, 10.],
+                             [10., 12.5],
+                             [12.5, 15.],
+                             [15. , 17.5],
+                             [17.5, 20.],
+                             [20. , 22.5],
+                             [22.5, 25.],
+                             [25. , 27.5],
+                             [27.5, 30.],
+                             [30., 32.5],
+                             [32.5, 35.],
+                             [35., 37.5],
+                             [37.5, 40.],
+                             [40., 42.5],
+                             [42.5, 45.],
+                             [45., 47.5],
+                             [47.5, 50.],
+                             [50., 52.5]])
+
+    num_pixels_m = np.array(([5, 4, 2, 0, 7, 0, 2, 4, 3, 2, 0, 4, 4, 2, 0, 1, 8, 0, 2, 2]))
+
+    assert_array_almost_equal(q_ring_val_m, q_ring_val)
+    assert_array_equal(num_pixels, num_pixels_m)
+    assert_array_equal(q_inds, np.ravel(q_inds_m))
+
+    # using a step for the Q rings
+    (qstep_inds, qstep_ring_val,
+     numstep_pixels) = recip.q_rings(num_qs, first_q, delta_q, q_val, step_q)
+
+    qstep_inds_m = np.array([[0, 0, 1, 2, 4, 7, 10, 14, 19, 0, 0, 0],
+                            [0, 0, 1, 2, 4, 7,10, 14, 19, 0, 0, 0],
+                            [1, 1, 1, 3, 5, 7, 11, 15, 19, 0, 0, 0],
+                            [2, 2, 3, 4, 6, 9, 12, 16, 0, 0, 0, 0],
+                            [ 4,  4,  5,  6,  8, 11, 14, 18, 0, 0, 0, 0],
+                            [ 7,  7,  7,  9, 11, 13, 17, 0, 0, 0, 0, 0],
+                            [10, 10, 11, 12, 14, 17, 20, 0, 0, 0, 0, 0],
+                            [14, 14, 15, 16, 18,  0, 0, 0, 0, 0, 0, 0],
+                            [19, 19, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+
+    numstep_pixels_m = np.array([5, 4, 2, 5, 2, 2, 6, 1, 2, 4, 4, 2, 1, 6, 2, 2, 2, 2, 6, 1])
+
+    qstep_ring_val_m = np.array([[2.5, 5.],
+                                [5.5, 8.],
+                                [8.5, 11.],
+                                [11.5, 14.],
+                                [14.5, 17.],
+                                [17.5, 20.],
+                                [20.5, 23.],
+                                [23.5, 26.],
+                                [26.5, 29.],
+                                [29.5, 32.],
+                                [32.5, 35.],
+                                [35.5, 38.],
+                                [38.5, 41.],
+                                [41.5, 44.],
+                                [44.5, 47.],
+                                [47.5, 50.],
+                                [50.5, 53.],
+                                [53.5, 56.],
+                                [56.5, 59.],
+                                [59.5, 62.]])
+
+    assert_almost_equal(qstep_ring_val, qstep_ring_val_m)
+    assert_array_equal(numstep_pixels, numstep_pixels_m)
+    assert_array_equal(qstep_inds, np.ravel(qstep_inds_m))
 
 
 if __name__ == '__main__':
