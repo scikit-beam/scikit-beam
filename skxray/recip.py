@@ -234,6 +234,12 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
         number of pixels in each Q ring
     """
 
+    if (step_q < 0):
+        raise ValueError("step_q has to be positive ")
+
+    if (delta_q < 0):
+        raise ValueError("delta_q has to be positive")
+
     if (q_val.ndim == 1):
         q_values = q_val
     elif ((q_val.ndim == 2) & (q_val.shape[1] == 3)):
@@ -269,16 +275,7 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
 
     else:
         #  when there is a step between Q rings find the edge values of Q rings
-        q_ring_val = np.zeros(num_qs*2)
-        q_rings = first_q
-        q_ring_val[0] = q_rings
-        for i in range(1, num_qs*2):
-            if (i % 2 == 0):
-                q_rings += step_q
-                q_ring_val[i] = q_rings
-            else:
-                q_rings += delta_q
-                q_ring_val[i] = q_rings
+        q_ring_val = first_q + np.r_[0, np.cumsum(np.tile([delta_q, step_q], num_qs))][:-1]
 
         # indices of Q rings
         q_inds = np.digitize(q_values, np.array(q_ring_val))
