@@ -214,9 +214,8 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
 
     q_val : ndarray
         Q space values for each pixel in the detector
-        shape is [detector_size[0]*detector_size[1]][1] or
-        (Qx, Qy, Qz) - HKL values
-        shape is [detector_size[0]*detector_size[1]][3]
+        shape is ([detector_size[0]*detector_size[1]][1], ) or
+        ([detector_size[0]*detector_size[1]][1], 1)
 
     step_q : float, optional
         step value for the next Q ring from the end of the previous Q ring
@@ -242,8 +241,8 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
     elif (q_val.ndim == 2):
         q_values = np.ravel(q_val)
     else:
-        raise ValueError("Q space values for each pixel in the detector has"
-                         " to be specified")
+        raise ValueError("Q space values for each pixel in the detector"
+                         " has to be specified")
 
     if (step_q is None):
         # last Q ring edge value
@@ -272,11 +271,13 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
 
     else:
         if (step_q < 0):
-            raise ValueError("step_q(step value for the next Q ring from"
-                         " the end of the previous ring) has to be positive ")
+            raise ValueError("step_q(step value for the next Q ring from the "
+                             "end of the previous ring) has to be positive ")
 
         #  when there is a step between Q rings find the edge values of Q rings
-        q_ring_val = first_q + np.r_[0, np.cumsum(np.tile([delta_q, step_q], num_qs))][:-1]
+        q_ring_val = first_q + np.r_[0,
+                                     np.cumsum(np.tile([delta_q,
+                                                        step_q], num_qs))][:-1]
 
         # indices of Q rings
         q_inds = np.digitize(q_values, np.array(q_ring_val))
