@@ -235,18 +235,19 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
     """
 
     if (step_q < 0):
-        raise ValueError("step_q has to be positive ")
+        raise ValueError("step_q(step value for the next Q ring from"
+                         " the end of the previous ring) has to be positive ")
 
     if (delta_q < 0):
-        raise ValueError("delta_q has to be positive")
+        raise ValueError("delta_q(thickness of the Q ring has to be positive")
 
     if (q_val.ndim == 1):
         q_values = q_val
-    elif ((q_val.ndim == 2) & (q_val.shape[1] == 3)):
-        q_values = np.sqrt(q_val[:, 0]**2 + q_val[:, 1]**2 + q_val[:, 2]**2)
+    elif (q_val.ndim == 2):
+        q_values = np.ravel(q_val)
     else:
-        raise ValueError("Either HKL values(Qx, Qy, Qz) or Q space values"
-                         " for each pixel in the detector has to be specified")
+        raise ValueError("Q space values for each pixel in the detector has"
+                         " to be specified")
 
     if (step_q is None):
         # last Q ring edge value
