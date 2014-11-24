@@ -234,10 +234,6 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
         number of pixels in each Q ring
     """
 
-    if (step_q < 0):
-        raise ValueError("step_q(step value for the next Q ring from"
-                         " the end of the previous ring) has to be positive ")
-
     if (delta_q < 0):
         raise ValueError("delta_q(thickness of the Q ring has to be positive")
 
@@ -275,6 +271,10 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
         q_ring_val = np.asarray(q_ring_val)
 
     else:
+        if (step_q < 0):
+            raise ValueError("step_q(step value for the next Q ring from"
+                         " the end of the previous ring) has to be positive ")
+
         #  when there is a step between Q rings find the edge values of Q rings
         q_ring_val = first_q + np.r_[0, np.cumsum(np.tile([delta_q, step_q], num_qs))][:-1]
 
