@@ -214,8 +214,8 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
 
     q_val : ndarray
         Q space values for each pixel in the detector
-        shape is ([detector_size[0]*detector_size[1]][1], ) or
-        ([detector_size[0]*detector_size[1]][1], 1)
+        shape is ([detector_size[0]*detector_size[1]], ) or
+        ([detector_size[0]*detector_size[1]], 1)
 
     step_q : float, optional
         step value for the next Q ring from the end of the previous Q ring
@@ -227,7 +227,7 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
 
     q_ring_val : ndarray
         edge values of each Q ring
-        shape is [num_qs][2]
+        shape is (num_qs, 2)
 
     num_pixels : ndarray
         number of pixels in each Q ring
@@ -235,6 +235,8 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
 
     if (delta_q < 0):
         raise ValueError("delta_q(thickness of the Q ring has to be positive")
+
+    q_val = np.asarray(q_val)
 
     if (q_val.ndim == 1):
         q_values = q_val
@@ -252,9 +254,8 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
 
         # indices of Q rings
         q_inds = np.digitize(q_values, np.array(q_r))
-        for i, item in enumerate(q_inds):
-            if (item > num_qs):
-                q_inds[i] = 0
+        # discard the indices grater than number of Q rings
+        q_inds[q_inds > num_qs] = 0
 
         # Edge values of each Q rings
         q_ring_val = []
