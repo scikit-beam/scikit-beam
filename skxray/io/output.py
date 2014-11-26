@@ -43,6 +43,9 @@
 import numpy as np
 import scipy.io
 import os
+import sys
+import logging
+logger = logging.getLogger(__name__)
 
 
 def save_output(tth, intensity,  output_name, q_or_2theta, ext='.chi',
@@ -56,10 +59,10 @@ def save_output(tth, intensity,  output_name, q_or_2theta, ext='.chi',
     ----------
     tth : ndarray
         twotheta values (degrees) or Q values (Angstroms)
-        shape 1XN array
+        shape (N, ) array
 
     intensity : ndarray
-        intensity values 1XN array
+        intensity values (N, ) array
 
     output_name : str
         name for the saved output diffraction intensities
@@ -73,16 +76,12 @@ def save_output(tth, intensity,  output_name, q_or_2theta, ext='.chi',
         selected it will be saved as a .chi file)
 
     err : ndarray, optional
-         error value of intensity
+         error value of intensity shape (N, ) array
 
     dir_path : str, optional
         new directory path to save the output data files
         eg: /Volumes/Data/experiments/data/
 
-    Returns
-    -------
-    Saved file of diffraction intensities in .chi, .dat or .xye
-    file formats
     """
 
     if q_or_2theta not in set(['Q', '2theta']):
@@ -90,7 +89,7 @@ def save_output(tth, intensity,  output_name, q_or_2theta, ext='.chi',
                          " Q values(enter Q) or two theta values"
                          " (enter 2theta)")
 
-    elif q_or_2theta == "Q":
+    if q_or_2theta == "Q":
         des = ("First column represents Q values (Angstroms) and second"
                " column represents intensities and if there is a third"
                " column it represents the error value of intensities")
@@ -99,8 +98,9 @@ def save_output(tth, intensity,  output_name, q_or_2theta, ext='.chi',
                "  second column represents intensities and if there is"
                " a third column it represents the error value of intensities")
 
-    file_path = _valid_inputs(tth, intensity,  output_name, ext, err,
-                                dir_path)
+    _validate_input(tth, intensity, err, ext)
+
+    file_path = _create_file_path(dir_path, output_name, ext)
 
     with open(file_path, 'wb') as f:
         f.write(output_name)
@@ -120,7 +120,7 @@ def save_output(tth, intensity,  output_name, q_or_2theta, ext='.chi',
             np.savetxt(f, np.c_[tth, intensity, err], newline='\n')
 
 
-def save_gsas(tth, intensity, output_name, ext='.gsas', mode=None,
+def save_gsas(tth, intensity, output_name, mode=None,
               err=None, dir_path=None):
     """
     Save diffraction intensities into .gsas file format
@@ -128,10 +128,10 @@ def save_gsas(tth, intensity, output_name, ext='.gsas', mode=None,
     Parameters
     ----------
     tth : ndarray
-        twotheta values (degrees)
+        twotheta values (degrees) shape (N, ) array
 
     intensity : ndarray
-        intensity values
+        intensity values shape (N, ) array
 
     output_name : str
         name for the saved output diffraction intensities
@@ -140,19 +140,20 @@ def save_gsas(tth, intensity, output_name, ext='.gsas', mode=None,
         gsas file formats, could be 'std', 'esd', 'fxye'
 
     err : ndarray, optional
-        error value of intensity
+        error value of intensity shape(N, ) array
+        err is None then mode will be 'std'
 
     dir_path : str, optional
         new directory path to save the output data files
         eg: /Data/experiments/data/
 
-    Returns
-    -------
-    Saved file of diffraction intensities in .gsas file format
-
     """
-    file_path = _valid_inputs(tth, intensity, output_name, ext,
-                                err, dir_path)
+    # save output diffraction intensities into .gsas file extension.
+    ext = '.gsas'
+
+    _validate_input(tth, intensity, err, ext)
+
+    file_path = _create_file_path(dir_path, output_name, ext)
 
     max_intensity = 999999
     log_scale = np.floor(np.log10(max_intensity / np.max(intensity)))
@@ -164,8 +165,7 @@ def save_gsas(tth, intensity, output_name, ext='.gsas', mode=None,
     title += ': %s' % output_name
     title += ' scale=%g' % scale
 
-    if len(title) > 80:
-        title = title[:80]
+    title = title[:80]
     lines.append("%-80s" % title)
     i_bank = 1
     n_chan = len(intensity)
@@ -219,33 +219,27 @@ def save_gsas(tth, intensity, output_name, ext='.gsas', mode=None,
         f.write(rv)
 
 
-def _valid_inputs(tth, intensity,  output_name, ext, err, dir_path):
+def _validate_input(tth, intensity, err, ext):
     """
+    This function validate all the inputs(eg: two theta values, Q space
+    values, directory path etc..) and create a output file path to save
+    diffraction intensities
+
     Parameters
     ----------
     tth : ndarray
-        twotheta values (degrees)
+        twotheta values (degrees) or Q space values (Angstroms)
 
     intensity : ndarray
         intensity values
 
-    output_name : str
-        name for the saved output diffraction intensities
-
-    mode : {'std', 'esd', 'fxye'}, optional
-        gsas file formats, could be 'std', 'esd', 'fxye'
-
     err : ndarray, optional
         error value of intensity
 
-    dir_path : str, optional
-        new directory path to save the output data files
-        eg: /Data/experiments/data/
+    ext : {'.chi', '.dat', '.xye', '.gsas'}
+        save output diffraction intensities into .chi,
+        .dat .xye or .gsas file formats.
 
-    Returns
-    -------
-    file_path : str
-        path to save the diffraction intensities
     """
 
     if len(tth) != len(intensity):
@@ -256,11 +250,41 @@ def _valid_inputs(tth, intensity,  output_name, ext, err, dir_path):
         raise ValueError("Provide the Error value of intensity"
                          " (for .xye file format err != None)")
 
+
+def _create_file_path(dir_path, output_name, ext):
+    """
+    This function create a output file path to save
+    diffraction intensities.
+
+    Parameters
+    ----------
+    dir_path : str
+        new directory path to save the output data files
+        eg: /Data/experiments/data/
+
+    output_name : str
+        name for the saved output diffraction intensities
+
+    ext : {'.chi', '.dat', '.xye', '.gsas'}
+        save output diffraction intensities into .chi,
+        .dat .xye or .gsas file formats.
+
+    Returns:
+    -------
+    file_path : str
+        path to save the diffraction intensities
+    """
+
     if (dir_path) is None:
         file_path = output_name + ext
     elif os.path.exists(dir_path):
         file_path = os.path.join(dir_path, output_name) + ext
     else:
         raise ValueError('The given path does not exist.')
+
+    if os.path.isfile(file_path):
+        logger.info("Output file of diffraction intensities"
+                       " already exists")
+        os.remove(file_path)
 
     return file_path
