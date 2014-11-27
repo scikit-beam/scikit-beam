@@ -78,11 +78,15 @@ def image_reduction(im, roi=None, bad_pixels=None):
             try:
                 im[x, y] = 0
             except IndexError:
-                logging.warning("Bad pixel indexes are out of range.")
+                raise
 
     if roi is not None:
-        x, y, w, l = roi
-        im = im[x : x + w, y : y + l]
+        try:
+            x, y, w, l = roi
+        except IndexError:
+            raise
+        else:
+            im = im[x : x + w, y : y + l]
 
     xline = np.sum(im, axis=0)
     yline = np.sum(im, axis=1)
@@ -147,7 +151,6 @@ def _rss_factory(length):
     return _rss
 
 
-
 def dpc_fit(rss, ref_f, f, start_point, solver, tol=1e-6, max_iters=2000):
     """
     Nonlinear fitting for 2 points
@@ -173,57 +176,40 @@ def dpc_fit(rss, ref_f, f, start_point, solver, tol=1e-6, max_iters=2000):
         * 'Powell'
         * 'CG'
         * 'BFGS'
-        * 'Newton-CG'
         * 'Anneal'
         * 'L-BFGS-B'
         * 'TNC'
         * 'COBYLA'
         * 'SLSQP'
-        * 'dogleg'
-        * 'trust-ncg'
-
+    
     tol : float, optional
         termination criteria of nonlinear fitting
-
+    
     max_iters : integer, optional
         maximum iterations of nonlinear fitting
-
-    Returns:
-    ----------
-    a : float
-        fitting result: intensity attenuation
-
-    g : float
-        fitting result: phase gradient
-
+    
+    Returns
+    -------
+        fitting result: intensity attenuation and phase gradient
+    
     """
-
-    res = minimize(rss, start_point, args=(ref_f, f), method=solver, tol=tol,
-                   options=dict(maxiter=max_iters))
-
-    vx = res.x
-    a = vx[0]
-    g = vx[1]
-
-    return a, g
+    
+    return minimize(rss, start_point, args=(ref_f, f), method=solver, tol=tol,
+                    options=dict(maxiter=max_iters)).x[:2]
 
 # attributes
 dpc_fit.solver = ['Nelder-Mead',
                   'Powell',
                   'CG',
                   'BFGS',
-                  'Newton-CG',
                   'Anneal',
                   'L-BFGS-B',
                   'TNC',
                   'COBYLA',
-                  'SLSQP',
-                  'dogleg',
-                  'trust-ncg']
+                  'SLSQP']
 
 
-
-def recon(gx, gy, dx, dy, padding=0, w=1.):
+def recon(gx, gy, dx, dy, padding=0, w=0.5):
     """
     Reconstruct the final phase image
 
@@ -243,19 +229,23 @@ def recon(gx, gy, dx, dy, padding=0, w=1.):
 
     padding : integer, optional
         padding parameter
-        default value, padding = 0 --> no padding
-                        p p p
-        padding = 1 --> p v p
-                        p p p
+        pad a N-by-M array to be (N*(2*padding+1))-by-(M*(2*padding+1)) array 
+        with the image in the middle with a (N*pad / M*pad) thick edge of 
+        zeros.
+        default value, padding = 0 --> no padding --> v
+                        v v v
+        padding = 1 --> v v v
+                        v v v
 
     w : float, optional
         weighting parameter for the phase gradient along x and y direction when
         constructing the final phase image
-        default value = 0, which means that gx and gy equally contribute to
+        valid range : [0, 1]
+        default value = 0.5, which means that gx and gy equally contribute to
         the final phase image
 
     Returns
-    ----------
+    -------
     phi : 2-D numpy array
         final phase image
 
@@ -293,7 +283,7 @@ def recon(gx, gy, dx, dy, padding=0, w=1.):
 
     kappax, kappay = np.meshgrid(ax, ay)
 
-    c = -1j * (kappax * tx + w * kappay * ty)
+    c = -2j * (kappax * tx * (1-w) + kappay * ty * w)
     div_v = kappax**2 + w * kappay**2
     zero_arr = (div_v == 0)
     c /= div_v
@@ -301,18 +291,18 @@ def recon(gx, gy, dx, dy, padding=0, w=1.):
 
     c = np.fft.ifftshift(c)
     phi_padding = np.fft.ifft2(c)
-    phi_padding = -phi_padding.real
 
     phi = phi_padding[(pad // 2) * rows : (pad // 2 + 1) * rows,
                       (pad // 2) * cols : (pad // 2 + 1) * cols]
+    
+    phi = phi.real
 
     return phi
 
 
-
 def dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, dy,
                energy, roi, bad_pixels, solver, ref, image_sequence, padding=0,
-               w=1., scale=True):
+               w=0.5, scale=True):
     """
     Controller function to run the whole DPC
 
@@ -357,14 +347,11 @@ def dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, dy,
         * 'Powell'
         * 'CG'
         * 'BFGS'
-        * 'Newton-CG'
         * 'Anneal'
         * 'L-BFGS-B'
         * 'TNC'
         * 'COBYLA'
         * 'SLSQP'
-        * 'dogleg'
-        * 'trust-ncg'
 
     ref : 2-D numpy array
         the reference image for a DPC calculation
@@ -382,7 +369,7 @@ def dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, dy,
     w : float, optional
         weighting parameter for the phase gradient along x and y direction when
         constructing the final phase image
-        default value = 0, which means that gx and gy equally contribute to
+        default value = 0.5, which means that gx and gy equally contribute to
         the final phase image
 
     scale : bool, optional
@@ -432,7 +419,7 @@ def dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, dy,
         gy[i, j] = _gy
         a[i, j] = _a
 
-    if scale is True:
+    if scale:
         # lambda = h * c / E
         lambda_ = 12.4e-4 / energy
         gx *= - len(ref_fx) * pixel_size / (lambda_ * focus_to_det)
@@ -448,11 +435,8 @@ dpc_runner.solver = ['Nelder-Mead',
                      'Powell',
                      'CG',
                      'BFGS',
-                     'Newton-CG',
                      'Anneal',
                      'L-BFGS-B',
                      'TNC',
                      'COBYLA',
-                     'SLSQP',
-                     'dogleg',
-                     'trust-ncg']
+                     'SLSQP']

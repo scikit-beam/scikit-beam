@@ -66,7 +66,6 @@ def test_image_reduction_default():
     xline, yline = dpc.image_reduction(img)
 
     assert_array_equal(xline, xsum)
-
     assert_array_equal(yline, ysum)
 
     dpc.image_reduction(img, bad_pixels=[(1, -1), (-1, 1)])
@@ -96,76 +95,71 @@ def test_image_reduction():
     xline, yline = dpc.image_reduction(img, roi, bad_pixels)
 
     assert_array_equal(xline, xsum)
-
     assert_array_equal(yline, ysum)
 
 
-def test_rss():
+def test_rss_factory():
     """
-    Test _rss
+    Test _rss_factory
 
     """
 
-    xdata = np.arange(10)
-    ydata = [0, 1.68770792 + 1.07314584j, -3.64452105 - 1.64847394j,
-             5.76102172 + 1.67649299j, -7.91993997 - 1.12896006j,
-             10.00000000 + 0.j, -11.87990996 + 1.6934401j,
-             13.44238401 - 3.91181697j, -14.57808419 + 6.59389576j,
-             15.18937126 - 9.65831252j]
-    rss = dpc._rss_factory(len(xdata))
+    length = 10
     v = [2, 3]
+    xdata = np.arange(length)
+    beta = 1j * (np.arange(length) - length//2)
+    ydata = xdata * v[0] * np.exp(v[1] * beta)
 
+    rss = dpc._rss_factory(length)
     residue = rss(v, xdata, ydata)
 
     assert_almost_equal(residue, 0)
-
-
+    
+    
 def test_dpc_fit():
     """
     Test dpc_fit
-
+    
     """
-
+    
     start_point = [1, 0]
+    length = 100
     solver = 'Nelder-Mead'
-
-    # Test 1 (succeeded): res = [1.34, 0.23]
-    xdata = np.arange(10)
-    ydata = [0, 0.81179901 - 1.06610617j, 2.06693932 - 1.70591965j,
-             3.60213104 - 1.78467139j, 5.21885188 - 1.22195953j,
-             6.70000000 + 0.j, 7.82827782 + 1.83293929j,
-             8.40497243 + 4.16423324j, 8.26775728 + 6.82367859j,
-             7.30619109 + 9.59495554j]
-    rss = dpc._rss_factory(len(ydata))
+    xdata = np.arange(length)
+    beta = 1j * (np.arange(length) - length//2)
+    rss = dpc._rss_factory(length)
+    
+    # Test 1
+    v = [1.02, -0.00023]
+    ydata = xdata * v[0] * np.exp(v[1] * beta)
     res = dpc.dpc_fit(rss, xdata, ydata, start_point, solver)
-    assert_array_almost_equal(res, [1.34, 0.23])
-
-    # Test 2 (succeeded): res = [0.88, 0.28]
-    ydata = [0, 0.38340055 - 0.79208839j, 1.17473457 - 1.31057189j,
-             2.23675349 - 1.40233156j,  3.38291514 - 0.97277188j,
-             4.40000000 + 0.j, 5.07437271 + 1.45915782j,
-             5.21909148 + 3.27210698j, 4.69893829 + 5.24228756j,
-             3.45060497 + 7.1287955j]
+    assert_array_almost_equal(res, v)
+    
+    # Test 2
+    v = [0.88, -0.0048]
+    ydata = xdata * v[0] * np.exp(v[1] * beta)
     res = dpc.dpc_fit(rss, xdata, ydata, start_point, solver)
-    assert_array_almost_equal(res, [0.88, 0.28])
-
-    """
-    # Test 3 (failed): res = [-0.25595591, -0.27603199]
-    ydata = [0, -0.71170192 - 0.31918705j, -0.70539481 - 1.3914087j,
-             0.48961848 - 2.28820317j, 2.42602688 - 1.96183423j, 3.9,
-             3.63904032 + 2.94275135j, 1.14244312 + 5.33914073j,
-             -2.82157925 + 5.56563478j, -6.40531730+2.87268347j]
-    res = dpc.dpc_fit(xdata, ydata, start_point, solver)
-    assert_array_almost_equal(res, [0.78, 0.68])
-    """
-
-
+    assert_array_almost_equal(res, v)
+    
+    # Test 3
+    v = [0.98, 0.0068]
+    ydata = xdata * v[0] * np.exp(v[1] * beta)
+    res = dpc.dpc_fit(rss, xdata, ydata, start_point, solver)
+    assert_array_almost_equal(res, v)
+    
+    # Test 4
+    v = [0.95, 0.0032]
+    ydata = xdata * v[0] * np.exp(v[1] * beta)
+    res = dpc.dpc_fit(rss, xdata, ydata, start_point, solver)
+    assert_array_almost_equal(res, v)
+    
+    
 def test_dpc_end_to_end():
     """
     Integrated test for DPC based on dpc_runner
-
+    
     """
-
+    
     start_point = [1, 0]
     pixel_size = 55
     focus_to_det = 1.46e6
@@ -196,7 +190,7 @@ if __name__ == "__main__":
 
     test_image_reduction_default()
     test_image_reduction()
-    test_rss()
+    test_rss_factory()
     test_dpc_fit()
 
     test_dpc_end_to_end()
