@@ -7,4 +7,4 @@ Contents:
    :maxdepth: 2
 
    binary
-   spec_to_nsls2
+   spec_to_skxray

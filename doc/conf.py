@@ -187,7 +187,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'NSLS2doc'
+htmlhelp_basename = 'skxraydoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -307,6 +307,14 @@ class Mock(object):
         else:
             return Mock()
 
-MOCK_MODULES = ['six', 'scipy', 'scipy.signal', 'scipy.special', 'six.moves', 'scipy.integrate', 'xraylib']
+    def __setitem__(self, key, value):
+        return
+
+    def __getitem__(self, key):
+        return Mock()
+
+
+MOCK_MODULES = ['six', 'scipy', 'scipy.signal', 'scipy.special',
+                'six.moves', 'scipy.integrate', 'xraylib']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()

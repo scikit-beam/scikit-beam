@@ -1,9 +1,9 @@
 ================================
- :mod:`io.spec_to_nsls2` Module
+ :mod:`io.spec_to_skxray` Module
 ================================
 
 
-.. automodule:: nsls2.io.spec_to_nsls2
+.. automodule:: skxray.io.spec_to_skxray
    :members:
    :show-inheritance:
    :undoc-members:

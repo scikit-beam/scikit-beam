@@ -3,7 +3,7 @@
 ============================
 
 
-.. automodule:: nsls2.spectroscopy
+.. automodule:: skxray.spectroscopy
    :members:
    :show-inheritance:
    :undoc-members:

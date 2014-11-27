@@ -2,7 +2,7 @@
  :mod:`core` Module
 ====================
 
-.. currentmodule:: nsls2.core
+.. currentmodule:: skxray.core
 
 
 Helper Classes

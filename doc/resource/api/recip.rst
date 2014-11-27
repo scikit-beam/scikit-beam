@@ -3,7 +3,7 @@
 =====================
 
 
-.. automodule:: nsls2.recip
+.. automodule:: skxray.recip
    :members:
    :show-inheritance:
    :undoc-members:

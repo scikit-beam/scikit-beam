@@ -3,7 +3,7 @@
 =======================================
 
 
-.. automodule:: nsls2.fitting.model.background
+.. automodule:: skxray.fitting.model.background
    :members:
    :show-inheritance:
    :undoc-members:

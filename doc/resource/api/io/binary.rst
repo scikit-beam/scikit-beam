@@ -3,7 +3,7 @@
 =========================
 
 
-.. automodule:: nsls2.io.binary
+.. automodule:: skxray.io.binary
    :members:
    :show-inheritance:
    :undoc-members:
