@@ -15,7 +15,7 @@ def read(fname):
 
 setup(
     name='scikit-xray',
-    version='0.0.2',
+    version='0.0.3',
     author='Brookhaven National Lab',
     description="Data analysis tools for X-ray science",
     packages=["skxray",
@@ -27,11 +27,9 @@ setup(
     include_dirs=[np.get_include()],
     ext_modules=ext_modules,
     url='http://github.com/Nikea/scikit-xray',
-    long_description=read('README.rst'),
     keywords='Xray Analysis',
     license='BSD',
     classifiers=['Development Status :: 3 - Alpha',
-                 'Topic :: ',
                  "License :: OSI Approved :: BSD License",
                  "Programming Language :: Python :: 2.7",
                  "Programming Language :: Python :: 3.4",
