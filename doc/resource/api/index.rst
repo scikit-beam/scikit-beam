@@ -10,6 +10,7 @@ Contents:
    core
    image
    recip
+   dpc
    rcparams
    spectroscopy
    io/index
