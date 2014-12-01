@@ -124,3 +124,8 @@ def test_peak_refinement():
                                       feature.refine_log_quadratic)
     assert_array_almost_equal(loc, cands + .5, decimal=3)
     assert_array_almost_equal(ht, heights, decimal=3)
+
+
+if __name__ == '__main__':
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

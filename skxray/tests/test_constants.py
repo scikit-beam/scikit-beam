@@ -185,3 +185,8 @@ def test_hkl():
     assert_equal(a, b)
     assert_equal(a, c)
     assert_equal(a, d)
+
+
+if __name__ == '__main__':
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

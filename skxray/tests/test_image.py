@@ -33,3 +33,8 @@ def _helper_find_rings(proc_method, center, radii_list):
     tt = tt + noise
     res = proc_method(tt)
     assert_equal(res, center)
+
+
+if __name__ == '__main__':
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
