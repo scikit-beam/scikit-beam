@@ -51,7 +51,7 @@ import skxray.dpc as dpc
 
 def test_image_reduction_default():
     """
-    Test image reduction when default parameters (roi and bad_pixels) are used
+    Test image reduction when default parameters (roi and bad_pixels) are used.
 
     """
 
@@ -100,7 +100,7 @@ def test_image_reduction():
 
 def test_rss_factory():
     """
-    Test _rss_factory
+    Test _rss_factory.
 
     """
 
@@ -118,7 +118,7 @@ def test_rss_factory():
     
 def test_dpc_fit():
     """
-    Test dpc_fit
+    Test dpc_fit.
     
     """
     
@@ -156,7 +156,7 @@ def test_dpc_fit():
     
 def test_dpc_end_to_end():
     """
-    Integrated test for DPC based on dpc_runner
+    Integrated test for DPC based on dpc_runner.
     
     """
     

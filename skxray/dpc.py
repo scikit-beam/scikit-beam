@@ -48,28 +48,28 @@ from scipy.optimize import minimize
 
 def image_reduction(im, roi=None, bad_pixels=None):
     """
-    Sum the image data along one dimension
-
+    Sum the image data along one dimension.
+    
     Parameters
     ----------
     im : 2-D numpy array
-        store the image data
+        Store the image data.
 
     roi : numpy.ndarray, optional
-        upper left co-ordinates of roi's and the, length and width of roi's
-        from those co-ordinates
+        Upper left co-ordinates of roi's and the, length and width of roi's
+        from those co-ordinates.
 
     bad_pixels : list, optional
-        store the coordinates of bad pixels
+        Store the coordinates of bad pixels.
         [(1, 5), (2, 6)] --> 2 bad pixels --> (1, 5) and (2, 6)
 
     Returns
-    ----------
-    xline : 1-D numpu array
-        the sum of the image data along x direction
+    -------
+    xline : 1-D numpy array
+        The sum of the image data along x direction.
 
     yline : 1-D numpy array
-        the sum of the image data along y direction
+        The sum of the image data along y direction.
 
     """
 
@@ -97,14 +97,13 @@ def image_reduction(im, roi=None, bad_pixels=None):
 def _rss_factory(length):
     """
     A factory function for returning a residue function for use in dpc fitting.
-
     The main reason to do this is to generate a closure over beta so that
     linspace is only called once.
 
     Parameters
     ----------
     length : int
-        The length of the data vector that the returned function can deal with
+        The length of the data vector that the returned function can deal with.
 
     Returns
     -------
@@ -124,22 +123,20 @@ def _rss_factory(length):
         Parameters
         ----------
         v : list
-            store the fitting value
+            Store the fitting value.
             v[0], intensity attenuation
             v[1], phase gradient along x or y direction
 
         xdata : 1-D complex numpy array
-            auxiliary data in nonlinear fitting
-            returning result of ifft1D()
+            Auxiliary data in nonlinear fitting, returning result of ifft1D().
 
         ydata : 1-D complex numpy array
-        auxiliary data in nonlinear fitting
-        returning result of ifft1D()
+            Auxiliary data in nonlinear fitting, returning result of ifft1D().
 
         Returns
         --------
         ret : float
-            residue value
+            Residue value.
 
         """
 
@@ -153,25 +150,25 @@ def _rss_factory(length):
 
 def dpc_fit(rss, ref_f, f, start_point, solver, tol=1e-6, max_iters=2000):
     """
-    Nonlinear fitting for 2 points
+    Nonlinear fitting for 2 points.
 
     Parameters
     ----------
     rss : function
-        objective function to be minimized in DPC fitting
+        Objective function to be minimized in DPC fitting.
 
     ref_f : 1-D numpy array
-        One of the two arrays used for nonlinear fitting
+        One of the two arrays used for nonlinear fitting.
 
     f : 1-D numpy array
-        One of the two arrays used for nonlinear fitting
+        One of the two arrays used for nonlinear fitting.
 
     start_point : 2-element list
-        start_point[0], start-searching point for the intensity attenuation
-        start_point[1], start-searching point for the phase gradient
+        start_point[0], start-searching point for the intensity attenuation.
+        start_point[1], start-searching point for the phase gradient.
 
     solver : string
-        type of solver, one of the following
+        Type of solver, one of the following:
         * 'Nelder-Mead'
         * 'Powell'
         * 'CG'
@@ -183,14 +180,15 @@ def dpc_fit(rss, ref_f, f, start_point, solver, tol=1e-6, max_iters=2000):
         * 'SLSQP'
     
     tol : float, optional
-        termination criteria of nonlinear fitting
+        Termination criteria of nonlinear fitting.
     
     max_iters : integer, optional
-        maximum iterations of nonlinear fitting
+        Maximum iterations of nonlinear fitting.
     
     Returns
     -------
-        fitting result: intensity attenuation and phase gradient
+    tuple 
+        Fitting result: intensity attenuation and phase gradient.
     
     """
     
@@ -211,43 +209,41 @@ dpc_fit.solver = ['Nelder-Mead',
 
 def recon(gx, gy, dx, dy, padding=0, w=0.5):
     """
-    Reconstruct the final phase image
+    Reconstruct the final phase image.
 
     Parameters
     ----------
     gx : 2-D numpy array
-        phase gradient along x direction
+        Phase gradient along x direction.
 
     gy : 2-D numpy array
-        phase gradient along y direction
+        Phase gradient along y direction.
 
     dx : float
-        scanning step size in x direction (in micro-meter)
+        Scanning step size in x direction (in micro-meter).
 
     dy : float
-        scanning step size in y direction (in micro-meter)
+        Scanning step size in y direction (in micro-meter).
 
     padding : integer, optional
-        padding parameter
-        pad a N-by-M array to be (N*(2*padding+1))-by-(M*(2*padding+1)) array 
+        Pad a N-by-M array to be a (N*(2*padding+1))-by-(M*(2*padding+1)) array 
         with the image in the middle with a (N*pad / M*pad) thick edge of 
         zeros.
-        default value, padding = 0 --> no padding --> v
+        padding = 0 (default value) --> no padding --> v
                         v v v
         padding = 1 --> v v v
                         v v v
 
     w : float, optional
-        weighting parameter for the phase gradient along x and y direction when
-        constructing the final phase image
-        valid range : [0, 1]
-        default value = 0.5, which means that gx and gy equally contribute to
-        the final phase image
+        Weighting parameter (valid range is [0, 1]) for the phase gradient 
+        along x and y direction when constructing the final phase image.
+        Default value = 0.5, which means that gx and gy equally contribute to
+        the final phase image.
 
     Returns
     -------
     phi : 2-D numpy array
-        final phase image
+        Final phase image.
 
     References
     ----------
@@ -304,45 +300,45 @@ def dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, dy,
                energy, roi, bad_pixels, solver, ref, image_sequence, padding=0,
                w=0.5, scale=True):
     """
-    Controller function to run the whole DPC
+    Controller function to run the whole DPC.
 
     Parameters
     ----------
     start_point : 2-element list
-        start_point[0], start-searching point for the intensity attenuation
-        start_point[1], start-searching point for the phase gradient
+        start_point[0], start-searching point for the intensity attenuation.
+        start_point[1], start-searching point for the phase gradient.
 
     pixel_size : integer
-        real physical pixel size of the detector in um
+        Real physical pixel size of the detector in um.
 
     focus_to_det : float
-        focus to detector distance in um
+        Focus to detector distance in um.
 
     rows : integer
-        number of scanned rows
+        Number of scanned rows.
 
     cols : integer
-        number of scanned columns
+        Number of scanned columns.
 
     dx : float
-        scanning step size in x direction (in micro-meter)
+        Scanning step size in x direction (in micro-meter).
 
     dy : float
-        scanning step size in y direction (in micro-meter)
+        Scanning step size in y direction (in micro-meter).
 
     energy : float
-        energy of the scanning x-ray in keV
+        Energy of the scanning x-ray in keV.
 
     roi : numpy.ndarray, optional
-        upper left co-ordinates of roi's and the, length and width of roi's
-        from those co-ordinates
+        Upper left co-ordinates of roi's and the, length and width of roi's
+        from those co-ordinates.
 
     bad_pixels : list
-        store the coordinates of bad pixels
+        Store the coordinates of bad pixels.
         [(1, 5), (2, 6)] --> 2 bad pixels --> (1, 5) and (2, 6)
 
     solver : string
-        type of solver, one of the following
+        Type of solver, one of the following:
         * 'Nelder-Mead'
         * 'Powell'
         * 'CG'
@@ -354,32 +350,34 @@ def dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, dy,
         * 'SLSQP'
 
     ref : 2-D numpy array
-        the reference image for a DPC calculation
+        The reference image for a DPC calculation.
 
     image_sequence : iteratable image object
-        return diffraction patterns (2D Numpy arrays) when iterated over
+        Return diffraction patterns (2D Numpy arrays) when iterated over.
 
     padding : integer, optional
-        padding parameter
-        default value, padding = 0 --> no padding
-                        p p p
-        padding = 1 --> p v p
-                        p p p
+        Pad a N-by-M array to be a (N*(2*padding+1))-by-(M*(2*padding+1)) array 
+        with the image in the middle with a (N*pad / M*pad) thick edge of 
+        zeros.
+        padding = 0 (default value) --> no padding --> v
+                        v v v
+        padding = 1 --> v v v
+                        v v v
 
     w : float, optional
-        weighting parameter for the phase gradient along x and y direction when
-        constructing the final phase image
-        default value = 0.5, which means that gx and gy equally contribute to
-        the final phase image
+        Weighting parameter (valid range is [0, 1]) for the phase gradient 
+        along x and y direction when constructing the final phase image.
+        Default value = 0.5, which means that gx and gy equally contribute to
+        the final phase image.
 
     scale : bool, optional
-        if True, scale gx and gy according to the experiment set up
-        if False, ignore pixel_size, focus_to_det, energy
+        If True, scale gx and gy according to the experiment set up.
+        If False, ignore pixel_size, focus_to_det, energy.
 
     Returns
     -------
     phi : 2-D numpy array
-        the final reconstructed phase image
+        The final reconstructed phase image.
 
     """
 
