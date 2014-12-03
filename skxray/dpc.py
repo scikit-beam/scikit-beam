@@ -245,7 +245,7 @@ def recon(gx, gy, dx, dy, padding=0, w=0.5):
     -------
     phi : 2-D numpy array
         Final phase image.
-
+    
     References
     ----------
     [1] Yan, Hanfei, Yong S. Chu, Jorg Maser, Evgeny Nazaretski, Jungdae Kim,
@@ -280,8 +280,8 @@ def recon(gx, gy, dx, dy, padding=0, w=0.5):
 
     kappax, kappay = np.meshgrid(ax, ay)
 
-    c = -2j * (kappax * tx * (1-w) + kappay * ty * w)
-    div_v = kappax**2 + w * kappay**2
+    c = -1j * (kappax * tx * (1-w) + kappay * ty * w)
+    div_v = kappax**2 * (1-w) + kappay**2 * w
     zero_arr = (div_v == 0)
     c /= div_v
     c[zero_arr] = 0
