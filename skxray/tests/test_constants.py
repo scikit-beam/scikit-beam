@@ -104,13 +104,16 @@ def test_XrayLibWrap():
 
 
 def smoke_test_element_creation():
-    from skxray.constants.basic import _elm_lst
+    from skxray.constants.basic import basic
     prev_element = None
-    for elem_info in _elm_lst:
-        Z = elem_info.Z
-        mass = elem_info.mass
-        rho = elem_info.rho
-        sym = elem_info.sym
+    elements = [elm for abbrev, elm in six.iteritems(basic)
+                if isinstance(abbrev, int)]
+    elements.sort()
+    for element in elements:
+        Z = element.Z
+        mass = element.mass
+        density = element.density
+        sym = element.sym
         inits = [Z, sym, sym.upper(), sym.lower(), sym.swapcase()]
         element = None
         for init in inits:
@@ -126,10 +129,10 @@ def smoke_test_element_creation():
             desc = six.text_type(element)
             assert_equal(desc, "Element name " + six.text_type(sym) +
                          " with atomic Z " + six.text_type(Z))
-            if not np.isnan(rho):
+            if not np.isnan(density):
                 # shield the assertion from any elements whose density is
                 # unknown
-                assert_equal(element.density, rho)
+                assert_equal(element.density, density)
             assert_equal(element.name, sym)
             if prev_element is not None:
                 # compare prev_element to element

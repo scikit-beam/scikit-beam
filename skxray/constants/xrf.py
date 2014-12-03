@@ -356,7 +356,8 @@ doc_ex += """>>> # Get the emission energy for the Kα1 line.
 
 class XraylibNotInstalledError(RuntimeError):
     message = ("Xraylib is not installed. Please see "
-              "https://github.com/tschoonj/xraylib for help installing")
+              "https://github.com/tschoonj/xraylib for help installing "
+              "or https://binstar.org/tacaswell/xraylib")
     def __init__(self, *args, **kwargs):
         super(XraylibNotInstalledError, self).__init__(self.message,
                                                        *args, **kwargs)
