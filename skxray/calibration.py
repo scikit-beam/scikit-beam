@@ -43,7 +43,7 @@ import six
 import numpy as np
 import scipy.signal
 from collections import deque
-from skxray.constants import calibration_standards
+from .constants.api import calibration_standards
 from skxray.feature import (filter_peak_height, peak_refinement,
                            refine_log_quadratic)
 from skxray.core import (pixel_to_phi, pixel_to_radius,

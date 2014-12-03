@@ -44,10 +44,10 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 from nose.tools import assert_equal, assert_not_equal
 
-from skxray.constants import (Element, emission_line_search,
-                             calibration_standards, HKL)
-from skxray.core import (q_to_d, d_to_q)
+from skxray.constants.api import (XrfElement, emission_line_search,
+                                  calibration_standards, HKL)
 
+from skxray.core import (q_to_d, d_to_q)
 
 def test_element_data():
     """
@@ -59,12 +59,12 @@ def test_element_data():
 
     name_list = []
     for i in range(100):
-        e = Element(i+1)
+        e = XrfElement(i+1)
         data1.append(e.cs(10)['Ka1'])
         name_list.append(e.name)
 
     for item in name_list:
-        e = Element(item)
+        e = XrfElement(item)
         data2.append(e.cs(10)['Ka1'])
 
     assert_array_equal(data1, data2)
@@ -82,7 +82,7 @@ def test_element_finder():
 
 
 def test_XrayLibWrap():
-    from skxray.constants import XrayLibWrap, XrayLibWrap_Energy
+    from skxray.constants.xrf import XrayLibWrap, XrayLibWrap_Energy
     for Z in range(1, 101):
         for infotype in XrayLibWrap.opts_info_type:
             xlw = XrayLibWrap(Z, infotype)
@@ -104,18 +104,17 @@ def test_XrayLibWrap():
 
 
 def smoke_test_element_creation():
-    from skxray.constants import elm_data_list
-
+    from skxray.constants.basic import _elm_lst
     prev_element = None
-    for elem_info in elm_data_list:
-        Z = elem_info['Z']
-        mass = elem_info['mass']
-        rho = elem_info['rho']
-        sym = elem_info['sym']
+    for elem_info in _elm_lst:
+        Z = elem_info.Z
+        mass = elem_info.mass
+        rho = elem_info.rho
+        sym = elem_info.sym
         inits = [Z, sym, sym.upper(), sym.lower(), sym.swapcase()]
         element = None
         for init in inits:
-            element = Element(init)
+            element = XrfElement(init)
             # obtain the next four attributes to make sure the XrayLibWrap is
             # working
             element.bind_energy
@@ -149,7 +148,7 @@ def smoke_test_element_creation():
                 assert_equal(element >= prev_element, True)
                 assert_equal(element > prev_element, True)
                 # create a second instance of element with the same Z value and test its comparison
-                element_2 = Element(element.Z)
+                element_2 = XrfElement(element.Z)
                 assert_equal(element < element_2, False)
                 assert_equal(element <= element_2, True)
                 assert_equal(element == element_2, True)

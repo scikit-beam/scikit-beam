@@ -111,21 +111,6 @@ def _gen_class_docs(func):
             func.__doc__)
 
 
-# SUBCLASS LMFIT MODELS TO REWRITE THE DOCS
-class GaussianModel(LmGaussianModel):
-    __doc__ = _gen_class_docs(gaussian)
-
-    def __init__(self, *args, **kwargs):
-         super(GaussianModel, self).__init__(*args, **kwargs)
-
-
-class LorentzianModel(LmLorentzianModel):
-    __doc__ = _gen_class_docs(lorentzian)
-
-    def __init__(self, *args, **kwargs):
-        super(LorentzianModel, self).__init__(*args, **kwargs)
-
-
 # DEFINE NEW MODELS
 class ElasticModel(Model):
 

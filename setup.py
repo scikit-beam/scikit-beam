@@ -33,5 +33,5 @@ setup(
                  "Topic :: Software Development :: Libraries",
                  "Intended Audience :: Science/Research",
                  "Intended Audience :: Developers",
-                 ]
+                 ], requires=['numpy']
     )
