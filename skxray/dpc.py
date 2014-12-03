@@ -165,8 +165,13 @@ def dpc_fit(rss, ref_f, f, start_point, solver='Nelder-Mead', tol=1e-6,
         One of the two arrays used for nonlinear fitting.
 
     start_point : 2-element list
-        start_point[0], start-searching point for the intensity attenuation.
-        start_point[1], start-searching point for the phase gradient.
+        In DPC, the sample transmission function can be simply denoted as:
+        a * exp(i * phi).
+        start_point[0], start-searching value for the amplitude (a) of the 
+        sample transmission function at one scanning point.
+        start_point[1], start-searching value for the phase (phi) gradient 
+        (along x or y direction) of the sample transmission function at one 
+        scanning point.
 
     solver : string, optional
         Type of solver, one of the following:
@@ -245,13 +250,6 @@ def recon(gx, gy, dx, dy, padding=0, w=0.5):
     -------
     phi : 2-D numpy array
         Final phase image.
-    
-    References
-    ----------
-    [1] Yan, Hanfei, Yong S. Chu, Jorg Maser, Evgeny Nazaretski, Jungdae Kim,
-    Hyon Chol Kang, Jeffrey J. Lombardo, and Wilson KS Chiu, "Quantitative
-    x-ray phase imaging at the nanoscale by multilayer Laue lenses," Scientific
-    reports 3 (2013).
 
     """
 
@@ -306,8 +304,13 @@ def dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, dy,
     Parameters
     ----------
     start_point : 2-element list
-        start_point[0], start-searching point for the intensity attenuation.
-        start_point[1], start-searching point for the phase gradient.
+        In DPC, the sample transmission function can be simply denoted as:
+        a * exp(i * phi).
+        start_point[0], start-searching value for the amplitude (a) of the 
+        sample transmission function at one scanning point.
+        start_point[1], start-searching value for the phase (phi) gradient 
+        (along x or y direction) of the sample transmission function at one 
+        scanning point.
 
     pixel_size : 2-element tuple
         Physical pixel (a rectangle) size of the detector in um.
@@ -379,7 +382,12 @@ def dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, dy,
     -------
     phi : 2-D numpy array
         The final reconstructed phase image.
-
+ 
+    References
+    ----------
+    [1] Yan, H. et al. Quantitative x-ray phase imaging at the nanoscale by 
+    multilayer Laue lenses. Sci. Rep. 3, 1307; DOI:10.1038/srep01307 (2013).
+    
     """
 
     # Initialize a, gx, gy and phi
