@@ -46,8 +46,8 @@ from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
 from nose.tools import (raises, assert_raises)
 
-import skxray.dpc as dpc
-
+#import skxray.dpc as dpc
+import dpc as dpc
 
 def test_image_reduction_default():
     """
@@ -161,7 +161,7 @@ def test_dpc_end_to_end():
     """
     
     start_point = [1, 0]
-    pixel_size = 55
+    pixel_size = (55, 55)
     focus_to_det = 1.46e6
     rows = 2
     cols = 2
@@ -180,8 +180,8 @@ def test_dpc_end_to_end():
     image_sequence = np.ones((rows * cols, img_size[0], img_size[1]))
 
     phi = dpc.dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx,
-                         dy, energy, roi, bad_pixels, solver, ref_image,
-                         image_sequence, padding, w, scale)
+                         dy, energy, roi, bad_pixels, ref_image, 
+                         image_sequence, solver, padding, w, scale)
 
     assert_array_almost_equal(phi, np.zeros((rows, cols)))
 

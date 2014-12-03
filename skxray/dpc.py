@@ -148,7 +148,8 @@ def _rss_factory(length):
     return _rss
 
 
-def dpc_fit(rss, ref_f, f, start_point, solver, tol=1e-6, max_iters=2000):
+def dpc_fit(rss, ref_f, f, start_point, solver='Nelder-Mead', tol=1e-6, 
+            max_iters=2000):
     """
     Nonlinear fitting for 2 points.
 
@@ -167,7 +168,7 @@ def dpc_fit(rss, ref_f, f, start_point, solver, tol=1e-6, max_iters=2000):
         start_point[0], start-searching point for the intensity attenuation.
         start_point[1], start-searching point for the phase gradient.
 
-    solver : string
+    solver : string, optional
         Type of solver, one of the following:
         * 'Nelder-Mead'
         * 'Powell'
@@ -297,8 +298,8 @@ def recon(gx, gy, dx, dy, padding=0, w=0.5):
 
 
 def dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, dy,
-               energy, roi, bad_pixels, solver, ref, image_sequence, padding=0,
-               w=0.5, scale=True):
+               energy, roi, bad_pixels, ref, image_sequence, 
+               solver='Nelder-Mead', padding=0, w=0.5, scale=True):
     """
     Controller function to run the whole DPC.
 
@@ -308,8 +309,8 @@ def dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, dy,
         start_point[0], start-searching point for the intensity attenuation.
         start_point[1], start-searching point for the phase gradient.
 
-    pixel_size : integer
-        Real physical pixel size of the detector in um.
+    pixel_size : 2-element tuple
+        Physical pixel (a rectangle) size of the detector in um.
 
     focus_to_det : float
         Focus to detector distance in um.
@@ -337,7 +338,7 @@ def dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, dy,
         Store the coordinates of bad pixels.
         [(1, 5), (2, 6)] --> 2 bad pixels --> (1, 5) and (2, 6)
 
-    solver : string
+    solver : string, optional
         Type of solver, one of the following:
         * 'Nelder-Mead'
         * 'Powell'
@@ -418,10 +419,12 @@ def dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, dy,
         a[i, j] = _a
 
     if scale:
-        # lambda = h * c / E
+        if pixel_size[0] != pixel_size[1]:
+            raise ValueError('In DPC, detector pixels are squares!')
+            
         lambda_ = 12.4e-4 / energy
-        gx *= - len(ref_fx) * pixel_size / (lambda_ * focus_to_det)
-        gy *= len(ref_fy) * pixel_size / (lambda_ * focus_to_det)
+        gx *= - len(ref_fx) * pixel_size[0] / (lambda_ * focus_to_det)
+        gy *= len(ref_fy) * pixel_size[0] / (lambda_ * focus_to_det)
 
     # Reconstruct the final phase image
     phi = recon(gx, gy, dx, dy, padding, w)
