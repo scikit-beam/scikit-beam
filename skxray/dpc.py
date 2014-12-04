@@ -75,18 +75,11 @@ def image_reduction(im, roi=None, bad_pixels=None):
 
     if bad_pixels is not None:
         for x, y in bad_pixels:
-            try:
-                im[x, y] = 0
-            except IndexError:
-                raise
+            im[x, y] = 0
 
     if roi is not None:
-        try:
-            x, y, w, l = roi
-        except IndexError:
-            raise
-        else:
-            im = im[x : x + w, y : y + l]
+        x, y, w, l = roi
+        im = im[x : x + w, y : y + l]
 
     xline = np.sum(im, axis=0)
     yline = np.sum(im, axis=1)
@@ -256,25 +249,32 @@ def recon(gx, gy, dx, dy, padding=0, w=0.5):
     rows, cols = gx.shape
 
     pad = 2 * padding + 1
+    
+    pad_col = pad * cols
+    pad_row = pad * rows    
 
-    gx_padding = np.zeros((pad * rows, pad * cols), dtype='d')
-    gy_padding = np.zeros((pad * rows, pad * cols), dtype='d')
-
-    gx_padding[(pad // 2) * rows : (pad // 2 + 1) * rows,
-               (pad // 2) * cols : (pad // 2 + 1) * cols] = gx
-    gy_padding[(pad // 2) * rows : (pad // 2 + 1) * rows,
-               (pad // 2) * cols : (pad // 2 + 1) * cols] = gy
+    gx_padding = np.zeros((pad_row, pad_col), dtype='d')
+    gy_padding = np.zeros((pad_row, pad_col), dtype='d')
+    
+    half_pad = pad // 2
+    roi_slice = (slice(half_pad * rows, (half_pad + 1) * rows),
+                 slice(half_pad * cols, (half_pad + 1) * cols))
+                 
+    gx_padding[roi_slice] = gx
+    gy_padding[roi_slice] = gy
 
     tx = np.fft.fftshift(np.fft.fft2(gx_padding))
     ty = np.fft.fftshift(np.fft.fft2(gy_padding))
 
-    c = np.zeros((pad * rows, pad * cols), dtype=complex)
+    c = np.zeros((pad_row, pad_col), dtype=complex)
 
-    mid_col = pad * cols // 2.0 + 1
-    mid_row = pad * rows // 2.0 + 1
+    mid_col = pad_col // 2.0 + 1
+    mid_row = pad_row // 2.0 + 1
 
-    ax = 2 * np.pi * (np.arange(pad * cols) + 1 - mid_col) / (pad * cols * dx)
-    ay = 2 * np.pi * (np.arange(pad * rows) + 1 - mid_row) / (pad * rows * dy)
+    ax = 2 * np.pi * np.arange(1 - mid_col, pad_col - mid_col + 1) / \
+         (pad_col * dx)
+    ay = 2 * np.pi * np.arange(1 - mid_row, pad_row - mid_col + 1) / \
+         (pad_row * dy)
 
     kappax, kappay = np.meshgrid(ax, ay)
 
@@ -287,8 +287,7 @@ def recon(gx, gy, dx, dy, padding=0, w=0.5):
     c = np.fft.ifftshift(c)
     phi_padding = np.fft.ifft2(c)
 
-    phi = phi_padding[(pad // 2) * rows : (pad // 2 + 1) * rows,
-                      (pad // 2) * cols : (pad // 2 + 1) * cols]
+    phi = phi_padding[roi_slice]
     
     phi = phi.real
 
