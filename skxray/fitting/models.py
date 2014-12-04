@@ -55,9 +55,6 @@ import os
 import logging
 logger = logging.getLogger(__name__)
 
-from skxray.fitting.model.physics_peak import (elastic_peak, compton_peak,
-                                              gauss_peak)
-
 from skxray.fitting.base.parameter_data import get_para
 from skxray.constants import Element
 
@@ -65,8 +62,7 @@ from lmfit import Model
 from lmfit.models import GaussianModel as LmGaussianModel
 from lmfit.models import LorentzianModel as LmLorentzianModel
 from .lineshapes import (elastic, compton, gaussian_tail, gausssian_step,
-                         lorentzian2, gaussian, lorentzian
-)
+                         lorentzian2, gaussian, lorentzian)
 
 import logging
 logger = logging.getLogger(__name__)

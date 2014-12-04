@@ -286,10 +286,10 @@ def test_elastic_model():
     elastic_model = ElasticModel()
 
     # fwhm_offset is not a sensitive parameter, used as a fixed value
-    elastic.set_param_hint(name='fwhm_offset', value=0.02, vary=False)
-    elastic.set_param_hint(name='e_offset', value=0, vary=False)
-    elastic.set_param_hint(name='e_linear', value=1, vary=False)
-    elastic.set_param_hint(name='e_quadratic', value=0, vary=False)
+    elastic_model.set_param_hint(name='fwhm_offset', value=0.02, vary=False)
+    elastic_model.set_param_hint(name='e_offset', value=0, vary=False)
+    elastic_model.set_param_hint(name='e_linear', value=1, vary=False)
+    elastic_model.set_param_hint(name='e_quadratic', value=0, vary=False)
 
     result = elastic_model.fit(out, x=x, coherent_sct_energy=10,
                                fwhm_offset=0.02, fwhm_fanoprime=0.03,
@@ -321,36 +321,36 @@ def test_compton_model():
 
     true_param = [energy, amp]
 
-
     out = compton(x, amp, energy, offset, fano,
                   e_offset, e_linear, e_quadratic, angle,
                   fwhm_corr, f_step, f_tail,
                   gamma, hi_f_tail, hi_gamma)
 
-    compton = ComptonModel()
+    cm = ComptonModel()
     # parameters not sensitive
 
-    compton.set_param_hint(name='compton_hi_gamma', value=1, vary=False)
-    compton.set_param_hint(name='fwhm_offset', value=0.01, vary=False)
-    compton.set_param_hint(name='compton_angle', value=90, vary=False)
-    compton.set_param_hint(name='e_offset', value=0, vary=False)
-    compton.set_param_hint(name='e_linear', value=1, vary=False)
-    compton.set_param_hint(name='e_quadratic', value=0, vary=False)
-    compton.set_param_hint(name='fwhm_fanoprime', value=0.01, vary=False)
-    compton.set_param_hint(name='compton_hi_f_tail', value=0.01, vary=False)
-    compton.set_param_hint(name='compton_f_step', value=0.05, vary=False)
+    cm.set_param_hint(name='compton_hi_gamma', value=1, vary=False)
+    cm.set_param_hint(name='fwhm_offset', value=0.01, vary=False)
+    cm.set_param_hint(name='compton_angle', value=90, vary=False)
+    cm.set_param_hint(name='e_offset', value=0, vary=False)
+    cm.set_param_hint(name='e_linear', value=1, vary=False)
+    cm.set_param_hint(name='e_quadratic', value=0, vary=False)
+    cm.set_param_hint(name='fwhm_fanoprime', value=0.01, vary=False)
+    cm.set_param_hint(name='compton_hi_f_tail', value=0.01, vary=False)
+    cm.set_param_hint(name='compton_f_step', value=0.05, vary=False)
 
     # parameters with boundary
-    compton_model.set_param_hint(name='coherent_sct_energy', value=10, min=9.5, max=10.5)
-    compton_model.set_param_hint(name='compton_gamma', value=2.2, min=1, max=3.5)
+    cm.set_param_hint(name='coherent_sct_energy', value=10, min=9.5, max=10.5)
+    cm.set_param_hint(name='compton_gamma', value=2.2, min=1, max=3.5)
 
-    p = compton_model.make_params()
-    result = compton_model.fit(out, x=x, params=p, compton_amplitude=1e5,
-                               compton_fwhm_corr=1, compton_f_tail=0.1)
+    p = cm.make_params()
+    result = cm.fit(out, x=x, params=p, compton_amplitude=1e5,
+                    compton_fwhm_corr=1, compton_f_tail=0.1)
 
     fit_val = [result.values['coherent_sct_energy'], result.values['compton_amplitude']]
 
     assert_array_almost_equal(true_param, fit_val, decimal=1)
+
 
 if __name__ == '__main__':
     import nose
