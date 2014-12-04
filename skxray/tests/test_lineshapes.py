@@ -167,7 +167,6 @@ def test_compton_peak():
     gamma = 10
     hi_f_tail = 0.1
     hi_gamma = 1
-<<<<<<< HEAD:skxray/tests/test_lineshapes.py
 
     e_offset = 0
     e_linear = 1
@@ -179,18 +178,7 @@ def test_compton_peak():
                   e_offset, e_linear, e_quadratic, angle,
                   fwhm_corr, f_step, f_tail,
                   gamma, hi_f_tail, hi_gamma)
-=======
-    e_offset = 0
-    e_linear = 1
-    e_quadratic = 0
-    ev = np.arange(8, 12, 0.1)
 
-    out = compton_peak(ev, amp, energy, offset, fano,
-                       e_offset, e_linear, e_quadratic, angle,
-                       fwhm_corr, f_step, f_tail,
-                       gamma, hi_f_tail, hi_gamma)
-
->>>>>>> update functions api:nsls2/tests/test_xrf_physics_peak.py
     assert_array_almost_equal(y_true, out)
 
 
