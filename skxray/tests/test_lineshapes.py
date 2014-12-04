@@ -130,16 +130,10 @@ def test_elastic_peak():
     e_quadratic = 0
 
     ev = np.arange(8, 12, 0.1)
-<<<<<<< HEAD:skxray/tests/test_lineshapes.py
     out = elastic(ev, area, energy,
                   offset, fanoprime,
                   e_offset, e_linear, e_quadratic)
-=======
-    out = elastic_peak(ev, area, energy,
-                       offset, fanoprime,
-                       e_offset, e_linear, e_quadratic)
 
->>>>>>> update functions api:nsls2/tests/test_xrf_physics_peak.py
     assert_array_almost_equal(y_true, out)
 
 
