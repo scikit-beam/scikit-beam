@@ -226,70 +226,60 @@ def recon(gx, gy, dx, dy, padding=0, w=0.5):
 
     padding : integer, optional
         Pad a N-by-M array to be a (N*(2*padding+1))-by-(M*(2*padding+1)) array 
-        with the image in the middle with a (N*pad / M*pad) thick edge of 
-        zeros.
-        padding = 0 (default value) --> no padding --> v
+        with the image in the middle with a (N*padding, M*padding) thick edge 
+        of zeros.
+        padding = 0 --> v (the original image, size = (N, M))
+                       -------
                         v v v
-        padding = 1 --> v v v
+        padding = 1 --> v v v (the padded image, size = (3 * N, 3 * M))
                         v v v
-
+    
     w : float, optional
         Weighting parameter (valid range is [0, 1]) for the phase gradient 
         along x and y direction when constructing the final phase image.
         Default value = 0.5, which means that gx and gy equally contribute to
         the final phase image.
-
+    
     Returns
     -------
     phi : 2-D numpy array
         Final phase image.
-
+    
     """
-
+    
     rows, cols = gx.shape
-
-    pad = 2 * padding + 1
     
-    pad_col = pad * cols
-    pad_row = pad * rows    
-
-    gx_padding = np.zeros((pad_row, pad_col), dtype='d')
-    gy_padding = np.zeros((pad_row, pad_col), dtype='d')
+    if padding:
+        pad_row = padding * rows
+        pad_col = padding * cols
+        roi_slice = (slice(pad_row, pad_row + rows), 
+                     slice(pad_col, pad_col + cols))
+        
+        pad_width = ((pad_row, pad_row), (pad_col, pad_col))
+        gx_padding = np.pad(gx, pad_width, str('constant'))
+        gy_padding = np.pad(gy, pad_width, str('constant'))
+        
+        tx = np.fft.fftshift(np.fft.fft2(gx_padding))[roi_slice]
+        ty = np.fft.fftshift(np.fft.fft2(gy_padding))[roi_slice]
+        
+    else:
+        tx = np.fft.fftshift(np.fft.fft2(gx))
+        ty = np.fft.fftshift(np.fft.fft2(gy))
+        
+    mid_col = cols // 2 + 1
+    mid_row = rows // 2 + 1
+    ax = 2 * np.pi * np.arange(1 - mid_col, cols - mid_col + 1) / \
+         (cols * dx)
+    ay = 2 * np.pi * np.arange(1 - mid_row, rows - mid_row + 1) / \
+         (rows * dy)
     
-    half_pad = pad // 2
-    roi_slice = (slice(half_pad * rows, (half_pad + 1) * rows),
-                 slice(half_pad * cols, (half_pad + 1) * cols))
-                 
-    gx_padding[roi_slice] = gx
-    gy_padding[roi_slice] = gy
-
-    tx = np.fft.fftshift(np.fft.fft2(gx_padding))
-    ty = np.fft.fftshift(np.fft.fft2(gy_padding))
-
-    c = np.zeros((pad_row, pad_col), dtype=complex)
-
-    mid_col = pad_col // 2.0 + 1
-    mid_row = pad_row // 2.0 + 1
-
-    ax = 2 * np.pi * np.arange(1 - mid_col, pad_col - mid_col + 1) / \
-         (pad_col * dx)
-    ay = 2 * np.pi * np.arange(1 - mid_row, pad_row - mid_col + 1) / \
-         (pad_row * dy)
-
     kappax, kappay = np.meshgrid(ax, ay)
-
-    c = -1j * (kappax * tx * (1-w) + kappay * ty * w)
-    div_v = kappax**2 * (1-w) + kappay**2 * w
-    zero_arr = (div_v == 0)
-    c /= div_v
-    c[zero_arr] = 0
-
-    c = np.fft.ifftshift(c)
-    phi_padding = np.fft.ifft2(c)
-
-    phi = phi_padding[roi_slice]
+    div_v = kappax ** 2 * (1 - w) + kappay ** 2 * w
     
-    phi = phi.real
+    c = -1j * (kappax * tx * (1 - w) + kappay * ty * w) / div_v    
+    c = np.fft.ifftshift(np.where(div_v == 0, 0, c))
+    
+    phi = np.fft.ifft2(c).real
 
     return phi
 
@@ -360,11 +350,12 @@ def dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, dy,
 
     padding : integer, optional
         Pad a N-by-M array to be a (N*(2*padding+1))-by-(M*(2*padding+1)) array 
-        with the image in the middle with a (N*pad / M*pad) thick edge of 
-        zeros.
-        padding = 0 (default value) --> no padding --> v
+        with the image in the middle with a (N*padding, M*padding) thick edge 
+        of zeros.
+        padding = 0 --> v (the original image, size = (N, M))
+                       -------
                         v v v
-        padding = 1 --> v v v
+        padding = 1 --> v v v (the padded image, size = (3 * N, 3 * M))
                         v v v
 
     w : float, optional
