@@ -44,6 +44,7 @@ import six
 from collections import Mapping, namedtuple
 import functools
 
+from ..core import NotInstalledError
 from .basic import BasicElement, doc_title, doc_params, doc_attrs, doc_ex
 from skxray.core import q_to_d, d_to_q, twotheta_to_q, q_to_twotheta, verbosedict
 
@@ -62,8 +63,8 @@ except ImportError:
     xraylib is None
 
 if xraylib is None:
-    XrayLibWrap = None
-    XrayLibWrap_Energy = None
+    # do nothing, for now
+    pass
 else:
     xraylib.XRayInit()
     xraylib.SetErrorMessages(0)
@@ -354,13 +355,15 @@ doc_ex += """>>> # Get the emission energy for the Kα1 line.
      ('mg', 0.0)]
     """""
 
-class XraylibNotInstalledError(RuntimeError):
-    message = ("Xraylib is not installed. Please see "
-              "https://github.com/tschoonj/xraylib for help installing "
-              "or https://binstar.org/tacaswell/xraylib")
-    def __init__(self, *args, **kwargs):
-        super(XraylibNotInstalledError, self).__init__(self.message,
-                                                       *args, **kwargs)
+class XraylibNotInstalledError(NotInstalledError):
+    message_post = ('xraylib is not installed. Please see '
+                    'https://github.com/tschoonj/xraylib '
+                    'or https://binstar.org/tacaswell/xraylib '
+                    'for help on installing xraylib')
+    def __init__(self, caller, *args, **kwargs):
+        message = ('The call to {} cannot be completed because {}'
+                   ''.format(caller, self.message_post))
+        super(XraylibNotInstalledError, self).__init__(message, *args, **kwargs)
 
 @functools.total_ordering
 class XrfElement(BasicElement):
@@ -379,14 +382,14 @@ class XrfElement(BasicElement):
 
     def __init__(self, element):
         if xraylib is None:
-            raise XraylibNotInstalledError()
+            raise XraylibNotInstalledError(self.__class__)
 
         super(XrfElement, self).__init__(element)
 
-        self._emission_line = XrayLibWrap(self._z, 'lines')
-        self._bind_energy = XrayLibWrap(self._z, 'binding_e')
-        self._jump_factor = XrayLibWrap(self._z, 'jump')
-        self._fluor_yield = XrayLibWrap(self._z, 'yield')
+        self._emission_line = XrayLibWrap(self.Z, 'lines')
+        self._bind_energy = XrayLibWrap(self.Z, 'binding_e')
+        self._jump_factor = XrayLibWrap(self.Z, 'jump')
+        self._fluor_yield = XrayLibWrap(self.Z, 'yield')
 
     @property
     def emission_line(self):
@@ -508,7 +511,7 @@ def emission_line_search(line_e, delta_e,
 
     """
     if xraylib is None:
-        raise XraylibNotInstalledError()
+        raise XraylibNotInstalledError(__name__)
 
     if element_list is None:
         element_list = range(1, 101)

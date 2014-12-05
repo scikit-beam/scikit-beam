@@ -62,25 +62,18 @@ element = namedtuple('element',
 
 
 def read_atomic_constants():
-    """Returns Atomic Constants
+    """Returns a dictionary of atomic constants
 
-    Array is in format:
-    0 = Atomic Number
-    1 = Atomic Radius [A]
-    2 = CovalentRadius [A]
-    3 = AtomicMass
-    4 = BoilingPoint [K]
-    5 = MeltingPoint [K]
-    6 = Density [g/ccm]
-    7 = Atomic Volume
-    8 = CoherentScatteringLength [1E-12cm]
-    9 = IncoherentX-section [barn]
-    10 = Absorption@1.8A [barn]
-    11 = DebyeTemperature [K]
-    12 = ThermalConductivity [W/cmK]
-
+    Returns
+    -------
+    constants : dict
+        keys: ['Z'. 'sym', 'name', 'atomic_radius', 'covalent_radius', 'mass',
+               'bp', 'mp', 'density', 'atomic_volume',
+               'coherent_scattering_length', 'incoherent_crosssection',
+               'absorption', 'debye_temp', 'thermal_conductivity']
     """
     basic = {}
+    field_desc = []
     with open(os.path.join(data_dir, 'AtomicConstants.dat'),'r') as infile:
         for line in infile:
             if line.split()[0] == '#S':
@@ -89,6 +82,11 @@ def read_atomic_constants():
                 Z = int(s[1])
                 if Z == 1000:
                     break
+            elif not field_desc and line.split()[0] == '#L':
+                field_desc = ['Atomic number',
+                              'Element symbol (Fe, Cr, etc.)',
+                              'Full element name (Iron, Chromium, etc.']
+                field_desc += line.split()[1:]
             elif line.startswith('#UNAME'):
                 elem_name = line.split()[1]
             elif line[0] == '#':
@@ -98,25 +96,28 @@ def read_atomic_constants():
                 data = [Z, abbrev, elem_name] + data
                 elem = element(*data)
                 basic[abbrev.lower()] = elem
-    return basic
+    return basic, field_desc
 
-basic = read_atomic_constants()
+
+basic, field_descriptors = read_atomic_constants()
 # also add entries with it keyed on atomic number
 basic.update({elm.Z: elm for elm in six.itervalues(basic)})
-
+basic.update({elm.name.lower(): elm for elm in six.itervalues(basic)})
 doc_title = """
     Object to return basic elemental information
     """
 doc_params = """
     element : str or int
-        Element symbol or element atomic Z
+        Element symbol, name or atomic number ('Zinc', 'Zn' or 30)
     """
-doc_attrs = """
-    name : str
-    Z ; int
-    mass : float
-    density : float
-    """
+fields = (['Z : int', 'sym : str', 'name : str'] +
+          ['{} : float'.format(field) for field in element._fields[3:]])
+
+fields = ['{}\n        {}'.format(field, field_desc)
+          for field, field_desc in zip(fields, field_descriptors)]
+
+doc_attrs = '\n    ' + "\n    ".join(fields)
+
 doc_ex = """
     >>> # Create an `Element` object
     >>> e = Element('Zn') # or e = Element(30)
@@ -128,6 +129,7 @@ doc_ex = """
     7.14
     """
 
+
 @functools.total_ordering
 class BasicElement(object):
     # define the docs
@@ -136,6 +138,7 @@ class BasicElement(object):
     ----------{}
     Attributes
     ----------{}
+
     Examples
     --------{}
     """.format(doc_title,
@@ -143,48 +146,31 @@ class BasicElement(object):
                doc_attrs,
                doc_ex)
 
-    def __init__(self, element):
-        if isinstance(element, six.string_types):
-            element = element.lower()
-        elem_dict = basic[element]
+    def __init__(self, Z):
+        if isinstance(Z, six.string_types):
+            Z = Z.lower()
+        # stash the element tuple
+        self._element = basic[Z]
+        # set the class attributes
+        for e in element._fields:
+            setattr(self, e, getattr(basic[Z], e))
 
-        self._name = elem_dict.sym
-        self._z = elem_dict.Z
-        self._mass = elem_dict.mass
-        self._density = elem_dict.density
-
-    @property
-    def name(self):
-        """
-        Atomic symbol, `str`
-
-        such as Fe, Cu
-        """
-        return self._name
-
-    @property
-    def Z(self):
-        """
-        atomic number, `int`
-        """
-        return self._z
-
-    @property
-    def mass(self):
-        """
-        atomic mass in g/mol, `float`
-        """
-        return self._mass
-
-    @property
-    def density(self):
-        """
-        element density in g/cm3, `float`
-        """
-        return self._density
+    # allow the Element to work as a dictionary as well
+    def __getitem__(self, item):
+        return getattr(self, item)
 
     def __repr__(self):
-        return 'Element name %s with atomic Z %s' % (self.name, self._z)
+        return six.text_type('BasicElement({})'.format(self.Z))
+
+    # pretty print the element
+    def __str__(self):
+        desc = self.name + '\n' + '=' * len(self.name)
+        for d in dir(self):
+            if d.startswith('_'):
+                continue
+            desc += '\n{}: {}'.format(d, getattr(self, d))
+
+        return desc
 
     def __eq__(self, other):
         return self.Z == other.Z

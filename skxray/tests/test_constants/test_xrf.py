@@ -42,7 +42,7 @@ from __future__ import (absolute_import, division,
 import six
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
-from nose.tools import assert_equal, assert_not_equal
+from nose.tools import assert_equal, assert_not_equal, raises
 
 from skxray.constants.api import (XrfElement, emission_line_search,
                                   calibration_standards, HKL)
@@ -79,6 +79,12 @@ def test_element_finder():
     found_name = sorted(list(six.iterkeys(out)))
     assert_equal(true_name, found_name)
     return
+
+
+@raises()
+def test_XrayLibWrap_notpresent():
+    from skxray.constants import xrf
+    xrf.XrayLibWrap=None
 
 
 def test_XrayLibWrap():
