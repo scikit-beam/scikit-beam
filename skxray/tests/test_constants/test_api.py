@@ -42,7 +42,6 @@ from __future__ import (absolute_import, division,
 
 def test_imports():
     from skxray.constants.api import BasicElement
-    from skxray.constants.api import XrayScatteringElement
     from skxray.constants.api import calibration_standards
     from skxray.constants.api import HKL
     from skxray.constants.api import XrfElement

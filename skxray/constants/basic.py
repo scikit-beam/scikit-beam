@@ -39,14 +39,10 @@
 
 from __future__ import (absolute_import, division,
                         unicode_literals, print_function)
-import numpy as np
 import six
 from collections import Mapping, namedtuple
 import functools
 import os
-from itertools import repeat
-from skxray.core import (q_to_d, d_to_q, twotheta_to_q, q_to_twotheta,
-                         verbosedict)
 
 
 data_dir = os.path.join(os.path.dirname(__file__), 'data')
@@ -103,6 +99,7 @@ basic, field_descriptors = read_atomic_constants()
 # also add entries with it keyed on atomic number
 basic.update({elm.Z: elm for elm in six.itervalues(basic)})
 basic.update({elm.name.lower(): elm for elm in six.itervalues(basic)})
+basic.update({elm.sym.lower(): elm for elm in six.itervalues(basic)})
 doc_title = """
     Object to return basic elemental information
     """
@@ -147,6 +144,9 @@ class BasicElement(object):
                doc_ex)
 
     def __init__(self, Z):
+        # init the parent object
+        super(BasicElement, self).__init__()
+        # bash the element abbreviation down to lowercase
         if isinstance(Z, six.string_types):
             Z = Z.lower()
         # stash the element tuple

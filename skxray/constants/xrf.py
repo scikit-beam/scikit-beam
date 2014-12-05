@@ -41,12 +41,12 @@ from __future__ import (absolute_import, division,
                         unicode_literals, print_function)
 import numpy as np
 import six
-from collections import Mapping, namedtuple
+from collections import Mapping
 import functools
 
 from ..core import NotInstalledError
 from .basic import BasicElement, doc_title, doc_params, doc_attrs, doc_ex
-from skxray.core import q_to_d, d_to_q, twotheta_to_q, q_to_twotheta, verbosedict
+from skxray.core import verbosedict
 
 line_name = ['Ka1', 'Ka2', 'Kb1', 'Kb2', 'La1', 'La2', 'Lb1', 'Lb2',
              'Lb3', 'Lb4', 'Lb5', 'Lg1', 'Lg2', 'Lg3', 'Lg4', 'Ll',
@@ -56,7 +56,6 @@ bindingE = ['K', 'L1', 'L2', 'L3', 'M1', 'M2', 'M3', 'M4', 'M5', 'N1',
             'N2', 'N3', 'N4', 'N5', 'N6', 'N7', 'O1', 'O2', 'O3',
             'O4', 'O5', 'P1', 'P2', 'P3']
 
-# try to create xraylib dependent things
 try:
     import xraylib
 except ImportError:
@@ -355,6 +354,7 @@ doc_ex += """>>> # Get the emission energy for the Kα1 line.
      ('mg', 0.0)]
     """""
 
+
 class XraylibNotInstalledError(NotInstalledError):
     message_post = ('xraylib is not installed. Please see '
                     'https://github.com/tschoonj/xraylib '
@@ -365,7 +365,7 @@ class XraylibNotInstalledError(NotInstalledError):
                    ''.format(caller, self.message_post))
         super(XraylibNotInstalledError, self).__init__(message, *args, **kwargs)
 
-@functools.total_ordering
+
 class XrfElement(BasicElement):
     # define the docs
     __doc__ = """{}
@@ -417,7 +417,7 @@ class XrfElement(BasicElement):
         cm²/g
         """
         def myfunc(incident_energy):
-            return XrayLibWrap_Energy(self._z, 'cs',
+            return XrayLibWrap_Energy(self.Z, 'cs',
                                       incident_energy)
         return myfunc
 
@@ -482,8 +482,8 @@ class XrfElement(BasicElement):
         return out_dict
 
 
-def emission_line_search(line_e, delta_e,
-                         incident_energy, element_list=None):
+def emission_line_search(line_e, delta_e, incident_energy,
+                         element_list=None):
     """Find elements which have an emission line near an energy
 
     This function returns a dict keyed on element type of all
@@ -524,6 +524,6 @@ def emission_line_search(line_e, delta_e,
     out_dict = dict()
     for e, lines in zip(search_list, cand_lines):
         if lines:
-            out_dict[e.name] = lines
+            out_dict[e.sym] = lines
 
     return out_dict

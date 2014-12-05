@@ -41,13 +41,11 @@ from __future__ import (absolute_import, division,
                         unicode_literals, print_function)
 import six
 import numpy as np
-from numpy.testing import assert_array_equal, assert_array_almost_equal
-from nose.tools import assert_equal, assert_not_equal
+from nose.tools import assert_equal
 
 from skxray.constants.basic import (BasicElement, basic, element)
 
 def smoke_test_element_creation():
-    prev_element = None
     # grab the set of elements represented by 'Z'
     elements = sorted([elm for abbrev, elm in six.iteritems(basic)
                        if isinstance(abbrev, int)])
@@ -85,22 +83,21 @@ def smoke_test_element_creation():
 
     # test the comparators
     for e1, e2 in zip(elements, elements[1:]):
-        if prev_element is not None:
-            # compare prev_element to element
-            assert_equal(e1.__lt__(e2), True)
-            assert_equal(e1 < e2, True)
-            assert_equal(e1.__eq__(e2), False)
-            assert_equal(e1 == e2, False)
-            assert_equal(e1 >= e2, False)
-            assert_equal(e1 > e2, False)
-            # compare element to prev_element
-            assert_equal(e2 < e1, False)
-            assert_equal(e2.__lt__(e1), False)
-            assert_equal(e2 <= e1, False)
-            assert_equal(e2.__eq__(e1), False)
-            assert_equal(e2 == e1, False)
-            assert_equal(e2 >= e1, True)
-            assert_equal(e2 > e1, True)
+        # compare prev_element to element
+        assert_equal(e1.__lt__(e2), True)
+        assert_equal(e1 < e2, True)
+        assert_equal(e1.__eq__(e2), False)
+        assert_equal(e1 == e2, False)
+        assert_equal(e1 >= e2, False)
+        assert_equal(e1 > e2, False)
+        # compare element to prev_element
+        assert_equal(e2 < e1, False)
+        assert_equal(e2.__lt__(e1), False)
+        assert_equal(e2 <= e1, False)
+        assert_equal(e2.__eq__(e1), False)
+        assert_equal(e2 == e1, False)
+        assert_equal(e2 >= e1, True)
+        assert_equal(e2 > e1, True)
 
 
 if __name__ == '__main__':

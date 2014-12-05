@@ -41,13 +41,14 @@ from __future__ import (absolute_import, division,
                         unicode_literals, print_function)
 import six
 import numpy as np
-from numpy.testing import assert_array_equal, assert_array_almost_equal
-from nose.tools import assert_equal, assert_not_equal, raises
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_raises)
+from nose.tools import assert_equal, assert_not_equal
 
 from skxray.constants.api import (XrfElement, emission_line_search,
                                   calibration_standards, HKL)
 
-from skxray.core import (q_to_d, d_to_q)
+from skxray.core import (q_to_d, d_to_q, NotInstalledError)
 
 def test_element_data():
     """
@@ -81,10 +82,16 @@ def test_element_finder():
     return
 
 
-@raises()
 def test_XrayLibWrap_notpresent():
     from skxray.constants import xrf
-    xrf.XrayLibWrap=None
+    xraylib = xrf.xraylib
+    # force the not present exception to be raised by setting xraylib to None
+    xrf.xraylib=None
+    assert_raises(NotInstalledError, xrf.XrfElement, None)
+    assert_raises(NotInstalledError, xrf.emission_line_search,
+                  None, None, None)
+    # reset xraylib so nothing else breaks
+    xrf.xraylib = xraylib
 
 
 def test_XrayLibWrap():
@@ -130,16 +137,6 @@ def smoke_test_element_creation():
             element.fluor_yield
             element.jump_factor
             element.emission_line.all
-            assert_equal(element.Z, Z)
-            assert_equal(element.mass, mass)
-            desc = six.text_type(element)
-            assert_equal(desc, "Element name " + six.text_type(sym) +
-                         " with atomic Z " + six.text_type(Z))
-            if not np.isnan(density):
-                # shield the assertion from any elements whose density is
-                # unknown
-                assert_equal(element.density, density)
-            assert_equal(element.name, sym)
             if prev_element is not None:
                 # compare prev_element to element
                 assert_equal(prev_element.__lt__(element), True)
@@ -156,18 +153,6 @@ def smoke_test_element_creation():
                 assert_equal(element == prev_element, False)
                 assert_equal(element >= prev_element, True)
                 assert_equal(element > prev_element, True)
-                # create a second instance of element with the same Z value and test its comparison
-                element_2 = XrfElement(element.Z)
-                assert_equal(element < element_2, False)
-                assert_equal(element <= element_2, True)
-                assert_equal(element == element_2, True)
-                assert_equal(element >= element_2, True)
-                assert_equal(element_2 > element, False)
-                assert_equal(element_2 < element, False)
-                assert_equal(element_2 <= element, True)
-                assert_equal(element_2 == element, True)
-                assert_equal(element_2 >= element, True)
-                assert_equal(element_2 > element, False)
         prev_element = element
 
 
