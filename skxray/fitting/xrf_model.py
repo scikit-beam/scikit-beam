@@ -76,12 +76,12 @@ l_line = ['Ga_L', 'Ge_L', 'As_L', 'Se_L', 'Br_L', 'Kr_L', 'Rb_L', 'Sr_L', 'Y_L',
 m_line = ['Au_M', 'Pb_M', 'U_M', 'Pt_M', 'Ti_M', 'Gd_M']
 
 
-def gauss_peak_xrf(x, area, center,
-                   delta_center, delta_sigma,
-                   ratio, ratio_adjust,
-                   fwhm_offset, fwhm_fanoprime,
-                   e_offset, e_linear, e_quadratic,
-                   epsilon=2.96):
+def element_peak_xrf(x, area, center,
+                     delta_center, delta_sigma,
+                     ratio, ratio_adjust,
+                     fwhm_offset, fwhm_fanoprime,
+                     e_offset, e_linear, e_quadratic,
+                     epsilon=2.96):
     """
     This is a function to construct xrf element peak, which is based on gauss profile,
     but more specific requirements need to be considered. For instance, the standard
@@ -130,12 +130,12 @@ def gauss_peak_xrf(x, area, center,
                     delta_sigma+get_sigma(center)) * ratio * ratio_adjust
 
 
-class GaussModel_xrf(Model):
+class ElementModel(Model):
 
-    __doc__ = _gen_class_docs(gauss_peak_xrf)
+    __doc__ = _gen_class_docs(element_peak_xrf)
 
     def __init__(self, *args, **kwargs):
-        super(GaussModel_xrf, self).__init__(gauss_peak_xrf, *args, **kwargs)
+        super(ElementModel, self).__init__(element_peak_xrf, *args, **kwargs)
         self.set_param_hint('epsilon', value=2.96, vary=False)
 
 
@@ -550,7 +550,7 @@ class ModelSpectrum(object):
                     if e.cs(incident_energy)[line_name] == 0:
                         continue
 
-                    gauss_mod = GaussModel_xrf(prefix=str(ename)+'_'+str(line_name)+'_')
+                    gauss_mod = ElementModel(prefix=str(ename)+'_'+str(line_name)+'_')
                     gauss_mod.set_param_hint('e_offset', value=self.compton_param['e_offset'].value,
                                              expr='e_offset')
                     gauss_mod.set_param_hint('e_linear', value=self.compton_param['e_linear'].value,
@@ -631,7 +631,7 @@ class ModelSpectrum(object):
                     if e.cs(incident_energy)[line_name] == 0:
                         continue
 
-                    gauss_mod = GaussModel_xrf(prefix=str(ename)+'_'+str(line_name)+'_')
+                    gauss_mod = ElementModel(prefix=str(ename)+'_'+str(line_name)+'_')
 
                     gauss_mod.set_param_hint('e_offset', value=self.compton_param['e_offset'].value,
                                              expr='e_offset')
@@ -711,7 +711,7 @@ class ModelSpectrum(object):
                     #if e.cs(incident_energy)[line_name] == 0:
                     #    continue
 
-                    gauss_mod = GaussModel_xrf(prefix=str(ename)+'_'+str(line_name)+'_')
+                    gauss_mod = ElementModel(prefix=str(ename)+'_'+str(line_name)+'_')
 
                     gauss_mod.set_param_hint('e_offset', expr='e_offset')
                     gauss_mod.set_param_hint('e_linear', expr='e_linear')
