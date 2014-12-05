@@ -52,12 +52,12 @@ import six
 import logging
 logger = logging.getLogger(__name__)
 
-from nsls2.constants import Element
-from nsls2.fitting.model.physics_peak import (gauss_peak)
-from nsls2.fitting.model.physics_model import (ComptonModel, ElasticModel,
-                                               _gen_class_docs)
-from nsls2.fitting.base.parameter_data import get_para
-from nsls2.fitting.model.background import snip_method
+from skxray.constants import Element
+from skxray.fitting.lineshapes import gaussian
+from skxray.fitting.models import (ComptonModel, ElasticModel,
+                                   _gen_class_docs)
+from skxray.fitting.base.parameter_data import get_para
+from skxray.fitting.background import snip_method
 from lmfit import Model
 
 
@@ -126,8 +126,8 @@ def gauss_peak_xrf(x, area, center,
 
     x = e_offset + x * e_linear + x**2 * e_quadratic
 
-    return gauss_peak(x, area, center+delta_center,
-                      delta_sigma+get_sigma(center)) * ratio * ratio_adjust
+    return gaussian(x, area, center+delta_center,
+                    delta_sigma+get_sigma(center)) * ratio * ratio_adjust
 
 
 class GaussModel_xrf(Model):
