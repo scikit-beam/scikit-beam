@@ -53,14 +53,15 @@ def image_reduction(im, roi=None, bad_pixels=None):
     Parameters
     ----------
     im : 2-D numpy array
-        Store the image data.
+        Input image.
 
-    roi : numpy.ndarray, optional
-        Upper left co-ordinates of roi's and the, length and width of roi's
-        from those co-ordinates.
+    roi : 4-element 1-D numpy darray, optional
+        [x, y, col, row], x and y are upper left co-ordinates (with (0, 0) in 
+        the top left) of the ROI. col and row are columns and rows from those 
+        co-ordinates.
 
     bad_pixels : list, optional
-        Store the coordinates of bad pixels.
+        List of (row, column) tuples marking bad pixels.
         [(1, 5), (2, 6)] --> 2 bad pixels --> (1, 5) and (2, 6)
 
     Returns
@@ -116,7 +117,7 @@ def _rss_factory(length):
         Parameters
         ----------
         v : list
-            Store the fitting value.
+            Fit parameters.
             v[0], intensity attenuation
             v[1], phase gradient along x or y direction
 
@@ -141,30 +142,30 @@ def _rss_factory(length):
     return _rss
 
 
-def dpc_fit(rss, ref_f, f, start_point, solver='Nelder-Mead', tol=1e-6, 
+def dpc_fit(rss, arg1, arg2, start_point, solver='Nelder-Mead', tol=1e-6, 
             max_iters=2000):
     """
     Nonlinear fitting for 2 points.
 
     Parameters
     ----------
-    rss : function
+    rss : callable
         Objective function to be minimized in DPC fitting.
 
-    ref_f : 1-D numpy array
-        One of the two arrays used for nonlinear fitting.
+    arg1 : 1-D numpy array
+        Extra argument passed to the objective function. In DPC, it's the sum 
+        of the reference image data along x or y direction.
 
-    f : 1-D numpy array
-        One of the two arrays used for nonlinear fitting.
+    arg2 : 1-D numpy array
+        Extra argument passed to the objective function. In DPC, it's the sum 
+        of one captured diffraction pattern along x or y direction.
 
     start_point : 2-element list
-        In DPC, the sample transmission function can be simply denoted as:
-        a * exp(i * phi).
-        start_point[0], start-searching value for the amplitude (a) of the 
-        sample transmission function at one scanning point.
-        start_point[1], start-searching value for the phase (phi) gradient 
-        (along x or y direction) of the sample transmission function at one 
-        scanning point.
+        start_point[0], start-searching value for the amplitude of the sample 
+        transmission function at one scanning point.
+        start_point[1], start-searching value for the phase gradient (along x 
+        or y direction) of the sample transmission function at one scanning 
+        point.
 
     solver : string, optional
         Type of solver, one of the following:
@@ -191,8 +192,8 @@ def dpc_fit(rss, ref_f, f, start_point, solver='Nelder-Mead', tol=1e-6,
     
     """
     
-    return minimize(rss, start_point, args=(ref_f, f), method=solver, tol=tol,
-                    options=dict(maxiter=max_iters)).x[:2]
+    return minimize(rss, start_point, args=(arg1, arg2), method=solver, 
+                    tol=tol, options=dict(maxiter=max_iters)).x[:2]
 
 # attributes
 dpc_fit.solver = ['Nelder-Mead',
@@ -220,10 +221,10 @@ def recon(gx, gy, dx, dy, padding=0, w=0.5):
 
     dx : float
         Scanning step size in x direction (in micro-meter).
-
+    
     dy : float
         Scanning step size in y direction (in micro-meter).
-
+    
     padding : integer, optional
         Pad a N-by-M array to be a (N*(2*padding+1))-by-(M*(2*padding+1)) array 
         with the image in the middle with a (N*padding, M*padding) thick edge 
@@ -289,17 +290,15 @@ def dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx, dy,
                solver='Nelder-Mead', padding=0, w=0.5, scale=True):
     """
     Controller function to run the whole DPC.
-
+    
     Parameters
     ----------
     start_point : 2-element list
-        In DPC, the sample transmission function can be simply denoted as:
-        a * exp(i * phi).
-        start_point[0], start-searching value for the amplitude (a) of the 
-        sample transmission function at one scanning point.
-        start_point[1], start-searching value for the phase (phi) gradient 
-        (along x or y direction) of the sample transmission function at one 
-        scanning point.
+        start_point[0], start-searching value for the amplitude of the sample 
+        transmission function at one scanning point.
+        start_point[1], start-searching value for the phase gradient (along x 
+        or y direction) of the sample transmission function at one scanning 
+        point.
 
     pixel_size : 2-element tuple
         Physical pixel (a rectangle) size of the detector in um.
