@@ -56,9 +56,9 @@ def image_reduction(im, roi=None, bad_pixels=None):
         Input image.
 
     roi : 4-element 1-D numpy darray, optional
-        [x, y, col, row], x and y are upper left co-ordinates (with (0, 0) in 
-        the top left) of the ROI. col and row are columns and rows from those 
-        co-ordinates.
+        [r, c, row, col], r and c are row and column number of the upper left 
+        corner of the ROI. row and col are number of rows and columns from r 
+        and c.
 
     bad_pixels : list, optional
         List of (row, column) tuples marking bad pixels.
@@ -74,13 +74,15 @@ def image_reduction(im, roi=None, bad_pixels=None):
 
     """
 
+    im = im.copy()
+    
     if bad_pixels is not None:
-        for x, y in bad_pixels:
-            im[x, y] = 0
+        for row, column in bad_pixels:
+            im[row, column] = 0
 
     if roi is not None:
-        x, y, w, l = roi
-        im = im[x : x + w, y : y + l]
+        r, c, row, col = roi
+        im = im[r : r + row, c : c + col]
 
     xline = np.sum(im, axis=0)
     yline = np.sum(im, axis=1)
@@ -248,6 +250,7 @@ def recon(gx, gy, dx, dy, padding=0, w=0.5):
     
     """
     
+    gx = np.asarray(gx)
     rows, cols = gx.shape
     
     if padding:
