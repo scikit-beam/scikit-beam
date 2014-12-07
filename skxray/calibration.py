@@ -42,12 +42,103 @@ from __future__ import (absolute_import, division, print_function,
 import six
 import numpy as np
 import scipy.signal
+from scipy import ndimage
 from collections import deque
 from .constants.api import calibration_standards
 from skxray.feature import (filter_peak_height, peak_refinement,
                            refine_log_quadratic)
 from skxray.core import (pixel_to_phi, pixel_to_radius,
                         pairwise, bin_edges_to_centers, bin_1D)
+from skxray.image import find_ring_center_acorr_1D
+
+
+def estimate_dist_center(input_image, st_name, wavelength, pixel_size):
+    """
+    Parameters
+    ----------
+    input_image: ndarray
+        A single image.
+
+    st_name: str
+        The name of the calibration standard.  Used to look up the
+        expected peak location
+
+    wavelength : float
+        The wavelength of scattered x-ray in nm
+
+    pixel_size : tuple
+        (pixel_height, pixel_width)
+
+    Returns
+    -------
+    dist_mean : float
+        The detector-sample distance in mm.  This is the mean of the estimate
+        from all of the peaks used.
+
+    dist_std : float
+        The standard deviation of detector-sample distance computed from the
+         peaks used.
+
+    calibrated_center : tuple
+        Returns the index (row, col) of the pixel that rings
+        are centered on.  Accurate to pixel resolution.
+    """
+
+    #if st_name == "Ni":
+        #input_image = ndimage.gaussian_filter(input_image, sigma=2)
+    #else:
+        #input_image = ndimage.gaussian_filter(input_image, sigma=0.5)
+
+    p_image = proc_funcs[st_name, input_image]
+
+    res = find_ring_center_acorr_1D(p_image)
+    calibrated_center = refine_center(p_image, res, pixel_size, 25, 5, thresh=0.1,
+                             window_size=5)
+
+    values = pixel_to_radius(p_image.shape, calibrated_center, pixel_size)
+
+    bins, sums, counts = bin_1D(np.ravel(values), np.ravel(p_image), nx=5000)
+    """bins, sums, counts = bin_image_to_1D(p_image,
+                                         calibrated_center,
+                                         pixel_to_radius,
+                                         pixel_to_1D_kwarg={'pixel_size': pixel_size},
+                                         bin_num=5000)"""
+
+    mask = counts > 10
+    bin_centers = bin_edges_to_centers(bins)[mask]
+    ring_averages = sums[mask] / counts[mask]
+
+    dist_mean, dist_std = estimate_d_blind(st_name, wavelength, bin_centers, ring_averages,
+                                           5, 7, thresh=0.03)
+
+    return dist_mean, dist_std, calibrated_center
+
+
+proc_funcs = {'Ni': PreProcess.ni_pre_process(name='Ni',image=image),
+              'Si': PreProcess.pre_process(name='Si',image=image)}
+              #"CeO2":PreProcess._pre_process(image), "LaB6":PreProcess._pre_process(image),
+              #"Al2O3": PreProcess._pre_process(image)}
+
+
+class PreProcess(object):
+    def __init__(self, st_name, image):
+        self._ni_pre_process =  ndimage.gaussian_filter(image, sigma=2)
+        self._pre_process = ndimage.gaussian_filter(image, sigma=0.5)
+
+    def ni_pre_process(self):
+        return self._ni_pre_process
+
+    def pre_process(self):
+        return self._pre_process
+
+    """def _ni_pre_process(image):
+        # Using a Gaussian blur with sigma=2 to the input image
+        return ndimage.gaussian_filter(image, sigma=2)
+
+
+    def _pre_process(image):
+        # Using a Gaussian blur with sigma=0.5 to the input image
+        return ndimage.gaussian_filter(image, sigma=0.5)"""
 
 
 def estimate_d_blind(name, wavelength, bin_centers, ring_average,
