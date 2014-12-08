@@ -60,35 +60,3 @@ from scipy.ndimage.filters import (gaussian_filter, median_filter,
                                    rank_filter)
 
 
-from .models import (GaussianModel, LorentzianModel, Lorentzian2Model,
-                     ComptonModel, ElasticModel)
-
-from lmfit.lineshapes import (pearson7, breit_wigner, damped_oscillator,
-                              logistic, lognormal, students_t, expgaussian,
-                              donaich, skewed_gaussian, skewed_voigt, step,
-                              rectangle, exponential, powerlaw, linear,
-                              parabolic)
-from .lineshapes import (gaussian, lorentzian, lorentzian2, voigt, pvoigt,
-                         gaussian_tail, gausssian_step, elastic, compton)
-
-# valid models
-model_list = [ConstantModel, LinearModel, QuadraticModel, ParabolicModel,
-              PolynomialModel, GaussianModel, LorentzianModel, VoigtModel,
-              PseudoVoigtModel, Pearson7Model, StudentsTModel, BreitWignerModel,
-              LognormalModel, DampedOscillatorModel, ExponentialGaussianModel,
-              SkewedGaussianModel, DonaichModel, PowerLawModel,
-              ExponentialModel, StepModel, RectangleModel, Lorentzian2Model,
-              ComptonModel, ElasticModel]
-
-model_list.sort(key=lambda s: str(s).split('.')[-1])
-
-
-lineshapes_list = [gaussian, lorentzian, voigt, pvoigt, pearson7,
-                   breit_wigner, damped_oscillator, logistic,
-                   lognormal, students_t, expgaussian, donaich,
-                   skewed_gaussian, skewed_voigt, step, rectangle,
-                   exponential, powerlaw, linear, parabolic,
-                   lorentzian2, compton, elastic, gausssian_step,
-                   gaussian_tail]
-
-lineshapes_list.sort(key = lambda s: str(s))
