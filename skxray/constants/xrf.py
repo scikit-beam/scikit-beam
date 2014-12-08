@@ -42,7 +42,6 @@ from __future__ import (absolute_import, division,
 import numpy as np
 import six
 from collections import Mapping
-import functools
 
 from ..core import NotInstalledError
 from .basic import BasicElement, doc_title, doc_params, doc_attrs, doc_ex
