@@ -37,7 +37,6 @@
 This module creates a namespace for X-Ray Fluorescence
 """
 
-
 import logging
 logger = logging.getLogger(__name__)
 
@@ -51,8 +50,19 @@ from ..fitting.api import (
     StepModel, RectangleModel, Lorentzian2Model, ComptonModel, ElasticModel
 )
 
-# import Element objects
-from ..constants import Element, emission_line_search
+from ..recip import process_to_q, hkl_to_q
 
-# import background subtraction
-from ..fitting.background import snip_method
+from ..constants import (
+    Element, HKL, Reflection, PowderStandard, calibration_standards
+)
+
+from ..core import (
+    bin_1D, bin_edges, bin_edges_to_centers, grid3d,
+    q_to_d, d_to_q,
+    q_to_twotheta, twotheta_to_q,
+    pixel_to_phi, pixel_to_radius,
+)
+
+from ..calibration import (
+    refine_center, estimate_d_blind,
+)
