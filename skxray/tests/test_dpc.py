@@ -55,7 +55,7 @@ def test_image_reduction_default():
 
     """
 
-    # Generate a 2D matrix
+    # Generate simulation image data
     img = np.arange(100).reshape(10, 10)
 
     # Expected results
@@ -68,35 +68,45 @@ def test_image_reduction_default():
     assert_array_equal(xline, xsum)
     assert_array_equal(yline, ysum)
 
-    dpc.image_reduction(img, bad_pixels=[(1, -1), (-1, 1)])
-    dpc.image_reduction(img, roi=np.array([0, 0, 20, 20]))
-
 
 def test_image_reduction():
     """
     Test image reduction when the following parameters are used:
-    roi = (3, 3, 5, 5);
-    bad_pixels = [(0, 1), (4, 4), (7, 8)]
+    roi = (3, 3, 5, 5) and bad_pixels = [(0, 1), (4, 4), (7, 8)];
+    roi = (0, 0, 20, 20);
+    bad_pixels = [(1, -1), (-1, 1)].
 
     """
 
-    # generate a 2D matrix
+    # generate simulation image data
     img = np.arange(100).reshape(10, 10)
 
     # set up roi and bad_pixels
-    roi = (3, 3, 5, 5)
-    bad_pixels = [(0, 1), (4, 4), (7, 8)]
+    roi_0 = (3, 3, 5, 5)
+    roi_1 = (0, 0, 20, 20)
+    bad_pixels_0 = [(0, 1), (4, 4), (7, 8)]
+    bad_pixels_1 = [(1, -1), (-1, 1)]
 
     # Expected results
     xsum = [265, 226, 275, 280, 285]
     ysum = [175, 181, 275, 325, 375]
+    xsum_bp = [450, 369, 470, 480, 490, 500, 510, 520, 530, 521]
+    ysum_bp = [45, 126, 245, 345, 445, 545, 645, 745, 845, 854]
+    xsum_roi = [450, 460, 470, 480, 490, 500, 510, 520, 530, 540]
+    ysum_roi = [45, 145, 245, 345, 445, 545, 645, 745, 845, 945]
 
     # call image reduction
-    xline, yline = dpc.image_reduction(img, roi, bad_pixels)
+    xline, yline = dpc.image_reduction(img, roi_0, bad_pixels_0)
+    xline_bp, yline_bp = dpc.image_reduction(img, bad_pixels=bad_pixels_1)
+    xline_roi, yline_roi = dpc.image_reduction(img, roi=roi_1)    
 
     assert_array_equal(xline, xsum)
     assert_array_equal(yline, ysum)
-
+    assert_array_equal(xline_bp, xsum_bp)
+    assert_array_equal(yline_bp, ysum_bp)
+    assert_array_equal(xline_roi, xsum_roi)
+    assert_array_equal(yline_roi, ysum_roi)
+    
 
 def test_rss_factory():
     """
@@ -175,22 +185,19 @@ def test_dpc_end_to_end():
     solver = 'Nelder-Mead'
     img_size = (40, 40)
     scale = True
+    invert = True
 
     ref_image = np.ones(img_size)
     image_sequence = np.ones((rows * cols, img_size[0], img_size[1]))
 
-    phi = dpc.dpc_runner(start_point, pixel_size, focus_to_det, rows, cols, dx,
-                         dy, energy, roi, bad_pixels, ref_image, 
-                         image_sequence, solver, padding, w, scale)
+    phi, a = dpc.dpc_runner(ref_image, image_sequence, start_point, pixel_size, 
+                            focus_to_det, rows, cols, dx, dy, energy, padding, 
+                            w, solver, roi, bad_pixels, invert, scale)
 
     assert_array_almost_equal(phi, np.zeros((rows, cols)))
+    assert_array_almost_equal(a, np.ones((rows, cols)))
 
 
 if __name__ == "__main__":
-
-    test_image_reduction_default()
-    test_image_reduction()
-    test_rss_factory()
-    test_dpc_fit()
-
-    test_dpc_end_to_end()
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
