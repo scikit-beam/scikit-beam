@@ -54,7 +54,7 @@ from lmfit.models import (ConstantModel, LinearModel, QuadraticModel,
                           LognormalModel, DampedOscillatorModel,
                           ExponentialGaussianModel, SkewedGaussianModel,
                           DonaichModel, PowerLawModel, ExponentialModel,
-                          StepModel, RectangleModel)
+                          StepModel, RectangleModel, ExpressionModel)
 
 from .models import (GaussianModel, LorentzianModel, Lorentzian2Model,
                      ComptonModel, ElasticModel)
