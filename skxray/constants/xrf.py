@@ -46,6 +46,8 @@ from collections import Mapping
 from ..core import NotInstalledError
 from .basic import BasicElement, doc_title, doc_params, doc_attrs, doc_ex
 from skxray.core import verbosedict
+import logging
+logger = logging.getLogger(__name__)
 
 line_name = ['Ka1', 'Ka2', 'Kb1', 'Kb2', 'La1', 'La2', 'Lb1', 'Lb2',
              'Lb3', 'Lb4', 'Lb5', 'Lg1', 'Lg2', 'Lg3', 'Lg4', 'Ll',
@@ -55,9 +57,23 @@ bindingE = ['K', 'L1', 'L2', 'L3', 'M1', 'M2', 'M3', 'M4', 'M5', 'N1',
             'N2', 'N3', 'N4', 'N5', 'N6', 'N7', 'O1', 'O2', 'O3',
             'O4', 'O5', 'P1', 'P2', 'P3']
 
+
+class XraylibNotInstalledError(NotInstalledError):
+    message_post = ('xraylib is not installed. Please see '
+                    'https://github.com/tschoonj/xraylib '
+                    'or https://binstar.org/tacaswell/xraylib '
+                    'for help on installing xraylib')
+    def __init__(self, caller, *args, **kwargs):
+        message = ('The call to {} cannot be completed because {}'
+                   ''.format(caller, self.message_post))
+        super(XraylibNotInstalledError, self).__init__(message, *args, **kwargs)
+
+
 try:
     import xraylib
 except ImportError:
+    logger.warning('Xraylib is not installed on your machine. ' +
+                   XraylibNotInstalledError.message_post)
     xraylib is None
 
 if xraylib is None:
@@ -97,182 +113,187 @@ else:
                                'yield': (shell_dict, xraylib.FluorYield),
                                })
 
-    class XrayLibWrap(Mapping):
-        """High-level interface to xraylib.
+class XrayLibWrap(Mapping):
+    """High-level interface to xraylib.
 
-        This class exposes various functions in xraylib
+    This class exposes various functions in xraylib
 
-        This is an interface to wrap xraylib to perform calculation related
-        to xray fluorescence.
+    This is an interface to wrap xraylib to perform calculation related
+    to xray fluorescence.
 
-        The code does one to one map between user options,
-        such as emission line, or binding energy, to xraylib function calls.
+    The code does one to one map between user options,
+    such as emission line, or binding energy, to xraylib function calls.
+
+    Parameters
+    ----------
+    element : int
+        atomic number
+    info_type : {'lines',  'binding_e', 'jump', 'yield'}
+        option to choose which physics quantity to calculate as follows:
+        :lines: emission lines
+        :binding_e: binding energy
+        :jump: absorption jump factor
+        :yield: fluorescence yield
+
+    Attributes
+    ----------
+    info_type : str
+
+
+    Examples
+    --------
+    Access the lines for zinc
+
+    >>> x = XrayLibWrap(30, 'lines') # 30 is atomic number for element Zn
+
+    Access the energy of the Kα1 line.
+
+    >>> x['Ka1'] # energy of emission line Ka1
+    8.047800064086914
+
+    List all of the lines and their energies
+
+    >>> x.all  # list energy of all the lines
+    [(u'ka1', 8.047800064086914),
+     (u'ka2', 8.027899742126465),
+     (u'kb1', 8.90530014038086),
+     (u'kb2', 0.0),
+     (u'la1', 0.9294999837875366),
+     (u'la2', 0.9294999837875366),
+     (u'lb1', 0.949400007724762),
+     (u'lb2', 0.0),
+     (u'lb3', 1.0225000381469727),
+     (u'lb4', 1.0225000381469727),
+     (u'lb5', 0.0),
+     (u'lg1', 0.0),
+     (u'lg2', 0.0),
+     (u'lg3', 0.0),
+     (u'lg4', 0.0),
+     (u'll', 0.8112999796867371),
+     (u'ln', 0.8312000036239624),
+     (u'ma1', 0.0),
+     (u'ma2', 0.0),
+     (u'mb', 0.0),
+     (u'mg', 0.0)]
+    """
+    # valid options for the info_type input parameter for the init method
+    opts_info_type = ['lines', 'binding_e', 'jump', 'yield']
+
+    def __init__(self, element, info_type, energy=None):
+        if xraylib is None:
+            raise XraylibNotInstalledError(self.__class__)
+        self._element = element
+        self._map, self._func = XRAYLIB_MAP[info_type]
+        self._keys = sorted(list(six.iterkeys(self._map)))
+        self._info_type = info_type
+
+    @property
+    def all(self):
+        """List the physics quantity for all the lines or shells.
+        """
+        return list(six.iteritems(self))
+
+    def __getitem__(self, key):
+        """
+        Call xraylib function to calculate physics quantity.  A return
+        value of 0 means that the quantity not valid.
 
         Parameters
         ----------
-        element : int
-            atomic number
-        info_type : {'lines',  'binding_e', 'jump', 'yield'}
-            option to choose which physics quantity to calculate as follows:
-            :lines: emission lines
-            :binding_e: binding energy
-            :jump: absorption jump factor
-            :yield: fluorescence yield
-
-        Attributes
-        ----------
-        info_type : str
-
-
-        Examples
-        --------
-        Access the lines for zinc
-
-        >>> x = XrayLibWrap(30, 'lines') # 30 is atomic number for element Zn
-
-        Access the energy of the Kα1 line.
-
-        >>> x['Ka1'] # energy of emission line Ka1
-        8.047800064086914
-
-        List all of the lines and their energies
-
-        >>> x.all  # list energy of all the lines
-        [(u'ka1', 8.047800064086914),
-         (u'ka2', 8.027899742126465),
-         (u'kb1', 8.90530014038086),
-         (u'kb2', 0.0),
-         (u'la1', 0.9294999837875366),
-         (u'la2', 0.9294999837875366),
-         (u'lb1', 0.949400007724762),
-         (u'lb2', 0.0),
-         (u'lb3', 1.0225000381469727),
-         (u'lb4', 1.0225000381469727),
-         (u'lb5', 0.0),
-         (u'lg1', 0.0),
-         (u'lg2', 0.0),
-         (u'lg3', 0.0),
-         (u'lg4', 0.0),
-         (u'll', 0.8112999796867371),
-         (u'ln', 0.8312000036239624),
-         (u'ma1', 0.0),
-         (u'ma2', 0.0),
-         (u'mb', 0.0),
-         (u'mg', 0.0)]
+        key : str
+            Define which physics quantity to calculate.
         """
-        # valid options for the info_type input parameter for the init method
-        opts_info_type = ['lines', 'binding_e', 'jump', 'yield']
 
-        def __init__(self, element, info_type, energy=None):
-            self._element = element
-            self._map, self._func = XRAYLIB_MAP[info_type]
-            self._keys = sorted(list(six.iterkeys(self._map)))
-            self._info_type = info_type
+        return self._func(self._element,
+                          self._map[key.lower()])
 
-        @property
-        def all(self):
-            """List the physics quantity for all the lines or shells.
-            """
-            return list(six.iteritems(self))
+    def __iter__(self):
+        return iter(self._keys)
 
-        def __getitem__(self, key):
-            """
-            Call xraylib function to calculate physics quantity.  A return
-            value of 0 means that the quantity not valid.
+    def __len__(self):
+        return len(self._keys)
 
-            Parameters
-            ----------
-            key : str
-                Define which physics quantity to calculate.
-            """
-
-            return self._func(self._element,
-                              self._map[key.lower()])
-
-        def __iter__(self):
-            return iter(self._keys)
-
-        def __len__(self):
-            return len(self._keys)
-
-        @property
-        def info_type(self):
-            """
-            option to choose which physics quantity to calculate as follows:
-
-            """
-            return self._info_type
-
-
-    class XrayLibWrap_Energy(XrayLibWrap):
+    @property
+    def info_type(self):
         """
-        This is an interface to wrap xraylib
-        to perform calculation on fluorescence
-        cross section, or other incident energy
-        related quantity.
+        option to choose which physics quantity to calculate as follows:
 
-        Attributes
+        """
+        return self._info_type
+
+
+class XrayLibWrap_Energy(XrayLibWrap):
+    """
+    This is an interface to wrap xraylib
+    to perform calculation on fluorescence
+    cross section, or other incident energy
+    related quantity.
+
+    Attributes
+    ----------
+    incident_energy : float
+    info_type : str
+
+    Parameters
+    ----------
+    element : int
+        atomic number
+    info_type : {'cs'}, optional
+        option to calculate physics quantities which depend on
+        incident energy.
+        See Class attribute `opts_info_type` for valid options
+
+        :cs: cross section, unit in cm2/g
+
+    incident_energy : float
+        incident energy for fluorescence in KeV
+
+    Examples
+    --------
+    >>> # Cross section of zinc with an incident X-ray at 12 KeV
+    >>> x = XrayLibWrap_Energy(30, 'cs', 12)
+    >>> # Compute the cross section of the Kα1 line.
+    >>> x['Ka1'] # cross section for Ka1, unit in cm2/g
+    34.44424057006836
+    """
+    opts_info_type = ['cs']
+
+    def __init__(self, element, info_type, incident_energy):
+        if xraylib is None:
+            raise XraylibNotInstalledError(self.__class__)
+
+        super(XrayLibWrap_Energy, self).__init__(element, info_type)
+        self._incident_energy = incident_energy
+
+    @property
+    def incident_energy(self):
+        """
+        Incident x-ray energy in keV, float
+        """
+        return self._incident_energy
+
+    @incident_energy.setter
+    def incident_energy(self, val):
+        """
+        Parameters
         ----------
-        incident_energy : float
-        info_type : str
+        val : float
+            new incident x-ray energy in keV
+        """
+        self._incident_energy = float(val)
+
+    def __getitem__(self, key):
+        """
+        Call xraylib function to calculate physics quantity.
 
         Parameters
         ----------
-        element : int
-            atomic number
-        info_type : {'cs'}, optional
-            option to calculate physics quantities which depend on
-            incident energy.
-            See Class attribute `opts_info_type` for valid options
-
-            :cs: cross section, unit in cm2/g
-
-        incident_energy : float
-            incident energy for fluorescence in KeV
-
-        Examples
-        --------
-        >>> # Cross section of zinc with an incident X-ray at 12 KeV
-        >>> x = XrayLibWrap_Energy(30, 'cs', 12)
-        >>> # Compute the cross section of the Kα1 line.
-        >>> x['Ka1'] # cross section for Ka1, unit in cm2/g
-        34.44424057006836
+        key : str
+            defines which physics quantity to calculate
         """
-        opts_info_type = ['cs']
-
-        def __init__(self, element, info_type, incident_energy):
-            super(XrayLibWrap_Energy, self).__init__(element, info_type)
-            self._incident_energy = incident_energy
-
-        @property
-        def incident_energy(self):
-            """
-            Incident x-ray energy in keV, float
-            """
-            return self._incident_energy
-
-        @incident_energy.setter
-        def incident_energy(self, val):
-            """
-            Parameters
-            ----------
-            val : float
-                new incident x-ray energy in keV
-            """
-            self._incident_energy = float(val)
-
-        def __getitem__(self, key):
-            """
-            Call xraylib function to calculate physics quantity.
-
-            Parameters
-            ----------
-            key : str
-                defines which physics quantity to calculate
-            """
-            return self._func(self._element,
-                              self._map[key.lower()],
-                              self._incident_energy)
+        return self._func(self._element,
+                          self._map[key.lower()],
+                          self._incident_energy)
 
 
 doc_title = """
@@ -352,17 +373,6 @@ doc_ex += """>>> # Get the emission energy for the Kα1 line.
      ('mb', 0.0),
      ('mg', 0.0)]
     """""
-
-
-class XraylibNotInstalledError(NotInstalledError):
-    message_post = ('xraylib is not installed. Please see '
-                    'https://github.com/tschoonj/xraylib '
-                    'or https://binstar.org/tacaswell/xraylib '
-                    'for help on installing xraylib')
-    def __init__(self, caller, *args, **kwargs):
-        message = ('The call to {} cannot be completed because {}'
-                   ''.format(caller, self.message_post))
-        super(XraylibNotInstalledError, self).__init__(message, *args, **kwargs)
 
 
 class XrfElement(BasicElement):

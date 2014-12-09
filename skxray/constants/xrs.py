@@ -51,6 +51,8 @@ from collections import namedtuple
 from itertools import repeat
 from ..core import q_to_d, d_to_q, twotheta_to_q, q_to_twotheta, verbosedict
 from .basic import BasicElement
+import logging
+logger = logging.getLogger(__name__)
 
 
 # http://stackoverflow.com/questions/3624753/how-to-provide-additional-initialization-for-a-subclass-of-namedtuple
@@ -99,7 +101,7 @@ class Reflection(namedtuple('Reflection', ('d', 'hkl', 'q'))):
     d : float
         Plane-spacing
 
-    HKL : `HKL`
+    hkl : `hkl`
         miller indicies
 
     q : float

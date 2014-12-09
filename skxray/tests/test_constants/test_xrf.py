@@ -90,6 +90,9 @@ def test_XrayLibWrap_notpresent():
     assert_raises(NotInstalledError, xrf.XrfElement, None)
     assert_raises(NotInstalledError, xrf.emission_line_search,
                   None, None, None)
+    assert_raises(NotInstalledError, xrf.XrayLibWrap, None, None)
+    assert_raises(NotInstalledError, xrf.XrayLibWrap_Energy,
+                  None, None, None)
     # reset xraylib so nothing else breaks
     xrf.xraylib = xraylib
 

@@ -40,9 +40,11 @@
 from __future__ import (absolute_import, division,
                         unicode_literals, print_function)
 import six
-from collections import namedtuple
+from collections import namedtuple, Mapping
 import functools
 import os
+import logging
+logger = logging.getLogger(__name__)
 
 
 data_dir = os.path.join(os.path.dirname(__file__), 'data')
@@ -143,9 +145,9 @@ class BasicElement(object):
                doc_attrs,
                doc_ex)
 
-    def __init__(self, Z):
+    def __init__(self, Z, *args, **kwargs):
         # init the parent object
-        super(BasicElement, self).__init__()
+        super(BasicElement, self).__init__(*args, **kwargs)
         # bash the element abbreviation down to lowercase
         if isinstance(Z, six.string_types):
             Z = Z.lower()
