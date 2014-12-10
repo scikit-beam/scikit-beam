@@ -95,6 +95,15 @@ def test_blind_d():
     assert np.abs(d - D) < 1e-6
 
 
+def test_estimate_dist_sample():
+
+    gaus = lambda x, center, height, width: (
+                          height * np.exp(-((x-center) / width)**2))
+    name = 'Ni'
+    wavelength = .18
+    pixel_size = (0.2, 0.2)
+
+
 if __name__ == '__main__':
     import nose
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

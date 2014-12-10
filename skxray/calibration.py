@@ -56,7 +56,7 @@ def estimate_dist_center(input_image, st_name, wavelength, pixel_size):
     """
     This function will find the sample detector distance and
     calibrated center from the image of the standard sample
-    
+
     Parameters
     ----------
     input_image: ndarray
@@ -117,8 +117,8 @@ def estimate_dist_center(input_image, st_name, wavelength, pixel_size):
 
     ring_averages = sums[mask] / counts[mask]
 
-    dist_mean, dist_std = estimate_d_blind(st_name, wavelength, bin_centers, ring_averages,
-                                           5, 7, thresh=0.03)
+    dist_mean, dist_std = estimate_d_blind(st_name, wavelength, bin_centers,
+                                           ring_averages, 5, 7, thresh=0.03)
 
     return dist_mean, dist_std, calibrated_center
 
