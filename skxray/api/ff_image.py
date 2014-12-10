@@ -96,3 +96,12 @@ from ..img_proc.transform import (swap_axes, flip_axis, crop_volume,
 swap_axes.select_axes = ['XY', 'YZ', 'XZ']
 flip_axis.flip_direction = ['Flip Z', 'Flip Y', 'Flip X']
 rotate_volume.rotate_axis = ['Z-axis', 'Y-axis', 'X-axis']
+
+
+#-----------------------------------------------------------------------------
+#Image processing: Image arithmetic
+#-----------------------------------------------------------------------------
+#from numpy import (logical_and, logical_or, logical_not, logical_xor)
+from ..img_proc.mathops import (logical_nand, logical_subtract,
+                                add, subtract, multiply, divide, logical_and,
+                                logical_or, logical_not, logical_xor)
