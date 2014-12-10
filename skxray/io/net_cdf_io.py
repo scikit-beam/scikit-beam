@@ -27,7 +27,7 @@ import os
 from netCDF4 import Dataset
 
 
-def load_netCDF(file_name):
+def read_netCDF(file_name):
     """
     This function loads the specified netCDF file format data set (e.g.*.volume 
     APS-Sector 13 GSECARS extension) file into a numpy array for further analysis.

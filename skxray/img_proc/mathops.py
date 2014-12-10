@@ -8,6 +8,7 @@
 
 import numpy as np
 
+from numpy import logical_and
 
 def add(src_data,
         offset_data):
@@ -150,6 +151,36 @@ def divide(src_data,
     else:
         raise ValueError
     return output
+
+
+# logical_and.__doc__ = (
+#     """
+#     This function enables the computation of the LOGICAL_AND of two image or
+#     volume  data sets. This function can be used for data comparison, material
+#     isolation, noise removal, or mask application/generation.
+#     NOTE:
+#     The actual operator in the fuction can be the bitwise operator "&" as in
+#     "x & y = z". The function also works using the standard logical operator
+#     "and" as in "x and y = z".
+#
+#     Parameters
+#     ----------
+#     src_data1 : array
+#         Specifies the first reference data
+#
+#     src_data2 : array
+#         Specifies the second reference data
+#
+#     Returns
+#     -------
+#     output : array
+#         Returns the resulting array to the designated variable
+#
+#     Example
+#     -------
+#     result = mathops.logical_AND('img_1', 'img_2')
+# 	"""
+#     )
 
 
 def logical_and(src_data1,
