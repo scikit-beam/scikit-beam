@@ -88,7 +88,7 @@ thresh_adapt.filter_type = ['generic', 'gaussian', 'mean', 'median']
 
 
 #-----------------------------------------------------------------------------
-#Image processing: Image thresholding
+#Image processing: Image transformation
 #-----------------------------------------------------------------------------
 from ..img_proc.transform import (swap_axes, flip_axis, crop_volume,
                                   rotate_volume)
