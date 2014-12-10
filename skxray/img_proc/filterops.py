@@ -6,6 +6,21 @@ This module contains functions used for filtering images and volume data sets.
 The basic filters included in this module utilize the filter set included in
 scipy.ndimage.filters. More advanced filtering operations will be added 
 shortly.
+
+Some tools are being added directly from scipy.ndimage for use in the skxray
+tool set that is included for image processing in VisTrails. These tools are
+wrappoed into the complete toolkit through the API. The tools from
+scipy.ndimage include:
+    gaussian_filter,
+    median_filter,
+    minimum_filter,
+    maximum_filter,
+    gaussian_gradient_magnitude,
+    gaussian_laplace,
+    laplace,
+    percentile_filter,
+    sobel, prewitt,
+    rank_filter
 """
 
 

@@ -60,3 +60,39 @@ from scipy.ndimage.filters import (gaussian_filter, median_filter,
                                    rank_filter)
 
 
+#-----------------------------------------------------------------------------
+#Image processing: Histogram analysis and manipulation
+#-----------------------------------------------------------------------------
+from ..img_proc.histops import (hist_make, rescale_intensity_values)
+
+
+#-----------------------------------------------------------------------------
+#Image processing: Image morphology
+#-----------------------------------------------------------------------------
+from scipy.ndimage.morphology import (binary_opening, binary_closing,
+                                      binary_erosion, binary_dilation,
+                                      grey_opening, grey_closing,
+                                      grey_erosion, grey_dilation,
+                                      binary_fill_holes, binary_propagation)
+
+
+#-----------------------------------------------------------------------------
+#Image processing: Image thresholding
+#-----------------------------------------------------------------------------
+from ..img_proc.threshops import (thresh_globalGT, thresh_globalLT,
+                                  thresh_bounded, thresh_adapt, thresh_otsu,
+                                  thresh_yen, thresh_isodata)
+
+thresh_adapt.k_shape = ['2D', '3D']
+thresh_adapt.filter_type = ['generic', 'gaussian', 'mean', 'median']
+
+
+#-----------------------------------------------------------------------------
+#Image processing: Image thresholding
+#-----------------------------------------------------------------------------
+from ..img_proc.transform import (swap_axes, flip_axis, crop_volume,
+                                  rotate_volume)
+
+swap_axes.select_axes = ['XY', 'YZ', 'XZ']
+flip_axis.flip_direction = ['Flip Z', 'Flip Y', 'Flip X']
+rotate_volume.rotate_axis = ['Z-axis', 'Y-axis', 'X-axis']

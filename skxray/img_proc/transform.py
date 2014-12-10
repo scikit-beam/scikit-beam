@@ -169,9 +169,3 @@ def rotate_volume(src_data, rotation_axis, rotate_degrees, fill_value):
 def resize_volume():
     pass
 
-
-# Assign selectable options as an attribute to the appropriate
-# functions so that the autowrapping knows what the valid options are
-swap_axes.select_axes = ['XY', 'YZ', 'XZ']
-flip_axis.flip_direction = ['Flip Z', 'Flip Y', 'Flip X']
-rotate_volume.rotate_axis = ['Z-axis', 'Y-axis', 'X-axis']

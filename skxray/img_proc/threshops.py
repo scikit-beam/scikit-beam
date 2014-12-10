@@ -296,9 +296,6 @@ def thresh_isodata(src_data):
     output_data = thresh_globalGT(src_data, thresh_value)
     return output_data, thresh_value
 
-
-thresh_adapt.k_shape = ['2D', '3D']
-thresh_adapt.filter_type = ['generic', 'gaussian', 'mean', 'median']
 # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 # TODO Add simple multi thresholding tool
 # TODO Add auto thresholding methods including:
