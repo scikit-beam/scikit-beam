@@ -92,4 +92,4 @@ def read_binary(filename, nx, ny, nz, dtype_str, headersize):
     return data, header
 
 # set an attribute for the dsize params that are valid options
-read_binary.dtype_str = sorted(list(np.typeDict))
+read_binary.dtype_str = sorted(np.typeDict, key=str)
