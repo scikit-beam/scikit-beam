@@ -37,16 +37,8 @@
 ########################################################################
 
 
-from __future__ import (absolute_import, division,
-                        unicode_literals, print_function)
-
-def test_imports():
-    from skxray.constants.api import BasicElement
-    from skxray.constants.api import calibration_standards
-    from skxray.constants.api import HKL
-    from skxray.constants.api import XrfElement
-    from skxray.constants.api import emission_line_search
-
+# import * is only allowed at the module level
+from skxray.constants.api import *
 
 if __name__ == '__main__':
     import nose

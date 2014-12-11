@@ -36,8 +36,43 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 
-# import * is only allowed at the module level
-from skxray.io.api import *
+
+from __future__ import (absolute_import, division,
+                        unicode_literals, print_function)
+import six
+import numpy as np
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_raises)
+from nose.tools import assert_equal, assert_not_equal
+
+from skxray.constants.xrs import (PowderStandard, Reflection, HKL,
+                                  calibration_standards)
+
+from skxray.core import q_to_d, d_to_q, NotInstalledError
+
+
+def smoke_test_powder_standard():
+    name = 'Si'
+    cal = calibration_standards[name]
+    assert(name == cal.name)
+
+    for d, hkl, q in cal:
+        assert_array_almost_equal(d_to_q(d), q)
+        assert_array_almost_equal(q_to_d(q), d)
+        assert_array_equal(np.linalg.norm(hkl), hkl.length)
+
+    assert_equal(str(cal), "Calibration standard: Si")
+    assert_equal(len(cal), 11)
+
+
+def test_hkl():
+    a = HKL(1, 1, 1)
+    b = HKL('1', '1', '1')
+    c = HKL(h='1', k='1', l='1')
+    d = HKL(1.5, 1.5, 1.75)
+    assert_equal(a, b)
+    assert_equal(a, c)
+    assert_equal(a, d)
 
 
 if __name__ == '__main__':

@@ -36,8 +36,9 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 
+
 # import * is only allowed at the module level
-from skxray.io.api import *
+from skxray.api.diffraction import *
 
 
 if __name__ == '__main__':
