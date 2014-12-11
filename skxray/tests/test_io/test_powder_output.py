@@ -41,28 +41,33 @@
 """
 
 from __future__ import (absolute_import, division,
-                       unicode_literals, print_function)
+                        unicode_literals, print_function)
 import six
+import os
+import math
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
-from nose.tools import assert_equal, assert_not_equal
-import six
-from nose.tools import raises
+from nose.tools import assert_equal, assert_not_equal, raises
 
 from skxray.testing.decorators import known_fail_if
-import skxray.io.output as output
+import skxray.io.save_powder_output as output
 
 
 def test_save_output():
-    filename = "sinvalues"
-    x = np.linspace(0, 100)
-    y = np.sin(x)
+    filename = "function_values"
+    x = np.arange(0, 100, 1)
+    y = np.exp(x)
+    y1 = y*math.erf(0.5)
 
-    output.save_output(x,y, filename, q_or_2theta="Q")
-    output.save_output(x, y, filename, q_or_2theta="2theta", ext=".dat", err=None, dir_path=None)
+    output.save_output(x, y, filename, q_or_2theta="Q")
+    output.save_output(x, y, filename, q_or_2theta="2theta", ext=".dat",
+                       err=None, dir_path=None)
+    output.save_output(x, y, filename, q_or_2theta="2theta", ext=".xye",
+                       err=y1, dir_path=None)
 
-    Data_chi = np.loadtxt("sinvalues.chi", skiprows=9)
-    Data_dat = np.loadtxt("sinvalues.dat", skiprows=9)
+    Data_chi = np.loadtxt("function_values.chi", skiprows=6)
+    Data_dat = np.loadtxt("function_values.dat", skiprows=6)
+    Data_xye = np.loadtxt("function_values.xye", skiprows=6)
 
     assert_array_almost_equal(x, Data_chi[:, 0])
     assert_array_almost_equal(y, Data_chi[:, 1])
@@ -70,8 +75,12 @@ def test_save_output():
     assert_array_almost_equal(x, Data_dat[:, 0])
     assert_array_almost_equal(y, Data_dat[:, 1])
 
+    assert_array_almost_equal(x, Data_xye[:, 0])
+    assert_array_almost_equal(y, Data_xye[:, 1])
+    assert_array_almost_equal(y1, Data_xye[:, 2])
+
+    os.remove("function_values.chi")
+    os.remove("function_values.dat")
+    os.remove("function_values.xye")
+
     return
-
-
-def test_save_gsas():
-    pass
