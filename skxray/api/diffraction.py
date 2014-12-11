@@ -34,7 +34,7 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 """
-This module creates a namespace for X-Ray Fluorescence
+This module creates a namespace for X-Ray Diffraction
 """
 
 import logging
@@ -52,8 +52,8 @@ from ..fitting.api import (
 
 from ..recip import process_to_q, hkl_to_q
 
-from ..constants import (
-    Element, HKL, Reflection, PowderStandard, calibration_standards
+from ..constants.api import (
+    BasicElement, calibration_standards
 )
 
 from ..core import (
@@ -66,3 +66,28 @@ from ..core import (
 from ..calibration import (
     refine_center, estimate_d_blind,
 )
+
+__all__ = [
+    # fitting api
+    'ConstantModel', 'LinearModel', 'QuadraticModel', 'ParabolicModel',
+    'PolynomialModel', 'VoigtModel', 'PseudoVoigtModel', 'Pearson7Model',
+    'StudentsTModel', 'BreitWignerModel', 'GaussianModel', 'LorentzianModel',
+    'LognormalModel', 'DampedOscillatorModel', 'ExponentialGaussianModel',
+    'SkewedGaussianModel', 'DonaichModel', 'PowerLawModel', 'ExponentialModel',
+    'StepModel', 'RectangleModel', 'Lorentzian2Model', 'ComptonModel',
+    'ElasticModel',
+
+    # recip
+    'process_to_q', 'hkl_to_q',
+
+    # constants api
+    'BasicElement', 'calibration_standards',
+
+    # core
+    'bin_1D', 'bin_edges', 'bin_edges_to_centers', 'grid3d', 'q_to_d',
+    'd_to_q', 'q_to_twotheta', 'twotheta_to_q', 'pixel_to_phi',
+    'pixel_to_radius',
+
+    # calibration
+    'refine_center', 'estimate_d_blind',
+]
