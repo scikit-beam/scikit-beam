@@ -254,40 +254,37 @@ def recon(gx, gy, dx, dy, padding=0, w=0.5):
     if w < 0 or w > 1:
         raise ValueError('w should be within the range of [0, 1]!')
         
+    pad = 2 * padding + 1
     gx = np.asarray(gx)
     rows, cols = gx.shape
+    pad_row = rows * pad
+    pad_col = cols * pad
+        
+    gx_padding = np.zeros((pad_row, pad_col), dtype='d')
+    gy_padding = np.zeros((pad_row, pad_col), dtype='d')
     
-    if padding:
-        pad_row = padding * rows
-        pad_col = padding * cols
-        roi_slice = (slice(pad_row, pad_row + rows), 
-                     slice(pad_col, pad_col + cols))
-        
-        pad_width = ((pad_row, pad_row), (pad_col, pad_col))
-        gx_padding = np.pad(gx, pad_width, str('constant'))
-        gy_padding = np.pad(gy, pad_width, str('constant'))
-        
-        tx = np.fft.fftshift(np.fft.fft2(gx_padding))[roi_slice]
-        ty = np.fft.fftshift(np.fft.fft2(gy_padding))[roi_slice]
-        
-    else:
-        tx = np.fft.fftshift(np.fft.fft2(gx))
-        ty = np.fft.fftshift(np.fft.fft2(gy))
-        
-    mid_col = cols // 2 + 1
-    mid_row = rows // 2 + 1
-    ax = (2 * np.pi * np.arange(1 - mid_col, cols - mid_col + 1) /
-         (cols * dx))
-    ay = (2 * np.pi * np.arange(1 - mid_row, rows - mid_row + 1) /
-         (rows * dy))
-    
+    roi_slice = (slice(padding * rows, (padding + 1) * rows),
+                 slice(padding * cols, (padding + 1) * cols))
+    gx_padding[roi_slice] = gx
+    gy_padding[roi_slice] = gy
+
+    tx = np.fft.fftshift(np.fft.fft2(gx_padding))
+    ty = np.fft.fftshift(np.fft.fft2(gy_padding))
+
+    mid_col = pad_col // 2 + 1
+    mid_row = pad_row // 2 + 1
+    ax = (2 * np.pi * np.arange(1 - mid_col, pad_col - mid_col + 1) / 
+         (pad_col * dx))
+    ay = (2 * np.pi * np.arange(1 - mid_row, pad_row - mid_row + 1) / 
+         (pad_row * dy))
+
     kappax, kappay = np.meshgrid(ax, ay)
     div_v = kappax ** 2 * (1 - w) + kappay ** 2 * w
-    
-    c = -1j * (kappax * tx * (1 - w) + kappay * ty * w) / div_v    
-    c = np.fft.ifftshift(np.where(div_v == 0, 0, c))
-    
-    phi = np.fft.ifft2(c).real
+
+    c = -1j * (kappax * tx * (1 - w) + kappay * ty * w) / div_v
+    c = np.fft.ifftshift(np.where(div_v==0, 0, c))
+
+    phi = np.fft.ifft2(c)[roi_slice].real
 
     return phi
 
@@ -367,15 +364,15 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
         corner of the ROI. row and col are number of rows and columns from r 
         and c.
     
-    bad_pixels : list, optional, (default None)
+    bad_pixels : list, optional (default None)
         List of (row, column) tuples marking bad pixels.
         [(1, 5), (2, 6)] --> 2 bad pixels --> (1, 5) and (2, 6)
     
-    invert : bool, optional, (default True)
+    invert : bool, optional (default True)
         If Ture (default), invert the phase gradient along x direction before 
         reconstructing the final phase image.
 
-    scale : bool, optional, (default True)
+    scale : bool, optional (default True)
         If True, scale gx and gy according to the experiment set up.
         If False, ignore pixel_size, focus_to_det, energy.
     
