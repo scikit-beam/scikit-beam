@@ -39,7 +39,8 @@
     (Output into different file formats, .chi, .dat and .xye)
 
 """
-
+from __future__ import (absolute_import, division,
+                        unicode_literals, print_function)
 import numpy as np
 import scipy.io
 import os
@@ -48,7 +49,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def save_output(tth, intensity,  output_name, q_or_2theta, ext='.chi',
+def save_output(tth, intensity, output_name, q_or_2theta, ext='.chi',
                 err=None, dir_path=None):
     """
     Save output diffraction intensities into .chi, .dat or .xye file formats.
@@ -102,21 +103,23 @@ def save_output(tth, intensity,  output_name, q_or_2theta, ext='.chi',
     file_path = _create_file_path(dir_path, output_name, ext)
 
     with open(file_path, 'wb') as f:
-        f.write(output_name)
+        f.write((output_name).encode('utf-8'))
 
-        f.write("\n This file contains integrated powder x-ray diffraction"
-                " intensities.\n\n")
+        f.write(("\n This file contains integrated powder x-ray diffraction "
+            "intensities.\n\n").encode('utf-8'))
 
-        f.write("Number of data points in the file {0} \n".format(len(tth)))
+        f.write(("Number of data points in the"
+                 " file {0} \n".format(len(tth))).encode('utf-8'))
 
-        f.write(des)
+        f.write((des).encode('utf-8'))
 
-        f.write("#####################################################\n\n")
+        f.write(("#############################################"
+                 "########\n\n").encode('utf-8'))
 
         if (err is None):
-            np.savetxt(f, np.c_[tth, intensity], newline='\n')
+            np.savetxt(f, np.c_[tth, intensity])
         else:
-            np.savetxt(f, np.c_[tth, intensity, err], newline='\n')
+            np.savetxt(f, np.c_[tth, intensity, err])
 
 
 def _validate_input(tth, intensity, err, ext):
