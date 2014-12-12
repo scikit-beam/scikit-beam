@@ -56,7 +56,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from skxray.fitting.base.parameter_data import get_para
-from skxray.constants import Element
+from skxray.constants.api import XrfElement as Element
 
 from lmfit import Model
 from lmfit.models import GaussianModel as LmGaussianModel

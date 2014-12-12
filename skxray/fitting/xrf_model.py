@@ -52,7 +52,7 @@ import six
 import logging
 logger = logging.getLogger(__name__)
 
-from skxray.constants import Element
+from skxray.constants.api import XrfElement as Element
 from skxray.fitting.lineshapes import gaussian
 from skxray.fitting.models import (ComptonModel, ElasticModel,
                                    _gen_class_docs)
