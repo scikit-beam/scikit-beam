@@ -59,7 +59,7 @@ def test_save_output():
     y = np.exp(x)
     y1 = y*math.erf(0.5)
 
-    output.save_output(x, y, filename, q_or_2theta="Q")
+    output.save_output(x, y, filename, q_or_2theta="Q", err=None, dir_path=None)
     output.save_output(x, y, filename, q_or_2theta="2theta", ext=".dat",
                        err=None, dir_path=None)
     output.save_output(x, y, filename, q_or_2theta="2theta", ext=".xye",

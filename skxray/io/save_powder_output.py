@@ -81,7 +81,6 @@ def save_output(tth, intensity,  output_name, q_or_2theta, ext='.chi',
     dir_path : str, optional
         new directory path to save the output data files
         eg: /Volumes/Data/experiments/data/
-
     """
 
     if q_or_2theta not in set(['Q', '2theta']):
@@ -122,9 +121,8 @@ def save_output(tth, intensity,  output_name, q_or_2theta, ext='.chi',
 
 def _validate_input(tth, intensity, err, ext):
     """
-    This function validate all the inputs(eg: two theta values, Q space
-    values, directory path etc..) and create a output file path to save
-    diffraction intensities
+    This function validate all the inputs and create a output file
+    path to save diffraction intensities
 
     Parameters
     ----------
@@ -137,10 +135,9 @@ def _validate_input(tth, intensity, err, ext):
     err : ndarray, optional
         error value of intensity
 
-    ext : {'.chi', '.dat', '.xye', '.gsas'}
+    ext : {'.chi', '.dat', '.xye'}
         save output diffraction intensities into .chi,
-        .dat .xye or .gsas file formats.
-
+        .dat or .xye file formats.
     """
 
     if len(tth) != len(intensity):
@@ -166,9 +163,9 @@ def _create_file_path(dir_path, output_name, ext):
     output_name : str
         name for the saved output diffraction intensities
 
-    ext : {'.chi', '.dat', '.xye', '.gsas'}
+    ext : {'.chi', '.dat', '.xye'}
         save output diffraction intensities into .chi,
-        .dat .xye or .gsas file formats.
+        .dat or .xye file formats.
 
     Returns:
     -------
