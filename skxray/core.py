@@ -75,6 +75,14 @@ _defaults = {
 }
 
 
+class NotInstalledError(ImportError):
+    '''
+    Custom exception that should be subclassed to handle
+    specific missing libraries
+
+    '''
+    pass
+
 class MD_dict(MutableMapping):
     """
     A class to make dealing with the meta-data scheme for DataExchange easier

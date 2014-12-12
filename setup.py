@@ -18,12 +18,7 @@ setup(
     version='0.0.3',
     author='Brookhaven National Lab',
     description="Data analysis tools for X-ray science",
-    packages=["skxray",
-              "skxray.testing",
-              "skxray.fitting",
-              "skxray.fitting.base",
-              "skxray.io",
-              ],
+    packages=setuptools.find_packages(exclude=['doc']),
     include_dirs=[np.get_include()],
     ext_modules=ext_modules,
     url='http://github.com/Nikea/scikit-xray',
@@ -38,5 +33,5 @@ setup(
                  "Topic :: Software Development :: Libraries",
                  "Intended Audience :: Science/Research",
                  "Intended Audience :: Developers",
-                 ]
+                 ], requires=['numpy']
     )

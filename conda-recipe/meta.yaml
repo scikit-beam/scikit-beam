@@ -13,7 +13,7 @@ build:
 requirements:
   build:
     - python
-    - distribute
+    - setuptools
     - numpy
     - six
   run:

@@ -41,13 +41,13 @@ from __future__ import (absolute_import, division,
                         unicode_literals, print_function)
 import six
 import numpy as np
-from numpy.testing import assert_array_equal, assert_array_almost_equal
+from numpy.testing import (assert_array_equal, assert_raises)
 from nose.tools import assert_equal, assert_not_equal
 
-from skxray.constants import (Element, emission_line_search,
-                             calibration_standards, HKL)
-from skxray.core import (q_to_d, d_to_q)
+from skxray.constants.xrf import (XrfElement, emission_line_search,
+                                  XrayLibWrap, XrayLibWrap_Energy)
 
+from skxray.core import NotInstalledError
 
 def test_element_data():
     """
@@ -59,12 +59,12 @@ def test_element_data():
 
     name_list = []
     for i in range(100):
-        e = Element(i+1)
+        e = XrfElement(i+1)
         data1.append(e.cs(10)['Ka1'])
         name_list.append(e.name)
 
     for item in name_list:
-        e = Element(item)
+        e = XrfElement(item)
         data2.append(e.cs(10)['Ka1'])
 
     assert_array_equal(data1, data2)
@@ -73,7 +73,6 @@ def test_element_data():
 
 
 def test_element_finder():
-
     true_name = sorted(['Eu', 'Cu'])
     out = emission_line_search(8, 0.05, 10)
     found_name = sorted(list(six.iterkeys(out)))
@@ -81,8 +80,23 @@ def test_element_finder():
     return
 
 
+def test_XrayLibWrap_notpresent():
+    from skxray.constants import xrf
+    # stash the original xraylib object
+    xraylib = xrf.xraylib
+    # force the not present exception to be raised by setting xraylib to None
+    xrf.xraylib=None
+    assert_raises(NotInstalledError, xrf.XrfElement, None)
+    assert_raises(NotInstalledError, xrf.emission_line_search,
+                  None, None, None)
+    assert_raises(NotInstalledError, xrf.XrayLibWrap, None, None)
+    assert_raises(NotInstalledError, xrf.XrayLibWrap_Energy,
+                  None, None, None)
+    # reset xraylib so nothing else breaks
+    xrf.xraylib = xraylib
+
+
 def test_XrayLibWrap():
-    from skxray.constants import XrayLibWrap, XrayLibWrap_Energy
     for Z in range(1, 101):
         for infotype in XrayLibWrap.opts_info_type:
             xlw = XrayLibWrap(Z, infotype)
@@ -92,6 +106,10 @@ def test_XrayLibWrap():
             assert_equal(xlw.info_type, infotype)
             # make sure len doesn't break
             len(xlw)
+
+
+def test_XrayLibWrap_Energy():
+    for Z in range(1, 101):
         for infotype in XrayLibWrap_Energy.opts_info_type:
             incident_energy = 10
             xlwe = XrayLibWrap_Energy(element=Z,
@@ -104,34 +122,26 @@ def test_XrayLibWrap():
 
 
 def smoke_test_element_creation():
-    from skxray.constants import elm_data_list
-
+    from skxray.constants.basic import basic
     prev_element = None
-    for elem_info in elm_data_list:
-        Z = elem_info['Z']
-        mass = elem_info['mass']
-        rho = elem_info['rho']
-        sym = elem_info['sym']
+    elements = [elm for abbrev, elm in six.iteritems(basic)
+                if isinstance(abbrev, int)]
+    elements.sort()
+    for element in elements:
+        Z = element.Z
+        mass = element.mass
+        density = element.density
+        sym = element.sym
         inits = [Z, sym, sym.upper(), sym.lower(), sym.swapcase()]
         element = None
         for init in inits:
-            element = Element(init)
+            element = XrfElement(init)
             # obtain the next four attributes to make sure the XrayLibWrap is
             # working
             element.bind_energy
             element.fluor_yield
             element.jump_factor
             element.emission_line.all
-            assert_equal(element.Z, Z)
-            assert_equal(element.mass, mass)
-            desc = six.text_type(element)
-            assert_equal(desc, "Element name " + six.text_type(sym) +
-                         " with atomic Z " + six.text_type(Z))
-            if not np.isnan(rho):
-                # shield the assertion from any elements whose density is
-                # unknown
-                assert_equal(element.density, rho)
-            assert_equal(element.name, sym)
             if prev_element is not None:
                 # compare prev_element to element
                 assert_equal(prev_element.__lt__(element), True)
@@ -148,44 +158,7 @@ def smoke_test_element_creation():
                 assert_equal(element == prev_element, False)
                 assert_equal(element >= prev_element, True)
                 assert_equal(element > prev_element, True)
-                # create a second instance of element with the same Z value and test its comparison
-                element_2 = Element(element.Z)
-                assert_equal(element < element_2, False)
-                assert_equal(element <= element_2, True)
-                assert_equal(element == element_2, True)
-                assert_equal(element >= element_2, True)
-                assert_equal(element_2 > element, False)
-                assert_equal(element_2 < element, False)
-                assert_equal(element_2 <= element, True)
-                assert_equal(element_2 == element, True)
-                assert_equal(element_2 >= element, True)
-                assert_equal(element_2 > element, False)
         prev_element = element
-
-
-def smoke_test_powder_standard():
-    name = 'Si'
-    cal = calibration_standards[name]
-    assert(name == cal.name)
-
-    for d, hkl, q in cal:
-        assert_array_almost_equal(d_to_q(d), q)
-        assert_array_almost_equal(q_to_d(q), d)
-        assert_array_equal(np.linalg.norm(hkl), hkl.length)
-
-    assert_equal(str(cal), "Calibration standard: Si")
-    assert_equal(len(cal), 11)
-
-
-def test_hkl():
-    a = HKL(1, 1, 1)
-    b = HKL('1', '1', '1')
-    c = HKL(h='1', k='1', l='1')
-    d = HKL(1.5, 1.5, 1.75)
-    assert_equal(a, b)
-    assert_equal(a, c)
-    assert_equal(a, d)
-
 
 if __name__ == '__main__':
     import nose

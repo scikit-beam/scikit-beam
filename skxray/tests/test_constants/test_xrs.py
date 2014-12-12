@@ -2,6 +2,9 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
+# @author: Li Li (lili@bnl.gov)                                        #
+# created on 08/19/2014                                                #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -32,64 +35,46 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-import numpy as np
 
+
+from __future__ import (absolute_import, division,
+                        unicode_literals, print_function)
 import six
-import logging
-logger = logging.getLogger(__name__)
+import numpy as np
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_raises)
+from nose.tools import assert_equal, assert_not_equal
+
+from skxray.constants.xrs import (PowderStandard, Reflection, HKL,
+                                  calibration_standards)
+
+from skxray.core import q_to_d, d_to_q, NotInstalledError
 
 
-def read_binary(filename, nx, ny, nz, dtype_str, headersize):
-    """
-    docstring, woo!
+def smoke_test_powder_standard():
+    name = 'Si'
+    cal = calibration_standards[name]
+    assert(name == cal.name)
 
-    Parameters
-    ----------
-    filename : String
-        The name of the file to open
-    nx : integer
-        The number of data elements in the x-direction
-    ny : integer
-        The number of data elements in the y-direction
-    nz : integer
-        The number of data elements in the z-direction
-    dtype_str : str
-        A valid argument for np.dtype(some_str). See read_binary.dsize
-        attribute
-    headersize : integer
-        The size of the file header in bytes
+    for d, hkl, q in cal:
+        assert_array_almost_equal(d_to_q(d), q)
+        assert_array_almost_equal(q_to_d(q), d)
+        assert_array_equal(np.linalg.norm(hkl), hkl.length)
 
-    Returns
-    -------
-    data : ndarray
-            data.shape = (x, y, z) if z > 1
-            data.shape = (x, y) if z == 1
-            data.shape = (x,) if y == 1 && z == 1
-    header : String
-            header = file.read(headersize)
-    """
+    assert_equal(str(cal), "Calibration standard: Si")
+    assert_equal(len(cal), 11)
 
-    # open the file
-    with open(filename, "rb") as opened_file:
-        # read the file header
-        header = opened_file.read(headersize)
 
-        # read the entire file in as 1D list
-        data = np.fromfile(file=opened_file, dtype=np.dtype(dtype_str),
-                           count=-1)
+def test_hkl():
+    a = HKL(1, 1, 1)
+    b = HKL('1', '1', '1')
+    c = HKL(h='1', k='1', l='1')
+    d = HKL(1.5, 1.5, 1.75)
+    assert_equal(a, b)
+    assert_equal(a, c)
+    assert_equal(a, d)
 
-    # reshape the array to 3D
-    if nz is not 1:
-        data.resize(nx, ny, nz)
-    # unless the 3rd dimension is 1, in which case reshape the array to 2D
-    elif ny is not 1:
-        data.resize(nx, ny)
-    # unless the 2nd dimension is also 1, in which case leave the array as 1D
 
-    # return the array and the header
-    return data, header
-
-# set an attribute for the dsize params that are valid options
-read_binary.dtype_str = sorted(np.typeDict, key=str)
+if __name__ == '__main__':
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
