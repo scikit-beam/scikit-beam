@@ -39,10 +39,13 @@ from __future__ import (absolute_import, division,
                         unicode_literals, print_function)
 import six
 import numpy as np
-from numpy.testing import assert_array_almost_equal
+
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_almost_equal)
 
 import skxray.calibration as calibration
-import skxray.calibration as core
+import skxray.core as core
+from nose.tools import assert_raises
 
 
 def _draw_gaussian_rings(shape, calibrated_center, r_list, r_width):
@@ -96,13 +99,23 @@ def test_blind_d():
 
 
 def test_estimate_dist_sample():
-
     gaus = lambda x, center, height, width: (
                           height * np.exp(-((x-center) / width)**2))
     name = 'Ni'
-    wavelength = .18
+    wavelength = .1839
     pixel_size = (0.2, 0.2)
 
+    sigma = calibration.proc_funs[name]
+
+    """cal = calibration.calibration_standards[name]
+
+    tan2theta = np.tan(cal.convert_2theta(wavelength))
+
+    D = 200
+    expected_r = D * tan2theta
+
+    bin_centers = np.linspace(0, 50, 2000)
+    I = np.zeros_like(bin_centers)"""
 
 if __name__ == '__main__':
     import nose

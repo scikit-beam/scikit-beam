@@ -55,7 +55,8 @@ from skxray.image import find_ring_center_acorr_1D
 def estimate_dist_center(input_image, st_name, wavelength, pixel_size):
     """
     This function will find the sample detector distance and
-    calibrated center from the image of the standard sample
+    calibrated center from the image of the standard sample using
+    other modules.
 
     Parameters
     ----------
@@ -105,11 +106,6 @@ def estimate_dist_center(input_image, st_name, wavelength, pixel_size):
 
     # bin image to 1D
     bins, sums, counts = bin_1D(np.ravel(values), np.ravel(p_image), nx=5000)
-    """bins, sums, counts = bin_image_to_1D(p_image,
-                                         calibrated_center,
-                                         pixel_to_radius,
-                                         pixel_to_1D_kwarg={'pixel_size': pixel_size},
-                                         bin_num=5000)"""
 
     mask = counts > 10
     # find the bin centers
