@@ -90,11 +90,11 @@ def save_output(tth, intensity, output_name, q_or_2theta, ext='.chi',
                          " (enter 2theta)")
 
     if q_or_2theta == "Q":
-        des = ("First column represents Q values (Angstroms) and second"
+        des = ("\n First column represents Q values (Angstroms) and second"
                " column represents intensities and if there is a third"
                " column it represents the error value of intensities")
     else:
-        des = ("First column represents two theta values (degrees) and"
+        des = ("\n First column represents two theta values (degrees) and"
                "  second column represents intensities and if there is"
                " a third column it represents the error value of intensities")
 
@@ -105,16 +105,16 @@ def save_output(tth, intensity, output_name, q_or_2theta, ext='.chi',
     with open(file_path, 'wb') as f:
         f.write((output_name).encode('utf-8'))
 
-        f.write(("\n This file contains integrated powder x-ray diffraction "
+        f.write(("\nThis file contains integrated powder x-ray diffraction "
             "intensities.\n\n").encode('utf-8'))
 
         f.write(("Number of data points in the"
-                 " file {0} \n".format(len(tth))).encode('utf-8'))
+                 " file : {0} \n".format(len(tth))).encode('utf-8'))
 
         f.write((des).encode('utf-8'))
 
-        f.write(("#############################################"
-                 "########\n\n").encode('utf-8'))
+        f.write(("\n #############################################"
+                 "###########################################\n\n").encode('utf-8'))
 
         if (err is None):
             np.savetxt(f, np.c_[tth, intensity])
