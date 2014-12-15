@@ -76,7 +76,7 @@ def test_refine_center():
 
 def test_blind_d():
     gaus = lambda x, center, height, width: (
-                          height * np.exp(-((x-center) / width)**2))
+        height * np.exp(-((x-center) / width)**2))
     name = 'Si'
     wavelength = .18
     window_size = 5
@@ -93,8 +93,8 @@ def test_blind_d():
     for r in expected_r:
         I += gaus(bin_centers, r, 100, .2)
     d, dstd = calibration.estimate_d_blind(name, wavelength, bin_centers,
-                                     I, window_size, len(expected_r),
-                                     threshold)
+                                           I, window_size, len(expected_r),
+                                           threshold)
     assert np.abs(d - D) < 1e-6
 
 

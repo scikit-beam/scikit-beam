@@ -46,9 +46,9 @@ from scipy import ndimage
 from collections import deque
 from .constants.api import calibration_standards
 from skxray.feature import (filter_peak_height, peak_refinement,
-                           refine_log_quadratic)
+                            refine_log_quadratic)
 from skxray.core import (pixel_to_phi, pixel_to_radius,
-                        pairwise, bin_edges_to_centers, bin_1D)
+                         pairwise, bin_edges_to_centers, bin_1D)
 from skxray.image import find_ring_center_acorr_1D
 
 
@@ -98,8 +98,9 @@ def estimate_dist_center(input_image, st_name, wavelength, pixel_size):
     res = find_ring_center_acorr_1D(p_image)
 
     # find the calibration center
-    calibrated_center = refine_center(p_image, res, pixel_size, 25, 5, thresh=0.1,
-                             window_size=5)
+    calibrated_center = refine_center(p_image, res, pixel_size,
+                                      25, 5, thresh=0.1,
+                                      window_size=5)
 
     # converts the pixel positions to radius from the calibrated center
     values = pixel_to_radius(p_image.shape, calibrated_center, pixel_size)
@@ -126,7 +127,7 @@ proc_funcs = {'Ni': 2, 'CeO2': 0.5, 'LaB6': 0.5, 'Al2O3': 0.5,
 
 
 def estimate_d_blind(name, wavelength, bin_centers, ring_average,
-               window_size, max_peak_count, thresh):
+                     window_size, max_peak_count, thresh):
     """
     Estimate the sample-detector distance
 
@@ -277,7 +278,7 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
         cands = scipy.signal.argrelmax(avg, order=window_size)[0]
         # filter local maximums by size
         cands = filter_peak_height(avg, cands, thresh*np.max(avg),
-                                           window=window_size)
+                                   window=window_size)
         ring_trace.append(bin_centers[cands[:max_peaks]])
 
     tr_len = [len(rt) for rt in ring_trace]
