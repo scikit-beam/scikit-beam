@@ -20,7 +20,7 @@ setup(
     description="Data analysis tools for X-ray science",
     packages=setuptools.find_packages(exclude=['doc']),
     include_dirs=[np.get_include()],
-    package_data = {'skxray.constants.data': ['*.dat']}
+    package_data = {'skxray.constants.data': ['*.dat']},
     ext_modules=ext_modules,
     url='http://github.com/Nikea/scikit-xray',
     keywords='Xray Analysis',
