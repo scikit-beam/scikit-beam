@@ -99,23 +99,12 @@ def test_blind_d():
 
 
 def test_estimate_dist_sample():
-    gaus = lambda x, center, height, width: (
-                          height * np.exp(-((x-center) / width)**2))
-    name = 'Ni'
-    wavelength = .1839
-    pixel_size = (0.2, 0.2)
+    sigma_Ni = calibration.proc_funcs["Ni"]
+    sigma_Si = calibration.proc_funcs["Si"]
 
-    sigma = calibration.proc_funs[name]
+    assert_almost_equal(0.5, sigma_Si)
+    assert_almost_equal(2, sigma_Ni)
 
-    """cal = calibration.calibration_standards[name]
-
-    tan2theta = np.tan(cal.convert_2theta(wavelength))
-
-    D = 200
-    expected_r = D * tan2theta
-
-    bin_centers = np.linspace(0, 50, 2000)
-    I = np.zeros_like(bin_centers)"""
 
 if __name__ == '__main__':
     import nose
