@@ -67,20 +67,22 @@ from .lineshapes import (gaussian, lorentzian, lorentzian2, voigt, pvoigt,
                          gaussian_tail, gausssian_step, elastic, compton)
 
 # construct lists of the models that can be used
-model_list = [
-    ConstantModel, LinearModel, QuadraticModel, ParabolicModel,
-    PolynomialModel, GaussianModel, LorentzianModel, VoigtModel,
-    PseudoVoigtModel, Pearson7Model, StudentsTModel, BreitWignerModel,
-    LognormalModel, DampedOscillatorModel, ExponentialGaussianModel,
-    SkewedGaussianModel, DonaichModel, PowerLawModel, ExponentialModel,
-    StepModel, RectangleModel, Lorentzian2Model, ComptonModel, ElasticModel
-].sort(key=lambda s: str(s).split('.')[-1])
+model_list = sorted(
+    [ConstantModel, LinearModel, QuadraticModel, ParabolicModel,
+     PolynomialModel, GaussianModel, LorentzianModel, VoigtModel,
+     PseudoVoigtModel, Pearson7Model, StudentsTModel, BreitWignerModel,
+     LognormalModel, DampedOscillatorModel, ExponentialGaussianModel,
+     SkewedGaussianModel, DonaichModel, PowerLawModel, ExponentialModel,
+     StepModel, RectangleModel, Lorentzian2Model, ComptonModel, ElasticModel
+    ], key=lambda s: str(s).split('.')[-1]
+)
 
 # construct a list of the models that can be used
-lineshapes_list = [
-    gaussian, lorentzian, voigt, pvoigt, pearson7, breit_wigner,
-    damped_oscillator, logistic, lognormal, students_t, expgaussian, donaich,
-    skewed_gaussian, skewed_voigt, step, rectangle, exponential, powerlaw,
-    linear, parabolic, lorentzian2, compton, elastic, gausssian_step,
-    gaussian_tail
-].sort(key = lambda s: str(s))
+lineshapes_list = sorted(
+    [gaussian, lorentzian, voigt, pvoigt, pearson7, breit_wigner,
+     damped_oscillator, logistic, lognormal, students_t, expgaussian, donaich,
+     skewed_gaussian, skewed_voigt, step, rectangle, exponential, powerlaw,
+     linear, parabolic, lorentzian2, compton, elastic, gausssian_step,
+     gaussian_tail],
+    key=lambda s: str(s)
+)
