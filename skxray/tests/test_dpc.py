@@ -173,29 +173,30 @@ def test_dpc_end_to_end():
     start_point = [1, 0]
     pixel_size = (55, 55)
     focus_to_det = 1.46e6
-    rows = 2
-    cols = 2
-    dx = 0.1
-    dy = 0.1
+    scan_rows = 2
+    scan_cols = 2
+    scan_xstep = 0.1
+    scan_ystep = 0.1
     energy = 19.5
     roi = None
     padding = 0
-    w = 1
+    weighting = 1
     bad_pixels = None
     solver = 'Nelder-Mead'
     img_size = (40, 40)
     scale = True
-    invert = True
+    negate = True
 
     ref_image = np.ones(img_size)
-    image_sequence = np.ones((rows * cols, img_size[0], img_size[1]))
+    image_sequence = np.ones((scan_rows * scan_cols, img_size[0], img_size[1]))
 
     phi, a = dpc.dpc_runner(ref_image, image_sequence, start_point, pixel_size, 
-                            focus_to_det, rows, cols, dx, dy, energy, padding, 
-                            w, solver, roi, bad_pixels, invert, scale)
+                            focus_to_det, scan_rows, scan_cols, scan_xstep, 
+                            scan_ystep, energy, padding, weighting, solver, 
+                            roi, bad_pixels, negate, scale)
 
-    assert_array_almost_equal(phi, np.zeros((rows, cols)))
-    assert_array_almost_equal(a, np.ones((rows, cols)))
+    assert_array_almost_equal(phi, np.zeros((scan_rows, scan_cols)))
+    assert_array_almost_equal(a, np.ones((scan_rows, scan_cols)))
 
 
 if __name__ == "__main__":
