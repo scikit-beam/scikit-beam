@@ -71,7 +71,8 @@ def gsas_reader(file, mode):
     """
 
     if os.path.splitext(file)[1] != ".gsas":
-        raise IOError("Provide a file written GSAS , file extension has to be .gsas ")
+        raise IOError("Provide a file written GSAS ,"
+                      " file extension has to be .gsas ")
 
     if mode == "std":
         tth, intensity, err = get_std_data(file)
@@ -80,7 +81,7 @@ def gsas_reader(file, mode):
     elif mode == "fxye":
         tth, intensity, err = get_fxye_data(file)
     else:
-        raise ValueError("Provide a correct mode of the GSAS "
+        raise ValueError("Provide a correct mode of the GSAS file, "
                          "file modes could be in 'std', 'esd', 'fxye' ")
 
     return tth, intensity, err
@@ -113,7 +114,9 @@ def get_fxye_data(file):
         S = fi.readlines()[2:]
         for line in S:
             vals = line.split()
-            tth.append(float(vals[0])/100.)       #CW: from centidegrees to degrees
+
+            # convert from centidegrees to degrees
+            tth.append(float(vals[0])/100.)
             f = float(vals[1])
             s = float(vals[2])
 
@@ -152,8 +155,8 @@ def get_esd_data(file):
     with open(file, 'r') as fi:
         S = fi.readlines()[1:]
 
-        start = float(S[0].split()[5])/100.0   # convert from centidegrees to degrees
-        #print (start)
+        # convert from centidegrees to degrees
+        start = float(S[0].split()[5])/100.0
         step = float(S[0].split()[6])/100.0
 
         j = 0
@@ -197,17 +200,17 @@ def get_std_data(file):
         error value of intensity shape(N, ) array
 
     """
-    tth= []
+    tth = []
     intensity = []
     err = []
 
     with open(file, 'r') as fi:
         S = fi.readlines()[1:]
 
-        start = float(S[0].split()[5])/100.0   # convert from centidegrees to degrees
-        #print (start)
-        step = float(S[0].split()[6])/100.0    #convert from centidegrees to degrees
-        #print (step)
+        # convert from centidegrees to degrees
+        start = float(S[0].split()[5])/100.0
+        step = float(S[0].split()[6])/100.0
+        # number of data values(two theta or intensity)
         nch = float(S[0].split()[2])
 
         j = 0
@@ -215,7 +218,7 @@ def get_std_data(file):
             for i in range(0, 80, 8):
                 xi = start + step*j
                 ni = max(s_int(line[i: i + 2]), 1)
-                yi = max(s_float(line[i+2 : i+8]), 0.0)
+                yi = max(s_float(line[i + 2: i + 8]), 0.0)
                 if yi:
                     vi = yi/ni
                 else:
@@ -234,14 +237,14 @@ def get_std_data(file):
     return [np.array(tth), np.array(intensity), np.array(err)]
 
 
-
 def s_float(S):
     """
     convert a string to a float, treating an all-blank string as zero
     Parameter
     ---------
     S : str
-        string that need to be converted as float treating an all-blank string as zero
+        string that need to be converted as float treating an
+        all-blank string as zero
 
     Returns
     _______
@@ -259,7 +262,8 @@ def s_int(S):
     Parameter
     ---------
     S : str
-        string that need to be converted as integer treating an all-blank strings as zero
+        string that need to be converted as integer treating an all-blank
+        strings as zero
 
     Returns
     -------
@@ -269,14 +273,3 @@ def s_int(S):
         return int(S)
     else:
         return 0
-
-
-if __name__ =="__main__":
-    file = '/Volumes/Data/BeamLines/XPD/output_Ni_fxye.gsas'
-    tth, intensity, err = get_fxye_data(file)
-
-    file1 = "/Volumes/Data/BeamLines/XPD/output_Ni_esd.gsas"
-    x1, y1, w1 = get_esd_data(file1)
-
-    file2 = "/Volumes/Data/BeamLines/XPD/output_Ni_std.gsas"
-    x2, y2, w2 = get_std_data(file2)
