@@ -36,8 +36,8 @@
 """
     This module is for test output.py saving integrated powder
     x-ray diffraction intensities into  different file formats.
-    (Output into different file formats, .chi, .dat, .xye, .gsas)
-
+    (Output into different file formats, .chi, .dat, .xye)
+    Added a test to check the GSAS file reader and file writer
 """
 
 from __future__ import (absolute_import, division,
@@ -51,6 +51,7 @@ from nose.tools import assert_equal, assert_not_equal, raises
 
 from skxray.testing.decorators import known_fail_if
 import skxray.io.save_powder_output as output
+from skxray.io.gsas_file_reader import gsas_reader
 
 
 def test_save_output():
