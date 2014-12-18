@@ -103,18 +103,18 @@ def save_output(tth, intensity, output_name, q_or_2theta, ext='.chi',
     file_path = _create_file_path(dir_path, output_name, ext)
 
     with open(file_path, 'wb') as f:
-        f.write((output_name).encode('utf-8'))
+        f.write(output_name)
 
-        f.write(("\nThis file contains integrated powder x-ray diffraction "
-            "intensities.\n\n").encode('utf-8'))
+        #f.write(("\nThis file contains integrated powder x-ray diffraction "
+           # "intensities.\n\n").encode('utf-8'))
 
-        f.write(("Number of data points in the"
-                 " file : {0} \n".format(len(tth))).encode('utf-8'))
+        #f.write(("Number of data points in the"
+                # " file : {0} \n".format(len(tth))).encode('utf-8'))
 
-        f.write((des).encode('utf-8'))
+        #f.write((des).encode('utf-8'))
 
-        f.write(("\n #############################################"
-                 "###########################################\n\n").encode('utf-8'))
+        #f.write(("\n #############################################"
+               #  "###########################################\n\n").encode('utf-8'))
 
         if (err is None):
             np.savetxt(f, np.c_[tth, intensity])
@@ -122,10 +122,21 @@ def save_output(tth, intensity, output_name, q_or_2theta, ext='.chi',
             np.savetxt(f, np.c_[tth, intensity, err])
 
 
+def _encoding_writer(file, output_name,len_tth, des):
+    file.write(output_name)
+    file.write("\nThis file contains integrated powder x-ray diffraction "
+            "intensities.\n\n")
+    file.write("Number of data points in the"
+                 " file : {0} \n".format(len_tth))
+    file.write(des)
+    file.write("\n #############################################"
+                 "###########################################\n\n")
+
+
+
 def _validate_input(tth, intensity, err, ext):
     """
-    This function validate all the inputs and create a output file
-    path to save diffraction intensities
+    This function validate all the inputs
 
     Parameters
     ----------
@@ -146,6 +157,10 @@ def _validate_input(tth, intensity, err, ext):
     if len(tth) != len(intensity):
         raise ValueError("Number of intensities and the number of Q or"
                          " two theta values are different ")
+    if err is not None:
+        if len(intensity) != len(err):
+            raise ValueError("Number of intensities and the number of"
+                             " err values are different")
 
     if ext == '.xye' and err is None:
         raise ValueError("Provide the Error value of intensity"

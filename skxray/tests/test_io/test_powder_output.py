@@ -80,7 +80,7 @@ def test_save_output():
     assert_array_almost_equal(y1, Data_xye[:, 2])
 
     os.remove("function_values.chi")
-    #os.remove("function_values.dat")
+    os.remove("function_values.dat")
     os.remove("function_values.xye")
 
     return
