@@ -75,11 +75,11 @@ def gsas_reader(file, mode):
                       " file extension has to be .gsas ")
 
     if mode == "std":
-        tth, intensity, err = get_std_data(file)
+        tth, intensity, err = _get_std_data(file)
     elif mode == "esd":
-        tth, intensity, err = get_esd_data(file)
+        tth, intensity, err = _get_esd_data(file)
     elif mode == "fxye":
-        tth, intensity, err = get_fxye_data(file)
+        tth, intensity, err = _get_fxye_data(file)
     else:
         raise ValueError("Provide a correct mode of the GSAS file, "
                          "file modes could be in 'std', 'esd', 'fxye' ")
@@ -87,7 +87,7 @@ def gsas_reader(file, mode):
     return tth, intensity, err
 
 
-def get_fxye_data(file):
+def _get_fxye_data(file):
     """
     Parameters
     ----------
@@ -129,7 +129,7 @@ def get_fxye_data(file):
     return [np.array(tth), np.array(intensity), np.array(err)]
 
 
-def get_esd_data(file):
+def _get_esd_data(file):
     """
     Parameters
     ----------
@@ -163,8 +163,8 @@ def get_esd_data(file):
         for line in S[1:]:
             for i in range(0, 80, 16):
                 xi = start + step*j
-                yi = s_float(line[i: i + 8])
-                ei = s_float(line[i + 8: i + 16])
+                yi = _sfloat(line[i: i + 8])
+                ei = _sfloat(line[i + 8: i + 16])
                 tth.append(xi)
 
                 if yi > 0.0:
@@ -181,7 +181,7 @@ def get_esd_data(file):
     return [np.array(tth), np.array(intensity), np.array(err)]
 
 
-def get_std_data(file):
+def _get_std_data(file):
     """
     Parameters
     ----------
@@ -217,8 +217,8 @@ def get_std_data(file):
         for line in S[1:]:
             for i in range(0, 80, 8):
                 xi = start + step*j
-                ni = max(s_int(line[i: i + 2]), 1)
-                yi = max(s_float(line[i + 2: i + 8]), 0.0)
+                ni = max(_sint(line[i: i + 2]), 1)
+                yi = max(_sfloat(line[i + 2: i + 8]), 0.0)
                 if yi:
                     vi = yi/ni
                 else:
@@ -237,7 +237,7 @@ def get_std_data(file):
     return [np.array(tth), np.array(intensity), np.array(err)]
 
 
-def s_float(S):
+def _sfloat(S):
     """
     convert a string to a float, treating an all-blank string as zero
     Parameter
@@ -256,7 +256,7 @@ def s_float(S):
         return 0.0
 
 
-def s_int(S):
+def _sint(S):
     """
     convert a string to an integer, treating an all-blank string as zero
     Parameter

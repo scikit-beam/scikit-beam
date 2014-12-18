@@ -51,6 +51,7 @@ from nose.tools import assert_equal, assert_not_equal, raises
 
 from skxray.testing.decorators import known_fail_if
 import skxray.io.save_powder_output as output
+from skxray.io.save_powder_output import save_gsas
 from skxray.io.gsas_file_reader import gsas_reader
 
 
@@ -84,3 +85,19 @@ def test_save_output():
     os.remove("function_values.chi")
     os.remove("function_values.dat")
     os.remove("function_values.xye")
+
+def test_gsas_output():
+    filename = "function_values"
+    x = np.arange(0,1000, 2)
+    y = np.exp(x)
+    err = y*math.erf(0.2)
+
+    save_gsas(x, y , filename+"_std", mode=None, err=None, dir_path=None)
+
+    save_gsas(x, y , filename+"_esd", mode=None, err=err, dir_path=None)
+
+    save_gsas(x, y , filename+"_fxye", mode=None, err=err, dir_path=None)
+
+    tth1, intensity1, err1 = gsas_reader(filename+"_std".gsas, "std")
+    tth2, intensity2, err2 = gsas_reader(filename+"_esd".gsas, "esd")
+    tth3, intensity3, err3 = gsas_reader(filename+"_fxye".gsas, "fxye")
