@@ -98,12 +98,28 @@ def test_blind_d():
     assert np.abs(d - D) < 1e-6
 
 
-def test_estimate_dist_sample():
-    sigma_Ni = calibration.proc_funcs["Ni"]
-    sigma_Si = calibration.proc_funcs["Si"]
+def test_sigma_val():
+    sigma_Ni = calibration.sigma_val["Ni"]
+    sigma_Si = calibration.sigma_val["Si"]
 
     assert_almost_equal(0.5, sigma_Si)
     assert_almost_equal(2, sigma_Ni)
+
+
+def test_estimate_dist_center():
+    st_name = "Ni"
+    wavelength = 0.1839
+    pixel_size = (0.2, 0.2)
+
+    cal = calibration.calibration_standards[st_name]
+    tan2theta = np.tan(cal.convert_2theta(wavelength))
+    D = 100
+    expected_r = D*tan2theta
+
+    st = np.arange(-2, 2, 0.01)
+    xs, ys = np.meshgrid(st, st)
+    z = np.sqrt(xs ** 2 + ys ** 2)
+
 
 
 if __name__ == '__main__':

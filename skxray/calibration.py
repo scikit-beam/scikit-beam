@@ -89,7 +89,7 @@ def estimate_dist_center(input_image, st_name, wavelength, pixel_size):
     """
 
     # find the sigma values for the gaussian blur for input image
-    sigma = proc_funcs[st_name]
+    sigma = sigma_val[st_name]
 
     # Using a gaussian blur for the input image
     p_image = ndimage.gaussian_filter(input_image, sigma)
@@ -122,7 +122,7 @@ def estimate_dist_center(input_image, st_name, wavelength, pixel_size):
 
 # Find the sigma values for gaussian blur for images
 # with different calibration standards
-proc_funcs = {'Ni': 2, 'CeO2': 0.5, 'LaB6': 0.5, 'Al2O3': 0.5,
+sigma_val = {'Ni': 2, 'CeO2': 0.5, 'LaB6': 0.5, 'Al2O3': 0.5,
               'Si': 0.5}
 
 
