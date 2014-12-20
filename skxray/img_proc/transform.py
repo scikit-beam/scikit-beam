@@ -116,7 +116,7 @@ def crop_volume(src_data, x_MIN, x_MAX, y_MIN, y_MAX, z_MIN, z_MAX):
     output : ndarray
         Return operation result to specified variable
 """
-    output = src_data[z_MAX:z_MIN, y_MAX:y_MIN, x_MAX:x_MIN]
+    output = src_data[z_MIN:z_MAX, y_MIN:y_MAX, x_MIN:x_MAX]
     return output
 
 

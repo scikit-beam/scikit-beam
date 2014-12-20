@@ -213,7 +213,6 @@ def logical_and(src_data1,
 	"""
     output = np.logical_and(src_data1,
                             src_data2)
-    print 'Operation successful: ' + src_data1 + ' AND ' + src_data2
     return output
 
 
@@ -248,7 +247,6 @@ def logical_or(src_data1,
     """
     output = np.logical_or(src_data1,
                            src_data2)
-    print 'Operation successful: ' + src_data1 + ' OR ' + src_data2
     return output
 
 
@@ -278,7 +276,6 @@ def logical_not(src_data):
     result = mathops.logical_NOT('img_1')
     """
     output = np.logical_not(src_data)
-    print 'Operation successful: ' + 'NOT ' + src_data
     return output
 
 

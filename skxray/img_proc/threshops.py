@@ -121,10 +121,10 @@ def thresh_bounded(src_data, thresh_value_min, thresh_value_max):
     src_data : ndarray
         Specify the volume to be thresholded.
 
-    thresh_value_MIN : float
+    thresh_value_min : float
         Specify the lower threshold boundary.
 
-    thresh_value_MAX : float
+    thresh_value_max : float
         Specify the upper threshold boundary.
 
     Returns
