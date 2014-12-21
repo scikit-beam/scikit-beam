@@ -2,6 +2,13 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
+# Original code:                                                       #
+# @author: Robert B. Von Dreele and Brian Toby                         #
+# General Structure Analysis System - II (GSAS-II)                     #
+# https://subversion.xor.aps.anl.gov/trac/pyGSAS                       #
+# Copyright 2010, UChicago Argonne, LLC, Operator of                   #
+# Argonne National Laboratory All rights reserved.                     #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -51,7 +58,7 @@ def gsas_reader(file, mode):
     Parameters
     ----------
     file: str
-        GSAS powder data files
+        GSAS powder data file
 
     mode : {'std', 'esd', 'fxye'}
         GSAS file formats, could be 'std', 'esd', 'fxye'
@@ -71,7 +78,7 @@ def gsas_reader(file, mode):
     """
 
     if os.path.splitext(file)[1] != ".gsas":
-        raise IOError("Provide a file written GSAS ,"
+        raise IOError("Provide a file diffraction data saved in GSAS,"
                       " file extension has to be .gsas ")
 
     if mode == "std":
@@ -92,7 +99,7 @@ def _get_fxye_data(file):
     Parameters
     ----------
     file: str
-        GSAS powder data files
+        GSAS powder data file
 
     Return
     ------
@@ -115,8 +122,7 @@ def _get_fxye_data(file):
         for line in S:
             vals = line.split()
 
-            # convert from centidegrees to degrees
-            tth.append(float(vals[0])/100.)
+            tth.append(float(vals[0]))
             f = float(vals[1])
             s = float(vals[2])
 
@@ -134,7 +140,7 @@ def _get_esd_data(file):
     Parameters
     ----------
     file: str
-        GSAS powder data files
+        GSAS powder data file
 
     Return
     ------
@@ -176,7 +182,7 @@ def _get_esd_data(file):
                     err.append(1.0/ei**2)
                 else:
                     err.append(0.0)
-                    j += 1
+                j += 1
     N = len(tth)
     return [np.array(tth), np.array(intensity), np.array(err)]
 
@@ -186,7 +192,7 @@ def _get_std_data(file):
     Parameters
     ----------
     file: str
-        GSAS powder data files
+        GSAS powder data file
 
     Return
     ------
@@ -210,6 +216,7 @@ def _get_std_data(file):
         # convert from centidegrees to degrees
         start = float(S[0].split()[5])/100.0
         step = float(S[0].split()[6])/100.0
+
         # number of data values(two theta or intensity)
         nch = float(S[0].split()[2])
 
@@ -224,7 +231,6 @@ def _get_std_data(file):
                 else:
                     yi = 0.0
                     vi = 0.0
-                j += 1
                 if j < nch:
                     tth.append(xi)
                     if vi <= 0.:
@@ -233,6 +239,7 @@ def _get_std_data(file):
                     else:
                         intensity.append(yi)
                         err.append(1.0/vi)
+                j += 1
     N = len(tth)
     return [np.array(tth), np.array(intensity), np.array(err)]
 

@@ -86,18 +86,33 @@ def test_save_output():
     os.remove("function_values.dat")
     os.remove("function_values.xye")
 
+
 def test_gsas_output():
     filename = "function_values"
-    x = np.arange(0,1000, 2)
-    y = np.exp(x)
+    x = np.arange(0, 100, 5)
+    y = np.arange(0, 200, 10)
     err = y*math.erf(0.2)
 
-    save_gsas(x, y , filename+"_std", mode=None, err=None, dir_path=None)
+    save_gsas(x, y, filename+"_std", mode=None, err=None, dir_path=None)
+    save_gsas(x, y, filename+"_esd", mode="esd", err=err, dir_path=None)
+    save_gsas(x, y, filename+"_fxye", mode="fxye", err=err, dir_path=None)
 
-    save_gsas(x, y , filename+"_esd", mode=None, err=err, dir_path=None)
+    tth1, intensity1, err1 = gsas_reader(filename+"_std.gsas", "std")
+    tth2, intensity2, err2 = gsas_reader(filename+"_esd.gsas", "esd")
+    tth3, intensity3, err3 = gsas_reader(filename+"_fxye.gsas", "fxye")
 
-    save_gsas(x, y , filename+"_fxye", mode=None, err=err, dir_path=None)
+    assert_array_equal(x, tth1)
+    assert_array_equal(x, tth2)
+    assert_array_equal(x, tth3)
 
     tth1, intensity1, err1 = gsas_reader(filename+"_std".gsas, "std")
     tth2, intensity2, err2 = gsas_reader(filename+"_esd".gsas, "esd")
     tth3, intensity3, err3 = gsas_reader(filename+"_fxye".gsas, "fxye")
+
+    assert_array_equal(y, intensity1)
+    assert_array_equal(y, intensity2)
+    assert_array_equal(y, intensity3)
+
+    os.remove(filename+"_std.gsas")
+    os.remove(filename+"_esd.gsas")
+    os.remove(filename+"_fxye.gsas")
