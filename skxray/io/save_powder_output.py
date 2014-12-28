@@ -76,8 +76,12 @@ def save_output(tth, intensity, output_name, q_or_2theta, ext='.chi',
         .xye file formats. (If the extension of output file is not
         selected it will be saved as a .chi file)
 
+    mode : {'STD', 'ESD', 'FXYE'}, optional
+        GSAS file formats, could be 'STD', 'ESD', 'FXYE'
+
     err : ndarray, optional
-         error value of intensity shape (N, ) array
+        error value of intensity shape(N, ) array
+        err is None then mode will be 'STD'
 
     dir_path : str, optional
         new directory path to save the output data files

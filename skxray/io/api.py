@@ -52,4 +52,3 @@ from .gsas_file_reader import gsas_reader
 from .save_powder_output import save_gsas
 
 __all__ = ['load_netCDF', 'read_binary', 'load_amiramesh', 'save_output']
-

@@ -1,13 +1,13 @@
 # ######################################################################
-# Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
-# National Laboratory. All rights reserved.                            #
-#                                                                      #
 # Original code:                                                       #
 # @author: Robert B. Von Dreele and Brian Toby                         #
 # General Structure Analysis System - II (GSAS-II)                     #
 # https://subversion.xor.aps.anl.gov/trac/pyGSAS                       #
 # Copyright 2010, UChicago Argonne, LLC, Operator of                   #
 # Argonne National Laboratory All rights reserved.                     #
+#                                                                      #
+# Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
+# National Laboratory. All rights reserved.                            #
 #                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
@@ -51,18 +51,14 @@ from __future__ import (absolute_import, division, print_function,
 import six
 import os
 import numpy as np
+import string
 
-
-def gsas_reader(file, mode):
+def gsas_reader(file):
     """
     Parameters
     ----------
     file: str
         GSAS powder data file
-
-    mode : {'std', 'esd', 'fxye'}
-        GSAS file formats, could be 'std', 'esd', 'fxye'
-
 
     Returns
     --------
@@ -74,22 +70,22 @@ def gsas_reader(file, mode):
 
     err : ndarray
         error value of intensity shape(N, ) array
-
     """
 
     if os.path.splitext(file)[1] != ".gsas":
-        raise IOError("Provide a file diffraction data saved in GSAS,"
+        raise IOError("Provide a file with diffraction data saved in GSAS,"
                       " file extension has to be .gsas ")
 
-    if mode == "std":
-        tth, intensity, err = _get_std_data(file)
-    elif mode == "esd":
-        tth, intensity, err = _get_esd_data(file)
-    elif mode == "fxye":
-        tth, intensity, err = _get_fxye_data(file)
-    else:
+    # find the file mode, could be 'std', 'esd', 'fxye'
+    with open(file, 'r') as fi:
+        S = fi.readlines()[1]
+        mode = S.split()[9]
+
+    try:
+        tth, intensity, err = func_look_up[mode](file)
+    except KeyError:
         raise ValueError("Provide a correct mode of the GSAS file, "
-                         "file modes could be in 'std', 'esd', 'fxye' ")
+                         "file modes could be in 'STD', 'ESD', 'FXYE' ")
 
     return tth, intensity, err
 
@@ -244,6 +240,11 @@ def _get_std_data(file):
     return [np.array(tth), np.array(intensity), np.array(err)]
 
 
+# find the which function to use according to mode of the GSAS file
+# mode could be "STD", "ESD" or "FXYE"
+func_look_up = {'STD':_get_std_data, 'ESD':_get_esd_data, 'FXYE':_get_fxye_data}
+
+
 def _sfloat(S):
     """
     convert a string to a float, treating an all-blank string as zero
@@ -254,7 +255,7 @@ def _sfloat(S):
         all-blank string as zero
 
     Returns
-    _______
+    -------
     float or zero
     """
     if S.strip():
