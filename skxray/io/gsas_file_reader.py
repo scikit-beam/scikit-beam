@@ -122,12 +122,16 @@ def _get_fxye_data(file):
             f = float(vals[1])
             s = float(vals[2])
 
-            if f <= 0.0 or s <= 0.0:
+            if f <= 0.0:
                 intensity.append(0.0)
-                err.append(0.0)
             else:
                 intensity.append(float(vals[1]))
+
+            if s > 0.0:
                 err.append(1.0/float(vals[2])**2)
+            else:
+                err.append(0.0)
+
     return [np.array(tth), np.array(intensity), np.array(err)]
 
 

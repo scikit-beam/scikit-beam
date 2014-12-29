@@ -93,9 +93,19 @@ def test_gsas_output():
     y = np.arange(0, 200, 10)
     err = y*math.erf(0.2)
 
+    vi = []
+    esd_vi = []
+    for ei in err:
+         if ei > 0.0:
+            vi.append(1.0/ei**2)
+            esd_vi.append(1.0/round(ei)**2)
+         else:
+            vi.append(0.0)
+            esd_vi.append(0.0)
+
     save_gsas(x, y, filename+"_std", mode=None, err=None, dir_path=None)
-    save_gsas(x, y, filename+"_esd", mode="esd", err=err, dir_path=None)
-    save_gsas(x, y, filename+"_fxye", mode="fxye", err=err, dir_path=None)
+    save_gsas(x, y, filename+"_esd", mode="ESD", err=err, dir_path=None)
+    save_gsas(x, y, filename+"_fxye", mode="FXYE", err=err, dir_path=None)
 
     tth1, intensity1, err1 = gsas_reader(filename+"_std.gsas")
     tth2, intensity2, err2 = gsas_reader(filename+"_esd.gsas")
@@ -112,6 +122,9 @@ def test_gsas_output():
     assert_array_equal(y, intensity1)
     assert_array_equal(y, intensity2)
     assert_array_equal(y, intensity3)
+
+    assert_array_equal(esd_vi, err2)
+    assert_array_almost_equal(vi, err3, decimal=12)
 
     os.remove(filename+"_std.gsas")
     os.remove(filename+"_esd.gsas")
