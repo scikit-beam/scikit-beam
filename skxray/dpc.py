@@ -48,7 +48,7 @@ from scipy.optimize import minimize
 
 def image_reduction(im, roi=None, bad_pixels=None):
     """
-    Sum the image data along one dimension.
+    Sum the image data over rows and columns.
     
     Parameters
     ----------
@@ -57,7 +57,7 @@ def image_reduction(im, roi=None, bad_pixels=None):
 
     roi : ndarray, optional
         [r, c, row, col], selects ROI im[r : r + row, c : c + col]. Default is
-        None.
+        None, which uses the whole image.
 
     bad_pixels : list, optional
         List of (row, column) tuples marking bad pixels.
@@ -67,14 +67,14 @@ def image_reduction(im, roi=None, bad_pixels=None):
     Returns
     -------
     xline : ndarray
-        The sum of the image data along x direction.
+        The row vector of the sums of each column.
 
     yline : ndarray
-        The sum of the image data along y direction.
+        The column vector of the sums of each row.
 
     """
     
-    if bad_pixels or roi:
+    if bad_pixels:
         im = im.copy()
     
     if bad_pixels is not None:
