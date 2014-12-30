@@ -90,48 +90,49 @@ def save_output(tth, intensity, output_name, q_or_2theta, ext='.chi',
                          " (enter 2theta)")
 
     if q_or_2theta == "Q":
-        des = ("\n First column represents Q values (Angstroms) and second"
-               " column represents intensities and if there is a third"
-               " column it represents the error value of intensities")
+        des = ("""First column represents Q values (Angstroms) and second
+        column represents intensities and if there is a third
+        column it represents the error values of intensities.""")
     else:
-        des = ("\n First column represents two theta values (degrees) and"
-               "  second column represents intensities and if there is"
-               " a third column it represents the error value of intensities")
+        des = ("""First column represents two theta values (degrees) and
+        second column represents intensities and if there is
+        a third column it represents the error values of intensities.""")
 
     _validate_input(tth, intensity, err, ext)
 
     file_path = _create_file_path(dir_path, output_name, ext)
 
     with open(file_path, 'wb') as f:
-        f.write(output_name)
-
-        #f.write(("\nThis file contains integrated powder x-ray diffraction "
-           # "intensities.\n\n").encode('utf-8'))
-
-        #f.write(("Number of data points in the"
-                # " file : {0} \n".format(len(tth))).encode('utf-8'))
-
-        #f.write((des).encode('utf-8'))
-
-        #f.write(("\n #############################################"
-               #  "###########################################\n\n").encode('utf-8'))
-
+        _HEADER = """ {out_name}
+        This file contains integrated powder x-ray diffraction
+        intensities.
+        {des}
+        Number of data points in the file : {n_pts}
+        ######################################################
+        """
+        _encoding_writer(f, _HEADER.format(n_pts=len(tth),
+                                           out_name=output_name,
+                                           des=des))
         if (err is None):
             np.savetxt(f, np.c_[tth, intensity])
         else:
             np.savetxt(f, np.c_[tth, intensity, err])
 
 
-def _encoding_writer(file, output_name,len_tth, des):
-    file.write(output_name)
-    file.write("\nThis file contains integrated powder x-ray diffraction "
-            "intensities.\n\n")
-    file.write("Number of data points in the"
-                 " file : {0} \n".format(len_tth))
-    file.write(des)
-    file.write("\n #############################################"
-                 "###########################################\n\n")
+def _encoding_writer(f, _HEADER):
+    """
+    Encode the writer for python 3
 
+    Parameters
+    ----------
+    f : str
+        file name
+
+    _HEADER : str
+        string need to be written in the file
+
+    """
+    f.write(_HEADER.encode('utf-8'))
 
 
 def _validate_input(tth, intensity, err, ext):

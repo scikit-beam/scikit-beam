@@ -59,15 +59,16 @@ def test_save_output():
     y = np.exp(x)
     y1 = y*math.erf(0.5)
 
-    output.save_output(x, y, filename, q_or_2theta="Q", err=None, dir_path=None)
+    output.save_output(x, y, filename, q_or_2theta="Q", err=None,
+                       dir_path=None)
     output.save_output(x, y, filename, q_or_2theta="2theta", ext=".dat",
                        err=None, dir_path=None)
     output.save_output(x, y, filename, q_or_2theta="2theta", ext=".xye",
                        err=y1, dir_path=None)
 
-    Data_chi = np.loadtxt("function_values.chi", skiprows=8)
-    Data_dat = np.loadtxt("function_values.dat", skiprows=8)
-    Data_xye = np.loadtxt("function_values.xye", skiprows=8)
+    Data_chi = np.loadtxt("function_values.chi", skiprows=7)
+    Data_dat = np.loadtxt("function_values.dat", skiprows=7)
+    Data_xye = np.loadtxt("function_values.xye", skiprows=7)
 
     assert_array_almost_equal(x, Data_chi[:, 0])
     assert_array_almost_equal(y, Data_chi[:, 1])
@@ -82,5 +83,3 @@ def test_save_output():
     os.remove("function_values.chi")
     os.remove("function_values.dat")
     os.remove("function_values.xye")
-
-    return
