@@ -51,7 +51,7 @@ from nose.tools import assert_equal, assert_not_equal, raises
 
 from skxray.testing.decorators import known_fail_if
 import skxray.io.save_powder_output as output
-from skxray.io.save_powder_output import save_gsas
+from skxray.io.save_powder_output import gsas_writer
 from skxray.io.gsas_file_reader import gsas_reader
 
 
@@ -96,16 +96,16 @@ def test_gsas_output():
     vi = []
     esd_vi = []
     for ei in err:
-         if ei > 0.0:
+        if ei > 0.0:
             vi.append(1.0/ei**2)
             esd_vi.append(1.0/round(ei)**2)
-         else:
+        else:
             vi.append(0.0)
             esd_vi.append(0.0)
 
-    save_gsas(x, y, filename+"_std", mode=None, err=None, dir_path=None)
-    save_gsas(x, y, filename+"_esd", mode="ESD", err=err, dir_path=None)
-    save_gsas(x, y, filename+"_fxye", mode="FXYE", err=err, dir_path=None)
+    gsas_writer(x, y, filename+"_std", mode=None, err=None, dir_path=None)
+    gsas_writer(x, y, filename+"_esd", mode="ESD", err=err, dir_path=None)
+    gsas_writer(x, y, filename+"_fxye", mode="FXYE", err=err, dir_path=None)
 
     tth1, intensity1, err1 = gsas_reader(filename+"_std.gsas")
     tth2, intensity2, err2 = gsas_reader(filename+"_esd.gsas")
@@ -114,10 +114,6 @@ def test_gsas_output():
     assert_array_equal(x, tth1)
     assert_array_equal(x, tth2)
     assert_array_equal(x, tth3)
-
-    tth1, intensity1, err1 = gsas_reader(filename+"_std".gsas, "std")
-    tth2, intensity2, err2 = gsas_reader(filename+"_esd".gsas, "esd")
-    tth3, intensity3, err3 = gsas_reader(filename+"_fxye".gsas, "fxye")
 
     assert_array_equal(y, intensity1)
     assert_array_equal(y, intensity2)

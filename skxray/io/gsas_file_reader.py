@@ -82,7 +82,7 @@ def gsas_reader(file):
         mode = S.split()[9]
 
     try:
-        tth, intensity, err = func_look_up[mode](file)
+        tth, intensity, err = _func_look_up[mode](file)
     except KeyError:
         raise ValueError("Provide a correct mode of the GSAS file, "
                          "file modes could be in 'STD', 'ESD', 'FXYE' ")
@@ -246,7 +246,7 @@ def _get_std_data(file):
 
 # find the which function to use according to mode of the GSAS file
 # mode could be "STD", "ESD" or "FXYE"
-func_look_up = {'STD':_get_std_data, 'ESD':_get_esd_data, 'FXYE':_get_fxye_data}
+_func_look_up = {'STD':_get_std_data, 'ESD':_get_esd_data, 'FXYE':_get_fxye_data}
 
 
 def _sfloat(S):
