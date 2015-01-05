@@ -73,15 +73,13 @@ def image_reduction(im, roi=None, bad_pixels=None):
         The column vector of the sums of each row.
 
     """
-    
+
     if bad_pixels:
         im = im.copy()
-    
-    if bad_pixels is not None:
         for row, column in bad_pixels:
             im[row, column] = 0
 
-    if roi is not None:
+    if roi:
         r, c, row, col = roi
         im = im[r : r + row, c : c + col]
 
@@ -240,11 +238,11 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
         padding = 1 --> 0 v 0 (the padded image, size = (3 * N, 3 * M))
                         0 0 0
     
-    weighting : float, valid in [0, 1], optional
+    weighting : float, optional
         Weighting parameter for the phase gradient along x and y direction when 
-        constructing the final phase image. Default value = 0.5, which means 
-        that gx and gy equally contribute to the final phase image. Default is
-        0.5.
+        constructing the final phase image. 
+        Valid in [0, 1]. Default value = 0.5, which means that gx and gy 
+        equally contribute to the final phase image. 
     
     Returns
     -------
@@ -344,11 +342,11 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
         padding = 1 --> 0 v 0 (the padded image, size = (3 * N, 3 * M))
                         0 0 0
 
-    weighting : float, valid in [0, 1], optional
+    weighting : float, optional
         Weighting parameter for the phase gradient along x and y direction when 
-        constructing the final phase image. Default value = 0.5, which means 
-        that gx and gy equally contribute to the final phase image. Default is
-        0.5.
+        constructing the final phase image. 
+        Valid in [0, 1]. Default value = 0.5, which means that gx and gy 
+        equally contribute to the final phase image. 
         
     solver : str, optional
         Type of solver, one of the following (default 'Nelder-Mead'):
