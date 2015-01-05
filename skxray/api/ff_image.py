@@ -75,6 +75,8 @@ from scipy.ndimage.morphology import (binary_opening, binary_closing,
                                       grey_erosion, grey_dilation,
                                       binary_fill_holes, binary_propagation)
 
+from ..img_proc.morphology import (extract_material, extract_all_else)
+
 
 #-----------------------------------------------------------------------------
 #Image processing: Image thresholding
