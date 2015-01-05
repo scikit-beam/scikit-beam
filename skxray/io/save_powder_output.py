@@ -103,16 +103,17 @@ def save_output(tth, intensity, output_name, q_or_2theta, ext='.chi',
     file_path = _create_file_path(dir_path, output_name, ext)
 
     with open(file_path, 'wb') as f:
-        _HEADER = """ {out_name}
+        _HEADER = """{out_name}
         This file contains integrated powder x-ray diffraction
         intensities.
         {des}
         Number of data points in the file : {n_pts}
-        ######################################################
-        """
+        ######################################################"""
         _encoding_writer(f, _HEADER.format(n_pts=len(tth),
                                            out_name=output_name,
                                            des=des))
+        new_line="\n"
+        _encoding_writer(f, new_line)
         if (err is None):
             np.savetxt(f, np.c_[tth, intensity])
         else:
