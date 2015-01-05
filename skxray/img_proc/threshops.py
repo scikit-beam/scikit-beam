@@ -5,17 +5,6 @@
 This module contains tools for thresholding data sets.
 """
 
-"""
-REVISION LOG: (FORMAT: "PROGRAMMER INITIALS: DATE -- RECORD")
-GCI: 2/11/2014 -- Modifying documentation of the package functions for 
-    inclusion in the bulk module pull to GITHUB
-GCI: 2/19/2014 -- Renaming module from C4_threshops to threshops.py
-    Updating documentation to docstring convention.
-    Changed module back from class structure to a simple module containing
-    thresholding function definitions.
-GCI: 9/23/14 -- Modified all functions to auto-wrap into the image
-    processing library in vistrails.
-"""
 
 import numpy as np
 import skimage.filter as sk

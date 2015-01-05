@@ -5,38 +5,7 @@
 This class is designed to evaluate data set histograms by providing 
 functions for easily plotting, evaluating, saving, and modifiying histograms.
 """
-"""
-REVISON LOG: (FORMAT: "PROGRAMMER INITIALS: DATE -- RECORD")
-GCI: 2/11/2014 -- Modifying documentation of the package functions for
-    inclusion in the bulk module pull to GITHUB
-GCI: 2/19/2014 -- Updating module to docstring format.
-    Changed filename from C3_histops.py to histops.py
-    TODO Finish Adding function for saving histogram data as a CSV file or
-    HDF5
-    data set.
-    TODO Finish adding function for loading previously saved histogram data.
-GCI: 2/28/2014 -- Added the functions:
-    hist_makeData: which writes histogram data to the HDF5 file
-    hist_makeCSV: which writes the histogram data to a CSV file
-GCI: 3/4/14 -- (1) Modified the hist_makeData function to include a keyword to
-    append the data set name so that it doesn't conflict with previously saved 
-    data. Currently this has been added to allow for custom histogram data
-    to be
-    saved in addition to standard histogram data, however, this will also
-    enable
-    the funciton to save multiple iterations or versions of the histogram
-    for a
-    single volume (e.g. for binsize evaluation, or filter evaluation).
-    (2) Created a new function specifically to generate histogram data. This 
-    function returns three numpy arrays corresponding to the bin voxel count 
-    (hist), average intensity value for each bin (bin_avg) and the edge value
-    for each bin (bin_edges). The results from this function are then used by 
-    the plotting funciton, as well as the two saving functions that are
-    included
-    for saving the data either to the H5 file, or to a separate CSV file.
-GCI: 9/18/14 -- Updating hist functions for incorporation into
-VisTrails
-"""
+
 
 import numpy as np
 

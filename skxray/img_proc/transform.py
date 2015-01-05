@@ -4,17 +4,7 @@
 """
 This class is designed to facilitate volume transformation.
 """
-"""
-REVISION LOG: (FORMAT: "PROGRAMMER INITIALS: DATE -- RECORD")
-GCI: 2/11/2014 -- Modifying documentation of the package functions for 
-    inclusion in the bulk module pull to GITHUB
-GCI: 2/20/2014 -- Updating documentation to docstring format
-    Converted back to simple module containing definitions from class structure.
-    This needs to be carried through all dependent pyLight executables.
-    Changed module name from C6_transform.py to transform.py
-GCI: 9/23/14 -- Modified existing functions so that they can be directly
-    auto-wrapped and incorporated into the vistrails image processing library.
-"""
+
 
 import numpy as np
 from scipy import ndimage
