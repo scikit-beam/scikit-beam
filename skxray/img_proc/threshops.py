@@ -211,12 +211,10 @@ def thresh_otsu(src_data):
         The threshold value determined by the thresholding function and used
         to generate the binary volume data set
     """
-    data_max = np.amax(src_data)
-    data_min = np.amin(src_data)
-    if (data_max - data_min) > 1000:
-        num_bins = (data_max - data_min) / 2
+    if (np.ptp(src_data)) > 1000:
+        num_bins = int(np.ptp(src_data) / 2)
     else:
-        num_bins = (data_max - data_min)
+        num_bins = int(np.ptp(src_data))
     thresh_value = sk.threshold_otsu(src_data, num_bins)
     output_data = thresh_globalGT(src_data, thresh_value)
     return output_data, thresh_value
@@ -243,13 +241,11 @@ def thresh_yen(src_data):
         The threshold value determined by the thresholding function and used
         to generate the binary volume data set
     """
-    data_max = np.amax(src_data)
-    data_min = np.amin(src_data)
-    if (data_max - data_min) > 1000:
-        num_bins = (data_max - data_min) / 2
+    if (np.ptp(src_data)) > 1000:
+        num_bins = int(np.ptp(src_data) / 2)
     else:
-        num_bins = (data_max - data_min)
-    thresh_value = sk.threshold_otsu(src_data, num_bins)
+        num_bins = int(np.ptp(src_data))
+    thresh_value = sk.threshold_yen(src_data, num_bins)
     output_data = thresh_globalGT(src_data, thresh_value)
     return output_data, thresh_value
 
@@ -275,12 +271,10 @@ def thresh_isodata(src_data):
         The threshold value determined by the thresholding function and used
         to generate the binary volume data set
     """
-    data_max = np.amax(src_data)
-    data_min = np.amin(src_data)
-    if (data_max - data_min) > 1000:
-        num_bins = int((data_max - data_min) / 2)
+    if (np.ptp(src_data)) > 1000:
+        num_bins = int(np.ptp(src_data) / 2)
     else:
-        num_bins = int((data_max - data_min))
+        num_bins = int(np.ptp(src_data))
     thresh_value = sk.threshold_isodata(src_data, num_bins)
     output_data = thresh_globalGT(src_data, thresh_value)
     return output_data, thresh_value
