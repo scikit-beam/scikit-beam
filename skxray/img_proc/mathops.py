@@ -8,7 +8,6 @@
 
 import numpy as np
 
-from numpy import logical_and
 
 def add(src_data,
         offset_data):
@@ -40,7 +39,7 @@ def add(src_data,
 
 
 def subtract(src_data,
-        offset_data):
+             offset_data):
     """
     This function enables the subtraction of EITHER one image or volume data 
     set from another, OR reduction of all values in an image/data set by a set 
@@ -151,36 +150,6 @@ def divide(src_data,
     else:
         raise ValueError
     return output
-
-
-# logical_and.__doc__ = (
-#     """
-#     This function enables the computation of the LOGICAL_AND of two image or
-#     volume  data sets. This function can be used for data comparison, material
-#     isolation, noise removal, or mask application/generation.
-#     NOTE:
-#     The actual operator in the fuction can be the bitwise operator "&" as in
-#     "x & y = z". The function also works using the standard logical operator
-#     "and" as in "x and y = z".
-#
-#     Parameters
-#     ----------
-#     src_data1 : array
-#         Specifies the first reference data
-#
-#     src_data2 : array
-#         Specifies the second reference data
-#
-#     Returns
-#     -------
-#     output : array
-#         Returns the resulting array to the designated variable
-#
-#     Example
-#     -------
-#     result = mathops.logical_AND('img_1', 'img_2')
-# 	"""
-#     )
 
 
 def logical_and(src_data1,
@@ -344,7 +313,7 @@ def logical_xor(src_data1,
 
 
 def logical_subtract(src_data1,
-                src_data2):
+                     src_data2):
     """
     This function enables LOGICAL SUBTRACTION of one binary image or volume data 
     set from another. This function can be used to remove phase information, 

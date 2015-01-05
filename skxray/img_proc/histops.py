@@ -69,23 +69,12 @@ def rescale_intensity_values(src_data,
     range_final = max_final - min_final
     #if 'int' in str(src_data.dtype):
     #    range_initial = range_initial + 1
-    print "initial range equals: " + str(range_initial)
     scale_factor = (range_final)/(range_initial)
-    print "scale factor equals"
-    print scale_factor
     normalized_data = scale_factor * (src_float - min_initial)
-    print "normalized data equals: "
-    print normalized_data
     scaled_data = normalized_data + min_initial
-    print "scaled data before floor"
-    print scaled_data
     if 'int' in out_dType:
         result = np.floor(scaled_data)
-    print "scaled data after floor"
-    print result
     result = result.astype(out_dType)
-    print "result after dType conversion"
-    print result
     return result
 
 #dType list for vistrails wrapper
@@ -155,5 +144,3 @@ def hist_make(src_data,
         if right_bin_edge == bin_edges[len(bin_edges) - 1]:
             break
     return hist, bin_edges, bin_avg
-
-

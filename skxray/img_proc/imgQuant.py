@@ -115,7 +115,6 @@ def save_measure_CSV (write_file_name, data, column_titles):
                delimiter=',',
                header=column_titles)
 
-#def save_measure_H5 ():
 
 def surf_area (label_field, label_dict = None):
     """

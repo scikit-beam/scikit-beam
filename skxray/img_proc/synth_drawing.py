@@ -60,9 +60,6 @@ def draw_triangle_outline (src_img,
                            B, 
                            C, 
                            value = 1):
-    print "first coordinates: " + str(A)
-    print "second coordinates: " + str(B)
-    print "third coordinates: " + str(C)
     ya, xa = A
     yb, xb = B
     yc, xc = C
@@ -77,8 +74,6 @@ def draw_triangle_outline (src_img,
         else:
             x2 = x_coord_list[x_index + 1]
             y2 = y_coord_list[x_index + 1]
-        print ("Drawing from: (" + str(y1) + ", " + str(x1) + ") to (" + 
-               str(y2) + ", " + str(x2) + ")")
         x_list = [x1, x2]
         y_list = [y1, y2]
         x_range = np.arange(np.amin(x_list), np.amax(x_list))
@@ -89,7 +84,6 @@ def draw_triangle_outline (src_img,
         y_coord = y1
         if x_len >= y_len:
             step_sz = (float(y2-y1)/x_len)
-            print "step size: " + str(step_sz)
             y_range = np.arange(y1,y2,step_sz)
             for i in y_range:
                 y_coord = int(i)
@@ -97,7 +91,6 @@ def draw_triangle_outline (src_img,
                 x_coord = x_coord + (x2-x1)/abs(x2-x1)
         elif y_len > x_len:
             step_sz = float(x2-x1)/y_len
-            print "step size: " + str(step_sz)
             x_range = np.arange(x1,x2,step_sz)
             for i in x_range:
                 x_coord = int(i)
