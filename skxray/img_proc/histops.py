@@ -8,6 +8,7 @@ functions for easily plotting, evaluating, saving, and modifiying histograms.
 
 
 import numpy as np
+from skxray.core import bin_edges_to_centers
 
 
 def rescale_intensity_values(src_data,
@@ -133,14 +134,5 @@ def hist_make(src_data,
     hist, bin_edges = np.histogram(src_data,
                                    bins=num_bins,
                                    density=pd_function)
-    bin_avg = np.empty(len(hist))
-    intensity = iter(bin_edges)
-    row_count = 0
-    right_bin_edge = next(intensity)
-    for left_bin_edge in bin_edges:
-        right_bin_edge = next(intensity)
-        bin_avg[row_count] = (left_bin_edge + right_bin_edge) / 2
-        row_count += 1
-        if right_bin_edge == bin_edges[len(bin_edges) - 1]:
-            break
-    return hist, bin_edges, bin_avg
+    bin_avg = bin_edges_to_centers(bin_edges)
+    return hist, bin_avg, bin_edges
