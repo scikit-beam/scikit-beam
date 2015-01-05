@@ -285,29 +285,3 @@ def thresh_isodata(src_data):
     output_data = thresh_globalGT(src_data, thresh_value)
     return output_data, thresh_value
 
-# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-# TODO Add simple multi thresholding tool
-# TODO Add auto thresholding methods including:
-# 1st derivative
-# entropy
-# moments
-# factorization
-# OTHERS...
-# MULTI-THRESHOLDING
-# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-# def thresh_multi(self, src_data):
-# output = not src_data
-# print 'Operation successful: ' + "NOT " + src_data
-# return output
-# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-# FIRST DERIVATIVE THRESHOLDING
-# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-# def thresh_firstDerivative(self, op_type='offset', offset_image=0):
-# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-# k_shape : string
-# Specify whether the kernel to be applied during automatic thresholding
-# is to be 2-dimensional ('2D') or 3-dimensional ('3D')
-# k_size : integer
-# Specify the size (in pixels) of the kernel to be used for thresholding
-# Note: specified kernel sizes must be odd integers greater than 1
-
