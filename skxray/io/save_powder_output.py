@@ -132,7 +132,6 @@ def _encoding_writer(f, _HEADER):
     _HEADER : str
         string need to be written in the file
     """
-
     f.write(_HEADER.encode('utf-8'))
 
 

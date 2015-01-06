@@ -36,7 +36,7 @@
 """
     This module is for test output.py saving integrated powder
     x-ray diffraction intensities into  different file formats.
-    (Output into different file formats, .chi, .dat, .xye)
+    (Output into different file formats, .chi, .dat, .xye, gsas)
     Added a test to check the GSAS file reader and file writer
 """
 
