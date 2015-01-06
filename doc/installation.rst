@@ -46,16 +46,6 @@ Finally, to try it out, type
 This will automatically open a browser tab, ready to interpret Python code.
 To get started, check out the links to tutorials at the top of this document.
 
-Updating Your Installation
---------------------------
-
-The code is under active development. To update to the latest stable release,
-run this in the command prompt:
-
-.. code-block:: bash
-
-    conda update -c tacaswell scikit-xray
-
 More Information for Experienced Python Users
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -63,7 +53,8 @@ We strongly recommend using conda install trackpy, as described above,
 but pip is also supported.
 
 Essential Dependencies:
-* python
+
+* python (both 2 and 3 are supported)
 * setuptools
 * numpy
 * scipy
@@ -77,3 +68,13 @@ Essential Dependencies:
 
    git clone https://github.com/Nikea/scikit-xray
    pip install -e scikit-xray
+
+Updating Your Installation
+--------------------------
+
+The code is under active development. To update to the latest stable release,
+run this in the command prompt:
+
+.. code-block:: bash
+
+    conda update -c tacaswell scikit-xray
