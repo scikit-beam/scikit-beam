@@ -39,7 +39,6 @@ Created on May 29, 2014
 
 def run():
     from skxray.io.binary import read_binary
-    from skxray.core import detector2D_to_1D
     from skxray.recip import project_to_sphere
     import numpy as np
     from matplotlib import pyplot
@@ -61,7 +60,6 @@ def run():
     # read in a binary file
     data, header = read_binary(**params)
 
-    # list_1D = detector2D_to_1D(data, **params)
 
     qi = project_to_sphere(data, ROI=[900,1100,900,1100], **params)
     

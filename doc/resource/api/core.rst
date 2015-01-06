@@ -25,7 +25,7 @@ Image warping functions
 .. autosummary::
    :toctree: generated/
 
-   detector2D_to_1D
+   img_to_relative_xyi
    pixel_to_radius
    pixel_to_phi
 

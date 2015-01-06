@@ -39,7 +39,7 @@ Created on Jun 4, 2014
 import matplotlib as mpl
 import numpy as np
 from skxray.io.binary import read_binary
-from skxray.core import detector2D_to_1D
+from skxray.core import img_to_relative_xyi
 
 def get_cbr4_sample_img():
     # define the 
@@ -66,7 +66,7 @@ def run():
     # get the sample data
     data, params = get_cbr4_sample_img
     # convert the data from 2d array to xyi relative to beam center
-    xyi = detector2D_to_1D(data, **params)
+    xyi = img_to_relative_xyi(data, **params)
     # convert xy to r
     r = np.linalg.norm(xyi[:,0:2])
     # bin i based on r
