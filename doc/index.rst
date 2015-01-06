@@ -45,12 +45,15 @@ scikit-xray: Data Analysis Tools for X-ray Science
     <br>
 
 
-Scikit-xray is a Python package providing tools for X-ray science. For
-non-programmers these tools and more and packaged into a drag-and-drop
-interface called vistrails. (Think `LabView <http://www.ni.com/labview/>`__ for
-X-ray image processing and data analysis.)
+Scikit-xray is a Python package providing tools for X-ray science.
+For a brief introduction to the ideas behind the package, you can read the
+:ref:`introductory notes <introduction>`.
 
-For a brief introduction to the ideas behind the package, you can read the :ref:`introductory notes <introduction>`.
+Users who prefer drag-and-drop software may prefer to use 
+`vistrails <http://www.vistrails.org/index.php/Main_Page>`__, through which
+all the functionality of scikit-xray is also available.
+(Think LabView for X-ray image processing and data analysis.)
+
 
 The :ref:`tutorial <tutorial>` walks through several experiments from start to
 finish -- from the raw data to a publication-style plot. You can also browse
