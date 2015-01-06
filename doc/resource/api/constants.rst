@@ -2,7 +2,7 @@
  :mod:`constants` Module
 ========================
 
-.. currentmodule:: nsls2.constants
+.. currentmodule:: skxray.constants
 
 Elemental data
 --------------

@@ -3,7 +3,7 @@
 ====================
 
 
-.. automodule:: nsls2.image
+.. automodule:: skxray.image
    :members:
    :show-inheritance:
    :undoc-members:
