@@ -20,7 +20,7 @@ Further, the modular design of scikit-xray allows its components to be easily
 reused in way not envisioned by the authors.
 
 Targeted Techniques
-===================
+^^^^^^^^^^^^^^^^^^^
 
 Scikit-image is developed in collaboration with X-ray beamline scientists
 working with the following techniques.
@@ -36,7 +36,7 @@ Of course, the analysis techniques developed for these experiments may be
 useful in others well.
 
 Credit
-======
+^^^^^^
 
 Scikit-xray is part of the `Nikea <https://github.com/Nikea>`__ software
 organization supported by the 
