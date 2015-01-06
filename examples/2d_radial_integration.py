@@ -64,7 +64,7 @@ def get_cbr4_sample_img():
     
 def run():
     # get the sample data
-    data, params = get_cbr4_sample_img
+    data, params = get_cbr4_sample_img()
     # convert the data from 2d array to xyi relative to beam center
     xyi = img_to_relative_xyi(data, **params)
     # convert xy to r
