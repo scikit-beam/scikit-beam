@@ -32,19 +32,54 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 
+"""
+    This module is for test output.py saving integrated powder
+    x-ray diffraction intensities into  different file formats.
+    (Output into different file formats, .chi, .dat, .xye, .gsas)
+
+"""
+
+from __future__ import (absolute_import, division,
+                        unicode_literals, print_function)
 import six
-import logging
-logger = logging.getLogger(__name__)
+import os
+import math
+import numpy as np
+from numpy.testing import assert_array_equal, assert_array_almost_equal
+from nose.tools import assert_equal, assert_not_equal, raises
 
-from .net_cdf_io import load_netCDF
+from skxray.testing.decorators import known_fail_if
+import skxray.io.save_powder_output as output
 
-from .binary import read_binary
 
-from .avizo_io import load_amiramesh
+def test_save_output():
+    filename = "function_values"
+    x = np.arange(0, 100, 1)
+    y = np.exp(x)
+    y1 = y*math.erf(0.5)
 
-from .save_powder_output import save_output
+    output.save_output(x, y, filename, q_or_2theta="Q", err=None,
+                       dir_path=None)
+    output.save_output(x, y, filename, q_or_2theta="2theta", ext=".dat",
+                       err=None, dir_path=None)
+    output.save_output(x, y, filename, q_or_2theta="2theta", ext=".xye",
+                       err=y1, dir_path=None)
 
-__all__ = ['load_netCDF', 'read_binary', 'load_amiramesh', 'save_output']
+    Data_chi = np.loadtxt("function_values.chi", skiprows=7)
+    Data_dat = np.loadtxt("function_values.dat", skiprows=7)
+    Data_xye = np.loadtxt("function_values.xye", skiprows=7)
+
+    assert_array_almost_equal(x, Data_chi[:, 0])
+    assert_array_almost_equal(y, Data_chi[:, 1])
+
+    assert_array_almost_equal(x, Data_dat[:, 0])
+    assert_array_almost_equal(y, Data_dat[:, 1])
+
+    assert_array_almost_equal(x, Data_xye[:, 0])
+    assert_array_almost_equal(y, Data_xye[:, 1])
+    assert_array_almost_equal(y1, Data_xye[:, 2])
+
+    os.remove("function_values.chi")
+    os.remove("function_values.dat")
+    os.remove("function_values.xye")
