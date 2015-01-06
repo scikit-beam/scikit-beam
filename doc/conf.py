@@ -61,7 +61,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'scikit-xray'
-copyright = u'2010-2014, Brookhaven National Lab'
+copyright = u'2014-2015 Brookhaven National Lab'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -286,7 +286,7 @@ intersphinx_mapping = {'python': ('http://docs.python.org/2.7', None),
 epub_title = u'scikit-xray'
 epub_author = u'Brookhaven National Lab'
 epub_publisher = u'Brookhaven National Lab'
-epub_copyright = u'2014 Brookhaven National Lab'
+epub_copyright = u'2014-2015 Brookhaven National Lab'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'scikit-xray'
