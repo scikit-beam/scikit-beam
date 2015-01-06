@@ -88,11 +88,9 @@ def estimate_dist_center(input_image, st_name, wavelength, pixel_size):
         are centered on.  Accurate to pixel resolution.
     """
 
-    # find the sigma values for the gaussian blur for input image
-    sigma = sigma_val[st_name]
-
     # Using a gaussian blur for the input image
-    p_image = ndimage.gaussian_filter(input_image, sigma)
+
+    p_image = _proc_funcs[st_name](input_image)
 
     # find the pixel-resolution center of a set of concentric rings
     res = find_ring_center_acorr_1D(p_image)
@@ -120,10 +118,22 @@ def estimate_dist_center(input_image, st_name, wavelength, pixel_size):
     return dist_mean, dist_std, calibrated_center
 
 
-# Find the sigma values for gaussian blur for images
-# with different calibration standards
-sigma_val = {'Ni': 2, 'CeO2': 0.5, 'LaB6': 0.5, 'Al2O3': 0.5,
-              'Si': 0.5}
+def _ni_pre_process(image):
+    """
+    Using a Gaussian blur with sigma=2 to the input image
+    """
+    return ndimage.gaussian_filter(image, sigma=2)
+
+
+def _pre_process(image):
+    """
+    Using a Gaussian blur with sigma=0.5 to the input image
+    """
+    return ndimage.gaussian_filter(image, sigma=0.5)
+
+
+_proc_funcs = {"Ni":_ni_pre_process, "Si":_pre_process, "CeO2":_pre_process,
+               "LaB6":_pre_process, "Al2O3":_pre_process}
 
 
 def estimate_d_blind(name, wavelength, bin_centers, ring_average,
