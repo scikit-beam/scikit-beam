@@ -314,7 +314,7 @@ class Mock(object):
         return Mock()
 
 
-MOCK_MODULES = ['six', 'scipy', 'scipy.signal', 'scipy.special',
-                'six.moves', 'scipy.integrate', 'xraylib']
+MOCK_MODULES = ['scipy', 'scipy.signal', 'scipy.special',
+                'scipy.integrate', 'xraylib']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()

@@ -43,7 +43,6 @@ from numpy.testing import assert_array_almost_equal
 
 import skxray.calibration as calibration
 import skxray.calibration as core
-from nose.tools import assert_raises
 
 
 def _draw_gaussian_rings(shape, calibrated_center, r_list, r_width):
