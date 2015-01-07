@@ -75,9 +75,9 @@ the `github repository <https://github.com/soft-matter/trackpy>`_.
 
    introduction
    installation
-   api
    whatsnew
-   resource/dev_guide
+   resource/api/index
+   resource/dev_guide/index
 
 .. raw:: html
 
