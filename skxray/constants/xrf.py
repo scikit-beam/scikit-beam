@@ -74,7 +74,7 @@ try:
 except ImportError:
     logger.warning('Xraylib is not installed on your machine. ' +
                    XraylibNotInstalledError.message_post)
-    xraylib is None
+    xraylib = None
 
 if xraylib is None:
     # do nothing, for now

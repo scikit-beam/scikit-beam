@@ -48,11 +48,14 @@ help:
 
 clean:
 	rm -rf $(BUILDDIR)/*
+	rm -rf tutorial/*_files/
+	rm -rf tutorial/*.rst
+
+notebooks:
+	make -C tutorial notebooks
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
-	@echo
-	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
@@ -85,17 +88,17 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/NSLS2.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/scikit-xray.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/NSLS2.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/scikit-xray.qhc"
 
 devhelp:
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/NSLS2"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/NSLS2"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/scikit-xray"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/scikit-xray"
 	@echo "# devhelp"
 
 epub:
@@ -175,3 +178,6 @@ pseudoxml:
 	$(SPHINXBUILD) -b pseudoxml $(ALLSPHINXOPTS) $(BUILDDIR)/pseudoxml
 	@echo
 	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."
+
+gh-pages:
+	cd .. && git checkout gh-pages && git rm -rf . && touch .nojekyll && mv doc/_build/html/* . && rm -rf doc && git add -A && git commit -a --amend -m "Makefile is force-commiting new build." && git push upstream gh-pages -f

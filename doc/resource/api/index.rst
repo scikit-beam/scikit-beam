@@ -1,6 +1,6 @@
 
-API
-===
+Complete Referece (API)
+=======================
 
 Contents:
 
