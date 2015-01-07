@@ -40,7 +40,7 @@ extensions = ['sphinx.ext.autodoc',
               'ipython_console_highlighting',
              ]
 
-extlinks = {'issue': ('https://github.com/soft-matter/scikit-xray/issues/%s',
+extlinks = {'issue': ('https://github.com/Nikea/scikit-xray/issues/%s',
                       'GH')}
 
 # Generate the API documentation when building

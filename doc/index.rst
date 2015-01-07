@@ -61,7 +61,7 @@ the :ref:`API reference <api_ref>` for a quick overview of all the available
 tools.
 
 To check out the code, report a bug, or contribute a new feature, please visit
-the `github repository <https://github.com/soft-matter/trackpy>`_.
+the `github repository <https://github.com/Nikea/scikit-xray>`_.
 
 .. raw:: html
 

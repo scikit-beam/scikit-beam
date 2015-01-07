@@ -49,7 +49,7 @@ To get started, check out the links to tutorials at the top of this document.
 More Information for Experienced Python Users
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We strongly recommend using conda install trackpy, as described above,
+We strongly recommend using conda install scikit-xray, as described above,
 but pip is also supported.
 
 Essential Dependencies:
