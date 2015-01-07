@@ -21,9 +21,42 @@ reused in way not envisioned by the authors.
 
 Targeted Techniques
 ^^^^^^^^^^^^^^^^^^^
+Scikit-xray is being developed to support X-ray techniques at the beamlines
+listed in the Supported Beamlines section.
 
-Scikit-image is developed in collaboration with X-ray beamline scientists
-working with the following techniques.
+Currently implemented
+=====================
+
+* Differential Phase Contrast
+
+Under active development
+========================
+
+* Powder Diffraction
+* X-ray Fluorescence
+* Image Segmentation
+* Tomography
+
+   * Absorption
+   * Fluorescence
+
+* 1-time correlation
+
+Planned
+=======
+
+* Ptychography
+* Inelastic Scattering
+* Coherent Diffractive Imaging
+* 2-time correlation
+* XANES (1-D, 2-D)
+
+Supported Beamlines
+^^^^^^^^^^^^^^^^^^^
+Scikit-image is developed in collaboration with beamline scientists at
+the following beamlines.
+
+**NSLS-II**
 
 * Inelastic X-ray Scattering (IXS)
 * X-ray Powder Diffraction (XPD)
@@ -31,9 +64,6 @@ working with the following techniques.
 * Coherent Soft X-ray Scattering (CSX)
 * Submicron Resolution X-ray Spectroscopy (SRX)
 * Hard X-ray Nanoprobe (HXN)
-
-Of course, the analysis techniques developed for these experiments may be
-useful in others well.
 
 Credit
 ^^^^^^
