@@ -778,7 +778,7 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
 
     Returns
     -------
-    np.array
+    edges : np.array
         An array of floats for the bin edges.  The last value is the
         right edge of the last bin.
     """
@@ -987,7 +987,7 @@ def bin_edges_to_centers(input_edges):
 
     Returns
     -------
-    ndarray
+    centers : ndarray
         A length N array giving the centers of the bins
     """
     input_edges = np.asarray(input_edges)
