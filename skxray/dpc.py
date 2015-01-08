@@ -40,8 +40,8 @@ Fourier shift fitting
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-
 import logging
+logger = logging.getLogger(__name__)
 import numpy as np
 from scipy.optimize import minimize
 
@@ -49,7 +49,7 @@ from scipy.optimize import minimize
 def image_reduction(im, roi=None, bad_pixels=None):
     """
     Sum the image data over rows and columns.
-    
+
     Parameters
     ----------
     im : ndarray
@@ -61,7 +61,7 @@ def image_reduction(im, roi=None, bad_pixels=None):
 
     bad_pixels : list, optional
         List of (row, column) tuples marking bad pixels.
-        [(1, 5), (2, 6)] --> 2 bad pixels --> (1, 5) and (2, 6). Default is 
+        [(1, 5), (2, 6)] --> 2 bad pixels --> (1, 5) and (2, 6). Default is
         None.
 
     Returns
@@ -81,7 +81,7 @@ def image_reduction(im, roi=None, bad_pixels=None):
 
     if roi:
         r, c, row, col = roi
-        im = im[r : r + row, c : c + col]
+        im = im[r:(r + row), c:(c + col)]
 
     xline = np.sum(im, axis=0)
     yline = np.sum(im, axis=1)
@@ -119,17 +119,17 @@ def _rss_factory(length):
         ----------
         v : list
             Fit parameters.
-            v[0], amplitude of the sample transmission function at one scanning 
+            v[0], amplitude of the sample transmission function at one scanning
             point;
-            v[1], the phase gradient (along x or y direction) of the sample 
+            v[1], the phase gradient (along x or y direction) of the sample
             transmission function.
 
         ref_reduction : ndarray
-            Extra argument passed to the objective function. In DPC, it's the 
+            Extra argument passed to the objective function. In DPC, it's the
             sum of the reference image data along x or y direction.
 
         diff_refuction : ndarray
-            Extra argument passed to the objective function. In DPC, it's the 
+            Extra argument passed to the objective function. In DPC, it's the
             sum of one captured diffraction pattern along x or y direction.
 
         Returns
@@ -140,13 +140,13 @@ def _rss_factory(length):
         """
 
         diff = diff_reduction - ref_reduction * v[0] * np.exp(v[1] * beta)
-        
+
         return np.sum((diff * np.conj(diff)).real)
 
     return _rss
 
 
-def dpc_fit(rss, ref_reduction, diff_reduction, start_point, 
+def dpc_fit(rss, ref_reduction, diff_reduction, start_point,
             solver='Nelder-Mead', tol=1e-6, max_iters=2000):
     """
     Nonlinear fitting for 2 points.
@@ -157,18 +157,18 @@ def dpc_fit(rss, ref_reduction, diff_reduction, start_point,
         Objective function to be minimized in DPC fitting.
 
     ref_reduction : ndarray
-        Extra argument passed to the objective function. In DPC, it's the sum 
+        Extra argument passed to the objective function. In DPC, it's the sum
         of the reference image data along x or y direction.
 
     diff_reduction : ndarray
-        Extra argument passed to the objective function. In DPC, it's the sum 
+        Extra argument passed to the objective function. In DPC, it's the sum
         of one captured diffraction pattern along x or y direction.
 
     start_point : list
-        start_point[0], start-searching value for the amplitude of the sample 
+        start_point[0], start-searching value for the amplitude of the sample
         transmission function at one scanning point.
-        start_point[1], start-searching value for the phase gradient (along x 
-        or y direction) of the sample transmission function at one scanning 
+        start_point[1], start-searching value for the phase gradient (along x
+        or y direction) of the sample transmission function at one scanning
         point.
 
     solver : str, optional
@@ -182,21 +182,21 @@ def dpc_fit(rss, ref_reduction, diff_reduction, start_point,
         * 'TNC'
         * 'COBYLA'
         * 'SLSQP'
-    
+
     tol : float, optional
         Termination criteria of nonlinear fitting. Default is 1e-6.
-    
+
     max_iters : int, optional
         Maximum iterations of nonlinear fitting. Default is 2000.
-    
+
     Returns
     -------
-    tuple 
+    tuple
         Fitting result: intensity attenuation and phase gradient.
-    
+
     """
-    
-    return minimize(rss, start_point, args=(ref_reduction, diff_reduction), 
+
+    return minimize(rss, start_point, args=(ref_reduction, diff_reduction),
                     method=solver, tol=tol, options=dict(maxiter=max_iters)).x
 
 # attributes
@@ -225,44 +225,44 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
 
     scan_xstep : float
         Scanning step size in x direction (in micro-meter).
-    
+
     scan_ystep : float
         Scanning step size in y direction (in micro-meter).
-    
+
     padding : int, optional
-        Pad a N-by-M array to be a (N*(2*padding+1))-by-(M*(2*padding+1)) array 
-        with the image in the middle with a (N*padding, M*padding) thick edge 
+        Pad a N-by-M array to be a (N*(2*padding+1))-by-(M*(2*padding+1)) array
+        with the image in the middle with a (N*padding, M*padding) thick edge
         of zeros. Default is 0.
         padding = 0 --> v (the original image, size = (N, M))
                         0 0 0
         padding = 1 --> 0 v 0 (the padded image, size = (3 * N, 3 * M))
                         0 0 0
-    
+
     weighting : float, optional
-        Weighting parameter for the phase gradient along x and y direction when 
-        constructing the final phase image. 
-        Valid in [0, 1]. Default value = 0.5, which means that gx and gy 
-        equally contribute to the final phase image. 
-    
+        Weighting parameter for the phase gradient along x and y direction when
+        constructing the final phase image.
+        Valid in [0, 1]. Default value = 0.5, which means that gx and gy
+        equally contribute to the final phase image.
+
     Returns
     -------
     phase : ndarray
         Final phase image.
-    
+
     """
-    
+
     if weighting < 0 or weighting > 1:
         raise ValueError('weighting should be within the range of [0, 1]!')
-        
+
     pad = 2 * padding + 1
     gx = np.asarray(gx)
     rows, cols = gx.shape
     pad_row = rows * pad
     pad_col = cols * pad
-        
+
     gx_padding = np.zeros((pad_row, pad_col), dtype='d')
     gy_padding = np.zeros((pad_row, pad_col), dtype='d')
-    
+
     roi_slice = (slice(padding * rows, (padding + 1) * rows),
                  slice(padding * cols, (padding + 1) * cols))
     gx_padding[roi_slice] = gx
@@ -273,30 +273,30 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
 
     mid_col = pad_col // 2 + 1
     mid_row = pad_row // 2 + 1
-    ax = (2 * np.pi * np.arange(1 - mid_col, pad_col - mid_col + 1) / 
+    ax = (2 * np.pi * np.arange(1 - mid_col, pad_col - mid_col + 1) /
          (pad_col * scan_xstep))
-    ay = (2 * np.pi * np.arange(1 - mid_row, pad_row - mid_row + 1) / 
+    ay = (2 * np.pi * np.arange(1 - mid_row, pad_row - mid_row + 1) /
          (pad_row * scan_ystep))
 
     kappax, kappay = np.meshgrid(ax, ay)
     div_v = kappax ** 2 * (1 - weighting) + kappay ** 2 * weighting
 
     c = -1j * (kappax * tx * (1 - weighting) + kappay * ty * weighting) / div_v
-    c = np.fft.ifftshift(np.where(div_v==0, 0, c))
+    c = np.fft.ifftshift(np.where(div_v == 0, 0, c))
 
     phase = np.fft.ifft2(c)[roi_slice].real
 
     return phase
 
 
-def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det, 
-               scan_rows, scan_cols, scan_xstep, scan_ystep, energy, padding=0, 
-               weighting=0.5, solver='Nelder-Mead', roi=None, bad_pixels=None, 
+def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
+               scan_rows, scan_cols, scan_xstep, scan_ystep, energy, padding=0,
+               weighting=0.5, solver='Nelder-Mead', roi=None, bad_pixels=None,
                negate=True, scale=True):
     """
-    Controller function to run the whole Differential Phase Contrast (DPC) 
+    Controller function to run the whole Differential Phase Contrast (DPC)
     imaging calculation.
-    
+
     Parameters
     ----------
     ref : ndarray
@@ -304,12 +304,12 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
 
     image_sequence : iterable of 2D arrays
         Return diffraction patterns (2D Numpy arrays) when iterated over.
-        
+
     start_point : list
-        start_point[0], start-searching value for the amplitude of the sample 
+        start_point[0], start-searching value for the amplitude of the sample
         transmission function at one scanning point.
-        start_point[1], start-searching value for the phase gradient (along x 
-        or y direction) of the sample transmission function at one scanning 
+        start_point[1], start-searching value for the phase gradient (along x
+        or y direction) of the sample transmission function at one scanning
         point.
 
     pixel_size : tuple
@@ -332,10 +332,10 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
 
     energy : float
         Energy of the scanning x-ray in keV.
-    
+
     padding : int, optional
-        Pad a N-by-M array to be a (N*(2*padding+1))-by-(M*(2*padding+1)) array 
-        with the image in the middle with a (N*padding, M*padding) thick edge 
+        Pad a N-by-M array to be a (N*(2*padding+1))-by-(M*(2*padding+1)) array
+        with the image in the middle with a (N*padding, M*padding) thick edge
         of zeros. Default is 0.
         padding = 0 --> v (the original image, size = (N, M))
                         0 0 0
@@ -343,11 +343,11 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
                         0 0 0
 
     weighting : float, optional
-        Weighting parameter for the phase gradient along x and y direction when 
-        constructing the final phase image. 
-        Valid in [0, 1]. Default value = 0.5, which means that gx and gy 
-        equally contribute to the final phase image. 
-        
+        Weighting parameter for the phase gradient along x and y direction when
+        constructing the final phase image.
+        Valid in [0, 1]. Default value = 0.5, which means that gx and gy
+        equally contribute to the final phase image.
+
     solver : str, optional
         Type of solver, one of the following (default 'Nelder-Mead'):
         * 'Nelder-Mead'
@@ -363,34 +363,34 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
     roi : ndarray, optional
         [r, c, row, col], selects ROI im[r : r + row, c : c + col]. Default is
         None.
-    
+
     bad_pixels : list, optional
         List of (row, column) tuples marking bad pixels.
-        [(1, 5), (2, 6)] --> 2 bad pixels --> (1, 5) and (2, 6). Default is 
+        [(1, 5), (2, 6)] --> 2 bad pixels --> (1, 5) and (2, 6). Default is
         None.
-    
+
     negate : bool, optional
-        If True (default), negate the phase gradient along x direction before 
+        If True (default), negate the phase gradient along x direction before
         reconstructing the final phase image. Default is True.
 
     scale : bool, optional
         If True, scale gx and gy according to the experiment set up.
         If False, ignore pixel_size, focus_to_det, energy. Default is True.
-    
+
     Returns
     -------
     phase : ndarray
         The final reconstructed phase image.
-    
+
     amplitude : ndarray
         Amplitude of the sample transmission function.
-    
+
     References: text [1]_
-    .. [1] Yan, H. et al. Quantitative x-ray phase imaging at the nanoscale by 
+    .. [1] Yan, H. et al. Quantitative x-ray phase imaging at the nanoscale by
     multilayer Laue lenses. Sci. Rep. 3, 1307; DOI:10.1038/srep01307 (2013).
-    
+
     """
-    
+
     if weighting < 0 or weighting > 1:
         raise ValueError('weighting should be within the range of [0, 1]!')
 
@@ -435,11 +435,11 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
     if scale:
         if pixel_size[0] != pixel_size[1]:
             raise ValueError('In DPC, detector pixels are squares!')
-            
+
         lambda_ = 12.4e-4 / energy
         gx *= len(ref_fx) * pixel_size[0] / (lambda_ * focus_to_det)
         gy *= len(ref_fy) * pixel_size[0] / (lambda_ * focus_to_det)
-        
+
     if negate:
         gx *= -1
 
