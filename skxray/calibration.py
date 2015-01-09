@@ -75,22 +75,22 @@ def estimate_dist_center(input_image, st_name, wavelength, pixel_size,
     pixel_size : tuple
         (pixel_height, pixel_width)
 
-    window_size : int
+    window_size : int, optional
         The number of elements on either side of a local maximum to
         use for locating and refining peaks.  Candidates are identified
         as a relative maximum in a window sized (2*window_size + 1) and
         the same window is used for fitting the peaks to refine the location.
 
-    max_peak_count : int
+    max_peak_count : int, optional
         Use at most this many peaks
 
-    thresh : float
+    thresh : float, optional
         Fraction of maximum peak height
 
-    phi_steps : int
+    phi_steps : int,optional
         How many regions to split the ring into, should be >10
 
-    no_rings : int
+    no_rings : int, optional
         Number of rings to look it
 
     Returns
