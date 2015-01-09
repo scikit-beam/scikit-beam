@@ -733,7 +733,8 @@ def radial_integration(pixel_size, calibrated_center, image_array,
                        dist_sample, detector_size, wavelength,
                        q_or_twotheta="Q"):
     """
-    Radial integration : taking the 2D image data and convert to 1D
+    Radial integration : taking the 2D powder image data
+    and convert to 1D
 
     Parameters
     ----------
