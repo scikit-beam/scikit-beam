@@ -509,7 +509,7 @@ def img_to_relative_xyi(img, cx, cy, pixel_size_x=None, pixel_size_y=None):
 
     Parameters
     ----------
-    img: `ndarray`
+    img: ndarray
         2D image
     cx : float
         Image center in the x direction
@@ -524,11 +524,11 @@ def img_to_relative_xyi(img, cx, cy, pixel_size_x=None, pixel_size_y=None):
 
     Returns
     -------
-    x : `ndarray`
+    x : ndarray
         x-coordinate of pixel. shape (N, )
-    y : `ndarray`
+    y : ndarray
         y-coordinate of pixel. shape (N, )
-    I : `ndarray`
+    I : ndarray
         intensity of pixel. shape (N, )
     """
     if pixel_size_x is not None and pixel_size_y is not None:
@@ -563,9 +563,9 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
 
     Parameters
     ----------
-    x : array
+    x : ndarray
         position
-    y : array
+    y : ndarray
         intensity
     nx : integer, optional
         number of bins to use
@@ -576,13 +576,13 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
 
     Returns
     -------
-    edges : array
+    edges : ndarray
         edges of bins, length nx + 1
 
-    val : array
+    val : ndarray
         sum of values in each bin, length nx
 
-    count : array
+    count : ndarray
         The number of counts in each bin, length nx
     """
 
@@ -623,7 +623,7 @@ def pixel_to_radius(shape, calibrated_center, pixel_size=None):
 
     Returns
     -------
-    R : array
+    R : ndarray
         The L2 norm of the distance of each pixel from the calibrated center.
     """
 
@@ -657,7 +657,7 @@ def pixel_to_phi(shape, calibrated_center, pixel_size=None):
 
     Returns
     -------
-    phi : array
+    phi : ndarray
         :math:`\\phi`, the angle from the vertical axis.
         :math:`\\phi \\el [-\pi, \pi]`
     """
@@ -682,12 +682,12 @@ def radius_to_twotheta(dist_sample, radius):
     dist_sample : float
         distance from the sample to the detector (mm)
 
-    radius : array
+    radius : ndarray
         The L2 norm of the distance of each pixel from the calibrated center.
 
     Returns
     -------
-    two_theta : array
+    two_theta : ndarray
         An array of :math:`2\\theta` values
     """
     return np.arctan(radius / dist_sample)
@@ -778,7 +778,7 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
 
     Returns
     -------
-    edges : np.array
+    edges : ndarray
         An array of floats for the bin edges.  The last value is the
         right edge of the last bin.
     """
