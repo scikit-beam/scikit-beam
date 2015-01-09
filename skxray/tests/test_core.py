@@ -454,22 +454,22 @@ def test_subtract_reference_images():
 def _fail_img_to_relative_xyi_helper(input_dict):
     core.img_to_relative_xyi(**input_dict)
 
+
 def test_img_to_relative_fails():
     fail_dicts = [
-        # invalid values of x and y
-        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_x': -1, 'pixel_size_y': -1},
-        # valid value of x, no value for y
-        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_x': 1},
-        # valid value of y, no value for x
-        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_y': 1},
-        # valid value of y, invalid value for x
-        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_x': -1, 'pixel_size_y': 1},
-        # valid value of x, invalid value for y
-        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_x': 1, 'pixel_size_y': -1},
-        # invalid value of x, no value for y
-        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_x': -1,},
-        # invalid value of y, no value for x
-        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_y': -1,},
+        # both x and y invalid
+        {'image': np.ones((100, 100)), 'cx': 50, 'cy': 50,
+         'pixel_size': (-1, -1)},
+        {'image': np.ones((100, 100)), 'cx': 50, 'cy': 50,
+         'pixel_size': (0, 0)},
+        # given x but not given y should fail -- that's weird
+        {'image': np.ones((100, 100)), 'cx': 50, 'cy': 50,
+         'pixel_size': (1, None)},
+        # one valid, one invalid
+        {'image': np.ones((100, 100)), 'cx': 50, 'cy': 50,
+         'pixel_size': (1, 0)},
+        {'image': np.ones((100, 100)), 'cx': 50, 'cy': 50,
+         'pixel_size': (1, -1)},
     ]
     for failer in fail_dicts:
         yield _fail_img_to_relative_xyi_helper, failer
@@ -497,7 +497,7 @@ def test_img_to_relative_xyi(random_seed=None):
     cy_lst = [0, cy, ny]
     for cx, cy in zip(cx_lst, cy_lst):
         # call the function
-        x, y, i = img_to_relative_xyi(img=img, cx=cx, cy=cy)
+        x, y, i = img_to_relative_xyi(img, cx=cx, cy=cy)
         logger.debug('y {0}'.format(y))
         logger.debug('sum(y) {0}'.format(sum(y)))
         expected_total_y = sum(np.arange(ny, dtype=np.int64) - cy) * nx

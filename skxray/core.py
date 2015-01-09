@@ -51,6 +51,7 @@ from itertools import tee
 from collections import namedtuple, MutableMapping, defaultdict, deque
 import numpy as np
 from itertools import tee
+from skxray import validations
 
 import logging
 logger = logging.getLogger(__name__)
@@ -501,7 +502,7 @@ def subtract_reference_images(imgs, is_reference):
     return list(corrected_image)
 
 
-def img_to_relative_xyi(img, cx, cy, pixel_size_x=None, pixel_size_y=None):
+def img_to_relative_xyi(image, cx, cy, pixel_size=None):
     """
     Convert the 2D image to a list of x y I coordinates where
     x == x_img - detector_center[0] and
@@ -509,18 +510,14 @@ def img_to_relative_xyi(img, cx, cy, pixel_size_x=None, pixel_size_y=None):
 
     Parameters
     ----------
-    img: `ndarray`
+    image: `ndarray`
         2D image
     cx : float
         Image center in the x direction
     cy : float
         Image center in the y direction
-    pixel_size_x : float, optional
-        Pixel size in x
-    pixel_size_y : float, optional
-        Pixel size in y
-    **kwargs: dict
-        Bucket for extra parameters in an unpacked dictionary
+    pixel_size : tuple, optional
+        Pixel size in microns, given as the tuple (x, y)
 
     Returns
     -------
@@ -531,30 +528,17 @@ def img_to_relative_xyi(img, cx, cy, pixel_size_x=None, pixel_size_y=None):
     I : `ndarray`
         intensity of pixel. shape (N, )
     """
-    if pixel_size_x is not None and pixel_size_y is not None:
-        if pixel_size_x <= 0:
-            raise ValueError('Input parameter pixel_size_x must be greater '
-                             'than 0. Your value was ' +
-                             six.text_type(pixel_size_x))
-        if pixel_size_y <= 0:
-            raise ValueError('Input parameter pixel_size_y must be greater '
-                             'than 0. Your value was ' +
-                             six.text_type(pixel_size_y))
-    elif pixel_size_x is None and pixel_size_y is None:
-        pixel_size_x = 1
-        pixel_size_y = 1
+    if pixel_size is not None:
+        validations.pixel_size(pixel_size)
     else:
-        raise ValueError('pixel_size_x and pixel_size_y must both be None or '
-                         'greater than zero. You passed in values for '
-                         'pixel_size_x of {0} and pixel_size_y of {1]'
-                         ''.format(pixel_size_x, pixel_size_y))
+        pixel_size = (1, 1)
 
     # Caswell's incredible terse rewrite
-    x, y = np.meshgrid(pixel_size_x * (np.arange(img.shape[0]) - cx),
-                       pixel_size_y * (np.arange(img.shape[1]) - cy))
+    x, y = np.meshgrid(pixel_size[0] * (np.arange(image.shape[0]) - cx),
+                       pixel_size[1] * (np.arange(image.shape[1]) - cy))
 
     # return x, y and intensity as 1D arrays
-    return x.ravel(), y.ravel(), img.ravel()
+    return x.ravel(), y.ravel(), image.ravel()
 
 
 def bin_1D(x, y, nx=None, min_x=None, max_x=None):
