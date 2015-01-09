@@ -693,42 +693,6 @@ def radius_to_twotheta(dist_sample, radius):
     return np.arctan(radius / dist_sample)
 
 
-def wedge_integration(src_data, center, theta_start,
-                      delta_theta, r_inner, delta_r):
-    """
-    Implementation of caking.
-
-    Parameters
-    ----------
-    scr_data : ndarray
-        The source-data to be integrated
-
-    center : ndarray
-        The center of the ring in pixels
-
-    theta_start : float
-        The angle of the start of the wedge from the
-        image y-axis in degrees
-
-    delta_theta : float
-        The angular width of the wedge in degrees.  Positive
-        angles go clockwise, negative go counter-clockwise.
-
-    r_inner : float
-        The inner radius in pixel units, Must be non-negative
-
-    delta_r : float
-        The length of the wedge in the radial direction
-        in pixel units. Must be non-negative
-
-    Returns
-    -------
-    float
-        The integrated intensity under the wedge
-    """
-    raise NotImplementedError()
-
-
 def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
     """
     Generate bin edges.  The last value is the returned array is

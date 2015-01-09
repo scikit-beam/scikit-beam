@@ -378,12 +378,6 @@ def test_multi_tau_lags():
     assert_array_equal(delay_steps, lag_steps)
 
 
-@raises(NotImplementedError)
-def test_wedge_integration():
-    core.wedge_integration(src_data=None, center=None, theta_start=None,
-                           delta_theta=None, r_inner=None, delta_r=None)
-
-
 def test_subtract_reference_images():
     num_images = 10
     img_dims = 200
