@@ -46,6 +46,7 @@ import sys
 from nose.tools import assert_equal, assert_true, raises
 
 import skxray.core as core
+import skxray.utils as utils
 
 from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
@@ -285,7 +286,7 @@ def test_small_verbosedict():
     else:
         # should never happen....
         assert(False)
-    dd = core.verbosedict()
+    dd = utils.verbosedict()
     dd['a'] = 1
     assert_equal(dd['a'], 1)
     try:
@@ -302,7 +303,7 @@ def test_large_verbosedict():
                       "which does not exist.  There are 100 "
                       "extant keys, which is too many to show you")
 
-    dd = core.verbosedict()
+    dd = utils.verbosedict()
     for j in range(100):
         dd[j] = j
     # test success

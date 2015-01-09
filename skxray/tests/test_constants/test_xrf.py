@@ -47,7 +47,7 @@ from nose.tools import assert_equal, assert_not_equal
 from skxray.constants.xrf import (XrfElement, emission_line_search,
                                   XrayLibWrap, XrayLibWrap_Energy)
 
-from skxray.core import NotInstalledError
+from skxray.utils import NotInstalledError
 
 def test_element_data():
     """

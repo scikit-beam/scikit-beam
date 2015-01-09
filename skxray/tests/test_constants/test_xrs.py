@@ -48,7 +48,8 @@ from nose.tools import assert_equal, assert_not_equal
 from skxray.constants.xrs import (PowderStandard, Reflection, HKL,
                                   calibration_standards)
 
-from skxray.core import q_to_d, d_to_q, NotInstalledError
+from skxray.core import q_to_d, d_to_q
+from skxray.utils import NotInstalledError
 
 
 def smoke_test_powder_standard():
