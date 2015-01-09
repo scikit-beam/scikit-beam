@@ -52,7 +52,9 @@ from skxray.core import (pixel_to_phi, pixel_to_radius,
 from skxray.image import find_ring_center_acorr_1D
 
 
-def estimate_dist_center(input_image, st_name, wavelength, pixel_size):
+def estimate_dist_center(input_image, st_name, wavelength, pixel_size,
+                         window_size=5, max_peak_count=7, thresh=0.1,
+                         phi_steps=25, no_rings=5):
     """
     This function will find the sample detector distance and
     calibrated center from the image of the standard sample using
@@ -72,6 +74,24 @@ def estimate_dist_center(input_image, st_name, wavelength, pixel_size):
 
     pixel_size : tuple
         (pixel_height, pixel_width)
+
+    window_size : int
+        The number of elements on either side of a local maximum to
+        use for locating and refining peaks.  Candidates are identified
+        as a relative maximum in a window sized (2*window_size + 1) and
+        the same window is used for fitting the peaks to refine the location.
+
+    max_peak_count : int
+        Use at most this many peaks
+
+    thresh : float
+        Fraction of maximum peak height
+
+    phi_steps : int
+        How many regions to split the ring into, should be >10
+
+    no_rings : int
+        Number of rings to look it
 
     Returns
     -------
@@ -97,14 +117,15 @@ def estimate_dist_center(input_image, st_name, wavelength, pixel_size):
 
     # find the calibration center
     calibrated_center = refine_center(p_image, res, pixel_size,
-                                      25, 5, thresh=0.1,
-                                      window_size=5)
+                                      phi_steps, no_rings, thresh,
+                                      window_size)
 
     # converts the pixel positions to radius from the calibrated center
     values = pixel_to_radius(p_image.shape, calibrated_center, pixel_size)
 
     # bin image to 1D
-    bins, sums, counts = bin_1D(np.ravel(values), np.ravel(p_image), nx=5000)
+    bins, sums, counts = bin_1D(np.ravel(values), np.ravel(p_image),
+                                nx=np.sum(input_image.shape))
 
     mask = counts > 10
     # find the bin centers
@@ -113,7 +134,8 @@ def estimate_dist_center(input_image, st_name, wavelength, pixel_size):
     ring_averages = sums[mask] / counts[mask]
 
     dist_mean, dist_std = estimate_d_blind(st_name, wavelength, bin_centers,
-                                           ring_averages, 5, 7, thresh=0.03)
+                                           ring_averages, window_size,
+                                           max_peak_count, thresh)
 
     return dist_mean, dist_std, calibrated_center
 
