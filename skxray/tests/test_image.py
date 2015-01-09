@@ -15,7 +15,7 @@ def test_find_ring_center_acorr_1D():
     for x in [110, 150, 190]:
         for y in [110, 150, 190]:
             yield (_helper_find_rings,
-                   cal.find_ring_center_acorr_1D,
+                   cal.find_ring_center,
                   (x, y), [10, 25, 50])
 
 

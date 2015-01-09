@@ -227,7 +227,47 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
                  np.array([row_shift, col_shift]))
 
 
-def find_ring_center_acorr_1D(input_image):
+FIND_RING_CENTER_METHODS = ['autocorrelation']
+
+
+def find_ring_center(input_image, method=None):
+    """
+    Find the pixel-resolution center of a set of concentric rings.
+
+    Parameters
+    ----------
+    input_image : ndarray
+        A single image.
+    method : string, optional
+        {'autocorrelation'}
+
+    Returns
+    -------
+    calibrated_center : tuple
+        Returns the index (row, col) of the pixel that rings
+        are centered on.  Accurate to pixel resolution.
+
+    Notes
+    -------
+
+    **Methods for Full Rings**
+
+    The **autocorrelation** method uses correlation between the image and
+    it's mirror to find the approximate center of  a single set of concentric
+    rings. It is assumed that there is only one set of rings in the image.
+    For this method to work well the image must have significant mirror-
+    symmetry in both dimensions.
+    """
+    if method is None:
+        method = 'autocorrelation'
+    if method == 'autocorrelation':
+        return _find_ring_center_acorr_1D(input_image)
+    else:
+        raise ValueError("Supported methods are: {0}".format(
+            ', '.join(FIND_RING_CENTER_METHODS)))
+
+
+def _find_ring_center_acorr_1D(input_image):
     """
     Find the pixel-resolution center of a set of concentric rings.
 
@@ -241,12 +281,15 @@ def find_ring_center_acorr_1D(input_image):
     ----------
     input_image : ndarray
         A single image.
+    method : string
+        {'autocorrelation'}
 
     Returns
     -------
     calibrated_center : tuple
         Returns the index (row, col) of the pixel that rings
         are centered on.  Accurate to pixel resolution.
+
     """
     return tuple(bins[np.argmax(vals)] for vals, bins in
                   (_corr_ax1(_im) for _im in (input_image.T, input_image)))
