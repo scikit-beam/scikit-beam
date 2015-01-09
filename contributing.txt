@@ -44,6 +44,11 @@ Here's the long and short of it:
    * Push your changes back to your fork on GitHub::
 
       git push origin transform-speedups
+      
+  * **Explain your contribution.** Include a description aimed at someone
+     who may not be following the issue closely. If your contribution
+     includes new functionality or enhancements, include a link to an
+     IPython notebook demonstrating its use. And, as always, include tests.
 
    * Go to GitHub. The new branch will show up with a green Pull Request
      button - click it.
