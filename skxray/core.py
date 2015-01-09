@@ -329,6 +329,10 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     if nx is None:
         nx = _defaults["bins"]
 
+    # Cast x, y to floats to avoid bug in which int wraps around to 0.
+    x = np.asfarray(x)
+    y = np.asfarray(y)
+
     # use a weighted histogram to get the bin sum
     bins = np.linspace(start=min_x, stop=max_x, num=nx+1, endpoint=True)
     val, _ = np.histogram(a=x, bins=bins, weights=y)
