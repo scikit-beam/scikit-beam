@@ -5,19 +5,6 @@
 .. currentmodule:: skxray.core
 
 
-Helper Classes
---------------
-
-Dictionary-like classes
-~~~~~~~~~~~~~~~~~~~~~~~
-
-.. autosummary::
-   :toctree: generated/
-
-   MD_dict
-   verbosedict
-   RCParamDict
-
 Image warping functions
 -----------------------
 
