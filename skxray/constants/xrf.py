@@ -107,7 +107,8 @@ else:
 
 
     XRAYLIB_MAP = verbosedict({'lines': (line_dict, xraylib.LineEnergy),
-                               'cs': (line_dict, xraylib.CS_FluorLine),
+                               'cs': (line_dict, xraylib.CS_FluorLine_Kissel),
+                               #'cs': (line_dict, xraylib.CS_FluorLine),
                                'binding_e': (shell_dict, xraylib.EdgeEnergy),
                                'jump': (shell_dict, xraylib.JumpFactor),
                                'yield': (shell_dict, xraylib.FluorYield),
