@@ -538,6 +538,28 @@ def run_image_to_relative_xyi_repeatedly():
             print('{0} calls successful'.format(num_calls))
 
 
+def test_radial_integration():
+    pixel_size = (1, 1)
+    calibrated_center = (100, 100)
+    dist_sample = 50 # (mm)
+    detector_size = (200, 200)
+    wavelength = 0.18 # (nm)
+    q_or_twotheta = "Q"
+    image = np.ones(detector_size)
+
+    sy = np.arange(-100,100,1)
+    xs,ys = np.meshgrid(sy, sy)
+    z = (xs**2 + ys**2)
+
+    (bin_centers,
+    ring_averages) = core.radial_integration(np.ravel(z), calibrated_center,
+                                              x_axis="r", wavelength=None,
+                                              pixel_size=None, dist_sample=None)
+
+
+
+
+
 if __name__ == '__main__':
     import nose
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

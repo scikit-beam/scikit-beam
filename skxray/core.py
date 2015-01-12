@@ -729,37 +729,37 @@ def wedge_integration(src_data, center, theta_start,
     raise NotImplementedError()
 
 
-def radial_integration(pixel_size, calibrated_center, image_array,
-                       dist_sample, detector_size, wavelength,
-                       q_or_twotheta="Q"):
+def radial_integration(image_array, calibrated_center,
+                       x_axis="r", wavelength=None,
+                       pixel_size=None, dist_sample=None):
     """
     Radial integration : taking the 2D powder image data
     and convert to 1D
 
     Parameters
     ----------
-    pixel_size : tuple, optional
-        The size of a pixel (really the pitch) in real units.
-        (height, width). (mm)
+    image_array : ndarray
+        input image
 
     calibrated_center : tuple
         The center in pixels-units (row, col)
 
-    dist_sample : float
-        distance from the sample to the detector (mm)
+    x_axis : {'q', 'two_theta', 'r', 'd'}, optional
+        q (1/Angstroms), two_theta (degrees),
+         r (mm) or d (Angstroms)
 
-    image_array : ndarray
-        input image
+         ..math ::
+        q = \\frac{2 \pi}{d}
 
-    detector_size : tuple
-        2 element tuple defining the number of pixels in the detector.
-        Order is (num_rows, num_columns)
-
-    wavelength : float
+    wavelength : float, optional
         wavelength of the incoming x-rays (Angstroms)
 
-    q_or_two_theta : {'Q', '2theta'}, optional
-        twotheta (degrees) or Q (Angstroms)
+    pixel_size : tuple, optional
+        The size of a pixel in real units.
+        (height, width). (mm)
+
+    dist_sample : float, optional
+        distance from the sample to the detector (mm)
 
     Returns
     -------
@@ -768,21 +768,37 @@ def radial_integration(pixel_size, calibrated_center, image_array,
 
     ring_average : ndarray
         radial integration of intensity
+
     """
-
     # convert to pixels to radius
-    radius = pixel_to_radius(detector_size, calibrated_center, pixel_size)
+    x_val = pixel_to_radius(np.shape(image_array), calibrated_center,
+                             pixel_size=None)
 
-    # convert to radius to two theta
-    two_theta = radius_to_twotheta(dist_sample, radius)
+    if (x_axis == 'two_theta' or x_axis == 'q' or x_axis == 'd'):
+            if dist_sample is 'None':
+                raise ValueError("Provide sample to detector distance"
+                                 " to find the two theta space values")
+            # convert to radius to two theta
+            x_val = radius_to_twotheta(dist_sample, x_val)
 
-    if q_or_twotheta == 'Q':
-        # convert to Q space values from known two theta values
-        x_val = twotheta_to_q(two_theta, wavelength)
-    else:
-        x_val = two_theta
+            if x_axis == 'q' or x_axis == 'd':
+                if wavelength is None:
+                    raise ValueError("Provide the wavelength to"
+                                 " find the q space values and d"
+                                 " space values")
+                # convert to q space values from known two theta values
+                x_val = twotheta_to_q(x_val, wavelength)
+                if x_axis == 'd':
+                    # convert to d space values from know q values
+                    x_val = (2 * np.pi) / x_val
+                    print (x_val)
 
-    bins, sums, counts = bin_1D(np.ravel(x_val), np.ravel(image_array), nx=1500)
+            """raise ValueError("Could not find x axis values."
+                             " Provide the correct x-axis 'r', ' two_theta',"
+                             " 'q' or 'd'")"""
+
+    bins, sums, counts = bin_1D(np.ravel(x_val), np.ravel(image_array),
+                                nx=np.sum(image_array.shape))
 
     mask = counts > 10
     # getting bin centers from bin edges
