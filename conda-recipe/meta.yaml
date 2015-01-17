@@ -34,6 +34,7 @@ test:
      - skxray.core
      - skxray.calibration
      - skxray.constants
+     - skxray.constants.api
      - skxray.dpc
      - skxray.feature
      - skxray.image
@@ -41,6 +42,8 @@ test:
      - skxray.spectroscopy
      - skxray.fitting
      - skxray.fitting.api
+     - skxray.io
+     - skxray.io.api
 
 about:
   home: http://Nikea.github.io/scikit-xray/
