@@ -451,9 +451,11 @@ class ModelSpectrum(object):
         xrf_parameter : dict
             saving all the fitting values and their bounds
         """
-
         self.parameter = xrf_parameter
+        self.parameter_default = get_para()
+        self._config()
 
+    def _config(self):
         non_fit = self.parameter['non_fitting_values']
         if non_fit.has_key('element_list'):
             if ',' in non_fit['element_list']:
@@ -465,10 +467,8 @@ class ModelSpectrum(object):
             logger.critical(' No element is selected for fitting!')
 
         self.incident_energy = self.parameter['coherent_sct_energy']['value']
-
-        self.parameter_default = get_para()
-
-        self.model_spectrum()
+        self.setComptonModel()
+        self.setElasticModel()
 
     def setComptonModel(self):
         """
@@ -492,7 +492,7 @@ class ModelSpectrum(object):
         logger.debug(' Finished setting up parameters for compton model.')
 
         self.compton_param = compton.make_params()
-        return compton
+        self.compton = compton
 
     def setElasticModel(self):
         """
@@ -524,224 +524,256 @@ class ModelSpectrum(object):
                                expr='coherent_sct_energy')
         logger.debug(' Finished setting up parameters for elastic model.')
 
-        return elastic
+        self.elastic = elastic
+
+
+    def setElementModel(self, ename):
+        """
+        Construct element model.
+
+        Parameters
+        ----------
+        ename : str
+            element model
+        """
+
+        incident_energy = self.incident_energy
+        parameter = self.parameter
+
+        element_mod = None
+
+        if ename in k_line:
+            e = Element(ename)
+            if e.cs(incident_energy)['ka1'] == 0:
+                logger.info(' {0} Ka emission line is not activated '
+                            'at this energy {1}'.format(ename, incident_energy))
+                return
+
+            logger.debug(' --- Started building {0} peak. ---'.format(ename))
+
+            for num, item in enumerate(e.emission_line.all[:4]):
+                line_name = item[0]
+                val = item[1]
+
+                if e.cs(incident_energy)[line_name] == 0:
+                    continue
+
+                gauss_mod = ElementModel(prefix=str(ename)+'_'+str(line_name)+'_')
+                gauss_mod.set_param_hint('e_offset', value=self.compton_param['e_offset'].value,
+                                         expr='e_offset')
+                gauss_mod.set_param_hint('e_linear', value=self.compton_param['e_linear'].value,
+                                         expr='e_linear')
+                gauss_mod.set_param_hint('e_quadratic', value=self.compton_param['e_quadratic'].value,
+                                         expr='e_quadratic')
+                gauss_mod.set_param_hint('fwhm_offset', value=self.compton_param['fwhm_offset'].value,
+                                         expr='fwhm_offset')
+                gauss_mod.set_param_hint('fwhm_fanoprime', value=self.compton_param['fwhm_fanoprime'].value,
+                                         expr='fwhm_fanoprime')
+
+                if line_name == 'ka1':
+                    gauss_mod.set_param_hint('area', value=1e5, vary=True, min=0)
+                    gauss_mod.set_param_hint('delta_center', value=0, vary=False)
+                    gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
+                elif line_name == 'ka2':
+                    gauss_mod.set_param_hint('area', value=1e5, vary=True,
+                                             expr=str(ename)+'_ka1_'+'area')
+                    gauss_mod.set_param_hint('delta_sigma', value=0, vary=False,
+                                             expr=str(ename)+'_ka1_'+'delta_sigma')
+                    gauss_mod.set_param_hint('delta_center', value=0, vary=False,
+                                             expr=str(ename)+'_ka1_'+'delta_center')
+                else:
+                    gauss_mod.set_param_hint('area', value=1e5, vary=True,
+                                             expr=str(ename)+'_ka1_'+'area')
+                    gauss_mod.set_param_hint('delta_center', value=0, vary=False)
+                    gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
+
+                #gauss_mod.set_param_hint('delta_center', value=0, vary=False)
+                #gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
+
+                area_name = str(ename)+'_'+str(line_name)+'_area'
+                if parameter.has_key(area_name):
+                    _set_parameter_hint(area_name, parameter[area_name],
+                                        gauss_mod, log_option=True)
+
+                gauss_mod.set_param_hint('center', value=val, vary=False)
+                ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
+                gauss_mod.set_param_hint('ratio', value=ratio_v, vary=False)
+                gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
+                logger.info(' {0} {1} peak is at energy {2} with'
+                            ' branching ratio {3}.'. format(ename, line_name, val, ratio_v))
+
+                # position needs to be adjusted
+                pos_name = ename+'_'+str(line_name)+'_delta_center'
+                if parameter.has_key(pos_name):
+                    _set_parameter_hint('delta_center', parameter[pos_name],
+                                        gauss_mod, log_option=True)
+
+                # width needs to be adjusted
+                width_name = ename+'_'+str(line_name)+'_delta_sigma'
+                if parameter.has_key(width_name):
+                    _set_parameter_hint('delta_sigma', parameter[width_name],
+                                        gauss_mod, log_option=True)
+
+                # branching ratio needs to be adjusted
+                ratio_name = ename+'_'+str(line_name)+'_ratio_adjust'
+                if parameter.has_key(ratio_name):
+                    _set_parameter_hint('ratio_adjust', parameter[ratio_name],
+                                        gauss_mod, log_option=True)
+
+                #mod = mod + gauss_mod
+                if element_mod:
+                    element_mod += gauss_mod
+                else:
+                    element_mod = gauss_mod
+            logger.debug(' Finished building element peak for {0}'.format(ename))
+
+        elif ename in l_line:
+            ename = ename[:-2]
+            e = Element(ename)
+            if e.cs(incident_energy)['la1'] == 0:
+                logger.info('{0} La1 emission line is not activated '
+                            'at this energy {1}'.format(ename, incident_energy))
+                return
+
+            for num, item in enumerate(e.emission_line.all[4:-4]):
+
+                line_name = item[0]
+                val = item[1]
+
+                if e.cs(incident_energy)[line_name] == 0:
+                    continue
+
+                gauss_mod = ElementModel(prefix=str(ename)+'_'+str(line_name)+'_')
+
+                gauss_mod.set_param_hint('e_offset', value=self.compton_param['e_offset'].value,
+                                         expr='e_offset')
+                gauss_mod.set_param_hint('e_linear', value=self.compton_param['e_linear'].value,
+                                         expr='e_linear')
+                gauss_mod.set_param_hint('e_quadratic', value=self.compton_param['e_quadratic'].value,
+                                         expr='e_quadratic')
+                gauss_mod.set_param_hint('fwhm_offset', value=self.compton_param['fwhm_offset'].value,
+                                         expr='fwhm_offset')
+                gauss_mod.set_param_hint('fwhm_fanoprime', value=self.compton_param['fwhm_fanoprime'].value,
+                                         expr='fwhm_fanoprime')
+
+                if line_name == 'la1':
+                    gauss_mod.set_param_hint('area', value=1e5, vary=True)
+                                         #expr=gauss_mod.prefix+'ratio_val * '+str(ename)+'_la1_'+'area')
+                else:
+                    gauss_mod.set_param_hint('area', value=1e5, vary=True,
+                                             expr=str(ename)+'_la1_'+'area')
+
+                gauss_mod.set_param_hint('center', value=val, vary=False)
+                gauss_mod.set_param_hint('sigma', value=1, vary=False)
+                gauss_mod.set_param_hint('ratio',
+                                         value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1'],
+                                         vary=False)
+
+                gauss_mod.set_param_hint('delta_center', value=0, vary=False)
+                gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
+                gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
+
+                # position needs to be adjusted
+                #if ename in pos_adjust:
+                #    pos_name = 'pos-'+ename+'-'+str(line_name)
+                #    if parameter.has_key(pos_name):
+                #        _set_parameter_hint('delta_center', parameter[pos_name],
+                #                            gauss_mod, log_option=True)
+                pos_name = ename+'_'+str(line_name)+'_delta_center'
+                if parameter.has_key(pos_name):
+                    _set_parameter_hint('delta_center', parameter[pos_name],
+                                        gauss_mod, log_option=True)
+
+                # width needs to be adjusted
+                #if ename in width_adjust:
+                #    width_name = 'width-'+ename+'-'+str(line_name)
+                #    if parameter.has_key(width_name):
+                #        _set_parameter_hint('delta_sigma', parameter[width_name],
+                #                            gauss_mod, log_option=True)
+                width_name = ename+'_'+str(line_name)+'_delta_sigma'
+                if parameter.has_key(width_name):
+                    _set_parameter_hint('delta_sigma', parameter[width_name],
+                                        gauss_mod, log_option=True)
+
+                # branching ratio needs to be adjusted
+                #if ename in ratio_adjust:
+                #    ratio_name = 'ratio-'+ename+'-'+str(line_name)
+                #    if parameter.has_key(ratio_name):
+                #        _set_parameter_hint('ratio_adjust', parameter[ratio_name],
+                #                            gauss_mod, log_option=True)
+                ratio_name = ename+'_'+str(line_name)+'_ratio_adjust'
+                if parameter.has_key(ratio_name):
+                    _set_parameter_hint('ratio_adjust', parameter[ratio_name],
+                                        gauss_mod, log_option=True)
+                if element_mod:
+                    element_mod += gauss_mod
+                else:
+                    element_mod = gauss_mod
+
+        elif ename in m_line:
+            ename = ename[:-2]
+            e = Element(ename)
+            if e.cs(incident_energy)['ma1'] == 0:
+                logger.info('{0} ma1 emission line is not activated '
+                            'at this energy {1}'.format(ename, incident_energy))
+                return
+
+            for num, item in enumerate(e.emission_line.all[-4:]):
+
+                line_name = item[0]
+                val = item[1]
+
+                if e.cs(incident_energy)[line_name] == 0:
+                    continue
+
+                #if gauss_mod:
+                #    gauss_mod = gauss_mod + ElementModel(prefix=str(ename)+'_'+str(line_name)+'_')
+                #else:
+                gauss_mod = ElementModel(prefix=str(ename)+'_'+str(line_name)+'_')
+
+                gauss_mod.set_param_hint('e_offset', value=self.compton_param['e_offset'].value,
+                                         expr='e_offset')
+                gauss_mod.set_param_hint('e_linear', value=self.compton_param['e_linear'].value,
+                                         expr='e_linear')
+                gauss_mod.set_param_hint('e_quadratic', value=self.compton_param['e_quadratic'].value,
+                                         expr='e_quadratic')
+                gauss_mod.set_param_hint('fwhm_offset', value=self.compton_param['fwhm_offset'].value,
+                                         expr='fwhm_offset')
+                gauss_mod.set_param_hint('fwhm_fanoprime', value=self.compton_param['fwhm_fanoprime'].value,
+                                         expr='fwhm_fanoprime')
+
+                if line_name == 'ma1':
+                    gauss_mod.set_param_hint('area', value=100, vary=True)
+                else:
+                    gauss_mod.set_param_hint('area', value=100, vary=True,
+                                             expr=str(ename)+'_ma1_'+'area')
+
+                gauss_mod.set_param_hint('center', value=val, vary=False)
+                gauss_mod.set_param_hint('sigma', value=1, vary=False)
+                gauss_mod.set_param_hint('ratio',
+                                         value=0.1, #e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ma1'],
+                                         vary=False)
+
+                gauss_mod.set_param_hint('delta_center', value=0, vary=False)
+                gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
+                gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
+
+                if element_mod:
+                    element_mod += gauss_mod
+                else:
+                    element_mod = gauss_mod
+
+        return element_mod
 
     def model_spectrum(self):
         """
-        Add all element peaks to the model.
+        Put all models together to form a spectrum.
         """
-        incident_energy = self.incident_energy
-        element_list = self.element_list
-        parameter = self.parameter
+        self.mod = self.compton + self.elastic
 
-        mod = self.setComptonModel() + self.setElasticModel()
-
-        for ename in element_list:
-            if ename in k_line:
-                e = Element(ename)
-                if e.cs(incident_energy)['ka1'] == 0:
-                    logger.info(' {0} Ka emission line is not activated '
-                                'at this energy {1}'.format(ename, incident_energy))
-                    continue
-
-                logger.debug(' --- Started building {0} peak. ---'.format(ename))
-
-                for num, item in enumerate(e.emission_line.all[:4]):
-                    line_name = item[0]
-                    val = item[1]
-
-                    if e.cs(incident_energy)[line_name] == 0:
-                        continue
-
-                    gauss_mod = ElementModel(prefix=str(ename)+'_'+str(line_name)+'_')
-                    gauss_mod.set_param_hint('e_offset', value=self.compton_param['e_offset'].value,
-                                             expr='e_offset')
-                    gauss_mod.set_param_hint('e_linear', value=self.compton_param['e_linear'].value,
-                                             expr='e_linear')
-                    gauss_mod.set_param_hint('e_quadratic', value=self.compton_param['e_quadratic'].value,
-                                             expr='e_quadratic')
-                    gauss_mod.set_param_hint('fwhm_offset', value=self.compton_param['fwhm_offset'].value,
-                                             expr='fwhm_offset')
-                    gauss_mod.set_param_hint('fwhm_fanoprime', value=self.compton_param['fwhm_fanoprime'].value,
-                                             expr='fwhm_fanoprime')
-
-                    if line_name == 'ka1':
-                        gauss_mod.set_param_hint('area', value=1e5, vary=True, min=0)
-                        gauss_mod.set_param_hint('delta_center', value=0, vary=False)
-                        gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
-                    elif line_name == 'ka2':
-                        gauss_mod.set_param_hint('area', value=1e5, vary=True,
-                                                 expr=str(ename)+'_ka1_'+'area')
-                        gauss_mod.set_param_hint('delta_sigma', value=0, vary=False,
-                                                 expr=str(ename)+'_ka1_'+'delta_sigma')
-                        gauss_mod.set_param_hint('delta_center', value=0, vary=False,
-                                                 expr=str(ename)+'_ka1_'+'delta_center')
-                    else:
-                        gauss_mod.set_param_hint('area', value=1e5, vary=True,
-                                                 expr=str(ename)+'_ka1_'+'area')
-                        gauss_mod.set_param_hint('delta_center', value=0, vary=False)
-                        gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
-
-                    #gauss_mod.set_param_hint('delta_center', value=0, vary=False)
-                    #gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
-
-                    area_name = str(ename)+'_'+str(line_name)+'_area'
-                    if parameter.has_key(area_name):
-                        _set_parameter_hint(area_name, parameter[area_name],
-                                            gauss_mod, log_option=True)
-
-                    gauss_mod.set_param_hint('center', value=val, vary=False)
-                    ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
-                    gauss_mod.set_param_hint('ratio', value=ratio_v, vary=False)
-                    gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
-                    logger.info(' {0} {1} peak is at energy {2} with'
-                                ' branching ratio {3}.'. format(ename, line_name, val, ratio_v))
-
-                    # position needs to be adjusted
-                    pos_name = ename+'_'+str(line_name)+'_delta_center'
-                    if parameter.has_key(pos_name):
-                        _set_parameter_hint('delta_center', parameter[pos_name],
-                                            gauss_mod, log_option=True)
-
-                    # width needs to be adjusted
-                    width_name = ename+'_'+str(line_name)+'_delta_sigma'
-                    if parameter.has_key(width_name):
-                        _set_parameter_hint('delta_sigma', parameter[width_name],
-                                            gauss_mod, log_option=True)
-
-                    # branching ratio needs to be adjusted
-                    ratio_name = ename+'_'+str(line_name)+'_ratio_adjust'
-                    if parameter.has_key(ratio_name):
-                        _set_parameter_hint('ratio_adjust', parameter[ratio_name],
-                                            gauss_mod, log_option=True)
-
-                    mod = mod + gauss_mod
-                logger.debug(' Finished building element peak for {0}'.format(ename))
-
-            elif ename in l_line:
-                ename = ename[:-2]
-                e = Element(ename)
-                if e.cs(incident_energy)['la1'] == 0:
-                    logger.info('{0} La1 emission line is not activated '
-                                'at this energy {1}'.format(ename, incident_energy))
-                    continue
-
-                for num, item in enumerate(e.emission_line.all[4:-4]):
-
-                    line_name = item[0]
-                    val = item[1]
-
-                    if e.cs(incident_energy)[line_name] == 0:
-                        continue
-
-                    gauss_mod = ElementModel(prefix=str(ename)+'_'+str(line_name)+'_')
-
-                    gauss_mod.set_param_hint('e_offset', value=self.compton_param['e_offset'].value,
-                                             expr='e_offset')
-                    gauss_mod.set_param_hint('e_linear', value=self.compton_param['e_linear'].value,
-                                             expr='e_linear')
-                    gauss_mod.set_param_hint('e_quadratic', value=self.compton_param['e_quadratic'].value,
-                                             expr='e_quadratic')
-                    gauss_mod.set_param_hint('fwhm_offset', value=self.compton_param['fwhm_offset'].value,
-                                             expr='fwhm_offset')
-                    gauss_mod.set_param_hint('fwhm_fanoprime', value=self.compton_param['fwhm_fanoprime'].value,
-                                             expr='fwhm_fanoprime')
-
-                    if line_name == 'la1':
-                        gauss_mod.set_param_hint('area', value=1e5, vary=True)
-                                             #expr=gauss_mod.prefix+'ratio_val * '+str(ename)+'_la1_'+'area')
-                    else:
-                        gauss_mod.set_param_hint('area', value=1e5, vary=True,
-                                                 expr=str(ename)+'_la1_'+'area')
-
-                    gauss_mod.set_param_hint('center', value=val, vary=False)
-                    gauss_mod.set_param_hint('sigma', value=1, vary=False)
-                    gauss_mod.set_param_hint('ratio',
-                                             value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1'],
-                                             vary=False)
-
-                    gauss_mod.set_param_hint('delta_center', value=0, vary=False)
-                    gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
-                    gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
-
-                    # position needs to be adjusted
-                    #if ename in pos_adjust:
-                    #    pos_name = 'pos-'+ename+'-'+str(line_name)
-                    #    if parameter.has_key(pos_name):
-                    #        _set_parameter_hint('delta_center', parameter[pos_name],
-                    #                            gauss_mod, log_option=True)
-                    pos_name = ename+'_'+str(line_name)+'_delta_center'
-                    if parameter.has_key(pos_name):
-                        _set_parameter_hint('delta_center', parameter[pos_name],
-                                            gauss_mod, log_option=True)
-
-                    # width needs to be adjusted
-                    #if ename in width_adjust:
-                    #    width_name = 'width-'+ename+'-'+str(line_name)
-                    #    if parameter.has_key(width_name):
-                    #        _set_parameter_hint('delta_sigma', parameter[width_name],
-                    #                            gauss_mod, log_option=True)
-                    width_name = ename+'_'+str(line_name)+'_delta_sigma'
-                    if parameter.has_key(width_name):
-                        _set_parameter_hint('delta_sigma', parameter[width_name],
-                                            gauss_mod, log_option=True)
-
-                    # branching ratio needs to be adjusted
-                    #if ename in ratio_adjust:
-                    #    ratio_name = 'ratio-'+ename+'-'+str(line_name)
-                    #    if parameter.has_key(ratio_name):
-                    #        _set_parameter_hint('ratio_adjust', parameter[ratio_name],
-                    #                            gauss_mod, log_option=True)
-                    ratio_name = ename+'_'+str(line_name)+'_ratio_adjust'
-                    if parameter.has_key(ratio_name):
-                        _set_parameter_hint('ratio_adjust', parameter[ratio_name],
-                                            gauss_mod, log_option=True)
-                    mod = mod + gauss_mod
-
-            elif ename in m_line:
-                ename = ename[:-2]
-                e = Element(ename)
-                #if e.cs(incident_energy)['ma1'] == 0:
-                #    logger.info('{0} ma1 emission line is not activated '
-                #                'at this energy {1}'.format(ename, incident_energy))
-                #    continue
-
-                for num, item in enumerate(e.emission_line.all[-4:]):
-
-                    line_name = item[0]
-                    val = item[1]
-
-                    #if e.cs(incident_energy)[line_name] == 0:
-                    #    continue
-
-                    gauss_mod = ElementModel(prefix=str(ename)+'_'+str(line_name)+'_')
-
-                    gauss_mod.set_param_hint('e_offset', expr='e_offset')
-                    gauss_mod.set_param_hint('e_linear', expr='e_linear')
-                    gauss_mod.set_param_hint('e_quadratic', expr='e_quadratic')
-                    gauss_mod.set_param_hint('fwhm_offset', expr='fwhm_offset')
-                    gauss_mod.set_param_hint('fwhm_fanoprime', expr='fwhm_fanoprime')
-
-                    if line_name == 'ma1':
-                        gauss_mod.set_param_hint('area', value=100, vary=True)
-                    else:
-                        gauss_mod.set_param_hint('area', value=100, vary=True,
-                                                 expr=str(ename)+'_ma1_'+'area')
-
-                    gauss_mod.set_param_hint('center', value=val, vary=False)
-                    gauss_mod.set_param_hint('sigma', value=1, vary=False)
-                    gauss_mod.set_param_hint('ratio',
-                                             value=0.1, #e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ma1'],
-                                             vary=False)
-
-                    gauss_mod.set_param_hint('delta_center', value=0, vary=False)
-                    gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
-                    gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
-
-                    mod = mod + gauss_mod
-
-        self.mod = mod
-        return
+        for ename in self.element_list:
+            print('construct model: {}'.format(ename))
+            self.mod += self.setElementModel(ename)
 
     def model_fit(self, x, y, w=None, method='leastsq', **kws):
         """
@@ -784,33 +816,47 @@ def set_range(parameter, x1, y1):
 
 def get_linear_model(x, param_dict):
     """
-    Construct linear model for fluorescence analysis.
+    Construct linear model for auto fitting analysis.
+
+    Parameters
+    ----------
+    x : array
+        independent variable
+    param_dict : dict
+        fitting paramters
+
+    Returns
+    -------
+    e_select : list
+        selected elements for given energy
+    matv : array
+        matrix for linear fitting
     """
     MS = ModelSpectrum(param_dict)
-    p = MS.mod.make_params()
-
     elist = MS.element_list
 
-    matv = np.zeros([len(x), len(elist)+2])
+    e_select = []
+    matv = []
 
     for i in range(len(elist)):
-        ename = elist[i]
-        if ename in k_line:
-            newname = ename+'_k'
-        else:
-            newname = ename[:-2]+'_l'
-        #temp = np.zeros(len(x))
-        for comp in MS.mod.components:
-            if newname in comp.prefix:
-                #print(comp.prefix)
-                #temp.append(comp)
-                y_temp = comp.eval(x=x, params=p)
-                matv[:, i] += y_temp
+        e_model = MS.setElementModel(elist[i])
+        if e_model:
+            p = e_model.make_params()
+            y_temp = e_model.eval(x=x, params=p)
+            matv.append(y_temp)
+            e_select.append(elist[i])
 
-    matv[:, -2] = MS.mod.components[0].eval(x=x, params=p)
-    matv[:, -1] = MS.mod.components[1].eval(x=x, params=p)
-    #y_init = MS.mod.eval(x=x, params=p)
-    return matv
+    p = MS.compton.make_params()
+    y_temp = MS.compton.eval(x=x, params=p)
+    matv.append(y_temp)
+
+    p = MS.elastic.make_params()
+    y_temp = MS.elastic.eval(x=x, params=p)
+    matv.append(y_temp)
+
+    matv = np.array(matv)
+    matv = matv.transpose()
+    return e_select, matv
 
 
 class PreFitAnalysis(object):
