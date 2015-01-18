@@ -46,6 +46,7 @@ import sys
 from nose.tools import assert_equal, assert_true, raises
 
 import skxray.core as core
+import skxray.utils as utils
 
 from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
@@ -285,7 +286,7 @@ def test_small_verbosedict():
     else:
         # should never happen....
         assert(False)
-    dd = core.verbosedict()
+    dd = utils.verbosedict()
     dd['a'] = 1
     assert_equal(dd['a'], 1)
     try:
@@ -302,7 +303,7 @@ def test_large_verbosedict():
                       "which does not exist.  There are 100 "
                       "extant keys, which is too many to show you")
 
-    dd = core.verbosedict()
+    dd = utils.verbosedict()
     for j in range(100):
         dd[j] = j
     # test success
@@ -376,12 +377,6 @@ def test_multi_tau_lags():
 
     assert_array_equal(16, tot_channels)
     assert_array_equal(delay_steps, lag_steps)
-
-
-@raises(NotImplementedError)
-def test_wedge_integration():
-    core.wedge_integration(src_data=None, center=None, theta_start=None,
-                           delta_theta=None, r_inner=None, delta_r=None)
 
 
 def test_subtract_reference_images():

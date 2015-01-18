@@ -45,7 +45,7 @@ from __future__ import (absolute_import, division, print_function,
 import six
 import numpy as np
 import logging
-from .core import verbosedict
+from .utils import verbosedict
 import sys
 logger = logging.getLogger(__name__)
 import time
