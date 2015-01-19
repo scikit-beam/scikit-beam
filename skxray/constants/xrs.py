@@ -49,8 +49,7 @@ import numpy as np
 import six
 from collections import namedtuple
 from itertools import repeat
-from ..core import q_to_d, d_to_q, twotheta_to_q, q_to_twotheta, verbosedict
-from .basic import BasicElement
+from ..core import q_to_d, d_to_q, twotheta_to_q, q_to_twotheta
 import logging
 logger = logging.getLogger(__name__)
 

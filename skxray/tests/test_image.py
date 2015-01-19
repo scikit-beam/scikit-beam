@@ -7,7 +7,7 @@ import numpy as np
 import numpy.random
 from nose.tools import assert_equal
 import skimage.draw as skd
-import skxray.image as nimage
+import skxray.calibration as cal
 from scipy.ndimage.morphology import binary_dilation
 
 
@@ -15,7 +15,7 @@ def test_find_ring_center_acorr_1D():
     for x in [110, 150, 190]:
         for y in [110, 150, 190]:
             yield (_helper_find_rings,
-                   nimage.find_ring_center_acorr_1D,
+                   cal.find_ring_center_acorr_1D,
                   (x, y), [10, 25, 50])
 
 

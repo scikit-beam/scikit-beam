@@ -43,9 +43,9 @@ import numpy as np
 import six
 from collections import Mapping
 
-from ..core import NotInstalledError
+from ..utils import NotInstalledError
 from .basic import BasicElement, doc_title, doc_params, doc_attrs, doc_ex
-from skxray.core import verbosedict
+from ..utils import verbosedict
 import logging
 logger = logging.getLogger(__name__)
 
