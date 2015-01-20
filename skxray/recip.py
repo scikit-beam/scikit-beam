@@ -196,45 +196,52 @@ def hkl_to_q(hkl_arr):
     return np.linalg.norm(hkl_arr, axis=1)
 
 
-def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
+def q_rings(num_qs, first_q, delta_q, q_val, step_q=None, *args):
     """
-    This will find the indices of the required Q rings, find the bin
-    edges of the Q rings, and count the number of pixels in each Q ring.
+    This will find the indices of the required q rings, find the bin
+    edges of the q rings, and count the number of pixels in each q ring.
 
     Parameters
     ----------
     num_qs : int
-        number of Q rings
+        number of q rings
 
     first_q : float
-        Q value of the first Q ring
+        q value of the first q ring
 
     delta_q : float
-        thickness of the Q ring
+        thickness of the q ring
 
     q_val : ndarray
-        Q space values for each pixel in the detector
+        q space values for each pixel in the detector
         shape is ([detector_size[0]*detector_size[1]], ) or
         ([detector_size[0]*detector_size[1]], 1)
 
-    step_q : float, optional
-        step value for the next Q ring from the end of the previous Q ring
+    step_q : {'same step', 'different steps'}, optional
+        step value for the next q ring from the end of the previous q ring
+        'same step' - same step values between q rings
+        'different steps' - different step value between q rings
+
+
 
     Returns
     -------
     q_inds : ndarray
-        indices of the Q values for the required rings
+        indices of the q values for the required rings
 
     q_ring_val : ndarray
-        edge values of each Q ring
+        edge values of each q ring
         shape is (num_qs, 2)
 
     num_pixels : ndarray
-        number of pixels in each Q ring
+        number of pixels in each q ring
+
+    pixel_list : ndarray
+        pixel list
     """
 
     if (delta_q < 0):
-        raise ValueError("delta_q(thickness of the Q ring has to be positive")
+        raise ValueError("delta_q(thickness of the q ring has to be positive")
 
     q_val = np.asarray(q_val)
 
@@ -243,7 +250,7 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
     elif (q_val.ndim == 2):
         q_values = np.ravel(q_val)
     else:
-        raise ValueError("Q space values for each pixel in the detector"
+        raise ValueError("q space values for each pixel in the detector"
                          " has to be specified")
 
     if (step_q is None):
@@ -270,15 +277,8 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
             count += 1
         q_ring_val = np.asarray(q_ring_val)
 
-    else:
-        if (step_q < 0):
-            raise ValueError("step_q(step value for the next Q ring from the "
-                             "end of the previous ring) has to be positive ")
-
-        #  when there is a step between Q rings find the edge values of Q rings
-        q_ring_val = first_q + np.r_[0,
-                                     np.cumsum(np.tile([delta_q,
-                                                        step_q], num_qs))][:-1]
+    elif (step_q == 'same_step' or step_q == 'different_steps'):
+        q_ring_val = q_step_val(num_qs, first_q, delta_q, step_q, *args)
 
         # indices of Q rings
         q_inds = np.digitize(q_values, np.array(q_ring_val))
@@ -289,6 +289,9 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
         indx = q_inds > 0
         q_inds[indx] = (q_inds[indx] + 1) // 2
 
+    else:
+        raise ValueError("Provide the correct step value between rings")
+
     q_ring_val = np.array(q_ring_val)
     q_ring_val = q_ring_val.reshape(num_qs, 2)
 
@@ -297,3 +300,49 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None):
     num_pixels = num_pixels[1:]
 
     return q_inds, q_ring_val, num_pixels
+
+
+def q_step_val(num_qs, first_q, delta_q, step_q, *argv):
+    """
+    Parameters
+    ----------
+    num_qs : int
+        number of q rings
+
+    first_q : float
+        q value of the first q ring
+
+    delta_q : float
+        thickness of the q ring
+
+    step_q : {'same step', 'different steps'}
+        step value for the next q ring from the end of the previous q ring
+        'same step' - same step values between q rings
+        'different steps' - different step value between q rings
+
+    Returns
+    -------
+    q_ring_val : ndarray
+        edge values of each q ring
+        shape is (num_qs, 2)
+    """
+    q_ring_val = []
+    if (step_q == 'same_step'):
+        #  when there is a same values of step between q rings
+        #  the edge values of q rings
+        q_ring_val = first_q + np.r_[0, np.cumsum(np.tile([delta_q,
+                                                           float(argv[0])],
+                                                          num_qs))][:-1]
+    else:
+        # when there is a different values of step  between q
+        # ring edge values of the q rings
+        if (len(argv) == num_qs):
+            q_ring_val.append(first_q)
+            for arg in argv:
+                q_ring_val.append(q_ring_val[-1] + delta_q)
+                q_ring_val.append(q_ring_val[-1] + float(arg))
+                print (q_ring_val)
+        else:
+            raise ValueError("Provide step value for each q ring ")
+
+    return q_ring_val

@@ -117,11 +117,10 @@ def test_q_rings():
 
     first_q = 2.5
     delta_q = 2.5
-    step_q = 0.5
     num_qs = 20  # number of Q rings
 
     q_inds, q_ring_val, num_pixels = recip.q_rings(num_qs, first_q,
-                                                   delta_q, q_val)
+                                                   delta_q, q_val, step_q=None)
 
     q_inds_m = np.array([[0, 0, 1, 2, 5, 8, 12, 17, 0, 0, 0, 0],
                         [0, 0, 1, 2, 5, 8, 12, 17, 0, 0, 0, 0],
@@ -168,8 +167,9 @@ def test_q_rings():
     assert_array_equal(q_inds, np.ravel(q_inds_m))
 
     # using a step for the Q rings
+    args = ('0.5')
     (qstep_inds, qstep_ring_val,
-     numstep_pixels) = recip.q_rings(num_qs, first_q, delta_q, q_val, step_q)
+     numstep_pixels) = recip.q_rings(num_qs, first_q, delta_q, q_val, step_q='same_step', *args)
 
     qstep_inds_m = np.array([[0, 0, 1, 2, 4, 7, 10, 14, 19, 0, 0, 0],
                             [0, 0, 1, 2, 4, 7, 10, 14, 19, 0, 0, 0],
@@ -215,7 +215,7 @@ def test_q_rings():
     assert_array_equal(numstep_pixels, numstep_pixels_m)
     assert_array_equal(qstep_inds, np.ravel(qstep_inds_m))
 
-
+    
 if __name__ == '__main__':
     import nose
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
