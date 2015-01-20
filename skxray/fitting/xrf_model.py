@@ -48,6 +48,7 @@ from __future__ import (absolute_import, division,
 import numpy as np
 from scipy.optimize import nnls
 import six
+import copy
 
 import logging
 logger = logging.getLogger(__name__)
@@ -76,7 +77,10 @@ l_line = ['Ga_L', 'Ge_L', 'As_L', 'Se_L', 'Br_L', 'Kr_L', 'Rb_L', 'Sr_L', 'Y_L',
 
 m_line = ['Hf_M', 'Ta_M', 'W_M', 'Re_M', 'Os_M', 'Ir_M', 'Pt_M', 'Au_M', 'Hg_M', 'TL_M', 'Pb_M', 'Bi_M',
           'Sm_M', 'Eu_M', 'Gd_M', 'Tb_M', 'Dy_M', 'Ho_M', 'Er_M', 'Tm_M', 'Yb_M', 'Lu_M', 'Th_M', 'Pa_M', 'U_M']
-#m_line = ['Au_M', 'Pb_M', 'U_M', 'Pt_M', 'Ti_M']
+
+k_list = ['ka1', 'ka2', 'kb1', 'kb2']
+l_list = ['la1', 'la2', 'lb1', 'lb2', 'lb3', 'lb4', 'lb5',
+          'lg1', 'lg2', 'lg3', 'lg4', 'll', 'ln']
 
 
 def element_peak_xrf(x, area, center,
@@ -142,14 +146,14 @@ class ElementModel(Model):
         self.set_param_hint('epsilon', value=2.96, vary=False)
 
 
-def _set_parameter_hint(para_name, input_dict, input_model,
+def _set_parameter_hint(param_name, input_dict, input_model,
                         log_option=False):
     """
-    Set parameter information to a given model
+    Set parameter hint information to lmfit model from input dict.
 
     Parameters
     ----------
-    para_name : str
+    param_name : str
         parameter used for fitting
     input_dict : dict
         all the initial values and constraints for given parameters
@@ -158,27 +162,25 @@ def _set_parameter_hint(para_name, input_dict, input_model,
     log_option : bool
         option for logger
     """
-
     if input_dict['bound_type'] == 'none':
-        input_model.set_param_hint(name=para_name, value=input_dict['value'], vary=True)
+        input_model.set_param_hint(name=param_name, value=input_dict['value'], vary=True)
     elif input_dict['bound_type'] == 'fixed':
-        input_model.set_param_hint(name=para_name, value=input_dict['value'], vary=False)
+        input_model.set_param_hint(name=param_name, value=input_dict['value'], vary=False)
     elif input_dict['bound_type'] == 'lohi':
-        input_model.set_param_hint(name=para_name, value=input_dict['value'], vary=True,
+        input_model.set_param_hint(name=param_name, value=input_dict['value'], vary=True,
                                    min=input_dict['min'], max=input_dict['max'])
     elif input_dict['bound_type'] == 'lo':
-        input_model.set_param_hint(name=para_name, value=input_dict['value'], vary=True,
+        input_model.set_param_hint(name=param_name, value=input_dict['value'], vary=True,
                                    min=input_dict['min'])
     elif input_dict['bound_type'] == 'hi':
-        input_model.set_param_hint(name=para_name, value=input_dict['value'], vary=True,
+        input_model.set_param_hint(name=param_name, value=input_dict['value'], vary=True,
                                    min=input_dict['max'])
     else:
-        raise ValueError("could not set values for {0}".format(para_name))
+        raise ValueError("could not set values for {0}".format(param_name))
     if log_option:
         logger.info(' {0} bound type: {1}, value: {2}, range: {3}'.
-                    format(para_name, input_dict['bound_type'], input_dict['value'],
+                    format(param_name, input_dict['bound_type'], input_dict['value'],
                            [input_dict['min'], input_dict['max']]))
-    return
 
 
 def update_parameter_dict(xrf_parameter, fit_results):
@@ -214,34 +216,33 @@ def set_parameter_bound(xrf_parameter, bound_option):
             continue
         v['bound_type'] = v[str(bound_option)]
 
-    return
 
 #This dict is used to update the current parameter dict to dynamically change the input data
 # and do the fitting. The user can adjust parameters such as position, width, area or branching ratio.
 element_dict = {
-    'pos': {"bound_type": "fixed", "min": -0.005, "max": 0.005, "value": 0,
-            "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"},
-    'width': {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0,
-              "free_more": "fixed", "adjust_element": "lohi", "e_calibration": "fixed", "linear": "fixed"},
-    'area': {"bound_type": "none", "min": 0, "max": 1e9, "value": 1000,
+    'pos': {"bound_type": "fixed", "min": -0.005, "max": 0.005, "value": 0, "fit_with_tail": "fixed",
+            "free_more": "fixed", "adjust_element": "fixed", "e_calibration": "fixed", "linear": "fixed"},
+    'width': {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0, "fit_with_tail": "fixed",
+              "free_more": "fixed", "adjust_element": "fixed", "e_calibration": "fixed", "linear": "fixed"},
+    'area': {"bound_type": "none", "min": 0, "max": 1e9, "value": 1000, "fit_with_tail": "fixed",
              "free_more": "none", "adjust_element": "fixed", "e_calibration": "fixed", "linear": "none"},
-    'ratio': {"bound_type": "fixed", "min": 0.1, "max": 5.0, "value": 1.0,
-              "free_more": "fixed", "adjust_element": "lohi", "e_calibration":"fixed", "linear":"fixed"}
+    'ratio': {"bound_type": "fixed", "min": 0.1, "max": 5.0, "value": 1.0, "fit_with_tail": "fixed",
+              "free_more": "fixed", "adjust_element": "fixed", "e_calibration":"fixed", "linear":"fixed"}
 }
 
 
-def get_L_line(prop_name, element):
-    #l_list = ['la1', 'la2', 'lb1', 'lb2', 'lb3', 'lb4', 'lb5',
-    #          'lg1', 'lg2', 'lg3', 'lg4', 'll', 'ln']
-    l_list = ['la1', 'la2', 'lb1', 'lb2', 'lb3',
-              'lg1', 'lg2', 'll']
-    return [str(prop_name)+'-'+str(element)+'-'+str(item)
-            for item in l_list]
+# def get_L_line(prop_name, element):
+#     #l_list = ['la1', 'la2', 'lb1', 'lb2', 'lb3', 'lb4', 'lb5',
+#     #          'lg1', 'lg2', 'lg3', 'lg4', 'll', 'ln']
+#     l_list = ['la1', 'la2', 'lb1', 'lb2', 'lb3',
+#               'lg1', 'lg2', 'll']
+#     return [str(prop_name)+'-'+str(element)+'-'+str(item)
+#            for item in l_list]
 
 
-class ElementController(object):
+class ParamController(object):
 
-    def __init__(self, xrf_parameter, fit_name):
+    def __init__(self, xrf_parameter):
         """
         Update element peak information in parameter dictionary.
         This is an important step in dynamical fitting. The
@@ -250,22 +251,106 @@ class ElementController(object):
         ----------
         xrf_parameter : dict
             saving all the fitting values and their bounds
-        fit_name : list
-            list of str for all the fitting parameters
         """
-        self.new_parameter = xrf_parameter.copy()
-        self.element_name = [item[0:-5] for item in fit_name if 'area' in item]
+        self.pre_parameter = xrf_parameter
+        self.new_parameter = copy.deepcopy(xrf_parameter)
+        self.element_list = xrf_parameter['non_fitting_values']['element_list'].split(', ')
+        self.element_line_name = self.get_all_lines(xrf_parameter['coherent_sct_energy']['value'],
+                                                    self.element_list)
 
-    def set_val(self, element_list,
-                **kws):
+    def get_all_lines(self, incident_energy, ename_list):
+        all_line = []
+        for v in ename_list:
+            activated_line = self.get_actived_line(incident_energy, v)
+            if activated_line:
+                all_line += activated_line
+        return all_line
+
+    def get_actived_line(self, incident_energy, ename):
         """
+        Collect all the actived lines for given element.
+        """
+        line_list = []
+        if ename in k_line:
+            e = Element(ename)
+            if e.cs(incident_energy)['ka1'] == 0:
+                return
+
+            for num, item in enumerate(e.emission_line.all[:4]):
+                line_name = item[0]
+                val = item[1]
+                if e.cs(incident_energy)[line_name] == 0:
+                    continue
+                line_list.append(str(ename)+'_'+str(line_name))
+            return line_list
+
+        elif ename in l_line:
+            ename = ename.split('_')[0]
+            e = Element(ename)
+            if e.cs(incident_energy)['la1'] == 0:
+                return
+
+            for num, item in enumerate(e.emission_line.all[4:-4]):
+                line_name = item[0]
+                val = item[1]
+                if e.cs(incident_energy)[line_name] == 0:
+                    continue
+                line_list.append(str(ename)+'_'+str(line_name))
+            return line_list
+
+    def create_full_param(self):
+        """
+        Add all element information, such as pos, width, ratio into parameter dict.
+        """
+        for v in self.element_list:
+            self.set_area(v)
+            self.set_position(v)
+            self.set_ratio(v)
+            self.set_width(v)
+
+    def update_single_item(self, **kwargs):
+        for k, v in six.iteritems(kwargs):
+            self.new_parameter[k]['value'] = v
+
+    def set_bound_type(self, bound_option):
+        """
+        Update the default value of bounds.
+
+        Parameters
+        ----------
+        bound_option : str
+            define bound type
+        """
+        set_parameter_bound(self.new_parameter, bound_option)
+
+    def update_with_fit_result(self, fit_results):
+        """
+        Update fitting parameters dictionary according to given fitting results,
+        usually obtained from previous run.
+
+        Parameters
+        ----------
+        fit_results : object
+            ModelFit object from lmfit
+        """
+        update_parameter_dict(self.new_parameter, fit_results)
+
+    def update_element_prop(self, element_list, **kwargs):
+        """
+        Update element properties, such as pos, width, area and ratio.
+
+        Parameters
+        ----------
         element_list : list
             define which element to update
         kws : dict
             define what kind of property to change
-        """
 
-        for k, v in six.iteritems(kws):
+        Returns
+        -------
+        dict : updated value
+        """
+        for k, v in six.iteritems(kwargs):
             if k == 'pos':
                 func = self.set_position
             elif k == 'width':
@@ -275,12 +360,11 @@ class ElementController(object):
             elif k == 'ratio':
                 func = self.set_ratio
             else:
-                raise ValueError('Please define either pos, width or area.')
+                raise ValueError('Please define either pos, width, area or ratio.')
 
             for element in element_list:
                 func(element, option=v)
-
-        return self.new_parameter
+        #return self.new_parameter
 
     def set_position(self, item, option=None):
         """
@@ -291,30 +375,22 @@ class ElementController(object):
         option : str, optional
             way to control position
         """
-
         if item in k_line:
-            pos_list = [str(item)+"_ka1_delta_center",
-                        str(item)+"_ka2_delta_center",
-                        str(item)+"_kb1_delta_center"]
-            for linename in pos_list:
-                new_pos = element_dict['pos'].copy()
-                if option:
-                    new_pos['adjust_element'] = option
-                addv = {linename: new_pos}
-                self.new_parameter.update(addv)
-
+            pos_list = k_list
         elif item in l_line:
-            item = item[0:-2]
-            pos_list = get_L_line('pos', item)
-            for linename in pos_list:
-                linev = linename.split('-')[1]+'_'+linename.split('-')[2]
-                if linev not in self.element_name:
-                    continue
-                new_pos = element_dict['pos'].copy()
-                if option:
-                    new_pos['adjust_element'] = option
-                addv = {linename: new_pos}
-                self.new_parameter.update(addv)
+            item = item.split('_')[0]
+            pos_list = l_list
+
+        pos_list = [str(item)+'_'+str(v).lower() for v in pos_list]
+
+        for linename in pos_list:
+            # check if the line is activated
+            if linename not in self.element_line_name:
+                continue
+            new_pos = element_dict['pos'].copy()
+            if option:
+                new_pos['adjust_element'] = option
+            self.new_parameter.update({str(linename)+'_delta_center': new_pos})
 
     def set_width(self, item, option=None):
         """
@@ -323,33 +399,29 @@ class ElementController(object):
         item : str
             element name
         option : str, optional
-            way to control width
+            Control peak width.
         """
         if item in k_line:
-            width_list = [str(item)+"_ka1_delta_sigma",
-                          str(item)+"_ka2_delta_sigma",
-                          str(item)+"_kb1_delta_sigma"]
-            for linename in width_list:
-                new_width = element_dict['width'].copy()
-                if option:
-                    new_width['adjust_element'] = option
-                addv = {linename: new_width}
-                self.new_parameter.update(addv)
+            data_list = k_list
         elif item in l_line:
-            item = item[0:-2]
-            data_list = get_L_line('width', item)
-            for linename in data_list:
-                linev = linename.split('-')[1]+'_'+linename.split('-')[2]
-                if linev not in self.element_name:
-                    continue
-                new_val = element_dict['width'].copy()
-                if option:
-                    new_val['adjust_element'] = option
-                addv = {linename: new_val}
-                self.new_parameter.update(addv)
+            item = item.split('_')[0]
+            data_list = l_list
+
+        data_list = [str(item)+'_'+str(v).lower() for v in data_list]
+
+        for linename in data_list:
+            # check if the line is activated
+            if linename not in self.element_line_name:
+                continue
+            new_width = element_dict['width'].copy()
+            if option:
+                new_width['adjust_element'] = option
+            self.new_parameter.update({str(linename)+'_delta_sigma': new_width})
 
     def set_area(self, item, option=None):
         """
+        Only the primary peak intensity is adjusted.
+
         Parameters
         ----------
         item : str
@@ -359,27 +431,20 @@ class ElementController(object):
         """
         if item in k_line:
             area_list = [str(item)+"_ka1_area"]
-            for linename in area_list:
-                new_area = element_dict['area'].copy()
-                if option:
-                    new_area['adjust_element'] = option
-                addv = {linename: new_area}
-                self.new_parameter.update(addv)
         elif item in l_line:
-            item = item[0:-2]
-            data_list = get_L_line('area', item)
-            for linename in data_list:
-                linev = linename.split('-')[1]+'_'+linename.split('-')[2]
-                if linev not in self.element_name:
-                    continue
-                new_val = element_dict['area'].copy()
-                if option:
-                    new_val['adjust_element'] = option
-                addv = {linename: new_val}
-                self.new_parameter.update(addv)
+            item = item.split('_')[0]
+            area_list = [str(item)+"_la1_area"]
+
+        for linename in area_list:
+            new_area = element_dict['area'].copy()
+            if option:
+                new_area['adjust_element'] = option
+            self.new_parameter.update({linename: new_area})
 
     def set_ratio(self, item, option=None):
         """
+        Only adjust lines after the the primary one.
+
         Parameters
         ----------
         item : str
@@ -388,28 +453,20 @@ class ElementController(object):
             way to control branching ratio
         """
         if item in k_line:
-            data_list = [str(item)+"_kb1_ratio_adjust"]
-            for linename in data_list:
-                new_val = element_dict['ratio'].copy()
-                if option:
-                    new_val['adjust_element'] = option
-                addv = {linename: new_val}
-                self.new_parameter.update(addv)
-
+            data_list = k_list[1:]
         elif item in l_line:
-            item = item[0:-2]
-            data_list = get_L_line('ratio', item)
-            for linename in data_list:
-                if 'la1' in linename:
-                    continue
-                linev = linename.split('-')[1]+'_'+linename.split('-')[2]
-                if linev not in self.element_name:
-                    continue
-                new_val = element_dict['ratio'].copy()
-                if option:
-                    new_val['adjust_element'] = option
-                addv = {linename: new_val}
-                self.new_parameter.update(addv)
+            item = item.split('_')[0]
+            data_list = l_list[1:]
+
+        data_list = [str(item)+'_'+str(v).lower() for v in data_list]
+
+        for linename in data_list:
+            if linename not in self.element_line_name:
+                continue
+            new_val = element_dict['ratio'].copy()
+            if option:
+                new_val['adjust_element'] = option
+            self.new_parameter.update({str(linename)+'_ratio_adjust': new_val})
 
 
 def get_sum_area(element_name, result_val):
@@ -523,9 +580,7 @@ class ModelSpectrum(object):
         elastic.set_param_hint('coherent_sct_energy', value=self.compton_param['coherent_sct_energy'].value,
                                expr='coherent_sct_energy')
         logger.debug(' Finished setting up parameters for elastic model.')
-
         self.elastic = elastic
-
 
     def setElementModel(self, ename):
         """
@@ -628,7 +683,7 @@ class ModelSpectrum(object):
             logger.debug(' Finished building element peak for {0}'.format(ename))
 
         elif ename in l_line:
-            ename = ename[:-2]
+            ename = ename.split('_')[0]
             e = Element(ename)
             if e.cs(incident_energy)['la1'] == 0:
                 logger.info('{0} La1 emission line is not activated '
@@ -711,7 +766,7 @@ class ModelSpectrum(object):
                     element_mod = gauss_mod
 
         elif ename in m_line:
-            ename = ename[:-2]
+            ename = ename.split('_')[0]
             e = Element(ename)
             if e.cs(incident_energy)['ma1'] == 0:
                 logger.info('{0} ma1 emission line is not activated '
@@ -772,7 +827,6 @@ class ModelSpectrum(object):
         self.mod = self.compton + self.elastic
 
         for ename in self.element_list:
-            print('construct model: {}'.format(ename))
             self.mod += self.setElementModel(ename)
 
     def model_fit(self, x, y, w=None, method='leastsq', **kws):
