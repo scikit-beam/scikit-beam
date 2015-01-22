@@ -196,13 +196,22 @@ def hkl_to_q(hkl_arr):
     return np.linalg.norm(hkl_arr, axis=1)
 
 
-def q_rings(num_qs, first_q, delta_q, q_val, step_q=None, *args):
+
+def q_no_step_val(img_dim, calibrated_center, num_qs,
+               first_q, delta_q):
     """
-    This will find the indices of the required q rings, find the bin
-    edges of the q rings, and count the number of pixels in each q ring.
+    This will provide the indices of the required q rings,
+    find the bin edges of the q rings, and count the number
+    of pixels in each q ring, and pixels list for the required
+    q rings when there is no step value between rings.
 
     Parameters
     ----------
+    q_val : ndarray
+        q space values for each pixel in the detector
+        shape is ([detector_size[0]*detector_size[1]], ) or
+        ([detector_size[0]*detector_size[1]], 1)
+
     num_qs : int
         number of q rings
 
@@ -212,17 +221,228 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None, *args):
     delta_q : float
         thickness of the q ring
 
-    q_val : ndarray
-        q space values for each pixel in the detector
-        shape is ([detector_size[0]*detector_size[1]], ) or
-        ([detector_size[0]*detector_size[1]], 1)
+    Returns
+    -------
+    q_ring_val : ndarray
+        edge values of the required q rings
 
-    step_q : {'same step', 'different steps'}, optional
-        step value for the next q ring from the end of the previous q ring
-        'same step' - same step values between q rings
-        'different steps' - different step value between q rings
+    q_inds : ndarray
+        indices of the q values for the required rings
+
+    """
+    q_values = _grid_values(img_dim, calibrated_center)
+
+    # last Q ring edge value
+    last_q = first_q + num_qs*(delta_q)
+
+    # edges of all the Q rings
+    q_r = np.linspace(first_q, last_q, num=(num_qs+1))
+
+    # indices of Q rings
+    q_inds = np.digitize(q_values, np.array(q_r))
+    # discard the indices greater than number of Q rings
+    q_inds[q_inds > num_qs] = 0
+
+    # Edge values of each Q rings
+    q_ring_val = []
+
+    for i in range(0, num_qs):
+        if i < num_qs:
+            q_ring_val.append(q_r[i])
+            q_ring_val.append(q_r[i + 1])
+        else:
+            q_ring_val.append(q_r[num_qs-1])
+
+    q_ring_val = np.asarray(q_ring_val)
+
+    (q_inds, q_ring_val, num_pixels, pixel_list,
+     all_pixels) = _process_q_rings(num_qs, img_dim, q_ring_val, q_inds)
+
+    return q_inds, q_ring_val, num_pixels, all_pixels, pixel_list
 
 
+def q_step_val(img_dim, calibrated_center, num_qs,
+               first_q, delta_q, *args):
+    """
+    This will provide the indices of the required q rings,
+    find the bin edges of the q rings, and count the number
+    of pixels in each q ring, and pixels list for the required
+    q rings when there is a step value between rings.
+    Step value can be same or different steps between
+    each q ring.
+
+    Parameters
+    ----------
+    img_val : tuple
+
+    num_qs : int
+        number of q rings
+
+    first_q : float
+        q value of the first q ring
+
+    delta_q : float
+        thickness of the q ring
+
+    *args : tuple
+        step value for the next q ring from the end of the previous
+        q ring. same step - same step values between q rings (one value)
+        different steps - different step value between q rings (provide
+        step value for each q ring eg: 6 rings provide 5 step values)
+
+    Returns
+    -------
+    q_ring_val : ndarray
+        edge values of q the required rings
+
+    q_inds : ndarray
+        indices of the q values for the required rings
+    """
+
+    q_values = _grid_values(img_dim, calibrated_center)
+
+    q_ring_val = []
+
+    for arg in args:
+        if arg < 0:
+            raise ValueError("step_q(step value for the next Q ring from the "
+                             "end of the previous ring) has to be positive ")
+
+    if len(args) == 1:
+        #  when there is a same values of step between q rings
+        #  the edge values of q rings will be
+        q_ring_val = first_q + np.r_[0, np.cumsum(np.tile([delta_q,
+                                                           float(args[0])],
+                                                          num_qs))][:-1]
+    else:
+        # when there is a different step values between each q ring
+        #  edge values of the q rings will be
+        if len(args) == (num_qs-1):
+            q_ring_val.append(first_q)
+            for arg in args:
+                q_ring_val.append(q_ring_val[-1] + delta_q)
+                q_ring_val.append(q_ring_val[-1] + float(arg))
+            q_ring_val.append(q_ring_val[-1] + delta_q)
+        else:
+            raise ValueError("Provide step value for each q ring ")
+
+    # indices of Q rings
+    q_inds = np.digitize(q_values, np.array(q_ring_val))
+
+    # to discard every-other bin and set the discarded bins indices to 0
+    q_inds[q_inds % 2 == 0] = 0
+    # change the indices of odd number of rings
+    indx = q_inds > 0
+    q_inds[indx] = (q_inds[indx] + 1) // 2
+
+    (q_inds, q_ring_val, num_pixels, pixel_list,
+     all_pixels) = _process_q_rings(num_qs, img_dim, q_ring_val, q_inds)
+
+    return q_inds, q_ring_val, num_pixels, all_pixels, pixel_list
+
+
+def _grid_values(img_dim, calibrated_center):
+    """
+    Parameters
+    ----------
+    img_dim: tuple
+        shape of the image (detector X and Y direction)
+        shape is [detector_size[0], detector_size[1]])
+
+    calibarted_center : tuple
+        defining the (x y) center of the detector (mm)
+
+    """
+    xx, yy = np.mgrid[:img_dim[0], :img_dim[1]]
+    grid_values = np.ravel((xx - calibrated_center[0]) ** 2
+                           + (yy - calibrated_center[1]) ** 2)
+
+    return grid_values
+
+
+def _process_q_rings(num_qs, q_val_shape, q_ring_val, q_inds):
+    """
+    This will find the indices of the required q rings, find the bin
+    edges of the q rings, and count the number of pixels in each q ring,
+    and pixels list for the required q rings.
+
+    Parameters
+    ----------
+    num_qs : int
+        number of q rings
+
+    q_val_shape : tuple
+        shape of the q space values(for each pixel in the detector,
+        shape is [detector_size[0]*detector_size[1]], )
+
+    q_ring_val : ndarray
+        edge values of each q ring
+
+    q_inds : ndarray
+        indices of the q values for the required rings
+        shape is ([detector_size[0]*detector_size[1]], )
+
+    Returns
+    -------
+    q_inds : ndarray
+        indices of the q values for the required rings
+        (after discarding zero values from the shape
+        ([detector_size[0]*detector_size[1]], )
+
+    q_ring_val : ndarray
+        edge values of each q ring
+        shape is (num_qs, 2)
+
+    num_pixels : ndarray
+        number of pixels in each q ring
+
+    all_pixels : int
+        sum of pixels of all the required q rings
+
+    pixel_list : ndarray
+        pixel list for the required q rings
+    """
+
+    # find the pixel list
+    w = np.where(q_inds > 0)
+    grid = np.indices([q_val_shape[0], q_val_shape[1]])
+    pixel_list = np.ravel(grid[1]*q_val_shape[0] + grid[0])[w]
+
+    q_inds = q_inds[q_inds > 0]
+
+    q_ring_val = np.array(q_ring_val)
+    q_ring_val = q_ring_val.reshape(num_qs, 2)
+
+    # number of pixels in each  Q ring
+    num_pixels = np.bincount(q_inds, minlength=(num_qs+1))
+    num_pixels = num_pixels[1:]
+
+    # sum of pixels of all the required q rings
+    all_pixels = sum(num_pixels)
+
+    return q_inds, q_ring_val, num_pixels, all_pixels, pixel_list
+
+
+def q_rings1(num_qs, q_val_shape, q_ring_val, q_inds):
+    """
+    This will find the indices of the required q rings, find the bin
+    edges of the q rings, and count the number of pixels in each q ring,
+    and pixels list for the required q rings.
+
+    Parameters
+    ----------
+    num_qs : int
+        number of q rings
+
+    q_val_shape : tuple
+        shape of the q space values(for each pixel in the detector,
+        shape is [detector_size[0]*detector_size[1]], )
+
+    q_ring_val : ndarray
+        edge values of each q ring
+
+    q_inds : ndarray
+        indices of the q values for the required rings
 
     Returns
     -------
@@ -237,60 +457,13 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None, *args):
         number of pixels in each q ring
 
     pixel_list : ndarray
-        pixel list
+        pixel list for the required q rings
     """
 
-    if (delta_q < 0):
-        raise ValueError("delta_q(thickness of the q ring has to be positive")
-
-    q_val = np.asarray(q_val)
-
-    if (q_val.ndim == 1):
-        q_values = q_val
-    elif (q_val.ndim == 2):
-        q_values = np.ravel(q_val)
-    else:
-        raise ValueError("q space values for each pixel in the detector"
-                         " has to be specified")
-
-    if (step_q is None):
-        # last Q ring edge value
-        last_q = first_q + num_qs*(delta_q)
-        # edges of all the Q rings
-        q_r = np.linspace(first_q, last_q, num=(num_qs+1))
-
-        # indices of Q rings
-        q_inds = np.digitize(q_values, np.array(q_r))
-        # discard the indices grater than number of Q rings
-        q_inds[q_inds > num_qs] = 0
-
-        # Edge values of each Q rings
-        q_ring_val = []
-
-        count = 0
-        for i in range(0, num_qs):
-            if (i < (num_qs)):
-                q_ring_val.append(q_r[count])
-                q_ring_val.append(q_r[count + 1])
-            else:
-                q_ring_val.append(q_r[num_qs-1])
-            count += 1
-        q_ring_val = np.asarray(q_ring_val)
-
-    elif (step_q == 'same_step' or step_q == 'different_steps'):
-        q_ring_val = q_step_val(num_qs, first_q, delta_q, step_q, *args)
-
-        # indices of Q rings
-        q_inds = np.digitize(q_values, np.array(q_ring_val))
-
-        # to discard every-other bin and set the discarded bins indices to 0
-        q_inds[q_inds % 2 == 0] = 0
-        # change the indices of odd number of rings
-        indx = q_inds > 0
-        q_inds[indx] = (q_inds[indx] + 1) // 2
-
-    else:
-        raise ValueError("Provide the correct step value between rings")
+    # find the pixel list
+    w = np.where(q_inds > 0)
+    grid = np.indices([q_val_shape[0], q_val_shape[1]])
+    pixel_list = np.ravel(grid[1]*q_val_shape[0] + grid[0])[w]
 
     q_ring_val = np.array(q_ring_val)
     q_ring_val = q_ring_val.reshape(num_qs, 2)
@@ -299,13 +472,56 @@ def q_rings(num_qs, first_q, delta_q, q_val, step_q=None, *args):
     num_pixels = np.bincount(q_inds, minlength=(num_qs+1))
     num_pixels = num_pixels[1:]
 
-    return q_inds, q_ring_val, num_pixels
+    return q_inds, q_ring_val, num_pixels, pixel_list
 
 
-def q_step_val(num_qs, first_q, delta_q, step_q, *argv):
+def _validate_q1(q_values, delta_q):
     """
     Parameters
     ----------
+    q_values : ndarray
+        q space values for each pixel in the detector
+        shape is ([detector_size[0]*detector_size[1]], ) or
+        ([detector_size[0]*detector_size[1]], 1)
+
+    delta_q : float
+        thickness of the q ring
+
+    Returns
+    -------
+     q_val : ndarray
+        q space values for each pixel in the detector
+        shape is ([detector_size[0]*detector_size[1]], )
+    """
+
+    if delta_q < 0:
+        raise ValueError("delta_q(thickness of the"
+                         " q ring has to be positive")
+
+    q_val = np.asarray(q_values)
+
+    if q_val.ndim == 1:
+        q_values = q_val
+    elif q_val.ndim == 2:
+        q_values = np.ravel(q_val)
+    else:
+        raise ValueError("q space values for each pixel in the detector"
+                         " has to be specified")
+    return q_val
+
+
+def q_no_step_val1(q_val, num_qs, first_q, delta_q, q_values):
+    """
+    This will provide q rings edge values when there is no step value
+    between rings.
+
+    Parameters
+    ----------
+     q_val : ndarray
+        q space values for each pixel in the detector
+        shape is ([detector_size[0]*detector_size[1]], ) or
+        ([detector_size[0]*detector_size[1]], 1)
+
     num_qs : int
         number of q rings
 
@@ -315,34 +531,114 @@ def q_step_val(num_qs, first_q, delta_q, step_q, *argv):
     delta_q : float
         thickness of the q ring
 
-    step_q : {'same step', 'different steps'}
-        step value for the next q ring from the end of the previous q ring
-        'same step' - same step values between q rings
-        'different steps' - different step value between q rings
+    Returns
+    -------
+    q_ring_val : ndarray
+        edge values of the required q rings
+
+    q_inds : ndarray
+        indices of the q values for the required rings
+    """
+
+    q_values = _validate_q1(q_val, delta_q)
+
+    # last Q ring edge value
+    last_q = first_q + num_qs*(delta_q)
+
+    # edges of all the Q rings
+    q_r = np.linspace(first_q, last_q, num=(num_qs+1))
+
+    # indices of Q rings
+    q_inds = np.digitize(q_values, np.array(q_r))
+    # discard the indices greater than number of Q rings
+    q_inds[q_inds > num_qs] = 0
+
+    # Edge values of each Q rings
+    q_ring_val = []
+
+    for i in range(0, num_qs):
+        if i < num_qs:
+            q_ring_val.append(q_r[i])
+            q_ring_val.append(q_r[i + 1])
+        else:
+            q_ring_val.append(q_r[num_qs-1])
+
+    q_ring_val = np.asarray(q_ring_val)
+
+    return q_ring_val, q_inds
+
+
+def q_step_val1(q_val, num_qs, first_q, delta_q, *args):
+    """
+    This will provide q rings edge values when there is a step value
+    between rings. Step value can be same or different steps between
+    each q ring
+
+    Parameters
+    ----------
+    q_val : ndarray
+        q space values for each pixel in the detector
+        shape is ([detector_size[0]*detector_size[1]], ) or
+        ([detector_size[0]*detector_size[1]], 1)
+
+    num_qs : int
+        number of q rings
+
+    first_q : float
+        q value of the first q ring
+
+    delta_q : float
+        thickness of the q ring
+
+    *args : tuple
+        step value for the next q ring from the end of the previous
+        q ring. same step - same step values between q rings (one value)
+        different steps - different step value between q rings (provide
+        step value for each q ring eg: 6 rings provide 5 step values)
 
     Returns
     -------
     q_ring_val : ndarray
-        edge values of each q ring
-        shape is (num_qs, 2)
+        edge values of q the required rings
+
+    q_inds : ndarray
+        indices of the q values for the required rings
+
     """
+    q_values = _validate_q1(q_val, delta_q)
+
     q_ring_val = []
-    if (step_q == 'same_step'):
+
+    for arg in args:
+        if arg < 0:
+            raise ValueError("step_q(step value for the next Q ring from the "
+                             "end of the previous ring) has to be positive ")
+
+    if len(args) == 1:
         #  when there is a same values of step between q rings
-        #  the edge values of q rings
+        #  the edge values of q rings will be
         q_ring_val = first_q + np.r_[0, np.cumsum(np.tile([delta_q,
-                                                           float(argv[0])],
+                                                           float(args[0])],
                                                           num_qs))][:-1]
     else:
-        # when there is a different values of step  between q
-        # ring edge values of the q rings
-        if (len(argv) == num_qs):
+        # when there is a different step values between each q ring
+        #  edge values of the q rings will be
+        if len(args) == (num_qs-1):
             q_ring_val.append(first_q)
-            for arg in argv:
+            for arg in args:
                 q_ring_val.append(q_ring_val[-1] + delta_q)
                 q_ring_val.append(q_ring_val[-1] + float(arg))
-                print (q_ring_val)
+            q_ring_val.append(q_ring_val[-1] + delta_q)
         else:
             raise ValueError("Provide step value for each q ring ")
 
-    return q_ring_val
+    # indices of Q rings
+    q_inds = np.digitize(q_values, np.array(q_ring_val))
+
+    # to discard every-other bin and set the discarded bins indices to 0
+    q_inds[q_inds % 2 == 0] = 0
+    # change the indices of odd number of rings
+    indx = q_inds > 0
+    q_inds[indx] = (q_inds[indx] + 1) // 2
+
+    return q_ring_val, q_inds

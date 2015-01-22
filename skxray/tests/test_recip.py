@@ -111,16 +111,26 @@ def test_hkl_to_q():
 
 
 def test_q_rings():
-    xx, yy = np.mgrid[:15, :12]
-    circle = (xx - 0.5) ** 2 + (yy - 0.5) ** 2
-    q_val = np.ravel(circle)
+    #xx, yy = np.mgrid[:15, :12]
+    calibrated_center = (0.5, 0.5)
+    img_dim = (15, 12)
+    #circle = (xx - 0.5) ** 2 + (yy - 0.5) ** 2
+    #q_val = np.ravel(circle)
 
     first_q = 2.5
     delta_q = 2.5
     num_qs = 20  # number of Q rings
 
-    q_inds, q_ring_val, num_pixels = recip.q_rings(num_qs, first_q,
-                                                   delta_q, q_val, step_q=None)
+    (q_inds, q_ring_val, num_pixels, all_pixels,
+     pixel_list) = recip.q_no_step_val(img_dim, calibrated_center, num_qs,
+               first_q, delta_q)
+
+    #q_ring_val, q_inds = recip.q_no_step_val(q_val, num_qs, first_q,
+    #                                         delta_q, q_val)
+    #(q_inds, q_ring_val, num_pixels, pixel_list) = recip.q_rings(num_qs,
+    #                                                             circle.shape,
+    #                                                            q_ring_val,
+    #                                                             q_inds)
 
     q_inds_m = np.array([[0, 0, 1, 2, 5, 8, 12, 17, 0, 0, 0, 0],
                         [0, 0, 1, 2, 5, 8, 12, 17, 0, 0, 0, 0],
@@ -162,14 +172,28 @@ def test_q_rings():
     num_pixels_m = np.array(([5, 4, 2, 0, 7, 0, 2, 4, 3, 2, 0, 4, 4, 2,
                               0, 1, 8, 0, 2, 2]))
 
+    pixel_list_m = np.array([30,  45, 60, 75, 90, 105, 31, 46, 61,
+                             76, 91, 106, 2, 17,  32, 47, 62, 77,
+                             92, 107, 3, 18, 33, 48, 63, 78, 93, 108,
+                             4, 19, 34, 49, 64, 79, 94,  5, 20, 35, 50,
+                             65,  80, 95, 6, 21, 36, 51, 66, 81, 7, 22,
+                             37, 52])
+
     assert_array_almost_equal(q_ring_val_m, q_ring_val)
     assert_array_equal(num_pixels, num_pixels_m)
     assert_array_equal(q_inds, np.ravel(q_inds_m))
+    assert_array_equal(pixel_list, pixel_list_m)
 
     # using a step for the Q rings
-    args = ('0.5')
-    (qstep_inds, qstep_ring_val,
-     numstep_pixels) = recip.q_rings(num_qs, first_q, delta_q, q_val, step_q='same_step', *args)
+    (qstep_inds, qstep_ring_val, numstep_pixels, allstep_pixels,
+     pixelstep_list) = recip.q_step_val(img_dim, calibrated_center, num_qs,
+               first_q, delta_q, 0.5)
+
+    #(qstep_ring_val, qstep_inds) = recip.q_step_val(q_val, num_qs,
+    #                                               first_q, delta_q, 0.5)
+    #(qstep_inds, qstep_ring_val,
+    # numstep_pixels, pixelstep_list) = recip.q_rings(num_qs, circle.shape,
+    #                                 qstep_ring_val, qstep_inds)
 
     qstep_inds_m = np.array([[0, 0, 1, 2, 4, 7, 10, 14, 19, 0, 0, 0],
                             [0, 0, 1, 2, 4, 7, 10, 14, 19, 0, 0, 0],
@@ -211,11 +235,71 @@ def test_q_rings():
                                 [56.5, 59.],
                                 [59.5, 62.]])
 
+    pixelstep_list_m = np.array([30, 45, 60, 75, 90, 105, 120, 31,
+                                 46, 61, 76, 91, 106, 121,  2, 17,
+                                 32, 47, 62, 77, 92, 107, 122, 3,
+                                 18, 33, 48, 63, 78, 93, 108, 4,
+                                 19, 34, 49, 64,  79, 94, 109, 5,
+                                 20, 35, 50, 65, 80, 95, 6, 21, 36,
+                                 51, 66, 81, 96,  7, 22, 37, 52, 67,
+                                 8, 23, 38])
+
     assert_almost_equal(qstep_ring_val, qstep_ring_val_m)
     assert_array_equal(numstep_pixels, numstep_pixels_m)
     assert_array_equal(qstep_inds, np.ravel(qstep_inds_m))
 
-    
+    assert_array_equal(pixelstep_list, pixelstep_list_m)
+
+    num_qs = 8
+    (qd_inds, qd_ring_val, numd_pixels, alld_pixels,
+     pixeld_list) = recip.q_step_val(img_dim, calibrated_center, num_qs,
+               first_q, delta_q,  0.4, 0.2, 0.5, 0.4, 0.0, 0.6, 0.2)
+
+
+    #(qd_ring_val, qd_inds) = recip.q_step_val(q_val, num_qs,
+    #                                          first_q, delta_q, 0.4, 0.2,
+                                              #0.5, 0.4, 0.0, 0.6, 0.2)
+
+    #(qd_inds, qd_ring_val, numd_pixels,
+    # pixeld_list) = recip.q_rings(num_qs, circle.shape, qd_ring_val, qd_inds)
+
+    qd_ring_val_m = ([[2.5, 5.],
+                     [5.4, 7.9],
+                     [8.1, 10.6],
+                     [11.1, 13.6],
+                     [14., 16.5],
+                     [16.5, 19.],
+                     [19.6, 22.1],
+                     [22.3, 24.8]])
+
+    numd_pixels_m = np.array([5, 4, 2, 5, 2, 2, 4, 3])
+
+    pixeld_list_m = np.array([30, 45, 60, 75, 31, 46, 61, 76, 2, 17, 32, 47,
+                              62, 77,  3, 18, 33, 48, 63, 4, 19, 34, 49, 64,
+                              5, 20, 35])
+
+    qd_inds_m = np.array([[0, 0, 1, 2, 4, 7, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 1, 2, 4, 7, 0, 0, 0, 0, 0, 0],
+                         [1, 1, 1, 3, 5, 8, 0, 0, 0, 0, 0, 0],
+                         [2, 2, 3, 4, 6, 0, 0, 0, 0, 0, 0, 0],
+                         [4, 4, 5, 6, 8, 0, 0, 0, 0, 0, 0, 0],
+                         [7, 7, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+
+    assert_array_equal(qd_inds, np.ravel(qd_inds_m))
+    assert_array_equal(qd_ring_val, qd_ring_val_m)
+    assert_array_equal(numd_pixels, numd_pixels_m)
+    assert_array_equal(pixeld_list, pixeld_list_m)
+
+
 if __name__ == '__main__':
     import nose
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
