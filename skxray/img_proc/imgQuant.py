@@ -19,9 +19,9 @@ def create_label_field(binary_vol_list,
     #md_dict should be optional input. If present then add to it.
     return result_lblfield, mislabeled_voxel_vol, md_dict
 
-def Vol_trial_1(src_labelField,
+def q_vol_hist(src_labelField,
                 num_bins, 
-                pd_function):
+                pd_function=False):
     """
     This function is a trial volume quantification tool which
     generates  a histogram of the labeled volume. Each individual
@@ -40,7 +40,7 @@ def Vol_trial_1(src_labelField,
     num_bins : integer
          number of bins in histogram
 
-    pd_function : bool
+    pd_function : bool, optional
         passed to `density` kwarg of `np.histogram`
 
     Returns
@@ -59,7 +59,7 @@ def Vol_trial_1(src_labelField,
     return output
 
 
-def Q_VOL(src_labelField, md_dict=None):
+def q_vol(src_labelField, md_dict=None):
     """
     This function quantifies the volume of each material or object
     contained in the parent label field, and returns a dictionary
@@ -97,8 +97,8 @@ def Q_VOL(src_labelField, md_dict=None):
         measures[material_ID] = {'name': 'Phase_' + str(x),
                                  'volume': {'value': material_vols[x],
                                             'units': 'voxels'}}
-        print measures[material_ID]['name'] + ' Measured Volume'
-        print (str(measures[material_ID]['volume']['value']) + ' ' +
+        #print measures[material_ID]['name'] + ' Measured Volume'
+        #print (str(measures[material_ID]['volume']['value']) + ' ' +
             measures['Material_0']['volume']['units'])
     vol_rec = np.recarray((len(measures.keys())), dtype=[('material ID', object), ('measured volume', float), ('units', object)])
     counter = 0
