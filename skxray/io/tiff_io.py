@@ -13,8 +13,6 @@ HDF5 (.h5 and .hdf5)
 
 import numpy as np
 import tifffile
-#from tifffile import imread as read_tiff
-#from tifffile import imsave as save_tiff
 
 def read_tiff(file_name):
     """
