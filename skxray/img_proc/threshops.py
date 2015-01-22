@@ -122,13 +122,6 @@ def thresh_bounded(src_data, thresh_value_min, thresh_value_max):
         The function returns a binary array where all voxels with values equal 
         to 1 correspond to voxels within the identified threshold range.
     """
-    # Check to make sure that maximum threshold boundary is less than or
-    # equal to the maximum array value, and
-    if thresh_value_max > np.amax(src_data):
-        thresh_value_max = np.amax(src_data)
-    elif thresh_value_min < np.amin(src_data):
-        thresh_value_min = np.amin(src_data)
-
     if thresh_value_min > np.amax(src_data):
         raise ValueError("Selected threshold value is greater than the "
                          "maximum array value. Current settings will "
