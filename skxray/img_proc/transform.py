@@ -155,7 +155,4 @@ def rotate_volume(src_data, rotation_axis, rotate_degrees, fill_value):
                             cval=fill_value)
     return output
 
-
-def resize_volume():
-    pass
-
+#TODO: Add function for resizing a volume
