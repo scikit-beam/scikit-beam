@@ -20,7 +20,7 @@ def swap_axes(src_data, select_axes):
     src_data : ndarray
         Identify source data for modification
     
-    select_axes : string
+    select_axes : {'XY', 'YZ', 'XZ'}
         Identify the axis pair for the operation.
         Options:
             "XY" -- Swap X and Y axes
@@ -51,7 +51,7 @@ def flip_axis(src_data, flip_direction):
     src_data : ndarray
         Identify source data for modification
     
-    flip_direction : string
+    flip_direction : {'Flip X', 'Flip Y', 'Flip Z'}
         Identify the axis along which to flip.
         Options:
             "Flip X" -- Flip X and Y axes
@@ -123,7 +123,7 @@ def rotate_volume(src_data, rotation_axis, rotate_degrees, fill_value):
     src_data : ndarray
         Identify source data for modification
     
-    rotation_axis : string
+    rotation_axis : {'Y-axis', 'Y-axis', 'Z-axis'}
         Specify the axis for rotation
         Options:
             "Z-axis"
