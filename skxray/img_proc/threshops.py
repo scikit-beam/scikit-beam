@@ -9,6 +9,39 @@ This module contains tools for thresholding data sets.
 import numpy as np
 import skimage.filter as sk
 
+def check_saturation (src_data):
+    """
+    This function is a helper function to test for potentially erroneous
+    thresholding results.
+
+    First:
+        The function checks the entire source data set to confirm that the
+        binary result is not completely "saturated" with all values set
+        equal to 1, nor that the source array is "empty" with all values set
+        equal to 0.
+        If the source array is either completely saturated or empty, then a
+        warning is produced to alert the user of a potential error.
+
+    Second:
+        If the source array has more than 2 dimensions, then the array is
+        evaluated slice-by-slice along each of the axial dimensions. Slices
+        that meet the evaluation criteria, with all values eq. 0 (empty) or
+        eq. 1 (saturated) are logged to assist the user in identifying:
+            (A) exterior regions outside of the Region Of Interest (ROI), for
+                cropping, or
+            (B) artifacts or problematic regions,
+            (C) the slice record could also be useful for quickly
+                identifying ROI for additional analysis.
+
+    Parameters
+    __________
+    src_data : array
+        Binary array, typically the result of thresholding
+
+    Returns
+    """
+
+    z_dim, y_dim, x_dim = src_data.shape
 
 def thresh_globalGT(src_data, thresh_value, md_dict=None):
     """
