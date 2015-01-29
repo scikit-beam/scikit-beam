@@ -83,7 +83,7 @@ def q_vol(src_labelField, md_dict=None):
         volume and unit attribute for the quantified volume.
     """
     z_dim, y_dim, x_dim = src_labelField.shape
-    binary_vol = np.ones((z_dim, 
+    binary_vol = np.ones((z_dim,
                           y_dim, 
                           x_dim))
     num_labels = np.amax(src_labelField)
