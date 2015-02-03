@@ -302,6 +302,7 @@ class ParamController(object):
         """
         Add all element information, such as pos, width, ratio into parameter dict.
         """
+        print('elist: {}'.format(self.element_list))
         for v in self.element_list:
             self.set_area(v)
             self.set_position(v)
@@ -434,6 +435,8 @@ class ParamController(object):
         elif item in l_line:
             item = item.split('_')[0]
             area_list = [str(item)+"_la1_area"]
+
+        print('which item: {}'.format(item))
 
         for linename in area_list:
             new_area = element_dict['area'].copy()
@@ -846,8 +849,7 @@ class ModelSpectrum(object):
 
         Returns
         -------
-        obj
-            saving all the fitting results
+        result object from lmfit
         """
 
         pars = self.mod.make_params()
@@ -866,6 +868,22 @@ def set_range(parameter, x1, y1):
     x0 = [item[0] for item in all if item[0] > lowv and item[0] < highv]
     y0 = [item[1] for item in all if item[0] > lowv and item[0] < highv]
     return np.array(x0), np.array(y0)
+
+
+def get_escape_peak(y, ratio, param,
+                    escape_e=1.73998):
+    """
+    Calculate the escape peak for given detector.
+
+    Parameters
+    ----------
+    y : array
+        original spectrum
+    ratio : float
+        ratio to adjust spectrum
+    param : dict
+    """
+    pass
 
 
 def get_linear_model(x, param_dict):
