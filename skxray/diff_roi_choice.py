@@ -107,14 +107,14 @@ def roi_rectangles(num_rois, roi_data, detector_size):
         mesh[slc1, slc2] = (i + 1)
 
     roi_inds = np.ravel(mesh)
-    pixel_list = np.where(roi_inds>0)
-    roi_inds = roi_inds[roi_inds>0]
+    pixel_list = np.where(roi_inds > 0)
+    roi_inds = roi_inds[roi_inds > 0]
 
     return roi_inds, num_pixels, pixel_list
 
 
 def roi_rings(img_dim, calibrated_center, num_rings,
-               first_r, delta_r):
+              first_r, delta_r):
     """
     This will provide the indices of the required rings,
     find the bin edges of the rings, and count the number
@@ -188,7 +188,7 @@ def roi_rings(img_dim, calibrated_center, num_rings,
 
 
 def roi_rings_step(img_dim, calibrated_center, num_rings,
-               first_r, delta_r, *args):
+                   first_r, delta_r, *args):
     """
     This will provide the indices of the required rings,
     find the bin edges of the rings, and count the number
@@ -250,8 +250,8 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
         #  when there is a same values of step between rings
         #  the edge values of rings will be
         ring_vals = first_r + np.r_[0, np.cumsum(np.tile([delta_r,
-                                                           float(args[0])],
-                                                          num_rings))][:-1]
+                                                          float(args[0])],
+                                                         num_rings))][:-1]
     else:
         # when there is a different step values between each ring
         #  edge values of the rings will be
@@ -294,7 +294,7 @@ def _grid_values(img_dim, calibrated_center):
     """
     xx, yy = np.mgrid[:img_dim[0], :img_dim[1]]
     x_ = (xx - calibrated_center[0] + 1)
-    y_ = (yy - calibrated_center[1] +1)
+    y_ = (yy - calibrated_center[1] + 1)
     grid_values = np.int_(np.hypot(x_, y_))
 
     return grid_values
