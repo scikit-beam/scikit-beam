@@ -35,8 +35,8 @@
 ########################################################################
 
 """
-This module is get informations of different region of interests(roi's)
- information : the number of pixels, pixel
+This module is to get informations of different region of interests(roi's).
+ Information : the number of pixels, pixel list, indices 
 """
 
 
