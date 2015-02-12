@@ -13,11 +13,11 @@ HDF5 (.h5 and .hdf5)
 
 import numpy as np
 import vtk
-from skxray.io import np_to_vtk_cnvrt as np2vtk
+from skxray.io import vtk_tools
 from numpy.testing import assert_equal
 
 _NP_TO_VTK_dTYPE_DICT = {
-    #np.bool: vtk.VTK_BIT,
+    np.bool: vtk.VTK_BIT,
     #np.character: vtk.VTK_UNSIGNED_CHAR,
     np.uint8: vtk.VTK_UNSIGNED_CHAR,
     np.uint16: vtk.VTK_UNSIGNED_SHORT,
@@ -121,39 +121,20 @@ def test_vtk_conversion():
         Type conversion to VTK_UNSIGNED_LONG_LONG and VTK_LONG_LONG
         generates an error. However, conversion to VTK_LONG and
         VTK_UNSIGNED_LONG appears to work.
+        Since  boolean (bit) arrays are not supported currently for
+        conversion, boolean numpy arrays are now converted directly to
+        dtype: 'uint8' where values remain either 0 or 1.
     """
 
     for _ in _NP_TO_VTK_dTYPE_DICT.keys():
+        if _ ==np.bool:
+            _ = np.uint8
         test_np_array = np.array(10*np.random.rand(3,3,3), dtype=_)
         array_shape = test_np_array.shape
-        vtk_obj = np2vtk.ndarray_to_vtk_obj(test_np_array,
-                                            array_type=_NP_TO_VTK_dTYPE_DICT[_])
+        vtk_obj = vtk_tools.np_to_vtk(test_np_array)
         assert_equal(_VTK_DTYPE_INDEX_DICT[vtk_obj.GetDataType()],
                      _NP_TO_VTK_dTYPE_DICT[_])
-        np_result = np2vtk.vtk_to_np(vtk_obj, array_shape)
+        np_result = vtk_tools.vtk_to_np(vtk_obj, array_shape)
         print np_result.dtype
         print np_result.shape
         assert_equal(np_result, test_np_array)
-
-
-
-def test_ndarray_to_vtk_obj():
-    """
-    This function automates the saving of volumes as .tiff files using a single
-    keyword
-
-    Parameters
-    ----------
-    file_name : str
-        Specify the path and file name to which you want the volume saved
-
-    data : array
-        Specify the array to be saved
-
-    Returns
-    -------
-
-    """
-    for _ in _VTK_TO_NP_dTYPE_DICT.keys():
-
-
