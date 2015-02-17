@@ -121,11 +121,11 @@ def roi_rectangles(num_rois, roi_data, detector_size):
 
 
 def roi_rings(img_dim, calibrated_center, num_rings,
-              first_r, delta_r):
+               first_r, delta_r):
     """
     This will provide the indices of the required rings,
     find the bin edges of the rings, and count the number
-    of pixels in each ring, and pixels indices for the required
+    of pixels in each ring, and pixels list for the required
     rings when there is no step value between rings.
 
     Parameters
@@ -153,16 +153,8 @@ def roi_rings(img_dim, calibrated_center, num_rings,
 
     ring_inds : ndarray
         indices of the required rings
-         after discarding zero values from the shape
-        ([detector_size[0]*detector_size[1]], )
 
-    num_pixels : ndarray
-        number of pixels in each ring
-
-    pixel_list : ndarray
-        pixel indices for the required rings
     """
-
     grid_values = _grid_values(img_dim, calibrated_center)
 
     # last ring edge value
@@ -172,8 +164,8 @@ def roi_rings(img_dim, calibrated_center, num_rings,
     q_r = np.linspace(first_r, last_r, num=(num_rings+1))
 
     # indices of rings
-    ring_inds = np.digitize(np.ravel(grid_values),
-                            np.array(q_r), right=True)
+    ring_inds = np.digitize(np.ravel(grid_values), np.array(q_r),
+                            right=False)
     # discard the indices greater than number of rings
     ring_inds[ring_inds > num_rings] = 0
 
@@ -197,14 +189,14 @@ def roi_rings(img_dim, calibrated_center, num_rings,
 
 
 def roi_rings_step(img_dim, calibrated_center, num_rings,
-                   first_r, delta_r, *step_r):
+               first_r, delta_r, *step_r):
     """
     This will provide the indices of the required rings,
     find the bin edges of the rings, and count the number
-    of pixels in each ring, and pixels indices for the
-    required rings when there is a step value between
-    rings. Step value can be same or different steps
-    between each ring.
+    of pixels in each ring, and pixels list for the required
+    rings when there is a step value between rings.
+    Step value can be same or different steps between
+    each ring.
 
     Parameters
     ----------
@@ -228,9 +220,8 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
         step value for the next ring from the end of the previous
         ring.
         same step - same step values between rings (one value)
-        different steps - different step value between rings
-        (provide step value for each ring.
-         eg-: 6 rings provide 5 step values)
+        different steps - different step value between rings (provide
+        step value for each ring eg: 6 rings provide 5 step values)
 
     Returns
     -------
@@ -239,16 +230,8 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
 
     ring_inds : ndarray
         indices of the required rings
-        after discarding zero values from the shape
-        ([detector_size[0]*detector_size[1]], )
 
-    num_pixels : ndarray
-        number of pixels in each ring
-
-    pixel_list : ndarray
-        pixel indices for the required rings
     """
-
     grid_values = _grid_values(img_dim, calibrated_center)
 
     ring_vals = []
@@ -262,26 +245,23 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
         #  when there is a same values of step between rings
         #  the edge values of rings will be
         ring_vals = first_r + np.r_[0, np.cumsum(np.tile([delta_r,
-                                                          float(step_r[0])],
-                                                         num_rings))][:-1]
-    elif len(step_r) == (num_rings - 1):
-        #  when there is a different step values between each ring
-        #  edge values of the rings will be
-        ring_vals.append(first_r)
-        for arg in step_r:
-            ring_vals.append(ring_vals[-1] + delta_r)
-            ring_vals.append(ring_vals[-1] + float(arg))
-        ring_vals.append(ring_vals[-1] + delta_r)
-
+                                                           float(step_r[0])],
+                                                          num_rings))][:-1]
     else:
-        raise ValueError("Provide valid step value between rings"
-                         "For different step values between rings-"
-                         "provide step value for each q ring "
-                         "eg -: 6 rings provide 5 step values ")
+        # when there is a different step values between each ring
+        #  edge values of the rings will be
+        if len(step_r) == (num_rings - 1):
+            ring_vals.append(first_r)
+            for arg in step_r:
+                ring_vals.append(ring_vals[-1] + delta_r)
+                ring_vals.append(ring_vals[-1] + float(arg))
+            ring_vals.append(ring_vals[-1] + delta_r)
+        else:
+            raise ValueError("Provide step value for each q ring ")
 
     # indices of rings
     ring_inds = np.digitize(np.ravel(grid_values), np.array(ring_vals),
-                            right=True)
+                            right=False)
 
     # to discard every-other bin and set the discarded bins indices to 0
     ring_inds[ring_inds % 2 == 0] = 0
@@ -307,14 +287,7 @@ def _grid_values(img_dim, calibrated_center):
     calibarted_center : tuple
         defining the (x y) center of the image (mm)
 
-    Returns
-    -------
-    grid values : ndarray
-       each grid values(x, y) from calibrated center
-       radial distance
-       shape is [detector_size[0], detector_size[1]])
     """
-
     xx, yy = np.mgrid[:img_dim[0], :img_dim[1]]
     x_ = (xx - calibrated_center[0])
     y_ = (yy - calibrated_center[1])
@@ -334,8 +307,8 @@ def _process_rings(num_rings, img_dim, ring_vals, ring_inds):
     num_rings : int
         number of rings
 
-    img_dim : tuple
-        shape of the image (detector X and Y direction)
+    ring_val_shape : tuple
+        shape of the ring values(for each pixel in the detector,
         shape is [detector_size[0]*detector_size[1]], )
 
     ring_vals : ndarray
@@ -349,7 +322,7 @@ def _process_rings(num_rings, img_dim, ring_vals, ring_inds):
     -------
     ring_inds : ndarray
         indices of the ring values for the required rings
-        after discarding zero values from the shape
+        (after discarding zero values from the shape
         ([detector_size[0]*detector_size[1]], )
 
     ring_vals : ndarray
@@ -360,13 +333,15 @@ def _process_rings(num_rings, img_dim, ring_vals, ring_inds):
         number of pixels in each ring
 
     pixel_list : ndarray
-        pixel indices for the required rings
+        pixel list for the required rings
 
     """
     # find the pixel list
     w = np.where(ring_inds > 0)
     grid = np.indices((img_dim[0], img_dim[1]))
-    pixel_list = np.ravel(grid[1]*img_dim[0] + grid[0])[w]
+    pixel_list = (grid[0]*img_dim[1] + grid[1]).flatten()[w]
+
+
     ring_inds = ring_inds[ring_inds > 0]
 
     ring_vals = np.array(ring_vals)
@@ -377,3 +352,80 @@ def _process_rings(num_rings, img_dim, ring_vals, ring_inds):
     num_pixels = num_pixels[1:]
 
     return ring_inds, ring_vals, num_pixels, pixel_list
+
+
+def test_demo(ax, center, inds, edges, pix_list, img_dim):
+
+    tt = np.zeros(img_dim).ravel() * np.nan
+    tt[pix_list] = inds
+
+    ax.cla()
+    ax.set_aspect('equal')
+    im = ax.imshow(tt.reshape(*img_dim), cmap='Paired', interpolation='nearest')
+
+    [ax.add_artist(mp.Circle(center, radius=j, lw=3, facecolor='none', edgecolor='k')) for j in edges[:, 0]]
+    [ax.add_artist(mp.Circle(center, radius=j, lw=3, facecolor='none', edgecolor='k', linestyle='dashed')) for j in edges[:, 1]]
+    Y, X = np.meshgrid(range(img_dim[0]), range(img_dim[1]))
+    ax.plot(X.ravel(), Y.ravel(), 'x')
+    ax.set_title(str(center))
+
+
+
+"""if __name__=="__main__":
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as mp
+
+    x_bar = 20.
+    y_bar = 4.
+    calibrated_center = (x_bar, y_bar)
+    img_dim = (20, 25)
+    first_q = 3
+    delta_q = 5
+    num_qs = 8  # number of Q rings
+
+    grid_values = _grid_values(img_dim, calibrated_center)
+
+    (q_inds, q_ring_val, num_pixels, pixel_list) = roi_rings(img_dim,
+                                                                  calibrated_center,
+                                                                  num_qs, first_q,
+                                                                  delta_q)
+
+
+    fig, ax2 = plt.subplots()
+    test_demo(ax2, (y_bar, x_bar), q_inds, q_ring_val, pixel_list, img_dim)
+    plt.show()
+
+    num_qs = 10
+
+    ## using a step for the Q rings
+
+    num_qs = 10
+
+    # using a step for the Q rings
+    (qstep_inds, qstep_ring_val, numstep_pixels,
+     pixelstep_list) = roi_rings_step(img_dim, calibrated_center, num_qs,
+               first_q, delta_q, 6)
+
+    m, num_qs)
+    fig, ax2 = plt.subplots()
+    test_demo(ax2, (y_bar, x_bar), qstep_inds, qstep_ring_val, pixelstep_list, img_dim)
+    plt.show()
+
+    calibrated_center = (6.5, 8.)
+    img_dim = (70, 50)
+    first_q = 10.
+    delta_q = 8.
+
+    num_qs = 6 # number of q rings
+
+    (qd_inds, qd_ring_val, numd_pixels, pixeld_list) = roi_rings_step(img_dim,
+                                                                           calibrated_center,
+                                                                           num_qs, first_q,
+                                                                           delta_q,
+                                                                           5., 6., 7., 4.,
+                                                                           0.0)
+
+
+    fig, ax2 = plt.subplots()
+    test_demo(ax2, (8.,6.), qd_inds, qd_ring_val, pixeld_list, img_dim)
+    plt.show()"""
