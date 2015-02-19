@@ -60,9 +60,8 @@ def test_roi_rectangles():
     roi_inds, num_pixels, pixel_list = diff_roi.roi_rectangles(num_rois,
                                                                roi_data,
                                                                detector_size)
-    ty = np.zeros(detector_size).ravel() * np.nan
+    ty = np.zeros(detector_size).ravel()
     ty[pixel_list] = roi_inds
-    ty[np.isnan(ty)] = 0
     num_pixels_m = (np.bincount(ty.astype(int)))[1:]
 
     re_mesh = ty.reshape(*detector_size)
@@ -81,89 +80,29 @@ def test_roi_rectangles():
     assert_array_equal(num_pixels, num_pixels_m)
 
 
-"""def test_roi_rings():
+def test_roi_rings():
     calibrated_center = (6., 4.)
     img_dim = (20, 25)
     first_q = 2
     delta_q = 3
-    num_qs = 10  # number of Q rings
+    num_qs = 7  # number of Q rings
 
     (q_inds, q_ring_val, num_pixels,
      pixel_list) = diff_roi.roi_rings(img_dim, calibrated_center, num_qs,
                                       first_q, delta_q)
 
-    ty = np.ones(img_dim).ravel() * np.nan
-    ty[pixel_list] = q_inds
-    ty[np.isnan(ty)] = 0
+    # check the rings edge values
+    q_ring_val_m = np.array([[2, 5], [5, 8], [8, 11], [11, 14], [14, 17],
+                             [17, 20], [20, 23]])
 
-    num_pixels_m = (np.bincount(ty.astype(int)))[1:]
-    assert_array_equal(num_pixels, num_pixels_m)
+    assert_array_almost_equal(q_ring_val_m, q_ring_val)
 
-    xx, yy = np.mgrid[:img_dim[0], :img_dim[1]]
-    x_ = (xx - calibrated_center[0])
-    y_ = (yy - calibrated_center[1])
-    grid_values = np.float_(np.hypot(x_, y_))"""
-
-"""q_ring_val_m = np.array([[2.5, 4.5],
-                             [4.5, 6.5],
-                             [6.5, 8.5],
-                             [8.5, 10.5],
-                             [10.5, 12.5],
-                             [12.5, 14.5],
-                             [14.5, 16.5],
-                             [16.5, 18.5],
-                             [18.5, 20.5],
-                             [20.5, 22.5]])
-
-    num_pixels_m = np.array([48, 68, 60, 61, 61, 65, 47, 44, 18, 7])
-
-    i = 1
-    for r in range(0, num_qs):
-        if q_ring_val[r][0]<=np.any(grid_values)<=q_ring_val[r][1]:
-            grid_values == i
-        i += 1
-
-    print (grid_values)
-    q_inds_m = np.array([3, 3, 3, 3, 2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 5,
-                         5, 6, 6, 6, 7, 7, 8, 8, 9, 3, 3, 2, 2, 2, 2, 2,
-                         2, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 6, 6, 7, 7, 8,
-                         8, 9, 3, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3,
-                         4, 4, 5, 5, 6, 6, 7, 7, 7, 8, 8, 3, 2, 2, 1, 1,
-                         1, 1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5, 6, 6,
-                         7, 7, 8, 8, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 3, 3,
-                         4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 2, 2, 1, 1, 1, 1,
-                         2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 2, 2,
-                         1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7,
-                         8, 8, 2, 2, 1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5,
-                         6, 6, 7, 7, 8, 8, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2,
-                         3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 3, 2, 2, 1,
-                         1, 1, 1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5, 6,
-                         6, 7, 7, 8, 8, 3, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2,
-                         2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 7, 8, 8, 3, 3,
-                         2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5,
-                         6, 6, 7, 7, 8, 8,  9,  3,  3,  3,  3,  2,  2,
-                          2,  2,  2,  3,
-        3,  3,  3,  4,  4,  5,  5,  6,  6,  6,  7,  7,  8,  8,  9,  4,  4,
-        3,  3,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  5,  5,  5,  6,  6,
-        7,  7,  8,  8,  8,  9,  4,  4,  4,  4,  3,  3,  3,  3,  3,  4,  4,
-        4,  4,  5,  5,  5,  6,  6,  6,  7,  7,  8,  8,  9,  9,  5,  4,  4,
-        4,  4,  4,  4,  4,  4,  4,  4,  4,  5,  5,  5,  6,  6,  6,  7,  7,
-        8,  8,  8,  9,  9,  5,  5,  5,  4,  4,  4,  4,  4,  4,  4,  5,  5,
-        5,  5,  6,  6,  6,  7,  7,  7,  8,  8,  9,  9, 10,  6,  5,  5,  5,
-        5,  5,  5,  5,  5,  5,  5,  5,  6,  6,  6,  6,  7,  7,  7,  8,  8,
-        9,  9,  9, 10,  6,  6,  6,  5,  5,  5,  5,  5,  5,  5,  6,  6,  6,
-        6,  6,  7,  7,  7,  8,  8,  8,  9,  9, 10, 10,  6,  6,  6,  6,  6,
-        6,  6,  6,  6,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,
-       10, 10, 10])
+    # check the pixel_list and q_inds and num_pixels
+    _helper_check(pixel_list, q_inds, num_pixels, q_ring_val,
+                  calibrated_center, img_dim, num_qs)
 
 
-
-    #assert_array_almost_equal(q_ring_val_m, q_ring_val)
-
-    #assert_array_equal(q_inds, np.ravel(q_inds_m))"""
-
-
-"""def test_roi_rings_step():
+def test_roi_rings_step():
     calibrated_center = (4., 6.)
     img_dim = (20, 25)
     first_q = 2.5
@@ -173,53 +112,24 @@ def test_roi_rectangles():
     num_qs = 6  # number of Q rings
     step_q = 1  # step value between each Q ring
 
-    (qstep_inds, qstep_ring_val, numstep_pixels,
-     pixelstep_list) = diff_roi.roi_rings_step(img_dim, calibrated_center,
-                                               num_qs, first_q, delta_q,
-                                               step_q)
-    ty = np.ones(img_dim).ravel() * np.nan
-    ty[pixelstep_list] = qstep_inds
-    ty[np.isnan(ty)] = 0
+    (q_inds, q_ring_val,
+     num_pixels, pixel_list) = diff_roi.roi_rings_step(img_dim,
+                                                       calibrated_center,
+                                                       num_qs, first_q,
+                                                       delta_q, step_q)
 
-    numstep_pixels_m = (np.bincount(ty.astype(int)))[1:]
-    assert_array_equal(numstep_pixels, numstep_pixels_m)"""
+    # check the ring edge values
+    q_ring_val_m = np.array([[2.5, 4.5], [5.5, 7.5], [8.5, 10.5],
+                             [11.5, 13.5], [14.5, 16.5], [17.5, 19.5]])
 
-"""qstep_inds_m = np.array([1, 1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6,
-                             1, 1, 1, 1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5,
-                             6, 6, 1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6,
-                             6, 1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6,
-                             1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 1,
-                             1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 1, 1,
-                             1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 1, 1, 1,
-                             1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 1,
-                             1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 2,
-                             2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 6, 6, 2, 2, 2,
-                             2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 6,
-                             6, 6, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4,
-                             5, 5, 6, 6, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 3,
-                             3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5,
-                             5, 6, 6, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4,
-                             5, 5, 6, 6, 6, 4, 4, 4, 4, 5, 5, 6, 6, 4, 4,
-                             4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6,
-                             6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 6,
-                             6, 6, 5, 5, 5, 5, 6, 6, 6, 5, 5, 5, 5, 5, 5,
-                             5, 5, 5, 5, 5, 5, 6, 6, 6, 6])
+    assert_almost_equal(q_ring_val, q_ring_val_m)
 
-    numstep_pixels_m = np.array([48, 70, 61, 67, 47, 34])
-
-    qstep_ring_val_m = np.array([[2.5, 4.5],
-                                 [5.5, 7.5],
-                                 [8.5, 10.5],
-                                 [11.5, 13.5],
-                                 [14.5, 16.5],
-                                 [17.5, 19.5]])
-
-    assert_almost_equal(qstep_ring_val, qstep_ring_val_m)
-
-    #assert_array_equal(qstep_inds, np.ravel(qstep_inds_m))"""
+    # check the pixel_list and q_inds and num_pixels
+    _helper_check(pixel_list, q_inds, num_pixels, q_ring_val,
+                  calibrated_center, img_dim, num_qs)
 
 
-"""def test_roi_rings_diff_steps():
+def test_roi_rings_diff_steps():
     calibrated_center = (10., 4.)
     img_dim = (45, 25)
     first_q = 2.
@@ -227,52 +137,51 @@ def test_roi_rectangles():
 
     num_qs = 8  # number of Q rings
 
-    (qd_inds, qd_ring_val, numd_pixels,
-     pixeld_list) = diff_roi.roi_rings_step(img_dim, calibrated_center, num_qs,
-                                            first_q, delta_q, 2., 2.5, 4., 3.
-                                            , 0., 2., 3.)
+    (q_inds, q_ring_val,
+     num_pixels, pixel_list) = diff_roi.roi_rings_step(img_dim,
+                                                       calibrated_center,
+                                                       num_qs, first_q,
+                                                       delta_q, 2., 2.5, 4.,
+                                                       3., 0., 2.5, 3.)
 
-    ty = np.ones(img_dim).ravel() * np.nan
-    ty[pixeld_list] = qd_inds
-    ty[np.isnan(ty)] = 0
+    # check the edge values of the rings
+    q_ring_val_m = np.array([[2., 4.], [6., 8.], [10.5, 12.5], [16.5, 18.5],
+                             [21.5, 23.5], [23.5, 25.5], [28.0, 30.0],
+                             [33.0, 35.0]])
 
-    numd_pixels_m = (np.bincount(ty.astype(int)))[1:]
-    assert_array_equal(numd_pixels, numd_pixels_m)"""
+    assert_array_almost_equal(q_ring_val, q_ring_val_m)
 
-"""qd_ring_val_m = np.array([[2., 4.],
-                             [4.4, 6.4],
-                             [6.6, 8.6],
-                             [9.1, 11.1],
-                             [11.5, 13.5],
-                             [13.5, 15.5],
-                             [16.1, 18.1],
-                             [18.3, 20.3]])
+    # check the pixel_list and q_inds and num_pixels
+    _helper_check(pixel_list, q_inds, num_pixels, q_ring_val,
+                  calibrated_center, img_dim, num_qs)
 
-    numd_pixels_m = np.array([36, 68, 64, 37, 32, 31, 33, 10])
 
-    qd_inds_m = np.array([2, 2, 2, 2, 2, 3, 3, 3, 4, 2, 1, 1, 1, 1,
-                          1, 2, 2, 2, 3, 3, 4, 1, 1, 1, 1, 1, 1, 1,
-                          2, 2, 3, 3, 4, 1, 1, 1, 1, 2, 2, 3, 3, 4,
-                          1, 1, 1, 1, 2, 2, 3, 3, 4, 1, 1, 1, 1, 2,
-                          2, 3, 3, 4, 1, 1, 1, 1, 1, 1, 1, 2, 2, 3,
-                          3, 4, 2, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4,
-                          2, 2, 2, 2, 2, 3, 3, 3, 4, 2, 2, 2, 2, 2,
-                          2, 2, 2, 2, 3, 3, 3, 4, 4, 3, 2, 2, 2, 2,
-                          2, 2, 2, 3, 3, 3, 4, 4, 4, 3, 3, 3, 3, 3,
-                          3, 3, 3, 3, 3, 4, 4, 5, 3, 3, 3, 3, 3, 3,
-                          3, 3, 3, 4, 4, 4, 5, 5, 4, 4, 4, 5, 5, 5,
-                          4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5,
-                          6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5,
-                          6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-                          6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6,
-                          6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-                          6, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7,
-                          7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-                          7, 7, 7, 7, 7, 8, 8, 7, 7, 7, 7, 7, 7, 7,
-                          7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-                          8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-                          8, 8, 8, 8])
+def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
+                  img_dim, num_qs):
+    # recreate the indices using pixel_list and inds values
+    ty = np.zeros(img_dim).ravel()
+    ty[pixel_list] = inds
+    data = ty.reshape(img_dim[0], img_dim[1])
 
-    #assert_array_equal(qd_inds, np.ravel(qd_inds_m))
-    assert_array_almost_equal(qd_ring_val, qd_ring_val_m)
-    assert_array_equal(numd_pixels, numd_pixels_m)"""
+    # get the grid values from the center
+    xx, yy = np.mgrid[:img_dim[0], :img_dim[1]]
+    x_ = (xx - calib_center[0])
+    y_ = (yy - calib_center[1])
+    grid_values = np.float_(np.hypot(x_, y_))
+
+    # get the indices into a grid
+    zero_grid = np.zeros((img_dim[0], img_dim[1]))
+    for r in range(num_qs):
+        vl = (q_ring_val[r][0] <= grid_values) & (grid_values
+                                                  < q_ring_val[r][1])
+        zero_grid[vl] = r + 1
+
+    # check the num_pixels
+    num_pixels = []
+    for r in range(num_qs):
+        num_pixels.append(int((np.histogramdd(np.ravel(grid_values), bins=1,
+                                              range=[[q_ring_val[r][0],
+                                                      (q_ring_val[r][1]
+                                                       - 0.000001)]]))[0][0]))
+    assert_array_equal(zero_grid, data)
+    assert_array_equal(num_pix, num_pixels)

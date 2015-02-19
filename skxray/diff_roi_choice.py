@@ -50,6 +50,7 @@ from six import string_types
 import time
 import sys
 import numpy as np
+import numpy.ma as ma
 
 import logging
 logger = logging.getLogger(__name__)
@@ -70,6 +71,11 @@ def roi_rectangles(num_rois, roi_data, detector_size):
     detector_size : tuple
         2 element tuple defining the number of pixels in the detector.
         Order is (num_rows, num_columns)
+
+    mask : ndarray, optional
+        masked array
+        shape is ([detector_size[0], detector_size[1]])
+
 
     Returns
     -------
@@ -121,7 +127,7 @@ def roi_rectangles(num_rois, roi_data, detector_size):
 
 
 def roi_rings(img_dim, calibrated_center, num_rings,
-               first_r, delta_r):
+              first_r, delta_r):
     """
     This will provide the indices of the required rings,
     find the bin edges of the rings, and count the number
@@ -189,7 +195,7 @@ def roi_rings(img_dim, calibrated_center, num_rings,
 
 
 def roi_rings_step(img_dim, calibrated_center, num_rings,
-               first_r, delta_r, *step_r):
+                   first_r, delta_r, *step_r):
     """
     This will provide the indices of the required rings,
     find the bin edges of the rings, and count the number
@@ -245,8 +251,8 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
         #  when there is a same values of step between rings
         #  the edge values of rings will be
         ring_vals = first_r + np.r_[0, np.cumsum(np.tile([delta_r,
-                                                           float(step_r[0])],
-                                                          num_rings))][:-1]
+                                                          float(step_r[0])],
+                                                         num_rings))][:-1]
     else:
         # when there is a different step values between each ring
         #  edge values of the rings will be
@@ -341,7 +347,6 @@ def _process_rings(num_rings, img_dim, ring_vals, ring_inds):
     grid = np.indices((img_dim[0], img_dim[1]))
     pixel_list = (grid[0]*img_dim[1] + grid[1]).flatten()[w]
 
-
     ring_inds = ring_inds[ring_inds > 0]
 
     ring_vals = np.array(ring_vals)
@@ -352,80 +357,3 @@ def _process_rings(num_rings, img_dim, ring_vals, ring_inds):
     num_pixels = num_pixels[1:]
 
     return ring_inds, ring_vals, num_pixels, pixel_list
-
-
-def test_demo(ax, center, inds, edges, pix_list, img_dim):
-
-    tt = np.zeros(img_dim).ravel() * np.nan
-    tt[pix_list] = inds
-
-    ax.cla()
-    ax.set_aspect('equal')
-    im = ax.imshow(tt.reshape(*img_dim), cmap='Paired', interpolation='nearest')
-
-    [ax.add_artist(mp.Circle(center, radius=j, lw=3, facecolor='none', edgecolor='k')) for j in edges[:, 0]]
-    [ax.add_artist(mp.Circle(center, radius=j, lw=3, facecolor='none', edgecolor='k', linestyle='dashed')) for j in edges[:, 1]]
-    Y, X = np.meshgrid(range(img_dim[0]), range(img_dim[1]))
-    ax.plot(X.ravel(), Y.ravel(), 'x')
-    ax.set_title(str(center))
-
-
-
-"""if __name__=="__main__":
-    import matplotlib.pyplot as plt
-    import matplotlib.patches as mp
-
-    x_bar = 20.
-    y_bar = 4.
-    calibrated_center = (x_bar, y_bar)
-    img_dim = (20, 25)
-    first_q = 3
-    delta_q = 5
-    num_qs = 8  # number of Q rings
-
-    grid_values = _grid_values(img_dim, calibrated_center)
-
-    (q_inds, q_ring_val, num_pixels, pixel_list) = roi_rings(img_dim,
-                                                                  calibrated_center,
-                                                                  num_qs, first_q,
-                                                                  delta_q)
-
-
-    fig, ax2 = plt.subplots()
-    test_demo(ax2, (y_bar, x_bar), q_inds, q_ring_val, pixel_list, img_dim)
-    plt.show()
-
-    num_qs = 10
-
-    ## using a step for the Q rings
-
-    num_qs = 10
-
-    # using a step for the Q rings
-    (qstep_inds, qstep_ring_val, numstep_pixels,
-     pixelstep_list) = roi_rings_step(img_dim, calibrated_center, num_qs,
-               first_q, delta_q, 6)
-
-    m, num_qs)
-    fig, ax2 = plt.subplots()
-    test_demo(ax2, (y_bar, x_bar), qstep_inds, qstep_ring_val, pixelstep_list, img_dim)
-    plt.show()
-
-    calibrated_center = (6.5, 8.)
-    img_dim = (70, 50)
-    first_q = 10.
-    delta_q = 8.
-
-    num_qs = 6 # number of q rings
-
-    (qd_inds, qd_ring_val, numd_pixels, pixeld_list) = roi_rings_step(img_dim,
-                                                                           calibrated_center,
-                                                                           num_qs, first_q,
-                                                                           delta_q,
-                                                                           5., 6., 7., 4.,
-                                                                           0.0)
-
-
-    fig, ax2 = plt.subplots()
-    test_demo(ax2, (8.,6.), qd_inds, qd_ring_val, pixeld_list, img_dim)
-    plt.show()"""
