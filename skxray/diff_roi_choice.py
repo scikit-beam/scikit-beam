@@ -131,17 +131,20 @@ def roi_rings(img_dim, calibrated_center, num_rings,
     """
     This will provide the indices of the required rings,
     find the bin edges of the rings, and count the number
-    of pixels in each ring, and pixels list for the required
-    rings when there is no step value between rings.
+    of pixels in each ring, and pixels indices for the
+    required rings when there is no step value between
+    rings.
 
     Parameters
     ----------
     img_dim: tuple
         shape of the image (detector X and Y direction)
+        Order is (num_rows, num_columns)
         shape is [detector_size[0], detector_size[1]])
 
-    calibarted_center : tuple
-        defining the center of the image (column value, row value) (mm)
+    calibrated_center : tuple
+        defining the center of the image
+        (column value, row value) (mm)
 
     num_rings : int
         number of rings
@@ -159,6 +162,12 @@ def roi_rings(img_dim, calibrated_center, num_rings,
 
     ring_inds : ndarray
         indices of the required rings
+
+    num_pixels : ndarray
+        number of pixels in each ring
+
+    pixel_list : ndarray
+        pixel indices for the required rings
 
     """
     grid_values = _grid_values(img_dim, calibrated_center)
@@ -199,8 +208,8 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
     """
     This will provide the indices of the required rings,
     find the bin edges of the rings, and count the number
-    of pixels in each ring, and pixels list for the required
-    rings when there is a step value between rings.
+    of pixels in each ring, and pixels indices for the
+    required rings when there is a step value between rings.
     Step value can be same or different steps between
     each ring.
 
@@ -208,9 +217,10 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
     ----------
     img_dim: tuple
         shape of the image (detector X and Y direction)
+        Order is (num_rows, num_columns)
         shape is [detector_size[0], detector_size[1]])
 
-    calibarted_center : tuple
+    calibrated_center : tuple
         defining the center of the image (column value, row value) (mm)
 
     num_rings : int
@@ -236,6 +246,12 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
 
     ring_inds : ndarray
         indices of the required rings
+
+    num_pixels : ndarray
+        number of pixels in each ring
+
+    pixel_list : ndarray
+        pixel indices for the required rings
 
     """
     grid_values = _grid_values(img_dim, calibrated_center)
@@ -288,6 +304,7 @@ def _grid_values(img_dim, calibrated_center):
     ----------
     img_dim: tuple
         shape of the image (detector X and Y direction)
+        Order is (num_rows, num_columns)
         shape is [detector_size[0], detector_size[1]])
 
     calibarted_center : tuple
@@ -313,9 +330,10 @@ def _process_rings(num_rings, img_dim, ring_vals, ring_inds):
     num_rings : int
         number of rings
 
-    ring_val_shape : tuple
-        shape of the ring values(for each pixel in the detector,
-        shape is [detector_size[0]*detector_size[1]], )
+    img_dim: tuple
+        shape of the image (detector X and Y direction)
+        Order is (num_rows, num_columns)
+        shape is [detector_size[0], detector_size[1]])
 
     ring_vals : ndarray
         edge values of each ring
@@ -339,7 +357,7 @@ def _process_rings(num_rings, img_dim, ring_vals, ring_inds):
         number of pixels in each ring
 
     pixel_list : ndarray
-        pixel list for the required rings
+        pixel indices for the required rings
 
     """
     # find the pixel list
