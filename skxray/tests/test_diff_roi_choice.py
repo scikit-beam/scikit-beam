@@ -165,8 +165,8 @@ def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
 
     # get the grid values from the center
     xx, yy = np.mgrid[:img_dim[0], :img_dim[1]]
-    x_ = (xx - calib_center[0])
-    y_ = (yy - calib_center[1])
+    x_ = (xx - calib_center[1])
+    y_ = (yy - calib_center[0])
     grid_values = np.float_(np.hypot(x_, y_))
 
     # get the indices into a grid

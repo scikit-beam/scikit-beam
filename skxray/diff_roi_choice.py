@@ -127,7 +127,7 @@ def roi_rectangles(num_rois, roi_data, detector_size):
 
 
 def roi_rings(img_dim, calibrated_center, num_rings,
-              first_r, delta_r):
+               first_r, delta_r):
     """
     This will provide the indices of the required rings,
     find the bin edges of the rings, and count the number
@@ -141,7 +141,7 @@ def roi_rings(img_dim, calibrated_center, num_rings,
         shape is [detector_size[0], detector_size[1]])
 
     calibarted_center : tuple
-        defining the (x y) center of the image (mm)
+        defining the center of the image (column value, row value) (mm)
 
     num_rings : int
         number of rings
@@ -195,7 +195,7 @@ def roi_rings(img_dim, calibrated_center, num_rings,
 
 
 def roi_rings_step(img_dim, calibrated_center, num_rings,
-                   first_r, delta_r, *step_r):
+               first_r, delta_r, *step_r):
     """
     This will provide the indices of the required rings,
     find the bin edges of the rings, and count the number
@@ -211,7 +211,7 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
         shape is [detector_size[0], detector_size[1]])
 
     calibarted_center : tuple
-        defining the (x y) center of the image (mm)
+        defining the center of the image (column value, row value) (mm)
 
     num_rings : int
         number of rings
@@ -251,8 +251,8 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
         #  when there is a same values of step between rings
         #  the edge values of rings will be
         ring_vals = first_r + np.r_[0, np.cumsum(np.tile([delta_r,
-                                                          float(step_r[0])],
-                                                         num_rings))][:-1]
+                                                           float(step_r[0])],
+                                                          num_rings))][:-1]
     else:
         # when there is a different step values between each ring
         #  edge values of the rings will be
@@ -291,12 +291,12 @@ def _grid_values(img_dim, calibrated_center):
         shape is [detector_size[0], detector_size[1]])
 
     calibarted_center : tuple
-        defining the (x y) center of the image (mm)
+        defining the center of the image (column value, row value) (mm)
 
     """
     xx, yy = np.mgrid[:img_dim[0], :img_dim[1]]
-    x_ = (xx - calibrated_center[0])
-    y_ = (yy - calibrated_center[1])
+    x_ = (xx - calibrated_center[1])
+    y_ = (yy - calibrated_center[0])
     grid_values = np.float_(np.hypot(x_, y_))
 
     return grid_values
