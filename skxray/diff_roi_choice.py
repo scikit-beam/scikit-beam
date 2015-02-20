@@ -232,7 +232,7 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
     delta_r : float
         thickness of the ring
 
-    *step_r : tuple
+    step_r : tuple
         step value for the next ring from the end of the previous
         ring.
         same step - same step values between rings (one value)
