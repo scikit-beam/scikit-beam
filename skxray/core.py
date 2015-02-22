@@ -731,7 +731,8 @@ def wedge_integration(src_data, center, theta_start,
 
 def radial_integration(image_array, calibrated_center,
                        x_axis="r", wavelength=None,
-                       pixel_size=None, dist_sample=None):
+                       pixel_size=None, dist_sample=None,
+                       num_bins=None):
     """
     Radial integration : taking the 2D powder image data
     and convert to 1D
@@ -746,7 +747,7 @@ def radial_integration(image_array, calibrated_center,
 
     x_axis : {'q', 'two_theta', 'r', 'd'}, optional
         q (1/Angstroms), two_theta (degrees),
-         r (mm) or d (Angstroms)
+        r (mm) or d (Angstroms)
 
          ..math ::
         q = \\frac{2 \pi}{d}
@@ -761,6 +762,9 @@ def radial_integration(image_array, calibrated_center,
     dist_sample : float, optional
         distance from the sample to the detector (mm)
 
+    num_bins : int, optional
+        number of bins
+
     Returns
     -------
     bin_centers : ndarray
@@ -771,42 +775,108 @@ def radial_integration(image_array, calibrated_center,
 
     """
     # convert to pixels to radius
-    x_val = pixel_to_radius(np.shape(image_array), calibrated_center,
-                             pixel_size=None)
+    pixel_val = pixel_to_radius(np.shape(image_array), calibrated_center)
 
-    if (x_axis == 'two_theta' or x_axis == 'q' or x_axis == 'd'):
-            if dist_sample is 'None':
-                raise ValueError("Provide sample to detector distance"
-                                 " to find the two theta space values")
-            # convert to radius to two theta
-            x_val = radius_to_twotheta(dist_sample, x_val)
+    if x_axis=='r':
+        x_val = pixel_val
+    else:
+        x_val = _process_x_val(x_axis, pixel_val, dist_sample, wavelength)
 
-            if x_axis == 'q' or x_axis == 'd':
-                if wavelength is None:
-                    raise ValueError("Provide the wavelength to"
-                                 " find the q space values and d"
-                                 " space values")
-                # convert to q space values from known two theta values
-                x_val = twotheta_to_q(x_val, wavelength)
-                if x_axis == 'd':
-                    # convert to d space values from know q values
-                    x_val = (2 * np.pi) / x_val
-                    print (x_val)
+    if num_bins is None:
+        bins = np.sum(image_array.shape)
 
-            """raise ValueError("Could not find x axis values."
-                             " Provide the correct x-axis 'r', ' two_theta',"
-                             " 'q' or 'd'")"""
+    print ("x_val")
+    print (x_val)
 
-    bins, sums, counts = bin_1D(np.ravel(x_val), np.ravel(image_array),
-                                nx=np.sum(image_array.shape))
+    bin_edges, sums, counts = bin_1D(np.ravel(x_val), np.ravel(image_array),
+                                nx=num_bins)
 
     mask = counts > 10
     # getting bin centers from bin edges
-    bin_centers = bin_edges_to_centers(bins)[mask]
+    bin_centers = bin_edges_to_centers(bin_edges)[mask]
     # radial integration
     ring_averages = sums[mask] / counts[mask]
 
+
     return bin_centers, ring_averages
+
+
+def _process_x_val(x_axis, val, dist_sample, wavelength):
+    """
+    Parameters
+    ----------
+    x_axis : str
+        {'q', 'two_theta', 'r', 'd'}
+
+    val : ndarray
+        radius values from the calibrated center
+        shape (image array shape)
+
+    dist_sample : float
+        distance from the sample to the detector (mm)
+
+    wavelength : float
+        wavelength of the incoming x-rays (Angstroms)
+
+    Returns
+    -------
+    x_val : ndarray
+        x axis values (two theta, Q space or d space values)
+        shape (image array shape)
+
+    """
+    if dist_sample is 'None':
+                raise ValueError("Provide sample to detector distance"
+                                 " to find the two theta space values")
+    # convert to radius to two theta
+    twotheta_val = radius_to_twotheta(dist_sample, val)
+
+    if x_axis=="two_theta":
+        x_val = twotheta_val
+    else:
+        x_val = _process_val(x_axis, twotheta_val, wavelength)
+
+    return x_val
+
+
+def _process_val(x_axis, x_val, wavelength):
+    """
+    Parameters
+    ----------
+    x_axis : str
+        {'q', 'two_theta', 'r', 'd'}
+
+    val : ndarray
+        two_theta values
+        shape (image array shape)
+
+    wavelength : float
+        wavelength of the incoming x-rays (Angstroms)
+
+    Returns
+    -------
+    x_val : ndarray
+        x axis values (two theta, Q space or d space values)
+        shape (image array shape)
+
+    """
+    if wavelength is None:
+                raise ValueError("Provide the wavelength to find"
+                                 " the q space values and"
+                                 " d space values")
+    # convert to q space values from known two theta values
+    x_values = twotheta_to_q(x_val, wavelength)
+
+    if x_axis=='q':
+        x_val = x_values
+    elif x_axis=='d':
+        # convert to d space values from know q values
+        x_val = (2 * np.pi) / np.asarray(x_values)
+    else:
+        raise ValueError("Could not find x axis values."
+                         " Provide the correct x-axis 'r',"
+                         " 'two_theta', 'q' or 'd'")
+    return x_val
 
 
 def bin_edges(range_min=None, range_max=None, nbins=None, step=None):

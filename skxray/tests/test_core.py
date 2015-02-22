@@ -539,27 +539,43 @@ def run_image_to_relative_xyi_repeatedly():
 
 
 def test_radial_integration():
-    pixel_size = (1, 1)
-    calibrated_center = (100, 100)
-    dist_sample = 50 # (mm)
-    detector_size = (200, 200)
-    wavelength = 0.18 # (nm)
-    q_or_twotheta = "Q"
-    image = np.ones(detector_size)
+    calib_center = (50., 50.)
+    dist_s = 50 # (mm)
+    detector_size = (100, 100)
+    wavelength = 0.15 # (nm)
+    image = np.ones((detector_size))
 
-    sy = np.arange(-100,100,1)
-    xs,ys = np.meshgrid(sy, sy)
-    z = (xs**2 + ys**2)
+    # when the x axis is in radius
+    (bin_cen_r, ring_ave_r) = core.radial_integration(image, calib_center,
+                                                           num_bins = 50)
 
-    (bin_centers,
-    ring_averages) = core.radial_integration(np.ravel(z), calibrated_center,
-                                              x_axis="r", wavelength=None,
-                                              pixel_size=None, dist_sample=None)
+    # when the x axis is in two theta
+    (bin_cen_t, ring_ave_t) = core.radial_integration(image, calib_center,
+                                                           x_axis='two_theta',
+                                                           dist_sample=dist_s,
+                                                           num_bins = 40)
+    # when the x axis is in Q space
+    (bin_cen_q, ring_ave_q) = core.radial_integration(image, calib_center,
+                                                           x_axis='q',
+                                                           wavelength=wavelength,
+                                                           dist_sample=dist_s,
+                                                           num_bins = 20)
+    # when the x axis in d space
+    (bin_cen_d, ring_ave_d) = core.radial_integration(image, calib_center,
+                                                           x_axis='d',
+                                                           wavelength=wavelength,
+                                                           dist_sample=dist_s,
+                                                           num_bins = 5)
 
-
-
+    assert_array_equal(ring_ave_r, np.ones(49))
+    assert_array_equal(ring_ave_t, np.ones(39))
+    assert_array_equal(ring_ave_q, np.ones(20))
+    # assert_array_equal(ring_ave_d, np.ones(19))
+    return bin_cen_r, ring_ave_r, bin_cen_t, ring_ave_t, bin_cen_q, ring_ave_q, bin_cen_d, ring_ave_d
 
 
 if __name__ == '__main__':
     import nose
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
+    (bin_cen_r, ring_ave_r, bin_cen_t, ring_ave_t,
+     bin_cen_q, ring_ave_q, bin_cen_d, ring_ave_d) = test_radial_integration()
