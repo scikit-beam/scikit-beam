@@ -777,13 +777,13 @@ def radial_integration(image_array, calibrated_center,
     # convert to pixels to radius
     pixel_val = pixel_to_radius(np.shape(image_array), calibrated_center)
 
-    if x_axis=='r':
+    if x_axis == 'r':
         x_val = pixel_val
     else:
         x_val = _process_x_val(x_axis, pixel_val, dist_sample, wavelength)
 
     if num_bins is None:
-        bins = np.sum(image_array.shape)
+        num_bins = np.sum(image_array.shape)
 
     print ("x_val")
     print (x_val)
@@ -796,7 +796,6 @@ def radial_integration(image_array, calibrated_center,
     bin_centers = bin_edges_to_centers(bin_edges)[mask]
     # radial integration
     ring_averages = sums[mask] / counts[mask]
-
 
     return bin_centers, ring_averages
 
@@ -821,61 +820,30 @@ def _process_x_val(x_axis, val, dist_sample, wavelength):
     Returns
     -------
     x_val : ndarray
-        x axis values (two theta, Q space or d space values)
+        x axis values (two theta or Q space)
         shape (image array shape)
 
     """
     if dist_sample is 'None':
                 raise ValueError("Provide sample to detector distance"
                                  " to find the two theta space values")
+
     # convert to radius to two theta
-    twotheta_val = radius_to_twotheta(dist_sample, val)
+    two_theta_val = radius_to_twotheta(dist_sample, val)
 
-    if x_axis=="two_theta":
-        x_val = twotheta_val
-    else:
-        x_val = _process_val(x_axis, twotheta_val, wavelength)
-
-    return x_val
-
-
-def _process_val(x_axis, x_val, wavelength):
-    """
-    Parameters
-    ----------
-    x_axis : str
-        {'q', 'two_theta', 'r', 'd'}
-
-    val : ndarray
-        two_theta values
-        shape (image array shape)
-
-    wavelength : float
-        wavelength of the incoming x-rays (Angstroms)
-
-    Returns
-    -------
-    x_val : ndarray
-        x axis values (two theta, Q space or d space values)
-        shape (image array shape)
-
-    """
-    if wavelength is None:
+    if x_axis == "two_theta":
+        x_val = two_theta_val
+    elif x_axis == "q":
+        if wavelength is None:
                 raise ValueError("Provide the wavelength to find"
-                                 " the q space values and"
-                                 " d space values")
-    # convert to q space values from known two theta values
-    x_values = twotheta_to_q(x_val, wavelength)
-
-    if x_axis=='q':
-        x_val = x_values
-    elif x_axis=='d':
-        # convert to d space values from know q values
-        x_val = (2 * np.pi) / np.asarray(x_values)
+                                 " the q space values")
+        # convert to q space values from known two theta values
+        x_val = twotheta_to_q(two_theta_val, wavelength)
     else:
         raise ValueError("Could not find x axis values."
                          " Provide the correct x-axis 'r',"
-                         " 'two_theta', 'q' or 'd'")
+                         " 'two_theta' or 'q'")
+
     return x_val
 
 

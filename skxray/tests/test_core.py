@@ -560,22 +560,12 @@ def test_radial_integration():
                                                            wavelength=wavelength,
                                                            dist_sample=dist_s,
                                                            num_bins = 20)
-    # when the x axis in d space
-    (bin_cen_d, ring_ave_d) = core.radial_integration(image, calib_center,
-                                                           x_axis='d',
-                                                           wavelength=wavelength,
-                                                           dist_sample=dist_s,
-                                                           num_bins = 5)
 
     assert_array_equal(ring_ave_r, np.ones(49))
     assert_array_equal(ring_ave_t, np.ones(39))
     assert_array_equal(ring_ave_q, np.ones(20))
-    # assert_array_equal(ring_ave_d, np.ones(19))
-    return bin_cen_r, ring_ave_r, bin_cen_t, ring_ave_t, bin_cen_q, ring_ave_q, bin_cen_d, ring_ave_d
 
 
 if __name__ == '__main__':
     import nose
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
-    (bin_cen_r, ring_ave_r, bin_cen_t, ring_ave_t,
-     bin_cen_q, ring_ave_q, bin_cen_d, ring_ave_d) = test_radial_integration()
