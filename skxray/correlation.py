@@ -2,8 +2,8 @@
 # Original code(in Yorick):                                            #
 # @author: Mark Sutton                                                 #
 #                                                                      #
-# The current work is collaboration with  Yugang Zhang  at Center for  #
-# Functional Nanomaterials, Brookhaven National Laboratory             #
+# Developed at the NSLS-II, Brookhaven National Laboratory             #
+# Developed by Sameera K. Abeykoon and  Yugang Zhang, February 2014    #
 #                                                                      #
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
@@ -41,7 +41,7 @@
 
 """
 
-This module is for functions specific to  one time correlation
+This module is for functions specific to time correlation
 
 """
 
@@ -59,6 +59,8 @@ import skxray.core as core
 def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
               pixel_list, q_inds, img_stack):
     """
+    This module is for one time correlation
+
     Parameters
     ----------
     num_levels : int
@@ -90,7 +92,6 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
 
     Notes
     -----
-
     References: text [1]_
 
     .. [1] D. Lumma, L. B. Lurio, S. G. J. Mochrie and M. Sutton,
@@ -123,8 +124,7 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
 
     cts = np.zeros(num_levels)
     cur = np.ones((num_levels), dtype=np.int64)
-    #cur = np.ones((num_levels)*num_bufs, dtype=np.int64)
-    #cur = np.ones((num_levels, num_bufs), dtype=np.int64)
+
     num = np.array(np.zeros(num_levels), dtype=np.int64)
 
     # number of frames(images)
@@ -134,13 +134,14 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
     start_time = time.time()
     for n in range (0, num_frames):  # changed the number of frames
         image_array = img_stack[n]
+        # print ("image number ", n)
 
         cur[0] = 1 + cur[0]%num_bufs  # increment buffer
-        print (cur)
+        # print (cur)
         buf[0, cur[0] -1 ]  = (np.ravel(image_array))[pixel_list]
-        G, IAP, IAF, num = _process(buf, num_qs, G, IAP, IAF, q_inds, num_bufs,
-                               num_pixels, num, level=0,
-                               buf_no=cur[0] - 1)
+        G, IAP, IAF, num = _process(buf, num_qs, G, IAP, IAF, q_inds,
+                                    num_bufs, num_pixels, num, level=0,
+                                    buf_no=cur[0] - 1)
         processing = 1
         level = 1
 
@@ -153,7 +154,7 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
                                                   cur[level - 1] - 1])/2
 
                 cts[level] = 0
-                G, IAP, IAF, num = _process(buf,num_qs, G, IAP, IAF, q_inds,
+                G, IAP, IAF, num = _process(buf, num_qs, G, IAP, IAF, q_inds,
                                        num_bufs, num_pixels, num,
                                        level=level, buf_no=cur[level]-1,)
                 level += 1
@@ -167,7 +168,6 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
                 cts[level] = 1
                 processing = 0
 
-
     elapsed_time = time.time() - start_time
 
     if len(np.where(IAP==0)[0])!= 0:
@@ -180,17 +180,15 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
     tot_channels, lag_steps = core.multi_tau_lags(num_levels,
                                                   num_bufs)
 
-    return g2, lag_steps
+    return g2, lag_steps, num, IAP, IAF, g_max, elapsed_time
 
 
-def _process(buf,  num_qs, G, IAP, IAF, q_inds, num_bufs, num_pixels,
-             num, level, buf_no):
+
+def _process(buf,  num_qs, G, IAP, IAF, q_inds, num_bufs,
+             num_pixels, num, level, buf_no):
     """
     Parameters
     ----------
-    num : ndarray
-
-
     buf : ndarray
         image data array to use for correlation
 
@@ -214,6 +212,9 @@ def _process(buf,  num_qs, G, IAP, IAF, q_inds, num_bufs, num_pixels,
         number of pixels in certain q space(reciprocal space)
         roi's, dimensions are : [num_qs]X1
 
+    num : ndarray
+        to track the level
+
     level : int
         the current level number
 
@@ -230,8 +231,8 @@ def _process(buf,  num_qs, G, IAP, IAF, q_inds, num_bufs, num_pixels,
 
     IAF : ndarray
         matrix of future intensity normalizations
-    """
 
+    """
     num[level] += 1
 
     if level==0:
@@ -242,24 +243,16 @@ def _process(buf,  num_qs, G, IAP, IAF, q_inds, num_bufs, num_pixels,
     for i in range(i_min, min(num[level], num_bufs)):
         t_index = level*num_bufs/2 + i
 
-        delay_num = (buf_no - i)%num_bufs
-        # delay_num1 = 1 + (buf_no - (i-1) -1 + num_bufs)%num_bufs
+        delay_num2 =  (buf_no - (i-1) -1 + num_bufs)%num_bufs
 
-        IP = buf[level, delay_num]
+        IP = buf[level, delay_num2]
         IF = buf[level, buf_no]
 
-        G[t_index] += (np.bincount(q_inds,
-                                   weights=np.ravel(IP*IF))[1:]/num_pixels
+        G[t_index] += ((np.bincount(q_inds, weights=np.ravel(IP*IF))[1:])/num_pixels
                        - G[t_index])/(num[level] - i)
-        #G[ptr]+= ((histogram(qind, bins=noqs, weights= IF*IP))[0]/nopr-G[ptr])/ (num[lev]-i)
-
-
-        IAP[t_index] += (np.bincount(q_inds,
-                                     weights=np.ravel(IP))[1:]/num_pixels
+        IAP[t_index] += ((np.bincount(q_inds, weights=np.ravel(IP))[1:])/num_pixels
                          - IAP[t_index])/(num[level] - i)
-
-        IAF[t_index] += (np.bincount(q_inds,
-                                     weights=np.ravel(IF))[1:]/num_pixels
-                         - IAF[t_index])/(num[level] - i)
+        IAF[t_index] += ((np.bincount(q_inds, weights=np.ravel(IF))[1:])/num_pixels
+                         - IAF[t_index])/(num[level] -i)
 
     return G, IAP, IAF, num
