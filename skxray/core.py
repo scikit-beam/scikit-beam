@@ -83,6 +83,7 @@ class NotInstalledError(ImportError):
     '''
     pass
 
+
 class MD_dict(MutableMapping):
     """
     A class to make dealing with the meta-data scheme for DataExchange easier
@@ -350,8 +351,8 @@ keys_core = {
         "units": "um",
     },
     "voxel_size": {
-        "description": ("3 element tuple defining the (x y z) dimensions of the "
-                         "voxel"),
+        "description": ("3 element tuple defining the (x y z)"
+                        " dimensions of the voxel"),
         "type": tuple,
         "units": "um"
     },
@@ -412,7 +413,7 @@ keys_core = {
     "bounding_box": {
         "description": ("physical extents of the array: useful for " +
                         "volume alignment, transformation, merge and " +
-                         "spatial comparison of multiple volumes"),
+                        "spatial comparison of multiple volumes"),
         "x_min": {
             "description": "minimum spatial coordinate along the x-axis",
             "type": float,
@@ -745,12 +746,9 @@ def radial_integration(image_array, calibrated_center,
     calibrated_center : tuple
         The center in pixels-units (row, col)
 
-    x_axis : {'q', 'two_theta', 'r', 'd'}, optional
-        q (1/Angstroms), two_theta (degrees),
-        r (mm) or d (Angstroms)
-
-         ..math ::
-        q = \\frac{2 \pi}{d}
+    x_axis : {'r', 'two_theta', 'q'}, optional
+         radius (mm), two_theta (degrees) or
+          q (1/Angstroms)
 
     wavelength : float, optional
         wavelength of the incoming x-rays (Angstroms)
@@ -785,11 +783,8 @@ def radial_integration(image_array, calibrated_center,
     if num_bins is None:
         num_bins = np.sum(image_array.shape)
 
-    print ("x_val")
-    print (x_val)
-
     bin_edges, sums, counts = bin_1D(np.ravel(x_val), np.ravel(image_array),
-                                nx=num_bins)
+                                     nx=num_bins)
 
     mask = counts > 10
     # getting bin centers from bin edges
@@ -1174,7 +1169,8 @@ def d_to_q(d):
 
 def q_to_twotheta(q, wavelength):
     """
-    Helper function to convert :math:`q` + :math:`\\lambda` to :math:`2\\theta`.
+    Helper function to convert
+    :math:`q` + :math:`\\lambda` to :math:`2\\theta`.
     The point of this function is to prevent fat-fingered typos.
 
     By definition the relationship is:
@@ -1212,7 +1208,8 @@ def q_to_twotheta(q, wavelength):
 
 def twotheta_to_q(two_theta, wavelength):
     """
-    Helper function to convert :math:`2\\theta` + :math:`\\lambda` to :math:`q`.
+    Helper function to convert
+    :math:`2\\theta` + :math:`\\lambda` to :math:`q`.
     The point of this function is to prevent fat-fingered typos.
 
     By definition the relationship is:
