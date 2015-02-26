@@ -3,6 +3,9 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
+# Developed at the NSLS-II, Brookhaven National Laboratory             #
+# Developed by Sameera K. Abeykoon, February 2014                      #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -157,11 +160,11 @@ def roi_rings(img_dim, calibrated_center, num_rings,
 
     Returns
     -------
-    ring_vals : ndarray
-        edge values of the required  rings
-
     ring_inds : ndarray
         indices of the required rings
+
+    ring_vals : ndarray
+        edge values of the required  rings
 
     num_pixels : ndarray
         number of pixels in each ring
@@ -241,11 +244,11 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
 
     Returns
     -------
-    ring_vals : ndarray
-        edge values of the required rings
-
     ring_inds : ndarray
         indices of the required rings
+
+    ring_vals : ndarray
+        edge values of the required rings
 
     num_pixels : ndarray
         number of pixels in each ring
@@ -375,3 +378,171 @@ def _process_rings(num_rings, img_dim, ring_vals, ring_inds):
     num_pixels = num_pixels[1:]
 
     return ring_inds, ring_vals, num_pixels, pixel_list
+
+
+def roi_divide_circle(detector_size, radius, calibrated_center,
+                      num_angles):
+    """
+    Parameters
+    ----------
+    detector_size : tuple
+        shape of the image (detector X and Y direction)
+        Order is (num_rows, num_columns)
+
+    radius : float
+        radius of the ring
+
+    calibrated_center : tuple
+        defining the center of the image
+        (column value, row value) (mm)
+
+    num_angles: int
+        number of angles ring divide into
+
+    Returns
+    -------
+    ring_inds : ndarray
+        indices of the ring values for the required rings
+        (after discarding zero values from the shape
+        ([detector_size[0]*detector_size[1]], )
+
+    num_pixels : ndarray
+        number of pixels in each ring
+
+    pixel_list : ndarray
+        pixel indices for the required rings
+
+    """
+    mesh = np.zeros(detector_size, dtype=np.int64)
+    angles = np.linspace(0, 360, num_angles)
+
+    yy, xx = np.mgrid[:detector_size[0], :detector_size[1]]
+    y_ = (np.flipud(yy) - calibrated_center[1])
+    x_ = (xx - calibrated_center[0])
+    grid_values = np.float_(np.hypot(x_, y_))
+    angle_grid = np.arctan2(y_, x_)*360/(2*np.pi)
+
+    grid_values, angle_grid = _grid_values(detector_size,
+                                         calibrated_center)
+
+    angle_grid[grid_values > radius]=np.nan
+
+    for i in range(num_angles-1):
+        if angles[i + 1] <= 180:
+            vl = (angles[i] < angle_grid) & (angle_grid <= angles[i + 1])
+
+        elif (angles[i] < 180) & (angles[i + 1] > 180):
+            vl = ((angles[i] < angle_grid) & (angle_grid <= 180) |
+                  (-180 < angle_grid) & (angle_grid <= angles[ i + 1] - 360))
+
+        elif (angles[i]==180):
+            vl= (-180 < angle_grid) & (angle_grid <= angles[i + 1] - 360)
+
+        else:
+            vl = (angles[i] - 360 < angle_grid) & (angle_grid <= angles[i + 1]- 360)
+
+        mesh[vl] = i + 1
+
+    roi_inds, num_pixels, pixel_list = _process_rois(mesh,
+                                                     detector_size,
+                                                     num_angles)
+    return roi_inds, num_pixels, pixel_list
+
+
+def roi_circles(detector_size, num_rings, *kwargs):
+    """
+    This will provide number of circular rois indices,
+    number of pixels, pixel indices
+
+    Parameters
+    ----------
+    detector_size : tuple
+        2 element tuple defining the number of pixels
+        in the detector.
+        Order is (num_rows, num_columns)
+
+    num_rings: int
+        number of reqiured circular roi's
+
+    kwargs : dict
+
+
+    Returns
+    -------
+    roi_inds : ndarray
+        indices of the reqiured roi's
+        (after discarding zero values from the shape
+        ([detector_size[0]*detector_size[1]], )
+
+    num_pixels : ndarray
+        number of pixels in each roi's
+
+    pixel_list : ndarray
+        pixel indices for the required roi's
+
+    """
+    mesh = np.zeros(detector_size, dtype=np.int64)
+
+    if len(kwargs)==num_rings:
+        raise ValueError("Enter radius and center of the"
+                         " ring for each ring")
+
+    i = 1
+    for radius, ring_center in kwargs[0].iteritems():
+        grid_values = _grid_values(detector_size, ring_center)
+        vl = (radius <= grid_values)
+        if np.any(mesh[vl]):
+            raise ValueError("overlapping ROIs")
+        else:
+            mesh[vl] = i
+        i += 1
+
+    roi_inds, num_pixels, pixel_list = _process_rois(mesh,
+                                                     detector_size,
+                                                     num_rings)
+    return roi_inds, num_pixels, pixel_list
+
+
+def _process_rois(mesh, detector_size, num_rois):
+    """
+    This will find the indices of the required rois,
+    and count the number of pixels in each rois,
+    and pixels list for the required rois.
+
+    Parameters
+    ----------
+    mesh : ndarry
+
+    detector_size : tuple
+        2 element tuple defining the number of pixels
+        in the detector.
+        Order is (num_rows, num_columns)
+
+    num_rois: int
+        number of region of interests
+
+    Returns
+    -------
+    roi_inds : ndarray
+        indices of the reqiured roi's
+        (after discarding zero values from the shape
+        ([detector_size[0]*detector_size[1]], )
+
+    num_pixels : ndarray
+        number of pixels in each roi's
+
+    pixel_list : ndarray
+        pixel indices for the required roi's
+
+    """
+    # find the pixel list
+    w = np.where(mesh > 0)
+    grid = np.indices((detector_size[0], detector_size[1]))
+    pixel_list = (grid[0]*detector_size[1] + grid[1]).flatten()[w]
+
+    roi_inds = mesh[mesh > 0]
+
+    num_pixels = np.bincount(np.ravel(mesh), minlength=num_rois)
+    num_pixels = num_pixels[1:]
+
+    return roi_inds, num_pixels, pixel_list
