@@ -383,6 +383,8 @@ def _process_rings(num_rings, img_dim, ring_vals, ring_inds):
 def roi_divide_circle(detector_size, radius, calibrated_center,
                       num_angles):
     """
+    This module will provide the indices, number of pixels and
+    pixel indices when a circular roi is divided into pies
     Parameters
     ----------
     detector_size : tuple
@@ -390,7 +392,7 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
         Order is (num_rows, num_columns)
 
     radius : float
-        radius of the ring
+        radius of the circle
 
     calibrated_center : tuple
         defining the center of the image
@@ -398,6 +400,7 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
 
     num_angles: int
         number of angles ring divide into
+        angles are measured from horizontal-anti clock wise
 
     Returns
     -------
