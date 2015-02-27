@@ -423,10 +423,7 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
     y_ = (np.flipud(yy) - calibrated_center[1])
     x_ = (xx - calibrated_center[0])
     grid_values = np.float_(np.hypot(x_, y_))
-    angle_grid = np.arctan2(y_, x_)*360/(2*np.pi)
-
-    grid_values, angle_grid = _grid_values(detector_size,
-                                         calibrated_center)
+    angle_grid = np.arctan2(y_, x_)*180/(np.pi)
 
     angle_grid[grid_values > radius]=np.nan
 
@@ -446,63 +443,9 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
 
         mesh[vl] = i + 1
 
-    roi_inds, num_pixels, pixel_list = _process_rois(mesh,
+    roi_inds, num_pixels, pixel_list = _process_rois(np.ravel(mesh),
                                                      detector_size,
                                                      num_angles)
-    return roi_inds, num_pixels, pixel_list
-
-
-def roi_circles(detector_size, num_rings, *kwargs):
-    """
-    This will provide number of circular rois indices,
-    number of pixels, pixel indices
-
-    Parameters
-    ----------
-    detector_size : tuple
-        2 element tuple defining the number of pixels
-        in the detector.
-        Order is (num_rows, num_columns)
-
-    num_rings: int
-        number of reqiured circular roi's
-
-    kwargs : dict
-
-
-    Returns
-    -------
-    roi_inds : ndarray
-        indices of the reqiured roi's
-        (after discarding zero values from the shape
-        ([detector_size[0]*detector_size[1]], )
-
-    num_pixels : ndarray
-        number of pixels in each roi's
-
-    pixel_list : ndarray
-        pixel indices for the required roi's
-
-    """
-    mesh = np.zeros(detector_size, dtype=np.int64)
-
-    if len(kwargs)==num_rings:
-        raise ValueError("Enter radius and center of the"
-                         " ring for each ring")
-
-    i = 1
-    for radius, ring_center in kwargs[0].iteritems():
-        grid_values = _grid_values(detector_size, ring_center)
-        vl = (radius <= grid_values)
-        if np.any(mesh[vl]):
-            raise ValueError("overlapping ROIs")
-        else:
-            mesh[vl] = i
-        i += 1
-
-    roi_inds, num_pixels, pixel_list = _process_rois(mesh,
-                                                     detector_size,
-                                                     num_rings)
     return roi_inds, num_pixels, pixel_list
 
 

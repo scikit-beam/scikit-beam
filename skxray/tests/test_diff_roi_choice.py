@@ -185,3 +185,41 @@ def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
                                                        - 0.000001)]]))[0][0]))
     assert_array_equal(zero_grid, data)
     assert_array_equal(num_pix, num_pixels)
+
+
+def test_roi_divide_circle():
+    num_rois = 3
+    detector_size = (20, 26)
+    radius = 8.
+    calibrated_center = (15., 12.)
+    num_angles = 8
+
+    roi_inds, num_pixels, pixel_list = diff_roi.roi_divide_circle(detector_size,
+                                                                  radius,
+                                                                  calibrated_center,
+                                                                  num_angles)
+    ty = np.zeros(detector_size).ravel()
+    ty[pixel_list] = roi_inds
+
+    yy, xx = np.mgrid[:detector_size[0], :detector_size[1]]
+    y_ = (np.flipud(yy) - calibrated_center[1])
+    x_ = (xx - calibrated_center[0])
+    grid_values = np.float_(np.hypot(x_, y_))
+    angle_grid = np.arctan2(y_, x_)*180/(np.pi)
+
+    num_pixels_m = (np.bincount(ty.astype(int)))[1:]
+
+    return (ty.reshape(*detector_size))
+
+
+
+if __name__=="__main__":
+    import matplotlib.pyplot as plt
+
+    ty = test_roi_divide_circle()
+    plt.imshow(ty)
+    plt.show()
+
+
+
+
