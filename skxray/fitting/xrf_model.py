@@ -150,6 +150,7 @@ def _set_parameter_hint(param_name, input_dict, input_model,
                         log_option=False):
     """
     Set parameter hint information to lmfit model from input dict.
+    .. warning :: This function mutates the input values.
 
     Parameters
     ----------
@@ -187,6 +188,7 @@ def update_parameter_dict(xrf_parameter, fit_results):
     """
     Update fitting parameters dictionary according to given fitting results,
     usually obtained from previous run.
+    .. warning :: This function mutates the input values.
 
     Parameters
     ----------
@@ -203,6 +205,7 @@ def update_parameter_dict(xrf_parameter, fit_results):
 def set_parameter_bound(xrf_parameter, bound_option):
     """
     Update the default value of bounds.
+    .. warning :: This function mutates the input values.
 
     Parameters
     ----------
@@ -229,15 +232,6 @@ element_dict = {
     'ratio': {"bound_type": "fixed", "min": 0.1, "max": 5.0, "value": 1.0, "fit_with_tail": "fixed",
               "free_more": "fixed", "adjust_element": "fixed", "e_calibration":"fixed", "linear":"fixed"}
 }
-
-
-# def get_L_line(prop_name, element):
-#     #l_list = ['la1', 'la2', 'lb1', 'lb2', 'lb3', 'lb4', 'lb5',
-#     #          'lg1', 'lg2', 'lg3', 'lg4', 'll', 'ln']
-#     l_list = ['la1', 'la2', 'lb1', 'lb2', 'lb3',
-#               'lg1', 'lg2', 'll']
-#     return [str(prop_name)+'-'+str(element)+'-'+str(item)
-#            for item in l_list]
 
 
 class ParamController(object):
