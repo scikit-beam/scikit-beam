@@ -98,7 +98,7 @@ def element_peak_xrf(x, area, center,
     Parameters
     ----------
     x : array
-        independent variable
+        independent variable, channel number instead of energy
     area : float
         area of gaussian function
     center : float
@@ -178,7 +178,7 @@ def _set_parameter_hint(param_name, input_dict, input_model,
     else:
         raise ValueError("could not set values for {0}".format(param_name))
     if log_option:
-        logger.info(' {0} bound type: {1}, value: {2}, range: {3}'.
+        logger.debug(' {0} bound type: {1}, value: {2}, range: {3}'.
                     format(param_name, input_dict['bound_type'], input_dict['value'],
                            [input_dict['min'], input_dict['max']]))
 
@@ -302,7 +302,6 @@ class ParamController(object):
         """
         Add all element information, such as pos, width, ratio into parameter dict.
         """
-        print('elist: {}'.format(self.element_list))
         for v in self.element_list:
             self.set_area(v)
             self.set_position(v)
@@ -435,8 +434,10 @@ class ParamController(object):
         elif item in l_line:
             item = item.split('_')[0]
             area_list = [str(item)+"_la1_area"]
+        elif item in m_line:
+            item = item.split('_')[0]
+            area_list = [str(item)+"_ma1_area"]
 
-        print('which item: {}'.format(item))
 
         for linename in area_list:
             new_area = element_dict['area'].copy()
@@ -585,7 +586,7 @@ class ModelSpectrum(object):
         logger.debug(' Finished setting up parameters for elastic model.')
         self.elastic = elastic
 
-    def setElementModel(self, ename):
+    def setElementModel(self, ename, default_area=1e5):
         """
         Construct element model.
 
@@ -603,7 +604,7 @@ class ModelSpectrum(object):
         if ename in k_line:
             e = Element(ename)
             if e.cs(incident_energy)['ka1'] == 0:
-                logger.info(' {0} Ka emission line is not activated '
+                logger.debug(' {0} Ka emission line is not activated '
                             'at this energy {1}'.format(ename, incident_energy))
                 return
 
@@ -629,18 +630,18 @@ class ModelSpectrum(object):
                                          expr='fwhm_fanoprime')
 
                 if line_name == 'ka1':
-                    gauss_mod.set_param_hint('area', value=1e5, vary=True, min=0)
+                    gauss_mod.set_param_hint('area', value=default_area, vary=True, min=0)
                     gauss_mod.set_param_hint('delta_center', value=0, vary=False)
                     gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
                 elif line_name == 'ka2':
-                    gauss_mod.set_param_hint('area', value=1e5, vary=True,
+                    gauss_mod.set_param_hint('area', value=default_area, vary=True,
                                              expr=str(ename)+'_ka1_'+'area')
                     gauss_mod.set_param_hint('delta_sigma', value=0, vary=False,
                                              expr=str(ename)+'_ka1_'+'delta_sigma')
                     gauss_mod.set_param_hint('delta_center', value=0, vary=False,
                                              expr=str(ename)+'_ka1_'+'delta_center')
                 else:
-                    gauss_mod.set_param_hint('area', value=1e5, vary=True,
+                    gauss_mod.set_param_hint('area', value=default_area, vary=True,
                                              expr=str(ename)+'_ka1_'+'area')
                     gauss_mod.set_param_hint('delta_center', value=0, vary=False)
                     gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
@@ -657,7 +658,7 @@ class ModelSpectrum(object):
                 ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
                 gauss_mod.set_param_hint('ratio', value=ratio_v, vary=False)
                 gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
-                logger.info(' {0} {1} peak is at energy {2} with'
+                logger.debug(' {0} {1} peak is at energy {2} with'
                             ' branching ratio {3}.'. format(ename, line_name, val, ratio_v))
 
                 # position needs to be adjusted
@@ -689,7 +690,7 @@ class ModelSpectrum(object):
             ename = ename.split('_')[0]
             e = Element(ename)
             if e.cs(incident_energy)['la1'] == 0:
-                logger.info('{0} La1 emission line is not activated '
+                logger.debug('{0} La1 emission line is not activated '
                             'at this energy {1}'.format(ename, incident_energy))
                 return
 
@@ -715,10 +716,10 @@ class ModelSpectrum(object):
                                          expr='fwhm_fanoprime')
 
                 if line_name == 'la1':
-                    gauss_mod.set_param_hint('area', value=1e5, vary=True)
+                    gauss_mod.set_param_hint('area', value=default_area, vary=True)
                                          #expr=gauss_mod.prefix+'ratio_val * '+str(ename)+'_la1_'+'area')
                 else:
-                    gauss_mod.set_param_hint('area', value=1e5, vary=True,
+                    gauss_mod.set_param_hint('area', value=default_area, vary=True,
                                              expr=str(ename)+'_la1_'+'area')
 
                 gauss_mod.set_param_hint('center', value=val, vary=False)
@@ -772,7 +773,7 @@ class ModelSpectrum(object):
             ename = ename.split('_')[0]
             e = Element(ename)
             if e.cs(incident_energy)['ma1'] == 0:
-                logger.info('{0} ma1 emission line is not activated '
+                logger.debug('{0} ma1 emission line is not activated '
                             'at this energy {1}'.format(ename, incident_energy))
                 return
 
@@ -801,9 +802,9 @@ class ModelSpectrum(object):
                                          expr='fwhm_fanoprime')
 
                 if line_name == 'ma1':
-                    gauss_mod.set_param_hint('area', value=100, vary=True)
+                    gauss_mod.set_param_hint('area', value=default_area, vary=True)
                 else:
-                    gauss_mod.set_param_hint('area', value=100, vary=True,
+                    gauss_mod.set_param_hint('area', value=default_area, vary=True,
                                              expr=str(ename)+'_ma1_'+'area')
 
                 gauss_mod.set_param_hint('center', value=val, vary=False)
@@ -858,19 +859,33 @@ class ModelSpectrum(object):
         return result
 
 
-def set_range(parameter, x1, y1):
+def set_range(x, y, low, high):
+    """
+    Parameters
+    ----------
+    x : array
+        independent variable
+    y : array
+        dependent variable
+    low : float
+        low bound
+    high : float
+        high bound
 
-    lowv = parameter['non_fitting_values']['energy_bound_low'] * 100
-    highv = parameter['non_fitting_values']['energy_bound_high'] * 100
+    Returns
+    -------
+    array :
+        x with new range
+    array :
+        y with new range
+    """
+    out = np.array([v for v in zip(x, y) if v[0]>low and v[0]<high])
+    return out[:,0], out[:,1]
 
-    all = zip(x1, y1)
-
-    x0 = [item[0] for item in all if item[0] > lowv and item[0] < highv]
-    y0 = [item[1] for item in all if item[0] > lowv and item[0] < highv]
-    return np.array(x0), np.array(y0)
 
 
-def get_escape_peak(y, ratio, param,
+
+def get_escape_peak(y, ratio, fitting_parameters,
                     escape_e=1.73998):
     """
     Calculate the escape peak for given detector.
@@ -882,18 +897,29 @@ def get_escape_peak(y, ratio, param,
     ratio : float
         ratio to adjust spectrum
     param : dict
+
+    Returns
+    -------
+    array:
+        x after shift, and adjusted y
+
     """
-    pass
+    x = np.arange(len(y))
+
+    x = fitting_parameters['e_offset']['value'] + fitting_parameters['e_linear']['value']*x + \
+        fitting_parameters['e_quadratic']['value'] * x**2
+
+    return x-escape_e, y*ratio
 
 
-def get_linear_model(x, param_dict):
+def get_linear_model(x, param_dict, default_area=1e5):
     """
     Construct linear model for auto fitting analysis.
 
     Parameters
     ----------
     x : array
-        independent variable
+        independent variable, channel number instead of energy
     param_dict : dict
         fitting paramters
 
@@ -911,7 +937,7 @@ def get_linear_model(x, param_dict):
     matv = []
 
     for i in range(len(elist)):
-        e_model = MS.setElementModel(elist[i])
+        e_model = MS.setElementModel(elist[i], default_area=default_area)
         if e_model:
             p = e_model.make_params()
             y_temp = e_model.eval(x=x, params=p)
