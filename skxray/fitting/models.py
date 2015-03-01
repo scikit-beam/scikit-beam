@@ -48,15 +48,6 @@ import six
 import numpy as np
 import sys
 import inspect
-import json
-import os
-
-
-import logging
-logger = logging.getLogger(__name__)
-
-from skxray.fitting.base.parameter_data import get_para
-from skxray.constants.api import XrfElement as Element
 
 from lmfit import Model
 from lmfit.models import GaussianModel as LmGaussianModel
@@ -64,15 +55,12 @@ from lmfit.models import LorentzianModel as LmLorentzianModel
 from .lineshapes import (elastic, compton, gaussian_tail, gausssian_step,
                          lorentzian2, gaussian, lorentzian)
 
-import logging
-logger = logging.getLogger(__name__)
-
 from skxray.fitting.lineshapes import (elastic, compton, gaussian,
                                        lorentzian, lorentzian2)
-
 from skxray.fitting.base.parameter_data import get_para
 
-from lmfit import Model
+import logging
+logger = logging.getLogger(__name__)
 
 
 def set_default(model_name, func_name):

@@ -353,9 +353,11 @@ def compton(x, compton_amplitude, coherent_sct_energy,
 
     x = e_offset + x * e_linear + x**2 * e_quadratic
 
-    compton_e = coherent_sct_energy / (1 + (coherent_sct_energy / 511) *
-                                       (1 - np.cos(compton_angle * np.pi / 180)))
-    
+    # the rest-mass energy of an electron (511 keV)
+    mc2 = 511
+    comp_denom = 1 + coherent_sct_energy / mc2 * (1 - np.cos(np.deg2rad(compton_angle)))
+    compton_e = coherent_sct_energy / comp_denom
+
     temp_val = 2 * np.sqrt(2 * np.log(2))
     sigma = np.sqrt((fwhm_offset / temp_val)**2 +
                     compton_e * epsilon * fwhm_fanoprime)
