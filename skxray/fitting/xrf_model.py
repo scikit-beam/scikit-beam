@@ -235,12 +235,12 @@ element_dict = {
 
 
 class ParamController(object):
-
+    """
+    Update element peak information in parameter dictionary.
+    This is an important step in dynamical fitting.
+    """
     def __init__(self, xrf_parameter):
         """
-        Update element peak information in parameter dictionary.
-        This is an important step in dynamical fitting. The
-
         Parameters
         ----------
         xrf_parameter : dict
@@ -253,6 +253,19 @@ class ParamController(object):
                                                     self.element_list)
 
     def get_all_lines(self, incident_energy, ename_list):
+        """
+        Parameters
+        ----------
+        incident_energy : float
+            beam energy
+        ename_list : list
+            element names
+
+        Returns
+        -------
+        list
+            all activated lines for given elements
+        """
         all_line = []
         for v in ename_list:
             activated_line = self.get_actived_line(incident_energy, v)
@@ -263,6 +276,18 @@ class ParamController(object):
     def get_actived_line(self, incident_energy, ename):
         """
         Collect all the actived lines for given element.
+
+        Parameters
+        ----------
+        incident_energy : float
+            beam energy
+        ename : str
+            element name
+
+        Returns
+        -------
+        list
+            all possible line names for given element
         """
         line_list = []
         if ename in k_line:
@@ -301,10 +326,6 @@ class ParamController(object):
             self.set_position(v)
             self.set_ratio(v)
             self.set_width(v)
-
-    def update_single_item(self, **kwargs):
-        for k, v in six.iteritems(kwargs):
-            self.new_parameter[k]['value'] = v
 
     def set_bound_type(self, bound_option):
         """
@@ -358,7 +379,6 @@ class ParamController(object):
 
             for element in element_list:
                 func(element, option=v)
-        #return self.new_parameter
 
     def set_position(self, item, option=None):
         """
@@ -484,20 +504,24 @@ def get_sum_area(element_name, result_val):
         the total area
     """
     def get_value(result_val, element_name, line_name):
-        return result_val.values[str(element_name)+'_'+line_name+'_area'] * \
-               result_val.values[str(element_name)+'_'+line_name+'_ratio'] * \
-               result_val.values[str(element_name)+'_'+line_name+'_ratio_adjust']
+        return (result_val.values[str(element_name)+'_'+line_name+'_area'] *
+                result_val.values[str(element_name)+'_'+line_name+'_ratio'] *
+                result_val.values[str(element_name)+'_'+line_name+'_ratio_adjust'])
 
     if element_name in k_line:
-        sum = get_value(result_val, element_name, 'ka1') + \
-              get_value(result_val, element_name, 'ka2') + \
-              get_value(result_val, element_name, 'kb1')
+        sumv = (get_value(result_val, element_name, 'ka1') +
+                get_value(result_val, element_name, 'ka2') +
+                get_value(result_val, element_name, 'kb1'))
         if result_val.values.has_key(str(element_name)+'_kb2_area'):
-            sum += get_value(result_val, element_name, 'kb2')
-    return sum
+            sumv += get_value(result_val, element_name, 'kb2')
+    return sumv
 
 
 class ModelSpectrum(object):
+    """
+    Consruct Fluorescence spectrum which includes elastic peak,
+    compton and element peaks.
+    """
 
     def __init__(self, xrf_parameter):
         """
@@ -506,7 +530,7 @@ class ModelSpectrum(object):
         xrf_parameter : dict
             saving all the fitting values and their bounds
         """
-        self.parameter = xrf_parameter
+        self.parameter = dict(xrf_parameter)
         self.parameter_default = get_para()
         self._config()
 
@@ -522,10 +546,10 @@ class ModelSpectrum(object):
             logger.critical(' No element is selected for fitting!')
 
         self.incident_energy = self.parameter['coherent_sct_energy']['value']
-        self.setComptonModel()
-        self.setElasticModel()
+        self.set_compton_model()
+        self.set_elastic_model()
 
-    def setComptonModel(self):
+    def set_compton_model(self):
         """
         setup parameters related to Compton model
         """
@@ -549,7 +573,7 @@ class ModelSpectrum(object):
         self.compton_param = compton.make_params()
         self.compton = compton
 
-    def setElasticModel(self):
+    def set_elastic_model(self):
         """
         setup parameters related to Elastic model
         """
@@ -580,7 +604,7 @@ class ModelSpectrum(object):
         logger.debug(' Finished setting up parameters for elastic model.')
         self.elastic = elastic
 
-    def setElementModel(self, ename, default_area=1e5):
+    def set_element_model(self, ename, default_area=1e5):
         """
         Construct element model.
 
@@ -825,7 +849,7 @@ class ModelSpectrum(object):
         self.mod = self.compton + self.elastic
 
         for ename in self.element_list:
-            self.mod += self.setElementModel(ename)
+            self.mod += self.set_element_model(ename)
 
     def model_fit(self, x, y, w=None, method='leastsq', **kws):
         """
@@ -900,8 +924,9 @@ def get_escape_peak(y, ratio, fitting_parameters,
     """
     x = np.arange(len(y))
 
-    x = fitting_parameters['e_offset']['value'] + fitting_parameters['e_linear']['value']*x + \
-        fitting_parameters['e_quadratic']['value'] * x**2
+    x = (fitting_parameters['e_offset']['value']
+         + fitting_parameters['e_linear']['value']*x
+         + fitting_parameters['e_quadratic']['value'] * x**2)
 
     return x-escape_e, y*ratio
 
@@ -931,7 +956,7 @@ def get_linear_model(x, param_dict, default_area=1e5):
     matv = []
 
     for i in range(len(elist)):
-        e_model = MS.setElementModel(elist[i], default_area=default_area)
+        e_model = MS.set_element_model(elist[i], default_area=default_area)
         if e_model:
             p = e_model.make_params()
             y_temp = e_model.eval(x=x, params=p)
