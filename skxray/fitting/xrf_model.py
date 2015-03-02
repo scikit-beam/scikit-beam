@@ -452,7 +452,6 @@ class ParamController(object):
             item = item.split('_')[0]
             area_list = [str(item)+"_ma1_area"]
 
-
         for linename in area_list:
             new_area = element_dict['area'].copy()
             if option:
@@ -901,8 +900,6 @@ def set_range(x, y, low, high):
     return out[:,0], out[:,1]
 
 
-
-
 def get_escape_peak(y, ratio, fitting_parameters,
                     escape_e=1.73998):
     """
@@ -981,20 +978,45 @@ class PreFitAnalysis(object):
     It is used to automatic peak finding.
     """
     def __init__(self, experiments, standard):
+        """
+        Parameters
+        ----------
+        experiments : array
+            spectrum of experiment data
+        standard : array
+            2D matrix of activated element spectrum
+        """
         self.experiments = np.asarray(experiments)
         self.standard = np.asarray(standard)
-        return
 
     def nnls_fit(self):
+        """
+        Non-negative fitting.
+
+        Returns
+        -------
+        results : array
+            weights of different element
+        residue : array
+            error
+        """
         standard = self.standard
         experiments = self.experiments
 
         [results, residue] = nnls(standard, experiments)
-
         return results, residue
 
     def nnls_fit_weight(self):
+        """
+        Non-negative fitting with weight.
 
+        Returns
+        -------
+        results : array
+            weights of different element
+        residue : array
+            error
+        """
         standard = self.standard
         experiments = self.experiments
 
