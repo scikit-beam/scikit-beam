@@ -41,7 +41,6 @@ import logging
 logger = logging.getLogger(__name__)
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
-import sys
 
 from nose.tools import assert_equal, assert_true, raises
 
@@ -210,19 +209,35 @@ def test_roi_divide_circle():
     angle_grid = angle_grid[grid_values <= radius]
     num_pixels_m = (np.bincount(ty.astype(int)))[1:]
 
-    return angle_grid, (ty.reshape(*detector_size))
+    # get the indices into a grid
+    zero_grid = np.zeros((detector_size[0], detector_size[1]))
+
+    zero_grid[grid_values<=radius]= 1
+
+    assert_array_equal(np.nonzero(zero_grid),
+                       np.nonzero((ty.reshape(*detector_size))))
+
+    roi_inds_m = np.array([3, 3, 2, 2, 2, 2, 2, 3, 3, 3, 3, 2, 2,
+                         2, 2, 2, 2, 1, 3, 3, 3, 3, 3, 2, 2, 2,
+                         2, 2, 1, 1, 1, 3, 3, 3, 3, 3, 3, 2, 2,
+                         2, 2, 1, 1, 1, 4, 3, 3, 3, 3, 3, 3, 2,
+                         2, 2, 1, 1, 1, 1, 1, 4, 4, 4, 3, 3, 3,
+                         3, 2, 2, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4,
+                         4, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 4, 4,
+                         4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7,
+                         7, 7, 4, 4, 4, 4, 4, 5, 5, 6, 7, 7, 7,
+                         7, 7, 7, 7, 4, 4, 4, 5, 5, 5, 5, 6, 6,
+                         7, 7, 7, 7, 7, 7, 4, 5, 5, 5, 5, 5, 5,
+                         6, 6, 6, 7, 7, 7, 7, 7, 5, 5, 5, 5, 5,
+                         5, 6, 6, 6, 6, 7, 7, 7, 5, 5, 5, 5, 5,
+                         6, 6, 6, 6, 6, 7, 7, 7, 5, 5, 5, 5, 6,
+                         6, 6, 6, 6, 6, 7, 5, 5, 6, 6, 6, 6, 6,
+                         6])
+
+    assert_array_equal(num_pixels_m, num_pixels)
+    assert_array_equal(roi_inds, roi_inds_m)
 
 
 if __name__=="__main__":
     import nose
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
-
-    import matplotlib.pyplot as plt
-
-    angle_grid, ty = test_roi_divide_circle()
-    plt.imshow(ty)
-    plt.show()
-
-
-
-

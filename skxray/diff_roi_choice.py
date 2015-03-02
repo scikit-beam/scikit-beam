@@ -398,17 +398,21 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
 
     for i in range(num_angles-1):
         if angles[i + 1] <= 180:
-            vl = (angles[i] < angle_grid) & (angle_grid <= angles[i + 1])
+            vl = ((angles[i] < angle_grid) &
+                  (angle_grid <= angles[i + 1]))
 
         elif (angles[i] < 180) & (angles[i + 1] > 180):
             vl = ((angles[i] < angle_grid) & (angle_grid <= 180) |
-                  (-180 < angle_grid) & (angle_grid <= angles[ i + 1] - 360))
+                  (-180 < angle_grid) &
+                  (angle_grid <= angles[ i + 1] - 360))
 
         elif (angles[i]==180):
-            vl= (-180 < angle_grid) & (angle_grid <= angles[i + 1] - 360)
+            vl= ((-180 < angle_grid) &
+                 (angle_grid <= angles[i + 1] - 360))
 
         else:
-            vl = (angles[i] - 360 < angle_grid) & (angle_grid <= angles[i + 1]- 360)
+            vl = ((angles[i] - 360 < angle_grid) &
+                  (angle_grid <= angles[i + 1]- 360))
 
         mesh[vl] = i + 1
 
