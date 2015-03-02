@@ -207,16 +207,19 @@ def test_roi_divide_circle():
     grid_values = np.float_(np.hypot(x_, y_))
     angle_grid = np.arctan2(y_, x_)*180/(np.pi)
 
+    angle_grid = angle_grid[grid_values <= radius]
     num_pixels_m = (np.bincount(ty.astype(int)))[1:]
 
-    return (ty.reshape(*detector_size))
-
+    return angle_grid, (ty.reshape(*detector_size))
 
 
 if __name__=="__main__":
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
+
     import matplotlib.pyplot as plt
 
-    ty = test_roi_divide_circle()
+    angle_grid, ty = test_roi_divide_circle()
     plt.imshow(ty)
     plt.show()
 

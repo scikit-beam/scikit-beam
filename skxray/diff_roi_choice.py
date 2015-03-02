@@ -38,7 +38,7 @@
 ########################################################################
 
 """
-This module is to get informations of different region of interests(roi's).
+This module is to get information of different region of interests(roi's).
 Information : the number of pixels, pixel indices, indices
 """
 
@@ -197,11 +197,11 @@ def roi_rings(img_dim, calibrated_center, num_rings,
         else:
             ring_vals.append(q_r[num_rings-1])
 
-    ring_vals = np.asarray(ring_vals)
+    ring_vals = _process_rings(num_rings, np.asarray(ring_vals))
 
-    (ring_inds, ring_vals, num_pixels,
-     pixel_list) = _process_rings(num_rings, img_dim,
-                                  ring_vals, ring_inds)
+    ring_inds, num_pixels, pixel_list = _process_rois(np.ravel(ring_inds),
+                                                     img_dim,
+                                                     num_rings)
 
     return ring_inds, ring_vals, num_pixels, pixel_list
 
@@ -294,9 +294,11 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
     indx = ring_inds > 0
     ring_inds[indx] = (ring_inds[indx] + 1) // 2
 
-    (ring_inds, ring_vals, num_pixels,
-     pixel_list) = _process_rings(num_rings, img_dim,
-                                  ring_vals, ring_inds)
+    ring_vals = _process_rings(num_rings, np.asarray(ring_vals))
+
+    ring_inds, num_pixels, pixel_list = _process_rois(np.ravel(ring_inds),
+                                                     img_dim,
+                                                     num_rings)
 
     return ring_inds, ring_vals, num_pixels, pixel_list
 
@@ -322,62 +324,29 @@ def _grid_values(img_dim, calibrated_center):
     return grid_values
 
 
-def _process_rings(num_rings, img_dim, ring_vals, ring_inds):
+def _process_rings(num_rings, ring_vals):
     """
-    This will find the indices of the required rings, find the bin
-    edges of the rings, and count the number of pixels in each ring,
-    and pixels list for the required rings.
+    This will process the edge values of the each roi ring
 
     Parameters
     ----------
     num_rings : int
         number of rings
 
-    img_dim: tuple
-        shape of the image (detector X and Y direction)
-        Order is (num_rows, num_columns)
-        shape is [detector_size[0], detector_size[1]])
-
     ring_vals : ndarray
         edge values of each ring
 
-    ring_inds : ndarray
-        indices of the required rings
-        shape is ([detector_size[0]*detector_size[1]], )
-
     Returns
     -------
-    ring_inds : ndarray
-        indices of the ring values for the required rings
-        (after discarding zero values from the shape
-        ([detector_size[0]*detector_size[1]], )
-
     ring_vals : ndarray
         edge values of each ring
         shape is (num_rings, 2)
 
-    num_pixels : ndarray
-        number of pixels in each ring
-
-    pixel_list : ndarray
-        pixel indices for the required rings
-
     """
-    # find the pixel list
-    w = np.where(ring_inds > 0)
-    grid = np.indices((img_dim[0], img_dim[1]))
-    pixel_list = (grid[0]*img_dim[1] + grid[1]).flatten()[w]
-
-    ring_inds = ring_inds[ring_inds > 0]
-
     ring_vals = np.array(ring_vals)
     ring_vals = ring_vals.reshape(num_rings, 2)
 
-    # number of pixels in each ring
-    num_pixels = np.bincount(ring_inds, minlength=(num_rings+1))
-    num_pixels = num_pixels[1:]
-
-    return ring_inds, ring_vals, num_pixels, pixel_list
+    return ring_vals
 
 
 def roi_divide_circle(detector_size, radius, calibrated_center,
