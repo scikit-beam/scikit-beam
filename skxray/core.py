@@ -731,7 +731,7 @@ def wedge_integration(src_data, center, theta_start,
 
 
 def radial_integration(image_array, calibrated_center,
-                       x_axis="r", wavelength=None,
+                       x_axis="r", threshold=10, wavelength=None,
                        pixel_size=None, dist_sample=None,
                        num_bins=None):
     """
@@ -749,6 +749,9 @@ def radial_integration(image_array, calibrated_center,
     x_axis : {'r', 'two_theta', 'q'}, optional
          radius (mm), two_theta (degrees) or
           q (1/Angstroms)
+
+    threshold : float, optional
+        threshold value to mask
 
     wavelength : float, optional
         wavelength of the incoming x-rays (Angstroms)
@@ -775,18 +778,16 @@ def radial_integration(image_array, calibrated_center,
     # convert to pixels to radius
     pixel_val = pixel_to_radius(np.shape(image_array), calibrated_center)
 
-    if x_axis == 'r':
-        x_val = pixel_val
-    else:
-        x_val = _process_x_val(x_axis, pixel_val, dist_sample, wavelength)
-
     if num_bins is None:
         num_bins = np.sum(image_array.shape)
 
-    bin_edges, sums, counts = bin_1D(np.ravel(x_val), np.ravel(image_array),
+    bin_edges, sums, counts = bin_1D(np.ravel(pixel_val), np.ravel(image_array),
                                      nx=num_bins)
 
-    mask = counts > 10
+    if x_axis != 'r':
+        bin_edges = process_x_val(x_axis, bin_edges, dist_sample, wavelength)
+
+    mask = counts > threshold
     # getting bin centers from bin edges
     bin_centers = bin_edges_to_centers(bin_edges)[mask]
     # radial integration
@@ -795,14 +796,17 @@ def radial_integration(image_array, calibrated_center,
     return bin_centers, ring_averages
 
 
-def _process_x_val(x_axis, val, dist_sample, wavelength):
+def process_x_val(x_axis, bin_edges, dist_sample, wavelength):
     """
+    This module will convert the radius array from the calibrated
+    center to two theta or Q space values
+
     Parameters
     ----------
     x_axis : str
-        {'q', 'two_theta', 'r', 'd'}
+        {'q' or 'two_theta'}
 
-    val : ndarray
+    bin_edges : ndarray
         radius values from the calibrated center
         shape (image array shape)
 
@@ -824,7 +828,7 @@ def _process_x_val(x_axis, val, dist_sample, wavelength):
                                  " to find the two theta space values")
 
     # convert to radius to two theta
-    two_theta_val = radius_to_twotheta(dist_sample, val)
+    two_theta_val = radius_to_twotheta(dist_sample, bin_edges)
 
     if x_axis == "two_theta":
         x_val = two_theta_val
@@ -1294,3 +1298,4 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     lag_steps = np.append(lag_steps, np.array(lag))
 
     return tot_channels, lag_steps
+

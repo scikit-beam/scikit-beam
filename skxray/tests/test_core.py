@@ -344,26 +344,13 @@ def test_q_twotheta_conversion():
 
 
 def test_radius_to_twotheta():
-    dist_sample = 100
-    radius = np.linspace(50, 100)
+    dist_sample = 1
+    y = np.arange(2, 100)
+    radius = np.tan(np.pi/y)
 
-    two_theta = np.array([0.46364761, 0.47177751, 0.47984053, 0.48783644,
-                          0.49576508, 0.5036263, 0.51142, 0.51914611,
-                          0.52680461, 0.53439548, 0.54191875, 0.54937448,
-                          0.55676277, 0.56408372, 0.57133748, 0.57852421,
-                          0.58564412, 0.5926974, 0.59968432, 0.60660511,
-                          0.61346007, 0.62024949, 0.62697369, 0.63363301,
-                          0.6402278, 0.64675843, 0.65322528, 0.65962874,
-                          0.66596924, 0.67224718, 0.67846301, 0.68461716,
-                          0.6907101, 0.69674228, 0.70271418, 0.70862627,
-                          0.71447905, 0.720273, 0.72600863, 0.73168643,
-                          0.73730693, 0.74287063, 0.74837805, 0.75382971,
-                          0.75922613, 0.76456784, 0.76985537, 0.77508925,
-                          0.78027, 0.78539816])
-
-    assert_array_almost_equal(two_theta,
-                              core.radius_to_twotheta(dist_sample,
-                                                      radius), decimal=8)
+    assert_array_almost_equal(np.rad2deg(np.pi/y),
+                              np.rad2deg(core.radius_to_twotheta(dist_sample,
+                                                                 radius)))
 
 
 def test_multi_tau_lags():
@@ -544,33 +531,33 @@ def run_image_to_relative_xyi_repeatedly():
 
 
 def test_radial_integration():
-    calib_center = (50., 50.)
+    calib_center = (100., 100.)
     dist_s = 50  # (mm)
-    detector_size = (100, 100)
-    wavelength = 0.15  # (nm)
+    detector_size = (250, 250)
+    wavelength = 1  # (nm)
     image = np.ones((detector_size))
 
     # when the x axis is in radius
     (bin_cen_r, ring_ave_r) = core.radial_integration(image, calib_center,
                                                       num_bins=50)
-
     # when the x axis is in two theta
     (bin_cen_t, ring_ave_t) = core.radial_integration(image, calib_center,
                                                       x_axis='two_theta',
                                                       dist_sample=dist_s,
-                                                      num_bins=40)
+                                                      num_bins=50)
     # when the x axis is in Q space
     (bin_cen_q, ring_ave_q) = core.radial_integration(image, calib_center,
                                                       x_axis='q',
                                                       wavelength=wavelength,
                                                       dist_sample=dist_s,
-                                                      num_bins=20)
+                                                      num_bins=50)
 
-    assert_array_equal(ring_ave_r, np.ones(49))
-    assert_array_equal(ring_ave_t, np.ones(39))
-    assert_array_equal(ring_ave_q, np.ones(20))
+    assert_array_equal(np.around(ring_ave_r), np.ones(50))
+    assert_array_equal(np.around(ring_ave_t), np.ones(50))
+    assert_array_equal(np.around(ring_ave_q), np.ones(50))
 
 
 if __name__ == '__main__':
     import nose
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
+
