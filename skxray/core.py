@@ -781,7 +781,8 @@ def radial_integration(image_array, calibrated_center,
     if num_bins is None:
         num_bins = np.sum(image_array.shape)
 
-    bin_edges, sums, counts = bin_1D(np.ravel(pixel_val), np.ravel(image_array),
+    bin_edges, sums, counts = bin_1D(np.ravel(pixel_val),
+                                     np.ravel(image_array),
                                      nx=num_bins)
 
     if x_axis != 'r':
@@ -1298,4 +1299,3 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     lag_steps = np.append(lag_steps, np.array(lag))
 
     return tot_channels, lag_steps
-
