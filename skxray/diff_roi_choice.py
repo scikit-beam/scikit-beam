@@ -130,7 +130,7 @@ def roi_rectangles(num_rois, roi_data, detector_size):
 
 
 def roi_rings(img_dim, calibrated_center, num_rings,
-               first_r, delta_r):
+              first_r, delta_r):
     """
     This will provide the indices of the required rings,
     find the bin edges of the rings, and count the number
@@ -200,14 +200,13 @@ def roi_rings(img_dim, calibrated_center, num_rings,
     ring_vals = _process_rings(num_rings, np.asarray(ring_vals))
 
     ring_inds, num_pixels, pixel_list = _process_rois(np.ravel(ring_inds),
-                                                     img_dim,
-                                                     num_rings)
+                                                      img_dim, num_rings)
 
     return ring_inds, ring_vals, num_pixels, pixel_list
 
 
 def roi_rings_step(img_dim, calibrated_center, num_rings,
-               first_r, delta_r, *step_r):
+                   first_r, delta_r, *step_r):
     """
     This will provide the indices of the required rings,
     find the bin edges of the rings, and count the number
@@ -270,8 +269,8 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
         #  when there is a same values of step between rings
         #  the edge values of rings will be
         ring_vals = first_r + np.r_[0, np.cumsum(np.tile([delta_r,
-                                                           float(step_r[0])],
-                                                          num_rings))][:-1]
+                                                          float(step_r[0])],
+                                                         num_rings))][:-1]
     else:
         # when there is a different step values between each ring
         #  edge values of the rings will be
@@ -297,8 +296,7 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
     ring_vals = _process_rings(num_rings, np.asarray(ring_vals))
 
     ring_inds, num_pixels, pixel_list = _process_rois(np.ravel(ring_inds),
-                                                     img_dim,
-                                                     num_rings)
+                                                      img_dim, num_rings)
 
     return ring_inds, ring_vals, num_pixels, pixel_list
 
@@ -394,7 +392,7 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
     grid_values = np.float_(np.hypot(x_, y_))
     angle_grid = np.arctan2(y_, x_)*180/(np.pi)
 
-    angle_grid[grid_values > radius]=np.nan
+    angle_grid[grid_values > radius] = np.nan
 
     for i in range(num_angles-1):
         if angles[i + 1] <= 180:
@@ -404,15 +402,15 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
         elif (angles[i] < 180) & (angles[i + 1] > 180):
             vl = ((angles[i] < angle_grid) & (angle_grid <= 180) |
                   (-180 < angle_grid) &
-                  (angle_grid <= angles[ i + 1] - 360))
+                  (angle_grid <= angles[i + 1] - 360))
 
-        elif (angles[i]==180):
-            vl= ((-180 < angle_grid) &
-                 (angle_grid <= angles[i + 1] - 360))
+        elif (angles[i] == 180):
+            vl = ((-180 < angle_grid) &
+                  (angle_grid <= angles[i + 1] - 360))
 
         else:
             vl = ((angles[i] - 360 < angle_grid) &
-                  (angle_grid <= angles[i + 1]- 360))
+                  (angle_grid <= angles[i + 1] - 360))
 
         mesh[vl] = i + 1
 

@@ -2,6 +2,9 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
+# Developed at the NSLS-II, Brookhaven National Laboratory             #
+# Developed by Sameera K. Abeykoon, February 2014                      #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -193,10 +196,10 @@ def test_roi_divide_circle():
     calibrated_center = (15., 12.)
     num_angles = 8
 
-    roi_inds, num_pixels, pixel_list = diff_roi.roi_divide_circle(detector_size,
-                                                                  radius,
-                                                                  calibrated_center,
-                                                                  num_angles)
+    (roi_inds, num_pixels,
+     pixel_list) = diff_roi.roi_divide_circle(detector_size,
+                                              radius, calibrated_center,
+                                              num_angles)
     ty = np.zeros(detector_size).ravel()
     ty[pixel_list] = roi_inds
 
@@ -212,32 +215,32 @@ def test_roi_divide_circle():
     # get the indices into a grid
     zero_grid = np.zeros((detector_size[0], detector_size[1]))
 
-    zero_grid[grid_values<=radius]= 1
+    zero_grid[grid_values <= radius] = 1
 
     assert_array_equal(np.nonzero(zero_grid),
                        np.nonzero((ty.reshape(*detector_size))))
 
     roi_inds_m = np.array([3, 3, 2, 2, 2, 2, 2, 3, 3, 3, 3, 2, 2,
-                         2, 2, 2, 2, 1, 3, 3, 3, 3, 3, 2, 2, 2,
-                         2, 2, 1, 1, 1, 3, 3, 3, 3, 3, 3, 2, 2,
-                         2, 2, 1, 1, 1, 4, 3, 3, 3, 3, 3, 3, 2,
-                         2, 2, 1, 1, 1, 1, 1, 4, 4, 4, 3, 3, 3,
-                         3, 2, 2, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4,
-                         4, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 4, 4,
-                         4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7,
-                         7, 7, 4, 4, 4, 4, 4, 5, 5, 6, 7, 7, 7,
-                         7, 7, 7, 7, 4, 4, 4, 5, 5, 5, 5, 6, 6,
-                         7, 7, 7, 7, 7, 7, 4, 5, 5, 5, 5, 5, 5,
-                         6, 6, 6, 7, 7, 7, 7, 7, 5, 5, 5, 5, 5,
-                         5, 6, 6, 6, 6, 7, 7, 7, 5, 5, 5, 5, 5,
-                         6, 6, 6, 6, 6, 7, 7, 7, 5, 5, 5, 5, 6,
-                         6, 6, 6, 6, 6, 7, 5, 5, 6, 6, 6, 6, 6,
-                         6])
+                           2, 2, 2, 2, 1, 3, 3, 3, 3, 3, 2, 2, 2,
+                           2, 2, 1, 1, 1, 3, 3, 3, 3, 3, 3, 2, 2,
+                           2, 2, 1, 1, 1, 4, 3, 3, 3, 3, 3, 3, 2,
+                           2, 2, 1, 1, 1, 1, 1, 4, 4, 4, 3, 3, 3,
+                           3, 2, 2, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4,
+                           4, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 4, 4,
+                           4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7,
+                           7, 7, 4, 4, 4, 4, 4, 5, 5, 6, 7, 7, 7,
+                           7, 7, 7, 7, 4, 4, 4, 5, 5, 5, 5, 6, 6,
+                           7, 7, 7, 7, 7, 7, 4, 5, 5, 5, 5, 5, 5,
+                           6, 6, 6, 7, 7, 7, 7, 7, 5, 5, 5, 5, 5,
+                           5, 6, 6, 6, 6, 7, 7, 7, 5, 5, 5, 5, 5,
+                           6, 6, 6, 6, 6, 7, 7, 7, 5, 5, 5, 5, 6,
+                           6, 6, 6, 6, 6, 7, 5, 5, 6, 6, 6, 6, 6,
+                           6])
 
     assert_array_equal(num_pixels_m, num_pixels)
     assert_array_equal(roi_inds, roi_inds_m)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import nose
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
