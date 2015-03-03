@@ -39,17 +39,21 @@ import six
 import logging
 logger = logging.getLogger(__name__)
 
-from .net_cdf_io import load_netCDF
+from skxray.io.net_cdf_io import read_netCDF
 
-from .binary import read_binary
+from skxray.io.binary import read_binary
 
-from .avizo_io import load_amiramesh
+from skxray.io.avizo_io import read_amiraMesh
 
-from .save_powder_output import save_output
+from skxray.io.save_powder_output import save_output
 
-from .gsas_file_reader import gsas_reader
+from skxray.io.gsas_file_reader import gsas_reader
 
-from .save_powder_output import gsas_writer
+from skxray.io.save_powder_output import gsas_writer
 
-__all__ = ['load_netCDF', 'read_binary', 'load_amiramesh', 'save_output',
-           'gsas_reader', 'gsas_writer']
+from skxray.io.np_to_vtk_cnvrt import np_to_vtk
+
+#from skxray.io.np_to_vtk_cnvrt import vtk_to_np
+
+__all__ = ['read_netCDF', 'read_binary', 'read_amiraMesh', 'save_output',
+           'gsas_reader', 'gsas_writer', 'np_to_vtk']

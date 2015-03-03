@@ -14,22 +14,9 @@ HDF5 (.h5 and .hdf5)
 import numpy as np
 from vtk.util import numpy_support
 import vtk
+from IPython.display import Image
 
 
-_NP_TO_VTK_dTYPE_DICT = {
-    'bool' : vtk.VTK_BIT,
-    'character' : vtk.VTK_UNSIGNED_CHAR,
-    'uint8' : vtk.VTK_UNSIGNED_CHAR,
-    'uint16' : vtk.VTK_UNSIGNED_SHORT,
-    'uint32' : vtk.VTK_UNSIGNED_INT,
-    'uint64' : vtk.VTK_UNSIGNED_LONG_LONG,
-    'int8' : vtk.VTK_CHAR,
-    'int16' : vtk.VTK_SHORT,
-    'int32' : vtk.VTK_INT,
-    'int64' : vtk.VTK_LONG_LONG,
-    'float32' : vtk.VTK_FLOAT,
-    'float64' : vtk.VTK_DOUBLE,
-    }
 #
 #
 # _VTK_TO_NP_dTYPE_DICT = {
@@ -76,7 +63,7 @@ _VTK_DTYPE_INDEX_DICT = {
     22 : vtk.VTK_UNICODE_STRING
     }
 
-def np_to_vtk(src_data):
+def np_to_vtk(src_data, pixel_spacing=None):
     """
     This function converts a given numpy array into a VTK object of the same
     type.
@@ -86,17 +73,47 @@ def np_to_vtk(src_data):
     src_data : ndarray
 	Complete path to the file to be loaded into memory
 
+	pixel_spacing : tuple, optional
+	Tuple containing pixel spacing, or resolution along the three primary
+	axes (x, y, z). If pixel_spacing is not defined then values default to
+	(1,1,1).
+
     Returns
     -------
     output : array-like
     """
+    dataImporter = vtk.vtkImageImport()
+    dataImporter.CopyImportVoidPointer(src_data, src_data.nbytes)
+    _NP_TO_VTK_dTYPE_DICT = {
+        'bool' : dataImporter.SetDataScalarTypeToUnsignedChar(),
+        'character' : dataImporter.SetDataScalarTypeToUnsignedChar(),
+        'uint8' : dataImporter.SetDataScalarTypeToUnsignedChar(),
+        'uint16' : dataImporter.SetDataScalarTypeToUnsignedShort(),
+        'uint32' : dataImporter.SetDataScalarTypeToInt(),
+        'uint64' : dataImporter.SetDataScalarTypeToInt(),
+        'int8' : dataImporter.SetDataScalarTypeToShort(),
+        'int16' : dataImporter.SetDataScalarTypeToShort(),
+        'int32' : dataImporter.SetDataScalarTypeToInt(),
+        'int64' : dataImporter.SetDataScalarTypeToInt(),
+        'float32' : dataImporter.SetDataScalarTypeToFloat(),
+        'float64' : dataImporter.SetDataScalarTypeToDouble(),
+        }
     src_data_shape = src_data.shape
-    print src_data.dtype
-    if src_data.dtype == bool:
-        src_data = np.array(src_data, dtype='uint8')
-    vtk_obj = numpy_support.numpy_to_vtk(num_array=src_data.ravel(),
-                                          deep=True)
-    return vtk_obj
+    _NP_TO_VTK_dTYPE_DICT[str(src_data.dtype)]
+    dataImporter.SetNumberOfScalarComponents(1)
+    dataImporter.SetDataExtent(0, src_data_shape[2],
+                               0, src_data_shape[1],
+                               0, src_data_shape[0])
+    dataImporter.SetWholeExtent(0, src_data_shape[2],
+                                0, src_data_shape[1],
+                                0, src_data_shape[0])
+    if pixel_spacing == None:
+        dataImporter.SetDataSpacing(1,1,1)
+    else:
+        dataImporter.SetDataSpacing(pixel_spacing[0],
+                                    pixel_spacing[1],
+                                    pixel_spacing[2])
+    return dataImporter
 
 
 def vtk_to_np(src_data, shape=None):
@@ -121,3 +138,132 @@ def vtk_to_np(src_data, shape=None):
         np_obj = np.reshape(np_obj, shape)
     return np_obj
 
+def ipython_vtk_viewer(renderer, width=None, height=None):
+    """
+    Converts a vtkRenderer object into an iPython image
+
+    Note: This method generates an external window within which
+    rendering actually occurs. The generated image is then returned
+    to the ipython session.
+
+    Ref: https://pyscience.wordpress.com/2014/09/03/ipython-notebook-vtk/
+
+    Parameters
+    ----------
+    renderer :
+
+    width : int, optional
+
+    height : int, optional
+
+    Returns
+    -------
+
+    """
+    if width == None:
+        width = 400
+    if height == None:
+        height=300
+
+    #Create new rendering window
+    renderWindow = vtkRenderWindow()
+    #Enable off-screen rendering
+    renderWindow.SetOffScreenRendering(1)
+    #Create instance
+    renderWindow.AddRenderer(renderer)
+    #Set Dims
+    renderWindow.SetSize(width, height)
+    #Execute render operation
+    renderWindow.Render()
+
+    #Create a new vtkWindow -> Image filter object which allows us to read
+    # the data in a vtkWindow and use it as input to the imaging pipeline.
+    windowToImageFilter = vtk.vtkWindowToImageFilter()
+    #Add renderWindow to the filter object
+    windowToImageFilter.SetInput(renderWindow)
+    windowToImageFilter.Update() #Update object
+
+    #Create vtk PNG writer object thereby allowing creation of PNG images
+    # of the vtkWindow rendering
+    writer = vtk.vtkPNGWriter()
+    #Setting eq to 1 enables image to be held in memory instead of saving
+    # to disk. This is the desired option since the image is meant to be
+    # loaded back into the notebook instead of stored on disk
+    writer.SetWriteToMemory(1)
+    # Link between output (GetOutputPort) of vtkWindowToImageFilter and
+    # the PNG writer (SetInputConnection)
+    writer.SetInputConnection(windowToImageFilter.GetOutputPort())
+    writer.Write()
+    data = str(buffer(writer.GetResult()))
+
+    return Image(data)
+
+
+def vtk_viewer(renderer, width=None, height=None):
+    """
+    Create a VTK viewer window to display 3D rendered surface and volume
+    objects.
+
+    Parameters
+    ----------
+    renderer :
+
+    width : int, optional
+
+    height : int, optional
+
+    Returns
+    -------
+
+    """
+    if width == None:
+        width = 400
+    if height == None:
+        height=300
+
+    #Create renderer instance
+    ren = vtk.vtkRenderer()
+    #Create new rendering window
+    renWin = vtkRenderWindow()
+    #Create instance
+    renWin.AddRenderer(ren)
+    #Set Dims
+    renWin.SetSize(width, height)
+    iren = vtk.vtkRenderWindowInteractor()
+    iren.SetRenderWindow(renWin)
+
+    iren.Initialize()
+    renWin.Render()
+    iren.Start()
+
+
+def write_stl(vtk_obj, filename, path=None):
+    """
+    This function enables the writing, or exporting of surface renderings as
+    stl files. These files can be saved for further analysis using VTK,
+    MayaVI, Paraview, or any 3D graphics software that is able to read this
+    common, and standard surface file type.
+
+    Parameters
+    ----------
+    surf_obj : array-like
+
+    filename : str
+
+    path : str, optional
+
+    Returns
+    -------
+
+    """
+    #Confirm that object is a VTK surface object, and if not, then attempt
+    # conversion.
+
+    #Generate writer object
+    writer = vtk.vtkSTLWriter()
+    writer.SetInputConnection(vtk_obj.GetOutputPort())
+    writer.SetFileTypeToBinary()
+    if path != None:
+        filename = path+filename
+    writer.SetFileName(filename)
+    writer.Write()
