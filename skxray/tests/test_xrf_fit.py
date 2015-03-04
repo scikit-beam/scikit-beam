@@ -11,6 +11,5 @@ from skxray.fitting.xrf_model import ModelSpectrum
 def test_xrf_model():
     MS = ModelSpectrum(default_param)
     MS.model_spectrum()
-    assert_equal(len(MS.mod.components), 8)
-    #return MS.mod
+    assert_equal(len(MS.mod.components), 24)
 
