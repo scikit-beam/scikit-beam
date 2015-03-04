@@ -58,6 +58,7 @@ from skxray.fitting.lineshapes import gaussian
 from skxray.fitting.models import (ComptonModel, ElasticModel,
                                    _gen_class_docs)
 from skxray.fitting.base.parameter_data import get_para
+import skxray.fitting.base.parameter_data as sfb_pd
 from skxray.fitting.background import snip_method
 from lmfit import Model
 
@@ -198,14 +199,21 @@ def update_parameter_dict(xrf_parameter, fit_results):
         ModelFit object from lmfit
     """
     for k, v in six.iteritems(xrf_parameter):
-        #if fit_results.values.has_key(k):
+        # if fit_results.values.has_key(k):
         if k in fit_results.values:
             xrf_parameter[str(k)]['value'] = fit_results.values[str(k)]
 
+_STRATEGEY_REGISTRY = {'linear': sfb_pd.linear,
+                       'adjust_element': sfb_pd.adjust_element,
+                       'e_calibration': sfb_pd.e_calibration,
+                       'fit_with_tail': sfb_pd.fit_with_tail,
+                       'free_more': sfb_pd.free_more}
 
-def set_parameter_bound(xrf_parameter, bound_option):
+
+def set_parameter_bound(xrf_parameter, bound_option, extra_config=None):
     """
     Update the default value of bounds.
+
     .. warning :: This function mutates the input values.
 
     Parameters
@@ -215,24 +223,29 @@ def set_parameter_bound(xrf_parameter, bound_option):
     bound_option : str
         define bound type
     """
+    strat_dict = _STRATEGEY_REGISTRY[bound_option]
+    if extra_config is None:
+        extra_config = dict()
     for k, v in six.iteritems(xrf_parameter):
         if k == 'non_fitting_values':
             continue
-        v['bound_type'] = v[str(bound_option)]
+        try:
+            v['bound_type'] = strat_dict[k]
+        except KeyError:
+            v['bound_type'] = extra_config.get(k, 'fixed')
 
 
-#This dict is used to update the current parameter dict to dynamically change the input data
-# and do the fitting. The user can adjust parameters such as position, width, area or branching ratio.
-element_dict = {
-    'pos': {"bound_type": "fixed", "min": -0.005, "max": 0.005, "value": 0, "fit_with_tail": "fixed",
-            "free_more": "fixed", "adjust_element": "fixed", "e_calibration": "fixed", "linear": "fixed"},
-    'width': {"bound_type": "fixed", "min": -0.02, "max": 0.02, "value": 0.0, "fit_with_tail": "fixed",
-              "free_more": "fixed", "adjust_element": "fixed", "e_calibration": "fixed", "linear": "fixed"},
-    'area': {"bound_type": "none", "min": 0, "max": 1e9, "value": 1000, "fit_with_tail": "fixed",
-             "free_more": "none", "adjust_element": "fixed", "e_calibration": "fixed", "linear": "none"},
-    'ratio': {"bound_type": "fixed", "min": 0.1, "max": 5.0, "value": 1.0, "fit_with_tail": "fixed",
-              "free_more": "fixed", "adjust_element": "fixed", "e_calibration":"fixed", "linear":"fixed"}
-}
+# This dict is used to update the current parameter dict to dynamically change
+# the input data and do the fitting. The user can adjust parameters such as
+# position, width, area or branching ratio.
+element_dict = {'area': {'bound_type': 'none',
+                         'max': 1000000000.0, 'min': 0, 'value': 1000},
+                'pos': {'bound_type': 'fixed',
+                        'max': 0.005, 'min': -0.005, 'value': 0},
+                'ratio': {'bound_type': 'fixed',
+                          'max': 5.0, 'min': 0.1, 'value': 1.0},
+                'width': {'bound_type': 'fixed',
+                          'max': 0.02, 'min': -0.02, 'value': 0.0}}
 
 
 class ParamController(object):
@@ -252,6 +265,7 @@ class ParamController(object):
         self.element_list = xrf_parameter['non_fitting_values']['element_list'].split(', ')
         self.element_line_name = self.get_all_lines(xrf_parameter['coherent_sct_energy']['value'],
                                                     self.element_list)
+        self._element_strategy = dict()
 
     def get_all_lines(self, incident_energy, ename_list):
         """
@@ -337,7 +351,8 @@ class ParamController(object):
         bound_option : str
             define bound type
         """
-        set_parameter_bound(self.new_parameter, bound_option)
+        set_parameter_bound(self.new_parameter, bound_option,
+                            self._element_strategy)
 
     def update_with_fit_result(self, fit_results):
         """
@@ -399,13 +414,14 @@ class ParamController(object):
         pos_list = [str(item)+'_'+str(v).lower() for v in pos_list]
 
         for linename in pos_list:
+            param_name = str(linename) + '_delta_center'
             # check if the line is activated
             if linename not in self.element_line_name:
                 continue
             new_pos = element_dict['pos'].copy()
             if option:
-                new_pos['adjust_element'] = option
-            self.new_parameter.update({str(linename)+'_delta_center': new_pos})
+                self._element_strategy[linename] = option
+            self.new_parameter.update({param_name: new_pos})
 
     def set_width(self, item, option=None):
         """
@@ -425,13 +441,14 @@ class ParamController(object):
         data_list = [str(item)+'_'+str(v).lower() for v in data_list]
 
         for linename in data_list:
+            param_name = str(linename) + '_delta_sigma'
             # check if the line is activated
             if linename not in self.element_line_name:
                 continue
             new_width = element_dict['width'].copy()
             if option:
-                new_width['adjust_element'] = option
-            self.new_parameter.update({str(linename)+'_delta_sigma': new_width})
+                self._element_strategy[param_name] = option
+            self.new_parameter.update({param_name: new_width})
 
     def set_area(self, item, option=None):
         """
@@ -454,10 +471,11 @@ class ParamController(object):
             area_list = [str(item)+"_ma1_area"]
 
         for linename in area_list:
+            param_name = linename
             new_area = element_dict['area'].copy()
             if option:
-                new_area['adjust_element'] = option
-            self.new_parameter.update({linename: new_area})
+                self._element_strategy[param_name] = option
+            self.new_parameter.update({param_name: new_area})
 
     def set_ratio(self, item, option=None):
         """
@@ -479,12 +497,13 @@ class ParamController(object):
         data_list = [str(item)+'_'+str(v).lower() for v in data_list]
 
         for linename in data_list:
+            param_name = str(linename) + '_ratio_adjust'
             if linename not in self.element_line_name:
                 continue
             new_val = element_dict['ratio'].copy()
             if option:
-                new_val['adjust_element'] = option
-            self.new_parameter.update({str(linename)+'_ratio_adjust': new_val})
+                self._element_strategy[param_name] = option
+            self.new_parameter.update({param_name: new_val})
 
 
 def get_sum_area(element_name, result_val):
