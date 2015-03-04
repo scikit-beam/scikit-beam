@@ -138,3 +138,188 @@ def get_para():
        Use copy for dict.
     """
     return para_dict
+
+default_param = {
+    "coherent_sct_amplitude": {
+        "adjust_element": "none",
+        "bound_type": "none",
+        "e_calibration": "none",
+        "fit_with_tail": "none",
+        "free_more": "none",
+        "linear": "none",
+        "max": 10000000.0,
+        "min": 1.0,
+        "value": 100000
+    },
+    "coherent_sct_energy": {
+        "adjust_element": "fixed",
+        "bound_type": "lohi",
+        "e_calibration": "fixed",
+        "fit_with_tail": "lohi",
+        "free_more": "lohi",
+        "linear": "fixed",
+        "max": 13.0,
+        "min": 9.0,
+        "value": 10.0,
+        "description": "Incident E [keV]"
+    },
+    "compton_amplitude": {
+        "adjust_element": "none",
+        "bound_type": "none",
+        "e_calibration": "none",
+        "fit_with_tail": "none",
+        "free_more": "none",
+        "linear": "none",
+        "max": 10000000.0,
+        "min": 0.0,
+        "value": 100000.0
+    },
+    "compton_angle": {
+        "adjust_element": "fixed",
+        "bound_type": "lohi",
+        "e_calibration": "fixed",
+        "fit_with_tail": "lohi",
+        "free_more": "lohi",
+        "linear": "fixed",
+        "max": 100.0,
+        "min": 80.0,
+        "value": 90.0
+    },
+    "compton_f_step": {
+        "adjust_element": "fixed",
+        "bound_type": "fixed",
+        "e_calibration": "fixed",
+        "fit_with_tail": "fixed",
+        "free_more": "lohi",
+        "linear": "fixed",
+        "max": 0.01,
+        "min": 0.0,
+        "value": 0.01
+    },
+    "compton_f_tail": {
+        "adjust_element": "fixed",
+        "bound_type": "fixed",
+        "e_calibration": "fixed",
+        "fit_with_tail": "lohi",
+        "free_more": "fixed",
+        "linear": "fixed",
+        "max": 0.3,
+        "min": 0.0001,
+        "value": 0.05
+    },
+    "compton_fwhm_corr": {
+        "adjust_element": "lohi",
+        "bound_type": "lohi",
+        "e_calibration": "fixed",
+        "fit_with_tail": "lohi",
+        "free_more": "lohi",
+        "linear": "fixed",
+        "max": 2.5,
+        "min": 0.5,
+        "value": 1.5,
+        "description": "fwhm Coef, Compton"
+    },
+    "compton_gamma": {
+        "adjust_element": "fixed",
+        "bound_type": "lohi",
+        "e_calibration": "fixed",
+        "fit_with_tail": "fixed",
+        "free_more": "lohi",
+        "linear": "fixed",
+        "max": 4.2,
+        "min": 3.8,
+        "value": 4.0
+    },
+    "compton_hi_f_tail": {
+        "adjust_element": "fixed",
+        "bound_type": "fixed",
+        "e_calibration": "fixed",
+        "fit_with_tail": "fixed",
+        "free_more": "fixed",
+        "linear": "fixed",
+        "max": 1.0,
+        "min": 1e-06,
+        "value": 0.1
+    },
+    "compton_hi_gamma": {
+        "adjust_element": "fixed",
+        "bound_type": "fixed",
+        "e_calibration": "fixed",
+        "fit_with_tail": "fixed",
+        "free_more": "fixed",
+        "linear": "fixed",
+        "max": 3.0,
+        "min": 0.1,
+        "value": 2.0
+    },
+    "e_linear": {
+        "adjust_element": "fixed",
+        "bound_type": "lohi",
+        "e_calibration": "lohi",
+        "fit_with_tail": "lohi",
+        "free_more": "lohi",
+        "linear": "fixed",
+        "max": 0.011,
+        "min": 0.009,
+        "value": 0.009532,
+        "description": "E Calib. Coef, a1",
+        "tool_tip": "E(channel) = a0 + a1*channel+ a2*channel**2"
+    },
+    "e_offset": {
+        "adjust_element": "fixed",
+        "bound_type": "lohi",
+        "e_calibration": "lohi",
+        "fit_with_tail": "lohi",
+        "free_more": "lohi",
+        "linear": "fixed",
+        "max": 0.015,
+        "min": 0.006,
+        "value": 0.007826,
+        "description": "E Calib. Coef, a0",
+        "tool_tip": "E(channel) = a0 + a1*channel+ a2*channel**2"
+    },
+    "e_quadratic": {
+        "adjust_element": "fixed",
+        "bound_type": "lohi",
+        "e_calibration": "fixed",
+        "fit_with_tail": "lohi",
+        "free_more": "lohi",
+        "linear": "fixed",
+        "max": 1e-06,
+        "min": -1e-06,
+        "value": 0.0,
+        "description": "E Calib. Coef, a2",
+        "tool_tip": "E(channel) = a0 + a1*channel+ a2*channel**2"
+    },
+    "fwhm_fanoprime": {
+        "adjust_element": "fixed",
+        "bound_type": "fixed",
+        "e_calibration": "fixed",
+        "fit_with_tail": "lohi",
+        "free_more": "lohi",
+        "linear": "fixed",
+        "max": 1e-04,
+        "min": 1e-7,
+        "value": 1e-6,
+        "description": "fwhm Coef, b2",
+        "tool_tip": "width**2 = (b1/2.3548)**2 + 3.85*b2*E, 3.85keV is electron-hole pair creation energy in silicon"
+    },
+    "fwhm_offset": {
+        "adjust_element": "fixed",
+        "bound_type": "lohi",
+        "e_calibration": "fixed",
+        "fit_with_tail": "lohi",
+        "free_more": "lohi",
+        "linear": "fixed",
+        "max": 0.19,
+        "min": 0.16,
+        "value": 0.178,
+        "description": "fwhm Coef, b1 [keV]",
+        "tool_tip": "width**2 = (b1/2.3548)**2 + 3.85*b2*E"
+    },
+    "non_fitting_values": {
+        "element_list": "Ar, Fe",
+        "energy_bound_high": 12.0,
+        "energy_bound_low": 2.5
+    }
+}
