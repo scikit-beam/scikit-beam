@@ -1,24 +1,37 @@
 # Module for the BNL image processing project
 # Developed at the NSLS-II, Brookhaven National Laboratory
-# Developed by Gabriel Iltis, Nov. 2013
+# Developed by Gabriel Iltis, March 2015
 """
-This module contains all fileIO operations and file conversion for the image 
-processing tool kit in pyLight. Operations for loading, saving, and converting 
-files and data sets are included for the following file formats:
-
-2D and 3D TIFF (.tif and .tiff)
-RAW (.raw and .volume)
-HDF5 (.h5 and .hdf5)
+This module contains test functions for the numpy-to-vtk, and vtk-to-numpy
+functions that are used in order to render and visualize 3D data in
+Vistrails. These functions are required due to the design decision to carry
+data through our pipelines using Numpy Arrays.
 """
-
 import numpy as np
 import vtk
-from skxray.io import vtk_tools
+from vtk.util import numpy_support
+from skxray.io import np_to_vtk_cnvrt as np2vtk
 from numpy.testing import assert_equal
 
+
 _NP_TO_VTK_dTYPE_DICT = {
-    np.bool: vtk.VTK_BIT,
-    #np.character: vtk.VTK_UNSIGNED_CHAR,
+    'bool' : dataImporter.SetDataScalarTypeToUnsignedChar(),
+    'character' : dataImporter.SetDataScalarTypeToUnsignedChar(),
+    'uint8' : dataImporter.SetDataScalarTypeToUnsignedChar(),
+    'uint16' : dataImporter.SetDataScalarTypeToUnsignedShort(),
+    'uint32' : dataImporter.SetDataScalarTypeToInt(),
+    'uint64' : dataImporter.SetDataScalarTypeToInt(),
+    'int8' : dataImporter.SetDataScalarTypeToShort(),
+    'int16' : dataImporter.SetDataScalarTypeToShort(),
+    'int32' : dataImporter.SetDataScalarTypeToInt(),
+    'int64' : dataImporter.SetDataScalarTypeToInt(),
+    'float32' : dataImporter.SetDataScalarTypeToFloat(),
+    'float64' : dataImporter.SetDataScalarTypeToDouble(),
+    }
+
+_NP_TO_VTK_dTYPE_DICT = {
+    np.bool: vtk.VTK_UNSIGNED_CHAR,
+    np.character: vtk.VTK_UNSIGNED_CHAR,
     np.uint8: vtk.VTK_UNSIGNED_CHAR,
     np.uint16: vtk.VTK_UNSIGNED_SHORT,
     np.uint32: vtk.VTK_UNSIGNED_INT,
@@ -28,11 +41,8 @@ _NP_TO_VTK_dTYPE_DICT = {
     np.int32: vtk.VTK_INT,
     np.int64: vtk.VTK_LONG,
     np.float32: vtk.VTK_FLOAT,
-    np.float64: vtk.VTK_DOUBLE,
-    #np.complex64: vtk.VTK_FLOAT,
-    #np.complex128: vtk.VTK_DOUBLE
+    np.float64: vtk.VTK_DOUBLE
 }
-
 
 VTK_ID_TYPE_SIZE = vtk.vtkIdTypeArray().GetDataTypeSize()
 if VTK_ID_TYPE_SIZE == 4:
@@ -47,7 +57,6 @@ if VTK_LONG_TYPE_SIZE == 4:
 elif VTK_LONG_TYPE_SIZE == 8:
     LONG_TYPE_CODE = np.int64
     ULONG_TYPE_CODE = np.uint64
-
 
 _VTK_TO_NP_dTYPE_DICT = {
     #vtk.VTK_BIT : np.bool,
@@ -121,20 +130,39 @@ def test_vtk_conversion():
         Type conversion to VTK_UNSIGNED_LONG_LONG and VTK_LONG_LONG
         generates an error. However, conversion to VTK_LONG and
         VTK_UNSIGNED_LONG appears to work.
-        Since  boolean (bit) arrays are not supported currently for
-        conversion, boolean numpy arrays are now converted directly to
-        dtype: 'uint8' where values remain either 0 or 1.
     """
 
     for _ in _NP_TO_VTK_dTYPE_DICT.keys():
-        if _ ==np.bool:
-            _ = np.uint8
         test_np_array = np.array(10*np.random.rand(3,3,3), dtype=_)
         array_shape = test_np_array.shape
-        vtk_obj = vtk_tools.np_to_vtk(test_np_array)
+        vtk_obj = np2vtk.ndarray_to_vtk_obj(test_np_array,
+                                            array_type=_NP_TO_VTK_dTYPE_DICT[_])
         assert_equal(_VTK_DTYPE_INDEX_DICT[vtk_obj.GetDataType()],
                      _NP_TO_VTK_dTYPE_DICT[_])
-        np_result = vtk_tools.vtk_to_np(vtk_obj, array_shape)
+        np_result = np2vtk.vtk_to_np(vtk_obj, array_shape)
         print np_result.dtype
         print np_result.shape
         assert_equal(np_result, test_np_array)
+
+
+
+def test_ndarray_to_vtk_obj():
+    """
+    This function automates the saving of volumes as .tiff files using a single
+    keyword
+
+    Parameters
+    ----------
+    file_name : str
+        Specify the path and file name to which you want the volume saved
+
+    data : array
+        Specify the array to be saved
+
+    Returns
+    -------
+
+    """
+    for _ in _VTK_TO_NP_dTYPE_DICT.keys():
+
+
