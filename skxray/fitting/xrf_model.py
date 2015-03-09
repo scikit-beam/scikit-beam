@@ -548,15 +548,17 @@ class ModelSpectrum(object):
     compton and element peaks.
     """
 
-    def __init__(self, xrf_parameter):
+    def __init__(self, xrf_parameter=None):
         """
         Parameters
         ----------
-        xrf_parameter : dict
+        xrf_parameter : dict, opt
             saving all the fitting values and their bounds
         """
-        self.parameter = dict(xrf_parameter)
-        self.parameter_default = get_para()
+        if xrf_parameter:
+            self.parameter = dict(xrf_parameter)
+        else:
+            self.parameter = get_para()
         self._config()
 
     def _config(self):
@@ -591,8 +593,6 @@ class ModelSpectrum(object):
         for name in compton_list:
             if name in self.parameter.keys():
                 _set_parameter_hint(name, self.parameter[name], compton)
-            else:
-                _set_parameter_hint(name, self.parameter_default[name], compton)
         logger.debug(' Finished setting up parameters for compton model.')
 
         self.compton_param = compton.make_params()
@@ -607,15 +607,12 @@ class ModelSpectrum(object):
         item = 'coherent_sct_amplitude'
         if item in self.parameter.keys():
             _set_parameter_hint(item, self.parameter[item], elastic)
-        else:
-            _set_parameter_hint(item, self.parameter_default[item], elastic)
 
         logger.debug(' ###### Started setting up parameters for elastic model. ######')
 
         # set constraints for the following global parameters
         elastic.set_param_hint('e_offset', value=self.compton_param['e_offset'].value,
                                expr='e_offset')
-        #elastic.set_param_hint('e_offset', expr='e_offset')
         elastic.set_param_hint('e_linear', value=self.compton_param['e_linear'].value,
                                expr='e_linear')
         elastic.set_param_hint('e_quadratic', value=self.compton_param['e_quadratic'].value,
@@ -689,9 +686,6 @@ class ModelSpectrum(object):
                     gauss_mod.set_param_hint('delta_center', value=0, vary=False)
                     gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
 
-                #gauss_mod.set_param_hint('delta_center', value=0, vary=False)
-                #gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
-
                 area_name = str(ename)+'_'+str(line_name)+'_area'
                 if area_name in parameter:
                     _set_parameter_hint(area_name, parameter[area_name],
@@ -722,7 +716,6 @@ class ModelSpectrum(object):
                     _set_parameter_hint('ratio_adjust', parameter[ratio_name],
                                         gauss_mod, log_option=True)
 
-                #mod = mod + gauss_mod
                 if element_mod:
                     element_mod += gauss_mod
                 else:
@@ -760,7 +753,6 @@ class ModelSpectrum(object):
 
                 if line_name == 'la1':
                     gauss_mod.set_param_hint('area', value=default_area, vary=True)
-                                         #expr=gauss_mod.prefix+'ratio_val * '+str(ename)+'_la1_'+'area')
                 else:
                     gauss_mod.set_param_hint('area', value=default_area, vary=True,
                                              expr=str(ename)+'_la1_'+'area')

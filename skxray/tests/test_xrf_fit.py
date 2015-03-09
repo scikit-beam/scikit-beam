@@ -10,10 +10,9 @@ from skxray.fitting.xrf_model import ModelSpectrum, ParamController
 
 
 def test_xrf_model():
-    default_param = get_para()
-    MS = ModelSpectrum(default_param)
+    MS = ModelSpectrum()
     MS.model_spectrum()
-    assert_equal(len(MS.mod.components), 24)
+    assert_equal(len(MS.mod.components), 20)
 
 
 def test_parameter_controller():
@@ -23,12 +22,14 @@ def test_parameter_controller():
     PC.update_element_prop(['Fe'],
                            pos='fixed', width='lohi',
                            area='none', ratio='fixed')
+    PC.set_bound_type('linear')
+
     for k, v in six.iteritems(PC.new_parameter):
-        print('{}: {}'.format(k, v))
+
         if 'Fe' in k:
             if 'ratio' in k or 'center' in k:
                 assert_equal(str(v['bound_type']), 'fixed')
             elif 'area' in k:
                 assert_equal(str(v['bound_type']), 'none')
-            else:
+            elif 'sigma' in k:
                 assert_equal(str(v['bound_type']), 'lohi')
