@@ -67,6 +67,7 @@ They are empirical experience from authors of the original code.
 """
 
 
+# old param dict, keep it here for now.
 para_dict = {'coherent_sct_amplitude': {'bound_type': 'none', 'min': 7.0, 'max': 8.0, 'value': 6.0},
              'coherent_sct_energy': {'bound_type': 'none', 'min': 10.4, 'max': 12.4, 'value': 11.8},
              'compton_amplitude': {'bound_type': 'none', 'min': 0.0, 'max': 10.0, 'value': 5.0},
@@ -213,17 +214,9 @@ fit_with_tail = {'coherent_sct_amplitude': 'none',
                  'non_fitting_values': 'fixed'}
 
 
-def get_para():
-    """More to be added here.
-       The para_dict will be updated
-       based on different algorithms.
-       Use copy for dict.
-    """
-    return para_dict
-
 default_param = {'coherent_sct_amplitude': {'bound_type': 'none',
                   'max': 10000000.0,
-                  'min': 1.0,
+                  'min': 0.10,
                   'value': 100000},
                  'coherent_sct_energy': {'bound_type': 'lohi',
                   'description': 'Incident E [keV]',
@@ -232,7 +225,7 @@ default_param = {'coherent_sct_amplitude': {'bound_type': 'none',
                   'value': 10.0},
                  'compton_amplitude': {'bound_type': 'none',
                   'max': 10000000.0,
-                  'min': 0.0,
+                  'min': 0.10,
                   'value': 100000.0},
                  'compton_angle': {'bound_type': 'lohi',
                   'max': 100.0,
@@ -290,6 +283,16 @@ default_param = {'coherent_sct_amplitude': {'bound_type': 'none',
                   'min': 0.16,
                   'tool_tip': 'width**2 = (b1/2.3548)**2 + 3.85*b2*E',
                   'value': 0.178},
-                 'non_fitting_values': {'element_list': 'Ar, Fe, Ce_L, Pt_M',
+                 'non_fitting_values': {'element_list': 'Ar, Fe, Ce_L',
                   'energy_bound_high': 12.0,
                   'energy_bound_low': 2.5}}
+
+
+def get_para():
+    """More to be added here.
+       The para_dict will be updated
+       based on different algorithms.
+       Use copy for dict.
+    """
+    #return para_dict
+    return default_param

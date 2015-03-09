@@ -199,9 +199,9 @@ def update_parameter_dict(xrf_parameter, fit_results):
         ModelFit object from lmfit
     """
     for k, v in six.iteritems(xrf_parameter):
-        # if fit_results.values.has_key(k):
         if k in fit_results.values:
             xrf_parameter[str(k)]['value'] = fit_results.values[str(k)]
+
 
 _STRATEGEY_REGISTRY = {'linear': sfb_pd.linear,
                        'adjust_element': sfb_pd.adjust_element,
@@ -410,6 +410,9 @@ class ParamController(object):
         elif item in l_line:
             item = item.split('_')[0]
             pos_list = l_list
+        else:
+            # calculation for m lines should be added
+            return
 
         pos_list = [str(item)+'_'+str(v).lower() for v in pos_list]
 
@@ -437,6 +440,9 @@ class ParamController(object):
         elif item in l_line:
             item = item.split('_')[0]
             data_list = l_list
+        else:
+            # calculation for m lines should be added
+            return
 
         data_list = [str(item)+'_'+str(v).lower() for v in data_list]
 
@@ -531,7 +537,6 @@ def get_sum_area(element_name, result_val):
         sumv = (get_value(result_val, element_name, 'ka1') +
                 get_value(result_val, element_name, 'ka2') +
                 get_value(result_val, element_name, 'kb1'))
-        #if result_val.values.has_key(str(element_name)+'_kb2_area'):
         if str(element_name)+'_kb2_area' in result_val.values:
             sumv += get_value(result_val, element_name, 'kb2')
     return sumv
@@ -556,7 +561,6 @@ class ModelSpectrum(object):
 
     def _config(self):
         non_fit = self.parameter['non_fitting_values']
-        #if non_fit.has_key('element_list'):
         if 'element_list' in non_fit:
             if ',' in non_fit['element_list']:
                 self.element_list = non_fit['element_list'].split(', ')
@@ -689,7 +693,6 @@ class ModelSpectrum(object):
                 #gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
 
                 area_name = str(ename)+'_'+str(line_name)+'_area'
-                #if parameter.has_key(area_name):
                 if area_name in parameter:
                     _set_parameter_hint(area_name, parameter[area_name],
                                         gauss_mod, log_option=True)
@@ -703,21 +706,18 @@ class ModelSpectrum(object):
 
                 # position needs to be adjusted
                 pos_name = ename+'_'+str(line_name)+'_delta_center'
-                #if parameter.has_key(pos_name):
                 if pos_name in parameter:
                     _set_parameter_hint('delta_center', parameter[pos_name],
                                         gauss_mod, log_option=True)
 
                 # width needs to be adjusted
                 width_name = ename+'_'+str(line_name)+'_delta_sigma'
-                #if parameter.has_key(width_name):
                 if width_name in parameter:
                     _set_parameter_hint('delta_sigma', parameter[width_name],
                                         gauss_mod, log_option=True)
 
                 # branching ratio needs to be adjusted
                 ratio_name = ename+'_'+str(line_name)+'_ratio_adjust'
-                #if parameter.has_key(ratio_name):
                 if ratio_name in parameter:
                     _set_parameter_hint('ratio_adjust', parameter[ratio_name],
                                         gauss_mod, log_option=True)
@@ -794,7 +794,6 @@ class ModelSpectrum(object):
                 #        _set_parameter_hint('delta_sigma', parameter[width_name],
                 #                            gauss_mod, log_option=True)
                 width_name = ename+'_'+str(line_name)+'_delta_sigma'
-                #if parameter.has_key(width_name):
                 if width_name in parameter:
                     _set_parameter_hint('delta_sigma', parameter[width_name],
                                         gauss_mod, log_option=True)
@@ -806,7 +805,6 @@ class ModelSpectrum(object):
                 #        _set_parameter_hint('ratio_adjust', parameter[ratio_name],
                 #                            gauss_mod, log_option=True)
                 ratio_name = ename+'_'+str(line_name)+'_ratio_adjust'
-                #if parameter.has_key(ratio_name):
                 if ratio_name in parameter:
                     _set_parameter_hint('ratio_adjust', parameter[ratio_name],
                                         gauss_mod, log_option=True)
