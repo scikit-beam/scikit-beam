@@ -39,6 +39,7 @@ test:
      - skxray.feature
      - skxray.image
      - skxray.recip
+     - skxray.diff_roi_choice
      - skxray.spectroscopy
      - skxray.fitting
      - skxray.fitting.api
