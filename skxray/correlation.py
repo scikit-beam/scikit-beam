@@ -59,7 +59,9 @@ import skxray.core as core
 def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
               pixel_list, q_inds, img_stack):
     """
-    This module is for one time correlation
+    This module is for one time correlation.
+    The multi-tau correlation scheme was used for
+    finding the lag times (delay times).
 
     Parameters
     ----------
@@ -71,15 +73,20 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
         auto-correlators normalizations (must be even)
 
     num_qs : int
-        number of interested q(space)regions
+        number of region of interests(roi's)
 
     num_pixels : ndarray
-        number of pixels in certain q space(reciprocal space)
+        number of pixels in certain roi's
         roi's, dimensions are : [num_qs]X1
 
+     ring_inds : ndarray
+        indices of the required rings
+
     pixel_list : ndarray
+        pixel indices for the required roi's
 
     q_inds : ndarray
+        indices of the required roi's
 
     img_stack : ndarray
         intensity array of the images
@@ -90,8 +97,21 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
     g2 : ndarray
         matrix of one-time correlation
 
+    lag_steps : ndarray
+        delay or lag steps for the multiple tau analysis
+
+    elapsed_times : float
+        elapsed time for auto correlation
+
     Notes
     -----
+    In order to calculate correlations for delays, images must be
+    keep for up to the maximum delay. These are stored in the array
+    buf. This algorithm only keeps number of buffers delays but several
+    levels of delays number of levels are kept. Each level has twice the
+    delay times of the next lower one. To save needless copying, of cyclic
+    storage of images in buf is used.
+
     References: text [1]_
 
     .. [1] D. Lumma, L. B. Lurio, S. G. J. Mochrie and M. Sutton,
@@ -116,9 +136,11 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
     IAF = np.zeros(((num_levels +1)*num_bufs/2, num_qs),
                    dtype=np.float64)
 
-    # matrix of one-time correlation for required  q regions
+    # matrix of one-time correlation for required roi's
     g2 = np.zeros((num_levels, num_qs), dtype=np.float64)
 
+    # correlation for delays, images must be keep for up to maximum
+    # delay in buf
     buf = np.zeros((num_levels, num_bufs, np.sum(num_pixels)),
                    dtype=np.float64)
 
@@ -130,20 +152,21 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
     # number of frames(images)
     num_frames = img_stack.shape[0]
 
-    ttx = 0
     start_time = time.time()
     for n in range (0, num_frames):  # changed the number of frames
         image_array = img_stack[n]
-        # print ("image number ", n)
 
         cur[0] = 1 + cur[0]%num_bufs  # increment buffer
-        # print (cur)
+
         buf[0, cur[0] -1 ]  = (np.ravel(image_array))[pixel_list]
-        G, IAP, IAF, num = _process(buf, num_qs, G, IAP, IAF, q_inds,
+        G, IAP, IAF, num = _process(buf, G, IAP, IAF, q_inds,
                                     num_bufs, num_pixels, num, level=0,
                                     buf_no=cur[0] - 1)
-        processing = 1
-        level = 1
+        if num_levels > 1:
+            processing = 1
+            level = 1
+        else:
+            processing = 0
 
         while processing:
             if cts[level]:
@@ -154,7 +177,7 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
                                                   cur[level - 1] - 1])/2
 
                 cts[level] = 0
-                G, IAP, IAF, num = _process(buf, num_qs, G, IAP, IAF, q_inds,
+                G, IAP, IAF, num = _process(buf, G, IAP, IAF, q_inds,
                                        num_bufs, num_pixels, num,
                                        level=level, buf_no=cur[level]-1,)
                 level += 1
@@ -180,13 +203,15 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
     tot_channels, lag_steps = core.multi_tau_lags(num_levels,
                                                   num_bufs)
 
-    return g2, lag_steps, num, IAP, IAF, g_max, elapsed_time
+    return g2, lag_steps, elapsed_time
 
 
-
-def _process(buf,  num_qs, G, IAP, IAF, q_inds, num_bufs,
+def _process(buf, G, IAP, IAF, q_inds, num_bufs,
              num_pixels, num, level, buf_no):
     """
+    Symmetric normalization is used and this helper function
+    calculates G, IAP and IAF at each level
+
     Parameters
     ----------
     buf : ndarray
@@ -203,13 +228,13 @@ def _process(buf,  num_qs, G, IAP, IAF, q_inds, num_bufs,
         matrix of future intensity normalizations
 
     q_inds : ndarray
-        indices of the q values for the required roi's
+        indices of the required roi's
 
     num_bufs : int, even
         number of buffers(channels)
 
     num_pixels : ndarray
-        number of pixels in certain q space(reciprocal space)
+        number of pixels in certain roi's
         roi's, dimensions are : [num_qs]X1
 
     num : ndarray
@@ -232,6 +257,17 @@ def _process(buf,  num_qs, G, IAP, IAF, q_inds, num_bufs,
     IAF : ndarray
         matrix of future intensity normalizations
 
+    Notes
+    -----
+    :math ::
+        G   = <I(t)I(t + delay)>
+
+    :math ::
+        IAP = <I(t)>
+
+    :math ::
+        IAF = <I(t + delay)>
+
     """
     num[level] += 1
 
@@ -243,9 +279,9 @@ def _process(buf,  num_qs, G, IAP, IAF, q_inds, num_bufs,
     for i in range(i_min, min(num[level], num_bufs)):
         t_index = level*num_bufs/2 + i
 
-        delay_num2 =  (buf_no - (i-1) -1 + num_bufs)%num_bufs
+        delay_no =  (buf_no - (i-1) -1 + num_bufs)%num_bufs
 
-        IP = buf[level, delay_num2]
+        IP = buf[level, delay_no]
         IF = buf[level, buf_no]
 
         G[t_index] += ((np.bincount(q_inds, weights=np.ravel(IP*IF))[1:])/num_pixels
