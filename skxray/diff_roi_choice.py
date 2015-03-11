@@ -324,7 +324,8 @@ def _grid_values(img_dim, calibrated_center):
 
 def _process_rings(num_rings, ring_vals):
     """
-    This will process the edge values of the each roi ring
+    This is a helper function to make edge values
+     of the each roi ring shape as (num_rings, 2)
 
     Parameters
     ----------
