@@ -341,8 +341,7 @@ def _process_rings(num_rings, ring_vals):
         shape is (num_rings, 2)
 
     """
-    ring_vals = np.array(ring_vals)
-    ring_vals = ring_vals.reshape(num_rings, 2)
+    ring_vals = np.asarray(ring_vals).reshape(-1, 2)
 
     return ring_vals
 
@@ -392,8 +391,6 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
     grid_values = np.float_(np.hypot(x_, y_))
     angle_grid = np.arctan2(y_, x_)*180/(np.pi)
 
-    angle_grid[grid_values > radius] = np.nan
-
     for i in range(num_angles-1):
         if angles[i + 1] <= 180:
             vl = ((angles[i] < angle_grid) &
@@ -414,6 +411,8 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
 
         mesh[vl] = i + 1
 
+    mesh[grid_values > radius] = 0
+
     roi_inds, num_pixels, pixel_list = _process_rois(np.ravel(mesh),
                                                      detector_size,
                                                      num_angles)
@@ -422,13 +421,15 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
 
 def _process_rois(mesh, detector_size, num_rois):
     """
-    This will find the indices of the required rois,
-    and count the number of pixels in each rois,
-    and pixels list for the required rois.
+    This is a helper function to find the indices of the required rois,
+    and count the number of pixels in each rois, and pixels list for
+    the required rois.
 
     Parameters
     ----------
-    mesh : ndarry
+    mesh : ndarray
+        indices of the required roi's
+        ([detector_size[0]*detector_size[1]], )
 
     detector_size : tuple
         2 element tuple defining the number of pixels
@@ -441,7 +442,7 @@ def _process_rois(mesh, detector_size, num_rois):
     Returns
     -------
     roi_inds : ndarray
-        indices of the reqiured roi's
+        indices of the required roi's
         (after discarding zero values from the shape
         ([detector_size[0]*detector_size[1]], )
 
