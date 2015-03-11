@@ -12,14 +12,14 @@ from skxray.fitting.xrf_model import ModelSpectrum, ParamController
 def test_xrf_model():
     MS = ModelSpectrum()
     MS.model_spectrum()
-    assert_equal(len(MS.mod.components), 20)
+    assert_equal(len(MS.mod.components), 24)
 
 
 def test_parameter_controller():
     param = get_para()
     PC = ParamController(param)
     PC.create_full_param()
-    PC.update_element_prop(['Fe'],
+    PC.update_element_prop(['Fe', 'Ce_L'],
                            pos='fixed', width='lohi',
                            area='none', ratio='fixed')
     PC.set_bound_type('linear')

@@ -111,23 +111,6 @@ para_dict = {'coherent_sct_amplitude': {'bound_type': 'none', 'min': 7.0, 'max':
              }
 
 
-# fitting strategy
-linear = {'coherent_sct_amplitude': 'none', 'compton_amplitude': 'none'}
-
-free_energy = {'coherent_sct_amplitude': 'none', 'coherent_sct_energy': 'lohi',
-               'compton_amplitude': 'none', 'compton_angle': 'lohi',
-               'compton_f_tail': 'lo', 'compton_fwhm_corr': 'lohi',
-               'e_linear': 'lohi', 'e_offset': 'lohi',
-               'fwhm_fanoprime': 'lohi', 'fwhm_offset': 'lohi'}
-
-free_all = {'coherent_sct_amplitude': 'none', 'coherent_sct_energy': 'lohi',
-            'compton_amplitude': 'none', 'compton_angle': 'lohi',
-            'compton_f_step': 'lohi', 'compton_fwhm_corr': 'lohi', 'compton_gamma': 'lohi',
-            'e_linear': 'lohi', 'e_offset': 'lohi',
-            'f_tail_linear': 'lohi', 'f_tail_offset': 'lohi',
-            'fwhm_fanoprime': 'lohi', 'fwhm_offset': 'lohi',
-            'kb_f_tail_linear': 'lohi', 'kb_f_tail_offset': 'lohi'}
-
 adjust_element = {'coherent_sct_amplitude': 'none',
                   'coherent_sct_energy': 'fixed',
                   'compton_amplitude': 'none',
@@ -146,21 +129,21 @@ adjust_element = {'coherent_sct_amplitude': 'none',
                   'non_fitting_values': 'fixed'}
 
 e_calibration = {'coherent_sct_amplitude': 'none',
-                  'coherent_sct_energy': 'fixed',
-                  'compton_amplitude': 'none',
-                  'compton_angle': 'fixed',
-                  'compton_f_step': 'fixed',
-                  'compton_f_tail': 'fixed',
-                  'compton_fwhm_corr': 'fixed',
-                  'compton_gamma': 'fixed',
-                  'compton_hi_f_tail': 'fixed',
-                  'compton_hi_gamma': 'fixed',
-                  'e_linear': 'lohi',
-                  'e_offset': 'lohi',
-                  'e_quadratic': 'fixed',
-                  'fwhm_fanoprime': 'fixed',
-                  'fwhm_offset': 'fixed',
-                  'non_fitting_values': 'fixed'}
+                 'coherent_sct_energy': 'fixed',
+                 'compton_amplitude': 'none',
+                 'compton_angle': 'fixed',
+                 'compton_f_step': 'fixed',
+                 'compton_f_tail': 'fixed',
+                 'compton_fwhm_corr': 'fixed',
+                 'compton_gamma': 'fixed',
+                 'compton_hi_f_tail': 'fixed',
+                 'compton_hi_gamma': 'fixed',
+                 'e_linear': 'lohi',
+                 'e_offset': 'lohi',
+                 'e_quadratic': 'fixed',
+                 'fwhm_fanoprime': 'fixed',
+                 'fwhm_offset': 'fixed',
+                 'non_fitting_values': 'fixed'}
 
 linear = {'coherent_sct_amplitude': 'none',
           'coherent_sct_energy': 'fixed',
@@ -180,8 +163,8 @@ linear = {'coherent_sct_amplitude': 'none',
           'non_fitting_values': 'fixed'}
 
 free_more = {'coherent_sct_amplitude': 'none',
-               'coherent_sct_energy': 'lohi',
-               'compton_amplitude': 'none',
+             'coherent_sct_energy': 'lohi',
+            'compton_amplitude': 'none',
                'compton_angle': 'lohi',
                'compton_f_step': 'lohi',
                'compton_f_tail': 'fixed',
@@ -222,7 +205,7 @@ default_param = {'coherent_sct_amplitude': {'bound_type': 'none',
                   'description': 'Incident E [keV]',
                   'max': 13.0,
                   'min': 9.0,
-                  'value': 10.0},
+                  'value': 11.0},
                  'compton_amplitude': {'bound_type': 'none',
                   'max': 10000000.0,
                   'min': 0.10,
@@ -283,7 +266,7 @@ default_param = {'coherent_sct_amplitude': {'bound_type': 'none',
                   'min': 0.16,
                   'tool_tip': 'width**2 = (b1/2.3548)**2 + 3.85*b2*E',
                   'value': 0.178},
-                 'non_fitting_values': {'element_list': 'Ar, Fe, Ce_L',
+                 'non_fitting_values': {'element_list': 'Ar, Fe, Ce_L, Pt_M',
                   'energy_bound_high': 12.0,
                   'energy_bound_low': 2.5}}
 

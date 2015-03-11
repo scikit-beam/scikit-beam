@@ -63,7 +63,7 @@ from skxray.fitting.background import snip_method
 from lmfit import Model
 
 
-# emission line energy above 1 keV
+# emission line energy between (1, 30) keV
 k_line = ['Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr',
           'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb',
           'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd',
@@ -82,6 +82,7 @@ m_line = ['Hf_M', 'Ta_M', 'W_M', 'Re_M', 'Os_M', 'Ir_M', 'Pt_M', 'Au_M', 'Hg_M',
 k_list = ['ka1', 'ka2', 'kb1', 'kb2']
 l_list = ['la1', 'la2', 'lb1', 'lb2', 'lb3', 'lb4', 'lb5',
           'lg1', 'lg2', 'lg3', 'lg4', 'll', 'ln']
+m_list = ['ma1', 'ma2', 'mb', 'mg']
 
 
 def element_peak_xrf(x, area, center,
@@ -203,11 +204,31 @@ def update_parameter_dict(xrf_parameter, fit_results):
             xrf_parameter[str(k)]['value'] = fit_results.values[str(k)]
 
 
-_STRATEGEY_REGISTRY = {'linear': sfb_pd.linear,
-                       'adjust_element': sfb_pd.adjust_element,
-                       'e_calibration': sfb_pd.e_calibration,
-                       'fit_with_tail': sfb_pd.fit_with_tail,
-                       'free_more': sfb_pd.free_more}
+_STRATEGY_REGISTRY = {'linear': sfb_pd.linear,
+                      'adjust_element': sfb_pd.adjust_element,
+                      'e_calibration': sfb_pd.e_calibration,
+                      'fit_with_tail': sfb_pd.fit_with_tail,
+                      'free_more': sfb_pd.free_more}
+
+
+def register_strategy(key, strategy, overwrite=True):
+    """
+    Register new strategy.
+
+    Parameters
+    ----------
+    key : str
+        strategy name
+    strategy : dict
+        bound for every parameter
+    """
+    if (not overwrite) and (key in _STRATEGY_REGISTRY):
+            if _STRATEGY_REGISTRY[key] is strategy:
+                return
+            raise RuntimeError("You are trying to overwrite an "
+                               "existing strategy: {}".format(key))
+    _STRATEGY_REGISTRY[key] = strategy
+
 
 
 def set_parameter_bound(xrf_parameter, bound_option, extra_config=None):
@@ -223,7 +244,7 @@ def set_parameter_bound(xrf_parameter, bound_option, extra_config=None):
     bound_option : str
         define bound type
     """
-    strat_dict = _STRATEGEY_REGISTRY[bound_option]
+    strat_dict = _STRATEGY_REGISTRY[bound_option]
     if extra_config is None:
         extra_config = dict()
     for k, v in six.iteritems(xrf_parameter):
@@ -406,17 +427,17 @@ class ParamController(object):
             way to control position
         """
         if item in k_line:
-            pos_list = k_list
+            data_list = k_list
         elif item in l_line:
             item = item.split('_')[0]
-            pos_list = l_list
+            data_list = l_list
         else:
-            # calculation for m lines should be added
-            return
+            item = item.split('_')[0]
+            data_list = m_list
 
-        pos_list = [str(item)+'_'+str(v).lower() for v in pos_list]
+        data_list = [str(item)+'_'+str(v).lower() for v in data_list]
 
-        for linename in pos_list:
+        for linename in data_list:
             param_name = str(linename) + '_delta_center'
             # check if the line is activated
             if linename not in self.element_line_name:
@@ -441,8 +462,8 @@ class ParamController(object):
             item = item.split('_')[0]
             data_list = l_list
         else:
-            # calculation for m lines should be added
-            return
+            item = item.split('_')[0]
+            data_list = m_list
 
         data_list = [str(item)+'_'+str(v).lower() for v in data_list]
 
@@ -499,6 +520,9 @@ class ParamController(object):
         elif item in l_line:
             item = item.split('_')[0]
             data_list = l_list[1:]
+        else:
+            item = item.split('_')[0]
+            data_list = m_list
 
         data_list = [str(item)+'_'+str(v).lower() for v in data_list]
 
@@ -768,34 +792,18 @@ class ModelSpectrum(object):
                 gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
 
                 # position needs to be adjusted
-                #if ename in pos_adjust:
-                #    pos_name = 'pos-'+ename+'-'+str(line_name)
-                #    if parameter.has_key(pos_name):
-                #        _set_parameter_hint('delta_center', parameter[pos_name],
-                #                            gauss_mod, log_option=True)
                 pos_name = ename+'_'+str(line_name)+'_delta_center'
-                #if parameter.has_key(pos_name):
                 if pos_name in parameter:
                     _set_parameter_hint('delta_center', parameter[pos_name],
                                         gauss_mod, log_option=True)
 
                 # width needs to be adjusted
-                #if ename in width_adjust:
-                #    width_name = 'width-'+ename+'-'+str(line_name)
-                #    if parameter.has_key(width_name):
-                #        _set_parameter_hint('delta_sigma', parameter[width_name],
-                #                            gauss_mod, log_option=True)
                 width_name = ename+'_'+str(line_name)+'_delta_sigma'
                 if width_name in parameter:
                     _set_parameter_hint('delta_sigma', parameter[width_name],
                                         gauss_mod, log_option=True)
 
                 # branching ratio needs to be adjusted
-                #if ename in ratio_adjust:
-                #    ratio_name = 'ratio-'+ename+'-'+str(line_name)
-                #    if parameter.has_key(ratio_name):
-                #        _set_parameter_hint('ratio_adjust', parameter[ratio_name],
-                #                            gauss_mod, log_option=True)
                 ratio_name = ename+'_'+str(line_name)+'_ratio_adjust'
                 if ratio_name in parameter:
                     _set_parameter_hint('ratio_adjust', parameter[ratio_name],
