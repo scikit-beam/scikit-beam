@@ -3,7 +3,7 @@
 # @author: Mark Sutton                                                 #
 #                                                                      #
 # Developed at the NSLS-II, Brookhaven National Laboratory             #
-# Developed by Sameera K. Abeykoon and  Yugang Zhang, February 2014    #
+# Developed by Sameera K. Abeykoon and Yugang Zhang, February 2014    #
 #                                                                      #
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
@@ -106,11 +106,11 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
     Notes
     -----
     In order to calculate correlations for delays, images must be
-    keep for up to the maximum delay. These are stored in the array
-    buf. This algorithm only keeps number of buffers delays but several
-    levels of delays number of levels are kept. Each level has twice the
-    delay times of the next lower one. To save needless copying, of cyclic
-    storage of images in buf is used.
+    keep for upto the maximum delay. These are stored in the array
+    buf. This algorithm only keeps number of buffers and delays but
+    several levels of delays number of levels are kept in buf. Each
+    level has twice the delay times of the next lower one. To save
+    needless copying, of cyclic storage of images in buf is used.
 
     References: text [1]_
 
@@ -121,19 +121,19 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
 
     """
     for item in num_pixels:
-        if item==0:
+        if item == 0:
             raise ValueError("Number of pixels of the required roi's"
                              " cannot be zero,"
                              " num_pixels = {0}".format(num_pixels))
 
     # matrix of auto-correlation function without normalizations
-    G = np.zeros(((num_levels +1)*num_bufs/2, num_qs),
+    G = np.zeros(((num_levels + 1)*num_bufs/2, num_qs),
                  dtype=np.float64)
     # matrix of past intensity normalizations
-    IAP = np.zeros(((num_levels +1)*num_bufs/2, num_qs),
+    IAP = np.zeros(((num_levels + 1)*num_bufs/2, num_qs),
                    dtype=np.float64)
     # matrix of future intensity normalizations
-    IAF = np.zeros(((num_levels +1)*num_bufs/2, num_qs),
+    IAF = np.zeros(((num_levels + 1)*num_bufs/2, num_qs),
                    dtype=np.float64)
 
     # matrix of one-time correlation for required roi's
@@ -153,12 +153,12 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
     num_frames = img_stack.shape[0]
 
     start_time = time.time()
-    for n in range (0, num_frames):  # changed the number of frames
+    for n in range(0, num_frames):  # changed the number of frames
         image_array = img_stack[n]
 
-        cur[0] = 1 + cur[0]%num_bufs  # increment buffer
+        cur[0] = 1 + cur[0] % num_bufs  # increment buffer
 
-        buf[0, cur[0] -1 ]  = (np.ravel(image_array))[pixel_list]
+        buf[0, cur[0] - 1] = (np.ravel(image_array))[pixel_list]
         G, IAP, IAF, num = _process(buf, G, IAP, IAF, q_inds,
                                     num_bufs, num_pixels, num, level=0,
                                     buf_no=cur[0] - 1)
@@ -170,20 +170,20 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
 
         while processing:
             if cts[level]:
-                prev = 1 + (cur[level - 1] - 1 - 1 + num_bufs)%num_bufs
-                cur[level] = 1 + cur[level]%num_bufs
+                prev = 1 + (cur[level - 1] -  2 + num_bufs)%num_bufs
+                cur[level] = 1 + cur[level] % num_bufs
                 buf[level, cur[level] - 1] = (buf[level - 1, prev - 1] +
                                               buf[level - 1,
                                                   cur[level - 1] - 1])/2
 
                 cts[level] = 0
                 G, IAP, IAF, num = _process(buf, G, IAP, IAF, q_inds,
-                                       num_bufs, num_pixels, num,
-                                       level=level, buf_no=cur[level]-1,)
+                                            num_bufs, num_pixels, num,
+                                            level=level, buf_no=cur[level]-1,)
                 level += 1
 
                 # Checking whether there is next level for processing
-                if level<num_levels:
+                if level < num_levels:
                     processing = 1
                 else:
                     processing = 0
@@ -193,12 +193,12 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
 
     elapsed_time = time.time() - start_time
 
-    if len(np.where(IAP==0)[0])!= 0:
-        g_max = np.where(IAP==0)[0][0]
+    if len(np.where(IAP == 0)[0]) != 0:
+        g_max = np.where(IAP == 0)[0][0]
     else:
         g_max = IAP.shape[0]
 
-    g2 = (G[: g_max]/ (IAP[: g_max]*IAF[: g_max]))
+    g2 = (G[: g_max] / (IAP[: g_max] * IAF[: g_max]))
 
     tot_channels, lag_steps = core.multi_tau_lags(num_levels,
                                                   num_bufs)
@@ -209,8 +209,8 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
 def _process(buf, G, IAP, IAF, q_inds, num_bufs,
              num_pixels, num, level, buf_no):
     """
-    Symmetric normalization is used and this helper function
-    calculates G, IAP and IAF at each level
+    This helper function calculates G, IAP and IAF at
+    each level, symmetric normalization is used
 
     Parameters
     ----------
@@ -271,7 +271,7 @@ def _process(buf, G, IAP, IAF, q_inds, num_bufs,
     """
     num[level] += 1
 
-    if level==0:
+    if level == 0:
         i_min = 0
     else:
         i_min = int(num_bufs/2)
@@ -279,16 +279,19 @@ def _process(buf, G, IAP, IAF, q_inds, num_bufs,
     for i in range(i_min, min(num[level], num_bufs)):
         t_index = level*num_bufs/2 + i
 
-        delay_no =  (buf_no - (i-1) -1 + num_bufs)%num_bufs
+        delay_no = (buf_no - i) % num_bufs
 
         IP = buf[level, delay_no]
         IF = buf[level, buf_no]
 
-        G[t_index] += ((np.bincount(q_inds, weights=np.ravel(IP*IF))[1:])/num_pixels
+        G[t_index] += ((np.bincount(q_inds,
+                                    weights=np.ravel(IP*IF))[1:])/num_pixels
                        - G[t_index])/(num[level] - i)
-        IAP[t_index] += ((np.bincount(q_inds, weights=np.ravel(IP))[1:])/num_pixels
+        IAP[t_index] += ((np.bincount(q_inds,
+                                      weights=np.ravel(IP))[1:])/num_pixels
                          - IAP[t_index])/(num[level] - i)
-        IAF[t_index] += ((np.bincount(q_inds, weights=np.ravel(IF))[1:])/num_pixels
-                         - IAF[t_index])/(num[level] -i)
+        IAF[t_index] += ((np.bincount(q_inds,
+                                      weights=np.ravel(IF))[1:])/num_pixels
+                         - IAF[t_index])/(num[level] - i)
 
     return G, IAP, IAF, num
