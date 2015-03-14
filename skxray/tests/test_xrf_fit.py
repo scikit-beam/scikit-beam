@@ -77,10 +77,15 @@ def test_fit():
 
 
 def test_register():
+    new_strategy = e_calibration
+    register_strategy('e_calibration', new_strategy, overwrite=False)
+    assert_equal(len(_STRATEGY_REGISTRY), 5)
+
     new_strategy = copy.deepcopy(e_calibration)
     new_strategy['coherent_sct_amplitude'] = 'fixed'
     register_strategy('new_strategy', new_strategy)
     assert_equal(len(_STRATEGY_REGISTRY), 6)
+
 
 @raises(RuntimeError)
 def test_register_error():
@@ -102,17 +107,21 @@ def test_pre_fit():
     for v in item_list:
         assert_true(v in y_total)
 
+    for k, v in six.iteritems(y_total):
+        print(k)
     # no weight pre fit
     x, y_total = pre_fit_linear(y0, param, weight=False)
     for v in item_list:
         assert_true(v in y_total)
 
 
+
 def test_escape_peak():
     y0 = synthetic_spectrum()
-    r = 0.01
+    ratio = 0.01
     param = get_para()
-    xnew, ynew = get_escape_peak(y0, r, param)
-    assert_array_almost_equal(np.sum(ynew)/np.sum(y0), r, decimal=3)
+    xnew, ynew = get_escape_peak(y0, ratio, param)
+    # ratio should be the same
+    assert_array_almost_equal(np.sum(ynew)/np.sum(y0), ratio, decimal=3)
 
 

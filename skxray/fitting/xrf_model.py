@@ -332,10 +332,8 @@ class ParamController(object):
             e = Element(ename)
             if e.cs(incident_energy)['ka1'] == 0:
                 return
-
             for num, item in enumerate(e.emission_line.all[:4]):
                 line_name = item[0]
-                val = item[1]
                 if e.cs(incident_energy)[line_name] == 0:
                     continue
                 line_list.append(str(ename)+'_'+str(line_name))
@@ -346,10 +344,20 @@ class ParamController(object):
             e = Element(ename)
             if e.cs(incident_energy)['la1'] == 0:
                 return
-
             for num, item in enumerate(e.emission_line.all[4:-4]):
                 line_name = item[0]
-                val = item[1]
+                if e.cs(incident_energy)[line_name] == 0:
+                    continue
+                line_list.append(str(ename)+'_'+str(line_name))
+            return line_list
+
+        elif ename in m_line:
+            ename = ename.split('_')[0]
+            e = Element(ename)
+            if e.cs(incident_energy)['ma1'] == 0:
+                return
+            for num, item in enumerate(e.emission_line.all[-4:]):
+                line_name = item[0]
                 if e.cs(incident_energy)[line_name] == 0:
                     continue
                 line_list.append(str(ename)+'_'+str(line_name))
@@ -832,9 +840,6 @@ class ModelSpectrum(object):
                 if e.cs(incident_energy)[line_name] == 0:
                     continue
 
-                #if gauss_mod:
-                #    gauss_mod = gauss_mod + ElementModel(prefix=str(ename)+'_'+str(line_name)+'_')
-                #else:
                 gauss_mod = ElementModel(prefix=str(ename)+'_'+str(line_name)+'_')
 
                 gauss_mod.set_param_hint('e_offset', value=self.compton_param['e_offset'].value,
@@ -857,12 +862,32 @@ class ModelSpectrum(object):
                 gauss_mod.set_param_hint('center', value=val, vary=False)
                 gauss_mod.set_param_hint('sigma', value=1, vary=False)
                 gauss_mod.set_param_hint('ratio',
-                                         value=0.1, #e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ma1'],
+                                         value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ma1'],
                                          vary=False)
 
                 gauss_mod.set_param_hint('delta_center', value=0, vary=False)
                 gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
                 gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
+
+                # position needs to be adjusted
+                pos_name = ename+'_'+str(line_name)+'_delta_center'
+                if pos_name in parameter:
+                    _set_parameter_hint('delta_center', parameter[pos_name],
+                                        gauss_mod, log_option=log_option)
+
+                # width needs to be adjusted
+                width_name = ename+'_'+str(line_name)+'_delta_sigma'
+                if width_name in parameter:
+                    _set_parameter_hint('delta_sigma', parameter[width_name],
+                                        gauss_mod, log_option=log_option)
+
+                # branching ratio needs to be adjusted
+                ratio_name = ename+'_'+str(line_name)+'_ratio_adjust'
+                if ratio_name in parameter:
+                    _set_parameter_hint('ratio_adjust', parameter[ratio_name],
+                                        gauss_mod, log_option=log_option)
+
+
 
                 if element_mod:
                     element_mod += gauss_mod
@@ -1098,7 +1123,7 @@ def pre_fit_linear(y0, param, weight=True):
 
     x, y = set_range(x0, y0, lowv, highv)
 
-    element_list = k_line + l_line #+ m_line
+    element_list = k_line + l_line + m_line
     new_element = ', '.join(element_list)
     fitting_parameters['non_fitting_values']['element_list'] = new_element
 
