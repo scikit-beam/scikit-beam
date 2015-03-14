@@ -49,7 +49,7 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 import scipy.special
 import six
-from lmfit.lineshapes import gaussian
+#from lmfit.lineshapes import gaussian
 
 
 log2 = np.log(2)

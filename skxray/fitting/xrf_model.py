@@ -49,9 +49,7 @@ import numpy as np
 from scipy.optimize import nnls
 import six
 import copy
-
-import logging
-logger = logging.getLogger(__name__)
+from collections import OrderedDict
 
 from skxray.constants.api import XrfElement as Element
 from skxray.fitting.lineshapes import gaussian
@@ -61,6 +59,9 @@ from skxray.fitting.base.parameter_data import get_para
 import skxray.fitting.base.parameter_data as sfb_pd
 from skxray.fitting.background import snip_method
 from lmfit import Model
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 # emission line energy between (1, 30) keV
@@ -152,6 +153,7 @@ def _set_parameter_hint(param_name, input_dict, input_model,
                         log_option=False):
     """
     Set parameter hint information to lmfit model from input dict.
+
     .. warning :: This function mutates the input values.
 
     Parameters
@@ -182,8 +184,8 @@ def _set_parameter_hint(param_name, input_dict, input_model,
         raise ValueError("could not set values for {0}".format(param_name))
     if log_option:
         logger.debug(' {0} bound type: {1}, value: {2}, range: {3}'.
-                    format(param_name, input_dict['bound_type'], input_dict['value'],
-                           [input_dict['min'], input_dict['max']]))
+                     format(param_name, input_dict['bound_type'], input_dict['value'],
+                            [input_dict['min'], input_dict['max']]))
 
 
 def update_parameter_dict(xrf_parameter, fit_results):
@@ -228,7 +230,6 @@ def register_strategy(key, strategy, overwrite=True):
             raise RuntimeError("You are trying to overwrite an "
                                "existing strategy: {}".format(key))
     _STRATEGY_REGISTRY[key] = strategy
-
 
 
 def set_parameter_bound(xrf_parameter, bound_option, extra_config=None):
@@ -375,17 +376,17 @@ class ParamController(object):
         set_parameter_bound(self.new_parameter, bound_option,
                             self._element_strategy)
 
-    def update_with_fit_result(self, fit_results):
-        """
-        Update fitting parameters dictionary according to given fitting results,
-        usually obtained from previous run.
-
-        Parameters
-        ----------
-        fit_results : object
-            ModelFit object from lmfit
-        """
-        update_parameter_dict(self.new_parameter, fit_results)
+    # def update_with_fit_result(self, fit_results):
+    #     """
+    #     Update fitting parameters dictionary according to given fitting results,
+    #     usually obtained from previous run.
+    #
+    #     Parameters
+    #     ----------
+    #     fit_results : object
+    #         ModelFit object from lmfit
+    #     """
+    #     update_parameter_dict(self.new_parameter, fit_results)
 
     def update_element_prop(self, element_list, **kwargs):
         """
@@ -444,7 +445,7 @@ class ParamController(object):
                 continue
             new_pos = element_dict['pos'].copy()
             if option:
-                self._element_strategy[linename] = option
+                self._element_strategy[param_name] = option
             self.new_parameter.update({param_name: new_pos})
 
     def set_width(self, item, option=None):
@@ -650,7 +651,7 @@ class ModelSpectrum(object):
         logger.debug(' Finished setting up parameters for elastic model.')
         self.elastic = elastic
 
-    def set_element_model(self, ename, default_area=1e5):
+    def set_element_model(self, ename, default_area=1e5, log_option=False):
         """
         Construct element model.
 
@@ -658,6 +659,10 @@ class ModelSpectrum(object):
         ----------
         ename : str
             element model
+        default_area : float
+            value for the initial area of a given element
+        log_option : bool
+            show log or not for element setup, mainly for _set_parameter_hint function
         """
 
         incident_energy = self.incident_energy
@@ -669,7 +674,7 @@ class ModelSpectrum(object):
             e = Element(ename)
             if e.cs(incident_energy)['ka1'] == 0:
                 logger.debug(' {0} Ka emission line is not activated '
-                            'at this energy {1}'.format(ename, incident_energy))
+                             'at this energy {1}'.format(ename, incident_energy))
                 return
 
             logger.debug(' --- Started building {0} peak. ---'.format(ename))
@@ -713,32 +718,32 @@ class ModelSpectrum(object):
                 area_name = str(ename)+'_'+str(line_name)+'_area'
                 if area_name in parameter:
                     _set_parameter_hint(area_name, parameter[area_name],
-                                        gauss_mod, log_option=True)
+                                        gauss_mod, log_option=log_option)
 
                 gauss_mod.set_param_hint('center', value=val, vary=False)
                 ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
                 gauss_mod.set_param_hint('ratio', value=ratio_v, vary=False)
                 gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
                 logger.debug(' {0} {1} peak is at energy {2} with'
-                            ' branching ratio {3}.'. format(ename, line_name, val, ratio_v))
+                             ' branching ratio {3}.'. format(ename, line_name, val, ratio_v))
 
                 # position needs to be adjusted
                 pos_name = ename+'_'+str(line_name)+'_delta_center'
                 if pos_name in parameter:
                     _set_parameter_hint('delta_center', parameter[pos_name],
-                                        gauss_mod, log_option=True)
+                                        gauss_mod, log_option=log_option)
 
                 # width needs to be adjusted
                 width_name = ename+'_'+str(line_name)+'_delta_sigma'
                 if width_name in parameter:
                     _set_parameter_hint('delta_sigma', parameter[width_name],
-                                        gauss_mod, log_option=True)
+                                        gauss_mod, log_option=log_option)
 
                 # branching ratio needs to be adjusted
                 ratio_name = ename+'_'+str(line_name)+'_ratio_adjust'
                 if ratio_name in parameter:
                     _set_parameter_hint('ratio_adjust', parameter[ratio_name],
-                                        gauss_mod, log_option=True)
+                                        gauss_mod, log_option=log_option)
 
                 if element_mod:
                     element_mod += gauss_mod
@@ -751,7 +756,7 @@ class ModelSpectrum(object):
             e = Element(ename)
             if e.cs(incident_energy)['la1'] == 0:
                 logger.debug('{0} La1 emission line is not activated '
-                            'at this energy {1}'.format(ename, incident_energy))
+                             'at this energy {1}'.format(ename, incident_energy))
                 return
 
             for num, item in enumerate(e.emission_line.all[4:-4]):
@@ -795,19 +800,19 @@ class ModelSpectrum(object):
                 pos_name = ename+'_'+str(line_name)+'_delta_center'
                 if pos_name in parameter:
                     _set_parameter_hint('delta_center', parameter[pos_name],
-                                        gauss_mod, log_option=True)
+                                        gauss_mod, log_option=log_option)
 
                 # width needs to be adjusted
                 width_name = ename+'_'+str(line_name)+'_delta_sigma'
                 if width_name in parameter:
                     _set_parameter_hint('delta_sigma', parameter[width_name],
-                                        gauss_mod, log_option=True)
+                                        gauss_mod, log_option=log_option)
 
                 # branching ratio needs to be adjusted
                 ratio_name = ename+'_'+str(line_name)+'_ratio_adjust'
                 if ratio_name in parameter:
                     _set_parameter_hint('ratio_adjust', parameter[ratio_name],
-                                        gauss_mod, log_option=True)
+                                        gauss_mod, log_option=log_option)
                 if element_mod:
                     element_mod += gauss_mod
                 else:
@@ -818,7 +823,7 @@ class ModelSpectrum(object):
             e = Element(ename)
             if e.cs(incident_energy)['ma1'] == 0:
                 logger.debug('{0} ma1 emission line is not activated '
-                            'at this energy {1}'.format(ename, incident_energy))
+                             'at this energy {1}'.format(ename, incident_energy))
                 return
 
             for num, item in enumerate(e.emission_line.all[-4:]):
@@ -957,7 +962,7 @@ def get_escape_peak(y, ratio, fitting_parameters,
 
 def get_linear_model(x, param_dict, default_area=1e5):
     """
-    Construct linear model for auto fitting analysis.
+    Create spectrum with parameters given from param_dict.
 
     Parameters
     ----------
@@ -965,6 +970,8 @@ def get_linear_model(x, param_dict, default_area=1e5):
         independent variable, channel number instead of energy
     param_dict : dict
         fitting paramters
+    default_area : float
+            value for the initial area of a given element
 
     Returns
     -------
@@ -1051,9 +1058,89 @@ class PreFitAnalysis(object):
         weights = abs(weights)
         weights = weights/max(weights)
 
-        a = np.transpose(np.multiply(np.transpose(standard),np.sqrt(weights)))
-        b = np.multiply(experiments,np.sqrt(weights))
+        a = np.transpose(np.multiply(np.transpose(standard), np.sqrt(weights)))
+        b = np.multiply(experiments, np.sqrt(weights))
 
         [results, residue] = nnls(a, b)
 
         return results, residue
+
+
+def pre_fit_linear(y0, param, weight=True):
+    """
+    Run prefit to get initial elements.
+
+    Parameters
+    ----------
+    y0 : array
+        Spectrum intensity
+    param : dict
+        Fitting parameters
+    weight : bool
+        use weight or not when fitting is performed
+
+    Returns
+    -------
+    x : array
+        x axis after cut
+    result_dict : dict
+        Fitting results
+    """
+
+    # Need to use deepcopy here to avoid unexpected change on parameter dict
+    fitting_parameters = copy.deepcopy(param)
+
+    x0 = np.arange(len(y0))
+
+    # ratio to transfer energy value back to channel value
+    approx_ratio = 100
+
+    lowv = fitting_parameters['non_fitting_values']['energy_bound_low'] * approx_ratio
+    highv = fitting_parameters['non_fitting_values']['energy_bound_high'] * approx_ratio
+
+    x, y = set_range(x0, y0, lowv, highv)
+
+    element_list = k_line + l_line #+ m_line
+    new_element = ', '.join(element_list)
+    fitting_parameters['non_fitting_values']['element_list'] = new_element
+
+    e_select, matv = get_linear_model(x, fitting_parameters)
+
+    non_element = ['compton', 'elastic']
+    total_list = e_select + non_element
+    total_list = [str(v) for v in total_list]
+
+    # get background
+    bg = snip_method(y, fitting_parameters['e_offset']['value'],
+                     fitting_parameters['e_linear']['value'],
+                     fitting_parameters['e_quadratic']['value'])
+
+    y = y - bg
+
+    PF = PreFitAnalysis(y, matv)
+
+    if weight:
+        out, res = PF.nnls_fit_weight()
+    else:
+        out, res = PF.nnls_fit()
+
+    total_y = out * matv
+
+    # use ordered dict
+    result_dict = OrderedDict()
+
+    for i in range(len(total_list)):
+        if np.sum(total_y[:, i]) == 0:
+            continue
+        if '_L' in total_list[i] or '_M' in total_list[i] \
+                or total_list[i] in non_element:
+            result_dict.update({total_list[i]: total_y[:, i]})
+        else:
+            result_dict.update({total_list[i] + '_K': total_y[:, i]})
+    result_dict.update(background=bg)
+
+    x = (fitting_parameters['e_offset']['value'] +
+         fitting_parameters['e_linear']['value']*x +
+         fitting_parameters['e_quadratic']['value'] * x**2)
+
+    return x, result_dict
