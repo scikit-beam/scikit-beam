@@ -192,6 +192,7 @@ def update_parameter_dict(xrf_parameter, fit_results):
     """
     Update fitting parameters dictionary according to given fitting results,
     usually obtained from previous run.
+
     .. warning :: This function mutates the input values.
 
     Parameters
@@ -376,18 +377,6 @@ class ParamController(object):
         set_parameter_bound(self.new_parameter, bound_option,
                             self._element_strategy)
 
-    # def update_with_fit_result(self, fit_results):
-    #     """
-    #     Update fitting parameters dictionary according to given fitting results,
-    #     usually obtained from previous run.
-    #
-    #     Parameters
-    #     ----------
-    #     fit_results : object
-    #         ModelFit object from lmfit
-    #     """
-    #     update_parameter_dict(self.new_parameter, fit_results)
-
     def update_element_prop(self, element_list, **kwargs):
         """
         Update element properties, such as pos, width, area and ratio.
@@ -557,19 +546,28 @@ def get_sum_area(element_name, result_val):
         return (result_val.values[str(element_name)+'_'+line_name+'_area'] *
                 result_val.values[str(element_name)+'_'+line_name+'_ratio'] *
                 result_val.values[str(element_name)+'_'+line_name+'_ratio_adjust'])
-
+    sumv = 0
     if element_name in k_line:
-        sumv = (get_value(result_val, element_name, 'ka1') +
-                get_value(result_val, element_name, 'ka2') +
-                get_value(result_val, element_name, 'kb1'))
-        if str(element_name)+'_kb2_area' in result_val.values:
-            sumv += get_value(result_val, element_name, 'kb2')
+        for line_n in k_list:
+            full_name = element_name + '_' + line_n + '_area'
+            if full_name in result_val.values:
+                sumv += get_value(result_val, element_name, line_n)
+    elif element_name in l_line:
+        for line_n in l_list:
+            full_name = element_name.split('_')[0] + '_' + line_n + '_area'
+            if full_name in result_val.values:
+                sumv += get_value(result_val, element_name.split('_')[0], line_n)
+    elif element_name in m_line:
+        for line_n in m_list:
+            full_name = element_name.split('_')[0] + '_' + line_n + '_area'
+            if full_name in result_val.values:
+                sumv += get_value(result_val, element_name.split('_')[0], line_n)
     return sumv
 
 
 class ModelSpectrum(object):
     """
-    Consruct Fluorescence spectrum which includes elastic peak,
+    Construct Fluorescence spectrum which includes elastic peak,
     compton and element peaks.
     """
 
@@ -581,9 +579,9 @@ class ModelSpectrum(object):
             saving all the fitting values and their bounds
         """
         if xrf_parameter:
-            self.parameter = dict(xrf_parameter)
+            self.parameter = copy.deepcopy(xrf_parameter)
         else:
-            self.parameter = get_para()
+            self.parameter = copy.deepcopy(get_para())
         self._config()
 
     def _config(self):
@@ -929,7 +927,7 @@ def set_range(x, y, low, high):
         y with new range
     """
     out = np.array([v for v in zip(x, y) if v[0]>low and v[0]<high])
-    return out[:,0], out[:,1]
+    return out[:, 0], out[:, 1]
 
 
 def get_escape_peak(y, ratio, fitting_parameters,
@@ -1114,7 +1112,6 @@ def pre_fit_linear(y0, param, weight=True):
     bg = snip_method(y, fitting_parameters['e_offset']['value'],
                      fitting_parameters['e_linear']['value'],
                      fitting_parameters['e_quadratic']['value'])
-
     y = y - bg
 
     PF = PreFitAnalysis(y, matv)

@@ -4,13 +4,16 @@ from __future__ import (absolute_import, division,
 
 import six
 import numpy as np
+import copy
 from numpy.testing import (assert_equal, assert_array_almost_equal)
 from nose.tools import assert_true, raises
-from skxray.fitting.base.parameter_data import get_para, default_param
-from skxray.fitting.xrf_model import (ElementModel, ModelSpectrum,
-                                      ParamController, _set_parameter_hint,
+from skxray.fitting.base.parameter_data import get_para, e_calibration, adjust_element
+from skxray.fitting.xrf_model import (ModelSpectrum, ParamController,
                                       pre_fit_linear,
-                                      get_linear_model, set_range, PreFitAnalysis)
+                                      get_linear_model, set_range,
+                                      get_sum_area, get_escape_peak,
+                                      register_strategy, update_parameter_dict,
+                                      _STRATEGY_REGISTRY)
 
 
 def synthetic_spectrum():
@@ -19,12 +22,6 @@ def synthetic_spectrum():
 
     elist, matv = get_linear_model(x, param, default_area=1e5)
     return np.sum(matv, 1) + 100  # avoid zero values
-
-
-# def test_xrf_model():
-#     MS = ModelSpectrum()
-#     MS.model_spectrum()
-#     assert_equal(len(MS.mod.components), 24)
 
 
 def test_parameter_controller():
@@ -62,6 +59,35 @@ def test_fit():
             # error smaller than 1%
             assert_true((v-1e5)/1e5 < 1e-2)
 
+    # multiple peak sumed, so value should be larger than one peak area 1e5
+    sum_Fe = get_sum_area('Fe', result)
+    assert_true(sum_Fe > 1e5)
+
+    sum_Ce = get_sum_area('Ce_L', result)
+    assert_true(sum_Ce > 1e5)
+
+    sum_Pt = get_sum_area('Pt_M', result)
+    assert_true(sum_Ce > 1e5)
+
+    # update values
+    update_parameter_dict(MS.parameter, result)
+    for k, v in six.iteritems(MS.parameter):
+        if 'area' in MS.parameter:
+            assert_equal(v['value'], result.values[k])
+
+
+def test_register():
+    new_strategy = copy.deepcopy(e_calibration)
+    new_strategy['coherent_sct_amplitude'] = 'fixed'
+    register_strategy('new_strategy', new_strategy)
+    assert_equal(len(_STRATEGY_REGISTRY), 6)
+
+@raises(RuntimeError)
+def test_register_error():
+    new_strategy = copy.deepcopy(e_calibration)
+    new_strategy['coherent_sct_amplitude'] = 'fixed'
+    register_strategy('e_calibration', new_strategy, overwrite=False)
+
 
 def test_pre_fit():
     y0 = synthetic_spectrum()
@@ -80,3 +106,13 @@ def test_pre_fit():
     x, y_total = pre_fit_linear(y0, param, weight=False)
     for v in item_list:
         assert_true(v in y_total)
+
+
+def test_escape_peak():
+    y0 = synthetic_spectrum()
+    r = 0.01
+    param = get_para()
+    xnew, ynew = get_escape_peak(y0, r, param)
+    assert_array_almost_equal(np.sum(ynew)/np.sum(y0), r, decimal=3)
+
+
