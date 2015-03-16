@@ -55,7 +55,7 @@ import numpy.testing as npt
 def test_correlation():
     num_levels = 4
     num_bufs = 4  # must be even
-    num_qs = 3  # number of interested roi's (rings)
+    num_qs = 2  # number of interested roi's (rings)
     img_dim = (150, 150) # detector size
     calibrated_center = (60., 55.)
     first_r = 20.  # radius of the first ring
@@ -64,7 +64,7 @@ def test_correlation():
     (q_inds, ring_vals, num_pixels,
      pixel_list) = diff_roi.roi_rings(img_dim, calibrated_center,
                                       num_qs, first_r, delta_r)
-    roi_data = np.array(([20, 50, 10, 8 ], [60, 70, 12, 6], [140, 120, 5, 10]),
+    roi_data = np.array(([60, 70, 12, 6], [140, 120, 5, 10]),
                                        dtype=np.int64)
 
     (q_inds, num_pixels,
@@ -77,5 +77,19 @@ def test_correlation():
     g2, lag_steps, elapsed_time = corr.auto_corr(num_levels, num_bufs,
                                                  num_qs, num_pixels,
                                                  pixel_list, q_inds,
-                                                 img_stack)
+                                                 np.asarray(img_stack))
 
+    assert_array_equal(lag_steps, np.array([0, 1, 2, 3, 4, 6, 8, 12, 16, 24]))
+
+    g2_m = np. array([[1.20062248, 1.20282828],
+                      [0.99881202, 1.0024648 ],
+                      [0.99804142, 0.99780405],
+                      [0.99948406, 1.0007873],
+                      [1.00007335, 1.00094191],
+                      [1.00070609, 1.00022211],
+                      [0.99935335, 1.00052731],
+                      [0.99994499, 1.00016869],
+                      [1.00043719, 1.00014879],
+                      [0.99970295, 1.0002489 ]])
+
+    assert_array_almost_equal(g2, g2_m, decimal=8)
