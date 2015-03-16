@@ -159,7 +159,7 @@ def _set_parameter_hint(param_name, input_dict, input_model,
     Parameters
     ----------
     param_name : str
-        parameter used for fitting
+        one of the fitting parameter name
     input_dict : dict
         all the initial values and constraints for given parameters
     input_model : object
@@ -179,7 +179,7 @@ def _set_parameter_hint(param_name, input_dict, input_model,
                                    min=input_dict['min'])
     elif input_dict['bound_type'] == 'hi':
         input_model.set_param_hint(name=param_name, value=input_dict['value'], vary=True,
-                                   min=input_dict['max'])
+                                   max=input_dict['max'])
     else:
         raise ValueError("could not set values for {0}".format(param_name))
     if log_option:
@@ -1084,12 +1084,16 @@ class PreFitAnalysis(object):
         a = np.transpose(np.multiply(np.transpose(standard), np.sqrt(weights)))
         b = np.multiply(experiments, np.sqrt(weights))
 
+        # when the experimental data becomes noisy, NaN value appear in a and b.
+        a[np.isnan(a)] = 0
+        b[np.isnan(b)] = 0
+
         [results, residue] = nnls(a, b)
 
         return results, residue
 
 
-def pre_fit_linear(y0, param, weight=True):
+def pre_fit_linear(y0, param, element_list=k_line+l_line+m_line, weight=True):
     """
     Run prefit to get initial elements.
 
@@ -1099,6 +1103,8 @@ def pre_fit_linear(y0, param, weight=True):
         Spectrum intensity
     param : dict
         Fitting parameters
+    element_list : list, opt
+        if not given, use list from param dict
     weight : bool
         use weight or not when fitting is performed
 
@@ -1123,9 +1129,10 @@ def pre_fit_linear(y0, param, weight=True):
 
     x, y = set_range(x0, y0, lowv, highv)
 
-    element_list = k_line + l_line + m_line
-    new_element = ', '.join(element_list)
-    fitting_parameters['non_fitting_values']['element_list'] = new_element
+    #element_list = k_line + l_line + m_line
+    if element_list:
+        new_element = ', '.join(element_list)
+        fitting_parameters['non_fitting_values']['element_list'] = new_element
 
     e_select, matv = get_linear_model(x, fitting_parameters)
 

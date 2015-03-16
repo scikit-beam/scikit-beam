@@ -60,7 +60,6 @@ lo: with low boundary
 hi: with high boundary
 none: no fitting boundary
 
-
 Different fitting strategies are included to turn on or turn off some parameters.
 Those strategies are default, linear, free_energy, free_all and e_calibration.
 They are empirical experience from authors of the original code.
@@ -111,6 +110,7 @@ para_dict = {'coherent_sct_amplitude': {'bound_type': 'none', 'min': 7.0, 'max':
              }
 
 
+# fitting strategies
 adjust_element = {'coherent_sct_amplitude': 'none',
                   'coherent_sct_energy': 'fixed',
                   'compton_amplitude': 'none',
@@ -164,20 +164,20 @@ linear = {'coherent_sct_amplitude': 'none',
 
 free_more = {'coherent_sct_amplitude': 'none',
              'coherent_sct_energy': 'lohi',
-            'compton_amplitude': 'none',
-               'compton_angle': 'lohi',
-               'compton_f_step': 'lohi',
-               'compton_f_tail': 'fixed',
-               'compton_fwhm_corr': 'lohi',
-               'compton_gamma': 'lohi',
-               'compton_hi_f_tail': 'fixed',
-               'compton_hi_gamma': 'fixed',
-               'e_linear': 'lohi',
-               'e_offset': 'lohi',
-               'e_quadratic': 'lohi',
-               'fwhm_fanoprime': 'lohi',
-               'fwhm_offset': 'lohi',
-               'non_fitting_values': 'fixed'}
+             'compton_amplitude': 'none',
+             'compton_angle': 'lohi',
+             'compton_f_step': 'lohi',
+             'compton_f_tail': 'fixed',
+             'compton_fwhm_corr': 'lohi',
+             'compton_gamma': 'lohi',
+             'compton_hi_f_tail': 'fixed',
+             'compton_hi_gamma': 'fixed',
+             'e_linear': 'lohi',
+             'e_offset': 'lohi',
+             'e_quadratic': 'lohi',
+             'fwhm_fanoprime': 'lohi',
+             'fwhm_offset': 'lohi',
+             'non_fitting_values': 'fixed'}
 
 fit_with_tail = {'coherent_sct_amplitude': 'none',
                  'coherent_sct_energy': 'lohi',

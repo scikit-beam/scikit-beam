@@ -13,7 +13,7 @@ from skxray.fitting.xrf_model import (ModelSpectrum, ParamController,
                                       get_linear_model, set_range,
                                       get_sum_area, get_escape_peak,
                                       register_strategy, update_parameter_dict,
-                                      _STRATEGY_REGISTRY)
+                                      _set_parameter_hint, _STRATEGY_REGISTRY)
 
 
 def synthetic_spectrum():
@@ -115,7 +115,6 @@ def test_pre_fit():
         assert_true(v in y_total)
 
 
-
 def test_escape_peak():
     y0 = synthetic_spectrum()
     ratio = 0.01
@@ -123,5 +122,24 @@ def test_escape_peak():
     xnew, ynew = get_escape_peak(y0, ratio, param)
     # ratio should be the same
     assert_array_almost_equal(np.sum(ynew)/np.sum(y0), ratio, decimal=3)
+
+
+def test_set_param_hint():
+    bound_options = ['none', 'lohi', 'fixed', 'lo', 'hi']
+
+    MS = ModelSpectrum()
+    MS.model_spectrum()
+
+    # get compton model
+    compton = MS.mod.components[0]
+
+    for v in bound_options:
+        input_param = {'bound_type': v, 'max': 13.0, 'min': 9.0, 'value': 11.0}
+        _set_parameter_hint('coherent_sct_energy', input_param, compton)
+        p = compton.make_params()
+        if v == 'fixed':
+            assert_equal(p['coherent_sct_energy'].vary, False)
+        else:
+            assert_equal(p['coherent_sct_energy'].vary, True)
 
 
