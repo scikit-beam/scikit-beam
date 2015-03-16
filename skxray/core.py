@@ -1171,9 +1171,9 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     tot_channels = (multitau_levels + 1)*multitau_channels//2
 
     lag = []
-    lag_steps = np.arange(1, multitau_channels + 1)
+    lag_steps = np.arange(0, multitau_channels)
     for i in range(2, multitau_levels + 1):
-        for j in range(1, multitau_channels//2 + 1):
+        for j in range(0, multitau_channels//2):
             lag.append((multitau_channels//2 + j)*(2**(i - 1)))
 
     lag_steps = np.append(lag_steps, np.array(lag))

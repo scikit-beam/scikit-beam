@@ -369,7 +369,7 @@ def test_multi_tau_lags():
     multi_tau_levels = 3
     multi_tau_channels = 8
 
-    delay_steps = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 28, 32]
+    delay_steps = [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 28]
 
     tot_channels, lag_steps = core.multi_tau_lags(multi_tau_levels,
                                                   multi_tau_channels)
