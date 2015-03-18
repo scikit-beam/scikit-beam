@@ -887,8 +887,6 @@ class ModelSpectrum(object):
                     _set_parameter_hint('ratio_adjust', parameter[ratio_name],
                                         gauss_mod, log_option=log_option)
 
-
-
                 if element_mod:
                     element_mod += gauss_mod
                 else:
@@ -1063,9 +1061,14 @@ class PreFitAnalysis(object):
         [results, residue] = nnls(standard, experiments)
         return results, residue
 
-    def nnls_fit_weight(self):
+    def nnls_fit_weight(self, c_weight=10):
         """
         Non-negative fitting with weight.
+
+        Parameters
+        ----------
+        c_weight : float
+            value used to calculate weight
 
         Returns
         -------
@@ -1077,16 +1080,12 @@ class PreFitAnalysis(object):
         standard = self.standard
         experiments = self.experiments
 
-        weights = 1.0 / (1.0 + experiments)
-        weights = abs(weights)
-        weights = weights/max(weights)
+        weights = c_weight / (c_weight + experiments)
+        weights = np.abs(weights)
+        weights = weights/np.max(weights)
 
         a = np.transpose(np.multiply(np.transpose(standard), np.sqrt(weights)))
         b = np.multiply(experiments, np.sqrt(weights))
-
-        # when the experimental data becomes noisy, NaN value appear in a and b.
-        a[np.isnan(a)] = 0
-        b[np.isnan(b)] = 0
 
         [results, residue] = nnls(a, b)
 
@@ -1129,7 +1128,6 @@ def pre_fit_linear(y0, param, element_list=k_line+l_line+m_line, weight=True):
 
     x, y = set_range(x0, y0, lowv, highv)
 
-    #element_list = k_line + l_line + m_line
     if element_list:
         new_element = ', '.join(element_list)
         fitting_parameters['non_fitting_values']['element_list'] = new_element
