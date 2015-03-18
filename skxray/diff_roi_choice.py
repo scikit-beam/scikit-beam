@@ -39,7 +39,7 @@
 
 """
 This module is to get information of different region of interests(roi's).
-Information : the number of pixels, pixel indices, indices
+Information : pixel indices, num pixels, indices
 """
 
 
@@ -59,14 +59,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def roi_rectangles(num_rois, roi_data, detector_size):
+def roi_rectangles(num_rois, roi_data, detector_size, mask=None):
     """
+    This module will provide pixel indices, number of pixels, indices
+    and number of pixels for required rectangle shapes.
+
     Parameters
     ----------
-    num_rois: int
+    num_rois : int
         number of region of interests(roi)
 
-    roi_data: ndarray
+    roi_data : ndarray
         upper left co-ordinates of roi's and the, length and width of roi's
         from those co-ordinates
         shape is [num_rois][4]
@@ -217,7 +220,7 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
 
     Parameters
     ----------
-    img_dim: tuple
+    img_dim : tuple
         shape of the image (detector X and Y direction)
         Order is (num_rows, num_columns)
         shape is [detector_size[0], detector_size[1]])
@@ -348,7 +351,7 @@ def _process_rings(num_rings, ring_vals):
 
 
 def roi_divide_circle(detector_size, radius, calibrated_center,
-                      num_angles):
+                      num_angles, rotate='N'):
     """
     This module will provide the indices, number of pixels and
     pixel indices when a circular roi is divided into pies
@@ -365,9 +368,12 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
         defining the center of the image
         (column value, row value) (mm)
 
-    num_angles: int
+    num_angles : int
         number of angles ring divide into
         angles are measured from horizontal-anti clock wise
+
+    rotate : {'Y', 'N'}, optional
+        to make angles measured from vertical-anti clock wise
 
     Returns
     -------
@@ -412,15 +418,19 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
 
         mesh[vl] = i + 1
 
+    if rotate == 'Y':
+        mesh = np.rot90(mesh)
+        grid_values = np.rot90(grid_values)
+
     mesh[grid_values > radius] = 0
 
     roi_inds, num_pixels, pixel_list = _process_rois(np.ravel(mesh),
                                                      detector_size,
-                                                     num_angles)
+                                                     num_angles, rotate)
     return roi_inds, num_pixels, pixel_list
 
 
-def _process_rois(mesh, detector_size, num_rois):
+def _process_rois(mesh, detector_size, num_rois, rotate='N'):
     """
     This is a helper function to find the indices of the required rois,
     and count the number of pixels in each rois, and pixels list for
@@ -437,8 +447,12 @@ def _process_rois(mesh, detector_size, num_rois):
         in the detector.
         Order is (num_rows, num_columns)
 
-    num_rois: int
+    num_rois : int
         number of region of interests
+
+    rotate : {'Y', 'N'}, optional
+        to make angles measured from vertical-anti clock wise
+        for roi_divide_circle
 
     Returns
     -------
@@ -456,7 +470,12 @@ def _process_rois(mesh, detector_size, num_rois):
     """
     # find the pixel list
     w = np.where(mesh > 0)
-    grid = np.indices((detector_size[0], detector_size[1]))
+
+    if rotate == 'Y':
+        grid = np.indices((detector_size[1], detector_size[0]))
+    else:
+        grid = np.indices((detector_size[0], detector_size[1]))
+
     pixel_list = (grid[0]*detector_size[1] + grid[1]).flatten()[w]
 
     roi_inds = mesh[mesh > 0]
