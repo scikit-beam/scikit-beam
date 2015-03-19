@@ -56,7 +56,7 @@ import time
 import skxray.core as core
 
 
-def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
+def auto_corr(num_levels, num_bufs, num_qs,
               pixel_list, q_inds, img_stack):
     """
     This module is for one time correlation.
@@ -74,10 +74,6 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
 
     num_qs : int
         number of region of interests(roi's)
-
-    num_pixels : ndarray
-        number of pixels in certain roi's
-        roi's, dimensions are : [num_qs]X1
 
      ring_inds : ndarray
         indices of the required rings
@@ -120,6 +116,10 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
         scattering," Rev. Sci. Instrum., vol 70, p 3274-3289, 2000.
 
     """
+    # number of pixels in required roi's, dimensions are : [num_qs]X1
+    num_pixels = np.bincount(q_inds, minlength=(num_qs+1))
+    num_pixels = num_pixels[1:]
+
     for item in num_pixels:
         if item == 0:
             raise ValueError("Number of pixels of the required roi's"
@@ -170,7 +170,7 @@ def auto_corr(num_levels, num_bufs, num_qs, num_pixels,
 
         while processing:
             if cts[level]:
-                prev = 1 + (cur[level - 1] -  2 + num_bufs)%num_bufs
+                prev = 1 + (cur[level - 1] - 2 + num_bufs) % num_bufs
                 cur[level] = 1 + cur[level] % num_bufs
                 buf[level, cur[level] - 1] = (buf[level - 1, prev - 1] +
                                               buf[level - 1,

@@ -56,7 +56,7 @@ def test_correlation():
     num_levels = 4
     num_bufs = 4  # must be even
     num_qs = 2  # number of interested roi's (rings)
-    img_dim = (150, 150) # detector size
+    img_dim = (150, 150)  # detector size
     calibrated_center = (60., 55.)
     first_r = 20.  # radius of the first ring
     delta_r = 10.  # thickness of the rings
@@ -65,7 +65,7 @@ def test_correlation():
      pixel_list) = diff_roi.roi_rings(img_dim, calibrated_center,
                                       num_qs, first_r, delta_r)
     roi_data = np.array(([60, 70, 12, 6], [140, 120, 5, 10]),
-                                       dtype=np.int64)
+                        dtype=np.int64)
 
     (q_inds, num_pixels,
      pixel_list) = diff_roi.roi_rectangles(num_qs, roi_data, img_dim)
@@ -75,21 +75,21 @@ def test_correlation():
         img_stack.append(np.random.randint(1, 5, size=(img_dim)))
 
     g2, lag_steps, elapsed_time = corr.auto_corr(num_levels, num_bufs,
-                                                 num_qs, num_pixels,
-                                                 pixel_list, q_inds,
+                                                 num_qs, pixel_list, q_inds,
                                                  np.asarray(img_stack))
 
-    assert_array_almost_equal(lag_steps, np.array([0, 1, 2, 3, 4, 6, 8, 12, 16, 24]))
+    assert_array_almost_equal(lag_steps, np.array([0, 1, 2, 3, 4, 6, 8,
+                                                   12, 16, 24]))
 
-    g2_m = np. array([[1.200, 1.200],
-                      [0.998, 1.000],
-                      [0.998, 0.997],
-                      [0.999, 1.000],
-                      [1.000, 1.000],
-                      [1.000, 1.000],
-                      [0.999, 1.000],
-                      [0.999, 1.000],
-                      [1.000, 1.000],
-                      [0.999, 1.000]])
+    g2_m = np.array([[1.200, 1.200],
+                     [0.998, 1.000],
+                     [0.998, 0.997],
+                     [0.999, 1.000],
+                     [1.000, 1.000],
+                     [1.000, 1.000],
+                     [0.999, 1.000],
+                     [0.999, 1.000],
+                     [1.000, 1.000],
+                     [0.999, 1.000]])
 
     assert_array_almost_equal(g2, g2_m, decimal=2)
