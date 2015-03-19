@@ -389,34 +389,19 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
         pixel indices for the required rings
 
     """
-    mesh = np.zeros(detector_size, dtype=np.int64)
+    #mesh = np.zeros(detector_size, dtype=np.int64)
     angles = np.linspace(0, 360, num_angles)
 
     yy, xx = np.mgrid[:detector_size[0], :detector_size[1]]
     y_ = (np.flipud(yy) - calibrated_center[1])
     x_ = (xx - calibrated_center[0])
     grid_values = np.float_(np.hypot(x_, y_))
-    angle_grid = np.arctan2(y_, x_)*180/(np.pi)
+    angle_grid = np.rad2deg(np.arctan2(y_, x_))
 
-    for i in range(num_angles-1):
-        if angles[i + 1] <= 180:
-            vl = ((angles[i] < angle_grid) &
-                  (angle_grid <= angles[i + 1]))
+    angle_grid[angle_grid < 0] = 360 + angle_grid[angle_grid < 0]
 
-        elif (angles[i] < 180) & (angles[i + 1] > 180):
-            vl = ((angles[i] < angle_grid) & (angle_grid <= 180) |
-                  (-180 < angle_grid) &
-                  (angle_grid <= angles[i + 1] - 360))
-
-        elif (angles[i] == 180):
-            vl = ((-180 < angle_grid) &
-                  (angle_grid <= angles[i + 1] - 360))
-
-        else:
-            vl = ((angles[i] - 360 < angle_grid) &
-                  (angle_grid <= angles[i + 1] - 360))
-
-        mesh[vl] = i + 1
+    mesh = (np.digitize(np.ravel(angle_grid), angles,
+                        right=False)).reshape(detector_size)
 
     if rotate == 'Y':
         mesh = np.rot90(mesh)

@@ -190,11 +190,10 @@ def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
 
 
 def test_roi_divide_circle():
-    num_rois = 3
-    detector_size = (20, 26)
-    radius = 8.
-    calibrated_center = (15., 12.)
-    num_angles = 8
+    detector_size = (10, 8)
+    radius = 5.
+    calibrated_center = (5., 2.)
+    num_angles = 3
 
     (roi_inds, num_pixels,
      pixel_list) = diff_roi.roi_divide_circle(detector_size,
@@ -207,9 +206,11 @@ def test_roi_divide_circle():
     y_ = (np.flipud(yy) - calibrated_center[1])
     x_ = (xx - calibrated_center[0])
     grid_values = np.float_(np.hypot(x_, y_))
-    angle_grid = np.arctan2(y_, x_)*180/(np.pi)
+    angle_grid = np.rad2deg(np.arctan2(y_, x_))
+    angle_grid1 = np.rad2deg(np.arctan2(y_, x_))
 
-    angle_grid = angle_grid[grid_values <= radius]
+    angles = np.linspace(0, 360, num_angles)
+
     num_pixels_m = (np.bincount(ty.astype(int)))[1:]
 
     # get the indices into a grid
@@ -220,24 +221,21 @@ def test_roi_divide_circle():
     assert_array_equal(np.nonzero(zero_grid),
                        np.nonzero((ty.reshape(*detector_size))))
 
-    roi_inds_m = np.array([3, 3, 2, 2, 2, 2, 2, 3, 3, 3, 3, 2, 2,
-                           2, 2, 2, 2, 1, 3, 3, 3, 3, 3, 2, 2, 2,
-                           2, 2, 1, 1, 1, 3, 3, 3, 3, 3, 3, 2, 2,
-                           2, 2, 1, 1, 1, 4, 3, 3, 3, 3, 3, 3, 2,
-                           2, 2, 1, 1, 1, 1, 1, 4, 4, 4, 3, 3, 3,
-                           3, 2, 2, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4,
-                           4, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 4, 4,
-                           4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7,
-                           7, 7, 4, 4, 4, 4, 4, 5, 5, 6, 7, 7, 7,
-                           7, 7, 7, 7, 4, 4, 4, 5, 5, 5, 5, 6, 6,
-                           7, 7, 7, 7, 7, 7, 4, 5, 5, 5, 5, 5, 5,
-                           6, 6, 6, 7, 7, 7, 7, 7, 5, 5, 5, 5, 5,
-                           5, 6, 6, 6, 6, 7, 7, 7, 5, 5, 5, 5, 5,
-                           6, 6, 6, 6, 6, 7, 7, 7, 5, 5, 5, 5, 6,
-                           6, 6, 6, 6, 6, 7, 5, 5, 6, 6, 6, 6, 6,
-                           6])
+    # to check the indices of the angle grid
+    angle_grid[angle_grid < 0] = 360 + angle_grid[angle_grid < 0]
 
-    assert_array_equal(num_pixels_m, num_pixels)
+    mesh = np.zeros((detector_size[0], detector_size[1]))
+    for i in range(num_angles-1):
+        vl = ((angles[i] <= angle_grid) &
+                  (angle_grid < angles[i + 1]))
+        mesh[vl] = i + 1
+
+    # remove the values grater than the radius
+    mesh[grid_values > radius] = 0
+    # take out the zero values in the grid
+    roi_inds_m = mesh[mesh > 0]
+
+    assert_array_almost_equal(num_pixels_m, num_pixels)
     assert_array_equal(roi_inds, roi_inds_m)
 
 
