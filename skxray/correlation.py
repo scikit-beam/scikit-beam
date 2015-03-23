@@ -97,7 +97,7 @@ def auto_corr(num_levels, num_bufs, num_qs,
         delay or lag steps for the multiple tau analysis
 
     elapsed_times : float
-        elapsed time for auto correlation
+        elapsed time for auto correlation (in seconds)
 
     Notes
     -----
@@ -202,6 +202,8 @@ def auto_corr(num_levels, num_bufs, num_qs,
 
     tot_channels, lag_steps = core.multi_tau_lags(num_levels,
                                                   num_bufs)
+
+    lag_steps = lag_steps[:g2.shape[0]]
 
     return g2, lag_steps, elapsed_time
 
