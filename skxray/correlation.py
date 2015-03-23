@@ -162,6 +162,9 @@ def auto_corr(num_levels, num_bufs, num_qs,
         G, IAP, IAF, num = _process(buf, G, IAP, IAF, q_inds,
                                     num_bufs, num_pixels, num, level=0,
                                     buf_no=cur[0] - 1)
+
+        # check whether the number of levels is one, otherwise
+        # continue processing the next level
         if num_levels > 1:
             processing = 1
             level = 1
