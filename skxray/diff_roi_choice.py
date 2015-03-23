@@ -59,7 +59,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def roi_rectangles(num_rois, roi_data, detector_size, mask=None):
+def roi_rectangles(num_rois, roi_data, detector_size):
     """
     This module will provide pixel indices, number of pixels, indices
     and number of pixels for required rectangle shapes.
@@ -77,11 +77,6 @@ def roi_rectangles(num_rois, roi_data, detector_size, mask=None):
     detector_size : tuple
         2 element tuple defining the number of pixels in the detector.
         Order is (num_rows, num_columns)
-
-    mask : ndarray, optional
-        masked array
-        shape is ([detector_size[0], detector_size[1]])
-
 
     Returns
     -------
@@ -353,7 +348,7 @@ def _process_rings(num_rings, ring_vals):
 def roi_divide_circle(detector_size, radius, calibrated_center,
                       num_angles, rotate='N'):
     """
-    This module will provide the indices, number of pixels and
+    This function will provide the indices, number of pixels and
     pixel indices when a circular roi is divided into pies
     Parameters
     ----------
@@ -377,21 +372,18 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
 
     Returns
     -------
-    ring_inds : ndarray
-        indices of the ring values for the required rings
+    roi_inds : ndarray
+        indices for the required roi's
         (after discarding zero values from the shape
         ([detector_size[0]*detector_size[1]], )
 
     num_pixels : ndarray
-        number of pixels in each ring
+        number of pixels in each roi
 
     pixel_list : ndarray
-        pixel indices for the required rings
+        pixel indices for the required roi's
 
     """
-    #mesh = np.zeros(detector_size, dtype=np.int64)
-    angles = np.linspace(0, 360, num_angles)
-
     yy, xx = np.mgrid[:detector_size[0], :detector_size[1]]
     y_ = (np.flipud(yy) - calibrated_center[1])
     x_ = (xx - calibrated_center[0])
@@ -400,6 +392,10 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
 
     angle_grid[angle_grid < 0] = 360 + angle_grid[angle_grid < 0]
 
+    # required angles
+    angles = np.linspace(0, 360, num_angles)
+    # the indices of the bins(angles) to which each value in input
+    #  array(angle_grid) belongs.
     mesh = (np.digitize(np.ravel(angle_grid), angles,
                         right=False)).reshape(detector_size)
 
