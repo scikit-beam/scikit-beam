@@ -75,7 +75,7 @@ def auto_corr(num_levels, num_bufs, num_qs,
     num_qs : int
         number of region of interests(roi's)
 
-     ring_inds : ndarray
+    ring_inds : ndarray
         indices of the required rings
 
     pixel_list : ndarray
@@ -86,23 +86,22 @@ def auto_corr(num_levels, num_bufs, num_qs,
 
     img_stack : ndarray
         intensity array of the images
-        dimensions are: [num_img][num_rows][num_cols]
+        dimensions are: (num of images, num_rows, num_cols)
 
     Returns
     -------
     g2 : ndarray
         matrix of one-time correlation
+        shape (num_levels, num_qs)
 
     lag_steps : ndarray
         delay or lag steps for the multiple tau analysis
-
-    elapsed_times : float
-        elapsed time for auto correlation (in seconds)
+        shape num_levels
 
     Notes
     -----
     In order to calculate correlations for delays, images must be
-    keep for upto the maximum delay. These are stored in the array
+    kept for up to the maximum delay. These are stored in the array
     buf. This algorithm only keeps number of buffers and delays but
     several levels of delays number of levels are kept in buf. Each
     level has twice the delay times of the next lower one. To save
@@ -120,11 +119,10 @@ def auto_corr(num_levels, num_bufs, num_qs,
     num_pixels = np.bincount(q_inds, minlength=(num_qs+1))
     num_pixels = num_pixels[1:]
 
-    for item in num_pixels:
-        if item == 0:
-            raise ValueError("Number of pixels of the required roi's"
-                             " cannot be zero,"
-                             " num_pixels = {0}".format(num_pixels))
+    if np.any(num_pixels == 0):
+        raise ValueError("Number of pixels of the required roi's"
+                         " cannot be zero, "
+                         "num_pixels = {0}".format(num_pixels))
 
     # matrix of auto-correlation function without normalizations
     G = np.zeros(((num_levels + 1)*num_bufs/2, num_qs),
@@ -144,78 +142,71 @@ def auto_corr(num_levels, num_bufs, num_qs,
     buf = np.zeros((num_levels, num_bufs, np.sum(num_pixels)),
                    dtype=np.float64)
 
-    cts = np.zeros(num_levels)
+    # to increment buffer
     cur = np.ones((num_levels), dtype=np.int64)
 
+    # to track how many images processed in each level
     num = np.array(np.zeros(num_levels), dtype=np.int64)
 
-    # number of frames(images)
-    num_frames = img_stack.shape[0]
+    # starting time for the process
+    t1 = time.time()
 
-    start_time = time.time()
-    for n in range(0, num_frames):  # changed the number of frames
+    for n in range(0, len(img_stack)):  # changed the number of frames
         image_array = img_stack[n]
 
-        cur[0] = 1 + cur[0] % num_bufs  # increment buffer
+        cur[0] = (1 + cur[0]) % num_bufs  # increment buffer
 
+        # add image data to the buf to use for correlation
         buf[0, cur[0] - 1] = (np.ravel(image_array))[pixel_list]
+
+        # call the _process function for multi-tau level one
         G, IAP, IAF, num = _process(buf, G, IAP, IAF, q_inds,
                                     num_bufs, num_pixels, num, level=0,
                                     buf_no=cur[0] - 1)
 
-        # check whether the number of levels is one, otherwise
-        # continue processing the next level
-        if num_levels > 1:
-            processing = 1
-            level = 1
-        else:
-            processing = 0
+        # the image data will be saved in buf according to each level then call
+        #  _process function to calculate one time correlation functions
+        for level in range(1, num_levels):
+            prev = 1 + (cur[level - 1] - 2 + num_bufs) % num_bufs
+            cur[level] = (1 + cur[level]) % num_bufs
 
-        while processing:
-            if cts[level]:
-                prev = 1 + (cur[level - 1] - 2 + num_bufs) % num_bufs
-                cur[level] = 1 + cur[level] % num_bufs
-                buf[level, cur[level] - 1] = (buf[level - 1, prev - 1] +
-                                              buf[level - 1,
-                                                  cur[level - 1] - 1])/2
+            # add image data to the buf to use for correlation
+            buf[level, cur[level] - 1] = (buf[level - 1, prev - 1] +
+                                          buf[level - 1, cur[level - 1] - 1])/2
 
-                cts[level] = 0
-                G, IAP, IAF, num = _process(buf, G, IAP, IAF, q_inds,
-                                            num_bufs, num_pixels, num,
-                                            level=level, buf_no=cur[level]-1,)
-                level += 1
+            # call the _process function for each multi-tau level
+            # for multi-tau levels greater than one
+            G, IAP, IAF, num = _process(buf, G, IAP, IAF, q_inds, num_bufs,
+                                        num_pixels, num, level=level,
+                                        buf_no=cur[level]-1,)
 
-                # Checking whether there is next level for processing
-                if level < num_levels:
-                    processing = 1
-                else:
-                    processing = 0
-            else:
-                cts[level] = 1
-                processing = 0
+    # ending time for the process
+    t2 = time.time()
 
-    elapsed_time = time.time() - start_time
+    logger.info("Processing time for {0} images took {1} seconds."
+                "".format(len(img_stack), (t2-t1)))
 
     if len(np.where(IAP == 0)[0]) != 0:
         g_max = np.where(IAP == 0)[0][0]
     else:
         g_max = IAP.shape[0]
 
+    # calculate the one time correlation
     g2 = (G[: g_max] / (IAP[: g_max] * IAF[: g_max]))
 
+    # finding the lag times (delay times) for multi-tau levels
     tot_channels, lag_steps = core.multi_tau_lags(num_levels,
                                                   num_bufs)
-
     lag_steps = lag_steps[:g2.shape[0]]
 
-    return g2, lag_steps, elapsed_time
+    return g2, lag_steps
 
 
 def _process(buf, G, IAP, IAF, q_inds, num_bufs,
              num_pixels, num, level, buf_no):
     """
     This helper function calculates G, IAP and IAF at
-    each level, symmetric normalization is used
+    each level, symmetric normalization is used.
 
     Parameters
     ----------
@@ -243,7 +234,7 @@ def _process(buf, G, IAP, IAF, q_inds, num_bufs,
         roi's, dimensions are : [num_qs]X1
 
     num : ndarray
-        to track the level
+        to track how many images processed in each level
 
     level : int
         the current level number
