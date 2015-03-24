@@ -189,23 +189,23 @@ def _set_parameter_hint(param_name, input_dict, input_model):
                             [input_dict['min'], input_dict['max']]))
 
 
-def update_parameter_dict(xrf_parameter, fit_results):
+def update_parameter_dict(param, fit_results):
     """
     Update fitting parameters dictionary according to given fitting results,
     usually obtained from previous run.
 
-    .. warning :: This function mutates the input values.
+    .. warning :: This function mutates param.
 
     Parameters
     ----------
-    xrf_parameter : dict
+    param : dict
         saving all the fitting values and their bounds
     fit_results : object
         ModelFit object from lmfit
     """
-    for k, v in six.iteritems(xrf_parameter):
+    for k, v in six.iteritems(param):
         if k in fit_results.values:
-            xrf_parameter[str(k)]['value'] = fit_results.values[str(k)]
+            param[str(k)]['value'] = fit_results.values[str(k)]
 
 
 _STRATEGY_REGISTRY = {'linear': sfb_pd.linear,
@@ -234,7 +234,7 @@ def register_strategy(key, strategy, overwrite=True):
     _STRATEGY_REGISTRY[key] = strategy
 
 
-def set_parameter_bound(xrf_parameter, bound_option, extra_config=None):
+def set_parameter_bound(param, bound_option, extra_config=None):
     """
     Update the default value of bounds.
 
@@ -242,15 +242,17 @@ def set_parameter_bound(xrf_parameter, bound_option, extra_config=None):
 
     Parameters
     ----------
-    xrf_parameter : dict
+    param : dict
         saving all the fitting values and their bounds
     bound_option : str
         define bound type
+    extra_config : dict
+        strategy-specific configuration
     """
     strat_dict = _STRATEGY_REGISTRY[bound_option]
     if extra_config is None:
         extra_config = dict()
-    for k, v in six.iteritems(xrf_parameter):
+    for k, v in six.iteritems(param):
         if k == 'non_fitting_values':
             continue
         try:
@@ -304,16 +306,16 @@ class ParamController(object):
             for kind in ['pos', 'width', 'area', 'ratio']:
                 self.add_param(kind, element)
 
-    def set_bound_type(self, bound_option):
+    def set_strategy(self, strategy_name):
         """
         Update the default value of bounds.
 
         Parameters
         ----------
-        bound_option : str
-            define bound type
+        strategy_name : str
+            fitting strategy that this Model will use
         """
-        set_parameter_bound(self.params, bound_option, self._element_strategy)
+        set_parameter_bound(self.params, strategy_name, self._element_strategy)
 
     def update_element_prop(self, element_list, **kwargs):
         """
@@ -743,7 +745,7 @@ class ModelSpectrum(object):
 
         return element_mod
 
-    def model_spectrum(self):
+    def assemble_models(self):
         """
         Put all models together to form a spectrum.
         """
@@ -752,15 +754,16 @@ class ModelSpectrum(object):
         for ename in self.element_list:
             self.mod += self.set_element_model(ename)
 
-    def model_fit(self, x, y, w=None, method='leastsq', **kws):
+    def model_fit(self, channel_number, spectrum, weights=None,
+                  method='leastsq', **kws):
         """
         Parameters
         ----------
-        x : array
+        channel_number : array
             independent variable
-        y : array
+        spectrum : array
             intensity
-        w : array, optional
+        weights : array, optional
             weight for fitting
         method : str
             default as leastsq
@@ -773,7 +776,7 @@ class ModelSpectrum(object):
         """
 
         pars = self.mod.make_params()
-        result = self.mod.fit(y, pars, x=x, weights=w,
+        result = self.mod.fit(spectrum, pars, x=channel_number, weights=weights,
                               method=method, fit_kws=kws)
         return result
 
@@ -804,18 +807,22 @@ def trim(x, y, low, high):
     return x[mask], y[mask]
 
 
-def get_escape_peak(y, ratio, fitting_parameters,
-                    escape_e=1.73998):
+def compute_escape_peak(spectrum, ratio, params,
+                        escape_e=1.73998):
     """
     Calculate the escape peak for given detector.
 
     Parameters
     ----------
-    y : array
-        original spectrum
+    spectrum : array
+        original, uncorrected spectrum
     ratio : float
-        ratio to adjust spectrum
+        ratio of shadow to full spectrum
     param : dict
+        fitting parameters
+    escape_e : float
+        Units: keV
+        By default, 1.73998
 
     Returns
     -------
@@ -825,37 +832,38 @@ def get_escape_peak(y, ratio, fitting_parameters,
     """
     x = np.arange(len(y))
 
-    x = (fitting_parameters['e_offset']['value']
-         + fitting_parameters['e_linear']['value']*x
-         + fitting_parameters['e_quadratic']['value'] * x**2)
+    x = (params['e_offset']['value']
+         + params['e_linear']['value']*x
+         + params['e_quadratic']['value'] * x**2)
 
-    return x-escape_e, y*ratio
+    result = x - escape_e, y * ratio
+    return result
 
 
-def get_linear_model(x, param_dict, default_area=1e5):
+def contruct_linear_model(channel_number, params, default_area=1e5):
     """
-    Create spectrum with parameters given from param_dict.
+    Create spectrum with parameters given from params.
 
     Parameters
     ----------
-    x : array
-        independent variable, channel number instead of energy
-    param_dict : dict
+    channel_number : array
+        N.B. This is the raw independent variable, not energy.
+    params : dict
         fitting paramters
     default_area : float
-            value for the initial area of a given element
+        value for the initial area of a given element
 
     Returns
     -------
-    e_select : list
+    selected_elements : list
         selected elements for given energy
     matv : array
         matrix for linear fitting
     """
-    MS = ModelSpectrum(param_dict)
+    MS = ModelSpectrum(params)
     elist = MS.element_list
 
-    e_select = []
+    selected_elements = []
     matv = []
 
     for i in range(len(elist)):
@@ -864,7 +872,7 @@ def get_linear_model(x, param_dict, default_area=1e5):
             p = e_model.make_params()
             y_temp = e_model.eval(x=x, params=p)
             matv.append(y_temp)
-            e_select.append(elist[i])
+            selected_elements.append(elist[i])
 
     p = MS.compton.make_params()
     y_temp = MS.compton.eval(x=x, params=p)
@@ -876,87 +884,98 @@ def get_linear_model(x, param_dict, default_area=1e5):
 
     matv = np.array(matv)
     matv = matv.transpose()
-    return e_select, matv
+    return selected_elements, matv
 
 
-class PreFitAnalysis(object):
+def nnls_fit(spectrum, expected_matrix):
     """
-    It is used to automatic peak finding.
-    """
-    def __init__(self, experiments, standard):
-        """
-        Parameters
-        ----------
-        experiments : array
-            spectrum of experiment data
-        standard : array
-            2D matrix of activated element spectrum
-        """
-        self.experiments = np.asarray(experiments)
-        self.standard = np.asarray(standard)
-
-    def nnls_fit(self):
-        """
-        Non-negative fitting.
-
-        Returns
-        -------
-        results : array
-            weights of different element
-        residue : array
-            error
-        """
-        standard = self.standard
-        experiments = self.experiments
-
-        [results, residue] = nnls(standard, experiments)
-        return results, residue
-
-    def nnls_fit_weight(self, c_weight=10):
-        """
-        Non-negative fitting with weight.
-
-        Parameters
-        ----------
-        c_weight : float
-            value used to calculate weight
-
-        Returns
-        -------
-        results : array
-            weights of different element
-        residue : array
-            error
-        """
-        standard = self.standard
-        experiments = self.experiments
-
-        weights = c_weight / (c_weight + experiments)
-        weights = np.abs(weights)
-        weights = weights/np.max(weights)
-
-        a = np.transpose(np.multiply(np.transpose(standard), np.sqrt(weights)))
-        b = np.multiply(experiments, np.sqrt(weights))
-
-        [results, residue] = nnls(a, b)
-
-        return results, residue
-
-
-def pre_fit_linear(y0, param, element_list=K_LINE+L_LINE+M_LINE, weight=True):
-    """
-    Run prefit to get initial elements.
+    Non-negative least squares fitting.
 
     Parameters
     ----------
-    y0 : array
-        Spectrum intensity
+    spectrum : array
+        spectrum of experiment data
+    expected_matrix : array
+        2D matrix of activated element spectrum
+
+    Returns
+    -------
+    results : array
+        weights of different element
+    residue : array
+        error
+
+    Note
+    ----
+    This is merely a domain-specific wrapper of
+    scipy.optimize.nnls. Note that the order of arguments
+    is changed. Confusing for scipy users, perhaps, but
+    more natural for domain-specific users.
+    """
+    experiments = spectrum
+    standard = expected_matrix
+
+    [results, residue] = nnls(standard, experiments)
+    return results, residue
+
+def weighted_nnls_fit(spectrum, expected_matrix,
+                      constant_weight=10):
+    """
+    Non-negative least squares fitting with weight.
+
+    Parameters
+    ----------
+    spectrum : array
+        spectrum of experiment data
+    expected_matrix : array
+        2D matrix of activated element spectrum
+    constant_weight : float
+        value used to calculate weight like so:
+        weights = constant_weight / (constant_weight + spectrum)
+
+    Returns
+    -------
+    results : array
+        weights of different element
+    residue : array
+        error
+    """
+    experiments = spectrum
+    standard = expected_matrix
+
+    weights = constant_weight / (constant_weight + experiments)
+    weights = np.abs(weights)
+    weights = weights/np.max(weights)
+
+    a = np.transpose(np.multiply(np.transpose(standard), np.sqrt(weights)))
+    b = np.multiply(experiments, np.sqrt(weights))
+
+    [results, residue] = nnls(a, b)
+
+    return results, residue
+
+
+def linear_spectrum_fitting(spectrum, params, element_list=None,
+                            constant_weight=10):
+    """
+    Fit a spectrum to a linear model.
+
+    This is a convenience function that wraps up construct_linear_model
+    and nnls_fit or weighted_nnls_fit.
+
+    Parameters
+    ----------
+    spectrum : array
+        spectrum intensity
     param : dict
-        Fitting parameters
-    element_list : list, opt
-        if not given, use list from param dict
-    weight : bool
-        use weight or not when fitting is performed
+        fitting parameters
+    element_list : list, optional
+        if not given, use a hard-coded list of all
+        applicable elements
+    constant_weight : float
+        value used to calculate weight like so:
+        weights = constant_weight / (constant_weight + spectrum)
+        Default is 10. If None, performed unweighted nnls fit.
 
     Returns
     -------
@@ -965,6 +984,8 @@ def pre_fit_linear(y0, param, element_list=K_LINE+L_LINE+M_LINE, weight=True):
     result_dict : dict
         Fitting results
     """
+    if element_list is None:
+        element_list = K_LINE + L_LINE + M_LINE
 
     # Need to use deepcopy here to avoid unexpected change on parameter dict
     fitting_parameters = copy.deepcopy(param)
@@ -997,10 +1018,10 @@ def pre_fit_linear(y0, param, element_list=K_LINE+L_LINE+M_LINE, weight=True):
 
     PF = PreFitAnalysis(y, matv)
 
-    if weight:
-        out, res = PF.nnls_fit_weight()
+    if constant_weight is not None:
+        out, res = weighted_nnls_fit(y, matv, constant_weight)
     else:
-        out, res = PF.nnls_fit()
+        out, res = nnls_fit(y, matv)
 
     total_y = out * matv
 
@@ -1017,9 +1038,9 @@ def pre_fit_linear(y0, param, element_list=K_LINE+L_LINE+M_LINE, weight=True):
             result_dict.update({total_list[i] + '_K': total_y[:, i]})
     result_dict.update(background=bg)
 
-    x = (fitting_parameters['e_offset']['value'] +
-         fitting_parameters['e_linear']['value']*x +
-         fitting_parameters['e_quadratic']['value'] * x**2)
+    x = (params['e_offset']['value'] +
+         params['e_linear']['value']*x +
+         params['e_quadratic']['value'] * x**2)
 
     return x, result_dict
 
