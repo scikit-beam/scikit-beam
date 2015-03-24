@@ -10,7 +10,7 @@ from nose.tools import assert_true, raises
 from skxray.fitting.base.parameter_data import get_para, e_calibration, adjust_element
 from skxray.fitting.xrf_model import (ModelSpectrum, ParamController,
                                       pre_fit_linear,
-                                      get_linear_model, set_range,
+                                      get_linear_model, trim,
                                       get_sum_area, get_escape_peak,
                                       register_strategy, update_parameter_dict,
                                       _set_parameter_hint, _STRATEGY_REGISTRY)
@@ -49,7 +49,7 @@ def test_fit():
     x0 = np.arange(2000)
     y0 = synthetic_spectrum()
 
-    x, y = set_range(x0, y0, 100, 1300)
+    x, y = trim(x0, y0, 100, 1300)
     MS = ModelSpectrum()
     MS.model_spectrum()
 

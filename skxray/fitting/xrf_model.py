@@ -929,8 +929,10 @@ class ModelSpectrum(object):
         return result
 
 
-def set_range(x, y, low, high):
+def trim(x, y, low, high):
     """
+    Mask two arrays applying bounds to the first array.
+
     Parameters
     ----------
     x : array
@@ -949,8 +951,8 @@ def set_range(x, y, low, high):
     array :
         y with new range
     """
-    out = np.array([v for v in zip(x, y) if v[0]>low and v[0]<high])
-    return out[:, 0], out[:, 1]
+    mask = (x > low) & (x < high)
+    return x[mask], y[mask]
 
 
 def get_escape_peak(y, ratio, fitting_parameters,
@@ -1126,7 +1128,7 @@ def pre_fit_linear(y0, param, element_list=k_line+l_line+m_line, weight=True):
     lowv = fitting_parameters['non_fitting_values']['energy_bound_low'] * approx_ratio
     highv = fitting_parameters['non_fitting_values']['energy_bound_high'] * approx_ratio
 
-    x, y = set_range(x0, y0, lowv, highv)
+    x, y = trim(x0, y0, lowv, highv)
 
     if element_list:
         new_element = ', '.join(element_list)
