@@ -65,25 +65,29 @@ logger = logging.getLogger(__name__)
 
 
 # emission line energy between (1, 30) keV
-k_line = ['Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr',
+# TODO Add _K after each of these.
+K_LINE = ['Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr',
           'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb',
           'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd',
           'In', 'Sn', 'Sb', 'Te', 'I']
 
-l_line = ['Ga_L', 'Ge_L', 'As_L', 'Se_L', 'Br_L', 'Kr_L', 'Rb_L', 'Sr_L', 'Y_L', 'Zr_L', 'Nb_L',
+L_LINE = ['Ga_L', 'Ge_L', 'As_L', 'Se_L', 'Br_L', 'Kr_L', 'Rb_L', 'Sr_L', 'Y_L', 'Zr_L', 'Nb_L',
           'Mo_L', 'Tc_L', 'Ru_L', 'Rh_L', 'Pd_L', 'Ag_L', 'Cd_L', 'In_L', 'Sn_L', 'Sb_L', 'Te_L',
           'I_L', 'Xe_L', 'Cs_L', 'Ba_L', 'La_L', 'Ce_L', 'Pr_L', 'Nd_L', 'Pm_L', 'Sm_L', 'Eu_L',
           'Gd_L', 'Tb_L', 'Dy_L', 'Ho_L', 'Er_L', 'Tm_L', 'Yb_L', 'Lu_L', 'Hf_L', 'Ta_L', 'W_L',
           'Re_L', 'Os_L', 'Ir_L', 'Pt_L', 'Au_L', 'Hg_L', 'Tl_L', 'Pb_L', 'Bi_L', 'Po_L', 'At_L',
           'Rn_L', 'Fr_L', 'Ac_L', 'Th_L', 'Pa_L', 'U_L', 'Np_L', 'Pu_L', 'Am_L']
 
-m_line = ['Hf_M', 'Ta_M', 'W_M', 'Re_M', 'Os_M', 'Ir_M', 'Pt_M', 'Au_M', 'Hg_M', 'TL_M', 'Pb_M', 'Bi_M',
+M_LINE = ['Hf_M', 'Ta_M', 'W_M', 'Re_M', 'Os_M', 'Ir_M', 'Pt_M', 'Au_M', 'Hg_M', 'TL_M', 'Pb_M', 'Bi_M',
           'Sm_M', 'Eu_M', 'Gd_M', 'Tb_M', 'Dy_M', 'Ho_M', 'Er_M', 'Tm_M', 'Yb_M', 'Lu_M', 'Th_M', 'Pa_M', 'U_M']
 
-k_list = ['ka1', 'ka2', 'kb1', 'kb2']
-l_list = ['la1', 'la2', 'lb1', 'lb2', 'lb3', 'lb4', 'lb5',
+K_TRANSITIONS = ['ka1', 'ka2', 'kb1', 'kb2']
+L_TRANSITIONS = ['la1', 'la2', 'lb1', 'lb2', 'lb3', 'lb4', 'lb5',
           'lg1', 'lg2', 'lg3', 'lg4', 'll', 'ln']
-m_list = ['ma1', 'ma2', 'mb', 'mg']
+M_TRANSITIONS = ['ma1', 'ma2', 'mb', 'mg']
+
+TRANSITIONS_LOOKUP = {'K': K_TRANSITIONS, 'L': L_TRANSITIONS,
+                      'M': M_TRANSITIONS}
 
 
 def element_peak_xrf(x, area, center,
@@ -261,14 +265,14 @@ def set_parameter_bound(xrf_parameter, bound_option, extra_config=None):
 # This dict is used to update the current parameter dict to dynamically change
 # the input data and do the fitting. The user can adjust parameters such as
 # position, width, area or branching ratio.
-element_dict = {'area': {'bound_type': 'none',
-                         'max': 1000000000.0, 'min': 0, 'value': 1000},
-                'pos': {'bound_type': 'fixed',
-                        'max': 0.005, 'min': -0.005, 'value': 0},
-                'ratio': {'bound_type': 'fixed',
-                          'max': 5.0, 'min': 0.1, 'value': 1.0},
-                'width': {'bound_type': 'fixed',
-                          'max': 0.02, 'min': -0.02, 'value': 0.0}}
+PARAM_DEFAULTS = {'area': {'bound_type': 'none',
+                           'max': 1000000000.0, 'min': 0, 'value': 1000},
+                  'pos': {'bound_type': 'fixed',
+                          'max': 0.005, 'min': -0.005, 'value': 0},
+                  'ratio': {'bound_type': 'fixed',
+                            'max': 5.0, 'min': 0.1, 'value': 1.0},
+                  'width': {'bound_type': 'fixed',
+                            'max': 0.02, 'min': -0.02, 'value': 0.0}}
 
 
 class ParamController(object):
@@ -276,92 +280,23 @@ class ParamController(object):
     Update element peak information in parameter dictionary.
     This is an important step in dynamical fitting.
     """
-    def __init__(self, xrf_parameter):
+    def __init__(self, params, elementaL_LINEs):
         """
         Parameters
         ----------
-        xrf_parameter : dict
+        params : dict
             saving all the fitting values and their bounds
+        elementaL_LINEs : list
+            e.g., ['Na_L', Mg_K', 'Pt_M'] refers to the L
+            lines of Sodium, the K lines of Magnesium, and the M
+            lines of Platinum
         """
-        self.pre_parameter = xrf_parameter
-        self.new_parameter = copy.deepcopy(xrf_parameter)
-        self.element_list = xrf_parameter['non_fitting_values']['element_list'].split(', ')
-        self.element_line_name = self.get_all_lines(xrf_parameter['coherent_sct_energy']['value'],
-                                                    self.element_list)
+        self._original_params = copy.deepcopy(params)
+        self.params = copy.deepcopy(xrf_parameter)
+        self.element_list = list(element_list)  # to copy it
+        self.element_linenames = get_activated_lines(
+            self.params['coherent_sct_energy']['value'], self.element_list)
         self._element_strategy = dict()
-
-    def get_all_lines(self, incident_energy, ename_list):
-        """
-        Parameters
-        ----------
-        incident_energy : float
-            beam energy
-        ename_list : list
-            element names
-
-        Returns
-        -------
-        list
-            all activated lines for given elements
-        """
-        all_line = []
-        for v in ename_list:
-            activated_line = self.get_actived_line(incident_energy, v)
-            if activated_line:
-                all_line += activated_line
-        return all_line
-
-    def get_actived_line(self, incident_energy, ename):
-        """
-        Collect all the actived lines for given element.
-
-        Parameters
-        ----------
-        incident_energy : float
-            beam energy
-        ename : str
-            element name
-
-        Returns
-        -------
-        list
-            all possible line names for given element
-        """
-        line_list = []
-        if ename in k_line:
-            e = Element(ename)
-            if e.cs(incident_energy)['ka1'] == 0:
-                return
-            for num, item in enumerate(e.emission_line.all[:4]):
-                line_name = item[0]
-                if e.cs(incident_energy)[line_name] == 0:
-                    continue
-                line_list.append(str(ename)+'_'+str(line_name))
-            return line_list
-
-        elif ename in l_line:
-            ename = ename.split('_')[0]
-            e = Element(ename)
-            if e.cs(incident_energy)['la1'] == 0:
-                return
-            for num, item in enumerate(e.emission_line.all[4:-4]):
-                line_name = item[0]
-                if e.cs(incident_energy)[line_name] == 0:
-                    continue
-                line_list.append(str(ename)+'_'+str(line_name))
-            return line_list
-
-        elif ename in m_line:
-            ename = ename.split('_')[0]
-            e = Element(ename)
-            if e.cs(incident_energy)['ma1'] == 0:
-                return
-            for num, item in enumerate(e.emission_line.all[-4:]):
-                line_name = item[0]
-                if e.cs(incident_energy)[line_name] == 0:
-                    continue
-                line_list.append(str(ename)+'_'+str(line_name))
-            return line_list
 
     def create_full_param(self):
         """
@@ -382,8 +317,7 @@ class ParamController(object):
         bound_option : str
             define bound type
         """
-        set_parameter_bound(self.new_parameter, bound_option,
-                            self._element_strategy)
+        set_parameter_bound(self.params, bound_option, self._element_strategy)
 
     def update_element_prop(self, element_list, **kwargs):
         """
@@ -400,141 +334,72 @@ class ParamController(object):
         -------
         dict : updated value
         """
-        for k, v in six.iteritems(kwargs):
-            if k == 'pos':
-                func = self.set_position
-            elif k == 'width':
-                func = self.set_width
-            elif k == 'area':
-                func = self.set_area
-            elif k == 'ratio':
-                func = self.set_ratio
-            else:
-                raise ValueError('Please define either pos, width, area or ratio.')
+        for element in element_list:
+            for kind, constraint in six.iteritems(kwargs):
+                self.add_param(kind, element, constraint)
 
-            for element in element_list:
-                func(element, option=v)
-
-    def set_position(self, item, option=None):
+    def add_param(self, kind, element, constraint=None):
         """
+        Create a Parameter controlling peak position, width,
+        branching ratio, or area.
+
         Parameters
         ----------
-        item : str
+        kind : {'pos', 'width', 'ratio', 'area'}
+        element : str
             element name
-        option : str, optional
-            way to control position
+        constraint : {'lo', 'hi', 'lohi', 'fixed', 'none'}, optional
+            default "bound strategy" (fitting constraints)
         """
-        if item in k_line:
-            data_list = k_list
-        elif item in l_line:
-            item = item.split('_')[0]
-            data_list = l_list
-        else:
-            item = item.split('_')[0]
-            data_list = m_list
+        if kind == 'area':
+            return self._set_area(element, constraint)
+        element, line = element.split('_')
+        transitions = LINES_LOOKUP[line]
 
-        data_list = [str(item)+'_'+str(v).lower() for v in data_list]
+        # Mg_L -> Mg_la1, which xraylib wants
+        linenames = [
+            '{element}_{transition}'.format(element, t) for t in transitions]
 
-        for linename in data_list:
-            param_name = str(linename) + '_delta_center'
+        PARAM_SUFFIXES = {'pos': '_delta_center',
+                          'width': '_delta_sigma',
+                          'ratio': '_ratio_adjust'}
+        param_suffix = PARAM_SUFFIXES[kind]
+
+        for linename in linenames:
             # check if the line is activated
-            if linename not in self.element_line_name:
+            if linename not in self.element_linenames:
                 continue
-            new_pos = element_dict['pos'].copy()
-            if option:
-                self._element_strategy[param_name] = option
-            self.new_parameter.update({param_name: new_pos})
+            param_name = str(linename) + '_delta_center'  # as in lmfit Model
+            new_pos = PARAM_DEFAULTS[kind].copy()
+            if constraint:
+                self._element_strategy[param_name] = constraint 
+            self.params.update({param_name: new_pos})
 
-    def set_width(self, item, option=None):
+    def _add_area_param(self, element, constraint=None):
         """
-        Parameters
-        ----------
-        item : str
-            element name
-        option : str, optional
-            Control peak width.
+        Special case for adding an area Parameter because
+        we only ever fit the first peak area.
+
+        Helper function called in self.add_param
         """
-        if item in k_line:
-            data_list = k_list
-        elif item in l_line:
-            item = item.split('_')[0]
-            data_list = l_list
-        else:
-            item = item.split('_')[0]
-            data_list = m_list
-
-        data_list = [str(item)+'_'+str(v).lower() for v in data_list]
-
-        for linename in data_list:
-            param_name = str(linename) + '_delta_sigma'
-            # check if the line is activated
-            if linename not in self.element_line_name:
-                continue
-            new_width = element_dict['width'].copy()
-            if option:
-                self._element_strategy[param_name] = option
-            self.new_parameter.update({param_name: new_width})
-
-    def set_area(self, item, option=None):
-        """
-        Only the primary peak intensity is adjusted.
-
-        Parameters
-        ----------
-        item : str
-            element name
-        option : str, optional
-            way to control area
-        """
-        if item in k_line:
+        if item in K_LINE:
             area_list = [str(item)+"_ka1_area"]
-        elif item in l_line:
+        elif item in L_LINE:
             item = item.split('_')[0]
             area_list = [str(item)+"_la1_area"]
-        elif item in m_line:
+        elif item in M_LINE:
             item = item.split('_')[0]
             area_list = [str(item)+"_ma1_area"]
 
         for linename in area_list:
             param_name = linename
-            new_area = element_dict['area'].copy()
+            new_area = PARAM_DEFAULTS['area'].copy()
             if option:
                 self._element_strategy[param_name] = option
-            self.new_parameter.update({param_name: new_area})
-
-    def set_ratio(self, item, option=None):
-        """
-        Only adjust lines after the the primary one.
-
-        Parameters
-        ----------
-        item : str
-            element name
-        option : str, optional
-            way to control branching ratio
-        """
-        if item in k_line:
-            data_list = k_list[1:]
-        elif item in l_line:
-            item = item.split('_')[0]
-            data_list = l_list[1:]
-        else:
-            item = item.split('_')[0]
-            data_list = m_list
-
-        data_list = [str(item)+'_'+str(v).lower() for v in data_list]
-
-        for linename in data_list:
-            param_name = str(linename) + '_ratio_adjust'
-            if linename not in self.element_line_name:
-                continue
-            new_val = element_dict['ratio'].copy()
-            if option:
-                self._element_strategy[param_name] = option
-            self.new_parameter.update({param_name: new_val})
+            self.params.update({param_name: new_area})
 
 
-def get_sum_area(element_name, result_val):
+def sum_area(element_name, result_val):
     """
     Return the total area for given element.
 
@@ -555,18 +420,18 @@ def get_sum_area(element_name, result_val):
                 result_val.values[str(element_name)+'_'+line_name+'_ratio'] *
                 result_val.values[str(element_name)+'_'+line_name+'_ratio_adjust'])
     sumv = 0
-    if element_name in k_line:
-        for line_n in k_list:
+    if element_name in K_LINE:
+        for line_n in K_TRANSITIONS:
             full_name = element_name + '_' + line_n + '_area'
             if full_name in result_val.values:
                 sumv += get_value(result_val, element_name, line_n)
-    elif element_name in l_line:
-        for line_n in l_list:
+    elif element_name in L_LINE:
+        for line_n in L_TRANSITIONS:
             full_name = element_name.split('_')[0] + '_' + line_n + '_area'
             if full_name in result_val.values:
                 sumv += get_value(result_val, element_name.split('_')[0], line_n)
-    elif element_name in m_line:
-        for line_n in m_list:
+    elif element_name in M_LINE:
+        for line_n in M_TRANSITIONS:
             full_name = element_name.split('_')[0] + '_' + line_n + '_area'
             if full_name in result_val.values:
                 sumv += get_value(result_val, element_name.split('_')[0], line_n)
@@ -676,7 +541,7 @@ class ModelSpectrum(object):
 
         element_mod = None
 
-        if ename in k_line:
+        if ename in K_LINE:
             e = Element(ename)
             if e.cs(incident_energy)['ka1'] == 0:
                 logger.debug(' {0} Ka emission line is not activated '
@@ -757,7 +622,7 @@ class ModelSpectrum(object):
                     element_mod = gauss_mod
             logger.debug(' Finished building element peak for {0}'.format(ename))
 
-        elif ename in l_line:
+        elif ename in L_LINE:
             ename = ename.split('_')[0]
             e = Element(ename)
             if e.cs(incident_energy)['la1'] == 0:
@@ -824,7 +689,7 @@ class ModelSpectrum(object):
                 else:
                     element_mod = gauss_mod
 
-        elif ename in m_line:
+        elif ename in M_LINE:
             ename = ename.split('_')[0]
             e = Element(ename)
             if e.cs(incident_energy)['ma1'] == 0:
@@ -1094,7 +959,7 @@ class PreFitAnalysis(object):
         return results, residue
 
 
-def pre_fit_linear(y0, param, element_list=k_line+l_line+m_line, weight=True):
+def pre_fit_linear(y0, param, element_list=K_LINE+L_LINE+M_LINE, weight=True):
     """
     Run prefit to get initial elements.
 
@@ -1173,3 +1038,79 @@ def pre_fit_linear(y0, param, element_list=k_line+l_line+m_line, weight=True):
          fitting_parameters['e_quadratic']['value'] * x**2)
 
     return x, result_dict
+
+
+def get_activated_lines(incident_energy, element_names):
+    """
+    Parameters
+    ----------
+    incident_energy : float
+        beam energy
+    element_names : list
+        e.g., ['Na_K', 'Mg_L', 'Pt_M']
+
+    Returns
+    -------
+    list
+        all activated lines for given elements
+    """
+    lines = []
+    for v in element_names:
+        activated_line = _get_activated_line(incident_energy, v)
+        if activated_line:
+            lines.extend(activated_line)
+    return lines
+
+
+def _get_activated_line(incident_energy, ename):
+    """
+    Collect all the activated lines for given element.
+
+    Parameters
+    ----------
+    incident_energy : float
+        beam energy
+    ename : str
+        element name
+
+    Returns
+    -------
+    list
+        all possible line names for given element
+    """
+    line_list = []
+    if ename in K_LINE:
+        e = Element(ename)
+        if e.cs(incident_energy)['ka1'] == 0:
+            return
+        for num, item in enumerate(e.emission_line.all[:4]):
+            line_name = item[0]
+            if e.cs(incident_energy)[line_name] == 0:
+                continue
+            line_list.append(str(ename)+'_'+str(line_name))
+        return line_list
+
+    elif ename in L_LINE:
+        ename = ename.split('_')[0]
+        e = Element(ename)
+        if e.cs(incident_energy)['la1'] == 0:
+            return
+        for num, item in enumerate(e.emission_line.all[4:-4]):
+            line_name = item[0]
+            if e.cs(incident_energy)[line_name] == 0:
+                continue
+            line_list.append(str(ename)+'_'+str(line_name))
+        return line_list
+
+    elif ename in M_LINE:
+        ename = ename.split('_')[0]
+        e = Element(ename)
+        if e.cs(incident_energy)['ma1'] == 0:
+            return
+        for num, item in enumerate(e.emission_line.all[-4:]):
+            line_name = item[0]
+            if e.cs(incident_energy)[line_name] == 0:
+                continue
+            line_list.append(str(ename)+'_'+str(line_name))
+        return line_list
+
