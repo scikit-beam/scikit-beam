@@ -7,11 +7,11 @@ import numpy as np
 import copy
 from numpy.testing import (assert_equal, assert_array_almost_equal)
 from nose.tools import assert_true, raises
-from skxray.fitting.base.parameter_data import get_para, e_calibration, adjust_element
+from skxray.fitting.base.parameter_data import get_para, e_calibration
 from skxray.fitting.xrf_model import (ModelSpectrum, ParamController,
-                                      pre_fit_linear,
-                                      get_linear_model, trim,
-                                      get_sum_area, get_escape_peak,
+                                      linear_spectrum_fitting,
+                                      construct_linear_model, trim,
+                                      sum_area, compute_escape_peak,
                                       register_strategy, update_parameter_dict,
                                       _set_parameter_hint, _STRATEGY_REGISTRY)
 
@@ -20,7 +20,7 @@ def synthetic_spectrum():
     param = get_para()
     x = np.arange(2000)
 
-    elist, matv = get_linear_model(x, param, default_area=1e5)
+    elist, matv = construct_linear_model(x, param, default_area=1e5)
     return np.sum(matv, 1) + 100  # avoid zero values
 
 
@@ -60,14 +60,14 @@ def test_fit():
             assert_true((v-1e5)/1e5 < 1e-2)
 
     # multiple peak sumed, so value should be larger than one peak area 1e5
-    sum_Fe = get_sum_area('Fe', result)
+    sum_Fe = sum_area('Fe', result)
     assert_true(sum_Fe > 1e5)
 
-    sum_Ce = get_sum_area('Ce_L', result)
+    sum_Ce = sum_area('Ce_L', result)
     assert_true(sum_Ce > 1e5)
 
-    sum_Pt = get_sum_area('Pt_M', result)
-    assert_true(sum_Ce > 1e5)
+    sum_Pt = sum_area('Pt_M', result)
+    assert_true(sum_Pt > 1e5)
 
     # update values
     update_parameter_dict(MS.parameter, result)
@@ -103,14 +103,14 @@ def test_pre_fit():
     param = get_para()
 
     # with weight pre fit
-    x, y_total = pre_fit_linear(y0, param, weight=True)
+    x, y_total = linear_spectrum_fitting(y0, param, weight=True)
     for v in item_list:
         assert_true(v in y_total)
 
     for k, v in six.iteritems(y_total):
         print(k)
     # no weight pre fit
-    x, y_total = pre_fit_linear(y0, param, weight=False)
+    x, y_total = linear_spectrum_fitting(y0, param, weight=False)
     for v in item_list:
         assert_true(v in y_total)
 
@@ -119,7 +119,7 @@ def test_escape_peak():
     y0 = synthetic_spectrum()
     ratio = 0.01
     param = get_para()
-    xnew, ynew = get_escape_peak(y0, ratio, param)
+    xnew, ynew = compute_escape_peak(y0, ratio, param)
     # ratio should be the same
     assert_array_almost_equal(np.sum(ynew)/np.sum(y0), ratio, decimal=3)
 
@@ -141,5 +141,3 @@ def test_set_param_hint():
             assert_equal(p['coherent_sct_energy'].vary, False)
         else:
             assert_equal(p['coherent_sct_energy'].vary, True)
-
-
