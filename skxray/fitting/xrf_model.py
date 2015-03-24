@@ -66,10 +66,11 @@ logger = logging.getLogger(__name__)
 
 # emission line energy between (1, 30) keV
 # TODO Add _K after each of these.
-K_LINE = ['Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr',
-          'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb',
-          'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd',
-          'In', 'Sn', 'Sb', 'Te', 'I']
+K_LINE = ['Na_K', 'Mg_K', 'Al_K', 'Si_K', 'P_K', 'S_K', 'Cl_K', 'Ar_K', 'K_K',
+    'Ca_K', 'Sc_K', 'Ti_K', 'V_K', 'Cr_K', 'Mn_K', 'Fe_K', 'Co_K', 'Ni_K',
+    'Cu_K', 'Zn_K', 'Ga_K', 'Ge_K', 'As_K', 'Se_K', 'Br_K', 'Kr_K',
+    'Rb_K', 'Sr_K', 'Y_K', 'Zr_K', 'Nb_K', 'Mo_K', 'Tc_K', 'Ru_K', 'Rh_K',
+    'Pd_K', 'Ag_K', 'Cd_K', 'In_K', 'Sn_K', 'Sb_K', 'Te_K', 'I_K']
 
 L_LINE = ['Ga_L', 'Ge_L', 'As_L', 'Se_L', 'Br_L', 'Kr_L', 'Rb_L', 'Sr_L', 'Y_L', 'Zr_L', 'Nb_L',
           'Mo_L', 'Tc_L', 'Ru_L', 'Rh_L', 'Pd_L', 'Ag_L', 'Cd_L', 'In_L', 'Sn_L', 'Sb_L', 'Te_L',
@@ -276,33 +277,32 @@ class ParamController(object):
     Update element peak information in parameter dictionary.
     This is an important step in dynamical fitting.
     """
-    def __init__(self, params, elementaL_LINEs):
+    def __init__(self, params, elemental_lines):
         """
         Parameters
         ----------
         params : dict
             saving all the fitting values and their bounds
-        elementaL_LINEs : list
+        elemental_lines : list
             e.g., ['Na_L', Mg_K', 'Pt_M'] refers to the L
             lines of Sodium, the K lines of Magnesium, and the M
             lines of Platinum
         """
         self._original_params = copy.deepcopy(params)
-        self.params = copy.deepcopy(xrf_parameter)
-        self.element_list = list(element_list)  # to copy it
+        self.params = copy.deepcopy(params)
+        self.element_list = list(elemental_lines)  # to copy it
         self.element_linenames = get_activated_lines(
             self.params['coherent_sct_energy']['value'], self.element_list)
         self._element_strategy = dict()
+        self._initialize_params()
 
-    def create_full_param(self):
+    def _initialize_params(self):
         """
         Add all element information, such as pos, width, ratio into parameter dict.
         """
-        for v in self.element_list:
-            self.set_area(v)
-            self.set_position(v)
-            self.set_ratio(v)
-            self.set_width(v)
+        for element in self.element_list:
+            for kind in ['pos', 'width', 'area', 'ratio']:
+                self.add_param(kind, element)
 
     def set_bound_type(self, bound_option):
         """
@@ -347,6 +347,10 @@ class ParamController(object):
         constraint : {'lo', 'hi', 'lohi', 'fixed', 'none'}, optional
             default "bound strategy" (fitting constraints)
         """
+        if element not in self.element_list:
+            self.element_list.append(element)
+            self.element_linenames.extend(get_activated_lines(
+                self.params['coherent_sct_energy']['value'], [element]))
         if kind == 'area':
             return self._set_area(element, constraint)
         element, line = element.split('_')
@@ -440,35 +444,21 @@ class ModelSpectrum(object):
     compton and element peaks.
     """
 
-    def __init__(self, xrf_parameter=None):
+    def __init__(self, params, elements):
         """
         Parameters
         ----------
-        xrf_parameter : dict, opt
+        params : dict
             saving all the fitting values and their bounds
+        elements : list
         """
-        if xrf_parameter:
-            self.parameter = copy.deepcopy(xrf_parameter)
-        else:
-            self.parameter = copy.deepcopy(get_para())
-        self._config()
+        self.params = copy.deepcopy(params)
+        self.elements = list(elements)  # to copy
+        self.incident_energy = self.params['coherent_sct_energy']['value']
+        self.setup_compton_model()
+        self.setup_elastic_model()
 
-    def _config(self):
-        non_fit = self.parameter['non_fitting_values']
-        if 'element_list' in non_fit:
-            if ',' in non_fit['element_list']:
-                self.element_list = non_fit['element_list'].split(', ')
-            else:
-                self.element_list = non_fit['element_list'].split()
-            self.element_list = [item.strip() for item in self.element_list]
-        else:
-            logger.critical(' No element is selected for fitting!')
-
-        self.incident_energy = self.parameter['coherent_sct_energy']['value']
-        self.set_compton_model()
-        self.set_elastic_model()
-
-    def set_compton_model(self):
+    def setup_compton_model(self):
         """
         setup parameters related to Compton model
         """
@@ -483,22 +473,22 @@ class ModelSpectrum(object):
 
         logger.debug(' ###### Started setting up parameters for compton model. ######')
         for name in compton_list:
-            if name in self.parameter.keys():
-                _set_parameter_hint(name, self.parameter[name], compton)
+            if name in self.params.keys():
+                _set_parameter_hint(name, self.params[name], compton)
         logger.debug(' Finished setting up parameters for compton model.')
 
         self.compton_param = compton.make_params()
         self.compton = compton
 
-    def set_elastic_model(self):
+    def setup_elastic_model(self):
         """
         setup parameters related to Elastic model
         """
         elastic = ElasticModel(prefix='elastic_')
 
         item = 'coherent_sct_amplitude'
-        if item in self.parameter.keys():
-            _set_parameter_hint(item, self.parameter[item], elastic)
+        if item in self.params.keys():
+            _set_parameter_hint(item, self.params[item], elastic)
 
         logger.debug(' ###### Started setting up parameters for elastic model. ######')
 
@@ -518,27 +508,26 @@ class ModelSpectrum(object):
         logger.debug(' Finished setting up parameters for elastic model.')
         self.elastic = elastic
 
-    def set_element_model(self, ename, default_area=1e5, log_option=False):
+    def setup_element_model(self, element, default_area=1e5):
         """
         Construct element model.
 
         Parameters
         ----------
-        ename : str
-            element model
-        default_area : float
+        element : str
+            element name
+        default_area : float, optional
             value for the initial area of a given element
-        log_option : bool
-            show log or not for element setup, mainly for _set_parameter_hint function
+            default is 1e5, found to be a good value
         """
 
         incident_energy = self.incident_energy
-        parameter = self.parameter
+        parameter = self.params
 
         element_mod = None
 
-        if ename in K_LINE:
-            e = Element(ename)
+        if element + '_K' in K_LINE:
+            e = Element(element)
             if e.cs(incident_energy)['ka1'] == 0:
                 logger.debug('%s Ka emission line is not activated '
                              'at this energy %f', element, incident_energy)
@@ -553,7 +542,7 @@ class ModelSpectrum(object):
                 if e.cs(incident_energy)[line_name] == 0:
                     continue
 
-                gauss_mod = ElementModel(prefix=str(ename)+'_'+str(line_name)+'_')
+                gauss_mod = ElementModel(prefix=str(element)+'_'+str(line_name)+'_')
                 gauss_mod.set_param_hint('e_offset', value=self.compton_param['e_offset'].value,
                                          expr='e_offset')
                 gauss_mod.set_param_hint('e_linear', value=self.compton_param['e_linear'].value,
@@ -571,18 +560,18 @@ class ModelSpectrum(object):
                     gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
                 elif line_name == 'ka2':
                     gauss_mod.set_param_hint('area', value=default_area, vary=True,
-                                             expr=str(ename)+'_ka1_'+'area')
+                                             expr=str(element)+'_ka1_'+'area')
                     gauss_mod.set_param_hint('delta_sigma', value=0, vary=False,
-                                             expr=str(ename)+'_ka1_'+'delta_sigma')
+                                             expr=str(element)+'_ka1_'+'delta_sigma')
                     gauss_mod.set_param_hint('delta_center', value=0, vary=False,
-                                             expr=str(ename)+'_ka1_'+'delta_center')
+                                             expr=str(element)+'_ka1_'+'delta_center')
                 else:
                     gauss_mod.set_param_hint('area', value=default_area, vary=True,
-                                             expr=str(ename)+'_ka1_'+'area')
+                                             expr=str(element)+'_ka1_'+'area')
                     gauss_mod.set_param_hint('delta_center', value=0, vary=False)
                     gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
 
-                area_name = str(ename)+'_'+str(line_name)+'_area'
+                area_name = str(element)+'_'+str(line_name)+'_area'
                 if area_name in parameter:
                     _set_parameter_hint(area_name, parameter[area_name], gauss_mod)
 
@@ -633,7 +622,7 @@ class ModelSpectrum(object):
                 if e.cs(incident_energy)[line_name] == 0:
                     continue
 
-                gauss_mod = ElementModel(prefix=str(ename)+'_'+str(line_name)+'_')
+                gauss_mod = ElementModel(prefix=str(element)+'_'+str(line_name)+'_')
 
                 gauss_mod.set_param_hint('e_offset', value=self.compton_param['e_offset'].value,
                                          expr='e_offset')
@@ -650,7 +639,7 @@ class ModelSpectrum(object):
                     gauss_mod.set_param_hint('area', value=default_area, vary=True)
                 else:
                     gauss_mod.set_param_hint('area', value=default_area, vary=True,
-                                             expr=str(ename)+'_la1_'+'area')
+                                             expr=str(element)+'_la1_'+'area')
 
                 gauss_mod.set_param_hint('center', value=val, vary=False)
                 gauss_mod.set_param_hint('sigma', value=1, vary=False)
@@ -700,7 +689,7 @@ class ModelSpectrum(object):
                 if e.cs(incident_energy)[line_name] == 0:
                     continue
 
-                gauss_mod = ElementModel(prefix=str(ename)+'_'+str(line_name)+'_')
+                gauss_mod = ElementModel(prefix=str(element)+'_'+str(line_name)+'_')
 
                 gauss_mod.set_param_hint('e_offset', value=self.compton_param['e_offset'].value,
                                          expr='e_offset')
@@ -717,7 +706,7 @@ class ModelSpectrum(object):
                     gauss_mod.set_param_hint('area', value=default_area, vary=True)
                 else:
                     gauss_mod.set_param_hint('area', value=default_area, vary=True,
-                                             expr=str(ename)+'_ma1_'+'area')
+                                             expr=str(element)+'_ma1_'+'area')
 
                 gauss_mod.set_param_hint('center', value=val, vary=False)
                 gauss_mod.set_param_hint('sigma', value=1, vary=False)
@@ -1074,38 +1063,37 @@ def _get_activated_line(incident_energy, ename):
         all possible line names for given element
     """
     line_list = []
-    if ename in K_LINE:
-        e = Element(ename)
+    if element in K_LINE:
+        e = Element(element)
         if e.cs(incident_energy)['ka1'] == 0:
             return
         for num, item in enumerate(e.emission_line.all[:4]):
             line_name = item[0]
             if e.cs(incident_energy)[line_name] == 0:
                 continue
-            line_list.append(str(ename)+'_'+str(line_name))
+            line_list.append(str(element)+'_'+str(line_name))
         return line_list
 
-    elif ename in L_LINE:
-        ename = ename.split('_')[0]
-        e = Element(ename)
+    elif element in L_LINE:
+        element = element.split('_')[0]
+        e = Element(element)
         if e.cs(incident_energy)['la1'] == 0:
             return
         for num, item in enumerate(e.emission_line.all[4:-4]):
             line_name = item[0]
             if e.cs(incident_energy)[line_name] == 0:
                 continue
-            line_list.append(str(ename)+'_'+str(line_name))
+            line_list.append(str(element)+'_'+str(line_name))
         return line_list
 
-    elif ename in M_LINE:
-        ename = ename.split('_')[0]
-        e = Element(ename)
+    elif element in M_LINE:
+        element = element.split('_')[0]
+        e = Element(element)
         if e.cs(incident_energy)['ma1'] == 0:
             return
         for num, item in enumerate(e.emission_line.all[-4:]):
             line_name = item[0]
             if e.cs(incident_energy)[line_name] == 0:
                 continue
-            line_list.append(str(ename)+'_'+str(line_name))
+            line_list.append(str(element)+'_'+str(line_name))
         return line_list
-
