@@ -841,7 +841,7 @@ def compute_escape_peak(spectrum, ratio, params,
         fitting parameters
     escape_e : float
         Units: keV
-        By default, 1.73998
+        By default, 1.73998 (Ka1 line of Si)
 
     Returns
     -------
@@ -859,7 +859,7 @@ def compute_escape_peak(spectrum, ratio, params,
     return result
 
 
-def contruct_linear_model(channel_number, params, default_area=1e5):
+def construct_linear_model(channel_number, params, default_area=1e5):
     """
     Create spectrum with parameters given from params.
 
@@ -1023,7 +1023,7 @@ def linear_spectrum_fitting(spectrum, params, element_list=None,
         new_element = ', '.join(element_list)
         fitting_parameters['non_fitting_values']['element_list'] = new_element
 
-    e_select, matv = contruct_linear_model(x, params)
+    e_select, matv = construct_linear_model(x, params)
 
     non_element = ['compton', 'elastic']
     total_list = e_select + non_element
