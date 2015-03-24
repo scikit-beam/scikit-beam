@@ -153,8 +153,7 @@ class ElementModel(Model):
         self.set_param_hint('epsilon', value=2.96, vary=False)
 
 
-def _set_parameter_hint(param_name, input_dict, input_model,
-                        log_option=False):
+def _set_parameter_hint(param_name, input_dict, input_model):
     """
     Set parameter hint information to lmfit model from input dict.
 
@@ -168,8 +167,6 @@ def _set_parameter_hint(param_name, input_dict, input_model,
         all the initial values and constraints for given parameters
     input_model : object
         model object used in lmfit
-    log_option : bool
-        option for logger
     """
     if input_dict['bound_type'] == 'none':
         input_model.set_param_hint(name=param_name, value=input_dict['value'], vary=True)
@@ -186,9 +183,8 @@ def _set_parameter_hint(param_name, input_dict, input_model,
                                    max=input_dict['max'])
     else:
         raise ValueError("could not set values for {0}".format(param_name))
-    if log_option:
-        logger.debug(' {0} bound type: {1}, value: {2}, range: {3}'.
-                     format(param_name, input_dict['bound_type'], input_dict['value'],
+    logger.debug(' {0} bound type: {1}, value: {2}, range: {3}'.
+                 format(param_name, input_dict['bound_type'], input_dict['value'],
                             [input_dict['min'], input_dict['max']]))
 
 
@@ -544,11 +540,11 @@ class ModelSpectrum(object):
         if ename in K_LINE:
             e = Element(ename)
             if e.cs(incident_energy)['ka1'] == 0:
-                logger.debug(' {0} Ka emission line is not activated '
-                             'at this energy {1}'.format(ename, incident_energy))
+                logger.debug('%s Ka emission line is not activated '
+                             'at this energy %f', element, incident_energy)
                 return
 
-            logger.debug(' --- Started building {0} peak. ---'.format(ename))
+            logger.debug(' --- Started building %s peak. ---', element)
 
             for num, item in enumerate(e.emission_line.all[:4]):
                 line_name = item[0]
@@ -588,8 +584,7 @@ class ModelSpectrum(object):
 
                 area_name = str(ename)+'_'+str(line_name)+'_area'
                 if area_name in parameter:
-                    _set_parameter_hint(area_name, parameter[area_name],
-                                        gauss_mod, log_option=log_option)
+                    _set_parameter_hint(area_name, parameter[area_name], gauss_mod)
 
                 gauss_mod.set_param_hint('center', value=val, vary=False)
                 ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
@@ -602,19 +597,19 @@ class ModelSpectrum(object):
                 pos_name = ename+'_'+str(line_name)+'_delta_center'
                 if pos_name in parameter:
                     _set_parameter_hint('delta_center', parameter[pos_name],
-                                        gauss_mod, log_option=log_option)
+                                        gauss_mod)
 
                 # width needs to be adjusted
                 width_name = ename+'_'+str(line_name)+'_delta_sigma'
                 if width_name in parameter:
                     _set_parameter_hint('delta_sigma', parameter[width_name],
-                                        gauss_mod, log_option=log_option)
+                                        gauss_mod)
 
                 # branching ratio needs to be adjusted
                 ratio_name = ename+'_'+str(line_name)+'_ratio_adjust'
                 if ratio_name in parameter:
                     _set_parameter_hint('ratio_adjust', parameter[ratio_name],
-                                        gauss_mod, log_option=log_option)
+                                        gauss_mod)
 
                 if element_mod:
                     element_mod += gauss_mod
@@ -671,19 +666,19 @@ class ModelSpectrum(object):
                 pos_name = ename+'_'+str(line_name)+'_delta_center'
                 if pos_name in parameter:
                     _set_parameter_hint('delta_center', parameter[pos_name],
-                                        gauss_mod, log_option=log_option)
+                                        gauss_mod)
 
                 # width needs to be adjusted
                 width_name = ename+'_'+str(line_name)+'_delta_sigma'
                 if width_name in parameter:
                     _set_parameter_hint('delta_sigma', parameter[width_name],
-                                        gauss_mod, log_option=log_option)
+                                        gauss_mod)
 
                 # branching ratio needs to be adjusted
                 ratio_name = ename+'_'+str(line_name)+'_ratio_adjust'
                 if ratio_name in parameter:
                     _set_parameter_hint('ratio_adjust', parameter[ratio_name],
-                                        gauss_mod, log_option=log_option)
+                                        gauss_mod)
                 if element_mod:
                     element_mod += gauss_mod
                 else:
@@ -738,19 +733,19 @@ class ModelSpectrum(object):
                 pos_name = ename+'_'+str(line_name)+'_delta_center'
                 if pos_name in parameter:
                     _set_parameter_hint('delta_center', parameter[pos_name],
-                                        gauss_mod, log_option=log_option)
+                                        gauss_mod)
 
                 # width needs to be adjusted
                 width_name = ename+'_'+str(line_name)+'_delta_sigma'
                 if width_name in parameter:
                     _set_parameter_hint('delta_sigma', parameter[width_name],
-                                        gauss_mod, log_option=log_option)
+                                        gauss_mod)
 
                 # branching ratio needs to be adjusted
                 ratio_name = ename+'_'+str(line_name)+'_ratio_adjust'
                 if ratio_name in parameter:
                     _set_parameter_hint('ratio_adjust', parameter[ratio_name],
-                                        gauss_mod, log_option=log_option)
+                                        gauss_mod)
 
                 if element_mod:
                     element_mod += gauss_mod
