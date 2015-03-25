@@ -128,9 +128,11 @@ def auto_corr(num_levels, num_bufs, num_qs,
     # matrix of auto-correlation function without normalizations
     G = np.zeros(((num_levels + 1)*num_bufs/2, num_qs),
                  dtype=np.float64)
+
     # matrix of past intensity normalizations
     IAP = np.zeros(((num_levels + 1)*num_bufs/2, num_qs),
                    dtype=np.float64)
+
     # matrix of future intensity normalizations
     IAF = np.zeros(((num_levels + 1)*num_bufs/2, num_qs),
                    dtype=np.float64)
@@ -143,6 +145,9 @@ def auto_corr(num_levels, num_bufs, num_qs,
     buf = np.zeros((num_levels, num_bufs, np.sum(num_pixels)),
                    dtype=np.float64)
 
+    # to track processing each level
+    cts = np.zeros(num_levels)
+
     # to increment buffer
     cur = np.ones((num_levels), dtype=np.int64)
 
@@ -153,33 +158,53 @@ def auto_corr(num_levels, num_bufs, num_qs,
     t1 = time.time()
 
     for n in range(0, len(img_stack)):  # changed the number of frames
-        image_array = img_stack[n]
 
         cur[0] = (1 + cur[0]) % num_bufs  # increment buffer
 
         # add image data to the buf to use for correlation
-        buf[0, cur[0] - 1] = (np.ravel(image_array))[pixel_list]
+        buf[0, cur[0] - 1] = (np.ravel(img_stack[n]))[pixel_list]
 
         # call the _process function for multi-tau level one
         G, IAP, IAF, num = _process(buf, G, IAP, IAF, q_inds,
                                     num_bufs, num_pixels, num, level=0,
                                     buf_no=cur[0] - 1)
 
+        # check whether the number of levels is one, otherwise
+        # continue processing the next level
+        if num_levels > 1:
+            processing = 1
+        else:
+            processing = 0
+
         # the image data will be saved in buf according to each level then call
         #  _process function to calculate one time correlation functions
-        for level in range(1, num_levels):
-            prev = 1 + (cur[level - 1] - 2 + num_bufs) % num_bufs
-            cur[level] = (1 + cur[level]) % num_bufs
+        level = 1
+        while processing:
+            if cts[level]:
+                prev = 1 + (cur[level - 1] - 1 - 1 + num_bufs)%num_bufs
+                cur[level] = 1 + cur[level]%num_bufs
+                buf[level, cur[level] - 1] = (buf[level - 1, prev - 1] +
+                                              buf[level - 1,
+                                                  cur[level - 1] - 1])/2
 
-            # add image data to the buf to use for correlation
-            buf[level, cur[level] - 1] = (buf[level - 1, prev - 1] +
-                                          buf[level - 1, cur[level - 1] - 1])/2
+                # make the cts zero once that level is processed
+                cts[level] = 0
 
-            # call the _process function for each multi-tau level
-            # for multi-tau levels greater than one
-            G, IAP, IAF, num = _process(buf, G, IAP, IAF, q_inds, num_bufs,
-                                        num_pixels, num, level=level,
-                                        buf_no=cur[level]-1,)
+                # call the _process function for each multi-tau level
+                # for multi-tau levels greater than one
+                G, IAP, IAF, num = _process(buf, G, IAP, IAF, q_inds,
+                                       num_bufs, num_pixels, num,
+                                       level=level, buf_no=cur[level]-1,)
+                level += 1
+
+                # Checking whether there is next level for processing
+                if level<num_levels:
+                    processing = 1
+                else:
+                    processing = 0
+            else:
+                cts[level] = 1
+                processing = 0
 
     # ending time for the process
     t2 = time.time()
