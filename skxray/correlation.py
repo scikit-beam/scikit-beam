@@ -75,9 +75,6 @@ def auto_corr(num_levels, num_bufs, num_qs,
     num_qs : int
         number of region of interests(roi's)
 
-    ring_inds : ndarray
-        indices of the required rings
-
     pixel_list : ndarray
         pixel indices for the required roi's
 
