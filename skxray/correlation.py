@@ -70,7 +70,7 @@ def auto_corr(num_levels, num_bufs, num_qs,
 
     num_bufs : int, even
         number of channels or number of buffers in
-        auto-correlators normalizations (must be even)
+        multiple-taus (must be even)
 
     num_qs : int
         number of region of interests(roi's)
@@ -115,6 +115,10 @@ def auto_corr(num_levels, num_bufs, num_qs,
         scattering," Rev. Sci. Instrum., vol 70, p 3274-3289, 2000.
 
     """
+    if num_bufs%2 != 0:
+        raise ValueError("number of channels or number of buffers in"
+                         " multiple-taus (must be even)")
+
     # number of pixels in required roi's, dimensions are : [num_qs]X1
     num_pixels = np.bincount(q_inds, minlength=(num_qs+1))
     num_pixels = num_pixels[1:]
