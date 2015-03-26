@@ -657,7 +657,7 @@ class ModelSpectrum(object):
         logger.debug(' Finished setting up parameters for elastic model.')
         self.elastic = elastic
 
-    def set_element_model(self, ename, default_area=1e5, log_option=False):
+    def set_element_model(self, ename, default_area=1e5, log_option=True):
         """
         Construct element model.
 
@@ -703,6 +703,10 @@ class ModelSpectrum(object):
                                          expr='fwhm_offset')
                 gauss_mod.set_param_hint('fwhm_fanoprime', value=self.compton_param['fwhm_fanoprime'].value,
                                          expr='fwhm_fanoprime')
+
+                area_name = str(ename)+'_'+str(line_name)+'_area'
+                if area_name in parameter:
+                    default_area = parameter[area_name]['value']
 
                 if line_name == 'ka1':
                     gauss_mod.set_param_hint('area', value=default_area, vary=True, min=0)
@@ -786,6 +790,10 @@ class ModelSpectrum(object):
                 gauss_mod.set_param_hint('fwhm_fanoprime', value=self.compton_param['fwhm_fanoprime'].value,
                                          expr='fwhm_fanoprime')
 
+                area_name = str(ename)+'_'+str(line_name)+'_area'
+                if area_name in parameter:
+                    default_area = parameter[area_name]['value']
+
                 if line_name == 'la1':
                     gauss_mod.set_param_hint('area', value=default_area, vary=True)
                 else:
@@ -852,6 +860,10 @@ class ModelSpectrum(object):
                                          expr='fwhm_offset')
                 gauss_mod.set_param_hint('fwhm_fanoprime', value=self.compton_param['fwhm_fanoprime'].value,
                                          expr='fwhm_fanoprime')
+
+                area_name = str(ename)+'_'+str(line_name)+'_area'
+                if area_name in parameter:
+                    default_area = parameter[area_name]['value']
 
                 if line_name == 'ma1':
                     gauss_mod.set_param_hint('area', value=default_area, vary=True)
