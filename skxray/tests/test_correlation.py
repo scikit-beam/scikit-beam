@@ -66,8 +66,7 @@ def test_correlation():
 
     img_stack = np.random.randint(1, 5, size=(500, ) + img_dim)
 
-    g2, lag_steps = corr.auto_corr(num_levels, num_bufs,
-                                                 num_qs, pixel_list, q_inds,
+    g2, lag_steps = corr.auto_corr(num_levels, num_bufs, pixel_list, q_inds,
                                                  np.asarray(img_stack))
 
     assert_array_almost_equal(lag_steps, np.array([0, 1, 2, 3, 4, 6, 8,

@@ -56,8 +56,8 @@ import time
 import skxray.core as core
 
 
-def auto_corr(num_levels, num_bufs, num_qs,
-              pixel_list, q_inds, img_stack):
+def auto_corr(num_levels, num_bufs, pixel_list, q_inds,
+              img_stack):
     """
     This module is for one time correlation.
     The multi-tau correlation scheme was used for
@@ -72,11 +72,9 @@ def auto_corr(num_levels, num_bufs, num_qs,
         number of channels or number of buffers in
         multiple-taus (must be even)
 
-    num_qs : int
-        number of region of interests(roi's)
-
     pixel_list : ndarray
-        pixel indices for the required roi's
+        pixel indices for the required region of interests
+        (roi's)
 
     q_inds : ndarray
         indices of the required roi's
@@ -116,6 +114,9 @@ def auto_corr(num_levels, num_bufs, num_qs,
         raise ValueError("number of channels or number of buffers in"
                          " multiple-taus (must be even)")
 
+    # get the number of region of interests(roi's)
+    num_qs = np.max(q_inds)
+
     # number of pixels in required roi's, dimensions are : [num_qs]X1
     num_pixels = np.bincount(q_inds, minlength=(num_qs+1))
     num_pixels = num_pixels[1:]
@@ -149,20 +150,20 @@ def auto_corr(num_levels, num_bufs, num_qs,
     cts = np.zeros(num_levels)
 
     # to increment buffer
-    cur = np.ones((num_levels), dtype=np.int64)
+    cur = np.ones(num_levels, dtype=np.int64)
 
     # to track how many images processed in each level
-    num = np.array(np.zeros(num_levels), dtype=np.int64)
+    num = np.zeros(num_levels, dtype=np.int64)
 
     # starting time for the process
     t1 = time.time()
 
-    for n in range(0, len(img_stack)):  # changed the number of frames
+    for n, img in enumerate(img_stack):  # changed the number of frames
 
         cur[0] = (1 + cur[0]) % num_bufs  # increment buffer
 
         # add image data to the buf to use for correlation
-        buf[0, cur[0] - 1] = (np.ravel(img_stack[n]))[pixel_list]
+        buf[0, cur[0] - 1] = (np.ravel(img))[pixel_list]
 
         # call the _process function for multi-tau level one
         G, IAP, IAF, num = _process(buf, G, IAP, IAF, q_inds,
@@ -172,16 +173,16 @@ def auto_corr(num_levels, num_bufs, num_qs,
         # check whether the number of levels is one, otherwise
         # continue processing the next level
         if num_levels > 1:
-            processing = 1
+            processing = True
         else:
-            processing = 0
+            processing = False
 
         # the image data will be saved in buf according to each level then call
         #  _process function to calculate one time correlation functions
         level = 1
-        while processing:
+        while processing is True:
             if cts[level]:
-                prev = 1 + (cur[level - 1] - 1 - 1 + num_bufs)%num_bufs
+                prev = 1 + (cur[level - 1] - 2 + num_bufs)%num_bufs
                 cur[level] = 1 + cur[level]%num_bufs
                 buf[level, cur[level] - 1] = (buf[level - 1, prev - 1] +
                                               buf[level - 1,
@@ -199,12 +200,12 @@ def auto_corr(num_levels, num_bufs, num_qs,
 
                 # Checking whether there is next level for processing
                 if level<num_levels:
-                    processing = 1
+                    processing = True
                 else:
-                    processing = 0
+                    processing = False
             else:
                 cts[level] = 1
-                processing = 0
+                processing = False
 
     # ending time for the process
     t2 = time.time()
@@ -212,6 +213,7 @@ def auto_corr(num_levels, num_bufs, num_qs,
     logger.info("Processing time for {0} images took {1} seconds."
                 "".format(len(img_stack), (t2-t1)))
 
+    # to find the how many
     if len(np.where(IAP == 0)[0]) != 0:
         g_max = np.where(IAP == 0)[0][0]
     else:
@@ -293,10 +295,12 @@ def _process(buf, G, IAP, IAF, q_inds, num_bufs,
     """
     num[level] += 1
 
+    # in multi-tau correlation other than first level all other levels
+    #  have to do the half of the correlation
     if level == 0:
         i_min = 0
     else:
-        i_min = int(num_bufs/2)
+        i_min = num_bufs//2
 
     for i in range(i_min, min(num[level], num_bufs)):
         t_index = level*num_bufs/2 + i
