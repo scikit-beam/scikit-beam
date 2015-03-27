@@ -5,6 +5,7 @@ from __future__ import (absolute_import, division,
 import six
 import numpy as np
 import copy
+import logging
 from numpy.testing import (assert_equal, assert_array_almost_equal)
 from nose.tools import assert_true, raises
 from skxray.fitting.base.parameter_data import get_para, e_calibration
@@ -15,25 +16,28 @@ from skxray.fitting.xrf_model import (ModelSpectrum, ParamController,
                                       register_strategy, update_parameter_dict,
                                       _set_parameter_hint, _STRATEGY_REGISTRY)
 
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
+                    level=logging.INFO,
+                    filemode='w')
 
 def synthetic_spectrum():
     param = get_para()
     x = np.arange(2000)
-
-    elist, matv = construct_linear_model(x, param, default_area=1e5)
+    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M']
+    elist, matv = construct_linear_model(x, param, elemental_lines, default_area=1e5)
     return np.sum(matv, 1) + 100  # avoid zero values
 
 
 def test_parameter_controller():
     param = get_para()
-    PC = ParamController(param)
-    PC.create_full_param()
+    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M']
+    PC = ParamController(param, elemental_lines)
     set_opt = dict(pos='hi', width='lohi', area='hi', ratio='lo')
-    PC.update_element_prop(['Fe', 'Ce_L'], **set_opt)
-    PC.set_bound_type('linear')
+    PC.update_element_prop(['Fe_K', 'Ce_L'], **set_opt)
+    PC.set_strategy('linear')
 
     # check boundary value
-    for k, v in six.iteritems(PC.new_parameter):
+    for k, v in six.iteritems(PC.params):
         if 'Fe' in k:
             if 'ratio' in k:
                 assert_equal(str(v['bound_type']), set_opt['ratio'])
@@ -46,21 +50,26 @@ def test_parameter_controller():
 
 
 def test_fit():
+    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
+                        level=logging.INFO,
+                        filemode='w')
+    param = get_para()
+    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M']
     x0 = np.arange(2000)
     y0 = synthetic_spectrum()
 
     x, y = trim(x0, y0, 100, 1300)
-    MS = ModelSpectrum()
-    MS.model_spectrum()
+    MS = ModelSpectrum(param, elemental_lines)
+    MS.assemble_models()
 
-    result = MS.model_fit(x, y, w=1/np.sqrt(y), maxfev=200)
+    result = MS.model_fit(x, y, weights=1/np.sqrt(y), maxfev=200)
     for k, v in six.iteritems(result.values):
         if 'area' in k:
             # error smaller than 1%
             assert_true((v-1e5)/1e5 < 1e-2)
 
     # multiple peak sumed, so value should be larger than one peak area 1e5
-    sum_Fe = sum_area('Fe', result)
+    sum_Fe = sum_area('Fe_K', result)
     assert_true(sum_Fe > 1e5)
 
     sum_Ce = sum_area('Ce_L', result)
@@ -70,9 +79,9 @@ def test_fit():
     assert_true(sum_Pt > 1e5)
 
     # update values
-    update_parameter_dict(MS.parameter, result)
-    for k, v in six.iteritems(MS.parameter):
-        if 'area' in MS.parameter:
+    update_parameter_dict(MS.params, result)
+    for k, v in six.iteritems(MS.params):
+        if 'area' in MS.params:
             assert_equal(v['value'], result.values[k])
 
 
@@ -103,14 +112,14 @@ def test_pre_fit():
     param = get_para()
 
     # with weight pre fit
-    x, y_total = linear_spectrum_fitting(y0, param, weight=True)
+    x, y_total = linear_spectrum_fitting(y0, param)
     for v in item_list:
         assert_true(v in y_total)
 
     for k, v in six.iteritems(y_total):
         print(k)
     # no weight pre fit
-    x, y_total = linear_spectrum_fitting(y0, param, weight=False)
+    x, y_total = linear_spectrum_fitting(y0, param, constant_weight=None)
     for v in item_list:
         assert_true(v in y_total)
 
@@ -125,10 +134,12 @@ def test_escape_peak():
 
 
 def test_set_param_hint():
+    param = get_para()
+    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M']
     bound_options = ['none', 'lohi', 'fixed', 'lo', 'hi']
 
-    MS = ModelSpectrum()
-    MS.model_spectrum()
+    MS = ModelSpectrum(param, elemental_lines)
+    MS.assemble_models()
 
     # get compton model
     compton = MS.mod.components[0]

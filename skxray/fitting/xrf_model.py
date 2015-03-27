@@ -361,13 +361,14 @@ class ParamController(object):
             self.element_linenames.extend(get_activated_lines(
                 self.params['coherent_sct_energy']['value'], [element]))
         if kind == 'area':
-            return self._set_area(element, constraint)
+            return self._add_area_param(element, constraint)
+
         element, line = element.split('_')
         transitions = TRANSITIONS_LOOKUP[line]
 
         # Mg_L -> Mg_la1, which xraylib wants
         linenames = [
-            '{element}_{transition}'.format(element, t) for t in transitions]
+            '{0}_{1}'.format(element, t) for t in transitions]
 
         PARAM_SUFFIXES = {'pos': '_delta_center',
                           'width': '_delta_sigma',
@@ -392,6 +393,7 @@ class ParamController(object):
         Helper function called in self.add_param
         """
         if element in K_LINE:
+            element = element.split('_')[0]
             param_name = str(element)+"_ka1_area"
         elif element in L_LINE:
             element = element.split('_')[0]
@@ -406,14 +408,14 @@ class ParamController(object):
         self.params.update({param_name: new_area})
 
 
-def sum_area(element_name, result_val):
+def sum_area(elemental_line, result_val):
     """
     Return the total area for given element.
 
     Parameters
     ----------
-    element_name : str
-        name of given element
+    elemental_line : str
+        name of a given element line, such as Na_K
     result_val : obj
         result obj from lmfit to save all the fitting results
 
@@ -427,21 +429,29 @@ def sum_area(element_name, result_val):
                 result_val.values[str(element_name)+'_'+line_name+'_ratio'] *
                 result_val.values[str(element_name)+'_'+line_name+'_ratio_adjust'])
     sumv = 0
-    if element_name in K_LINE:
-        for line_n in K_TRANSITIONS:
-            full_name = element_name + '_' + line_n + '_area'
-            if full_name in result_val.values:
-                sumv += get_value(result_val, element_name, line_n)
-    elif element_name in L_LINE:
-        for line_n in L_TRANSITIONS:
-            full_name = element_name.split('_')[0] + '_' + line_n + '_area'
-            if full_name in result_val.values:
-                sumv += get_value(result_val, element_name.split('_')[0], line_n)
-    elif element_name in M_LINE:
-        for line_n in M_TRANSITIONS:
-            full_name = element_name.split('_')[0] + '_' + line_n + '_area'
-            if full_name in result_val.values:
-                sumv += get_value(result_val, element_name.split('_')[0], line_n)
+    element, line = elemental_line.split('_')
+    transitions = TRANSITIONS_LOOKUP[line]
+
+    for line_n in transitions:
+        full_name = element + '_' + line_n + '_area'
+        if full_name in result_val.values:
+            sumv += get_value(result_val, element, line_n)
+    #
+    # if element_name in K_LINE:
+    #     for line_n in K_TRANSITIONS:
+    #         full_name = element_name + '_' + line_n + '_area'
+    #         if full_name in result_val.values:
+    #             sumv += get_value(result_val, element_name, line_n)
+    # elif element_name in L_LINE:
+    #     for line_n in L_TRANSITIONS:
+    #         full_name = element_name.split('_')[0] + '_' + line_n + '_area'
+    #         if full_name in result_val.values:
+    #             sumv += get_value(result_val, element_name.split('_')[0], line_n)
+    # elif element_name in M_LINE:
+    #     for line_n in M_TRANSITIONS:
+    #         full_name = element_name.split('_')[0] + '_' + line_n + '_area'
+    #         if full_name in result_val.values:
+    #             sumv += get_value(result_val, element_name.split('_')[0], line_n)
     return sumv
 
 
