@@ -43,10 +43,29 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import six
 import numpy as np
-import sys
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+def squared_dist_2D(dims):
+    """
+    Create array with pixel value equals squared euclidian distance
+    from array center in 2D.
+
+    Parameters
+    ----------
+    dims : list or tuple
+        shape of the data
+
+    Returns
+    -------
+    array :
+        2D array to meet requirement
+    """
+    x_sq = (np.arange(dims[0]) - dims[0]/2)**2
+    y_sq = (np.arange(dims[1]) - dims[1]/2)**2
+    return x_sq.reshape([dims[0], 1]) + y_sq
 
 
 def dist(dims):
@@ -61,23 +80,35 @@ def dist(dims):
     Returns
     -------
     array :
-        array with equal distance from center.
+        2D or 3D array
     """
-    new_array = np.zeros(dims)
-
     if np.size(dims) == 2:
-        x_sq = (np.arange(dims[0]) - dims[0]/2)**2
-        y_sq = (np.arange(dims[1]) - dims[1]/2)**2
-        for j in range(dims[1]):
-            new_array[:, j] = np.sqrt(x_sq + y_sq[j])
+        return np.sqrt(squared_dist_2D(dims))
 
     if np.size(dims) == 3:
-        x_sq = (np.arange(dims[0]) - dims[0]/2)**2
-        y_sq = (np.arange(dims[1]) - dims[1]/2)**2
+        temp = squared_dist_2D(dims[:-1])
         z_sq = (np.arange(dims[2]) - dims[2]/2)**2
-        for j in range(dims[1]):
-            for k in range(dims[2]):
-                new_array[:, j, k] = np.sqrt(x_sq + y_sq[j] + z_sq[k])
+        return np.sqrt(temp.reshape([dims[0], dims[1], 1])
+                       + z_sq.reshape([1, 1, dims[2]]))
 
-    return new_array
+
+def gauss(dims, sigma):
+    """
+    Generate Gaussian function in 2D or 3D.
+
+    Parameters
+    ----------
+    dims : list or tuple
+        shape of the data
+    sigma : float
+        standard deviation of gaussian function
+
+    Returns
+    -------
+    Array :
+        2D or 3D gaussian
+    """
+    x = dist(dims)
+    y = np.exp(-(x / sigma)**2/2.)
+    return y/np.sum(y)
 
