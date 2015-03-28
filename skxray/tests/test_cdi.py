@@ -6,7 +6,7 @@ import numpy as np
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
 
-from skxray.cdi import dist, gauss
+from skxray.cdi import dist, gauss, convolution
 
 
 def dist_temp(dims):
@@ -59,4 +59,12 @@ def test_gauss():
         assert_almost_equal(0, np.mean(d), decimal=3)
 
 
-
+def test_convolution():
+    shape_list = [(100, 50), (100, 100, 100)]
+    std1 = 5
+    std2 = 10
+    for v in shape_list:
+        g1 = gauss(v, std1)
+        g2 = gauss(v, std2)
+        f = convolution(g1, g2)
+        assert_almost_equal(0, np.mean(f), decimal=3)
