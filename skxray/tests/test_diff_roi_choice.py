@@ -57,7 +57,7 @@ def test_roi_rectangles():
     roi_data = np.array(([2, 2, 6, 3], [6, 7, 8, 5], [8, 18, 5, 10]),
                         dtype=np.int64)
 
-    roi_inds, num_pixels, pixel_list = diff_roi.roi_rectangles(num_rois,
+    all_roi_inds, roi_inds, num_pixels, pixel_list = diff_roi.roi_rectangles(num_rois,
                                                                roi_data,
                                                                detector_size)
     ty = np.zeros(detector_size).ravel()
@@ -87,7 +87,7 @@ def test_roi_rings():
     delta_q = 3
     num_qs = 7  # number of Q rings
 
-    (q_inds, q_ring_val, num_pixels,
+    (all_roi_inds, q_inds, q_ring_val, num_pixels,
      pixel_list) = diff_roi.roi_rings(img_dim, calibrated_center, num_qs,
                                       first_q, delta_q)
 
@@ -112,7 +112,7 @@ def test_roi_rings_step():
     num_qs = 6  # number of Q rings
     step_q = 1  # step value between each Q ring
 
-    (q_inds, q_ring_val,
+    (all_roi_inds, q_inds, q_ring_val,
      num_pixels, pixel_list) = diff_roi.roi_rings_step(img_dim,
                                                        calibrated_center,
                                                        num_qs, first_q,
@@ -137,7 +137,7 @@ def test_roi_rings_diff_steps():
 
     num_qs = 8  # number of Q rings
 
-    (q_inds, q_ring_val,
+    (all_roi_inds, q_inds, q_ring_val,
      num_pixels, pixel_list) = diff_roi.roi_rings_step(img_dim,
                                                        calibrated_center,
                                                        num_qs, first_q,
