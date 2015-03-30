@@ -49,6 +49,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import six
 import numpy as np
+import numpy.ma as ma
 import logging
 logger = logging.getLogger(__name__)
 import time
@@ -56,8 +57,7 @@ import time
 import skxray.core as core
 
 
-def auto_corr(num_levels, num_bufs, pixel_list, q_inds,
-              img_stack):
+def auto_corr(num_levels, num_bufs, indices, img_stack, mask=None):
     """
     This module is for one time correlation.
     The multi-tau correlation scheme was used for
@@ -72,16 +72,15 @@ def auto_corr(num_levels, num_bufs, pixel_list, q_inds,
         number of channels or number of buffers in
         multiple-taus (must be even)
 
-    pixel_list : ndarray
-        pixel indices for the required region of interests
-        (roi's)
-
-    q_inds : ndarray
-        indices of the required roi's
+    indices : ndarray
+        indices of the required region of interest's (roi's)
 
     img_stack : ndarray
         intensity array of the images
         dimensions are: (num of images, num_rows, num_cols)
+
+    mask : ndarray, optional
+        mask (eg: dead pixel mask)
 
     Returns
     -------
@@ -111,15 +110,23 @@ def auto_corr(num_levels, num_bufs, pixel_list, q_inds,
 
     """
     if num_bufs%2 != 0:
-        raise ValueError("number of channels or number of buffers in"
+        raise ValueError("number of channels(number of buffers) in"
                          " multiple-taus (must be even)")
 
-    # get the number of region of interests(roi's)
-    num_qs = np.max(q_inds)
+    if (indices.shape == (img_stack.shape[1:])
+        and (mask.indices == img_stack[1:])):
+        raise ValueError("Shape of the image array should be equal to "
+                         "shape of the indices array and the shape of"
+                         " the mask array ")
 
-    # number of pixels in required roi's, dimensions are : [num_qs]X1
-    num_pixels = np.bincount(q_inds, minlength=(num_qs+1))
-    num_pixels = num_pixels[1:]
+    if mask is not None:
+        roi_inds = ma(indices)
+    else:
+        roi_inds = indices
+
+    #  to get indices, number of roi's, number of pixels in each roi's and
+    #  pixels indices for the required roi's.
+    q_inds, num_qs, num_pixels, pixel_list = _get_roi_info(roi_inds)
 
     if np.any(num_pixels == 0):
         raise ValueError("Number of pixels of the required roi's"
@@ -182,8 +189,9 @@ def auto_corr(num_levels, num_bufs, pixel_list, q_inds,
         level = 1
         while processing is True:
             if cts[level]:
-                prev = 1 + (cur[level - 1] - 2 + num_bufs)%num_bufs
+                prev = 1 + (cur[level - 1] - 2 )%num_bufs
                 cur[level] = 1 + cur[level]%num_bufs
+
                 buf[level, cur[level] - 1] = (buf[level - 1, prev - 1] +
                                               buf[level - 1,
                                                   cur[level - 1] - 1])/2
@@ -213,11 +221,8 @@ def auto_corr(num_levels, num_bufs, pixel_list, q_inds,
     logger.info("Processing time for {0} images took {1} seconds."
                 "".format(len(img_stack), (t2-t1)))
 
-    # to find the how many
-    if len(np.where(IAP == 0)[0]) != 0:
-        g_max = np.where(IAP == 0)[0][0]
-    else:
-        g_max = IAP.shape[0]
+    # to get the final G, IAP and IAF values
+    g_max = IAP.shape[0]
 
     # calculate the one time correlation
     g2 = (G[: g_max] / (IAP[: g_max] * IAF[: g_max]))
@@ -321,3 +326,50 @@ def _process(buf, G, IAP, IAF, q_inds, num_bufs,
                          - IAF[t_index])/(num[level] - i)
 
     return G, IAP, IAF, num
+
+
+def _get_roi_info(roi_inds):
+    """
+    This will find the indices required region of interests (roi's),
+    number of roi's count the number of pixels in each roi's and pixels
+    list for the required roi's.
+
+    Parameters
+    ----------
+    ring_inds : ndarray
+        indices of the required rings
+        shape is ([detector_size[0]*detector_size[1]], )
+
+    Returns
+    -------
+    ring_inds : ndarray
+        indices of the ring values for the required roi's
+        (after discarding zero values from the shape
+        ([detector_size[0]*detector_size[1]], )
+
+    num_pixels : ndarray
+        number of pixels in each ring
+
+    num_rois : int
+        number of roi's
+
+    pixel_list : ndarray
+        pixel indices for the required roi's
+    """
+    img_dim = roi_inds.shape
+
+    # find the pixel list
+    w = np.where(np.ravel(roi_inds) > 0)
+    grid = np.indices((img_dim[0], img_dim[1]))
+
+    pixel_list = np.ravel((grid[0]*img_dim[1] + grid[1]))[w]
+
+    roi_inds = roi_inds[roi_inds > 0]
+
+    num_rois = np.max(roi_inds)
+
+    # number of pixels in each roi's
+    num_pixels = np.bincount(roi_inds, minlength=(num_rois+1))
+    num_pixels = num_pixels[1:]
+
+    return roi_inds, num_rois, num_pixels, pixel_list
