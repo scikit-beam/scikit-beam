@@ -11,7 +11,7 @@
 # Copyright (c) 2013, Stefan Vogt, Argonne National Laboratory         #
 # All rights reserved.                                                 #
 #                                                                      #
-# Redistribution and bound_type in source and binary forms, with or without   #
+# Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
 #                                                                      #
@@ -24,7 +24,7 @@
 #   distribution.                                                      #
 #                                                                      #
 # * Neither the name of the Brookhaven Science Associates, Brookhaven  #
-#   National Laboratory nor the names of its contributors may be bound_typed  #
+#   National Laboratory nor the names of its contributors may be used  #
 #   to endorse or promote products derived from this software without  #
 #   specific prior written permission.                                 #
 #                                                                      #
@@ -35,14 +35,15 @@
 # COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,           #
 # INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES   #
 # (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR   #
-# SERVICES; LOSS OF bound_type, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)   #
-# HOWEVER CAbound_typeD AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,  #
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)   #
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,  #
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OTHERWISE) ARISING   #
-# IN ANY WAY OUT OF THE bound_type OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
+# IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 
-from __future__ import (absolute_import, division, unicode_literals, print_function)
+from __future__ import (absolute_import, division,
+                        unicode_literals, print_function)
 import six
 
 
@@ -59,13 +60,13 @@ lo: with low boundary
 hi: with high boundary
 none: no fitting boundary
 
-
 Different fitting strategies are included to turn on or turn off some parameters.
 Those strategies are default, linear, free_energy, free_all and e_calibration.
 They are empirical experience from authors of the original code.
 """
 
 
+# old param dict, keep it here for now.
 para_dict = {'coherent_sct_amplitude': {'bound_type': 'none', 'min': 7.0, 'max': 8.0, 'value': 6.0},
              'coherent_sct_energy': {'bound_type': 'none', 'min': 10.4, 'max': 12.4, 'value': 11.8},
              'compton_amplitude': {'bound_type': 'none', 'min': 0.0, 'max': 10.0, 'value': 5.0},
@@ -109,25 +110,165 @@ para_dict = {'coherent_sct_amplitude': {'bound_type': 'none', 'min': 7.0, 'max':
              }
 
 
-# fitting strategy
-linear = {'coherent_sct_amplitude': 'none', 'compton_amplitude': 'none'}
+# fitting strategies
+adjust_element = {'coherent_sct_amplitude': 'none',
+                  'coherent_sct_energy': 'fixed',
+                  'compton_amplitude': 'none',
+                  'compton_angle': 'fixed',
+                  'compton_f_step': 'fixed',
+                  'compton_f_tail': 'fixed',
+                  'compton_fwhm_corr': 'lohi',
+                  'compton_gamma': 'fixed',
+                  'compton_hi_f_tail': 'fixed',
+                  'compton_hi_gamma': 'fixed',
+                  'e_linear': 'fixed',
+                  'e_offset': 'fixed',
+                  'e_quadratic': 'fixed',
+                  'fwhm_fanoprime': 'fixed',
+                  'fwhm_offset': 'fixed',
+                  'non_fitting_values': 'fixed'}
 
-e_calibration = {'coherent_sct_amplitude': 'none', 'compton_amplitude': 'none',
-                 'e_linear': 'lohi', 'e_offset': 'lohi', 'e_quadratic': 'lohi'}
+e_calibration = {'coherent_sct_amplitude': 'none',
+                 'coherent_sct_energy': 'fixed',
+                 'compton_amplitude': 'none',
+                 'compton_angle': 'fixed',
+                 'compton_f_step': 'fixed',
+                 'compton_f_tail': 'fixed',
+                 'compton_fwhm_corr': 'fixed',
+                 'compton_gamma': 'fixed',
+                 'compton_hi_f_tail': 'fixed',
+                 'compton_hi_gamma': 'fixed',
+                 'e_linear': 'lohi',
+                 'e_offset': 'lohi',
+                 'e_quadratic': 'fixed',
+                 'fwhm_fanoprime': 'fixed',
+                 'fwhm_offset': 'fixed',
+                 'non_fitting_values': 'fixed'}
 
-free_energy = {'coherent_sct_amplitude': 'none', 'coherent_sct_energy': 'lohi',
-               'compton_amplitude': 'none', 'compton_angle': 'lohi',
-               'compton_f_tail': 'lo', 'compton_fwhm_corr': 'lohi',
-               'e_linear': 'lohi', 'e_offset': 'lohi', 'e_quadratic': 'lohi',
-               'fwhm_fanoprime': 'lohi', 'fwhm_offset': 'lohi'}
+linear = {'coherent_sct_amplitude': 'none',
+          'coherent_sct_energy': 'fixed',
+          'compton_amplitude': 'none',
+          'compton_angle': 'fixed',
+          'compton_f_step': 'fixed',
+          'compton_f_tail': 'fixed',
+          'compton_fwhm_corr': 'fixed',
+          'compton_gamma': 'fixed',
+          'compton_hi_f_tail': 'fixed',
+          'compton_hi_gamma': 'fixed',
+          'e_linear': 'fixed',
+          'e_offset': 'fixed',
+          'e_quadratic': 'fixed',
+          'fwhm_fanoprime': 'fixed',
+          'fwhm_offset': 'fixed',
+          'non_fitting_values': 'fixed'}
 
-free_all = {'coherent_sct_amplitude': 'none', 'coherent_sct_energy': 'lohi',
-            'compton_amplitude': 'none', 'compton_angle': 'lohi',
-            'compton_f_step': 'lohi', 'compton_fwhm_corr': 'lohi', 'compton_gamma': 'lohi',
-            'e_linear': 'lohi', 'e_offset': 'lohi', 'e_quadratic': 'lohi',
-            'f_tail_linear': 'lohi', 'f_tail_offset': 'lohi',
-            'fwhm_fanoprime': 'lohi', 'fwhm_offset': 'lohi',
-            'kb_f_tail_linear': 'lohi', 'kb_f_tail_offset': 'lohi'}
+free_more = {'coherent_sct_amplitude': 'none',
+             'coherent_sct_energy': 'lohi',
+             'compton_amplitude': 'none',
+             'compton_angle': 'lohi',
+             'compton_f_step': 'lohi',
+             'compton_f_tail': 'fixed',
+             'compton_fwhm_corr': 'lohi',
+             'compton_gamma': 'lohi',
+             'compton_hi_f_tail': 'fixed',
+             'compton_hi_gamma': 'fixed',
+             'e_linear': 'lohi',
+             'e_offset': 'lohi',
+             'e_quadratic': 'lohi',
+             'fwhm_fanoprime': 'lohi',
+             'fwhm_offset': 'lohi',
+             'non_fitting_values': 'fixed'}
+
+fit_with_tail = {'coherent_sct_amplitude': 'none',
+                 'coherent_sct_energy': 'lohi',
+                 'compton_amplitude': 'none',
+                 'compton_angle': 'lohi',
+                 'compton_f_step': 'fixed',
+                 'compton_f_tail': 'lohi',
+                 'compton_fwhm_corr': 'lohi',
+                 'compton_gamma': 'fixed',
+                 'compton_hi_f_tail': 'fixed',
+                 'compton_hi_gamma': 'fixed',
+                 'e_linear': 'lohi',
+                 'e_offset': 'lohi',
+                 'e_quadratic': 'lohi',
+                 'fwhm_fanoprime': 'lohi',
+                 'fwhm_offset': 'lohi',
+                 'non_fitting_values': 'fixed'}
+
+
+default_param = {'coherent_sct_amplitude': {'bound_type': 'none',
+                  'max': 10000000.0,
+                  'min': 0.10,
+                  'value': 100000},
+                 'coherent_sct_energy': {'bound_type': 'lohi',
+                  'description': 'Incident E [keV]',
+                  'max': 13.0,
+                  'min': 9.0,
+                  'value': 11.0},
+                 'compton_amplitude': {'bound_type': 'none',
+                  'max': 10000000.0,
+                  'min': 0.10,
+                  'value': 100000.0},
+                 'compton_angle': {'bound_type': 'lohi',
+                  'max': 100.0,
+                  'min': 80.0,
+                  'value': 90.0},
+                 'compton_f_step': {'bound_type': 'fixed',
+                  'max': 0.01,
+                  'min': 0.0,
+                  'value': 0.01},
+                 'compton_f_tail': {'bound_type': 'fixed',
+                  'max': 0.3,
+                  'min': 0.0001,
+                  'value': 0.05},
+                 'compton_fwhm_corr': {'bound_type': 'lohi',
+                  'description': 'fwhm Coef, Compton',
+                  'max': 2.5,
+                  'min': 0.5,
+                  'value': 1.5},
+                 'compton_gamma': {'bound_type': 'lohi', 'max': 4.2,
+                                   'min': 3.8, 'value': 4.0},
+                 'compton_hi_f_tail': {'bound_type': 'fixed',
+                  'max': 1.0,
+                  'min': 1e-06,
+                  'value': 0.1},
+                 'compton_hi_gamma': {'bound_type': 'fixed',
+                  'max': 3.0,
+                  'min': 0.1,
+                  'value': 2.0},
+                 'e_linear': {'bound_type': 'lohi',
+                  'description': 'E Calib. Coef, a1',
+                  'max': 0.011,
+                  'min': 0.009,
+                  'tool_tip': 'E(channel) = a0 + a1*channel+ a2*channel**2',
+                  'value': 0.009532},
+                 'e_offset': {'bound_type': 'lohi',
+                  'description': 'E Calib. Coef, a0',
+                  'max': 0.015,
+                  'min': 0.006,
+                  'tool_tip': 'E(channel) = a0 + a1*channel+ a2*channel**2',
+                  'value': 0.007826},
+                 'e_quadratic': {'bound_type': 'lohi',
+                  'description': 'E Calib. Coef, a2',
+                  'max': 1e-06,
+                  'min': -1e-06,
+                  'tool_tip': 'E(channel) = a0 + a1*channel+ a2*channel**2',
+                  'value': 0.0},
+                 'fwhm_fanoprime': {'bound_type': 'fixed',
+                  'description': 'fwhm Coef, b2',
+                  'max': 0.0001,
+                  'min': 1e-07,
+                  'value': 1e-06},
+                 'fwhm_offset': {'bound_type': 'lohi',
+                  'description': 'fwhm Coef, b1 [keV]',
+                  'max': 0.19,
+                  'min': 0.16,
+                  'tool_tip': 'width**2 = (b1/2.3548)**2 + 3.85*b2*E',
+                  'value': 0.178},
+                 'non_fitting_values': {'element_list': 'Ar, Fe, Ce_L, Pt_M',
+                  'energy_bound_high': 12.0,
+                  'energy_bound_low': 2.5}}
 
 
 def get_para():
@@ -136,4 +277,5 @@ def get_para():
        based on different algorithms.
        Use copy for dict.
     """
-    return para_dict
+    #return para_dict
+    return default_param
