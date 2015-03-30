@@ -43,14 +43,3 @@ def test_gauss():
     for v in shape_list:
         d = gauss(v, std)
         assert_almost_equal(0, np.mean(d), decimal=3)
-
-
-def test_convolution():
-    shape_list = [(100, 50), (100, 100, 100)]
-    std1 = 5
-    std2 = 10
-    for v in shape_list:
-        g1 = gauss(v, std1)
-        g2 = gauss(v, std2)
-        f = convolution(g1, g2)
-        assert_almost_equal(0, np.mean(f), decimal=3)
