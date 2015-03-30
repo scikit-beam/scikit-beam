@@ -51,36 +51,45 @@ import skxray.diff_roi_choice as diff_roi
 from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
 
+from skimage import data
+
 
 def test_correlation():
     num_levels = 4
-    num_bufs = 4  # must be even
+    num_bufs = 8  # must be even
     num_qs = 2  # number of interested roi's (rings)
-    img_dim = (150, 150)  # detector size
+    img_dim = (50, 50)  # detector size
 
-    roi_data = np.array(([60, 70, 12, 6], [140, 120, 5, 10]),
+    roi_data = np.array(([10, 20, 12, 14], [40, 10, 9, 10]),
                         dtype=np.int64)
 
-    (q_inds, num_pixels,
+    (indices, q_inds, num_pixels,
      pixel_list) = diff_roi.roi_rectangles(num_qs, roi_data, img_dim)
 
     img_stack = np.random.randint(1, 5, size=(500, ) + img_dim)
 
-    g2, lag_steps = corr.auto_corr(num_levels, num_bufs, pixel_list, q_inds,
-                                                 np.asarray(img_stack))
+    g2, lag_steps = corr.auto_corr(num_levels, num_bufs, indices, img_stack,
+                                   mask=None)
 
-    assert_array_almost_equal(lag_steps, np.array([0, 1, 2, 3, 4, 6, 8,
-                                                   12, 16, 24]))
+    assert_array_almost_equal(lag_steps, np.array([0, 1, 2, 3, 4, 5, 6, 7, 8,
+                                                   10, 12, 14, 16, 20, 24, 28,
+                                                   32, 40, 48, 56]))
 
-    g2_m = np.array([[1.200, 1.200],
-                     [0.998, 1.000],
-                     [0.998, 0.997],
-                     [0.999, 1.000],
-                     [1.000, 1.000],
-                     [1.000, 1.000],
-                     [0.999, 1.000],
-                     [0.999, 1.000],
-                     [1.000, 1.000],
-                     [0.999, 1.000]])
+    assert_array_almost_equal(g2[1:, 0], 1.00, decimal=2)
+    assert_array_almost_equal(g2[1:, 1], 1.00, decimal=2)
 
-    assert_array_almost_equal(g2, g2_m, decimal=1)
+    coins = data.camera()
+    coins_stack = []
+
+    for i in range(500):
+        coins_stack.append(coins)
+
+    mesh = np.zeros_like(coins)
+    mesh[coins < 30] = 1
+    mesh[coins > 50] = 2
+
+    g2, lag_steps = corr.auto_corr(num_levels, num_bufs,
+                                   mesh, np.asarray(coins_stack))
+
+    assert_almost_equal(True, np.all(g2[:, 0], axis = 0))
+    assert_almost_equal(True, np.all(g2[:, 1], axis = 0))

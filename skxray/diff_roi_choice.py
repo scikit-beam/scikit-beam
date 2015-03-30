@@ -123,7 +123,7 @@ def roi_rectangles(num_rois, roi_data, detector_size):
 
     roi_inds = mesh[mesh > 0]
 
-    return mesh, roi_inds, num_pixels, pixel_list
+    return mesh.reshape(detector_size), roi_inds, num_pixels, pixel_list
 
 
 def roi_rings(img_dim, calibrated_center, num_rings,
@@ -204,7 +204,7 @@ def roi_rings(img_dim, calibrated_center, num_rings,
      pixel_list) = _process_rings(num_rings, img_dim,
                                   ring_vals, mesh)
 
-    return mesh, ring_inds, ring_vals, num_pixels, pixel_list
+    return mesh.reshape(img_dim), ring_inds, ring_vals, num_pixels, pixel_list
 
 
 def roi_rings_step(img_dim, calibrated_center, num_rings,
@@ -303,7 +303,7 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
      pixel_list) = _process_rings(num_rings, img_dim,
                                   ring_vals, mesh)
 
-    return mesh, ring_inds, ring_vals, num_pixels, pixel_list
+    return mesh.reshape(img_dim), ring_inds, ring_vals, num_pixels, pixel_list
 
 
 def _grid_values(img_dim, calibrated_center):

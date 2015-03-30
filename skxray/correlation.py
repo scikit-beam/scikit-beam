@@ -113,11 +113,9 @@ def auto_corr(num_levels, num_bufs, indices, img_stack, mask=None):
         raise ValueError("number of channels(number of buffers) in"
                          " multiple-taus (must be even)")
 
-    if (indices.shape == (img_stack.shape[1:])
-        and (mask.indices == img_stack[1:])):
-        raise ValueError("Shape of the image array should be equal to "
-                         "shape of the indices array and the shape of"
-                         " the mask array ")
+    if indices.shape == img_stack[0].shape[1:]:
+        raise ValueError("Shape of an image should be equal to"
+                         " shape of the indices array")
 
     if mask is not None:
         roi_inds = ma(indices)
