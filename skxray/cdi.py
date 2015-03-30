@@ -48,48 +48,31 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def squared_dist_2D(dims):
+def _dist(dims):
     """
-    Create array with pixel value equals squared euclidian distance
-    from array center in 2D.
+    Create array with pixel value equals to the distance from array center.
 
     Parameters
     ----------
     dims : list or tuple
-        shape of the data
+        shape of array to create
 
     Returns
     -------
-    array :
-        2D array to meet requirement
+    arr : np.ndarray
+        ND array whose pixels are equal to the distance from the center
+        of the array of shape `dims`
     """
-    x_sq = (np.arange(dims[0]) - dims[0]/2)**2
-    y_sq = (np.arange(dims[1]) - dims[1]/2)**2
-    return x_sq.reshape([dims[0], 1]) + y_sq
+    dist_sum = []
+    shape = np.ones(len(dims))
+    for idx, d in enumerate(dims):
+        vec = (np.arange(d) - (d-1)/2) ** 2
+        shape[idx] = -1
+        vec = vec.reshape(*shape)
+        shape[idx] = 1
+        dist_sum.append(vec)
 
-
-def dist(dims):
-    """
-    Create array with pixel value equals euclidian distance from array center.
-
-    Parameters
-    ----------
-    dims : list or tuple
-        shape of the data
-
-    Returns
-    -------
-    array :
-        2D or 3D array
-    """
-    if np.size(dims) == 2:
-        return np.sqrt(squared_dist_2D(dims))
-
-    if np.size(dims) == 3:
-        temp = squared_dist_2D(dims[:-1])
-        z_sq = (np.arange(dims[2]) - dims[2]/2)**2
-        return np.sqrt(temp.reshape([dims[0], dims[1], 1])
-                       + z_sq.reshape([1, 1, dims[2]]))
+    return np.sqrt(np.sum(dist_sum, axis=0))
 
 
 def gauss(dims, sigma):
@@ -106,11 +89,11 @@ def gauss(dims, sigma):
     Returns
     -------
     Array :
-        2D or 3D gaussian
+        ND gaussian
     """
-    x = dist(dims)
-    y = np.exp(-(x / sigma)**2/2.)
-    return y/np.sum(y)
+    x = _dist(dims)
+    y = np.exp(-(x / sigma)**2 / 2)
+    return y / np.sum(y)
 
 
 def convolution(array1, array2):
