@@ -74,6 +74,7 @@ def auto_corr(num_levels, num_bufs, indices, img_stack, mask=None):
 
     indices : ndarray
         indices of the required region of interest's (roi's)
+        dimensions are: (num_rows, num_cols)
 
     img_stack : ndarray
         intensity array of the images
@@ -334,13 +335,13 @@ def _get_roi_info(roi_inds):
 
     Parameters
     ----------
-    ring_inds : ndarray
+    roi_inds : ndarray
         indices of the required rings
         shape is ([detector_size[0]*detector_size[1]], )
 
     Returns
     -------
-    ring_inds : ndarray
+    roi_inds : ndarray
         indices of the ring values for the required roi's
         (after discarding zero values from the shape
         ([detector_size[0]*detector_size[1]], )
@@ -359,11 +360,12 @@ def _get_roi_info(roi_inds):
     # find the pixel list
     w = np.where(np.ravel(roi_inds) > 0)
     grid = np.indices((img_dim[0], img_dim[1]))
-
     pixel_list = np.ravel((grid[0]*img_dim[1] + grid[1]))[w]
 
+    # discard the zeros
     roi_inds = roi_inds[roi_inds > 0]
 
+    # the number of roi's
     num_rois = np.max(roi_inds)
 
     # number of pixels in each roi's
