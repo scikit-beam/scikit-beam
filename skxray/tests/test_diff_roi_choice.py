@@ -195,7 +195,7 @@ def test_roi_divide_circle():
     calibrated_center = (5., 2.)
     num_angles = 3
 
-    (roi_inds, num_pixels,
+    (all_roi_inds, roi_inds, num_pixels,
      pixel_list) = diff_roi.roi_divide_circle(detector_size,
                                               radius, calibrated_center,
                                               num_angles)
@@ -237,6 +237,25 @@ def test_roi_divide_circle():
 
     assert_array_almost_equal(num_pixels_m, num_pixels)
     assert_array_equal(roi_inds, roi_inds_m)
+
+
+def test_roi_angles_rings():
+    detector_size = (20, 20)
+    calibrated_center = (10., 7.)
+    num_angles = 7
+    first_r = 5.
+    delta_r = 5.
+
+    step_r = (2., 3)
+
+    num_rings = 3  # number of Q rings
+
+    (all_rois, roi_inds, num_pixels,
+     pixel_list) = diff_roi.roi_angles_rings(detector_size,
+                                                    calibrated_center,
+                                                    num_angles, num_rings,
+                                                    first_r, delta_r, *step_r)
+
 
 
 if __name__ == "__main__":
