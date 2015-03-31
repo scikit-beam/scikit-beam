@@ -102,12 +102,6 @@ def roi_rectangles(num_rois, roi_data, detector_size):
                                                      detector_size[0]])
         top, bottom = np.max([row_coor, 0]), np.min([row_coor + row_val,
                                                      detector_size[1]])
-
-        area = (right - left) * (bottom - top)
-
-        # find the number of pixels in each roi
-        num_pixels.append(area)
-
         slc1 = slice(left, right)
         slc2 = slice(top, bottom)
 
@@ -117,13 +111,10 @@ def roi_rectangles(num_rois, roi_data, detector_size):
         # assign a different scalar for each roi
         mesh[slc1, slc2] = (i + 1)
 
-    # find the pixel indices
-    w = np.where(mesh > 0)
-    grid = np.indices((detector_size[0], detector_size[1]))
-    pixel_list = ((grid[0]*detector_size[1] + grid[1]))[w]
-
     roi_inds = mesh[mesh > 0]
 
+    (roi_inds, num_pixels, pixel_list) = _process_rois(np.ravel(mesh),
+                                                       detector_size, num_rois)
     return roi_inds, num_pixels, pixel_list
 
 
@@ -195,7 +186,7 @@ def roi_rings(img_dim, calibrated_center, num_rings,
         else:
             ring_vals.append(q_r[num_rings-1])
 
-    ring_vals = _process_rings(num_rings, np.asarray(ring_vals))
+    ring_vals = _process_ring_edges(np.asarray(ring_vals))
 
     ring_inds, num_pixels, pixel_list = _process_rois(np.ravel(ring_inds),
                                                       img_dim, num_rings)
@@ -254,8 +245,66 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
         pixel indices for the required rings
 
     """
-    grid_values = _grid_values(img_dim, calibrated_center)
+    # get indices and the edge values processing from step value(s)
+    ring_vals, ring_inds = _process_ring_step(num_rings, first_r, delta_r,
+                                              img_dim, calibrated_center,
+                                              *step_r)
+    # get the edges of the rings
+    ring_vals = _process_ring_edges(np.asarray(ring_vals))
 
+    ring_inds, num_pixels, pixel_list = _process_rois(np.ravel(ring_inds),
+                                                      img_dim, num_rings)
+
+    return ring_inds, ring_vals, num_pixels, pixel_list
+
+
+def _grid_values(img_dim, calibrated_center):
+    """
+    Parameters
+    ----------
+    img_dim: tuple
+        shape of the image (detector X and Y direction)
+        Order is (num_rows, num_columns)
+        shape is [detector_size[0], detector_size[1]])
+
+    calibarted_center : tuple
+        defining the center of the image (column value, row value) (mm)
+
+    """
+    xx, yy = np.mgrid[:img_dim[0], :img_dim[1]]
+    x_ = (xx - calibrated_center[1])
+    y_ = (yy - calibrated_center[0])
+    grid_values = np.float_(np.hypot(x_, y_))
+
+    return grid_values
+
+
+def _process_ring_step(num_rings, first_r, delta_r, detector_size,
+                       calibrated_center, *step_r):
+    """
+    num_rings : int
+        number of rings
+
+    first_r : float
+        radius of the first ring
+
+    delta_r : float
+        thickness of the ring
+
+    step_r : tuple
+        step value for the next ring from the end of the previous
+        ring.
+        same step - same step values between rings (one value)
+        different steps - different step value between rings (provide
+        step value for each ring eg: 6 rings provide 5 step values)
+
+    Returns
+    -------
+    ring_vals : ndarray
+        edge values of each ring
+
+    """
+    grid_values = _grid_values(detector_size, calibrated_center)
     ring_vals = []
 
     for arg in step_r:
@@ -291,45 +340,16 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
     indx = ring_inds > 0
     ring_inds[indx] = (ring_inds[indx] + 1) // 2
 
-    ring_vals = _process_rings(num_rings, np.asarray(ring_vals))
-
-    ring_inds, num_pixels, pixel_list = _process_rois(np.ravel(ring_inds),
-                                                      img_dim, num_rings)
-
-    return ring_inds, ring_vals, num_pixels, pixel_list
+    return ring_vals, ring_inds
 
 
-def _grid_values(img_dim, calibrated_center):
-    """
-    Parameters
-    ----------
-    img_dim: tuple
-        shape of the image (detector X and Y direction)
-        Order is (num_rows, num_columns)
-        shape is [detector_size[0], detector_size[1]])
-
-    calibarted_center : tuple
-        defining the center of the image (column value, row value) (mm)
-
-    """
-    xx, yy = np.mgrid[:img_dim[0], :img_dim[1]]
-    x_ = (xx - calibrated_center[1])
-    y_ = (yy - calibrated_center[0])
-    grid_values = np.float_(np.hypot(x_, y_))
-
-    return grid_values
-
-
-def _process_rings(num_rings, ring_vals):
+def _process_ring_edges(ring_vals):
     """
     This is a helper function to make edge values
      of the each roi ring shape as (num_rings, 2)
 
     Parameters
     ----------
-    num_rings : int
-        number of rings
-
     ring_vals : ndarray
         edge values of each ring
 
@@ -346,7 +366,7 @@ def _process_rings(num_rings, ring_vals):
 
 
 def roi_divide_circle(detector_size, radius, calibrated_center,
-                      num_angles, rotate='N'):
+                      num_angles, rotate='N',):
     """
     This function will provide the indices, number of pixels and
     pixel indices when a circular roi is divided into pies
@@ -372,8 +392,8 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
 
     Returns
     -------
-    mesh : nedarry
-        indices of the required rings
+    roi_grid : ndarray
+        indices of the required roi's
         shape is ([detector_size[0], detector_size[1]])
 
     roi_inds : ndarray
@@ -386,6 +406,126 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
 
     pixel_list : ndarray
         pixel indices for the required roi's
+
+    """
+    mesh, grid_values = _get_roi_grid(detector_size, calibrated_center,
+                                              num_angles)
+    if rotate == 'Y':
+        mesh = np.rot90(mesh)
+        grid_values = np.rot90(grid_values)
+
+    mesh[grid_values > radius] = 0
+
+    roi_grid = mesh.reshape(detector_size)
+
+    roi_inds, num_pixels, pixel_list = _process_rois(np.ravel(mesh),
+                                                     detector_size,
+                                                     num_angles, rotate)
+    return roi_grid, roi_inds, num_pixels, pixel_list
+
+
+def roi_angles_rings(detector_size, calibrated_center,
+                      num_angles, num_rings,  first_r, delta_r,
+                      rotate= 'N', *step_r):
+    """
+    Parameters
+    ----------
+    img_dim : tuple
+        shape of the image (detector X and Y direction)
+        Order is (num_rows, num_columns)
+        shape is [detector_size[0], detector_size[1]])
+
+    calibrated_center : tuple
+        defining the center of the image (column value, row value) (mm)
+
+    radius : float
+        radius of the circle
+
+    num_angles : int
+        number of angles ring divide into
+        angles are measured from horizontal-anti clock wise
+
+    num_rings : int
+        number of rings
+
+    first_r : float
+        radius of the first ring
+
+    delta_r : float
+        thickness of the ring
+
+    step_r : tuple
+        step value for the next ring from the end of the previous
+        ring.
+        same step - same step values between rings (one value)
+        different steps - different step value between rings (provide
+        step value for each ring eg: 6 rings provide 5 step values)
+
+    Returns
+    -------
+    roi_grid : ndarray
+        indices of the required roi's
+        shape is ([detector_size[0], detector_size[1]])
+
+    roi_inds : ndarray
+        indices for the required roi's
+        (after discarding zero values from the shape
+        ([detector_size[0]*detector_size[1]], )
+
+    num_pixels : ndarray
+        number of pixels in each roi
+
+    pixel_list : ndarray
+        pixel indices for the required roi's
+
+    """
+    roi_grid, grid_values = _get_roi_grid(detector_size, calibrated_center,
+                                              num_angles)
+
+    # get the edge values of the rings
+    ring_vals, ring_inds = _process_ring_step(num_rings, first_r, delta_r,
+                                              detector_size, calibrated_center,
+                                              *step_r)
+    roi_grid = roi_grid.reshape(detector_size)
+    roi_grid[ring_inds.reshape(detector_size) == 0] = 0
+
+    ring_vals = _process_ring_edges(np.asarray(ring_vals))
+
+    for r in range(num_rings):
+        vl = (ring_vals[r][0] <= grid_values) & (grid_values
+                                                  < ring_vals[r][1])
+        roi_grid[vl] = roi_grid[vl] + num_angles*(r)
+
+    if rotate == 'Y':
+        roi_grid = np.rot90(roi_grid)
+        grid_values = np.rot90(grid_values)
+
+    roi_inds, num_pixels, pixel_list = _process_rois(np.ravel(roi_grid),
+                                                     detector_size,
+                                                     num_angles, rotate)
+
+    return roi_grid, roi_inds, num_pixels, pixel_list
+
+
+def _get_roi_grid(detector_size, calibrated_center, num_angles):
+    """
+    Parameters
+    ----------
+    detector_size : tuple
+        shape of the image (detector X and Y direction)
+        Order is (num_rows, num_columns)
+
+    calibrated_center : tuple
+        defining the center of the image
+        (column value, row value) (mm)
+
+    Returns
+    -------
+    mesh : ndarray
+        angle grid in degrees
+
+    grid_values : ndarray
+        grid values
 
     """
     yy, xx = np.mgrid[:detector_size[0], :detector_size[1]]
@@ -403,16 +543,7 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
     mesh = (np.digitize(np.ravel(angle_grid), angles,
                         right=False)).reshape(detector_size)
 
-    if rotate == 'Y':
-        mesh = np.rot90(mesh)
-        grid_values = np.rot90(grid_values)
-
-    mesh[grid_values > radius] = 0
-
-    roi_inds, num_pixels, pixel_list = _process_rois(np.ravel(mesh),
-                                                     detector_size,
-                                                     num_angles, rotate)
-    return mesh.reshape(detector_size), roi_inds, num_pixels, pixel_list
+    return mesh, grid_values
 
 
 def _process_rois(mesh, detector_size, num_rois, rotate='N'):
@@ -469,6 +600,3 @@ def _process_rois(mesh, detector_size, num_rois, rotate='N'):
     num_pixels = num_pixels[1:]
 
     return roi_inds, num_pixels, pixel_list
-
-
-
