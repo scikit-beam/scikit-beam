@@ -372,6 +372,10 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
 
     Returns
     -------
+    mesh : nedarry
+        indices of the required rings
+        shape is ([detector_size[0], detector_size[1]])
+
     roi_inds : ndarray
         indices for the required roi's
         (after discarding zero values from the shape
@@ -408,7 +412,7 @@ def roi_divide_circle(detector_size, radius, calibrated_center,
     roi_inds, num_pixels, pixel_list = _process_rois(np.ravel(mesh),
                                                      detector_size,
                                                      num_angles, rotate)
-    return roi_inds, num_pixels, pixel_list
+    return mesh.reshape(detector_size), roi_inds, num_pixels, pixel_list
 
 
 def _process_rois(mesh, detector_size, num_rois, rotate='N'):
@@ -465,3 +469,6 @@ def _process_rois(mesh, detector_size, num_rois, rotate='N'):
     num_pixels = num_pixels[1:]
 
     return roi_inds, num_pixels, pixel_list
+
+
+
