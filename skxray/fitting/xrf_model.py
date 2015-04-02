@@ -436,22 +436,6 @@ def sum_area(elemental_line, result_val):
         full_name = element + '_' + line_n + '_area'
         if full_name in result_val.values:
             sumv += get_value(result_val, element, line_n)
-    #
-    # if element_name in K_LINE:
-    #     for line_n in K_TRANSITIONS:
-    #         full_name = element_name + '_' + line_n + '_area'
-    #         if full_name in result_val.values:
-    #             sumv += get_value(result_val, element_name, line_n)
-    # elif element_name in L_LINE:
-    #     for line_n in L_TRANSITIONS:
-    #         full_name = element_name.split('_')[0] + '_' + line_n + '_area'
-    #         if full_name in result_val.values:
-    #             sumv += get_value(result_val, element_name.split('_')[0], line_n)
-    # elif element_name in M_LINE:
-    #     for line_n in M_TRANSITIONS:
-    #         full_name = element_name.split('_')[0] + '_' + line_n + '_area'
-    #         if full_name in result_val.values:
-    #             sumv += get_value(result_val, element_name.split('_')[0], line_n)
     return sumv
 
 
@@ -1059,13 +1043,10 @@ def linear_spectrum_fitting(spectrum, params, elemental_lines=None,
     # ratio to transfer energy value back to channel value
     approx_ratio = 100
 
-    lowv = fitting_parameters['non_fitting_values']['energy_bound_low'] * approx_ratio
-    highv = fitting_parameters['non_fitting_values']['energy_bound_high'] * approx_ratio
+    lowv = fitting_parameters['non_fitting_values']['energy_bound_low']['value'] * approx_ratio
+    highv = fitting_parameters['non_fitting_values']['energy_bound_high']['value'] * approx_ratio
 
     x, y = trim(x0, spectrum, lowv, highv)
-
-    #new_element = ', '.join(element_list)
-    #fitting_parameters['non_fitting_values']['element_list'] = new_element
 
     e_select, matv = construct_linear_model(x, params, elemental_lines)
 

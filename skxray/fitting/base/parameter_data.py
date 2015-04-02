@@ -267,8 +267,9 @@ default_param = {'coherent_sct_amplitude': {'bound_type': 'none',
                   'tool_tip': 'width**2 = (b1/2.3548)**2 + 3.85*b2*E',
                   'value': 0.178},
                  'non_fitting_values': {'element_list': 'Ar, Fe, Ce_L, Pt_M',
-                  'energy_bound_high': 12.0,
-                  'energy_bound_low': 2.5}}
+                  'energy_bound_low': {'value': 1.5, 'default_value': 1.5, 'description': 'E low [keV]'},
+                  'energy_bound_high': {'value': 13.5, 'default_value': 13.5, 'description': 'E high [keV]'}}
+}
 
 
 def get_para():
