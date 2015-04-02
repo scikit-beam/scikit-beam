@@ -209,9 +209,16 @@ def update_parameter_dict(param, fit_results):
     fit_results : object
         ModelFit object from lmfit
     """
+    elastic_list = ['coherent_sct_amplitude', 'coherent_sct_energy']
     for k, v in six.iteritems(param):
-        if k in fit_results.values:
-            param[str(k)]['value'] = fit_results.values[str(k)]
+        if k in elastic_list:
+            k_temp = 'elastic_' + k
+        else:
+            k_temp = k
+        if k_temp in fit_results.values:
+            param[k]['value'] = fit_results.values[k_temp]
+        else:
+            logger.warning('values not updated: {}'.format(k))
 
 
 _STRATEGY_REGISTRY = {'linear': sfb_pd.linear,
@@ -459,6 +466,7 @@ class ModelSpectrum(object):
         self.params = copy.deepcopy(params)
         self.elemental_lines = list(elemental_lines)  # to copy
         self.incident_energy = self.params['coherent_sct_energy']['value']
+        self.epsilon = self.params['non_fitting_values']['electron_hole_energy']
         self.setup_compton_model()
         self.setup_elastic_model()
 
@@ -480,6 +488,7 @@ class ModelSpectrum(object):
             if name in self.params.keys():
                 _set_parameter_hint(name, self.params[name], compton)
         logger.debug(' Finished setting up parameters for compton model.')
+        compton.set_param_hint('epsilon', value=self.epsilon, vary=False)
 
         self.compton_param = compton.make_params()
         self.compton = compton
@@ -489,10 +498,6 @@ class ModelSpectrum(object):
         setup parameters related to Elastic model
         """
         elastic = ElasticModel(prefix='elastic_')
-
-        item = 'coherent_sct_amplitude'
-        if item in self.params.keys():
-            _set_parameter_hint(item, self.params[item], elastic)
 
         logger.debug('Started setting up parameters for elastic model')
 
@@ -515,6 +520,17 @@ class ModelSpectrum(object):
         elastic.set_param_hint('coherent_sct_energy',
                                value=self.compton_param['coherent_sct_energy'].value,
                                expr='coherent_sct_energy')
+
+        elastic.set_param_hint('coherent_sct_energy',
+                               value=self.compton_param['coherent_sct_energy'].value,
+                               expr='coherent_sct_energy')
+
+        item = 'coherent_sct_amplitude'
+        item_prefix = 'elastic_'+item
+        if item in self.params.keys():
+            _set_parameter_hint(item, self.params[item], elastic)
+
+        elastic.set_param_hint('epsilon', value=self.epsilon, vary=False)
         logger.debug(' Finished setting up parameters for elastic model.')
         self.elastic = elastic
 
@@ -569,6 +585,7 @@ class ModelSpectrum(object):
                 gauss_mod.set_param_hint('fwhm_fanoprime',
                                          value=self.compton_param['fwhm_fanoprime'].value,
                                          expr='fwhm_fanoprime')
+                gauss_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
 
                 area_name = str(element)+'_'+str(line_name)+'_area'
                 if area_name in parameter:
@@ -661,6 +678,8 @@ class ModelSpectrum(object):
                                          value=self.compton_param['fwhm_fanoprime'].value,
                                          expr='fwhm_fanoprime')
 
+                gauss_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
+
                 area_name = str(element)+'_'+str(line_name)+'_area'
                 if area_name in parameter:
                     default_area = parameter[area_name]['value']
@@ -735,6 +754,8 @@ class ModelSpectrum(object):
                                          expr='fwhm_offset')
                 gauss_mod.set_param_hint('fwhm_fanoprime', value=self.compton_param['fwhm_fanoprime'].value,
                                          expr='fwhm_fanoprime')
+
+                gauss_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
 
                 area_name = str(element)+'_'+str(line_name)+'_area'
                 if area_name in parameter:
