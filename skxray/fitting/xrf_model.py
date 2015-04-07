@@ -192,7 +192,7 @@ def _set_parameter_hint(param_name, input_dict, input_model):
         raise ValueError("could not set values for {0}".format(param_name))
     logger.debug(' {0} bound type: {1}, value: {2}, range: {3}'.
                  format(param_name, input_dict['bound_type'], input_dict['value'],
-                            [input_dict['min'], input_dict['max']]))
+                        [input_dict['min'], input_dict['max']]))
 
 
 def update_parameter_dict(param, fit_results):
@@ -216,7 +216,7 @@ def update_parameter_dict(param, fit_results):
         else:
             k_temp = k
         if k_temp in fit_results.values:
-            param[k]['value'] = fit_results.values[k_temp]
+            param[k]['value'] = float(fit_results.values[k_temp])
         else:
             logger.warning('values not updated: {}'.format(k))
 
@@ -278,9 +278,9 @@ def set_parameter_bound(param, bound_option, extra_config=None):
 # the input data and do the fitting. The user can adjust parameters such as
 # position, width, area or branching ratio.
 PARAM_DEFAULTS = {'area': {'bound_type': 'none',
-                           'max': 1000000000.0, 'min': 0, 'value': 1000},
+                           'max': 1000000000.0, 'min': 0.001, 'value': 1000.0},
                   'pos': {'bound_type': 'fixed',
-                          'max': 0.005, 'min': -0.005, 'value': 0},
+                          'max': 0.005, 'min': -0.005, 'value': 0.0},
                   'ratio': {'bound_type': 'fixed',
                             'max': 5.0, 'min': 0.1, 'value': 1.0},
                   'width': {'bound_type': 'fixed',
@@ -525,10 +525,10 @@ class ModelSpectrum(object):
                                value=self.compton_param['coherent_sct_energy'].value,
                                expr='coherent_sct_energy')
 
-        item = 'coherent_sct_amplitude'
-        item_prefix = 'elastic_'+item
-        if item in self.params.keys():
-            _set_parameter_hint(item, self.params[item], elastic)
+        item_list = ['coherent_sct_amplitude', 'coherent_sct_energy']
+        for item in item_list:
+            if item in self.params.keys():
+                _set_parameter_hint(item, self.params[item], elastic)
 
         elastic.set_param_hint('epsilon', value=self.epsilon, vary=False)
         logger.debug(' Finished setting up parameters for elastic model.')
@@ -928,16 +928,22 @@ def construct_linear_model(channel_number, params,
         selected elements for given energy
     matv : array
         matrix for linear fitting
+    element_area : dict
+        area of the given elements
     """
     MS = ModelSpectrum(params, elemental_lines)
 
     selected_elements = []
     matv = []
+    element_area = {}
 
     for i in range(len(elemental_lines)):
         e_model = MS.setup_element_model(elemental_lines[i], default_area=default_area)
         if e_model:
             p = e_model.make_params()
+            for k, v in six.iteritems(p):
+                if 'area' in k:
+                    element_area.update({elemental_lines[i]: p[k].value})
             y_temp = e_model.eval(x=channel_number, params=p)
             matv.append(y_temp)
             selected_elements.append(elemental_lines[i])
@@ -945,14 +951,16 @@ def construct_linear_model(channel_number, params,
     p = MS.compton.make_params()
     y_temp = MS.compton.eval(x=channel_number, params=p)
     matv.append(y_temp)
+    element_area.update({'compton': p['compton_amplitude'].value})
 
     p = MS.elastic.make_params()
     y_temp = MS.elastic.eval(x=channel_number, params=p)
     matv.append(y_temp)
+    element_area.update({'elastic': p['elastic_coherent_sct_amplitude'].value})
 
     matv = np.array(matv)
     matv = matv.transpose()
-    return selected_elements, matv
+    return selected_elements, matv, element_area
 
 
 def nnls_fit(spectrum, expected_matrix):
@@ -1024,7 +1032,7 @@ def weighted_nnls_fit(spectrum, expected_matrix, constant_weight=10):
 
 
 def linear_spectrum_fitting(spectrum, params, elemental_lines=None,
-                            constant_weight=10):
+                            constant_weight=10, area_option=False):
     """
     Fit a spectrum to a linear model.
 
@@ -1045,6 +1053,8 @@ def linear_spectrum_fitting(spectrum, params, elemental_lines=None,
         value used to calculate weight like so:
         weights = constant_weight / (constant_weight + spectrum)
         Default is 10. If None, performed unweighted nnls fit.
+    area_option : Bool
+        return area value of each element if chosen.
 
     Returns
     -------
@@ -1052,6 +1062,8 @@ def linear_spectrum_fitting(spectrum, params, elemental_lines=None,
         x axis after cut
     result_dict : dict
         Fitting results
+    area_dict : dict
+        area of all fitting elements
     """
     if elemental_lines is None:
         elemental_lines = K_LINE + L_LINE + M_LINE
@@ -1069,7 +1081,7 @@ def linear_spectrum_fitting(spectrum, params, elemental_lines=None,
 
     x, y = trim(x0, spectrum, lowv, highv)
 
-    e_select, matv = construct_linear_model(x, params, elemental_lines)
+    e_select, matv, element_area = construct_linear_model(x, params, elemental_lines)
 
     non_element = ['compton', 'elastic']
     total_list = e_select + non_element
@@ -1087,21 +1099,31 @@ def linear_spectrum_fitting(spectrum, params, elemental_lines=None,
         out, res = nnls_fit(y, matv)
 
     total_y = out * matv
-
-    # use ordered dict
-    result_dict = OrderedDict()
-
-    for i in range(len(total_list)):
-        if np.sum(total_y[:, i]) == 0:
-            continue
-        result_dict.update({total_list[i]: total_y[:, i]})
-    result_dict.update(background=bg)
-
     x = (params['e_offset']['value'] +
          params['e_linear']['value']*x +
          params['e_quadratic']['value'] * x**2)
 
-    return x, result_dict
+    if area_option:
+        result_dict = OrderedDict()
+        area_dict = OrderedDict()
+
+        for i in range(len(total_list)):
+            if np.sum(total_y[:, i]) == 0:
+                continue
+            result_dict.update({total_list[i]: total_y[:, i]})
+            area_dict.update({total_list[i]: out[i]*element_area[total_list[i]]})
+        result_dict.update(background=bg)
+        area_dict.update(background=np.sum(bg))
+        return x, result_dict, area_dict
+    else:
+        result_dict = OrderedDict()
+
+        for i in range(len(total_list)):
+            if np.sum(total_y[:, i]) == 0:
+                continue
+            result_dict.update({total_list[i]: total_y[:, i]})
+        result_dict.update(background=bg)
+        return x, result_dict
 
 
 def get_activated_lines(incident_energy, elemental_lines):
