@@ -263,7 +263,7 @@ def _create_md_dict(clean_header):
     return md_dict
 
 
-def load_amiramesh(file_path):
+def read_amiraMesh(file_path):
     """
     This function will load and convert an AmiraMesh binary file to a numpy 
     array. All pertinent information contained in the .am header file is written

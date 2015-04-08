@@ -981,7 +981,7 @@ def bin_edges_to_centers(input_edges):
 
     Parameters
     ----------
-    input_edges : array-like
+    input_edges : array
         N + 1 values which are the left edges of N bins
         and the right edge of the last bin
 
