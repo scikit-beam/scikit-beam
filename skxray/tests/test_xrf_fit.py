@@ -24,7 +24,7 @@ def synthetic_spectrum():
     param = get_para()
     x = np.arange(2000)
     elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M']
-    elist, matv = construct_linear_model(x, param, elemental_lines, default_area=1e5)
+    elist, matv, area_v = construct_linear_model(x, param, elemental_lines, default_area=1e5)
     return np.sum(matv, 1) + 100  # avoid zero values
 
 
