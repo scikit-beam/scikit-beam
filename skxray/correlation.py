@@ -49,6 +49,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import six
 import numpy as np
+import pandas as pd
 import numpy.ma as ma
 import logging
 import time
@@ -57,49 +58,50 @@ import skxray.core as core
 logger = logging.getLogger(__name__)
 
 
-def multi_tau_auto_corr(num_levels, num_bufs, roi_inds, img_stack):
+def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     """
-    This module is for one time correlation.
-    The multi-tau correlation scheme was used for
-    finding the lag times (delay times).
+    This function computes one-time correlations.
+    
+    It uses a scheme to achieve long-time correlations inexpensively
+    by downsampling the data, iteratively combining successive frames.
+
+    The longest lag time computed is num_levels * num_bufs.
 
     Parameters
     ----------
     num_levels : int
-        number of levels of multiple-taus
+        how many generations of downsampling to perform, i.e.,
+        the depth of the binomial tree of averaged frames
 
-    num_bufs : int, even
-        number of channels or number of buffers in
-        multiple-taus (must be even)
+    num_bufs : int, must be even
+        maximum lag step to compute in each generation of
+        downsampling
 
-    roi_inds : ndarray
-        indices of the required region of interest's (roi's)
-        dimensions are: (num_rows, num_cols)
+    labels : array
+        labeled array of the same shape as the image stack;
+        each ROI is represented by a distinct label (i.e., integer)
 
-    img_stack : ndarray
-        intensity array of the images
-        dimensions are: (num of images, num_rows, num_cols)
+    images : iterable of 2D arrays
+        dimensions are: (rr, cc)
 
     Returns
     -------
     g2 : ndarray
         matrix of one-time correlation
-        shape (num_levels, num_rois)
+        shape (num_levels, number of labels)
 
     lag_steps : ndarray
         delay or lag steps for the multiple tau analysis
         shape num_levels
 
-    Notes
-    -----
-    In order to calculate correlations for delays, images must be
-    kept for up to the maximum delay. These are stored in the array
-    buf. This algorithm only keeps number of buffers and delays but
-    several levels of delays number of levels are kept in buf. Each
-    level has twice the delay times of the next lower one. To save
-    needless copying, of cyclic storage of images in buf is used.
+    Note
+    ----
 
-    References: text [1]_
+    This implementation is based on code in the language Yorrick
+    by Mark Sutton, based on published work. [1]_
+
+    References
+    ----------
 
     .. [1] D. Lumma, L. B. Lurio, S. G. J. Mochrie and M. Sutton,
         "Area detector based photon correlation in the regime of
@@ -107,24 +109,38 @@ def multi_tau_auto_corr(num_levels, num_bufs, roi_inds, img_stack):
         scattering," Rev. Sci. Instrum., vol 70, p 3274-3289, 2000.
 
     """
-    if num_bufs%2 != 0:
-        raise ValueError("number of channels(number of buffers) in"
-                         " multiple-taus (must be even)")
+    # In order to calculate correlations for `num_bufs`, images must be
+    # kept for up to the maximum lag step. These are stored in the array
+    # buffer. This algorithm only keeps number of buffers and delays but
+    # several levels of delays number of levels are kept in buf. Each
+    # level has twice the delay times of the next lower one. To save
+    # needless copying, of cyclic storage of images in buf is used.
 
-    if roi_inds.shape == img_stack[0].shape[1:]:
-        raise ValueError("Shape of an image should be equal to"
-                         " shape of the roi_inds array")
+    if num_bufs % 2 != 0:
+        raise ValueError("number of channels(number of buffers) in "
+                         "multiple-taus (must be even)")
 
-    #  to get roi_inds, number of roi's, number of pixels in each roi's and
-    #  pixels roi_inds for the required roi's.
-    roi_inds, num_rois, num_pixels, pixel_list = _get_roi_info(roi_inds)
+    if labels.shape == images[0].shape[1:]:
+        raise ValueError("Shape of an image should be equal to "
+                         "shape of the labels array")
+
+    # Which pixels are in each label?
+    labels, pixel_list = extract_label_indices(labels)
+
+    num_rois = np.max(labels)
+
+    # number of pixels per ROI
+    num_pixels = np.bincount(labels, minlength=(num_rois+1))
+    num_pixels = num_pixels[1:]
+
 
     if np.any(num_pixels == 0):
         raise ValueError("Number of pixels of the required roi's"
                          " cannot be zero, "
                          "num_pixels = {0}".format(num_pixels))
 
-    # matrix of auto-correlation function without normalizations
+    # G holds the unnormalized auto-correlation result. We 
+    # accumulate computations into G as the algorithm proceeds.
     G = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
                  dtype=np.float64)
 
@@ -136,11 +152,8 @@ def multi_tau_auto_corr(num_levels, num_bufs, roi_inds, img_stack):
     future_intensity_norm = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
                    dtype=np.float64)
 
-    # matrix of one-time correlation for required roi's
-    g2 = np.zeros((num_levels, num_rois), dtype=np.float64)
-
-    # correlation for delays, images must be keep for up to maximum
-    # delay in buf
+    # Ring buffer, a buffer with periodic boundary conditions.
+    # Images must be keep for up to maximum delay in buf.
     buf = np.zeros((num_levels, num_bufs, np.sum(num_pixels)),
                    dtype=np.float64)
 
@@ -153,36 +166,35 @@ def multi_tau_auto_corr(num_levels, num_bufs, roi_inds, img_stack):
     # to track how many images processed in each level
     img_per_level = np.zeros(num_levels, dtype=np.int64)
 
-    # starting time for the process
-    start_time = time.time()
+    start_time = time.time()  # used to log the computation time (optionally)
 
-    for n, img in enumerate(img_stack):  # changed the number of frames
+    for n, img in enumerate(images):
 
         cur[0] = (1 + cur[0]) % num_bufs  # increment buffer
 
-        # add image data to the buf to use for correlation
+        # Put the image into the ring buffer.
         buf[0, cur[0] - 1] = (np.ravel(img))[pixel_list]
 
-        # call the _process function for multi-tau level one
-        (G, past_intensity_norm,
-         future_intensity_norm,
-         img_per_level) = _process(buf, G, past_intensity_norm,
-                                   future_intensity_norm, roi_inds,
-                                   num_bufs, num_pixels, img_per_level,
-                                   level=0, buf_no=cur[0] - 1)
+        # Compute the correlations between the first level
+        # (undownsampled) frames. This modifies G,
+        # past_ and future_intensity_norm, and img_per_level
+        # in place!
+        _process(buf, G, past_intensity_norm,
+                 future_intensity_norm, labels,
+                 num_bufs, num_pixels, img_per_level,
+                 level=0, buf_no=cur[0] - 1)
 
         # check whether the number of levels is one, otherwise
         # continue processing the next level
-        if num_levels > 1:
-            processing = True
-        else:
-            processing = False
+        processing = num_levels > 1
 
-        # the image data will be saved in buf according to each level then call
-        #  _process function to calculate one time correlation functions
+        # Compute the correlations for all higher levels.
         level = 1
-        while processing is True:
-            if track_level[level]:
+        while processing:
+            if not track_level[level]:
+                track_level[level] = 1
+                processing = False
+            else:
                 prev = 1 + (cur[level - 1] - 2 )%num_bufs
                 cur[level] = 1 + cur[level]%num_bufs
 
@@ -195,66 +207,61 @@ def multi_tau_auto_corr(num_levels, num_bufs, roi_inds, img_stack):
 
                 # call the _process function for each multi-tau level
                 # for multi-tau levels greater than one
-                (G, past_intensity_norm,
-                 future_intensity_norm,
-                 img_per_level) = _process(buf, G, past_intensity_norm,
-                                           future_intensity_norm, roi_inds,
-                                           num_bufs, num_pixels, img_per_level,
-                                           level=level, buf_no=cur[level]-1,)
+                # Again, this is modifying things in place. See comment
+                # on previous call above.
+                _process(buf, G, past_intensity_norm,
+                         future_intensity_norm, labels,
+                         num_bufs, num_pixels, img_per_level,
+                         level=level, buf_no=cur[level]-1,)
                 level += 1
 
                 # Checking whether there is next level for processing
-                if level<num_levels:
-                    processing = True
-                else:
-                    processing = False
-            else:
-                track_level[level] = 1
-                processing = False
+                processing = level < num_levels
 
     # ending time for the process
     end_time = time.time()
 
     logger.info("Processing time for {0} images took {1} seconds."
-                "".format(len(img_stack), (end_time-start_time)))
+                "".format(n, (end_time - start_time)))
 
-    # to get the final G, past_intensity_norm and future_intensity_norm values
-    g_max = past_intensity_norm.shape[0]
+    g_max = past_intensity_norm.shape[0]  # the normalization factor
 
-    # calculate the one time correlation
+    # g2 is noramlized G
     g2 = (G[: g_max] / (past_intensity_norm[: g_max] * future_intensity_norm[: g_max]))
 
-    # finding the lag times (delay times) for multi-tau levels
+    # Convert from num_levels, num_bufs to lag frames.
     tot_channels, lag_steps = core.multi_tau_lags(num_levels,
                                                   num_bufs)
-    lag_steps = lag_steps[:g2.shape[0]]
+    lag_steps = lag_steps[:g_max]
 
-    return g2, lag_steps
+    return pd.DataFrame(g2, index=lag_steps)
 
 
 def _process(buf, G, past_intensity_norm, future_intensity_norm,
-             roi_inds, num_bufs, num_pixels, img_per_level, level, buf_no):
+             labels, num_bufs, num_pixels, img_per_level, level, buf_no):
     """
+    Internal helper function. This modifies inputs in place.
+
     This helper function calculates G, past_intensity_norm and
     future_intensity_norm at each level, symmetric normalization is used.
 
     Parameters
     ----------
-    buf : ndarray
+    buf : array
         image data array to use for correlation
 
-    G : ndarray
+    G : array
         matrix of auto-correlation function without
         normalizations
 
-    past_intensity_norm : ndarray
+    past_intensity_norm : array
         matrix of past intensity normalizations
 
     future_intensity_norm : ndarray
         matrix of future intensity normalizations
 
-    roi_inds : ndarray
-        roi_inds of the required region of interests(roi's)
+    labels : ndarray
+        labels of the required region of interests(roi's)
 
     num_bufs : int, even
         number of buffers(channels)
@@ -313,71 +320,59 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
         future_img = buf[level, buf_no]
 
         #  get the matrix of auto-correlation function without normalizations
-        tmp_binned = (np.bincount(roi_inds,
+        tmp_binned = (np.bincount(labels,
                                   weights=np.ravel(past_img*future_img))[1:])
         G[t_index] += ((tmp_binned/num_pixels - G[t_index])/
                        (img_per_level[level] - i))
 
         # get the matrix of past intensity normalizations
-        pi_binned = (np.bincount(roi_inds,
+        pi_binned = (np.bincount(labels,
                                  weights=np.ravel(past_img))[1:])
         past_intensity_norm[t_index] += ((pi_binned/num_pixels
                                          - past_intensity_norm[t_index])/
                                          (img_per_level[level] - i))
 
         # get the matrix of future intensity normalizations
-        fi_binned = (np.bincount(roi_inds,
+        fi_binned = (np.bincount(labels,
                                  weights=np.ravel(future_img))[1:])
         future_intensity_norm[t_index] += ((fi_binned/num_pixels
                                            - future_intensity_norm[t_index])/
                                            (img_per_level[level] - i))
 
-    return G, past_intensity_norm, future_intensity_norm, img_per_level
+    return None  # modifies arguments in place!
 
 
-def _get_roi_info(roi_inds):
+def extract_label_indicies(labels):
     """
-    This will find the roi_inds required region of interests (roi's),
+    This will find the label's required region of interests (roi's),
     number of roi's count the number of pixels in each roi's and pixels
     list for the required roi's.
 
     Parameters
     ----------
-    roi_inds : ndarray
-        indices of the required rings
-        shape is ([detector_size[0]*detector_size[1]], )
+    labels : array
+        labeled array; 0 is background.
+        Each ROI is represented by a distinct label (i.e., integer).
 
     Returns
     -------
-    roi_inds : ndarray
-        indices of the ring values for the required roi's
-        (after discarding zero values from the shape
-        ([detector_size[0]*detector_size[1]], )
+    labels : ndarray
+        1D array labeling each foreground pixel
+        e.g., [1, 1, 1, 1, 2, 2, 1, 1]
 
-    num_pixels : ndarray
-        number of pixels in each ring
-
-    num_rois : int
-        number of roi's
-
-    pixel_list : ndarray
-        pixel indices for the required roi's
+    indices : array
+        1D array of indicies into the raveled image for all
+        foreground pixels (labeled nonzero)
+        e.g., [5, 6, 7, 8, 14, 15, 21, 22]
     """
-    img_dim = roi_inds.shape
+    img_dim = labels.shape
 
-    # find the pixel list
-    w = np.where(np.ravel(roi_inds) > 0)
+    # TODO Make this tighter.
+    w = np.where(np.ravel(labels) > 0)
     grid = np.indices((img_dim[0], img_dim[1]))
-    pixel_list = np.ravel((grid[0]*img_dim[1] + grid[1]))[w]
+    pixel_list = np.ravel((grid[0] * img_dim[1] + grid[1]))[w]
 
     # discard the zeros
-    roi_inds = roi_inds[roi_inds > 0]
+    labels = labels[labels > 0]
 
-    # the number of roi's
-    num_rois = np.max(roi_inds)
-
-    # number of pixels in each roi's
-    num_pixels = np.bincount(roi_inds, minlength=(num_rois+1))
-    num_pixels = num_pixels[1:]
-
-    return roi_inds, num_rois, num_pixels, pixel_list
+    return labels, pixel_list
