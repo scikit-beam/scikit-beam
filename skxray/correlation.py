@@ -63,19 +63,19 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     This function computes one-time correlations.
     
     It uses a scheme to achieve long-time correlations inexpensively
-    by downsampling the data, iteratively combining successive frames.
+    by down sampling the data, iteratively combining successive frames.
 
     The longest lag time computed is num_levels * num_bufs.
 
     Parameters
     ----------
     num_levels : int
-        how many generations of downsampling to perform, i.e.,
+        how many generations of down sampling to perform, i.e.,
         the depth of the binomial tree of averaged frames
 
     num_bufs : int, must be even
         maximum lag step to compute in each generation of
-        downsampling
+        down sampling
 
     labels : array
         labeled array of the same shape as the image stack;
@@ -86,18 +86,18 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
 
     Returns
     -------
-    g2 : ndarray
+    g2 : array
         matrix of one-time correlation
         shape (num_levels, number of labels)
 
-    lag_steps : ndarray
+    lag_steps : array
         delay or lag steps for the multiple tau analysis
         shape num_levels
 
     Note
     ----
 
-    This implementation is based on code in the language Yorrick
+    This implementation is based on code in the language Yorick
     by Mark Sutton, based on published work. [1]_
 
     References
@@ -139,7 +139,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
                          " cannot be zero, "
                          "num_pixels = {0}".format(num_pixels))
 
-    # G holds the unnormalized auto-correlation result. We 
+    # G holds the un normalized auto-correlation result. We
     # accumulate computations into G as the algorithm proceeds.
     G = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
                  dtype=np.float64)
@@ -176,7 +176,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
         buf[0, cur[0] - 1] = (np.ravel(img))[pixel_list]
 
         # Compute the correlations between the first level
-        # (undownsampled) frames. This modifies G,
+        # (undown sampled) frames. This modifies G,
         # past_ and future_intensity_norm, and img_per_level
         # in place!
         _process(buf, G, past_intensity_norm,
@@ -224,17 +224,22 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     logger.info("Processing time for {0} images took {1} seconds."
                 "".format(n, (end_time - start_time)))
 
-    g_max = past_intensity_norm.shape[0]  # the normalization factor
+    # the normalization factor
+    if len(np.where(past_intensity_norm == 0)[0]) != 0:
+        g_max = np.where(past_intensity_norm == 0)[0][0]
+    else:
+        g_max = past_intensity_norm.shape[0]
 
-    # g2 is noramlized G
-    g2 = (G[: g_max] / (past_intensity_norm[: g_max] * future_intensity_norm[: g_max]))
+    # g2 is normalized G
+    g2 = (G[: g_max] / (past_intensity_norm[: g_max] *
+                        future_intensity_norm[: g_max]))
 
     # Convert from num_levels, num_bufs to lag frames.
     tot_channels, lag_steps = core.multi_tau_lags(num_levels,
                                                   num_bufs)
     lag_steps = lag_steps[:g_max]
 
-    return pd.DataFrame(g2, index=lag_steps)
+    return g2, lag_steps
 
 
 def _process(buf, G, past_intensity_norm, future_intensity_norm,
@@ -257,20 +262,20 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
     past_intensity_norm : array
         matrix of past intensity normalizations
 
-    future_intensity_norm : ndarray
+    future_intensity_norm : array
         matrix of future intensity normalizations
 
-    labels : ndarray
+    labels : array
         labels of the required region of interests(roi's)
 
     num_bufs : int, even
         number of buffers(channels)
 
-    num_pixels : ndarray
+    num_pixels : array
         number of pixels in certain roi's
         roi's, dimensions are : [number of roi's]X1
 
-    img_per_level : ndarray
+    img_per_level : array
         to track how many images processed in each level
 
     level : int
@@ -278,17 +283,6 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
 
     buf_no : int
         the current buffer number
-
-    Returns
-    -------
-    G : ndarray
-        matrix of auto-correlation function without normalizations
-
-    past_intensity_norm : ndarray
-        matrix of past intensity normalizations
-
-    future_intensity_norm : ndarray
-        matrix of future intensity normalizations
 
     Notes
     -----
@@ -342,7 +336,7 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
     return None  # modifies arguments in place!
 
 
-def extract_label_indicies(labels):
+def extract_label_indices(labels):
     """
     This will find the label's required region of interests (roi's),
     number of roi's count the number of pixels in each roi's and pixels
@@ -356,12 +350,12 @@ def extract_label_indicies(labels):
 
     Returns
     -------
-    labels : ndarray
+    labels : array
         1D array labeling each foreground pixel
         e.g., [1, 1, 1, 1, 2, 2, 1, 1]
 
     indices : array
-        1D array of indicies into the raveled image for all
+        1D array of indices into the raveled image for all
         foreground pixels (labeled nonzero)
         e.g., [5, 6, 7, 8, 14, 15, 21, 22]
     """
