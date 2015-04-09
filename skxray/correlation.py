@@ -49,7 +49,6 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import six
 import numpy as np
-import pandas as pd
 import numpy.ma as ma
 import logging
 import time
