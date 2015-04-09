@@ -68,8 +68,7 @@ def test_correlation():
 
     img_stack = np.random.randint(1, 5, size=(500, ) + img_dim)
 
-    g2, lag_steps = corr.auto_corr(num_levels, num_bufs, indices, img_stack,
-                                   mask=None)
+    g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, indices, img_stack)
 
     assert_array_almost_equal(lag_steps, np.array([0, 1, 2, 3, 4, 5, 6, 7, 8,
                                                    10, 12, 14, 16, 20, 24, 28,
@@ -88,7 +87,7 @@ def test_correlation():
     mesh[coins < 30] = 1
     mesh[coins > 50] = 2
 
-    g2, lag_steps = corr.auto_corr(num_levels, num_bufs,
+    g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs,
                                    mesh, np.asarray(coins_stack))
 
     assert_almost_equal(True, np.all(g2[:, 0], axis = 0))

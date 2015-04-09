@@ -51,13 +51,13 @@ import six
 import numpy as np
 import numpy.ma as ma
 import logging
-logger = logging.getLogger(__name__)
 import time
 
 import skxray.core as core
+logger = logging.getLogger(__name__)
 
 
-def auto_corr(num_levels, num_bufs, indices, img_stack, mask=None):
+def multi_tau_auto_corr(num_levels, num_bufs, roi_inds, img_stack):
     """
     This module is for one time correlation.
     The multi-tau correlation scheme was used for
@@ -72,7 +72,7 @@ def auto_corr(num_levels, num_bufs, indices, img_stack, mask=None):
         number of channels or number of buffers in
         multiple-taus (must be even)
 
-    indices : ndarray
+    roi_inds : ndarray
         indices of the required region of interest's (roi's)
         dimensions are: (num_rows, num_cols)
 
@@ -80,14 +80,11 @@ def auto_corr(num_levels, num_bufs, indices, img_stack, mask=None):
         intensity array of the images
         dimensions are: (num of images, num_rows, num_cols)
 
-    mask : ndarray, optional
-        mask (eg: dead pixel mask)
-
     Returns
     -------
     g2 : ndarray
         matrix of one-time correlation
-        shape (num_levels, num_qs)
+        shape (num_levels, num_rois)
 
     lag_steps : ndarray
         delay or lag steps for the multiple tau analysis
@@ -114,18 +111,13 @@ def auto_corr(num_levels, num_bufs, indices, img_stack, mask=None):
         raise ValueError("number of channels(number of buffers) in"
                          " multiple-taus (must be even)")
 
-    if indices.shape == img_stack[0].shape[1:]:
+    if roi_inds.shape == img_stack[0].shape[1:]:
         raise ValueError("Shape of an image should be equal to"
-                         " shape of the indices array")
+                         " shape of the roi_inds array")
 
-    if mask is not None:
-        roi_inds = ma(indices)
-    else:
-        roi_inds = indices
-
-    #  to get indices, number of roi's, number of pixels in each roi's and
-    #  pixels indices for the required roi's.
-    q_inds, num_qs, num_pixels, pixel_list = _get_roi_info(roi_inds)
+    #  to get roi_inds, number of roi's, number of pixels in each roi's and
+    #  pixels roi_inds for the required roi's.
+    roi_inds, num_rois, num_pixels, pixel_list = _get_roi_info(roi_inds)
 
     if np.any(num_pixels == 0):
         raise ValueError("Number of pixels of the required roi's"
@@ -133,19 +125,19 @@ def auto_corr(num_levels, num_bufs, indices, img_stack, mask=None):
                          "num_pixels = {0}".format(num_pixels))
 
     # matrix of auto-correlation function without normalizations
-    G = np.zeros(((num_levels + 1)*num_bufs/2, num_qs),
+    G = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
                  dtype=np.float64)
 
     # matrix of past intensity normalizations
-    IAP = np.zeros(((num_levels + 1)*num_bufs/2, num_qs),
+    past_intensity_norm = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
                    dtype=np.float64)
 
     # matrix of future intensity normalizations
-    IAF = np.zeros(((num_levels + 1)*num_bufs/2, num_qs),
+    future_intensity_norm = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
                    dtype=np.float64)
 
     # matrix of one-time correlation for required roi's
-    g2 = np.zeros((num_levels, num_qs), dtype=np.float64)
+    g2 = np.zeros((num_levels, num_rois), dtype=np.float64)
 
     # correlation for delays, images must be keep for up to maximum
     # delay in buf
@@ -153,16 +145,16 @@ def auto_corr(num_levels, num_bufs, indices, img_stack, mask=None):
                    dtype=np.float64)
 
     # to track processing each level
-    cts = np.zeros(num_levels)
+    track_level = np.zeros(num_levels)
 
     # to increment buffer
     cur = np.ones(num_levels, dtype=np.int64)
 
     # to track how many images processed in each level
-    num = np.zeros(num_levels, dtype=np.int64)
+    img_per_level = np.zeros(num_levels, dtype=np.int64)
 
     # starting time for the process
-    t1 = time.time()
+    start_time = time.time()
 
     for n, img in enumerate(img_stack):  # changed the number of frames
 
@@ -172,9 +164,12 @@ def auto_corr(num_levels, num_bufs, indices, img_stack, mask=None):
         buf[0, cur[0] - 1] = (np.ravel(img))[pixel_list]
 
         # call the _process function for multi-tau level one
-        G, IAP, IAF, num = _process(buf, G, IAP, IAF, q_inds,
-                                    num_bufs, num_pixels, num, level=0,
-                                    buf_no=cur[0] - 1)
+        (G, past_intensity_norm,
+         future_intensity_norm,
+         img_per_level) = _process(buf, G, past_intensity_norm,
+                                   future_intensity_norm, roi_inds,
+                                   num_bufs, num_pixels, img_per_level,
+                                   level=0, buf_no=cur[0] - 1)
 
         # check whether the number of levels is one, otherwise
         # continue processing the next level
@@ -187,7 +182,7 @@ def auto_corr(num_levels, num_bufs, indices, img_stack, mask=None):
         #  _process function to calculate one time correlation functions
         level = 1
         while processing is True:
-            if cts[level]:
+            if track_level[level]:
                 prev = 1 + (cur[level - 1] - 2 )%num_bufs
                 cur[level] = 1 + cur[level]%num_bufs
 
@@ -195,14 +190,17 @@ def auto_corr(num_levels, num_bufs, indices, img_stack, mask=None):
                                               buf[level - 1,
                                                   cur[level - 1] - 1])/2
 
-                # make the cts zero once that level is processed
-                cts[level] = 0
+                # make the track_level zero once that level is processed
+                track_level[level] = 0
 
                 # call the _process function for each multi-tau level
                 # for multi-tau levels greater than one
-                G, IAP, IAF, num = _process(buf, G, IAP, IAF, q_inds,
-                                       num_bufs, num_pixels, num,
-                                       level=level, buf_no=cur[level]-1,)
+                (G, past_intensity_norm,
+                 future_intensity_norm,
+                 img_per_level) = _process(buf, G, past_intensity_norm,
+                                           future_intensity_norm, roi_inds,
+                                           num_bufs, num_pixels, img_per_level,
+                                           level=level, buf_no=cur[level]-1,)
                 level += 1
 
                 # Checking whether there is next level for processing
@@ -211,20 +209,20 @@ def auto_corr(num_levels, num_bufs, indices, img_stack, mask=None):
                 else:
                     processing = False
             else:
-                cts[level] = 1
+                track_level[level] = 1
                 processing = False
 
     # ending time for the process
-    t2 = time.time()
+    end_time = time.time()
 
     logger.info("Processing time for {0} images took {1} seconds."
-                "".format(len(img_stack), (t2-t1)))
+                "".format(len(img_stack), (end_time-start_time)))
 
-    # to get the final G, IAP and IAF values
-    g_max = IAP.shape[0]
+    # to get the final G, past_intensity_norm and future_intensity_norm values
+    g_max = past_intensity_norm.shape[0]
 
     # calculate the one time correlation
-    g2 = (G[: g_max] / (IAP[: g_max] * IAF[: g_max]))
+    g2 = (G[: g_max] / (past_intensity_norm[: g_max] * future_intensity_norm[: g_max]))
 
     # finding the lag times (delay times) for multi-tau levels
     tot_channels, lag_steps = core.multi_tau_lags(num_levels,
@@ -234,11 +232,11 @@ def auto_corr(num_levels, num_bufs, indices, img_stack, mask=None):
     return g2, lag_steps
 
 
-def _process(buf, G, IAP, IAF, q_inds, num_bufs,
-             num_pixels, num, level, buf_no):
+def _process(buf, G, past_intensity_norm, future_intensity_norm,
+             roi_inds, num_bufs, num_pixels, img_per_level, level, buf_no):
     """
-    This helper function calculates G, IAP and IAF at
-    each level, symmetric normalization is used.
+    This helper function calculates G, past_intensity_norm and
+    future_intensity_norm at each level, symmetric normalization is used.
 
     Parameters
     ----------
@@ -249,23 +247,23 @@ def _process(buf, G, IAP, IAF, q_inds, num_bufs,
         matrix of auto-correlation function without
         normalizations
 
-    IAP : ndarray
+    past_intensity_norm : ndarray
         matrix of past intensity normalizations
 
-    IAF : ndarray
+    future_intensity_norm : ndarray
         matrix of future intensity normalizations
 
-    q_inds : ndarray
-        indices of the required roi's
+    roi_inds : ndarray
+        roi_inds of the required region of interests(roi's)
 
     num_bufs : int, even
         number of buffers(channels)
 
     num_pixels : ndarray
         number of pixels in certain roi's
-        roi's, dimensions are : [num_qs]X1
+        roi's, dimensions are : [number of roi's]X1
 
-    num : ndarray
+    img_per_level : ndarray
         to track how many images processed in each level
 
     level : int
@@ -279,10 +277,10 @@ def _process(buf, G, IAP, IAF, q_inds, num_bufs,
     G : ndarray
         matrix of auto-correlation function without normalizations
 
-    IAP : ndarray
+    past_intensity_norm : ndarray
         matrix of past intensity normalizations
 
-    IAF : ndarray
+    future_intensity_norm : ndarray
         matrix of future intensity normalizations
 
     Notes
@@ -291,13 +289,13 @@ def _process(buf, G, IAP, IAF, q_inds, num_bufs,
         G   = <I(t)I(t + delay)>
 
     :math ::
-        IAP = <I(t)>
+        past_intensity_norm = <I(t)>
 
     :math ::
-        IAF = <I(t + delay)>
+        future_intensity_norm = <I(t + delay)>
 
     """
-    num[level] += 1
+    img_per_level[level] += 1
 
     # in multi-tau correlation other than first level all other levels
     #  have to do the half of the correlation
@@ -306,30 +304,40 @@ def _process(buf, G, IAP, IAF, q_inds, num_bufs,
     else:
         i_min = num_bufs//2
 
-    for i in range(i_min, min(num[level], num_bufs)):
+    for i in range(i_min, min(img_per_level[level], num_bufs)):
         t_index = level*num_bufs/2 + i
 
         delay_no = (buf_no - i) % num_bufs
 
-        IP = buf[level, delay_no]
-        IF = buf[level, buf_no]
+        past_img = buf[level, delay_no]
+        future_img = buf[level, buf_no]
 
-        G[t_index] += ((np.bincount(q_inds,
-                                    weights=np.ravel(IP*IF))[1:])/num_pixels
-                       - G[t_index])/(num[level] - i)
-        IAP[t_index] += ((np.bincount(q_inds,
-                                      weights=np.ravel(IP))[1:])/num_pixels
-                         - IAP[t_index])/(num[level] - i)
-        IAF[t_index] += ((np.bincount(q_inds,
-                                      weights=np.ravel(IF))[1:])/num_pixels
-                         - IAF[t_index])/(num[level] - i)
+        #  get the matrix of auto-correlation function without normalizations
+        tmp_binned = (np.bincount(roi_inds,
+                                  weights=np.ravel(past_img*future_img))[1:])
+        G[t_index] += ((tmp_binned/num_pixels - G[t_index])/
+                       (img_per_level[level] - i))
 
-    return G, IAP, IAF, num
+        # get the matrix of past intensity normalizations
+        pi_binned = (np.bincount(roi_inds,
+                                 weights=np.ravel(past_img))[1:])
+        past_intensity_norm[t_index] += ((pi_binned/num_pixels
+                                         - past_intensity_norm[t_index])/
+                                         (img_per_level[level] - i))
+
+        # get the matrix of future intensity normalizations
+        fi_binned = (np.bincount(roi_inds,
+                                 weights=np.ravel(future_img))[1:])
+        future_intensity_norm[t_index] += ((fi_binned/num_pixels
+                                           - future_intensity_norm[t_index])/
+                                           (img_per_level[level] - i))
+
+    return G, past_intensity_norm, future_intensity_norm, img_per_level
 
 
 def _get_roi_info(roi_inds):
     """
-    This will find the indices required region of interests (roi's),
+    This will find the roi_inds required region of interests (roi's),
     number of roi's count the number of pixels in each roi's and pixels
     list for the required roi's.
 
