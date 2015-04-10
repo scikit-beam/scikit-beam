@@ -66,7 +66,7 @@ def _dist(dims):
     dist_sum = []
     shape = np.ones(len(dims))
     for idx, d in enumerate(dims):
-        vec = (np.arange(d) - (d-1)/2) ** 2
+        vec = (np.arange(d) - d/2) ** 2
         shape[idx] = -1
         vec = vec.reshape(*shape)
         shape[idx] = 1
@@ -94,3 +94,29 @@ def gauss(dims, sigma):
     x = _dist(dims)
     y = np.exp(-(x / sigma)**2 / 2)
     return y / np.sum(y)
+
+
+def convolution(array1, array2):
+    """
+    Calculate convolution of two arrays. Transfer into q space to perform the calculation.
+
+    Parameters
+    ----------
+    array1 : array
+        The size of array1 needs to be normalized.
+    array2 : array
+        The size of array2 keeps the same
+
+    Returns
+    -------
+    array :
+        convolution result
+
+    .. note:: Another option is to use scipy.signal.fftconvolve.
+              Some difference found on the boundary part compared to this function.
+    """
+    fft_norm = lambda x:  np.fft.fftshift(np.fft.fftn(x)) / np.sqrt(np.size(x))
+    fft_1 = fft_norm(array1)
+    fft_2 = fft_norm(array2)
+    return np.abs(np.fft.ifftshift(np.fft.ifftn(fft_1*fft_2)) * np.sqrt(np.size(array2)))
+

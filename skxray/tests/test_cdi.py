@@ -15,9 +15,23 @@ def dist_temp(dims):
     euclidian distance from array center.
     This is used for test purpose only.
     """
-    vec = [np.abs(np.arange(d) - (d-1.)/2.) for d in dims]
-    grid = np.sqrt(np.sum([g*g for g in np.meshgrid(*vec, indexing='ij')], axis=0))
-    return grid
+    new_array = np.zeros(dims)
+
+    if np.size(dims) == 2:
+        x_sq = (np.arange(dims[0]) - dims[0]/2)**2
+        y_sq = (np.arange(dims[1]) - dims[1]/2)**2
+        for j in range(dims[1]):
+            new_array[:, j] = np.sqrt(x_sq + y_sq[j])
+
+    if np.size(dims) == 3:
+        x_sq = (np.arange(dims[0]) - dims[0]/2)**2
+        y_sq = (np.arange(dims[1]) - dims[1]/2)**2
+        z_sq = (np.arange(dims[2]) - dims[2]/2)**2
+        for j in range(dims[1]):
+            for k in range(dims[2]):
+                new_array[:, j, k] = np.sqrt(x_sq + y_sq[j] + z_sq[k])
+
+    return new_array
 
 
 def test_dist():
@@ -43,3 +57,14 @@ def test_gauss():
     for v in shape_list:
         d = gauss(v, std)
         assert_almost_equal(0, np.mean(d), decimal=3)
+
+
+def test_convolution():
+    shape_list = [(100, 50), (100, 100, 100)]
+    std1 = 5
+    std2 = 10
+    for v in shape_list:
+        g1 = gauss(v, std1)
+        g2 = gauss(v, std2)
+        f = convolution(g1, g2)
+        assert_almost_equal(0, np.mean(f), decimal=3)
