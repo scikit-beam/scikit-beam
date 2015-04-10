@@ -11,22 +11,25 @@ from skxray.cdi import _dist, gauss, convolution
 
 def dist_temp(dims):
     """
-    Another way to create array with pixel value equals
-    euclidian distance from array center.
+    Another way to create array with pixel value equals euclidian distance
+    from array center.
     This is used for test purpose only.
+    This is Xiaojing's original code for computing the squared distance and is
+    very useful as a test to ensure that new code conforms to the original
+    code, as this has been used to publish results.
     """
     new_array = np.zeros(dims)
 
     if np.size(dims) == 2:
-        x_sq = (np.arange(dims[0]) - dims[0]/2)**2
-        y_sq = (np.arange(dims[1]) - dims[1]/2)**2
+        x_sq = (np.arange(dims[0]) - dims[0]//2)**2
+        y_sq = (np.arange(dims[1]) - dims[1]//2)**2
         for j in range(dims[1]):
             new_array[:, j] = np.sqrt(x_sq + y_sq[j])
 
     if np.size(dims) == 3:
-        x_sq = (np.arange(dims[0]) - dims[0]/2)**2
-        y_sq = (np.arange(dims[1]) - dims[1]/2)**2
-        z_sq = (np.arange(dims[2]) - dims[2]/2)**2
+        x_sq = (np.arange(dims[0]) - dims[0]//2)**2
+        y_sq = (np.arange(dims[1]) - dims[1]//2)**2
+        z_sq = (np.arange(dims[2]) - dims[2]//2)**2
         for j in range(dims[1]):
             for k in range(dims[2]):
                 new_array[:, j, k] = np.sqrt(x_sq + y_sq[j] + z_sq[k])

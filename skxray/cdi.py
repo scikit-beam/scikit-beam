@@ -66,7 +66,7 @@ def _dist(dims):
     dist_sum = []
     shape = np.ones(len(dims))
     for idx, d in enumerate(dims):
-        vec = (np.arange(d) - d/2) ** 2
+        vec = (np.arange(d) - d // 2) ** 2
         shape[idx] = -1
         vec = vec.reshape(*shape)
         shape[idx] = 1
@@ -112,11 +112,16 @@ def convolution(array1, array2):
     array :
         convolution result
 
-    .. note:: Another option is to use scipy.signal.fftconvolve.
-              Some difference found on the boundary part compared to this function.
+    Notes
+    -----
+    Another option is to use scipy.signal.fftconvolve. Some differences between
+    the scipy function and this function were found at the boundary.  See
+    `this issue on github <https://github.com/Nikea/scikit-xray/issues/258>`_
+    for details.
     """
     fft_norm = lambda x:  np.fft.fftshift(np.fft.fftn(x)) / np.sqrt(np.size(x))
     fft_1 = fft_norm(array1)
     fft_2 = fft_norm(array2)
-    return np.abs(np.fft.ifftshift(np.fft.ifftn(fft_1*fft_2)) * np.sqrt(np.size(array2)))
+    return np.abs(np.fft.ifftshift(np.fft.ifftn(fft_1*fft_2)) *
+                  np.sqrt(np.size(array2)))
 
