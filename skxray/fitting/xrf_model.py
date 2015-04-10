@@ -466,7 +466,7 @@ class ModelSpectrum(object):
         self.params = copy.deepcopy(params)
         self.elemental_lines = list(elemental_lines)  # to copy
         self.incident_energy = self.params['coherent_sct_energy']['value']
-        self.epsilon = self.params['non_fitting_values']['electron_hole_energy']
+        self.epsilon = self.params['non_fitting_values']['epsilon']
         self.setup_compton_model()
         self.setup_elastic_model()
 
