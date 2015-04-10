@@ -62,19 +62,19 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     This function computes one-time correlations.
     
     It uses a scheme to achieve long-time correlations inexpensively
-    by down sampling the data, iteratively combining successive frames.
+    by downsampling the data, iteratively combining successive frames.
 
     The longest lag time computed is num_levels * num_bufs.
 
     Parameters
     ----------
     num_levels : int
-        how many generations of down sampling to perform, i.e.,
+        how many generations of downsampling to perform, i.e.,
         the depth of the binomial tree of averaged frames
 
     num_bufs : int, must be even
         maximum lag step to compute in each generation of
-        down sampling
+        downsampling
 
     labels : array
         labeled array of the same shape as the image stack;
@@ -87,7 +87,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     -------
     g2 : array
         matrix of one-time correlation
-        shape (num_levels, number of labels)
+        shape (num_levels, number of labels(ROI))
 
     lag_steps : array
         delay or lag steps for the multiple tau analysis
@@ -175,7 +175,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
         buf[0, cur[0] - 1] = (np.ravel(img))[pixel_list]
 
         # Compute the correlations between the first level
-        # (undown sampled) frames. This modifies G,
+        # (undownsampled) frames. This modifies G,
         # past_ and future_intensity_norm, and img_per_level
         # in place!
         _process(buf, G, past_intensity_norm,
@@ -278,7 +278,7 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
         to track how many images processed in each level
 
     level : int
-        the current level number
+        the current multi-tau level
 
     buf_no : int
         the current buffer number
