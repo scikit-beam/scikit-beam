@@ -3,11 +3,19 @@
 # Developed by Gabriel Iltis, Oct. 2013
 """
 This module is designed to facilitate image arithmetic and logical operations
-on image data sets.
+on image data sets. The included functions supplement the logical operations
+currently provided in numpy in order to provide a complete set of logical
+operations for data analysis.
+
+The new functions include:
+    logical_nand: Identifies all elements NOT included in BOTH inputs
+    logical_nor: Identifies all elements NOT included in EITHER input
+    logical_sub: Identifies all elements ONLY included in input_1
 """
 
 import numpy as np
-from numpy import (logical_and, logical_or, logical_not, logical_xor)
+from numpy import (logical_and, logical_or, logical_not, logical_xor, add,
+                   subtract, multiply, divide)
 
 def logical_nand(x1,
                  x2):
@@ -46,8 +54,8 @@ def logical_nand(x1,
     return output
 
 
-def logical_nor(src_data1,
-                 src_data2):
+def logical_nor(x1,
+                x2):
     """
     This function enables the computation of the LOGICAL_NOR of two image or
     volume data sets. This function enables easy isolation of all data points
@@ -57,28 +65,34 @@ def logical_nor(src_data1,
 
     Parameters
     ----------
-    src_data1 : ndarray
+    x1 : {array, list, tuple, int, float}
         Specifies the first reference data
 
-    src_data2 : ndarray
+    x2 : {array, list, tuple, int, float}
         Specifies the second reference data
 
     Returns
     -------
-    output : ndarray
+    output : {bool, array, list, tuple}
         Returns the resulting array to the designated variable
 
     Example
     -------
-    result = mathops.logical_NOR('img_1', 'img_2')
+    >>>input_1 = [[0,0,1,0,0], [2,1,1,1,2], [2,0,1,0,2]]
+    >>>input_2 = [[0,0,0,0,0], [2,1,1,1,2], [0,0,0,0,0]]
+    result = logical_not(input_1, input_2)
+    >>>result
+    [out]: array([[ True,  True, False,  True,  True],
+                  [False, False, False, False, False],
+                  [False,  True, False,  True, False]], dtype=bool)
     """
-    output = logical_not(logical_or(src_data1,
-                                    src_data2))
+    output = logical_not(logical_or(x1,
+                                    x2))
     return output
 
 
-def logical_sub(src_data1,
-                src_data2):
+def logical_sub(x1,
+                x2):
     """
     This function enables LOGICAL SUBTRACTION of one binary image or volume data 
     set from another. This function can be used to remove phase information, 
@@ -90,23 +104,34 @@ def logical_sub(src_data1,
 
     Parameters
     ----------
-    src_data1 : ndarray
+    x1 : {array, list, tuple, int, float}
         Specifies the first reference data
 
-    src_data2 : ndarray
+    x2 : {array, list, tuple, int, float}
         Specifies the second reference data
 
     Returns
     -------
-    output : ndarray
+    output : {bool, array, list, tuple}
         Returns the resulting array to the designated variable
 
     Example
     -------
-    result = mathops.logical_SUB('img_1', 'img_2')
+    >>>input_1 = [[0,0,1,0,0], [2,1,1,1,2], [2,0,1,0,2]]
+    >>>input_2 = [[0,0,0,0,0], [2,1,1,1,2], [0,0,0,0,0]]
+    result = logical_nand(input_1, input_2)
+    >>>result
+    [out]: array([[False, False,  True, False, False],
+                  [False, False, False, False, False],
+                  [ True, False,  True, False,  True]], dtype=bool)
+
     """
-    temp = logical_not(logical_and(src_data1,
-                                   src_data2))
-    output = logical_and(src_data1,
+    temp = logical_not(logical_and(x1,
+                                   x2))
+    output = logical_and(x1,
                          temp)
     return output
+
+
+__all__ = (add, subtract, multiply, divide, logical_and, logical_or,
+           logical_nor, logical_xor, logical_not, logical_sub, logical_nand)
