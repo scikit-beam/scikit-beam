@@ -1075,10 +1075,12 @@ def linear_spectrum_fitting(spectrum, params, elemental_lines=None,
     x0 = np.arange(len(spectrum))
 
     # ratio to transfer energy value back to channel value
-    approx_ratio = 100
+    # The default transfer from channel to energy is energy = 0.01*channel
+    # number. So to transfer back is just 100.
+    chanel_value_to_energy = 100
 
-    lowv = fitting_parameters['non_fitting_values']['energy_bound_low']['value'] * approx_ratio
-    highv = fitting_parameters['non_fitting_values']['energy_bound_high']['value'] * approx_ratio
+    lowv = fitting_parameters['non_fitting_values']['energy_bound_low']['value'] * chanel_value_to_energy
+    highv = fitting_parameters['non_fitting_values']['energy_bound_high']['value'] * chanel_value_to_energy
 
     x, y = trim(x0, spectrum, lowv, highv)
 
