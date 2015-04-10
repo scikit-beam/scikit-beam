@@ -9,8 +9,8 @@ on image data sets.
 import numpy as np
 from numpy import (logical_and, logical_or, logical_not, logical_xor)
 
-def logical_nand(src_data1,
-                 src_data2):
+def logical_nand(x1,
+                 x2):
     """
     This function enables the computation of the LOGICAL_NAND of two image or 
     volume data sets. This function enables easy isolation of all data points 
@@ -20,23 +20,29 @@ def logical_nand(src_data1,
 
     Parameters
     ----------
-    src_data1 : ndarray
+    x1 : {array, list, tuple, int, float}
         Specifies the first reference data
 
-    src_data2 : ndarray
+    x2 : {array, list, tuple, int, float}
         Specifies the second reference data
 
     Returns
     -------
-    output : ndarray
+    output : {bool, array, list, tuple}
         Returns the resulting array to the designated variable
 
     Example
     -------
-    result = mathops.logical_NAND('img_1', 'img_2')
+    >>>input_1 = [[0,0,1,0,0], [2,1,1,1,2], [2,0,1,0,2]]
+    >>>input_2 = [[0,0,0,0,0], [2,1,1,1,2], [0,0,0,0,0]]
+    result = logical_nand(input_1, input_2)
+    >>>result
+    [out]: array([[ True,  True,  True,  True,  True],
+                  [False, False, False, False, False],
+                  [ True,  True,  True,  True,  True]], dtype=bool)
     """
-    output = logical_not(logical_and(src_data1,
-                                           src_data2))
+    output = logical_not(logical_and(x1,
+                                     x2))
     return output
 
 
