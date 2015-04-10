@@ -67,47 +67,77 @@ They are empirical experience from authors of the original code.
 
 
 # old param dict, keep it here for now.
-para_dict = {'coherent_sct_amplitude': {'bound_type': 'none', 'min': 7.0, 'max': 8.0, 'value': 6.0},
-             'coherent_sct_energy': {'bound_type': 'none', 'min': 10.4, 'max': 12.4, 'value': 11.8},
-             'compton_amplitude': {'bound_type': 'none', 'min': 0.0, 'max': 10.0, 'value': 5.0},
-             'compton_angle': {'bound_type': 'lohi', 'min': 75.0, 'max': 90.0, 'value': 90.0},
-             'compton_f_step': {'bound_type': 'lohi', 'min': 0.0, 'max': 1.5, 'value': 0.1},
-             'compton_f_tail': {'bound_type': 'lohi', 'min': 0.0, 'max': 3.0, 'value': 0.8},
-             'compton_fwhm_corr': {'bound_type': 'lohi', 'min': 0.1, 'max': 3.0, 'value': 1.4},
-             'compton_gamma': {'bound_type': 'none', 'min': 0.1, 'max': 10.0, 'value': 1.0},
-             'compton_hi_f_tail': {'bound_type': 'none', 'min': 1e-06, 'max': 1.0, 'value': 0.01},
-             'compton_hi_gamma': {'bound_type': 'none', 'min': 0.1, 'max': 3.0, 'value': 1.0},
-             'e_linear': {'bound_type': 'fixed', 'min': 0.001, 'max': 0.1, 'value': 1.0},
-             'e_offset': {'bound_type': 'fixed', 'min': -0.2, 'max': 0.2, 'value': 0.0},
-             'e_quadratic': {'bound_type': 'none', 'min': -0.0001, 'max': 0.0001, 'value': 0.0},
-             'f_step_linear': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0},
-             'f_step_offset': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0},
-             'f_step_quadratic': {'bound_type': 'none', 'min': 0.0, 'max': 0.0, 'value': 0.0},
-             'f_tail_linear': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.01},
-             'f_tail_offset': {'bound_type': 'none', 'min': 0.0, 'max': 0.1, 'value': 0.04},
-             'f_tail_quadratic': {'bound_type': 'none', 'min': 0.0, 'max': 0.01, 'value': 0.0},
-             'fwhm_fanoprime': {'bound_type': 'lohi', 'min': 1e-06, 'max': 0.05, 'value': 0.00012},
-             'fwhm_offset': {'bound_type': 'lohi', 'min': 0.005, 'max': 0.5, 'value': 0.12},
-             'gamma_linear': {'bound_type': 'none', 'min': 0.0, 'max': 3.0, 'value': 0.0},
-             'gamma_offset': {'bound_type': 'none', 'min': 0.1, 'max': 10.0, 'value': 2.0},
-             'gamma_quadratic': {'bound_type': 'none', 'min': 0.0, 'max': 0.0, 'value': 0.0},
-             'ge_escape': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0},
-             'kb_f_tail_linear': {'bound_type': 'none', 'min': 0.0, 'max': 0.02, 'value': 0.0},
-             'kb_f_tail_offset': {'bound_type': 'none', 'min': 0.0, 'max': 0.2, 'value': 0.0},
-             'kb_f_tail_quadratic': {'bound_type': 'none', 'min': 0.0, 'max': 0.0, 'value': 0.0},
-             'linear': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0},
-             'pileup0': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-             'pileup1': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-             'pileup2': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-             'pileup3': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-             'pileup4': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-             'pileup5': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-             'pileup6': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-             'pileup7': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-             'pileup8': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-             'si_escape': {'bound_type': 'none', 'min': 0.0, 'max': 0.5, 'value': 0.0},
-             'snip_width': {'bound_type': 'none', 'min': 0.1, 'max': 2.82842712475, 'value': 0.15},
-             }
+para_dict = {
+    'coherent_sct_amplitude': {
+        'bound_type': 'none', 'min': 7.0, 'max': 8.0, 'value': 6.0},
+    'coherent_sct_energy': {
+        'bound_type': 'none', 'min': 10.4, 'max': 12.4, 'value': 11.8},
+    'compton_amplitude': {
+        'bound_type': 'none', 'min': 0.0, 'max': 10.0, 'value': 5.0},
+    'compton_angle': {
+        'bound_type': 'lohi', 'min': 75.0, 'max': 90.0, 'value': 90.0},
+    'compton_f_step': {
+        'bound_type': 'lohi', 'min': 0.0, 'max': 1.5, 'value': 0.1},
+    'compton_f_tail': {
+        'bound_type': 'lohi', 'min': 0.0, 'max': 3.0, 'value': 0.8},
+    'compton_fwhm_corr': {
+        'bound_type': 'lohi', 'min': 0.1, 'max': 3.0, 'value': 1.4},
+    'compton_gamma': {
+        'bound_type': 'none', 'min': 0.1, 'max': 10.0, 'value': 1.0},
+    'compton_hi_f_tail': {
+        'bound_type': 'none', 'min': 1e-06, 'max': 1.0, 'value': 0.01},
+    'compton_hi_gamma': {
+        'bound_type': 'none', 'min': 0.1, 'max': 3.0, 'value': 1.0},
+    'e_linear': {
+        'bound_type': 'fixed', 'min': 0.001, 'max': 0.1, 'value': 1.0},
+    'e_offset': {
+        'bound_type': 'fixed', 'min': -0.2, 'max': 0.2, 'value': 0.0},
+    'e_quadratic': {
+        'bound_type': 'none', 'min': -0.0001, 'max': 0.0001, 'value': 0.0},
+    'f_step_linear': {
+        'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0},
+    'f_step_offset': {
+        'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0},
+    'f_step_quadratic': {
+        'bound_type': 'none', 'min': 0.0, 'max': 0.0, 'value': 0.0},
+    'f_tail_linear': {
+        'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.01},
+    'f_tail_offset': {
+        'bound_type': 'none', 'min': 0.0, 'max': 0.1, 'value': 0.04},
+    'f_tail_quadratic': {
+        'bound_type': 'none', 'min': 0.0, 'max': 0.01, 'value': 0.0},
+    'fwhm_fanoprime': {
+        'bound_type': 'lohi', 'min': 1e-06, 'max': 0.05, 'value': 0.00012},
+    'fwhm_offset': {
+        'bound_type': 'lohi', 'min': 0.005, 'max': 0.5, 'value': 0.12},
+    'gamma_linear': {
+        'bound_type': 'none', 'min': 0.0, 'max': 3.0, 'value': 0.0},
+    'gamma_offset': {
+        'bound_type': 'none', 'min': 0.1, 'max': 10.0, 'value': 2.0},
+    'gamma_quadratic': {
+        'bound_type': 'none', 'min': 0.0, 'max': 0.0, 'value': 0.0},
+    'ge_escape': {
+        'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0},
+    'kb_f_tail_linear': {
+        'bound_type': 'none', 'min': 0.0, 'max': 0.02, 'value': 0.0},
+    'kb_f_tail_offset': {
+        'bound_type': 'none', 'min': 0.0, 'max': 0.2, 'value': 0.0},
+    'kb_f_tail_quadratic': {
+        'bound_type': 'none', 'min': 0.0, 'max': 0.0, 'value': 0.0},
+    'linear': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0},
+    'pileup0': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+    'pileup1': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+    'pileup2': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+    'pileup3': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+    'pileup4': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+    'pileup5': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+    'pileup6': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+    'pileup7': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+    'pileup8': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+    'si_escape': {'bound_type': 'none', 'min': 0.0, 'max': 0.5, 'value': 0.0},
+    'snip_width': {
+        'bound_type': 'none', 'min': 0.1, 'max': 2.82842712475, 'value': 0.15},
+}
 
 
 # fitting strategies
@@ -197,78 +227,104 @@ fit_with_tail = {'coherent_sct_amplitude': 'none',
                  'non_fitting_values': 'fixed'}
 
 
-default_param = {'coherent_sct_amplitude': {'bound_type': 'none',
-                  'max': 10000000.0,
-                  'min': 0.10,
-                  'value': 100000},
-                 'coherent_sct_energy': {'bound_type': 'lohi',
-                  'description': 'Incident E [keV]',
-                  'max': 13.0,
-                  'min': 9.0,
-                  'value': 11.0},
-                 'compton_amplitude': {'bound_type': 'none',
-                  'max': 10000000.0,
-                  'min': 0.10,
-                  'value': 100000.0},
-                 'compton_angle': {'bound_type': 'lohi',
-                  'max': 100.0,
-                  'min': 80.0,
-                  'value': 90.0},
-                 'compton_f_step': {'bound_type': 'fixed',
-                  'max': 0.01,
-                  'min': 0.0,
-                  'value': 0.01},
-                 'compton_f_tail': {'bound_type': 'fixed',
-                  'max': 0.3,
-                  'min': 0.0001,
-                  'value': 0.05},
-                 'compton_fwhm_corr': {'bound_type': 'lohi',
-                  'description': 'fwhm Coef, Compton',
-                  'max': 2.5,
-                  'min': 0.5,
-                  'value': 1.5},
-                 'compton_gamma': {'bound_type': 'lohi', 'max': 4.2,
-                                   'min': 3.8, 'value': 4.0},
-                 'compton_hi_f_tail': {'bound_type': 'fixed',
-                  'max': 1.0,
-                  'min': 1e-06,
-                  'value': 0.1},
-                 'compton_hi_gamma': {'bound_type': 'fixed',
-                  'max': 3.0,
-                  'min': 0.1,
-                  'value': 2.0},
-                 'e_linear': {'bound_type': 'lohi',
-                  'description': 'E Calib. Coef, a1',
-                  'max': 0.011,
-                  'min': 0.009,
-                  'tool_tip': 'E(channel) = a0 + a1*channel+ a2*channel**2',
-                  'value': 0.009532},
-                 'e_offset': {'bound_type': 'lohi',
-                  'description': 'E Calib. Coef, a0',
-                  'max': 0.015,
-                  'min': 0.006,
-                  'tool_tip': 'E(channel) = a0 + a1*channel+ a2*channel**2',
-                  'value': 0.007826},
-                 'e_quadratic': {'bound_type': 'lohi',
-                  'description': 'E Calib. Coef, a2',
-                  'max': 1e-06,
-                  'min': -1e-06,
-                  'tool_tip': 'E(channel) = a0 + a1*channel+ a2*channel**2',
-                  'value': 0.0},
-                 'fwhm_fanoprime': {'bound_type': 'fixed',
-                  'description': 'fwhm Coef, b2',
-                  'max': 0.0001,
-                  'min': 1e-07,
-                  'value': 1e-06},
-                 'fwhm_offset': {'bound_type': 'lohi',
-                  'description': 'fwhm Coef, b1 [keV]',
-                  'max': 0.19,
-                  'min': 0.16,
-                  'tool_tip': 'width**2 = (b1/2.3548)**2 + 3.85*b2*E',
-                  'value': 0.178},
-                 'non_fitting_values': {'element_list': 'Ar, Fe, Ce_L, Pt_M',
-                  'energy_bound_high': 12.0,
-                  'energy_bound_low': 2.5}}
+default_param = {
+    'coherent_sct_amplitude': {
+        'bound_type': 'none',
+        'max': 10000000.0,
+        'min': 0.10,
+        'value': 100000},
+    'coherent_sct_energy': {
+        'bound_type': 'lohi',
+        'description': 'Incident E [keV]',
+        'max': 13.0,
+        'min': 9.0, 'value': 11.0},
+    'compton_amplitude': {
+        'bound_type': 'none',
+        'max': 10000000.0,
+        'min': 0.10,
+        'value': 100000.0},
+    'compton_angle': {
+        'bound_type': 'lohi',
+        'max': 100.0,
+        'min': 80.0,
+        'value': 90.0},
+    'compton_f_step': {
+        'bound_type': 'fixed',
+        'max': 0.01,
+        'min': 0.0,
+        'value': 0.01},
+    'compton_f_tail': {
+        'bound_type': 'fixed',
+        'max': 0.3,
+        'min': 0.0001,
+        'value': 0.05},
+    'compton_fwhm_corr': {
+        'bound_type': 'lohi',
+        'description': 'fwhm Coef, Compton',
+        'max': 2.5,
+        'min': 0.5,
+        'value': 1.5},
+    'compton_gamma': {
+        'bound_type': 'lohi',
+        'max': 4.2,
+        'min': 3.8,
+        'value': 4.0},
+    'compton_hi_f_tail': {
+        'bound_type': 'fixed',
+        'max': 1.0,
+        'min': 1e-06,
+        'value': 0.1},
+    'compton_hi_gamma': {
+        'bound_type': 'fixed',
+        'max': 3.0,
+        'min': 0.1,
+        'value': 2.0},
+    'e_linear': {
+        'bound_type': 'lohi',
+        'description': 'E Calib. Coef, a1',
+        'max': 0.011,
+        'min': 0.009,
+        'tool_tip': 'E(channel) = a0 + a1*channel+ a2*channel**2',
+        'value': 0.009532},
+    'e_offset': {
+        'bound_type': 'lohi',
+        'description': 'E Calib. Coef, a0',
+        'max': 0.015,
+        'min': 0.006,
+        'tool_tip': 'E(channel) = a0 + a1*channel+ a2*channel**2',
+        'value': 0.007826},
+    'e_quadratic': {
+        'bound_type': 'lohi',
+        'description': 'E Calib. Coef, a2',
+        'max': 1e-06,
+        'min': -1e-06,
+        'tool_tip': 'E(channel) = a0 + a1*channel+ a2*channel**2',
+        'value': 0.0},
+    'fwhm_fanoprime': {'bound_type': 'fixed',
+        'description': 'fwhm Coef, b2',
+        'max': 0.0001,
+        'min': 1e-07,
+        'value': 1e-06},
+    'fwhm_offset': {
+        'bound_type': 'lohi',
+        'description': 'fwhm Coef, b1 [keV]',
+        'max': 0.19,
+        'min': 0.16,
+        'tool_tip': 'width**2 = (b1/2.3548)**2 + 3.85*b2*E',
+        'value': 0.178},
+    'non_fitting_values': {
+        'element_list': 'Ar, Fe, Ce_L, Pt_M',
+        'energy_bound_low': {
+            'value': 1.5,
+            'default_value': 1.5,
+            'description': 'E low [keV]'},
+        'energy_bound_high': {
+            'value': 13.5,
+            'default_value': 13.5,
+            'description': 'E high [keV]'},
+        'epsilon': 3.51 # electron hole energy
+    }
+}
 
 
 def get_para():

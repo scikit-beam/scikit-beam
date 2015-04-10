@@ -24,7 +24,7 @@ def synthetic_spectrum():
     param = get_para()
     x = np.arange(2000)
     elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M']
-    elist, matv = construct_linear_model(x, param, elemental_lines, default_area=1e5)
+    elist, matv, area_v = construct_linear_model(x, param, elemental_lines, default_area=1e5)
     return np.sum(matv, 1) + 100  # avoid zero values
 
 
@@ -112,7 +112,7 @@ def test_pre_fit():
     param = get_para()
 
     # with weight pre fit
-    x, y_total = linear_spectrum_fitting(y0, param)
+    x, y_total, area_v = linear_spectrum_fitting(y0, param, area_option=True)
     for v in item_list:
         assert_true(v in y_total)
 
