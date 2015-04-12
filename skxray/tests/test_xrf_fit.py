@@ -116,10 +116,8 @@ def test_pre_fit():
     for v in item_list:
         assert_true(v in y_total)
 
-    for k, v in six.iteritems(y_total):
-        print(k)
     # no weight pre fit
-    x, y_total = linear_spectrum_fitting(y0, param, constant_weight=None)
+    x, y_total, area_v = linear_spectrum_fitting(y0, param, constant_weight=None)
     for v in item_list:
         assert_true(v in y_total)
 
