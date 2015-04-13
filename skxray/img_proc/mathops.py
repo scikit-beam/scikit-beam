@@ -14,9 +14,14 @@ The new functions include:
 """
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-
+import six
 from numpy import (logical_and, logical_or, logical_not, logical_xor, add,
-                subtract, multiply, divide)
+                   subtract, multiply, divide)
+
+
+__all__ = ["add", "subtract", "multiply", "divide", "logical_and",
+           "logical_or", "logical_nor", "logical_xor", "logical_not",
+           "logical_sub", "logical_nand"]
 
 
 def logical_nand(x1, x2):
