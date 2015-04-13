@@ -2,6 +2,9 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
+# Developed at the NSLS-II, Brookhaven National Laboratory             #
+# Developed by Sameera K. Abeykoon, February 2014                      #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -41,7 +44,6 @@ import logging
 logger = logging.getLogger(__name__)
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
-import sys
 
 from nose.tools import assert_equal, assert_true, raises
 
@@ -185,3 +187,77 @@ def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
                                                        - 0.000001)]]))[0][0]))
     assert_array_equal(zero_grid, data)
     assert_array_equal(num_pix, num_pixels)
+
+
+def test_roi_divide_circle():
+    detector_size = (10, 8)
+    radius = 5.
+    calibrated_center = (5., 2.)
+    num_angles = 3
+
+    (all_roi_inds, roi_inds, num_pixels,
+     pixel_list) = diff_roi.roi_divide_circle(detector_size,
+                                              radius, calibrated_center,
+                                              num_angles)
+    ty = np.zeros(detector_size).ravel()
+    ty[pixel_list] = roi_inds
+
+    yy, xx = np.mgrid[:detector_size[0], :detector_size[1]]
+    y_ = (np.flipud(yy) - calibrated_center[1])
+    x_ = (xx - calibrated_center[0])
+    grid_values = np.float_(np.hypot(x_, y_))
+    angle_grid = np.rad2deg(np.arctan2(y_, x_))
+    angle_grid1 = np.rad2deg(np.arctan2(y_, x_))
+
+    angles = np.linspace(0, 360, num_angles)
+
+    num_pixels_m = (np.bincount(ty.astype(int)))[1:]
+
+    # get the indices into a grid
+    zero_grid = np.zeros((detector_size[0], detector_size[1]))
+
+    zero_grid[grid_values <= radius] = 1
+
+    assert_array_equal(np.nonzero(zero_grid),
+                       np.nonzero((ty.reshape(*detector_size))))
+
+    # to check the indices of the angle grid
+    angle_grid[angle_grid < 0] = 360 + angle_grid[angle_grid < 0]
+
+    mesh = np.zeros((detector_size[0], detector_size[1]))
+    for i in range(num_angles-1):
+        vl = ((angles[i] <= angle_grid) &
+                  (angle_grid < angles[i + 1]))
+        mesh[vl] = i + 1
+
+    # remove the values grater than the radius
+    mesh[grid_values > radius] = 0
+    # take out the zero values in the grid
+    roi_inds_m = mesh[mesh > 0]
+
+    assert_array_almost_equal(num_pixels_m, num_pixels)
+    assert_array_equal(roi_inds, roi_inds_m)
+
+
+def test_roi_angles_rings():
+    detector_size = (20, 20)
+    calibrated_center = (10., 7.)
+    num_angles = 7
+    first_r = 5.
+    delta_r = 5.
+
+    step_r = (2., 3)
+
+    num_rings = 3  # number of Q rings
+
+    (all_rois, roi_inds, num_pixels,
+     pixel_list) = diff_roi.roi_angles_rings(detector_size,
+                                                    calibrated_center,
+                                                    num_angles, num_rings,
+                                                    first_r, delta_r, *step_r)
+
+
+
+if __name__ == "__main__":
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
