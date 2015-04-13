@@ -15,7 +15,8 @@ The new functions include:
 
 import numpy as np
 from numpy import (logical_and, logical_or, logical_not, logical_xor, add,
-                   subtract, multiply, divide)
+                subtract, multiply, divide)
+
 
 def logical_nand(x1,
                  x2):
@@ -133,5 +134,6 @@ def logical_sub(x1,
     return output
 
 
-__all__ = (add, subtract, multiply, divide, logical_and, logical_or,
-           logical_nor, logical_xor, logical_not, logical_sub, logical_nand)
+__all__ = ["add", "subtract", "multiply", "divide", "logical_and",
+           "logical_or", "logical_nor", "logical_xor", "logical_not",
+           "logical_sub", "logical_nand"]
