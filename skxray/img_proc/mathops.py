@@ -6,11 +6,6 @@ This module is designed to facilitate image arithmetic and logical operations
 on image data sets. The included functions supplement the logical operations
 currently provided in numpy in order to provide a complete set of logical
 operations for data analysis.
-
-The new functions include:
-    logical_nand: Identifies all elements NOT included in BOTH inputs
-    logical_nor: Identifies all elements NOT included in EITHER input
-    logical_sub: Identifies all elements ONLY included in input_1
 """
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
@@ -25,7 +20,8 @@ __all__ = ["add", "subtract", "multiply", "divide", "logical_and",
 
 
 def logical_nand(x1, x2):
-    """
+    """Computes the truth value of NOT (x1 AND x2) element wise.
+
     This function enables the computation of the LOGICAL_NAND of two image or
     volume data sets. This function enables easy isolation of all data points
     NOT INCLUDED IN BOTH SOURCE DATA SETS. This function can be used for data
@@ -58,7 +54,8 @@ def logical_nand(x1, x2):
 
 
 def logical_nor(x1, x2):
-    """
+    """Compute truth value of NOT (x1 OR x2)) element wise.
+
     This function enables the computation of the LOGICAL_NOR of two image or
     volume data sets. This function enables easy isolation of all data points
     NOT INCLUDED IN EITHER OF THE SOURCE DATA SETS. This function can be used
@@ -89,7 +86,8 @@ def logical_nor(x1, x2):
 
 
 def logical_sub(x1, x2):
-    """
+    """Compute truth value of x1 AND (NOT (x1 AND x2)) element wise.
+
     This function enables LOGICAL SUBTRACTION of one binary image or volume data
     set from another. This function can be used to remove phase information,
     interface boundaries, or noise, present in two data sets, without having to
