@@ -13,7 +13,6 @@ The new functions include:
     logical_sub: Identifies all elements ONLY included in input_1
 """
 
-import numpy as np
 from numpy import (logical_and, logical_or, logical_not, logical_xor, add,
                 subtract, multiply, divide)
 
@@ -29,15 +28,15 @@ def logical_nand(x1,
 
     Parameters
     ----------
-    x1 : {array, list, tuple, int, float}
+    x1 : array_like
         Specifies the first reference data
 
-    x2 : {array, list, tuple, int, float}
+    x2 : array_like
         Specifies the second reference data
 
     Returns
     -------
-    output : {bool, array, list, tuple}
+    output : {ndarray, bool}
         Returns the resulting array to the designated variable
 
     Example
@@ -50,8 +49,7 @@ def logical_nand(x1,
                   [False, False, False, False, False],
                   [ True,  True,  True,  True,  True]], dtype=bool)
     """
-    output = logical_not(logical_and(x1,
-                                     x2))
+    output = logical_not(logical_and(x1, x2))
     return output
 
 
@@ -66,15 +64,15 @@ def logical_nor(x1,
 
     Parameters
     ----------
-    x1 : {array, list, tuple, int, float}
+    x1 : array_like
         Specifies the first reference data
 
-    x2 : {array, list, tuple, int, float}
+    x2 : array_like
         Specifies the second reference data
 
     Returns
     -------
-    output : {bool, array, list, tuple}
+    output : {ndarray, bool}
         Returns the resulting array to the designated variable
 
     Example
@@ -87,8 +85,7 @@ def logical_nor(x1,
                   [False, False, False, False, False],
                   [False,  True, False,  True, False]], dtype=bool)
     """
-    output = logical_not(logical_or(x1,
-                                    x2))
+    output = logical_not(logical_or(x1, x2))
     return output
 
 
@@ -105,15 +102,15 @@ def logical_sub(x1,
 
     Parameters
     ----------
-    x1 : {array, list, tuple, int, float}
+    x1 : array_like
         Specifies the first reference data
 
-    x2 : {array, list, tuple, int, float}
+    x2 : array_like
         Specifies the second reference data
 
     Returns
     -------
-    output : {bool, array, list, tuple}
+    output : {ndarray, bool}
         Returns the resulting array to the designated variable
 
     Example
@@ -127,8 +124,7 @@ def logical_sub(x1,
                   [ True, False,  True, False,  True]], dtype=bool)
 
     """
-    temp = logical_not(logical_and(x1,
-                                   x2))
+    temp = logical_not(logical_and(x1, x2))
     output = logical_and(x1,
                          temp)
     return output
