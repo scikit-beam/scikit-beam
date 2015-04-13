@@ -1109,12 +1109,12 @@ def linear_spectrum_fitting(spectrum, params,
     area_dict = OrderedDict()
     result_dict = OrderedDict()
 
-    for i, func in enumerate(total_list):
-        if np.sum(total_y[i, :]) == 0:
+    for name, y, _out in zip(total_list, total_y, out):
+        if np.sum(y) == 0:
             continue
-        result_dict.update({total_list[i]: total_y[i, :]})
-        area = out[i]*element_area[total_list[i]]
-        area_dict.update({total_list[i]: area})
+        result_dict[name] = y
+        area_dict[name] = _out * element_area[name]
+
     result_dict['background'] = bg
     area_dict['background'] = np.sum(bg)
     return x, result_dict, area_dict
