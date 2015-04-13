@@ -19,8 +19,7 @@ from numpy import (logical_and, logical_or, logical_not, logical_xor, add,
                 subtract, multiply, divide)
 
 
-def logical_nand(x1,
-                 x2):
+def logical_nand(x1, x2):
     """
     This function enables the computation of the LOGICAL_NAND of two image or
     volume data sets. This function enables easy isolation of all data points
@@ -30,33 +29,30 @@ def logical_nand(x1,
 
     Parameters
     ----------
-    x1 : array_like
-        Specifies the first reference data
-
-    x2 : array_like
-        Specifies the second reference data
+    x1, x2 : array_like
+        Input arrays. `x1` and `x2` must be of the same shape.
 
     Returns
     -------
     output : {ndarray, bool}
-        Returns the resulting array to the designated variable
+        Boolean result with the same shape as `x1` and `x2` of the logical
+        NAND operation on corresponding elements of `x1` and `x2`.
+
 
     Example
     -------
-    >>>input_1 = [[0,0,1,0,0], [2,1,1,1,2], [2,0,1,0,2]]
-    >>>input_2 = [[0,0,0,0,0], [2,1,1,1,2], [0,0,0,0,0]]
-    result = logical_nand(input_1, input_2)
-    >>>result
-    [out]: array([[ True,  True,  True,  True,  True],
-                  [False, False, False, False, False],
-                  [ True,  True,  True,  True,  True]], dtype=bool)
+    >>> x1 = [[0,0,1,0,0], [2,1,1,1,2], [2,0,1,0,2]]
+    >>> x2 = [[0,0,0,0,0], [2,1,1,1,2], [0,0,0,0,0]]
+    >>> logical_nand(x1, x2)
+    array([[ True,  True,  True,  True,  True],
+           [False, False, False, False, False],
+           [ True,  True,  True,  True,  True]], dtype=bool)
+
     """
-    output = logical_not(logical_and(x1, x2))
-    return output
+    return logical_not(logical_and(x1, x2))
 
 
-def logical_nor(x1,
-                x2):
+def logical_nor(x1, x2):
     """
     This function enables the computation of the LOGICAL_NOR of two image or
     volume data sets. This function enables easy isolation of all data points
@@ -66,33 +62,28 @@ def logical_nor(x1,
 
     Parameters
     ----------
-    x1 : array_like
-        Specifies the first reference data
-
-    x2 : array_like
-        Specifies the second reference data
+    x1, x2 : array_like
+        Input arrays. `x1` and `x2` must be of the same shape.
 
     Returns
     -------
     output : {ndarray, bool}
-        Returns the resulting array to the designated variable
+        Boolean result with the same shape as `x1` and `x2` of the logical
+        NOR operation on corresponding elements of `x1` and `x2`.
 
     Example
     -------
-    >>>input_1 = [[0,0,1,0,0], [2,1,1,1,2], [2,0,1,0,2]]
-    >>>input_2 = [[0,0,0,0,0], [2,1,1,1,2], [0,0,0,0,0]]
-    result = logical_not(input_1, input_2)
-    >>>result
-    [out]: array([[ True,  True, False,  True,  True],
-                  [False, False, False, False, False],
-                  [False,  True, False,  True, False]], dtype=bool)
+    >>> input_1 = [[0,0,1,0,0], [2,1,1,1,2], [2,0,1,0,2]]
+    >>> input_2 = [[0,0,0,0,0], [2,1,1,1,2], [0,0,0,0,0]]
+    >>> logical_nor(input_1, input_2)
+    array([[ True,  True, False,  True,  True],
+           [False, False, False, False, False],
+           [False,  True, False,  True, False]], dtype=bool)
     """
-    output = logical_not(logical_or(x1, x2))
-    return output
+    return logical_not(logical_or(x1, x2))
 
 
-def logical_sub(x1,
-                x2):
+def logical_sub(x1, x2):
     """
     This function enables LOGICAL SUBTRACTION of one binary image or volume data
     set from another. This function can be used to remove phase information,
@@ -104,34 +95,22 @@ def logical_sub(x1,
 
     Parameters
     ----------
-    x1 : array_like
-        Specifies the first reference data
-
-    x2 : array_like
-        Specifies the second reference data
+    x1, x2 : array_like
+        Input arrays. `x1` and `x2` must be of the same shape.
 
     Returns
     -------
     output : {ndarray, bool}
-        Returns the resulting array to the designated variable
+        Boolean result with the same shape as `x1` and `x2` of the logical
+        SUBTRACT operation on corresponding elements of `x1` and `x2`.
 
     Example
     -------
-    >>>input_1 = [[0,0,1,0,0], [2,1,1,1,2], [2,0,1,0,2]]
-    >>>input_2 = [[0,0,0,0,0], [2,1,1,1,2], [0,0,0,0,0]]
-    result = logical_nand(input_1, input_2)
-    >>>result
-    [out]: array([[False, False,  True, False, False],
-                  [False, False, False, False, False],
-                  [ True, False,  True, False,  True]], dtype=bool)
-
+    >>> input_1 = [[0,0,1,0,0], [2,1,1,1,2], [2,0,1,0,2]]
+    >>> input_2 = [[0,0,0,0,0], [2,1,1,1,2], [0,0,0,0,0]]
+    >>> logical_sub(input_1, input_2)
+    array([[False, False,  True, False, False],
+           [False, False, False, False, False],
+           [ True, False,  True, False,  True]], dtype=bool)
     """
-    temp = logical_not(logical_and(x1, x2))
-    output = logical_and(x1,
-                         temp)
-    return output
-
-
-__all__ = ["add", "subtract", "multiply", "divide", "logical_and",
-           "logical_or", "logical_nor", "logical_xor", "logical_not",
-           "logical_sub", "logical_nand"]
+    return logical_and(x1, logical_not(logical_and(x1, x2)))
