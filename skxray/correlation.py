@@ -119,19 +119,18 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
         raise ValueError("number of channels(number of buffers) in "
                          "multiple-taus (must be even)")
 
-    if labels.shape == images[0].shape[1:]:
-        raise ValueError("Shape of an image should be equal to "
-                         "shape of the labels array")
+    if labels.shape != images.operands[0].shape[1:]:
+        raise ValueError("Shape of the image stack should be equal to"
+                         " shape of the labels array")
 
-    # Which pixels are in each label?
-    labels, pixel_list = extract_label_indices(labels)
+    # get the pixels in each label
+    label_mask, pixel_list = extract_label_indices(labels)
 
-    num_rois = np.max(labels)
+    num_rois = np.max(label_mask)
 
     # number of pixels per ROI
-    num_pixels = np.bincount(labels, minlength=(num_rois+1))
+    num_pixels = np.bincount(label_mask, minlength=(num_rois+1))
     num_pixels = num_pixels[1:]
-
 
     if np.any(num_pixels == 0):
         raise ValueError("Number of pixels of the required roi's"
@@ -145,11 +144,11 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
 
     # matrix of past intensity normalizations
     past_intensity_norm = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
-                   dtype=np.float64)
+                                   dtype=np.float64)
 
     # matrix of future intensity normalizations
     future_intensity_norm = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
-                   dtype=np.float64)
+                                     dtype=np.float64)
 
     # Ring buffer, a buffer with periodic boundary conditions.
     # Images must be keep for up to maximum delay in buf.
@@ -167,7 +166,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
 
     start_time = time.time()  # used to log the computation time (optionally)
 
-    for n, img in enumerate(images):
+    for n, img in enumerate(images.operands[0]):
 
         cur[0] = (1 + cur[0]) % num_bufs  # increment buffer
 
@@ -176,10 +175,10 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
 
         # Compute the correlations between the first level
         # (undownsampled) frames. This modifies G,
-        # past_ and future_intensity_norm, and img_per_level
-        # in place!
+        # past_intensity_norm, future_intensity_norm,
+        # and img_per_level in place!
         _process(buf, G, past_intensity_norm,
-                 future_intensity_norm, labels,
+                 future_intensity_norm, label_mask,
                  num_bufs, num_pixels, img_per_level,
                  level=0, buf_no=cur[0] - 1)
 
@@ -194,8 +193,8 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
                 track_level[level] = 1
                 processing = False
             else:
-                prev = 1 + (cur[level - 1] - 2 )%num_bufs
-                cur[level] = 1 + cur[level]%num_bufs
+                prev = 1 + (cur[level - 1] - 2) % num_bufs
+                cur[level] = 1 + cur[level] % num_bufs
 
                 buf[level, cur[level] - 1] = (buf[level - 1, prev - 1] +
                                               buf[level - 1,
@@ -209,7 +208,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
                 # Again, this is modifying things in place. See comment
                 # on previous call above.
                 _process(buf, G, past_intensity_norm,
-                         future_intensity_norm, labels,
+                         future_intensity_norm, label_mask,
                          num_bufs, num_pixels, img_per_level,
                          level=level, buf_no=cur[level]-1,)
                 level += 1
@@ -230,19 +229,18 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
         g_max = past_intensity_norm.shape[0]
 
     # g2 is normalized G
-    g2 = (G[: g_max] / (past_intensity_norm[: g_max] *
-                        future_intensity_norm[: g_max]))
+    g2 = (G[:g_max] / (past_intensity_norm[:g_max] *
+                       future_intensity_norm[:g_max]))
 
     # Convert from num_levels, num_bufs to lag frames.
-    tot_channels, lag_steps = core.multi_tau_lags(num_levels,
-                                                  num_bufs)
+    tot_channels, lag_steps = core.multi_tau_lags(num_levels, num_bufs)
     lag_steps = lag_steps[:g_max]
 
     return g2, lag_steps
 
 
 def _process(buf, G, past_intensity_norm, future_intensity_norm,
-             labels, num_bufs, num_pixels, img_per_level, level, buf_no):
+             label_mask, num_bufs, num_pixels, img_per_level, level, buf_no):
     """
     Internal helper function. This modifies inputs in place.
 
@@ -264,7 +262,7 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
     future_intensity_norm : array
         matrix of future intensity normalizations
 
-    labels : array
+    label_mask : array
         labels of the required region of interests(roi's)
 
     num_bufs : int, even
@@ -313,23 +311,23 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
         future_img = buf[level, buf_no]
 
         #  get the matrix of auto-correlation function without normalizations
-        tmp_binned = (np.bincount(labels,
-                                  weights=np.ravel(past_img*future_img))[1:])
-        G[t_index] += ((tmp_binned/num_pixels - G[t_index])/
+        tmp_binned = (np.bincount(label_mask,
+                                  weights=past_img*future_img)[1:])
+        G[t_index] += ((tmp_binned / num_pixels - G[t_index]) /
                        (img_per_level[level] - i))
 
         # get the matrix of past intensity normalizations
-        pi_binned = (np.bincount(labels,
-                                 weights=np.ravel(past_img))[1:])
+        pi_binned = (np.bincount(label_mask,
+                                 weights=past_img)[1:])
         past_intensity_norm[t_index] += ((pi_binned/num_pixels
-                                         - past_intensity_norm[t_index])/
+                                         - past_intensity_norm[t_index]) /
                                          (img_per_level[level] - i))
 
         # get the matrix of future intensity normalizations
-        fi_binned = (np.bincount(labels,
-                                 weights=np.ravel(future_img))[1:])
+        fi_binned = (np.bincount(label_mask,
+                                 weights=future_img)[1:])
         future_intensity_norm[t_index] += ((fi_binned/num_pixels
-                                           - future_intensity_norm[t_index])/
+                                           - future_intensity_norm[t_index]) /
                                            (img_per_level[level] - i))
 
     return None  # modifies arguments in place!
@@ -349,7 +347,7 @@ def extract_label_indices(labels):
 
     Returns
     -------
-    labels : array
+    label_mask : array
         1D array labeling each foreground pixel
         e.g., [1, 1, 1, 1, 2, 2, 1, 1]
 
@@ -366,6 +364,6 @@ def extract_label_indices(labels):
     pixel_list = np.ravel((grid[0] * img_dim[1] + grid[1]))[w]
 
     # discard the zeros
-    labels = labels[labels > 0]
+    label_mask = labels[labels > 0]
 
-    return labels, pixel_list
+    return label_mask, pixel_list
