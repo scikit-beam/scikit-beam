@@ -1031,8 +1031,9 @@ def weighted_nnls_fit(spectrum, expected_matrix, constant_weight=10):
     return results, residue
 
 
-def linear_spectrum_fitting(spectrum, params, elemental_lines=None,
-                            constant_weight=10, area_option=False):
+def linear_spectrum_fitting(spectrum, params,
+                            elemental_lines=None,
+                            constant_weight=10):
     """
     Fit a spectrum to a linear model.
 
@@ -1053,8 +1054,6 @@ def linear_spectrum_fitting(spectrum, params, elemental_lines=None,
         value used to calculate weight like so:
         weights = constant_weight / (constant_weight + spectrum)
         Default is 10. If None, performed unweighted nnls fit.
-    area_option : Bool
-        return the area of the first gaussian that corresponds to each element.
 
     Returns
     -------
@@ -1063,8 +1062,7 @@ def linear_spectrum_fitting(spectrum, params, elemental_lines=None,
     result_dict : dict
         Fitting results
     area_dict : dict
-        Returns 0 for the area if area_option=False
-        Returns the area if area_option=True
+        the area of the first main peak, such as Ka1, of a given element
     """
     if elemental_lines is None:
         elemental_lines = K_LINE + L_LINE + M_LINE
@@ -1102,30 +1100,23 @@ def linear_spectrum_fitting(spectrum, params, elemental_lines=None,
         out, res = nnls_fit(y, matv)
 
     total_y = out * matv
+    total_y = np.transpose(total_y)
+
     x = (params['e_offset']['value'] +
          params['e_linear']['value']*x +
          params['e_quadratic']['value'] * x**2)
 
-
     area_dict = OrderedDict()
     result_dict = OrderedDict()
 
-    # todo benchmark this function with area_option as True and False. It might
-    # be cheap enough to just calculate the area every time that this extra
-    # flag is not worth having.
-    for i in range(len(total_list)):
-        if np.sum(total_y[:, i]) == 0:
+    for name, y, _out in zip(total_list, total_y, out):
+        if np.sum(y) == 0:
             continue
-        result_dict.update({total_list[i]: total_y[:, i]})
-        area = 0
-        if area_option:
-            area = out[i]*element_area[total_list[i]]
-        area_dict.update({total_list[i]: area})
-    result_dict.update(background=bg)
-    bg = 0
-    if area_option:
-        bg = np.sum(bg)
-    area_dict.update(background=bg)
+        result_dict[name] = y
+        area_dict[name] = _out * element_area[name]
+
+    result_dict['background'] = bg
+    area_dict['background'] = np.sum(bg)
     return x, result_dict, area_dict
 
 
