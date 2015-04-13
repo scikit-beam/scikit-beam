@@ -73,9 +73,9 @@ def logical_nor(x1, x2):
 
     Example
     -------
-    >>> input_1 = [[0,0,1,0,0], [2,1,1,1,2], [2,0,1,0,2]]
-    >>> input_2 = [[0,0,0,0,0], [2,1,1,1,2], [0,0,0,0,0]]
-    >>> logical_nor(input_1, input_2)
+    >>> x1 = [[0,0,1,0,0], [2,1,1,1,2], [2,0,1,0,2]]
+    >>> x2 = [[0,0,0,0,0], [2,1,1,1,2], [0,0,0,0,0]]
+    >>> logical_nor(x1, x2)
     array([[ True,  True, False,  True,  True],
            [False, False, False, False, False],
            [False,  True, False,  True, False]], dtype=bool)
@@ -106,9 +106,9 @@ def logical_sub(x1, x2):
 
     Example
     -------
-    >>> input_1 = [[0,0,1,0,0], [2,1,1,1,2], [2,0,1,0,2]]
-    >>> input_2 = [[0,0,0,0,0], [2,1,1,1,2], [0,0,0,0,0]]
-    >>> logical_sub(input_1, input_2)
+    >>> x1 = [[0,0,1,0,0], [2,1,1,1,2], [2,0,1,0,2]]
+    >>> x2 = [[0,0,0,0,0], [2,1,1,1,2], [0,0,0,0,0]]
+    >>> logical_sub(x1, x2)
     array([[False, False,  True, False, False],
            [False, False, False, False, False],
            [ True, False,  True, False,  True]], dtype=bool)
