@@ -43,7 +43,7 @@ from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
 import sys
 
-from nose.tools import assert_equal, assert_true, raises, assert_raises
+from nose.tools import assert_equal, assert_true, raises
 
 import skxray.correlation as corr
 import skxray.diff_roi_choice as diff_roi
