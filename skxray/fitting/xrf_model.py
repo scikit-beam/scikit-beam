@@ -1063,7 +1063,7 @@ def linear_spectrum_fitting(spectrum, params, elemental_lines=None,
     result_dict : dict
         Fitting results
     area_dict : dict
-        Returns 0 for the area if area_option=False
+        Returns None for the area if area_option=False
         Returns the area if area_option=True
     """
     if elemental_lines is None:
