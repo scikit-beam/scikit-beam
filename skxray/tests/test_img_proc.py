@@ -19,19 +19,19 @@ from numpy.testing import assert_equal
 
 
 def test_logical_nor():
-    test_array_1 = np.zeros((30,30,30), dtype=int)
+    test_array_1 = np.zeros((30, 30, 30), dtype=int)
     test_array_1[0:15, 0:15, 0:15] = 1
     test_array_2 = np.zeros((30, 30, 30), dtype=int)
     test_array_2[15:29, 15:29, 15:29] = 87
-    test_array_3 = np.ones((30,30,30), dtype=float)
+    test_array_3 = np.ones((30, 30, 30), dtype=float)
     test_array_3[10:20, 10:20, 10:20] = 87.4
-    test_array_4 = np.zeros((30,30), dtype=int)
+    test_array_4 = np.zeros((30, 30), dtype=int)
     test_array_4[24:29, 24:29] = 254
 
     test_1D_array_1 = np.zeros(100, dtype=int)
-    test_1D_array_1[0:30]=50
+    test_1D_array_1[0:30] = 50
     test_1D_array_2 = np.zeros(50, dtype=int)
-    test_1D_array_2[20:49]=10
+    test_1D_array_2[20:49] = 10
 
     assert_equal(mathops.logical_nor(test_array_1, test_array_1),
                  np.logical_not(test_array_1))
@@ -41,22 +41,22 @@ def test_logical_nor():
 
 
 def test_logical_nand():
-    #TEST DATA
-    test_array_1 = np.zeros((90,90,90), dtype=int)
+    # TEST DATA
+    test_array_1 = np.zeros((90, 90, 90), dtype=int)
     test_array_1[10:19, 10:19, 10:19] = 1
-    test_array_2 = np.zeros((90,90,90), dtype=int)
+    test_array_2 = np.zeros((90, 90, 90), dtype=int)
     test_array_2[20:29, 20:29, 20:29] = 2
-    test_array_3 = np.zeros((90,90,90), dtype=int)
+    test_array_3 = np.zeros((90, 90, 90), dtype=int)
     test_array_3[30:39, 30:39, 30:39] = 3
-    test_array_4 = np.zeros((90,90,90), dtype=int)
+    test_array_4 = np.zeros((90, 90, 90), dtype=int)
     test_array_4[40:49, 40:49, 40:49] = 4
-    test_array_5 = np.zeros((90,90,90), dtype=int)
+    test_array_5 = np.zeros((90, 90, 90), dtype=int)
     test_array_5[50:59, 50:59, 50:59] = 5
-    test_array_6 = np.zeros((90,90,90), dtype=int)
+    test_array_6 = np.zeros((90, 90, 90), dtype=int)
     test_array_6[60:69, 60:69, 60:69] = 6
-    test_array_7 = np.zeros((90,90,90), dtype=int)
+    test_array_7 = np.zeros((90, 90, 90), dtype=int)
     test_array_7[70:79, 70:79, 70:79] = 7
-    test_array_8 = np.zeros((90,90,90), dtype=int)
+    test_array_8 = np.zeros((90, 90, 90), dtype=int)
     test_array_8[80:89, 80:89, 80:89] = 8
 
     assert_equal(mathops.logical_nand(test_array_1, test_array_1),
@@ -66,12 +66,12 @@ def test_logical_nand():
 
 
 def test_logical_sub():
-    #TEST DATA
-    test_array_1 = np.zeros((90,90,90), dtype=int)
+    # TEST DATA
+    test_array_1 = np.zeros((90, 90, 90), dtype=int)
     test_array_1[0:39, 0:39, 0:39] = 1
-    test_array_2 = np.zeros((90,90,90), dtype=int)
+    test_array_2 = np.zeros((90, 90, 90), dtype=int)
     test_array_2[20:79, 20:79, 20:79] = 2
-    test_array_3 = np.zeros((90,90,90), dtype=int)
+    test_array_3 = np.zeros((90, 90, 90), dtype=int)
     test_array_3[40:89, 40:89, 40:89] = 3
 
     assert_equal(mathops.logical_sub(test_array_1, test_array_1),
@@ -81,7 +81,7 @@ def test_logical_sub():
     assert_equal(test_result.sum(),
                  (test_array_1.sum() -
                   np.logical_and(test_array_1, test_array_2).sum()))
-    
+
     test_result = mathops.logical_sub(test_array_1, test_array_3)
     assert_equal(test_result, test_array_1)
 
