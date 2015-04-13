@@ -112,7 +112,7 @@ def test_pre_fit():
     param = get_para()
 
     # with weight pre fit
-    x, y_total, area_v = linear_spectrum_fitting(y0, param, area_option=True)
+    x, y_total, area_v = linear_spectrum_fitting(y0, param)
     for v in item_list:
         assert_true(v in y_total)
 
