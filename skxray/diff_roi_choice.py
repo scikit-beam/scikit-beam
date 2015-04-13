@@ -123,7 +123,7 @@ def roi_rectangles(num_rois, roi_data, detector_size):
 
     roi_inds = mesh[mesh > 0]
 
-    return roi_inds, num_pixels, pixel_list
+    return mesh.reshape(detector_size), roi_inds, num_pixels, pixel_list
 
 
 def roi_rings(img_dim, calibrated_center, num_rings,
@@ -157,11 +157,15 @@ def roi_rings(img_dim, calibrated_center, num_rings,
 
     Returns
     -------
-    ring_vals : ndarray
-        edge values of the required  rings
+    mesh : nedarry
+        indices of the required rings
+        shape is ([detector_size[0]*detector_size[1]], )
 
     ring_inds : ndarray
         indices of the required rings
+
+    ring_vals : ndarray
+        edge values of the required  rings
 
     num_pixels : ndarray
         number of pixels in each ring
@@ -179,10 +183,10 @@ def roi_rings(img_dim, calibrated_center, num_rings,
     q_r = np.linspace(first_r, last_r, num=(num_rings+1))
 
     # indices of rings
-    ring_inds = np.digitize(np.ravel(grid_values), np.array(q_r),
+    mesh = np.digitize(np.ravel(grid_values), np.array(q_r),
                             right=False)
     # discard the indices greater than number of rings
-    ring_inds[ring_inds > num_rings] = 0
+    mesh[mesh > num_rings] = 0
 
     # Edge values of each rings
     ring_vals = []
@@ -198,9 +202,9 @@ def roi_rings(img_dim, calibrated_center, num_rings,
 
     (ring_inds, ring_vals, num_pixels,
      pixel_list) = _process_rings(num_rings, img_dim,
-                                  ring_vals, ring_inds)
+                                  ring_vals, mesh)
 
-    return ring_inds, ring_vals, num_pixels, pixel_list
+    return mesh.reshape(img_dim), ring_inds, ring_vals, num_pixels, pixel_list
 
 
 def roi_rings_step(img_dim, calibrated_center, num_rings,
@@ -241,11 +245,15 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
 
     Returns
     -------
-    ring_vals : ndarray
-        edge values of the required rings
+    mesh : nedarry
+        indices of the required rings
+        shape is ([detector_size[0]*detector_size[1]], )
 
     ring_inds : ndarray
         indices of the required rings
+
+    ring_vals : ndarray
+        edge values of the required rings
 
     num_pixels : ndarray
         number of pixels in each ring
@@ -282,20 +290,20 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
             raise ValueError("Provide step value for each q ring ")
 
     # indices of rings
-    ring_inds = np.digitize(np.ravel(grid_values), np.array(ring_vals),
+    mesh = np.digitize(np.ravel(grid_values), np.array(ring_vals),
                             right=False)
 
     # to discard every-other bin and set the discarded bins indices to 0
-    ring_inds[ring_inds % 2 == 0] = 0
+    mesh[mesh % 2 == 0] = 0
     # change the indices of odd number of rings
-    indx = ring_inds > 0
-    ring_inds[indx] = (ring_inds[indx] + 1) // 2
+    indx = mesh > 0
+    mesh[indx] = (mesh[indx] + 1) // 2
 
     (ring_inds, ring_vals, num_pixels,
      pixel_list) = _process_rings(num_rings, img_dim,
-                                  ring_vals, ring_inds)
+                                  ring_vals, mesh)
 
-    return ring_inds, ring_vals, num_pixels, pixel_list
+    return mesh.reshape(img_dim), ring_inds, ring_vals, num_pixels, pixel_list
 
 
 def _grid_values(img_dim, calibrated_center):
