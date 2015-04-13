@@ -12,6 +12,8 @@ The new functions include:
     logical_nor: Identifies all elements NOT included in EITHER input
     logical_sub: Identifies all elements ONLY included in input_1
 """
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 from numpy import (logical_and, logical_or, logical_not, logical_xor, add,
                 subtract, multiply, divide)
@@ -20,10 +22,10 @@ from numpy import (logical_and, logical_or, logical_not, logical_xor, add,
 def logical_nand(x1,
                  x2):
     """
-    This function enables the computation of the LOGICAL_NAND of two image or 
-    volume data sets. This function enables easy isolation of all data points 
-    NOT INCLUDED IN BOTH SOURCE DATA SETS. This function can be used for data 
-    comparison, material isolation, noise removal, or mask 
+    This function enables the computation of the LOGICAL_NAND of two image or
+    volume data sets. This function enables easy isolation of all data points
+    NOT INCLUDED IN BOTH SOURCE DATA SETS. This function can be used for data
+    comparison, material isolation, noise removal, or mask
     application/generation.
 
     Parameters
@@ -92,12 +94,12 @@ def logical_nor(x1,
 def logical_sub(x1,
                 x2):
     """
-    This function enables LOGICAL SUBTRACTION of one binary image or volume data 
-    set from another. This function can be used to remove phase information, 
-    interface boundaries, or noise, present in two data sets, without having to 
-    worry about mislabeling of pixels which would result from arithmetic 
-    subtraction. This function will evaluate as true for all "true" voxels 
-    present ONLY in Source Dataset 1. This function can be used for data 
+    This function enables LOGICAL SUBTRACTION of one binary image or volume data
+    set from another. This function can be used to remove phase information,
+    interface boundaries, or noise, present in two data sets, without having to
+    worry about mislabeling of pixels which would result from arithmetic
+    subtraction. This function will evaluate as true for all "true" voxels
+    present ONLY in Source Dataset 1. This function can be used for data
     cleanup, or boundary/interface analysis.
 
     Parameters
