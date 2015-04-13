@@ -1106,7 +1106,6 @@ def linear_spectrum_fitting(spectrum, params, elemental_lines=None,
          params['e_linear']['value']*x +
          params['e_quadratic']['value'] * x**2)
 
-
     area_dict = OrderedDict()
     result_dict = OrderedDict()
 
@@ -1117,12 +1116,12 @@ def linear_spectrum_fitting(spectrum, params, elemental_lines=None,
         if np.sum(total_y[:, i]) == 0:
             continue
         result_dict.update({total_list[i]: total_y[:, i]})
-        area = 0
+        area = None
         if area_option:
             area = out[i]*element_area[total_list[i]]
         area_dict.update({total_list[i]: area})
     result_dict.update(background=bg)
-    bg = 0
+    bg = None
     if area_option:
         bg = np.sum(bg)
     area_dict.update(background=bg)
