@@ -19,7 +19,7 @@ __all__ = ["add", "subtract", "multiply", "divide", "logical_and",
            "logical_sub", "logical_nand"]
 
 
-def logical_nand(x1, x2):
+def logical_nand(x1, x2, out=None):
     """Computes the truth value of NOT (x1 AND x2) element wise.
 
     This function enables the computation of the LOGICAL_NAND of two image or
@@ -32,6 +32,10 @@ def logical_nand(x1, x2):
     ----------
     x1, x2 : array_like
         Input arrays. `x1` and `x2` must be of the same shape.
+
+    output : array-like
+        Boolean result with the same shape as `x1` and `x2` of the logical
+        operation on corresponding elements of `x1` and `x2`.
 
     Returns
     -------
@@ -50,10 +54,10 @@ def logical_nand(x1, x2):
            [ True,  True,  True,  True,  True]], dtype=bool)
 
     """
-    return logical_not(logical_and(x1, x2))
+    return logical_not(logical_and(x1, x2, out), out)
 
 
-def logical_nor(x1, x2):
+def logical_nor(x1, x2, out=None):
     """Compute truth value of NOT (x1 OR x2)) element wise.
 
     This function enables the computation of the LOGICAL_NOR of two image or
@@ -66,6 +70,10 @@ def logical_nor(x1, x2):
     ----------
     x1, x2 : array_like
         Input arrays. `x1` and `x2` must be of the same shape.
+
+    output : array-like
+        Boolean result with the same shape as `x1` and `x2` of the logical
+        operation on corresponding elements of `x1` and `x2`.
 
     Returns
     -------
@@ -82,10 +90,10 @@ def logical_nor(x1, x2):
            [False, False, False, False, False],
            [False,  True, False,  True, False]], dtype=bool)
     """
-    return logical_not(logical_or(x1, x2))
+    return logical_not(logical_or(x1, x2, out), out)
 
 
-def logical_sub(x1, x2):
+def logical_sub(x1, x2, out=None):
     """Compute truth value of x1 AND (NOT (x1 AND x2)) element wise.
 
     This function enables LOGICAL SUBTRACTION of one binary image or volume data
@@ -100,6 +108,10 @@ def logical_sub(x1, x2):
     ----------
     x1, x2 : array_like
         Input arrays. `x1` and `x2` must be of the same shape.
+
+    output : array-like
+        Boolean result with the same shape as `x1` and `x2` of the logical
+        operation on corresponding elements of `x1` and `x2`.
 
     Returns
     -------
@@ -116,4 +128,4 @@ def logical_sub(x1, x2):
            [False, False, False, False, False],
            [ True, False,  True, False,  True]], dtype=bool)
     """
-    return logical_and(x1, logical_not(logical_and(x1, x2)))
+    return logical_and(x1, logical_not(logical_and(x1, x2, out), out), out)
