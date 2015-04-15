@@ -327,6 +327,103 @@ def _grid_values(img_dim, calibrated_center):
     return grid_values
 
 
+def roi_divide_circle(detector_size, radius, calibrated_center,
+                      num_angles, rotate='N',):
+    """
+    This function will provide the indices, number of pixels and
+    pixel indices when a circular roi is divided into pies
+
+    Parameters
+    ----------
+    detector_size : tuple
+        shape of the image (detector X and Y direction)
+        Order is (num_rows, num_columns)
+
+    radius : float
+        radius of the circle
+
+    calibrated_center : tuple
+        defining the center of the image
+        (column value, row value) (mm)
+
+    num_angles : int
+        number of angles ring divide into
+        angles are measured from horizontal-anti clock wise
+
+    rotate : {'Y', 'N'}, optional
+        to make angles measured from vertical-anti clock wise
+
+    Returns
+    -------
+    labels_grid : array
+        indices of the required roi's
+        shape is ([detector_size[0], detector_size[1]])
+
+    roi_labels : array
+        indices for the required roi's
+        (after discarding zero values from the shape
+        ([detector_size[0]*detector_size[1]], )
+
+    indices : array
+        pixel indices for the required roi's
+
+    """
+    angle_grid, grid_values = _get_roi_grid(detector_size, calibrated_center,
+                                            num_angles)
+    if rotate == 'Y':
+        mesh = np.rot90(angle_grid)
+        grid_values = np.rot90(grid_values)
+
+    angle_grid[grid_values > radius] = 0
+
+    labels_grid = angle_grid.reshape(detector_size)
+
+    roi_labels, indices = extract_label_indices(angle_grid, rotate)
+    return labels_grid, roi_labels, indices
+
+
+def _get_roi_grid(detector_size, calibrated_center, num_angles):
+    """
+    Helper function to get the grid values and indices values from
+    the angles of the grid
+
+    Parameters
+    ----------
+    detector_size : tuple
+        shape of the image (detector X and Y direction)
+        Order is (num_rows, num_columns)
+
+    calibrated_center : tuple
+        defining the center of the image
+        (column value, row value) (mm)
+
+    Returns
+    -------
+    ind_grid : array
+        indices grid, indices according to the angles
+
+    grid_values : array
+        grid values
+
+    """
+    yy, xx = np.mgrid[:detector_size[0], :detector_size[1]]
+    y_ = (np.flipud(yy) - calibrated_center[1])
+    x_ = (xx - calibrated_center[0])
+    grid_values = np.float_(np.hypot(x_, y_))
+    angle_grid = np.rad2deg(np.arctan2(y_, x_))
+
+    angle_grid[angle_grid < 0] = 360 + angle_grid[angle_grid < 0]
+
+    # required angles
+    angles = np.linspace(0, 360, num_angles)
+    # the indices of the bins(angles) to which each value in input
+    #  array(angle_grid) belongs.
+    ind_grid = (np.digitize(np.ravel(angle_grid), angles,
+                            right=False)).reshape(detector_size)
+
+    return ind_grid, grid_values
+
+
 def _process_rings(num_rings, img_dim, ring_vals, ring_inds):
     """
     This will find the indices of the required rings, find the bin
@@ -383,3 +480,48 @@ def _process_rings(num_rings, img_dim, ring_vals, ring_inds):
     num_pixels = num_pixels[1:]
 
     return ring_inds, ring_vals, num_pixels, pixel_list
+
+
+def extract_label_indices(labels, rotate='N'):
+    """
+    This will find the label's required region of interests (roi's),
+    number of roi's count the number of pixels in each roi's and pixels
+    list for the required roi's.
+
+    Parameters
+    ----------
+    labels : array
+        labeled array; 0 is background.
+        Each ROI is represented by a distinct label (i.e., integer).
+
+    rotate : {'Y', 'N'}, optional
+        to make angles measured from vertical-anti clock wise
+
+    Returns
+    -------
+    label_mask : array
+        1D array labeling each foreground pixel
+        e.g., [1, 1, 1, 1, 2, 2, 1, 1]
+
+    indices : array
+        1D array of indices into the raveled image for all
+        foreground pixels (labeled nonzero)
+        e.g., [5, 6, 7, 8, 14, 15, 21, 22]
+    """
+    detector_size = labels.shape
+
+    # TODO Make this tighter.
+    w = np.where(np.ravel(labels) > 0)
+
+    if rotate == 'Y':
+        grid = np.indices((detector_size[1], detector_size[0]))
+    else:
+        grid = np.indices((detector_size[0], detector_size[1]))
+
+    grid = np.indices((detector_size[0], detector_size[1]))
+    indices = np.ravel((grid[0] * detector_size[1] + grid[1]))[w]
+
+    # discard the zeros
+    label_mask = labels[labels > 0]
+
+    return label_mask, indices
