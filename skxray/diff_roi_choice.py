@@ -79,21 +79,20 @@ def roi_rectangles(num_rois, roi_data, detector_size):
 
     Returns
     -------
-    roi_inds : ndarray
+    labels_grid : array
+        indices of the required rings
+        shape is ([detector_size[0]*detector_size[1]], )
+
+    roi_labels : array
         indices of the required shape
          after discarding zero values from the shape
         ([detector_size[0]*detector_size[1]], )
 
-    num_pixels : ndarray
-        number of pixels in certain rectangle shape
-
-    pixel_list : ndarray
+    indices : array
         pixel indices for the required rectangles
     """
 
     mesh = np.zeros(detector_size, dtype=np.int64)
-
-    num_pixels = []
 
     for i, (col_coor, row_coor, col_val, row_val) in enumerate(roi_data, 0):
 
@@ -101,12 +100,6 @@ def roi_rectangles(num_rois, roi_data, detector_size):
                                                      detector_size[0]])
         top, bottom = np.max([row_coor, 0]), np.min([row_coor + row_val,
                                                      detector_size[1]])
-
-        area = (right - left) * (bottom - top)
-
-        # find the number of pixels in each roi
-        num_pixels.append(area)
-
         slc1 = slice(left, right)
         slc2 = slice(top, bottom)
 
@@ -116,18 +109,15 @@ def roi_rectangles(num_rois, roi_data, detector_size):
         # assign a different scalar for each roi
         mesh[slc1, slc2] = (i + 1)
 
-    # find the pixel indices
-    w = np.where(mesh > 0)
-    grid = np.indices((detector_size[0], detector_size[1]))
-    pixel_list = ((grid[0]*detector_size[1] + grid[1]))[w]
+    roi_labels = mesh[mesh > 0]
 
-    roi_inds = mesh[mesh > 0]
+    roi_labels, indices = extract_label_indices(mesh)
 
-    return mesh.reshape(detector_size), roi_inds, num_pixels, pixel_list
+    return mesh.reshape(detector_size), roi_labels, indices
 
 
-def roi_rings(img_dim, calibrated_center, num_rings,
-               first_r, delta_r):
+def roi_rings(detector_size, calibrated_center, num_rings,
+              first_r, delta_r):
     """
     This will provide the indices of the required rings,
     find the bin edges of the rings, and count the number
@@ -137,7 +127,7 @@ def roi_rings(img_dim, calibrated_center, num_rings,
 
     Parameters
     ----------
-    img_dim: tuple
+    detector_size: tuple
         shape of the image (detector X and Y direction)
         Order is (num_rows, num_columns)
         shape is [detector_size[0], detector_size[1]])
@@ -157,24 +147,23 @@ def roi_rings(img_dim, calibrated_center, num_rings,
 
     Returns
     -------
-    mesh : nedarry
+    labels_grid : array
         indices of the required rings
         shape is ([detector_size[0]*detector_size[1]], )
 
-    ring_inds : ndarray
+    ring_labels : array
         indices of the required rings
+        after discarding zero values from the shape
+        ([detector_size[0]*detector_size[1]], )
 
-    ring_vals : ndarray
+    ring_vals : array
         edge values of the required  rings
 
-    num_pixels : ndarray
-        number of pixels in each ring
-
-    pixel_list : ndarray
+    indices : array
         pixel indices for the required rings
 
     """
-    grid_values = _grid_values(img_dim, calibrated_center)
+    grid_values = _grid_values(detector_size, calibrated_center)
 
     # last ring edge value
     last_r = first_r + num_rings*(delta_r)
@@ -184,9 +173,11 @@ def roi_rings(img_dim, calibrated_center, num_rings,
 
     # indices of rings
     mesh = np.digitize(np.ravel(grid_values), np.array(q_r),
-                            right=False)
+                       right=False)
     # discard the indices greater than number of rings
     mesh[mesh > num_rings] = 0
+
+    labels_grid = mesh.reshape(detector_size)
 
     # Edge values of each rings
     ring_vals = []
@@ -198,17 +189,16 @@ def roi_rings(img_dim, calibrated_center, num_rings,
         else:
             ring_vals.append(q_r[num_rings-1])
 
-    ring_vals = np.asarray(ring_vals)
+    # get the edge values of the rings
+    ring_edges = _process_ring_edges(np.asarray(ring_vals))
 
-    (ring_inds, ring_vals, num_pixels,
-     pixel_list) = _process_rings(num_rings, img_dim,
-                                  ring_vals, mesh)
+    ring_labels, indices = extract_label_indices(mesh.reshape(detector_size))
 
-    return mesh.reshape(img_dim), ring_inds, ring_vals, num_pixels, pixel_list
+    return labels_grid, ring_labels, ring_edges, indices
 
 
-def roi_rings_step(img_dim, calibrated_center, num_rings,
-               first_r, delta_r, *step_r):
+def roi_rings_step(detector_size, calibrated_center, num_rings,
+                   first_r, delta_r, *step_r):
     """
     This will provide the indices of the required rings,
     find the bin edges of the rings, and count the number
@@ -219,7 +209,7 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
 
     Parameters
     ----------
-    img_dim: tuple
+    detector_size: tuple
         shape of the image (detector X and Y direction)
         Order is (num_rows, num_columns)
         shape is [detector_size[0], detector_size[1]])
@@ -245,24 +235,65 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
 
     Returns
     -------
-    mesh : nedarry
+    labels_grid : array
         indices of the required rings
         shape is ([detector_size[0]*detector_size[1]], )
 
-    ring_inds : ndarray
+    ring_labels : array
         indices of the required rings
+        after discarding zero values from the shape
+        ([detector_size[0]*detector_size[1]], )
 
-    ring_vals : ndarray
+    ring_edges : array
         edge values of the required rings
 
-    num_pixels : ndarray
-        number of pixels in each ring
-
-    pixel_list : ndarray
+    indices : array
         pixel indices for the required rings
 
     """
-    grid_values = _grid_values(img_dim, calibrated_center)
+    # get indices and the edge values processing from step value(s)
+    labels_grid, ring_vals = _process_ring_step(num_rings, first_r, delta_r,
+                                                detector_size,
+                                                calibrated_center, *step_r)
+    # get the edges of the rings
+    ring_edges = _process_ring_edges(np.asarray(ring_vals))
+
+    ring_labels, indices = extract_label_indices(labels_grid)
+    return labels_grid, ring_labels, ring_edges, indices
+
+
+def _process_ring_step(num_rings, first_r, delta_r, detector_size,
+                       calibrated_center, *step_r):
+    """
+    Helper function to process the edge values of the rings and
+    ring indices
+
+    num_rings : int
+        number of rings
+
+    first_r : float
+        radius of the first ring
+
+    delta_r : float
+        thickness of the ring
+
+    calibarted_center : tuple
+        defining the center of the image (column value, row value) (mm)
+
+    step_r : tuple
+        step value for the next ring from the end of the previous
+        ring.
+        same step - same step values between rings (one value)
+        different steps - different step value between rings (provide
+        step value for each ring eg: 6 rings provide 5 step values)
+
+    Returns
+    -------
+    ring_vals : array
+        edge values of each ring
+
+    """
+    grid_values = _grid_values(detector_size, calibrated_center)
 
     ring_vals = []
 
@@ -275,8 +306,8 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
         #  when there is a same values of step between rings
         #  the edge values of rings will be
         ring_vals = first_r + np.r_[0, np.cumsum(np.tile([delta_r,
-                                                           float(step_r[0])],
-                                                          num_rings))][:-1]
+                                                          float(step_r[0])],
+                                                         num_rings))][:-1]
     else:
         # when there is a different step values between each ring
         #  edge values of the rings will be
@@ -291,7 +322,7 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
 
     # indices of rings
     mesh = np.digitize(np.ravel(grid_values), np.array(ring_vals),
-                            right=False)
+                       right=False)
 
     # to discard every-other bin and set the discarded bins indices to 0
     mesh[mesh % 2 == 0] = 0
@@ -299,18 +330,36 @@ def roi_rings_step(img_dim, calibrated_center, num_rings,
     indx = mesh > 0
     mesh[indx] = (mesh[indx] + 1) // 2
 
-    (ring_inds, ring_vals, num_pixels,
-     pixel_list) = _process_rings(num_rings, img_dim,
-                                  ring_vals, mesh)
-
-    return mesh.reshape(img_dim), ring_inds, ring_vals, num_pixels, pixel_list
+    return mesh.reshape(detector_size), ring_vals
 
 
-def _grid_values(img_dim, calibrated_center):
+def _process_ring_edges(ring_vals):
+    """
+    This is a helper function to make edge values
+     of the each roi ring shape as (num_rings, 2)
+
+    Parameters
+    ----------
+    ring_vals : array
+        edge values of each ring
+
+    Returns
+    -------
+    ring_vals : array
+        edge values of each ring
+        shape is (num_rings, 2)
+
+    """
+    ring_vals = np.asarray(ring_vals).reshape(-1, 2)
+
+    return ring_vals
+
+
+def _grid_values(detector_size, calibrated_center):
     """
     Parameters
     ----------
-    img_dim: tuple
+    detector_size: tuple
         shape of the image (detector X and Y direction)
         Order is (num_rows, num_columns)
         shape is [detector_size[0], detector_size[1]])
@@ -319,7 +368,7 @@ def _grid_values(img_dim, calibrated_center):
         defining the center of the image (column value, row value) (mm)
 
     """
-    xx, yy = np.mgrid[:img_dim[0], :img_dim[1]]
+    xx, yy = np.mgrid[:detector_size[0], :detector_size[1]]
     x_ = (xx - calibrated_center[1])
     y_ = (yy - calibrated_center[0])
     grid_values = np.float_(np.hypot(x_, y_))
@@ -422,64 +471,6 @@ def _get_roi_grid(detector_size, calibrated_center, num_angles):
                             right=False)).reshape(detector_size)
 
     return ind_grid, grid_values
-
-
-def _process_rings(num_rings, img_dim, ring_vals, ring_inds):
-    """
-    This will find the indices of the required rings, find the bin
-    edges of the rings, and count the number of pixels in each ring,
-    and pixels list for the required rings.
-
-    Parameters
-    ----------
-    num_rings : int
-        number of rings
-
-    img_dim: tuple
-        shape of the image (detector X and Y direction)
-        Order is (num_rows, num_columns)
-        shape is [detector_size[0], detector_size[1]])
-
-    ring_vals : ndarray
-        edge values of each ring
-
-    ring_inds : ndarray
-        indices of the required rings
-        shape is ([detector_size[0]*detector_size[1]], )
-
-    Returns
-    -------
-    ring_inds : ndarray
-        indices of the ring values for the required rings
-        (after discarding zero values from the shape
-        ([detector_size[0]*detector_size[1]], )
-
-    ring_vals : ndarray
-        edge values of each ring
-        shape is (num_rings, 2)
-
-    num_pixels : ndarray
-        number of pixels in each ring
-
-    pixel_list : ndarray
-        pixel indices for the required rings
-
-    """
-    # find the pixel list
-    w = np.where(ring_inds > 0)
-    grid = np.indices((img_dim[0], img_dim[1]))
-    pixel_list = (grid[0]*img_dim[1] + grid[1]).flatten()[w]
-
-    ring_inds = ring_inds[ring_inds > 0]
-
-    ring_vals = np.array(ring_vals)
-    ring_vals = ring_vals.reshape(num_rings, 2)
-
-    # number of pixels in each ring
-    num_pixels = np.bincount(ring_inds, minlength=(num_rings+1))
-    num_pixels = num_pixels[1:]
-
-    return ring_inds, ring_vals, num_pixels, pixel_list
 
 
 def extract_label_indices(labels, rotate='N'):

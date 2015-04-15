@@ -57,12 +57,11 @@ def test_roi_rectangles():
     roi_data = np.array(([2, 2, 6, 3], [6, 7, 8, 5], [8, 18, 5, 10]),
                         dtype=np.int64)
 
-    all_roi_inds, roi_inds, num_pixels, pixel_list = diff_roi.roi_rectangles(num_rois,
-                                                               roi_data,
-                                                               detector_size)
+    all_roi_inds, roi_inds, pixel_list = diff_roi.roi_rectangles(num_rois,
+                                                                 roi_data,
+                                                                 detector_size)
     ty = np.zeros(detector_size).ravel()
     ty[pixel_list] = roi_inds
-    num_pixels_m = (np.bincount(ty.astype(int)))[1:]
 
     re_mesh = ty.reshape(*detector_size)
     for i, (col_coor, row_coor, col_val, row_val) in enumerate(roi_data, 0):
@@ -77,8 +76,6 @@ def test_roi_rectangles():
         assert_almost_equal(top, ind_co[0][1])
         assert_almost_equal(bottom-1, ind_co[-1][-1])
 
-    assert_array_equal(num_pixels, num_pixels_m)
-
 
 def test_roi_rings():
     calibrated_center = (6., 4.)
@@ -87,7 +84,7 @@ def test_roi_rings():
     delta_q = 3
     num_qs = 7  # number of Q rings
 
-    (all_roi_inds, q_inds, q_ring_val, num_pixels,
+    (all_roi_inds, q_inds, q_ring_val,
      pixel_list) = diff_roi.roi_rings(img_dim, calibrated_center, num_qs,
                                       first_q, delta_q)
 
@@ -98,8 +95,8 @@ def test_roi_rings():
     assert_array_almost_equal(q_ring_val_m, q_ring_val)
 
     # check the pixel_list and q_inds and num_pixels
-    _helper_check(pixel_list, q_inds, num_pixels, q_ring_val,
-                  calibrated_center, img_dim, num_qs)
+    _helper_check(pixel_list, q_inds, q_ring_val, calibrated_center, img_dim,
+                  num_qs)
 
 
 def test_roi_rings_step():
@@ -113,10 +110,8 @@ def test_roi_rings_step():
     step_q = 1  # step value between each Q ring
 
     (all_roi_inds, q_inds, q_ring_val,
-     num_pixels, pixel_list) = diff_roi.roi_rings_step(img_dim,
-                                                       calibrated_center,
-                                                       num_qs, first_q,
-                                                       delta_q, step_q)
+     pixel_list) = diff_roi.roi_rings_step(img_dim, calibrated_center, num_qs,
+                                           first_q, delta_q, step_q)
 
     # check the ring edge values
     q_ring_val_m = np.array([[2.5, 4.5], [5.5, 7.5], [8.5, 10.5],
@@ -125,7 +120,7 @@ def test_roi_rings_step():
     assert_almost_equal(q_ring_val, q_ring_val_m)
 
     # check the pixel_list and q_inds and num_pixels
-    _helper_check(pixel_list, q_inds, num_pixels, q_ring_val,
+    _helper_check(pixel_list, q_inds, q_ring_val,
                   calibrated_center, img_dim, num_qs)
 
 
@@ -138,11 +133,9 @@ def test_roi_rings_diff_steps():
     num_qs = 8  # number of Q rings
 
     (all_roi_inds, q_inds, q_ring_val,
-     num_pixels, pixel_list) = diff_roi.roi_rings_step(img_dim,
-                                                       calibrated_center,
-                                                       num_qs, first_q,
-                                                       delta_q, 2., 2.5, 4.,
-                                                       3., 0., 2.5, 3.)
+     pixel_list) = diff_roi.roi_rings_step(img_dim, calibrated_center, num_qs,
+                                           first_q, delta_q, 2., 2.5, 4., 3.,
+                                           0., 2.5, 3.)
 
     # check the edge values of the rings
     q_ring_val_m = np.array([[2., 4.], [6., 8.], [10.5, 12.5], [16.5, 18.5],
@@ -152,15 +145,17 @@ def test_roi_rings_diff_steps():
     assert_array_almost_equal(q_ring_val, q_ring_val_m)
 
     # check the pixel_list and q_inds and num_pixels
-    _helper_check(pixel_list, q_inds, num_pixels, q_ring_val,
-                  calibrated_center, img_dim, num_qs)
+    _helper_check(pixel_list, q_inds, q_ring_val, calibrated_center, img_dim,
+                  num_qs)
 
 
-def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
+def _helper_check(pixel_list, inds, q_ring_val, calib_center,
                   img_dim, num_qs):
     # recreate the indices using pixel_list and inds values
     ty = np.zeros(img_dim).ravel()
     ty[pixel_list] = inds
+    num_pix = (np.bincount(ty.astype(int)))[1:]
+
     data = ty.reshape(img_dim[0], img_dim[1])
 
     # get the grid values from the center
