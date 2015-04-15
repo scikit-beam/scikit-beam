@@ -525,3 +525,45 @@ def extract_label_indices(labels, rotate='N'):
     label_mask = labels[labels > 0]
 
     return label_mask, indices
+
+
+def _get_roi_grid(detector_size, calibrated_center, num_angles):
+    """
+    Helper function to get the grid values and indices values from
+    the angles of the grid
+
+    Parameters
+    ----------
+    detector_size : tuple
+        shape of the image (detector X and Y direction)
+        Order is (num_rows, num_columns)
+
+    calibrated_center : tuple
+        defining the center of the image
+        (column value, row value) (mm)
+
+    Returns
+    -------
+    ind_grid : array
+        indices grid, indices according to the angles
+
+    grid_values : array
+        grid values
+
+    """
+    yy, xx = np.mgrid[:detector_size[0], :detector_size[1]]
+    y_ = (np.flipud(yy) - calibrated_center[1])
+    x_ = (xx - calibrated_center[0])
+    grid_values = np.float_(np.hypot(x_, y_))
+    angle_grid = np.rad2deg(np.arctan2(y_, x_))
+
+    angle_grid[angle_grid < 0] = 360 + angle_grid[angle_grid < 0]
+
+    # required angles
+    angles = np.linspace(0, 360, num_angles)
+    # the indices of the bins(angles) to which each value in input
+    #  array(angle_grid) belongs.
+    ind_grid = (np.digitize(np.ravel(angle_grid), angles,
+                            right=False)).reshape(detector_size)
+
+    return ind_grid, grid_values
