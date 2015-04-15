@@ -54,6 +54,7 @@ import logging
 import time
 
 import skxray.core as core
+import skxray.diff_roi_choice as diff_roi
 logger = logging.getLogger(__name__)
 
 
@@ -124,7 +125,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
                          " shape of the labels array")
 
     # get the pixels in each label
-    label_mask, pixel_list = extract_label_indices(labels)
+    label_mask, pixel_list = diff_roi.extract_label_indices(labels)
 
     num_rois = np.max(label_mask)
 
