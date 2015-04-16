@@ -18,6 +18,21 @@ from skxray.img_proc import mathops
 from numpy.testing import assert_equal
 
 
+def _helper_prealloc_passthrough(op, x1, x2, scratch_space):
+    ret = op(x1, x2, scratch_space)
+    assert_equal(ret, scratch_space)
+
+
+def test_prealloc_passthrough():
+    """Smoketest the pre-allocation bit of numpy
+    """
+    x1 = np.arange(10)
+    x2 = np.arange(10)
+    scratch_space = np.zeros(x1.shape)
+    for op in [mathops.logical_nand, mathops.logical_sub, mathops.logical_nor]:
+        yield _helper_prealloc_passthrough, op, x1, x2, scratch_space
+
+
 def test_logical_nor():
     test_array_1 = np.zeros((30, 30, 30), dtype=int)
     test_array_1[0:15, 0:15, 0:15] = 1
