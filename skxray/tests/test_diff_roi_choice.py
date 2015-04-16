@@ -180,3 +180,59 @@ def _helper_check(pixel_list, inds, q_ring_val, calib_center,
                                                        - 0.000001)]]))[0][0]))
     assert_array_equal(zero_grid, data)
     assert_array_equal(num_pix, num_pixels)
+
+
+def test_roi_divide_circle():
+    detector_size = (10, 8)
+    radius = 5.
+    calibrated_center = (5., 2.)
+    num_angles = 3
+
+    (all_roi_inds, labels,
+     indices) = diff_roi.roi_divide_circle(detector_size,
+                                           radius, calibrated_center,
+                                           num_angles)
+    ty = np.zeros(detector_size).ravel()
+    ty[indices] = labels
+
+    num_pixels = (np.bincount(ty.astype(int)))[1:]
+
+    angles, angle_grid, grid_values = _helper_grid(detector_size,
+                                                   calibrated_center,
+                                                   num_angles)
+    # get the indices into a grid
+    zero_grid = np.zeros((detector_size[0], detector_size[1]))
+
+    zero_grid[grid_values <= radius] = 1
+
+    assert_array_equal(np.nonzero(zero_grid),
+                       np.nonzero((ty.reshape(*detector_size))))
+
+    mesh = np.zeros((detector_size[0], detector_size[1]))
+    for i in range(num_angles-1):
+        vl = ((angles[i] <= angle_grid) &
+              (angle_grid < angles[i + 1]))
+        mesh[vl] = i + 1
+
+    # remove the values grater than the radius
+    mesh[grid_values > radius] = 0
+    # take out the zero values in the grid
+    roi_inds_m = mesh[mesh > 0]
+
+    assert_array_equal(labels, roi_inds_m)
+
+
+def _helper_grid(detector_size, calibrated_center, num_angles):
+
+    yy, xx = np.mgrid[:detector_size[0], :detector_size[1]]
+    y_ = (np.flipud(yy) - calibrated_center[1])
+    x_ = (xx - calibrated_center[0])
+    grid_values = np.float_(np.hypot(x_, y_))
+    angle_grid = np.rad2deg(np.arctan2(y_, x_))
+
+    angles = np.linspace(0, 360, num_angles)
+
+    # to check the indices of the angle grid
+    angle_grid[angle_grid < 0] = 360 + angle_grid[angle_grid < 0]
+
+    return angles, angle_grid, grid_values
