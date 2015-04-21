@@ -42,16 +42,124 @@ from __future__ import (absolute_import, division, print_function,
 import six
 import numpy as np
 import scipy.signal
+from scipy import ndimage
 from collections import deque
 from .constants.api import calibration_standards
 from skxray.feature import (filter_peak_height, peak_refinement,
-                           refine_log_quadratic)
+                            refine_log_quadratic)
 from skxray.core import (pixel_to_phi, pixel_to_radius,
-                        pairwise, bin_edges_to_centers, bin_1D)
+                         pairwise, bin_edges_to_centers, bin_1D)
+from skxray.image import find_ring_center_acorr_1D
+
+
+def estimate_dist_center(input_image, st_name, wavelength, pixel_size,
+                         window_size=5, max_peak_count=7, thresh=0.1,
+                         phi_steps=25, no_rings=5):
+    """
+    This function will find the sample detector distance and
+    calibrated center from the image of the standard sample using
+    other modules.
+
+    Parameters
+    ----------
+    input_image: ndarray
+        A single image.
+
+    st_name: str
+        The name of the calibration standard.  Used to look up the
+        expected peak location
+
+    wavelength : float
+        The wavelength of scattered x-ray in nm
+
+    pixel_size : tuple
+        (pixel_height, pixel_width)
+
+    window_size : int, optional
+        The number of elements on either side of a local maximum to
+        use for locating and refining peaks.  Candidates are identified
+        as a relative maximum in a window sized (2*window_size + 1) and
+        the same window is used for fitting the peaks to refine the location.
+
+    max_peak_count : int, optional
+        Use at most this many peaks
+
+    thresh : float, optional
+        Fraction of maximum peak height
+
+    phi_steps : int,optional
+        How many regions to split the ring into, should be >10
+
+    no_rings : int, optional
+        Number of rings to look it
+
+    Returns
+    -------
+    dist_mean : float
+        The detector-sample distance in mm.  This is the mean of the estimate
+        from all of the peaks used.
+
+    dist_std : float
+        The standard deviation of detector-sample distance computed from the
+         peaks used.
+
+    calibrated_center : tuple
+        Returns the index (row, col) of the pixel that rings
+        are centered on.  Accurate to pixel resolution.
+    """
+
+    # Using a gaussian blur for the input image
+
+    p_image = _proc_funcs[st_name](input_image)
+
+    # find the pixel-resolution center of a set of concentric rings
+    res = find_ring_center_acorr_1D(p_image)
+
+    # find the calibration center
+    calibrated_center = refine_center(p_image, res, pixel_size,
+                                      phi_steps, no_rings, thresh,
+                                      window_size)
+
+    # converts the pixel positions to radius from the calibrated center
+    values = pixel_to_radius(p_image.shape, calibrated_center, pixel_size)
+
+    # bin image to 1D
+    bins, sums, counts = bin_1D(np.ravel(values), np.ravel(p_image),
+                                nx=np.sum(input_image.shape))
+
+    mask = counts > 10
+    # find the bin centers
+    bin_centers = bin_edges_to_centers(bins)[mask]
+
+    ring_averages = sums[mask] / counts[mask]
+
+    dist_mean, dist_std = estimate_d_blind(st_name, wavelength, bin_centers,
+                                           ring_averages, window_size,
+                                           max_peak_count, thresh)
+
+    return dist_mean, dist_std, calibrated_center
+
+
+def _ni_pre_process(image):
+    """
+    Using a Gaussian blur with sigma=2 to the input image
+    """
+    return ndimage.gaussian_filter(image, sigma=2)
+
+
+def _pre_process(image):
+    """
+    Using a Gaussian blur with sigma=0.5 to the input image
+    """
+    return ndimage.gaussian_filter(image, sigma=0.5)
+
+
+_proc_funcs = {"Ni":_ni_pre_process, "Si":_pre_process, "CeO2":_pre_process,
+               "LaB6":_pre_process, "Al2O3":_pre_process}
 
 
 def estimate_d_blind(name, wavelength, bin_centers, ring_average,
-               window_size, max_peak_count, thresh):
+                     window_size, max_peak_count, thresh):
     """
     Estimate the sample-detector distance
 
@@ -202,7 +310,7 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
         cands = scipy.signal.argrelmax(avg, order=window_size)[0]
         # filter local maximums by size
         cands = filter_peak_height(avg, cands, thresh*np.max(avg),
-                                           window=window_size)
+                                   window=window_size)
         ring_trace.append(bin_centers[cands[:max_peaks]])
 
     tr_len = [len(rt) for rt in ring_trace]
