@@ -35,8 +35,8 @@
 ########################################################################
 
 """
-This module is to get informations of different region of interests(roi's).
-Information : the number of pixels, pixel indices, indices
+This module is to get information of different region of interests(roi's).
+Information :  pixel indices, indices array
 """
 
 
@@ -62,6 +62,8 @@ logger = logging.getLogger(__name__)
 
 def rectangles(coords, shape):
     """
+    This function wil provide the indices array for rectangle region of interests.
+
     Parameters
     ----------
     coords : iterable
@@ -267,8 +269,7 @@ def divide_pies(image_shape, radius, calibrated_center,
                                 num_angles)
     #grid_values = core.pixel_to_radius(image_shape, calibrated_center)
     if rotate == 'Y':
-        mesh = np.rot90(angle_grid)
-        grid_values = np.rot90(grid_values)
+        angle_grid = np.rot90(angle_grid)
 
     angle_grid[grid_values > radius] = 0
 
@@ -279,8 +280,8 @@ def divide_pies(image_shape, radius, calibrated_center,
 
 def get_angle_grid(image_shape, calibrated_center, num_angles):
     """
-    Helper function to get the grid values and indices values from
-    the angles of the grid
+    This function will provide the grid values and indices values from
+    the angles of the grid and the radius values of the grid
 
     Parameters
     ----------
@@ -299,7 +300,6 @@ def get_angle_grid(image_shape, calibrated_center, num_angles):
 
     grid_values : array
         grid values
-
     """
     yy, xx = np.mgrid[:image_shape[0], :image_shape[1]]
     y_ = (np.flipud(yy) - calibrated_center[1])
@@ -317,4 +317,3 @@ def get_angle_grid(image_shape, calibrated_center, num_angles):
                             right=False)).reshape(image_shape)
 
     return ind_grid, grid_values
-
