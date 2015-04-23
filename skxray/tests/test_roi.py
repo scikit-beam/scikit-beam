@@ -43,7 +43,7 @@ from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
 import sys
 
-from nose.tools import assert_equal, assert_true, raises
+from nose.tools import assert_equal, assert_true, assert_raises
 
 import skxray.roi as roi
 import skxray.correlation as corr
@@ -81,107 +81,44 @@ def test_roi_rectangles():
 
 
 def test_roi_rings():
-    calibrated_center = (6., 4.)
-    img_dim = (20, 25)
+    calibrated_center = (100, 100)
+    img_dim = (200, 205)
     first_q = 2
     delta_q = 3
-    num_qs = 7  # number of Q rings
+    num_rings = 7  # number of Q rings
 
-    all_roi_inds = roi.rings(img_dim, calibrated_center, num_qs,
-                             first_q, delta_q)
-    ring_vals = roi.rings_edges(num_qs, first_q, delta_q)
+    edges = roi.ring_edges(first_q, width=delta_q, num_rings=num_rings)
+    print(edges)
+    label_array = roi.rings(edges, calibrated_center, img_dim)
+    print(label_array)
 
-    q_inds, pixel_list = corr.extract_label_indices(all_roi_inds)
+    # Did we draw the right number of rings?
+    print(np.unique(label_array))
+    actual_num_rings = len(np.unique(label_array)) - 1
+    assert_equal(actual_num_rings, num_rings)
 
-    num_pixels = np.bincount(q_inds)[1:]
+    # Does each ring have more pixels than the last, being larger?
+    ring_areas = np.bincount(label_array.ravel())[1:]
+    area_comparison = np.diff(ring_areas)
+    print(area_comparison)
+    areas_monotonically_increasing = np.all(area_comparison > 0)
+    assert_true(areas_monotonically_increasing)
 
-    ring_vals = roi.rings_edges(num_qs, first_q, delta_q)
-
-    # Edge values of each rings
-    ring_edges = []
-
-    for i in range(num_qs):
-        if i < num_qs:
-            ring_edges.append(ring_vals[i])
-            ring_edges.append(ring_vals[i + 1])
-
-    ring_edges = np.asarray(ring_edges)
-    ring_edges = ring_edges.reshape(num_qs, 2)
-
-    # check the rings edge values
-    q_ring_val_m = np.array([[2, 5], [5, 8], [8, 11], [11, 14], [14, 17],
-                             [17, 20], [20, 23]])
-
-    assert_array_almost_equal(q_ring_val_m, ring_edges)
-
-    # check the pixel_list and q_inds and num_pixels
-    _helper_check(pixel_list, q_inds, num_pixels, ring_edges,
-                  calibrated_center, img_dim, num_qs)
-
-
-def test_roi_rings_step():
-    calibrated_center = (4., 6.)
-    img_dim = (20, 25)
-    first_q = 2.5
-    delta_q = 2
-
-    # using a step for the Q rings
-    num_qs = 6  # number of Q rings
-    step_q = (1, )  # step value between each Q ring
-
-    all_roi_inds = roi.rings_step(img_dim, calibrated_center, num_qs,
-                                  first_q, delta_q, *step_q)
-
-    ring_vals = roi.rings_step_edges(num_qs, first_q, delta_q, *step_q)
-    q_ring_val = roi.process_ring_edges(ring_vals)
-
-    q_inds, pixel_list = corr.extract_label_indices(all_roi_inds)
-
-    # get the number of pixels in each Q ring
-    num_pixels = np.bincount(q_inds)[1:]
-
-    # check the ring edge values
-    q_ring_val_m = np.array([[2.5, 4.5], [5.5, 7.5], [8.5, 10.5],
-                             [11.5, 13.5], [14.5, 16.5], [17.5, 19.5]])
-
-    assert_almost_equal(q_ring_val, q_ring_val_m)
-
-    # check the pixel_list and q_inds and num_pixels
-    _helper_check(pixel_list, q_inds, num_pixels, q_ring_val,
-                  calibrated_center, img_dim, num_qs)
-
-
-def test_roi_rings_diff_steps():
-    calibrated_center = (10., 4.)
-    img_dim = (45, 25)
-    first_q = 2.
-    delta_q = 2.
-
-    num_qs = 8  # number of Q rings
-
-    step_q = (2., 2.5, 4., 3., 0., 2.5, 3.)
-    all_roi_inds = roi.rings_step(img_dim, calibrated_center, num_qs,
-                                  first_q, delta_q, *step_q)
-
-    ring_vals = roi.rings_step_edges(num_qs, first_q, delta_q, *step_q)
-
-    q_ring_val = roi.process_ring_edges(ring_vals)
-
-    q_inds, pixel_list = corr.extract_label_indices(all_roi_inds)
-
-    # get the number of pixels in each Q ring
-    num_pixels = np.bincount(q_inds)[1:]
-
-    # check the edge values of the rings
-    q_ring_val_m = np.array([[2., 4.], [6., 8.], [10.5, 12.5], [16.5, 18.5],
-                             [21.5, 23.5], [23.5, 25.5], [28.0, 30.0],
-                             [33.0, 35.0]])
-
-    assert_array_almost_equal(q_ring_val, q_ring_val_m)
-
-    # check the pixel_list and q_inds and num_pixels
-    _helper_check(pixel_list, q_inds, num_pixels, q_ring_val,
-                  calibrated_center, img_dim, num_qs)
+    # Test various illegal inputs
+    assert_raises(ValueError,
+            lambda: roi.ring_edges(1, 2))  # need num_rings
+    # width incompatible with num_rings
+    assert_raises(ValueError,
+            lambda: roi.ring_edges(1, [1, 2, 3], num_rings=2))
+    # too few spacings
+    assert_raises(ValueError,
+            lambda: roi.ring_edges(1, [1, 2, 3], [1]))
+    # too many spacings
+    assert_raises(ValueError,
+            lambda: roi.ring_edges(1, [1, 2, 3], [1, 2, 3]))
+    # num_rings conflicts with width, spacing
+    assert_raises(ValueError,
+            lambda: roi.ring_edges(1, [1, 2, 3], [1, 2], 5))
 
 
 def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
