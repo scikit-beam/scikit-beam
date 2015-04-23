@@ -147,3 +147,51 @@ def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
                                                        - 0.000001)]]))[0][0]))
     assert_array_equal(zero_grid, data)
     assert_array_equal(num_pix, num_pixels)
+
+
+def test_divide_pies():
+    detector_size = (10, 8)
+    radius = 5.
+    calibrated_center = (5., 2.)
+    num_angles = 3
+
+    angles = np.linspace(0, 360, num_angles)
+
+    all_roi_inds = roi.divide_pies(detector_size, radius,
+                                         calibrated_center,
+                                         num_angles)
+
+    labels, indices =  corr.extract_label_indices(all_roi_inds)
+
+    ty = np.zeros(detector_size).ravel()
+    ty[indices] = labels
+
+    num_pixels = (np.bincount(ty.astype(int)))[1:]
+
+    # get the angle grid and grid values from the center
+    angle_grid, grid_values = roi.get_angle_grid(detector_size, calibrated_center,
+                                num_angles)
+    # get the indices into a grid
+    zero_grid = np.zeros((detector_size[0], detector_size[1]))
+
+    zero_grid[grid_values <= radius] = 1
+
+    assert_array_equal(np.nonzero(zero_grid),
+                       np.nonzero((ty.reshape(*detector_size))))
+
+    mesh = np.zeros((detector_size[0], detector_size[1]))
+    for i in range(num_angles-1):
+        vl = ((angles[i] <= angle_grid) &
+              (angle_grid < angles[i + 1]))
+        mesh[vl] = i + 1
+
+    # remove the values grater than the radius
+    mesh[grid_values > radius] = 0
+    # take out the zero values in the grid
+    roi_inds_m = mesh[mesh > 0]
+
+    assert_array_equal(roi_inds_m, labels)
+
+
+if __name__ == "__main__":
+    test_divide_pies()
