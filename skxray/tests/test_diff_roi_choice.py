@@ -47,6 +47,7 @@ from nose.tools import assert_equal, assert_true, raises
 
 import skxray.diff_roi_choice as roi
 import skxray.correlation as corr
+import skxray.core as core
 
 from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
@@ -192,10 +193,7 @@ def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
     data = ty.reshape(img_dim[0], img_dim[1])
 
     # get the grid values from the center
-    xx, yy = np.mgrid[:img_dim[0], :img_dim[1]]
-    x_ = (xx - calib_center[1])
-    y_ = (yy - calib_center[0])
-    grid_values = np.float_(np.hypot(x_, y_))
+    grid_values = core.pixel_to_radius(img_dim, calib_center)
 
     # get the indices into a grid
     zero_grid = np.zeros((img_dim[0], img_dim[1]))
@@ -213,3 +211,9 @@ def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
                                                        - 0.000001)]]))[0][0]))
     assert_array_equal(zero_grid, data)
     assert_array_equal(num_pix, num_pixels)
+
+
+if __name__ == " __main__":
+    test_roi_rings()
+    test_roi_rings_step()
+    test_roi_rings_diff_steps()

@@ -53,6 +53,7 @@ import numpy as np
 import numpy.ma as ma
 
 import skxray.correlation as corr
+import skxray.core as core
 
 import logging
 logger = logging.getLogger(__name__)
@@ -73,11 +74,6 @@ def rectangles(num_rois, roi_data, image_shape):
     image_shape : tuple
         2 element tuple defining the number of pixels in the detector.
         Order is (num_rows, num_columns)
-
-    mask : ndarray, optional
-        masked array
-        shape is ([image_shape[0], image_shape[1]])
-
 
     Returns
     -------
@@ -146,7 +142,7 @@ def rings(image_shape, calibrated_center, num_rings,
         shape is ([image_shape[0]*image_shape[1]], )
 
     """
-    grid_values = _grid_values(image_shape, calibrated_center)
+    grid_values = core.pixel_to_radius(image_shape, calibrated_center)
 
     edges = rings_edges(num_rings, first_r, delta_r)
 
@@ -229,7 +225,7 @@ def rings_step(image_shape, calibrated_center, num_rings, first_r, delta_r,
         indices of the required rings
         shape is ([image_shape[0]*image_shape[1]], )
     """
-    grid_values = _grid_values(image_shape, calibrated_center)
+    grid_values = core.pixel_to_radius(image_shape, calibrated_center)
 
     ring_vals = rings_step_edges(num_rings, first_r, delta_r, *step_r)
 
@@ -325,24 +321,3 @@ def process_ring_edges(ring_vals):
     ring_vals = np.asarray(ring_vals).reshape(-1, 2)
 
     return ring_vals
-
-
-def _grid_values(image_shape, calibrated_center):
-    """
-    Parameters
-    ----------
-    image_shape: tuple
-        shape of the image (detector X and Y direction)
-        Order is (num_rows, num_columns)
-        shape is [image_shape[0], image_shape[1]])
-
-    calibarted_center : tuple
-        defining the center of the image (column value, row value) (mm)
-
-    """
-    xx, yy = np.mgrid[:image_shape[0], :image_shape[1]]
-    x_ = (xx - calibrated_center[1])
-    y_ = (yy - calibrated_center[0])
-    grid_values = np.float_(np.hypot(x_, y_))
-
-    return grid_values
