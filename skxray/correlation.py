@@ -1,6 +1,9 @@
 # ######################################################################
-# Original code(in Yorick):                                            #
+# multi_tau_auto_corr Original code(in Yorick):                        #
 # @author: Mark Sutton                                                 #
+#                                                                      #
+# two_time_corr Original code                                          #
+# @author: Yugang Zhang                                                #
 #                                                                      #
 # Developed at the NSLS-II, Brookhaven National Laboratory             #
 # Developed by Sameera K. Abeykoon, February 2014                      #
@@ -367,3 +370,98 @@ def extract_label_indices(labels):
     label_mask = labels[labels > 0]
 
     return label_mask, pixel_list
+
+
+def two_time_corr():
+
+def _process_two_time(lev,bufno,n):
+        num[lev]+=1
+        if lev==0:
+            imin = 0
+        else:
+            imin = num_bufs/2
+        for i in range(imin, min(num[lev], num_bufs) ):
+            ptr = lev * num_bufs/2+i
+            delayno = (bufno-i)%num_bufs #//cyclic buffers
+            IP=buf[lev,delayno]
+            IF=buf[lev,bufno]
+            I_t12 = (np.histogram(qind, bins=num_rois, weights= IF*IP))[0]
+            I_t1  =  (np.histogram(qind, bins=num_rois, weights= IP))[0]
+            I_t2  =  (np.histogram(qind, bins=num_rois, weights= IF))[0]
+            tind1 = (n-1);tind2=(n -dly[ptr] -1)
+
+            if not isinstance(n, int ):
+                nshift = 2**(lev-1)
+                for i in range( -nshift+1, nshift +1 ):
+                    #print tind1+i
+                    g12[ int(tind1 + i), int(tind2 + i) ] =I_t12/( I_t1 * I_t2) * nopr
+            else:
+                #print tind1
+                g12[ tind1, tind2 ]  =   I_t12/( I_t1 * I_t2) * nopr
+
+    def insertimg_twotime(self, n, norm=None, print_=False):
+        cur[0]=1+cur[0]%num_bufs  # increment buffer
+        fp = FILENAME + '%04d'%n
+
+        if img_format=='EDF':fp+='.edf';img= get_edf( fp ) -  DK
+        elif img_format=='TIFF':fp+='.tiff';img = scipy.misc.imread(fp,flatten=1)
+        else:img= cpopen( n= n,prefix= 'data_', inDir=DATA_DIR)
+
+        if print_:print 'The insert image %s is %s' %(n,fp)
+        buf[0, cur[0]-1 ]=img.flatten()[pixellist]
+        img=[] #//save space
+        countl[0] = 1+ countl[0]
+        current_img_time = n - begframe +1
+        self.process_two_time(lev=0, bufno=cur[0]-1,n=current_img_time )
+        time_ind[0].append(  current_img_time   )
+        processing=1
+        lev=1
+        while processing:
+            if cts[lev]:
+                prev=  1+ (cur[lev-1]-1-1+num_bufs)%num_bufs
+                cur[lev]=  1+ cur[lev]%num_bufs
+                countl[lev] = 1+ countl[lev]
+                buf[lev,cur[lev]-1] = ( buf[lev-1,prev-1] + buf[lev-1,cur[lev-1]-1] ) /2
+                cts[lev]=0
+                t1_idx=   (countl[lev]-1) *2
+                current_img_time = ((time_ind[lev-1])[t1_idx ] +  (time_ind[lev-1])[t1_idx +1 ] )/2.
+                time_ind[lev].append(  current_img_time      )
+                self.process_two_time(lev= lev, bufno= cur[lev]-1,n=current_img_time )
+                lev+=1
+                #//Since this level finished, test if there is a next level for processing
+                if lev<num_levels:processing = 1
+                else:processing = 0
+            else:
+                cts[lev]=1      #// set flag to process next time
+                processing=0    #// can stop until more images are accumulated
+
+
+    def two_time_corr(num_levels, num_bufs, num_rois):
+        global buf, num, cts, cur, g12, countl
+        global Ndel, Npix
+        global time_ind  #generate a time-frame for each level
+        global g12x, g12y, g12z #for interpolate
+        start_time = time.time()
+        buf = np.zeros([num_levels, num_bufs, num_pixels])  #// matrix of buffers, for store img
+        cts = np.zeros(num_levels)
+        cur = np.ones(num_levels) * num_bufs
+        countl = np.array(np.zeros(  num_levels ),dtype='int')
+        g12 =  np.zeros([noframes, noframes, num_rois] )
+        g12x = []
+        g12y = []
+        g12z = []
+        num= np.array(np.zeros(num_levels),dtype='int')
+        time_ind ={key: [] for key in range(num_levels)}
+        ttx=0
+        for n in range(1, noframes +1 ):   ##do the work here
+            insertimg_twotime(begframe + n - 1, print_=print_)
+            if  n %(noframes/10) ==0:
+                sys.stdout.write("#")
+                sys.stdout.flush()
+        for q in range(num_rois):
+            x0 =  g12[:,:,q]
+            g12[:,:,q] = tril(x0) +  tril(x0).T - diag(diag(x0))
+        elapsed_time = time.time() - start_time
+        return g12, (elapsed_time/60.)
+
+
