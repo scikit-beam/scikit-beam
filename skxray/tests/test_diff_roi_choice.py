@@ -45,7 +45,9 @@ import sys
 
 from nose.tools import assert_equal, assert_true, raises
 
-import skxray.diff_roi_choice as diff_roi
+import skxray.diff_roi_choice as roi
+import skxray.correlation as corr
+import skxray.core as core
 
 from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
@@ -57,9 +59,10 @@ def test_roi_rectangles():
     roi_data = np.array(([2, 2, 6, 3], [6, 7, 8, 5], [8, 18, 5, 10]),
                         dtype=np.int64)
 
-    all_roi_inds, roi_inds, num_pixels, pixel_list = diff_roi.roi_rectangles(num_rois,
-                                                               roi_data,
-                                                               detector_size)
+    all_roi_inds = roi.rectangles(num_rois, roi_data, detector_size)
+
+    roi_inds, pixel_list = corr.extract_label_indices(all_roi_inds)
+
     ty = np.zeros(detector_size).ravel()
     ty[pixel_list] = roi_inds
     num_pixels_m = (np.bincount(ty.astype(int)))[1:]
@@ -77,8 +80,6 @@ def test_roi_rectangles():
         assert_almost_equal(top, ind_co[0][1])
         assert_almost_equal(bottom-1, ind_co[-1][-1])
 
-    assert_array_equal(num_pixels, num_pixels_m)
-
 
 def test_roi_rings():
     calibrated_center = (6., 4.)
@@ -87,18 +88,35 @@ def test_roi_rings():
     delta_q = 3
     num_qs = 7  # number of Q rings
 
-    (all_roi_inds, q_inds, q_ring_val, num_pixels,
-     pixel_list) = diff_roi.roi_rings(img_dim, calibrated_center, num_qs,
-                                      first_q, delta_q)
+    all_roi_inds = roi.rings(img_dim, calibrated_center, num_qs,
+                             first_q, delta_q)
+    ring_vals = roi.rings_edges(num_qs, first_q, delta_q)
+
+    q_inds, pixel_list = corr.extract_label_indices(all_roi_inds)
+
+    num_pixels = np.bincount(q_inds)[1:]
+
+    ring_vals = roi.rings_edges(num_qs, first_q, delta_q)
+
+    # Edge values of each rings
+    ring_edges = []
+
+    for i in range(num_qs):
+        if i < num_qs:
+            ring_edges.append(ring_vals[i])
+            ring_edges.append(ring_vals[i + 1])
+
+    ring_edges = np.asarray(ring_edges)
+    ring_edges = ring_edges.reshape(num_qs, 2)
 
     # check the rings edge values
     q_ring_val_m = np.array([[2, 5], [5, 8], [8, 11], [11, 14], [14, 17],
                              [17, 20], [20, 23]])
 
-    assert_array_almost_equal(q_ring_val_m, q_ring_val)
+    assert_array_almost_equal(q_ring_val_m, ring_edges)
 
     # check the pixel_list and q_inds and num_pixels
-    _helper_check(pixel_list, q_inds, num_pixels, q_ring_val,
+    _helper_check(pixel_list, q_inds, num_pixels, ring_edges,
                   calibrated_center, img_dim, num_qs)
 
 
@@ -110,13 +128,18 @@ def test_roi_rings_step():
 
     # using a step for the Q rings
     num_qs = 6  # number of Q rings
-    step_q = 1  # step value between each Q ring
+    step_q = (1, )  # step value between each Q ring
 
-    (all_roi_inds, q_inds, q_ring_val,
-     num_pixels, pixel_list) = diff_roi.roi_rings_step(img_dim,
-                                                       calibrated_center,
-                                                       num_qs, first_q,
-                                                       delta_q, step_q)
+    all_roi_inds = roi.rings_step(img_dim, calibrated_center, num_qs,
+                                  first_q, delta_q, *step_q)
+
+    ring_vals = roi.rings_step_edges(num_qs, first_q, delta_q, *step_q)
+    q_ring_val = roi.process_ring_edges(ring_vals)
+
+    q_inds, pixel_list = corr.extract_label_indices(all_roi_inds)
+
+    # get the number of pixels in each Q ring
+    num_pixels = np.bincount(q_inds)[1:]
 
     # check the ring edge values
     q_ring_val_m = np.array([[2.5, 4.5], [5.5, 7.5], [8.5, 10.5],
@@ -137,12 +160,18 @@ def test_roi_rings_diff_steps():
 
     num_qs = 8  # number of Q rings
 
-    (all_roi_inds, q_inds, q_ring_val,
-     num_pixels, pixel_list) = diff_roi.roi_rings_step(img_dim,
-                                                       calibrated_center,
-                                                       num_qs, first_q,
-                                                       delta_q, 2., 2.5, 4.,
-                                                       3., 0., 2.5, 3.)
+    step_q = (2., 2.5, 4., 3., 0., 2.5, 3.)
+    all_roi_inds = roi.rings_step(img_dim, calibrated_center, num_qs,
+                                  first_q, delta_q, *step_q)
+
+    ring_vals = roi.rings_step_edges(num_qs, first_q, delta_q, *step_q)
+
+    q_ring_val = roi.process_ring_edges(ring_vals)
+
+    q_inds, pixel_list = corr.extract_label_indices(all_roi_inds)
+
+    # get the number of pixels in each Q ring
+    num_pixels = np.bincount(q_inds)[1:]
 
     # check the edge values of the rings
     q_ring_val_m = np.array([[2., 4.], [6., 8.], [10.5, 12.5], [16.5, 18.5],
@@ -164,10 +193,7 @@ def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
     data = ty.reshape(img_dim[0], img_dim[1])
 
     # get the grid values from the center
-    xx, yy = np.mgrid[:img_dim[0], :img_dim[1]]
-    x_ = (xx - calib_center[1])
-    y_ = (yy - calib_center[0])
-    grid_values = np.float_(np.hypot(x_, y_))
+    grid_values = core.pixel_to_radius(img_dim, calib_center)
 
     # get the indices into a grid
     zero_grid = np.zeros((img_dim[0], img_dim[1]))
@@ -185,3 +211,9 @@ def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
                                                        - 0.000001)]]))[0][0]))
     assert_array_equal(zero_grid, data)
     assert_array_equal(num_pix, num_pixels)
+
+
+if __name__ == " __main__":
+    test_roi_rings()
+    test_roi_rings_step()
+    test_roi_rings_diff_steps()
