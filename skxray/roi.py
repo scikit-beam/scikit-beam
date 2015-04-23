@@ -59,38 +59,35 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def rectangles(num_rois, roi_data, image_shape):
+def rectangles(roi_coords, shape):
     """
     Parameters
     ----------
-    num_rois: int
-        number of region of interests(roi)
+    roi_coords: ndarray
+        coordinates of the upper-left corner and width and height of each
+        rectangle: e.g., [(x, y, w, h), (x, y, w, h)]
 
-    roi_data: ndarray
-        upper left co-ordinates of roi's and the, length and width of roi's
-        from those co-ordinates
-        shape is [num_rois][4]
-
-    image_shape : tuple
-        2 element tuple defining the number of pixels in the detector.
-        Order is (num_rows, num_columns)
+    shape : rr, cc : tuple
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates.
 
     Returns
     -------
-    labels_grid : array
-        indices of the required rings
-        shape is ([image_shape[0]*image_shape[1]], )
+    label_array : array
+        Elements not inside any ROI are zero; elements inside each
+        ROI are 1, 2, 3, corresponding to the order they are specified
+        in roi_specs.
 
     """
 
-    labels_grid = np.zeros(image_shape, dtype=np.int64)
+    labels_grid = np.zeros(shape, dtype=np.int64)
 
-    for i, (col_coor, row_coor, col_val, row_val) in enumerate(roi_data, 0):
+    for i, (col_coor, row_coor, col_val, row_val) in enumerate(roi_coords):
 
         left, right = np.max([col_coor, 0]), np.min([col_coor + col_val,
-                                                     image_shape[0]])
+                                                     shape[0]])
         top, bottom = np.max([row_coor, 0]), np.min([row_coor + row_val,
-                                                     image_shape[1]])
+                                                     shape[1]])
 
         area = (right - left) * (bottom - top)
 

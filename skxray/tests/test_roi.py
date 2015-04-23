@@ -54,27 +54,26 @@ import numpy.testing as npt
 
 
 def test_roi_rectangles():
-    num_rois = 3
-    detector_size = (15, 26)
+    shape = (15, 26)
     roi_data = np.array(([2, 2, 6, 3], [6, 7, 8, 5], [8, 18, 5, 10]),
                         dtype=np.int64)
 
-    all_roi_inds = roi.rectangles(num_rois, roi_data, detector_size)
+    all_roi_inds = roi.rectangles(roi_data, shape)
 
     roi_inds, pixel_list = corr.extract_label_indices(all_roi_inds)
 
-    ty = np.zeros(detector_size).ravel()
+    ty = np.zeros(shape).ravel()
     ty[pixel_list] = roi_inds
     num_pixels_m = (np.bincount(ty.astype(int)))[1:]
 
-    re_mesh = ty.reshape(*detector_size)
+    re_mesh = ty.reshape(*shape)
     for i, (col_coor, row_coor, col_val, row_val) in enumerate(roi_data, 0):
         ind_co = np.column_stack(np.where(re_mesh == i + 1))
 
         left, right = np.max([col_coor, 0]), np.min([col_coor + col_val,
-                                                     detector_size[0]])
+                                                     shape[0]])
         top, bottom = np.max([row_coor, 0]), np.min([row_coor + row_val,
-                                                     detector_size[1]])
+                                                     shape[1]])
         assert_almost_equal(left, ind_co[0][0])
         assert_almost_equal(right-1, ind_co[-1][0])
         assert_almost_equal(top, ind_co[0][1])
@@ -211,3 +210,9 @@ def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
                                                        - 0.000001)]]))[0][0]))
     assert_array_equal(zero_grid, data)
     assert_array_equal(num_pix, num_pixels)
+
+
+if __name__ == " __main__":
+    test_roi_rings()
+    test_roi_rings_step()
+    test_roi_rings_diff_steps()
