@@ -64,7 +64,7 @@ def rectangles(coords, shape):
     """
     Parameters
     ----------
-    coords: ndarray
+    coords : iterable
         coordinates of the upper-left corner and width and height of each
         rectangle: e.g., [(x, y, w, h), (x, y, w, h)]
 
@@ -118,8 +118,11 @@ def rings(edges, center, shape):
         e.g., [(1, 2), (11, 12), (21, 22)]
 
     center : rr, cc : tuple
+        point in image where r=0; may be a float giving subpixel precision
 
     shape: rr, cc: tuple
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates.
 
     Returns
     -------
@@ -128,17 +131,19 @@ def rings(edges, center, shape):
         ROI are 1, 2, 3, corresponding to the order they are specified
         in edges.
     """
-    edges = np.asarray(edges)
-    if not (edges.shape[1] == 2) and (edges.ndim == 2):
-        raise ValueError("edges must be a list of two-element lists")
+    edges = np.atleast_2d(np.asarray(edges))
+    if not 0 == len(np.asarray(edges).ravel()) % 2:
+        raise ValueError("edges should have an even number of elements, "
+                         "giving inner, outer radii for each ring")
+    if not np.all(np.diff(edges.ravel()) >= 0):
+        raise ValueError("edges are expected to be monotonically increasing, "
+                         "giving inner and outer radii of each ring from "
+                         "r=0 outward")
     r_coord = core.pixel_to_radius(shape, center)
-    print(edges.ravel())
     label_array = np.digitize(np.ravel(r_coord), edges.ravel(),
                               right=False)
-    print(np.unique(label_array))
     # Even elements of label_array are in the space between rings.
     label_array = (np.where(label_array % 2 != 0, label_array, 0) + 1) // 2
-    print(np.unique(label_array))
     return label_array.reshape(shape)
 
 
@@ -147,7 +152,7 @@ def ring_edges(inner_radius, width, spacing=0, num_rings=None):
     Calculate the inner and outer radius of a set of rings.
 
     The number of rings, their widths, and any spacing between rings can be
-    specified. They can be uniform of varied.
+    specified. They can be uniform or varied.
 
     Parameters
     ----------
@@ -166,8 +171,9 @@ def ring_edges(inner_radius, width, spacing=0, num_rings=None):
 
     num_rings : int, optional
         number of rings
-        required if width and spacing are not lists and number
-        cannot thereby be inferred
+        Required if width and spacing are not lists and number
+        cannot thereby be inferred. If it is given and can also be
+        inferred, input is checked for consistency.
 
     Returns
     -------
