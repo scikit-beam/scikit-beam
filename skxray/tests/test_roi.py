@@ -147,9 +147,3 @@ def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
                                                        - 0.000001)]]))[0][0]))
     assert_array_equal(zero_grid, data)
     assert_array_equal(num_pix, num_pixels)
-
-
-if __name__ == " __main__":
-    test_roi_rings()
-    test_roi_rings_step()
-    test_roi_rings_diff_steps()
