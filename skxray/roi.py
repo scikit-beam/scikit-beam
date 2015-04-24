@@ -216,7 +216,7 @@ def ring_edges(inner_radius, width, spacing=0, num_rings=None):
             if num_rings != len(width):
                 raise ValueError("num_rings does not match width list")
         if spacing_is_list:
-            if num_rings != len(spacing):
+            if num_rings-1 != len(spacing):
                 raise ValueError("num_rings does not match spacing list")
 
     # Now regularlize the input.
@@ -265,23 +265,31 @@ def divide_pies(image_shape, radius, calibrated_center,
         indices of the required roi's
         shape is ([image_shape[0], image_shape[1]])
     """
-    angle_grid, grid_values = get_angle_grid(image_shape, calibrated_center,
-                                num_angles)
-    #grid_values = core.pixel_to_radius(image_shape, calibrated_center)
+    angle_grid  = get_angle_grid(image_shape, calibrated_center)
+    # required angles
+    angles = np.linspace(0, 360, num_angles)
+    # the indices of the bins(angles) to which each value in input
+    #  array(angle_grid) belongs.
+    ind_grid = (np.digitize(np.ravel(angle_grid), angles,
+                            right=False)).reshape(image_shape)
+
+    # radius grid for the image_shape
+    grid_values = core.pixel_to_radius(image_shape, calibrated_center)
+
     if rotate == 'Y':
-        angle_grid = np.rot90(angle_grid)
+        ind_grid = np.rot90(ind_grid)
 
-    angle_grid[grid_values > radius] = 0
+    ind_grid[grid_values > radius] = 0
 
-    labels_grid = angle_grid.reshape(image_shape)
+    labels_grid = ind_grid.reshape(image_shape)
 
     return labels_grid
 
 
-def get_angle_grid(image_shape, calibrated_center, num_angles):
+def get_angle_grid(image_shape, calibrated_center):
     """
-    This function will provide the grid values and indices values from
-    the angles of the grid and the radius values of the grid
+    This function will provide angle values for the whole grid
+    from the calibrated center
 
     Parameters
     ----------
@@ -295,25 +303,15 @@ def get_angle_grid(image_shape, calibrated_center, num_angles):
 
     Returns
     -------
-    ind_grid : array
-        indices grid, indices according to the angles
-
-    grid_values : array
-        grid values
+    angle_grid : array
+        angle values from the calibrated center
+        shape image_shape
     """
     yy, xx = np.mgrid[:image_shape[0], :image_shape[1]]
-    y_ = (np.flipud(yy) - calibrated_center[1])
-    x_ = (xx - calibrated_center[0])
-    grid_values = np.float_(np.hypot(x_, y_))
+    y_ = (np.flipud(yy) - calibrated_center[0])
+    x_ = (xx - calibrated_center[1])
     angle_grid = np.rad2deg(np.arctan2(y_, x_))
 
     angle_grid[angle_grid < 0] = 360 + angle_grid[angle_grid < 0]
 
-    # required angles
-    angles = np.linspace(0, 360, num_angles)
-    # the indices of the bins(angles) to which each value in input
-    #  array(angle_grid) belongs.
-    ind_grid = (np.digitize(np.ravel(angle_grid), angles,
-                            right=False)).reshape(image_shape)
-
-    return ind_grid, grid_values
+    return angle_grid

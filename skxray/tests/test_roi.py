@@ -53,7 +53,7 @@ from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
 
 
-def test_roi_rectangles():
+def test_rectangles():
     shape = (15, 26)
     roi_data = np.array(([2, 2, 6, 3], [6, 7, 8, 5], [8, 18, 5, 10]),
                         dtype=np.int64)
@@ -80,17 +80,41 @@ def test_roi_rectangles():
         assert_almost_equal(bottom-1, ind_co[-1][-1])
 
 
-def test_roi_rings():
-    calibrated_center = (100, 100)
+def test_rings():
+    calibrated_center = (100., 100.)
     img_dim = (200, 205)
-    first_q = 2
-    delta_q = 3
+    first_q = 10.
+    delta_q = 5.
     num_rings = 7  # number of Q rings
+    one_step_q = 5.0
+    step_q = [2.5, 3.0, 5.8]
 
-    edges = roi.ring_edges(first_q, width=delta_q, num_rings=num_rings)
-    print(edges)
+    # test when there is same spacing between rings
+    edges = roi.ring_edges(first_q, width=delta_q, spacing=one_step_q,
+                           num_rings=num_rings)
+    print("edges there is same spacing between rings ", edges)
     label_array = roi.rings(edges, calibrated_center, img_dim)
-    print(label_array)
+    print("label_array there is same spacing between rings", label_array)
+
+    # test when there is same spacing between rings
+    edges = roi.ring_edges(first_q, width=delta_q, spacing=2.5,
+                           num_rings=num_rings)
+    print("edges there is same spacing between rings ", edges)
+    label_array = roi.rings(edges, calibrated_center, img_dim)
+    print("label_array there is same spacing between rings", label_array)
+
+    # test when there is different spacing between rings
+    edges = roi.ring_edges(first_q, width=delta_q, spacing=step_q,
+                           num_rings=4)
+    print("edges when there is different spacing between rings", edges)
+    label_array = roi.rings(edges, calibrated_center, img_dim)
+    print("label_array there is different spacing between rings", label_array)
+
+    # test when there is no spacing between rings
+    edges = roi.ring_edges(first_q, width=delta_q, num_rings=num_rings)
+    print("edges", edges)
+    label_array = roi.rings(edges, calibrated_center, img_dim)
+    print("label_array", label_array)
 
     # Did we draw the right number of rings?
     print(np.unique(label_array))
@@ -150,10 +174,10 @@ def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
 
 
 def test_divide_pies():
-    detector_size = (10, 8)
-    radius = 5.
-    calibrated_center = (5., 2.)
-    num_angles = 3
+    detector_size = (100, 80)
+    radius = 50.
+    calibrated_center = (50., 20.)
+    num_angles = 8
 
     angles = np.linspace(0, 360, num_angles)
 
@@ -168,11 +192,13 @@ def test_divide_pies():
 
     num_pixels = (np.bincount(ty.astype(int)))[1:]
 
-    # get the angle grid and grid values from the center
-    angle_grid, grid_values = roi.get_angle_grid(detector_size, calibrated_center,
-                                num_angles)
+    # get the angle grid from the center
+    angle_grid = roi.get_angle_grid(detector_size, calibrated_center)
     # get the indices into a grid
     zero_grid = np.zeros((detector_size[0], detector_size[1]))
+
+    # radius values from the calibrated
+    grid_values = core.pixel_to_radius(detector_size, calibrated_center)
 
     zero_grid[grid_values <= radius] = 1
 
@@ -191,7 +217,3 @@ def test_divide_pies():
     roi_inds_m = mesh[mesh > 0]
 
     assert_array_equal(roi_inds_m, labels)
-
-
-if __name__ == "__main__":
-    test_divide_pies()
