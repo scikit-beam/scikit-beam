@@ -46,7 +46,7 @@ import sys
 from nose.tools import assert_equal, assert_true, raises
 
 import skxray.correlation as corr
-import skxray.diff_roi_choice as diff_roi
+import skxray.roi as roi
 
 from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
@@ -65,8 +65,7 @@ def test_correlation():
     roi_data = np.array(([10, 20, 12, 14], [40, 10, 9, 10]),
                         dtype=np.int64)
 
-    (indices, q_inds, num_pixels,
-     pixel_list) = diff_roi.roi_rectangles(num_qs, roi_data, img_dim)
+    indices = roi.rectangles(num_qs, roi_data, img_dim)
 
     img_stack = np.random.randint(1, 5, size=(500, ) + img_dim)
 
