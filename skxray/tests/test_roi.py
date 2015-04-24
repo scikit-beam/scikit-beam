@@ -185,9 +185,4 @@ def test_pie_slices():
                            num_rings=num_rings)
     label_array = roi.pie_slices(edges, slicing, calibrated_center, img_dim,
                                  theta=0)
-
-
-
-if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-    test_pie_slices()
+    
