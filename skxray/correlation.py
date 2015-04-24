@@ -1,4 +1,7 @@
 # ######################################################################
+# Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
+# National Laboratory. All rights reserved.                            #
+#                                                                      #
 # multi_tau_auto_corr Original code(in Yorick):                        #
 # @author: Mark Sutton                                                 #
 #                                                                      #
@@ -7,9 +10,6 @@
 #                                                                      #
 # Developed at the NSLS-II, Brookhaven National Laboratory             #
 # Developed by Sameera K. Abeykoon, February 2014                      #
-#                                                                      #
-# Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
-# National Laboratory. All rights reserved.                            #
 #                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
