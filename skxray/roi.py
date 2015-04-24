@@ -233,84 +233,93 @@ def ring_edges(inner_radius, width, spacing=0, num_rings=None):
     return edges
 
 
-def divide_pies(image_shape, radius, calibrated_center,
-                      num_angles, rotate='N',):
+def pie_slices(edges, slicing, center, shape, theta=0):
     """
-    This function will provide the indices when a circular roi
-    is divided into pies.
-
     Parameters
     ----------
-    image_shape : tuple
-        shape of the image (detector X and Y direction)
-        Order is (num_rows, num_columns)
+    edges : array
+         inner and outer radius for each ring
 
-    radius : float
-        radius of the circle
+    slicing : int or list
+        number of pie slices or list of angles in degrees
 
-    calibrated_center : tuple
-        defining the center of the image
-        (column value, row value) (mm)
+    center : rr, cc : tuple
+        point in image where r=0; may be a float giving subpixel precision
 
-    num_angles : int
-        number of angles ring divide into
-        angles are measured from horizontal-anti clock wise
+    shape: rr, cc: tuple
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates.
 
-    rotate : {'Y', 'N'}, optional
-        to make angles measured from vertical-anti clock wise
+    theta : float, optional
+        angle in degrees
 
     Returns
     -------
-    labels_grid : array
-        indices of the required roi's
-        shape is ([image_shape[0], image_shape[1]])
+    label_array : array
+        Elements not inside any ROI are zero; elements inside each
+        ROI are 1, 2, 3, corresponding to the order they are specified
+        in edges and slicing
+
     """
-    angle_grid  = get_angle_grid(image_shape, calibrated_center)
+    angle_grid  = get_angle_grid(shape, center)
+
+    slicing_is_list = isinstance(slicing, collections.Iterable)
     # required angles
-    angles = np.linspace(0, 360, num_angles)
+
+    if slicing_is_list:
+        slicing = np.asarray(slicing) + theta
+    else:
+        slicing = np.linspace(0, 360, slicing) + theta
+
     # the indices of the bins(angles) to which each value in input
     #  array(angle_grid) belongs.
-    ind_grid = (np.digitize(np.ravel(angle_grid), angles,
-                            right=False)).reshape(image_shape)
+    ind_grid = (np.digitize(np.ravel(angle_grid), slicing,
+                            right=False)).reshape(shape)
 
+    label_array = np.zeros(shape, dtype=np.int64)
     # radius grid for the image_shape
-    grid_values = core.pixel_to_radius(image_shape, calibrated_center)
+    grid_values = core.pixel_to_radius(shape, center)
 
-    if rotate == 'Y':
-        ind_grid = np.rot90(ind_grid)
+    # assign indices value according to angles then rings
+    for r in range(len(edges)):
+        vl = (edges[r][0] <= grid_values) & (grid_values
+                                                  < edges[r][1])
+        label_array[vl] = ind_grid[vl] + len(slicing)*(r)
 
-    ind_grid[grid_values > radius] = 0
-
-    labels_grid = ind_grid.reshape(image_shape)
-
-    return labels_grid
+    return label_array
 
 
-def get_angle_grid(image_shape, calibrated_center):
+def get_angle_grid(shape, center):
     """
     This function will provide angle values for the whole grid
     from the calibrated center
 
     Parameters
     ----------
-    image_shape : tuple
+    shape : tuple
         shape of the image (detector X and Y direction)
         Order is (num_rows, num_columns)
 
-    calibrated_center : tuple
-        defining the center of the image
-        (column value, row value) (mm)
+    center : rr, cc : tuple
+        point in image where r=0; may be a float giving
+        subpixel precision
+
+    pixel_size : tuple, optional
+        The size of a pixel (really the pitch) in real units. (height, width).
+        Defaults to 1 pixel/pixel if not specified.
 
     Returns
     -------
     angle_grid : array
         angle values from the calibrated center
         shape image_shape
+
     """
-    yy, xx = np.mgrid[:image_shape[0], :image_shape[1]]
-    y_ = (np.flipud(yy) - calibrated_center[0])
-    x_ = (xx - calibrated_center[1])
-    angle_grid = np.rad2deg(np.arctan2(y_, x_))
+    X, Y = np.meshgrid((np.arange(shape[1]) -
+                                        center[1]),
+                       (np.arange(shape[0]) -
+                                        center[0]))
+    angle_grid = np.rad2deg(np.arctan2(Y, X))
 
     angle_grid[angle_grid < 0] = 360 + angle_grid[angle_grid < 0]
 

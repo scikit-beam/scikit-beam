@@ -173,47 +173,21 @@ def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
     assert_array_equal(num_pix, num_pixels)
 
 
-def test_divide_pies():
-    detector_size = (100, 80)
-    radius = 50.
-    calibrated_center = (50., 20.)
-    num_angles = 8
+def test_pie_slices():
+    calibrated_center = (20., 25.)
+    img_dim = (100, 80)
+    first_q = 5.
+    delta_q = 5.
+    num_rings = 4  # number of Q rings
+    slicing = 4
 
-    angles = np.linspace(0, 360, num_angles)
+    edges = roi.ring_edges(first_q, width=delta_q, spacing=4,
+                           num_rings=num_rings)
+    label_array = roi.pie_slices(edges, slicing, calibrated_center, img_dim,
+                                 theta=0)
 
-    all_roi_inds = roi.divide_pies(detector_size, radius,
-                                         calibrated_center,
-                                         num_angles)
 
-    labels, indices =  corr.extract_label_indices(all_roi_inds)
 
-    ty = np.zeros(detector_size).ravel()
-    ty[indices] = labels
-
-    num_pixels = (np.bincount(ty.astype(int)))[1:]
-
-    # get the angle grid from the center
-    angle_grid = roi.get_angle_grid(detector_size, calibrated_center)
-    # get the indices into a grid
-    zero_grid = np.zeros((detector_size[0], detector_size[1]))
-
-    # radius values from the calibrated
-    grid_values = core.pixel_to_radius(detector_size, calibrated_center)
-
-    zero_grid[grid_values <= radius] = 1
-
-    assert_array_equal(np.nonzero(zero_grid),
-                       np.nonzero((ty.reshape(*detector_size))))
-
-    mesh = np.zeros((detector_size[0], detector_size[1]))
-    for i in range(num_angles-1):
-        vl = ((angles[i] <= angle_grid) &
-              (angle_grid < angles[i + 1]))
-        mesh[vl] = i + 1
-
-    # remove the values grater than the radius
-    mesh[grid_values > radius] = 0
-    # take out the zero values in the grid
-    roi_inds_m = mesh[mesh > 0]
-
-    assert_array_equal(roi_inds_m, labels)
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+    test_pie_slices()
