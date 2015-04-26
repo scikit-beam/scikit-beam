@@ -36,11 +36,12 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 
-from __future__ import (absolute_import, division, unicode_literals, print_function)
+from __future__ import (absolute_import, division, unicode_literals,
+                        print_function)
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skxray.constants import Element
+from skxray.constants.api import XrfElement
 from skxray.fitting.api import gaussian
 
 
@@ -55,7 +56,7 @@ def get_line(name, incident_energy):
     incident_energy : float
         xray incident energy for fluorescence emission
     """
-    e = Element(name)
+    e = XrfElement(name)
     lines = e.emission_line.all
     ratio = [val for val in e.cs(incident_energy).all if val[1] > 0]
 
@@ -91,7 +92,7 @@ def get_spectrum(name, incident_energy, emax=15):
         max value on spectrum
 
     """
-    e = Element(name)
+    e = XrfElement(name)
     lines = e.emission_line.all
     ratio = [val for val in e.cs(incident_energy).all if val[1] > 0]
 
