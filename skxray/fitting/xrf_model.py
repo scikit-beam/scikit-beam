@@ -55,7 +55,6 @@ from skxray.constants.api import XrfElement as Element
 from skxray.fitting.lineshapes import gaussian
 from skxray.fitting.models import (ComptonModel, ElasticModel,
                                    _gen_class_docs)
-from skxray.fitting.base.parameter_data import get_para
 import skxray.fitting.base.parameter_data as sfb_pd
 from skxray.fitting.background import snip_method
 from lmfit import Model
@@ -65,7 +64,6 @@ logger = logging.getLogger(__name__)
 
 
 # emission line energy between (1, 30) keV
-# TODO Add _K after each of these.
 K_LINE = ['Na_K', 'Mg_K', 'Al_K', 'Si_K', 'P_K', 'S_K', 'Cl_K', 'Ar_K', 'K_K',
           'Ca_K', 'Sc_K', 'Ti_K', 'V_K', 'Cr_K', 'Mn_K', 'Fe_K', 'Co_K',
           'Ni_K', 'Cu_K', 'Zn_K', 'Ga_K', 'Ge_K', 'As_K', 'Se_K', 'Br_K',
@@ -278,7 +276,7 @@ def set_parameter_bound(param, bound_option, extra_config=None):
 # the input data and do the fitting. The user can adjust parameters such as
 # position, width, area or branching ratio.
 PARAM_DEFAULTS = {'area': {'bound_type': 'none',
-                           'max': 1000000000.0, 'min': 0.001, 'value': 1000.0},
+                           'max': 1000000000.0, 'min': 0.0, 'value': 1000.0},
                   'pos': {'bound_type': 'fixed',
                           'max': 0.005, 'min': -0.005, 'value': 0.0},
                   'ratio': {'bound_type': 'fixed',
@@ -521,11 +519,9 @@ class ModelSpectrum(object):
                                value=self.compton_param['coherent_sct_energy'].value,
                                expr='coherent_sct_energy')
 
-        elastic.set_param_hint('coherent_sct_energy',
-                               value=self.compton_param['coherent_sct_energy'].value,
-                               expr='coherent_sct_energy')
-
-        item_list = ['coherent_sct_amplitude', 'coherent_sct_energy']
+        item_list = ['e_offset', 'e_linear', 'e_quadratic',
+                     'fwhm_offset', 'fwhm_fanoprime',
+                     'coherent_sct_amplitude', 'coherent_sct_energy']
         for item in item_list:
             if item in self.params.keys():
                 _set_parameter_hint(item, self.params[item], elastic)
@@ -867,7 +863,7 @@ def trim(x, y, low, high):
     array :
         y with new range
     """
-    mask = (x > low) & (x < high)
+    mask = (x >= low) & (x <= high)
     return x[mask], y[mask]
 
 
@@ -1072,15 +1068,13 @@ def linear_spectrum_fitting(spectrum, params,
 
     x0 = np.arange(len(spectrum))
 
-    # ratio to transfer energy value back to channel value
-    # The default transfer from channel to energy is energy = 0.01*channel
-    # number. So to transfer back is just 100.
-    chanel_value_to_energy = 100
+    # transfer energy value back to channel value
+    lowv = (fitting_parameters['non_fitting_values']['energy_bound_low']['value'] -
+            fitting_parameters['e_offset']['value'])/fitting_parameters['e_linear']['value']
+    highv = (fitting_parameters['non_fitting_values']['energy_bound_high']['value'] -
+             fitting_parameters['e_offset']['value'])/fitting_parameters['e_linear']['value']
 
-    lowv = fitting_parameters['non_fitting_values']['energy_bound_low']['value'] * chanel_value_to_energy
-    highv = fitting_parameters['non_fitting_values']['energy_bound_high']['value'] * chanel_value_to_energy
-
-    x, y = trim(x0, spectrum, lowv, highv)
+    x, y = trim(x0, spectrum, int(np.around(lowv)), int(np.around(highv)))
 
     e_select, matv, element_area = construct_linear_model(x, params, elemental_lines)
 

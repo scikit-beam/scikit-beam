@@ -237,7 +237,8 @@ default_param = {
         'bound_type': 'lohi',
         'description': 'Incident E [keV]',
         'max': 13.0,
-        'min': 9.0, 'value': 11.0},
+        'min': 9.0,
+        'value': 10.0},
     'compton_amplitude': {
         'bound_type': 'none',
         'max': 10000000.0,
