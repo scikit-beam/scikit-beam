@@ -275,6 +275,8 @@ def segmented_rings(edges, segments, center, shape, offset_angle=0):
 
     agrid = core.angle_grid(center, shape)
 
+    agrid[agrid < 0] = 2*np.pi + agrid[agrid < 0]
+
     segments_is_list = isinstance(segments, collections.Iterable)
     if segments_is_list:
         segments = np.asarray(segments) + offset_angle

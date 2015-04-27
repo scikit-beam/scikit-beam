@@ -95,6 +95,12 @@ def test_rings():
     print("edges there is same spacing between rings ", edges)
     label_array = roi.rings(edges, center, img_dim)
     print("label_array there is same spacing between rings", label_array)
+    label_mask, pixel_list = corr.extract_label_indices(label_array)
+    # number of pixels per ROI
+    num_pixels = np.bincount(label_mask, minlength=(np.max(label_mask)+1))
+    num_pixels = num_pixels[1:]
+    _helper_check(pixel_list, label_mask, num_pixels, edges, center,
+                  img_dim, num_rings)
 
     # test when there is same spacing between rings
     edges = roi.ring_edges(first_q, width=delta_q, spacing=2.5,
@@ -102,6 +108,12 @@ def test_rings():
     print("edges there is same spacing between rings ", edges)
     label_array = roi.rings(edges, center, img_dim)
     print("label_array there is same spacing between rings", label_array)
+    label_mask, pixel_list = corr.extract_label_indices(label_array)
+    # number of pixels per ROI
+    num_pixels = np.bincount(label_mask, minlength=(np.max(label_mask)+1))
+    num_pixels = num_pixels[1:]
+    _helper_check(pixel_list, label_mask, num_pixels, edges, center,
+                  img_dim, num_rings)
 
     # test when there is different spacing between rings
     edges = roi.ring_edges(first_q, width=delta_q, spacing=step_q,
@@ -109,12 +121,24 @@ def test_rings():
     print("edges when there is different spacing between rings", edges)
     label_array = roi.rings(edges, center, img_dim)
     print("label_array there is different spacing between rings", label_array)
+    label_mask, pixel_list = corr.extract_label_indices(label_array)
+    # number of pixels per ROI
+    num_pixels = np.bincount(label_mask, minlength=(np.max(label_mask)+1))
+    num_pixels = num_pixels[1:]
+    _helper_check(pixel_list, label_mask, num_pixels, edges, center,
+                  img_dim, num_rings)
 
     # test when there is no spacing between rings
     edges = roi.ring_edges(first_q, width=delta_q, num_rings=num_rings)
     print("edges", edges)
     label_array = roi.rings(edges, center, img_dim)
     print("label_array", label_array)
+    label_mask, pixel_list = corr.extract_label_indices(label_array)
+    # number of pixels per ROI
+    num_pixels = np.bincount(label_mask, minlength=(np.max(label_mask)+1))
+    num_pixels = num_pixels[1:]
+    _helper_check(pixel_list, label_mask, num_pixels, edges, center,
+                  img_dim, num_rings)
 
     # Did we draw the right number of rings?
     print(np.unique(label_array))
@@ -153,7 +177,7 @@ def _helper_check(pixel_list, inds, num_pix, edges, center,
     data = ty.reshape(img_dim[0], img_dim[1])
 
     # get the grid values from the center
-    grid_values = core.pixel_to_radius(img_dim, center)
+    grid_values = core.radial_grid(img_dim, center)
 
     # get the indices into a grid
     zero_grid = np.zeros((img_dim[0], img_dim[1]))
@@ -169,7 +193,6 @@ def _helper_check(pixel_list, inds, num_pix, edges, center,
                                               range=[[edges[r][0],
                                                       (edges[r][1]
                                                        - 0.000001)]]))[0][0]))
-    assert_array_equal(zero_grid, data)
     assert_array_equal(num_pix, num_pixels)
 
 
@@ -183,5 +206,13 @@ def test_segmented_rings():
 
     edges = roi.ring_edges(first_q, width=delta_q, spacing=4,
                            num_rings=num_rings)
+    print("edges", edges)
+
     label_array = roi.segmented_rings(edges, slicing, center,
                                       img_dim, offset_angle=0)
+    print("label_array for segmented_rings", label_array)
+
+    label_mask, pixel_list = corr.extract_label_indices(label_array)
+    # number of pixels per ROI
+    num_pixels = np.bincount(label_mask, minlength=(np.max(label_mask)+1))
+    num_pixels = num_pixels
