@@ -81,7 +81,7 @@ def test_rectangles():
 
 
 def test_rings():
-    calibrated_center = (100., 100.)
+    center = (100., 100.)
     img_dim = (200, 205)
     first_q = 10.
     delta_q = 5.
@@ -93,27 +93,27 @@ def test_rings():
     edges = roi.ring_edges(first_q, width=delta_q, spacing=one_step_q,
                            num_rings=num_rings)
     print("edges there is same spacing between rings ", edges)
-    label_array = roi.rings(edges, calibrated_center, img_dim)
+    label_array = roi.rings(edges, center, img_dim)
     print("label_array there is same spacing between rings", label_array)
 
     # test when there is same spacing between rings
     edges = roi.ring_edges(first_q, width=delta_q, spacing=2.5,
                            num_rings=num_rings)
     print("edges there is same spacing between rings ", edges)
-    label_array = roi.rings(edges, calibrated_center, img_dim)
+    label_array = roi.rings(edges, center, img_dim)
     print("label_array there is same spacing between rings", label_array)
 
     # test when there is different spacing between rings
     edges = roi.ring_edges(first_q, width=delta_q, spacing=step_q,
                            num_rings=4)
     print("edges when there is different spacing between rings", edges)
-    label_array = roi.rings(edges, calibrated_center, img_dim)
+    label_array = roi.rings(edges, center, img_dim)
     print("label_array there is different spacing between rings", label_array)
 
     # test when there is no spacing between rings
     edges = roi.ring_edges(first_q, width=delta_q, num_rings=num_rings)
     print("edges", edges)
-    label_array = roi.rings(edges, calibrated_center, img_dim)
+    label_array = roi.rings(edges, center, img_dim)
     print("label_array", label_array)
 
     # Did we draw the right number of rings?
@@ -145,7 +145,7 @@ def test_rings():
             lambda: roi.ring_edges(1, [1, 2, 3], [1, 2], 5))
 
 
-def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
+def _helper_check(pixel_list, inds, num_pix, edges, center,
                   img_dim, num_qs):
     # recreate the indices using pixel_list and inds values
     ty = np.zeros(img_dim).ravel()
@@ -153,28 +153,28 @@ def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
     data = ty.reshape(img_dim[0], img_dim[1])
 
     # get the grid values from the center
-    grid_values = core.pixel_to_radius(img_dim, calib_center)
+    grid_values = core.pixel_to_radius(img_dim, center)
 
     # get the indices into a grid
     zero_grid = np.zeros((img_dim[0], img_dim[1]))
     for r in range(num_qs):
-        vl = (q_ring_val[r][0] <= grid_values) & (grid_values
-                                                  < q_ring_val[r][1])
+        vl = (edges[r][0] <= grid_values) & (grid_values
+                                                  < edges[r][1])
         zero_grid[vl] = r + 1
 
     # check the num_pixels
     num_pixels = []
     for r in range(num_qs):
         num_pixels.append(int((np.histogramdd(np.ravel(grid_values), bins=1,
-                                              range=[[q_ring_val[r][0],
-                                                      (q_ring_val[r][1]
+                                              range=[[edges[r][0],
+                                                      (edges[r][1]
                                                        - 0.000001)]]))[0][0]))
     assert_array_equal(zero_grid, data)
     assert_array_equal(num_pix, num_pixels)
 
 
 def test_segmented_rings():
-    calibrated_center = (20., 25.)
+    center = (20., 25.)
     img_dim = (100, 80)
     first_q = 5.
     delta_q = 5.
@@ -183,5 +183,5 @@ def test_segmented_rings():
 
     edges = roi.ring_edges(first_q, width=delta_q, spacing=4,
                            num_rings=num_rings)
-    label_array = roi.segmented_rings(edges, slicing, calibrated_center, img_dim,
-                                      offset_angle=0)
+    label_array = roi.segmented_rings(edges, slicing, center,
+                                      img_dim, offset_angle=0)
