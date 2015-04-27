@@ -262,6 +262,15 @@ def segmented_rings(edges, segments, center, shape, offset_angle=0):
         in edges and segments
 
     """
+    edges = np.asarray(edges).ravel()
+    if not 0 == len(edges) % 2:
+        raise ValueError("edges should have an even number of elements, "
+                         "giving inner, outer radii for each ring")
+    if not np.all(np.diff(edges) >= 0):
+        raise ValueError("edges are expected to be monotonically increasing, "
+                         "giving inner and outer radii of each ring from "
+                         "r=0 outward")
+
     agrid = core.angle_grid(center, shape)
 
     segments_is_list = isinstance(segments, collections.Iterable)
