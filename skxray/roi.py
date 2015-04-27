@@ -286,12 +286,13 @@ def segmented_rings(edges, segments, center, shape, offset_angle=0):
 
     label_array = np.zeros(shape, dtype=np.int64)
     # radius grid for the image_shape
-    grid_values = core.radial_grid(center, shape)
+    rgrid = core.radial_grid(center, shape)
 
     # assign indices value according to angles then rings
-    for r in range(len(edges)):
-        vl = (edges[r][0] <= grid_values) & (grid_values
-                                                  < edges[r][1])
-        label_array[vl] = ind_grid[vl] + len(segments)*(r)
+    len_segments = len(segments)
+    for i in range(len(edges) // 2):
+        indices = (edges[2*i] <= rgrid) & (rgrid < edges[2*i + 1])
+        # Combine "segment #" and "ring #" to get unique label for each.
+        label_array[indices] = ind_grid[indices] + len_segments * i
 
     return label_array
