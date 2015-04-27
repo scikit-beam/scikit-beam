@@ -372,7 +372,38 @@ def extract_label_indices(labels):
     return label_mask, pixel_list
 
 
-def two_time_corr():
+def two_time_corr(num_levels, num_bufs, labels, images, num_rois):
+    two_time = np.zeros(images[0].shape, num_rois)
+    time_ind = []
+
+    def two_time_corr(num_levels, num_bufs, num_rois):
+        global buf, num, cts, cur, g12, countl
+        global Ndel, Npix
+        global time_ind  #generate a time-frame for each level
+        global g12x, g12y, g12z #for interpolate
+        start_time = time.time()
+        buf = np.zeros([num_levels, num_bufs, num_pixels])  #// matrix of buffers, for store img
+        cts = np.zeros(num_levels)
+        cur = np.ones(num_levels) * num_bufs
+        countl = np.array(np.zeros(  num_levels ),dtype='int')
+        g12 =  np.zeros([noframes, noframes, num_rois] )
+        g12x = []
+        g12y = []
+        g12z = []
+        num= np.array(np.zeros(num_levels),dtype='int')
+        time_ind ={key: [] for key in range(num_levels)}
+        ttx=0
+        for n in range(1, noframes +1 ):   ##do the work here
+            insertimg_twotime(begframe + n - 1, print_=print_)
+            if  n %(noframes/10) ==0:
+                sys.stdout.write("#")
+                sys.stdout.flush()
+        for q in range(num_rois):
+            x0 =  g12[:,:,q]
+            g12[:,:,q] = tril(x0) +  tril(x0).T - diag(diag(x0))
+        elapsed_time = time.time() - start_time
+        return g12, (elapsed_time/60.)
+
 
 def _process_two_time(lev,bufno,n):
         num[lev]+=1
@@ -399,7 +430,7 @@ def _process_two_time(lev,bufno,n):
                 #print tind1
                 g12[ tind1, tind2 ]  =   I_t12/( I_t1 * I_t2) * nopr
 
-    def insertimg_twotime(self, n, norm=None, print_=False):
+def insertimg_twotime(self, n, norm=None, print_=False):
         cur[0]=1+cur[0]%num_bufs  # increment buffer
         fp = FILENAME + '%04d'%n
 
@@ -436,32 +467,5 @@ def _process_two_time(lev,bufno,n):
                 processing=0    #// can stop until more images are accumulated
 
 
-    def two_time_corr(num_levels, num_bufs, num_rois):
-        global buf, num, cts, cur, g12, countl
-        global Ndel, Npix
-        global time_ind  #generate a time-frame for each level
-        global g12x, g12y, g12z #for interpolate
-        start_time = time.time()
-        buf = np.zeros([num_levels, num_bufs, num_pixels])  #// matrix of buffers, for store img
-        cts = np.zeros(num_levels)
-        cur = np.ones(num_levels) * num_bufs
-        countl = np.array(np.zeros(  num_levels ),dtype='int')
-        g12 =  np.zeros([noframes, noframes, num_rois] )
-        g12x = []
-        g12y = []
-        g12z = []
-        num= np.array(np.zeros(num_levels),dtype='int')
-        time_ind ={key: [] for key in range(num_levels)}
-        ttx=0
-        for n in range(1, noframes +1 ):   ##do the work here
-            insertimg_twotime(begframe + n - 1, print_=print_)
-            if  n %(noframes/10) ==0:
-                sys.stdout.write("#")
-                sys.stdout.flush()
-        for q in range(num_rois):
-            x0 =  g12[:,:,q]
-            g12[:,:,q] = tril(x0) +  tril(x0).T - diag(diag(x0))
-        elapsed_time = time.time() - start_time
-        return g12, (elapsed_time/60.)
 
 
