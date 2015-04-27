@@ -141,7 +141,7 @@ def rings(edges, center, shape):
         raise ValueError("edges are expected to be monotonically increasing, "
                          "giving inner and outer radii of each ring from "
                          "r=0 outward")
-    r_coord = core.pixel_to_radius(shape, center)
+    r_coord = core.radial_grid(center, shape)
     label_array = np.digitize(np.ravel(r_coord), edges.ravel(),
                               right=False)
     # Even elements of label_array are in the space between rings.
@@ -233,7 +233,7 @@ def ring_edges(inner_radius, width, spacing=0, num_rings=None):
     return edges
 
 
-def pie_slices(edges, slicing, center, shape, theta=0):
+def segmented_rings(edges, slicing, center, shape, offset_angle=0):
     """
     Parameters
     ----------
@@ -241,7 +241,7 @@ def pie_slices(edges, slicing, center, shape, theta=0):
          inner and outer radius for each ring
 
     slicing : int or list
-        number of pie slices or list of angles in degrees
+        number of pie slices or list of angles in radians
 
     center : rr, cc : tuple
         point in image where r=0; may be a float giving subpixel precision
@@ -250,8 +250,8 @@ def pie_slices(edges, slicing, center, shape, theta=0):
         Image shape which is used to determine the maximum extent of output
         pixel coordinates.
 
-    theta : float, optional
-        angle in degrees
+    angle_offset : float or array, optional
+        offset in radians from offset_angle=0 along the positive X axis
 
     Returns
     -------
@@ -261,24 +261,22 @@ def pie_slices(edges, slicing, center, shape, theta=0):
         in edges and slicing
 
     """
-    angle_grid  = get_angle_grid(shape, center)
+    agrid = core.angle_grid(center, shape)
 
     slicing_is_list = isinstance(slicing, collections.Iterable)
-    # required angles
-
     if slicing_is_list:
-        slicing = np.asarray(slicing) + theta
+        slicing = np.asarray(slicing) + offset_angle
     else:
-        slicing = np.linspace(0, 360, slicing) + theta
+        slicing = np.linspace(0, 360, slicing) + offset_angle
 
     # the indices of the bins(angles) to which each value in input
     #  array(angle_grid) belongs.
-    ind_grid = (np.digitize(np.ravel(angle_grid), slicing,
+    ind_grid = (np.digitize(np.ravel(agrid), slicing,
                             right=False)).reshape(shape)
 
     label_array = np.zeros(shape, dtype=np.int64)
     # radius grid for the image_shape
-    grid_values = core.pixel_to_radius(shape, center)
+    grid_values = core.radial_grid(center, shape)
 
     # assign indices value according to angles then rings
     for r in range(len(edges)):

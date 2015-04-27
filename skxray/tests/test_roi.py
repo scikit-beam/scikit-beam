@@ -173,7 +173,7 @@ def _helper_check(pixel_list, inds, num_pix, q_ring_val, calib_center,
     assert_array_equal(num_pix, num_pixels)
 
 
-def test_pie_slices():
+def test_segmented_rings():
     calibrated_center = (20., 25.)
     img_dim = (100, 80)
     first_q = 5.
@@ -183,6 +183,5 @@ def test_pie_slices():
 
     edges = roi.ring_edges(first_q, width=delta_q, spacing=4,
                            num_rings=num_rings)
-    label_array = roi.pie_slices(edges, slicing, calibrated_center, img_dim,
-                                 theta=0)
-    
+    label_array = roi.segmented_rings(edges, slicing, calibrated_center, img_dim,
+                                      offset_angle=0)
