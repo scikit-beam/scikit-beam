@@ -603,27 +603,22 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     return bins, val, count
 
 
-def pixel_to_radius(shape, calibrated_center, pixel_size=None):
+def radial_grid(center, shape, pixel_size=None):
     """
-    Converts pixel positions to radius from the calibrated center
+    Make a grid of radial positions.
 
     Parameters
     ----------
-    shape : tuple
-        The shape of the image (nrow, ncol) to warp
-        the coordinates of
+    center : rr, cc : tuple
+        point in image where r=0; may be a float giving subpixel precision
 
-    calibrated_center : tuple
-        The center in pixels-units (row, col)
-
-    pixel_size : tuple, optional
-        The size of a pixel (really the pitch) in real units. (height, width).
-
-        Defaults to 1 pixel/pixel if not specified.
+    shape : rr, cc : tuple
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates.
 
     Returns
     -------
-    R : array
+    r : array
         The L2 norm of the distance of each pixel from the calibrated center.
     """
 
@@ -631,45 +626,39 @@ def pixel_to_radius(shape, calibrated_center, pixel_size=None):
         pixel_size = (1, 1)
 
     X, Y = np.meshgrid(pixel_size[1] * (np.arange(shape[1]) -
-                                        calibrated_center[1]),
+                                        center[1]),
                        pixel_size[0] * (np.arange(shape[0]) -
-                                        calibrated_center[0]))
+                                        center[0]))
     return np.sqrt(X*X + Y*Y)
 
 
-def pixel_to_phi(shape, calibrated_center, pixel_size=None):
+def angle_grid(center, shape, pixel_size=None):
     """
-    Converts pixel positions to :math:`\\phi`, the angle from vertical.
+    Make a grid of angular positions.
 
     Parameters
     ----------
-    shape : tuple
-        The shape of the image (nrow, ncol) to warp
-        the coordinates of
+    center : rr, cc : tuple
+        point in image where r=0; may be a float giving subpixel precision
 
-    calibrated_center : tuple
-        The center in pixels-units (row, col)
-
-    pixel_size : tuple, optional
-        The size of a pixel (really the pitch) in real units. (height, width).
-
-        Defaults to 1 pixel/pixel if not specified.
+    shape : rr, cc : tuple
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates.
 
     Returns
     -------
-    phi : array
-        :math:`\\phi`, the angle from the vertical axis.
-        :math:`\\phi \\el [-\pi, \pi]`
+    agrid : array
+        angular position (in radians) of each array element
     """
 
     if pixel_size is None:
         pixel_size = (1, 1)
 
-    X, Y = np.meshgrid(pixel_size[1] * (np.arange(shape[1]) -
-                                        calibrated_center[1]),
+    x, y = np.meshgrid(pixel_size[1] * (np.arange(shape[1]) -
+                                        center[1]),
                        pixel_size[0] * (np.arange(shape[0]) -
-                                        calibrated_center[0]))
-    return np.arctan2(X, Y)
+                                        center[0]))
+    return np.arctan2(x, y)
 
 
 def radius_to_twotheta(dist_sample, radius):
