@@ -609,12 +609,13 @@ def radial_grid(center, shape, pixel_size=None):
 
     Parameters
     ----------
-    center : rr, cc : tuple
-        point in image where r=0; may be a float giving subpixel precision
+    center : tuple
+        point in image where r=0; may be a float giving subpixel precision.
+        Order is (rr, cc).
 
-    shape : rr, cc : tuple
+    shape: tuple
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates.
+        pixel coordinates. Order is (rr, cc).
 
     Returns
     -------
@@ -638,12 +639,13 @@ def angle_grid(center, shape, pixel_size=None):
 
     Parameters
     ----------
-    center : rr, cc : tuple
-        point in image where r=0; may be a float giving subpixel precision
+    center : tuple
+        point in image where r=0; may be a float giving subpixel precision.
+        Order is (rr, cc).
 
-    shape : rr, cc : tuple
+    shape: tuple
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates.
+        pixel coordinates. Order is (rr, cc).
 
     Returns
     -------

@@ -70,16 +70,16 @@ def rectangles(coords, shape):
         coordinates of the upper-left corner and width and height of each
         rectangle: e.g., [(x, y, w, h), (x, y, w, h)]
 
-    shape : rr, cc : tuple
+    shape : tuple
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates.
+        pixel coordinates. Order is (rr, cc).
 
     Returns
     -------
-    label_array : rr, cc: array
+    label_array : array
         Elements not inside any ROI are zero; elements inside each
         ROI are 1, 2, 3, corresponding to the order they are specified
-        in coords.
+        in coords. Order is (rr, cc).
 
     """
 
@@ -119,12 +119,13 @@ def rings(edges, center, shape):
         giving the inner and outer radius of each ring
         e.g., [(1, 2), (11, 12), (21, 22)]
 
-    center : rr, cc : tuple
-        point in image where r=0; may be a float giving subpixel precision
+    center : tuple
+        point in image where r=0; may be a float giving subpixel precision.
+        Order is (rr, cc).
 
-    shape: rr, cc: tuple
+    shape: tuple
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates.
+        pixel coordinates. Order is (rr, cc).
 
     Returns
     -------
@@ -244,12 +245,13 @@ def segmented_rings(edges, segments, center, shape, offset_angle=0):
         That is, 8 produces eight equal-sized angular segments,
         whereas a list can be used to produce segments of unequal size.
 
-    center : rr, cc : tuple
-        point in image where r=0; may be a float giving subpixel precision
+    center : tuple
+        point in image where r=0; may be a float giving subpixel precision.
+        Order is (rr, cc).
 
-    shape: rr, cc: tuple
+    shape: tuple
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates.
+        pixel coordinates. Order is (rr, cc).
 
     angle_offset : float or array, optional
         offset in radians from offset_angle=0 along the positive X axis
