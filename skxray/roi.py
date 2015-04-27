@@ -232,15 +232,17 @@ def ring_edges(inner_radius, width, spacing=0, num_rings=None):
     return edges
 
 
-def segmented_rings(edges, slicing, center, shape, offset_angle=0):
+def segmented_rings(edges, segments, center, shape, offset_angle=0):
     """
     Parameters
     ----------
     edges : array
          inner and outer radius for each ring
 
-    slicing : int or list
+    segments : int or list
         number of pie slices or list of angles in radians
+        That is, 8 produces eight equal-sized angular segments,
+        whereas a list can be used to produce segments of unequal size.
 
     center : rr, cc : tuple
         point in image where r=0; may be a float giving subpixel precision
@@ -257,20 +259,20 @@ def segmented_rings(edges, slicing, center, shape, offset_angle=0):
     label_array : array
         Elements not inside any ROI are zero; elements inside each
         ROI are 1, 2, 3, corresponding to the order they are specified
-        in edges and slicing
+        in edges and segments
 
     """
     agrid = core.angle_grid(center, shape)
 
-    slicing_is_list = isinstance(slicing, collections.Iterable)
-    if slicing_is_list:
-        slicing = np.asarray(slicing) + offset_angle
+    segments_is_list = isinstance(segments, collections.Iterable)
+    if segments_is_list:
+        segments = np.asarray(segments) + offset_angle
     else:
-        slicing = np.linspace(0, 360, slicing) + offset_angle
+        segments = np.linspace(0, 2*np.pi, num=segments) + offset_angle
 
     # the indices of the bins(angles) to which each value in input
     #  array(angle_grid) belongs.
-    ind_grid = (np.digitize(np.ravel(agrid), slicing,
+    ind_grid = (np.digitize(np.ravel(agrid), segments,
                             right=False)).reshape(shape)
 
     label_array = np.zeros(shape, dtype=np.int64)
@@ -281,6 +283,6 @@ def segmented_rings(edges, slicing, center, shape, offset_angle=0):
     for r in range(len(edges)):
         vl = (edges[r][0] <= grid_values) & (grid_values
                                                   < edges[r][1])
-        label_array[vl] = ind_grid[vl] + len(slicing)*(r)
+        label_array[vl] = ind_grid[vl] + len(segments)*(r)
 
     return label_array
