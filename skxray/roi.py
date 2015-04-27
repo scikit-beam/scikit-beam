@@ -35,8 +35,8 @@
 ########################################################################
 
 """
-This module is to get informations of different region of interests(roi's).
-Information : the number of pixels, pixel indices, indices
+This module is to get information of different region of interests(roi's).
+Information :  pixel indices, indices array
 """
 
 
@@ -62,6 +62,8 @@ logger = logging.getLogger(__name__)
 
 def rectangles(coords, shape):
     """
+    This function wil provide the indices array for rectangle region of interests.
+
     Parameters
     ----------
     coords : iterable
@@ -214,7 +216,7 @@ def ring_edges(inner_radius, width, spacing=0, num_rings=None):
             if num_rings != len(width):
                 raise ValueError("num_rings does not match width list")
         if spacing_is_list:
-            if num_rings != len(spacing):
+            if num_rings-1 != len(spacing):
                 raise ValueError("num_rings does not match spacing list")
 
     # Now regularlize the input.
@@ -229,3 +231,96 @@ def ring_edges(inner_radius, width, spacing=0, num_rings=None):
     edges = np.cumsum(steps).reshape(-1, 2)
 
     return edges
+
+
+def pie_slices(edges, slicing, center, shape, theta=0):
+    """
+    Parameters
+    ----------
+    edges : array
+         inner and outer radius for each ring
+
+    slicing : int or list
+        number of pie slices or list of angles in degrees
+
+    center : rr, cc : tuple
+        point in image where r=0; may be a float giving subpixel precision
+
+    shape: rr, cc: tuple
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates.
+
+    theta : float, optional
+        angle in degrees
+
+    Returns
+    -------
+    label_array : array
+        Elements not inside any ROI are zero; elements inside each
+        ROI are 1, 2, 3, corresponding to the order they are specified
+        in edges and slicing
+
+    """
+    angle_grid  = get_angle_grid(shape, center)
+
+    slicing_is_list = isinstance(slicing, collections.Iterable)
+    # required angles
+
+    if slicing_is_list:
+        slicing = np.asarray(slicing) + theta
+    else:
+        slicing = np.linspace(0, 360, slicing) + theta
+
+    # the indices of the bins(angles) to which each value in input
+    #  array(angle_grid) belongs.
+    ind_grid = (np.digitize(np.ravel(angle_grid), slicing,
+                            right=False)).reshape(shape)
+
+    label_array = np.zeros(shape, dtype=np.int64)
+    # radius grid for the image_shape
+    grid_values = core.pixel_to_radius(shape, center)
+
+    # assign indices value according to angles then rings
+    for r in range(len(edges)):
+        vl = (edges[r][0] <= grid_values) & (grid_values
+                                                  < edges[r][1])
+        label_array[vl] = ind_grid[vl] + len(slicing)*(r)
+
+    return label_array
+
+
+def get_angle_grid(shape, center):
+    """
+    This function will provide angle values for the whole grid
+    from the calibrated center
+
+    Parameters
+    ----------
+    shape : tuple
+        shape of the image (detector X and Y direction)
+        Order is (num_rows, num_columns)
+
+    center : rr, cc : tuple
+        point in image where r=0; may be a float giving
+        subpixel precision
+
+    pixel_size : tuple, optional
+        The size of a pixel (really the pitch) in real units. (height, width).
+        Defaults to 1 pixel/pixel if not specified.
+
+    Returns
+    -------
+    angle_grid : array
+        angle values from the calibrated center
+        shape image_shape
+
+    """
+    X, Y = np.meshgrid((np.arange(shape[1]) -
+                                        center[1]),
+                       (np.arange(shape[0]) -
+                                        center[0]))
+    angle_grid = np.rad2deg(np.arctan2(Y, X))
+
+    angle_grid[angle_grid < 0] = 360 + angle_grid[angle_grid < 0]
+
+    return angle_grid
