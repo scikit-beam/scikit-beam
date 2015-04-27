@@ -208,3 +208,8 @@ def test_segmented_rings():
     # number of pixels per ROI
     num_pixels = np.bincount(label_mask, minlength=(np.max(label_mask)+1))
     num_pixels = num_pixels
+
+    # Did we draw the right number of ROIs?
+    print("label_array", np.unique(label_array))
+    actual_num_rois = len(np.unique(label_array)) - 1
+    assert_equal(actual_num_rois, num_rings * slicing)
