@@ -465,6 +465,7 @@ class ModelSpectrum(object):
         self.elemental_lines = list(elemental_lines)  # to copy
         self.incident_energy = self.params['coherent_sct_energy']['value']
         self.epsilon = self.params['non_fitting_values']['epsilon']
+        self.pileup_peaks = self.params['non_fitting_values']['pileup']
         self.setup_compton_model()
         self.setup_elastic_model()
 
@@ -805,6 +806,90 @@ class ModelSpectrum(object):
 
         return element_mod
 
+    def setup_pileup(self, element_combination, default_area=1e5):
+        element_line1, element_line2 = element_combination.split('-')
+        logger.info('Started setting up pileup peaks for {}'.format(
+            element_combination))
+
+        def get_line_energy(elemental_line):
+            """Return the energy of the first line in K, L or M series.
+            Parameters
+            ----------
+            elemental_line : str
+                such as Si_K, Pt_M
+            Returns
+            -------
+            float :
+                energy of emission line
+            """
+            name, line = elemental_line.split('_')
+            e = Element(name)
+            if line == 'K':
+                e_cen = e.emission_line.all[0][1]
+            elif line == 'L':
+                e_cen = e.emission_line.all[4][1]
+            else:
+                e_cen = e.emission_line.all[-4][1]
+            return e_cen
+
+        e1_cen = get_line_energy(element_line1)
+        e2_cen = get_line_energy(element_line2)
+
+        pre_name = ('pileup_' + element_line1 + '_'
+                    + element_line2 + '_')
+        gauss_mod = ElementModel(prefix=pre_name)
+        gauss_mod.set_param_hint('e_offset',
+                                 value=self.compton_param['e_offset'].value,
+                                 expr='e_offset')
+        gauss_mod.set_param_hint('e_linear',
+                                 value=self.compton_param['e_linear'].value,
+                                 expr='e_linear')
+        gauss_mod.set_param_hint('e_quadratic',
+                                 value=self.compton_param['e_quadratic'].value,
+                                 expr='e_quadratic')
+        gauss_mod.set_param_hint('fwhm_offset',
+                                 value=self.compton_param['fwhm_offset'].value,
+                                 expr='fwhm_offset')
+        gauss_mod.set_param_hint('fwhm_fanoprime',
+                                 value=self.compton_param['fwhm_fanoprime'].value,
+                                 expr='fwhm_fanoprime')
+        gauss_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
+
+        area_name = pre_name + 'area'
+        if area_name in self.params:
+            default_area = self.params[area_name]['value']
+
+        gauss_mod.set_param_hint('area', value=default_area, vary=True, min=0)
+        gauss_mod.set_param_hint('delta_center', value=0, vary=False)
+        gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
+
+        # area needs to be adjusted
+        if area_name in self.params:
+            _set_parameter_hint(area_name, self.params[area_name], gauss_mod)
+
+        gauss_mod.set_param_hint('center', value=e1_cen+e2_cen, vary=False)
+        gauss_mod.set_param_hint('ratio', value=1.0, vary=False)
+        gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
+
+        # position needs to be adjusted
+        pos_name = pre_name + 'delta_center'
+        if pos_name in self.params:
+            _set_parameter_hint('delta_center', self.params[pos_name],
+                                gauss_mod)
+
+        # width needs to be adjusted
+        width_name = pre_name + 'delta_sigma'
+        if width_name in self.params:
+            _set_parameter_hint('delta_sigma', self.params[width_name],
+                                gauss_mod)
+
+        # branching ratio needs to be adjusted
+        ratio_name = pre_name + 'ratio_adjust'
+        if ratio_name in self.params:
+            _set_parameter_hint('ratio_adjust', self.params[ratio_name],
+                                gauss_mod)
+        return gauss_mod
+
     def assemble_models(self):
         """
         Put all models together to form a spectrum.
@@ -813,6 +898,9 @@ class ModelSpectrum(object):
 
         for element in self.elemental_lines:
             self.mod += self.setup_element_model(element)
+
+        for p in self.pileup_peaks:
+            self.mod += self.setup_pileup(p)
 
     def model_fit(self, channel_number, spectrum, weights=None,
                   method='leastsq', **kwargs):
@@ -933,16 +1021,29 @@ def construct_linear_model(channel_number, params,
     matv = []
     element_area = {}
 
-    for i in range(len(elemental_lines)):
-        e_model = MS.setup_element_model(elemental_lines[i], default_area=default_area)
+    for elemental_line in elemental_lines:
+        e_model = MS.setup_element_model(elemental_line,
+                                         default_area=default_area)
         if e_model:
             p = e_model.make_params()
             for k, v in six.iteritems(p):
                 if 'area' in k:
-                    element_area.update({elemental_lines[i]: p[k].value})
+                    element_area.update({elemental_line: v.value})
             y_temp = e_model.eval(x=channel_number, params=p)
             matv.append(y_temp)
-            selected_elements.append(elemental_lines[i])
+            selected_elements.append(elemental_line)
+
+    # add pileup peaks
+    pileup_peaks = MS.pileup_peaks
+    for pileup_name in pileup_peaks:
+        p_model = MS.setup_pileup(pileup_name)
+        p = p_model.make_params()
+        for k, v in six.iteritems(p):
+            if 'area' in k:
+                element_area.update({'pileup_'+pileup_name: v.value})
+        y_temp = p_model.eval(x=channel_number, params=p)
+        matv.append(y_temp)
+        selected_elements.append('pileup_'+pileup_name)
 
     p = MS.compton.make_params()
     y_temp = MS.compton.eval(x=channel_number, params=p)
