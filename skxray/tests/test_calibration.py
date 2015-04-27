@@ -46,7 +46,7 @@ import skxray.calibration as core
 
 
 def _draw_gaussian_rings(shape, calibrated_center, r_list, r_width):
-    R = core.pixel_to_radius(shape, calibrated_center)
+    R = core.radial_grid(calibrated_center, shape)
     I = np.zeros_like(R)
 
     for r in r_list:
