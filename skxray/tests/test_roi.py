@@ -99,8 +99,6 @@ def test_rings():
     # number of pixels per ROI
     num_pixels = np.bincount(label_mask, minlength=(np.max(label_mask)+1))
     num_pixels = num_pixels[1:]
-    _helper_check(pixel_list, label_mask, num_pixels, edges, center,
-                  img_dim, num_rings)
 
     # test when there is same spacing between rings
     edges = roi.ring_edges(first_q, width=delta_q, spacing=2.5,
@@ -112,8 +110,6 @@ def test_rings():
     # number of pixels per ROI
     num_pixels = np.bincount(label_mask, minlength=(np.max(label_mask)+1))
     num_pixels = num_pixels[1:]
-    _helper_check(pixel_list, label_mask, num_pixels, edges, center,
-                  img_dim, num_rings)
 
     # test when there is different spacing between rings
     edges = roi.ring_edges(first_q, width=delta_q, spacing=step_q,
@@ -125,8 +121,6 @@ def test_rings():
     # number of pixels per ROI
     num_pixels = np.bincount(label_mask, minlength=(np.max(label_mask)+1))
     num_pixels = num_pixels[1:]
-    _helper_check(pixel_list, label_mask, num_pixels, edges, center,
-                  img_dim, num_rings)
 
     # test when there is no spacing between rings
     edges = roi.ring_edges(first_q, width=delta_q, num_rings=num_rings)
@@ -137,8 +131,6 @@ def test_rings():
     # number of pixels per ROI
     num_pixels = np.bincount(label_mask, minlength=(np.max(label_mask)+1))
     num_pixels = num_pixels[1:]
-    _helper_check(pixel_list, label_mask, num_pixels, edges, center,
-                  img_dim, num_rings)
 
     # Did we draw the right number of rings?
     print(np.unique(label_array))
