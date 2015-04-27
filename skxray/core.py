@@ -637,6 +637,8 @@ def angle_grid(center, shape, pixel_size=None):
     """
     Make a grid of angular positions.
 
+    Read note for our conventions here -- there be dragons!
+
     Parameters
     ----------
     center : tuple
@@ -650,17 +652,24 @@ def angle_grid(center, shape, pixel_size=None):
     Returns
     -------
     agrid : array
-        angular position (in radians) of each array element
+        angular position (in radians) of each array element in range [-pi, pi]
+
+    Note
+    ----
+    :math:`\\theta`, the counter-clockwise angle from the positive x axis
+    :math:`\\theta \\el [-\pi, \pi]`. Postivie y is downward, so 45-degrees
+    is to the lower right.
     """
 
     if pixel_size is None:
         pixel_size = (1, 1)
 
+    # row is y, column is x. "so say we all. amen."
     x, y = np.meshgrid(pixel_size[1] * (np.arange(shape[1]) -
                                         center[1]),
                        pixel_size[0] * (np.arange(shape[0]) -
                                         center[0]))
-    return np.arctan2(x, y)
+    return np.arctan2(y, x)
 
 
 def radius_to_twotheta(dist_sample, radius):
