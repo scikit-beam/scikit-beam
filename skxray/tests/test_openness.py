@@ -23,8 +23,10 @@ def _everybody_welcome_here(string_to_check, blacklisted=blacklisted):
             if b in string_to_check:
                 raise UnwelcomenessError(
                     "string %s contains '%s' which is blacklisted. Tests will "
-                    "not pass until this language is changed. Blacklisted "
-                    "words: %s" % (string_to_check, b, blacklisted))
+                    "not pass until this language is changed. For tips on "
+                    "writing gender-neutrally, see "
+                    "http://www.lawprose.org/blog/?p=499. Blacklisted words: "
+                    "%s" % (string_to_check, b, blacklisted))
 
 
 def _openess_tester(module):
@@ -39,7 +41,7 @@ def _openess_tester(module):
 def test_openness():
     """
     Ensure that our library does not contain sexist (intentional or otherwise)
-    language
+    language. For tips on writing gender-neutrally, see http://www.lawprose.org/blog/?p=499
 
     Notes
     -----
