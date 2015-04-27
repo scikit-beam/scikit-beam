@@ -133,17 +133,16 @@ def rings(edges, center, shape):
         ROI are 1, 2, 3, corresponding to the order they are specified
         in edges.
     """
-    edges = np.atleast_2d(np.asarray(edges))
-    if not 0 == len(np.asarray(edges).ravel()) % 2:
+    edges = np.atleast_2d(np.asarray(edges)).ravel()
+    if not 0 == len(edges) % 2:
         raise ValueError("edges should have an even number of elements, "
                          "giving inner, outer radii for each ring")
-    if not np.all(np.diff(edges.ravel()) >= 0):
+    if not np.all(np.diff(edges) >= 0):
         raise ValueError("edges are expected to be monotonically increasing, "
                          "giving inner and outer radii of each ring from "
                          "r=0 outward")
-    r_coord = core.radial_grid(center, shape)
-    label_array = np.digitize(np.ravel(r_coord), edges.ravel(),
-                              right=False)
+    r_coord = core.radial_grid(center, shape).ravel()
+    label_array = np.digitize(r_coord, edges, right=False)
     # Even elements of label_array are in the space between rings.
     label_array = (np.where(label_array % 2 != 0, label_array, 0) + 1) // 2
     return label_array.reshape(shape)
