@@ -189,10 +189,10 @@ def _helper_check(pixel_list, inds, num_pix, edges, center,
 
 
 def test_segmented_rings():
-    center = (20., 25.)
-    img_dim = (100, 80)
-    first_q = 5.
-    delta_q = 5.
+    center = (75, 75)
+    img_dim = (150, 140)
+    first_q = 5
+    delta_q = 5
     num_rings = 4  # number of Q rings
     slicing = 4
 
@@ -204,12 +204,19 @@ def test_segmented_rings():
                                       img_dim, offset_angle=0)
     print("label_array for segmented_rings", label_array)
 
-    label_mask, pixel_list = corr.extract_label_indices(label_array)
-    # number of pixels per ROI
-    num_pixels = np.bincount(label_mask, minlength=(np.max(label_mask)+1))
-    num_pixels = num_pixels
-
     # Did we draw the right number of ROIs?
-    print("label_array", np.unique(label_array))
-    actual_num_rois = len(np.unique(label_array)) - 1
-    assert_equal(actual_num_rois, num_rings * slicing)
+    label_list = np.unique(label_array.ravel())
+    actual_num_labels = len(label_list) - 1
+    num_labels = num_rings * slicing
+    assert_equal(actual_num_labels, num_labels)
+
+    # Did we draw the right ROIs? (1-16 with some zeros around too)
+    assert_array_equal(label_list, np.arange(num_labels + 1))
+
+    # A brittle test to make sure the exactly number of pixels per label
+    # is never accidentally changed:
+    # number of pixels per ROI
+    num_pixels = np.bincount(label_array.ravel())
+    expected_num_pixels = [18372, 59, 59, 59, 59, 129, 129, 129,
+                           129, 200, 200, 200, 200, 269, 269, 269, 269]
+    assert_array_equal(num_pixels, expected_num_pixels)

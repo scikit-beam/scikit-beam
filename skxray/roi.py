@@ -299,6 +299,6 @@ def segmented_rings(edges, segments, center, shape, offset_angle=0):
     for i in range(len(edges) // 2):
         indices = (edges[2*i] <= rgrid) & (rgrid < edges[2*i + 1])
         # Combine "segment #" and "ring #" to get unique label for each.
-        label_array[indices] = ind_grid[indices] + len_segments * i
+        label_array[indices] = ind_grid[indices] + (len_segments - 1) * i
 
     return label_array
