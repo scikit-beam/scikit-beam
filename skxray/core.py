@@ -657,8 +657,8 @@ def angle_grid(center, shape, pixel_size=None):
     Note
     ----
     :math:`\\theta`, the counter-clockwise angle from the positive x axis
-    :math:`\\theta \\el [-\pi, \pi]`. Postivie y is downward, so 45-degrees
-    is to the lower right.
+    :math:`\\theta \\el [-\pi, \pi]`.  In array indexing and the conventional
+    axes for images (origin in upper left), positive y is downward.
     """
 
     if pixel_size is None:
