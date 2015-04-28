@@ -281,7 +281,9 @@ def segmented_rings(edges, segments, center, shape, offset_angle=0):
     if segments_is_list:
         segments = np.asarray(segments) + offset_angle
     else:
-        segments = np.linspace(0, 2*np.pi, num=segments) + offset_angle
+        # N equal segments requires N+1 bin edges spanning 0 to 2pi.
+        segments = np.linspace(0, 2*np.pi, num=1+segments, endpoint=True)
+        segments += offset_angle
 
     # the indices of the bins(angles) to which each value in input
     #  array(angle_grid) belongs.
