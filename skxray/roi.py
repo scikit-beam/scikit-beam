@@ -35,8 +35,8 @@
 ########################################################################
 
 """
-This module is to get information of different region of interests(roi's).
-Information :  pixel indices, indices array
+This module contain convenience methods to generate ROI labeled arrays for
+simple shapes such as rectangles and concentric circles.
 """
 
 
