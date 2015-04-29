@@ -98,3 +98,12 @@ def test_correlation():
 
     assert_almost_equal(True, np.all(g2[:, 0], axis=0))
     assert_almost_equal(True, np.all(g2[:, 1], axis=0))
+
+
+def test_two_time_corr():
+    num_levels = 8
+    num_bufs = 8
+    num_qs = 2
+    img_dim = (50, 50)
+
+    edges =
