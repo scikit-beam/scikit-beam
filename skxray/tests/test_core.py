@@ -537,6 +537,20 @@ def run_image_to_relative_xyi_repeatedly():
         if num_calls % 10 == 0:
             print('{0} calls successful'.format(num_calls))
 
+def test_angle_grid():
+    a = core.angle_grid((3, 3), (7, 7))
+    assert_equal(a[3, -1], 0)
+    assert_almost_equal(a[3, 0], np.pi)
+    assert_almost_equal(a[4, 4], np.pi/4)  # (1, 1) should be 45 degrees
+    # The documented domain is [-pi, pi].
+    correct_domain = np.all((a < np.pi + 0.1) & (a > -np.pi - 0.1))
+    assert_true(correct_domain)
+
+def test_radial_grid():
+    a = core.radial_grid((3, 3), (7, 7))
+    assert_equal(a[3, 3], 0)
+    assert_equal(a[3, 4], 1)
+
 
 if __name__ == '__main__':
     import nose

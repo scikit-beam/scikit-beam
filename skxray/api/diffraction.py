@@ -60,7 +60,7 @@ from ..core import (
     bin_1D, bin_edges, bin_edges_to_centers, grid3d,
     q_to_d, d_to_q,
     q_to_twotheta, twotheta_to_q,
-    pixel_to_phi, pixel_to_radius,
+    angle_grid, radial_grid,
 )
 
 from ..calibration import (
@@ -85,8 +85,8 @@ __all__ = [
 
     # core
     'bin_1D', 'bin_edges', 'bin_edges_to_centers', 'grid3d', 'q_to_d',
-    'd_to_q', 'q_to_twotheta', 'twotheta_to_q', 'pixel_to_phi',
-    'pixel_to_radius',
+    'd_to_q', 'q_to_twotheta', 'twotheta_to_q', 'angle_grid',
+    'radial_grid',
 
     # calibration
     'refine_center', 'estimate_d_blind',

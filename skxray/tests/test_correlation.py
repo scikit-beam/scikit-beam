@@ -65,7 +65,7 @@ def test_correlation():
     roi_data = np.array(([10, 20, 12, 14], [40, 10, 9, 10]),
                         dtype=np.int64)
 
-    indices = roi.rectangles(num_qs, roi_data, img_dim)
+    indices = roi.rectangles(roi_data, img_dim)
 
     img_stack = np.random.randint(1, 5, size=(500, ) + img_dim)
 
