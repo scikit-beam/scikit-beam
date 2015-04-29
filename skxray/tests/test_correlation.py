@@ -41,6 +41,8 @@ import logging
 
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
+from nose.tools import assert_raises
+
 import sys
 
 from nose.tools import assert_equal, assert_true, raises
@@ -100,10 +102,28 @@ def test_correlation():
     assert_almost_equal(True, np.all(g2[:, 1], axis=0))
 
 
-def test_two_time_corr():
-    num_levels = 8
-    num_bufs = 8
-    num_qs = 2
-    img_dim = (50, 50)
+    two_time_coins = corr.two_time_corr(num_levels=2, num_bufs=6,
+                                        labels=coins_mesh, images=coin_it)
 
-    edges =
+    assert_almost_equal(True, np.all(two_time_coins[:, :, 0].diagonal(),
+                                     axis=0))
+    assert_almost_equal(True, np.all(two_time_coins[:, :, 1].diagonal(),
+                                     axis=0))
+
+    # Test various illegal inputs
+    assert_raises(ValueError,
+                  lambda: corr.two_time_corr(1, 13, coins_mesh, coin_it))
+    # num_levels cannot be 13 must be even
+
+    assert_raises(ValueError,
+                  lambda: corr.two_time_corr(1, 4, indices, coin_it))
+    # shape of the indices has to be equal to shape of the coin_it
+
+    new_mesh = np.zeros_like(coins)
+
+    new_mesh[coins < 30] = 1
+    new_mesh[coins > 255] = 2
+    new_mesh[coins >70] = 3
+
+    assert_raises(ValueError,
+                  lambda: corr.two_time_corr(1, 4, new_mesh, coin_it))
