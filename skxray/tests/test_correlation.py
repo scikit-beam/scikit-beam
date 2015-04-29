@@ -101,7 +101,6 @@ def test_correlation():
     assert_almost_equal(True, np.all(g2[:, 0], axis=0))
     assert_almost_equal(True, np.all(g2[:, 1], axis=0))
 
-
     two_time_coins = corr.two_time_corr(num_levels=2, num_bufs=6,
                                         labels=coins_mesh, images=coin_it)
 
@@ -123,7 +122,8 @@ def test_correlation():
 
     new_mesh[coins < 30] = 1
     new_mesh[coins > 255] = 2
-    new_mesh[coins >70] = 3
+    new_mesh[coins > 70] = 3
 
     assert_raises(ValueError,
                   lambda: corr.two_time_corr(1, 4, new_mesh, coin_it))
+    # to check whether number of pixels of any of the ROI's are zero

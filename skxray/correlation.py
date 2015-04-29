@@ -407,7 +407,7 @@ def two_time_corr(num_levels, num_bufs, labels, images):
     count_level = np.zeros(num_levels, dtype=np.int64)
 
     # generate a time frame for each level
-    time_ind ={key: [] for key in range(num_levels)}
+    time_ind = {key: [] for key in range(num_levels)}
 
     start_time = time.time()  # used to log the computation time (optionally)
     #  for two time correlation
@@ -452,10 +452,10 @@ def two_time_corr(num_levels, num_bufs, labels, images):
                                               buf[level - 1,
                                                   cur[level - 1] - 1])/2
 
-                t1_idx = (count_level[level] - 1) *2
+                t1_idx = (count_level[level] - 1) * 2
 
                 current_img_time = ((time_ind[level - 1])[t1_idx]
-                                    + (time_ind[level - 1])[t1_idx + 1 ])/2.
+                                    + (time_ind[level - 1])[t1_idx + 1])/2.
 
                 # time frame for each level
                 time_ind[level].append(current_img_time)
@@ -477,16 +477,15 @@ def two_time_corr(num_levels, num_bufs, labels, images):
                 processing = level < num_levels
 
     for q in range(np.max(labels)):
-        x0 =  two_time_c[:, :, q]
-        two_time_c[:, :, q] = (np.tril(x0) +  np.tril(x0).T
+        x0 = two_time_c[:, :, q]
+        two_time_c[:, :, q] = (np.tril(x0) + np.tril(x0).T
                                - np.diag(np.diag(x0)))
 
     # ending time for the two time correlation
     end_time = time.time()
 
     logger.info("Two Time Correlation - Processing time for {0} images took"
-                " {1} seconds."
-                "".format(n, (end_time - start_time)))
+                " {1} seconds." .format(n, (end_time - start_time)))
 
     return two_time_c
 
@@ -554,11 +553,11 @@ def _two_time_process(buf, two_time_c, label_mask, num_bufs, num_pixels,
             nshift = 2**(level-1)
             for i in range(-nshift+1, nshift+1):
                 two_time_c[int(tind1+i),
-                     int(tind2+i)] = (tmp_binned/(pi_binned *
-                                                  fi_binned))*num_pixels
+                           int(tind2+i)] = (tmp_binned/(pi_binned *
+                                                        fi_binned))*num_pixels
         else:
-            two_time_c[tind1, tind2 ] = tmp_binned/(pi_binned *
-                                                    fi_binned)*num_pixels
+            two_time_c[tind1, tind2] = tmp_binned/(pi_binned *
+                                                   fi_binned)*num_pixels
     return None
 
 
