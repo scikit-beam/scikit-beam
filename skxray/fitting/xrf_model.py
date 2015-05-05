@@ -216,7 +216,7 @@ def update_parameter_dict(param, fit_results):
         if k_temp in fit_results.values:
             param[k]['value'] = float(fit_results.values[k_temp])
         elif k == 'non_fitting_values':
-            logger.debug('All values are updated.')
+            logger.debug('Ignore non fitting values.')
         else:
             logger.warning('values not updated: {}'.format(k))
 
@@ -819,6 +819,7 @@ class ModelSpectrum(object):
         else:
             logger.debug('Started setting up pileup peaks for {}'.format(
                 elemental_line))
+
             element_line1, element_line2 = elemental_line.split('-')
 
             def get_line_energy(elemental_line):
@@ -826,19 +827,26 @@ class ModelSpectrum(object):
                 Parameters
                 ----------
                 elemental_line : str
-                    such as Si_K, Pt_M
+                    For instance, Eu_L is the format for L lines and Pt_M for M lines.
+                    And for K lines, user needs to define lines like ka1, kb1,
+                    because for K lines, we consider contributions from either ka1
+                    or kb1, while for L or M lines, we only consider the primary peak.
+
                 Returns
                 -------
                 float :
                     energy of emission line
                 """
                 name, line = elemental_line.split('_')
+                line = line.lower()
                 e = Element(name)
-                if line == 'K':
-                    e_cen = e.emission_line['ka1']
-                elif line == 'L':
+                if 'k' in line:
+                    e_cen = e.emission_line[line]
+                elif 'l' in line:
+                    # only the first line for L
                     e_cen = e.emission_line['la1']
                 else:
+                    # only the first line for M
                     e_cen = e.emission_line['ma1']
                 return e_cen
 
@@ -846,7 +854,7 @@ class ModelSpectrum(object):
             e2_cen = get_line_energy(element_line2)
 
             # no '-' allowed in prefix name in lmfit
-            pre_name = ('pileup_'+elemental_line.replace('-', '_') + '_')
+            pre_name = 'pileup_' + elemental_line.replace('-', '_') + '_'
             gauss_mod = ElementModel(prefix=pre_name)
             gauss_mod.set_param_hint('e_offset',
                                      value=self.compton_param['e_offset'].value,
@@ -900,7 +908,6 @@ class ModelSpectrum(object):
                                     gauss_mod)
 
             element_mod = gauss_mod
-
         return element_mod
 
     def assemble_models(self):
