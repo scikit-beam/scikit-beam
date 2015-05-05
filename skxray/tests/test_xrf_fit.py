@@ -100,6 +100,16 @@ def test_fit():
         if 'area' in k:
             assert_equal(v['value'], result.values[k])
 
+    MS = ModelSpectrum(new_params, elemental_lines)
+    MS.assemble_models()
+
+    result = MS.model_fit(x, y, weights=1/np.sqrt(y), maxfev=200)
+    # check area of each element
+    for k, v in six.iteritems(result.values):
+        if 'area' in k:
+            # error smaller than 0.1%
+            assert_true((v-1e5)/1e5 < 1e-3)
+
 
 def test_register():
     new_strategy = e_calibration
