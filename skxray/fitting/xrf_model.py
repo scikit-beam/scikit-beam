@@ -196,6 +196,32 @@ def _set_parameter_hint(param_name, input_dict, input_model):
                  input_dict['min'], input_dict['max'])
 
 
+def _copy_model_param_hints(target, source, params):
+    """
+    Copy parameters from one model to another
+
+    .. warning
+
+       This updates ``target`` in-place
+
+    Parameters
+    ----------
+    target : lmfit.Model
+        The model to be updated
+    source : lmfit.Model
+        The model to copy from
+
+    params : list
+       The names of the parameters to copy
+    """
+
+    for label in params:
+        target.set_param_hint(label,
+                              value=source[label].value,
+                              expr=label)
+
+
+
 def update_parameter_dict(param, fit_results):
     """
     Update fitting parameters dictionary according to given fitting results,
@@ -563,7 +589,8 @@ class ModelSpectrum(object):
         parameter = self.params
 
         element_mod = None
-
+        param_hints_to_copy = ['e_offset', 'e_linear', 'e_quadratic',
+                               'fwhm_offset', 'fwhm_fanoprime']
         if elemental_line in K_LINE:
             element = elemental_line.split('_')[0]
             e = Element(element)
@@ -582,22 +609,12 @@ class ModelSpectrum(object):
                     continue
 
                 gauss_mod = ElementModel(prefix=str(element)+'_'+str(line_name)+'_')
-                gauss_mod.set_param_hint('e_offset',
-                                         value=self.compton_param['e_offset'].value,
-                                         expr='e_offset')
-                gauss_mod.set_param_hint('e_linear',
-                                         value=self.compton_param['e_linear'].value,
-                                         expr='e_linear')
-                gauss_mod.set_param_hint('e_quadratic',
-                                         value=self.compton_param['e_quadratic'].value,
-                                         expr='e_quadratic')
-                gauss_mod.set_param_hint('fwhm_offset',
-                                         value=self.compton_param['fwhm_offset'].value,
-                                         expr='fwhm_offset')
-                gauss_mod.set_param_hint('fwhm_fanoprime',
-                                         value=self.compton_param['fwhm_fanoprime'].value,
-                                         expr='fwhm_fanoprime')
-                gauss_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
+                # copy the fixed parameters from the Compton model
+                _copy_model_param_hints(gauss_mod, self.compton_param,
+                                        param_hints_to_copy)
+
+                gauss_mod.set_param_hint('epsilon', value=self.epsilon,
+                                         vary=False)
 
                 area_name = str(element)+'_'+str(line_name)+'_area'
                 if area_name in parameter:
