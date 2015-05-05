@@ -7,7 +7,7 @@ import numpy as np
 import copy
 import logging
 from numpy.testing import (assert_equal, assert_array_almost_equal)
-from nose.tools import assert_true, raises
+from nose.tools import assert_true, raises, assert_raises
 from skxray.fitting.base.parameter_data import get_para, e_calibration
 from skxray.fitting.xrf_model import (ModelSpectrum, ParamController,
                                       linear_spectrum_fitting,
@@ -20,12 +20,19 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
                     level=logging.INFO,
                     filemode='w')
 
+
 def synthetic_spectrum():
     param = get_para()
     x = np.arange(2000)
     elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M']
     elist, matv, area_v = construct_linear_model(x, param, elemental_lines, default_area=1e5)
     return np.sum(matv, 1) + 100  # avoid zero values
+
+
+def test_param_controller_fail():
+    param = get_para()
+    PC = ParamController(param, [])
+    assert_raises(ValueError, PC._add_area_param, 'Ar')
 
 
 def test_parameter_controller():
