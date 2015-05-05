@@ -399,19 +399,24 @@ class ParamController(object):
 
         Helper function called in self.add_param
         """
+        base_element, line = element.split('_')
         if element in K_LINE:
-            element = element.split('_')[0]
-            param_name = str(element)+"_ka1_area"
+            post_fix = "ka1_area"
         elif element in L_LINE:
-            element = element.split('_')[0]
-            param_name = str(element)+"_la1_area"
+            post_fix = "la1_area"
         elif element in M_LINE:
-            element = element.split('_')[0]
-            param_name = str(element)+"_ma1_area"
+            post_fix = "ma1_area"
+        else:
+            raise ValueError(
+                "{} is not a well formed element string".format(element))
+
+        param_name = '_'.join((base_element, post_fix))
 
         new_area = PARAM_DEFAULTS['area'].copy()
-        if constraint:
+        if constraint is not None:
             self._element_strategy[param_name] = constraint
+
+        # update parameters in place
         self.params.update({param_name: new_area})
 
 
