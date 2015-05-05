@@ -83,8 +83,8 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
         labeled array of the same shape as the image stack;
         each ROI is represented by a distinct label (i.e., integer)
 
-    images : iterable of 2D arrays
-        dimensions are: (rr, cc)
+    images : array
+        dimensions are: (rr, cc), iterable of 2D arrays
 
     Returns
     -------
@@ -346,7 +346,7 @@ def extract_label_indices(labels):
     return label_mask, pixel_list
 
 
-def two_time_corr(num_levels, num_bufs, labels, images):
+def two_time(num_levels, num_bufs, labels, images):
     """
     This function computes two-time correlations.
 
@@ -370,8 +370,8 @@ def two_time_corr(num_levels, num_bufs, labels, images):
         labeled array of the same shape as the image stack;
         each ROI is represented by a distinct label (i.e., integer)
 
-    images : iterable of 2D arrays
-        dimensions are: (rr, cc)
+    images : array
+        dimensions are: (rr, cc), iterable of 2D arrays
 
     Returns
     -------
