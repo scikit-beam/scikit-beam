@@ -173,24 +173,27 @@ def _set_parameter_hint(param_name, input_dict, input_model):
     input_model : object
         model object used in lmfit
     """
+    value = input_dict['value']
     if input_dict['bound_type'] == 'none':
-        input_model.set_param_hint(name=param_name, value=input_dict['value'], vary=True)
+        input_model.set_param_hint(name=param_name, value=value, vary=True)
     elif input_dict['bound_type'] == 'fixed':
-        input_model.set_param_hint(name=param_name, value=input_dict['value'], vary=False)
+        input_model.set_param_hint(name=param_name, value=value, vary=False)
     elif input_dict['bound_type'] == 'lohi':
-        input_model.set_param_hint(name=param_name, value=input_dict['value'], vary=True,
-                                   min=input_dict['min'], max=input_dict['max'])
+        input_model.set_param_hint(name=param_name, value=value, vary=True,
+                                   min=input_dict['min'],
+                                   max=input_dict['max'])
     elif input_dict['bound_type'] == 'lo':
-        input_model.set_param_hint(name=param_name, value=input_dict['value'], vary=True,
+        input_model.set_param_hint(name=param_name, value=value,
+                                   vary=True,
                                    min=input_dict['min'])
     elif input_dict['bound_type'] == 'hi':
-        input_model.set_param_hint(name=param_name, value=input_dict['value'], vary=True,
+        input_model.set_param_hint(name=param_name, value=value, vary=True,
                                    max=input_dict['max'])
     else:
         raise ValueError("could not set values for {0}".format(param_name))
-    logger.debug(' {0} bound type: {1}, value: {2}, range: {3}'.
-                 format(param_name, input_dict['bound_type'], input_dict['value'],
-                        [input_dict['min'], input_dict['max']]))
+    logger.debug(' %s bound type: %s, value: %f, range: [%f, %f]',
+                 param_name, input_dict['bound_type'], value,
+                 input_dict['min'], input_dict['max'])
 
 
 def update_parameter_dict(param, fit_results):
