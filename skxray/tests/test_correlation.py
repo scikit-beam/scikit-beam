@@ -101,7 +101,7 @@ def test_correlation():
     assert_almost_equal(True, np.all(g2[:, 0], axis=0))
     assert_almost_equal(True, np.all(g2[:, 1], axis=0))
 
-    two_time_coins = corr.two_time_corr(num_levels=2, num_bufs=6,
+    two_time_coins = corr.two_time(num_levels=2, num_bufs=6,
                                         labels=coins_mesh, images=coin_it)
 
     assert_almost_equal(True, np.all(two_time_coins[:, :, 0].diagonal(),
@@ -111,11 +111,11 @@ def test_correlation():
 
     # Test various illegal inputs
     assert_raises(ValueError,
-                  lambda: corr.two_time_corr(1, 13, coins_mesh, coin_it))
+                  lambda: corr.two_time(1, 13, coins_mesh, coin_it))
     # num_levels cannot be 13 must be even
 
     assert_raises(ValueError,
-                  lambda: corr.two_time_corr(1, 4, indices, coin_it))
+                  lambda: corr.two_time(1, 4, indices, coin_it))
     # shape of the indices has to be equal to shape of the coin_it
 
     new_mesh = np.zeros_like(coins)
@@ -125,5 +125,5 @@ def test_correlation():
     new_mesh[coins > 70] = 3
 
     assert_raises(ValueError,
-                  lambda: corr.two_time_corr(1, 4, new_mesh, coin_it))
+                  lambda: corr.two_time(1, 4, new_mesh, coin_it))
     # to check whether number of pixels of any of the ROI's are zero
