@@ -24,19 +24,19 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
 def synthetic_spectrum():
     param = get_para()
     x = np.arange(2000)
-    pileup_peak = 'Si_Ka1-Si_Ka1'
-    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M', pileup_peak]
+    pileup_peak = ['Si_Ka1-Si_Ka1', 'Si_Ka1-Ce_La1']
+    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak
     elist, matv, area_v = construct_linear_model(x, param, elemental_lines, default_area=1e5)
     return np.sum(matv, 1) + 100  # avoid zero values
 
 
 def test_parameter_controller():
     param = get_para()
-    pileup_peak = 'Si_Ka1-Si_Ka1'
-    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M', pileup_peak]
+    pileup_peak = ['Si_Ka1-Si_Ka1', 'Si_Ka1-Ce_La1']
+    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak
     PC = ParamController(param, elemental_lines)
     set_opt = dict(pos='hi', width='lohi', area='hi', ratio='lo')
-    PC.update_element_prop(['Fe_K', 'Ce_L', pileup_peak], **set_opt)
+    PC.update_element_prop(['Fe_K', 'Ce_L', pileup_peak[0]], **set_opt)
     PC.set_strategy('linear')
 
     # check boundary value
@@ -50,7 +50,7 @@ def test_parameter_controller():
                 assert_equal(str(v['bound_type']), set_opt['area'])
             elif 'sigma' in k:
                 assert_equal(str(v['bound_type']), set_opt['width'])
-        elif ('pileup_'+pileup_peak.replace('-', '_')) in k:
+        elif ('pileup_'+pileup_peak[0].replace('-', '_')) in k:
             if 'ratio' in k:
                 assert_equal(str(v['bound_type']), set_opt['ratio'])
             if 'center' in k:
@@ -64,8 +64,8 @@ def test_parameter_controller():
 def test_fit():
 
     param = get_para()
-    pileup_peak = 'Si_Ka1-Si_Ka1'
-    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M', pileup_peak]
+    pileup_peak = ['Si_Ka1-Si_Ka1', 'Si_Ka1-Ce_La1']
+    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak
     x0 = np.arange(2000)
     y0 = synthetic_spectrum()
 
@@ -166,3 +166,18 @@ def test_set_param_hint():
             assert_equal(p['coherent_sct_energy'].vary, False)
         else:
             assert_equal(p['coherent_sct_energy'].vary, True)
+
+
+@raises(ValueError)
+def test_set_param():
+    param = get_para()
+    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M']
+
+    MS = ModelSpectrum(param, elemental_lines)
+    MS.assemble_models()
+
+    # get compton model
+    compton = MS.mod.components[0]
+
+    input_param = {'bound_type': 'other', 'max': 13.0, 'min': 9.0, 'value': 11.0}
+    _set_parameter_hint('coherent_sct_energy', input_param, compton)
