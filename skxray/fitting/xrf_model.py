@@ -358,6 +358,7 @@ class ParamController(object):
         Parameters
         ----------
         kind : {'pos', 'width', 'ratio', 'area'}
+            The kind of parameter to add
         element : str
             element name
         constraint : {'lo', 'hi', 'lohi', 'fixed', 'none'}, optional
@@ -377,18 +378,19 @@ class ParamController(object):
         linenames = [
             '{0}_{1}'.format(element, t) for t in transitions]
 
-        PARAM_SUFFIXES = {'pos': '_delta_center',
-                          'width': '_delta_sigma',
-                          'ratio': '_ratio_adjust'}
+        PARAM_SUFFIXES = {'pos': 'delta_center',
+                          'width': 'delta_sigma',
+                          'ratio': 'ratio_adjust'}
         param_suffix = PARAM_SUFFIXES[kind]
 
         for linename in linenames:
             # check if the line is activated
             if linename not in self.element_linenames:
                 continue
-            param_name = str(linename) + param_suffix  # as in lmfit Model
+            # as in lmfit Model
+            param_name = '_'.join((str(linename), param_suffix))
             new_pos = PARAM_DEFAULTS[kind].copy()
-            if constraint:
+            if constraint is not None:
                 self._element_strategy[param_name] = constraint
             self.params.update({param_name: new_pos})
 
