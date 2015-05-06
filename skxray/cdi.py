@@ -197,10 +197,10 @@ def find_support(sample_obj,
     return new_sample, s_index, s_out_index
 
 
-def pi_support(array_in, index_v):
-    obj_out = array_in.copy()
-    obj_out[index_v] = 0.0
-    return obj_out
+def pi_support(sample_obj, index_v):
+    sample_obj = sample_obj.copy()
+    sample_obj[index_v] = 0.0
+    return sample_obj
 
 
 class CDI(object):
