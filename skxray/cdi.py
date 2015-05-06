@@ -43,6 +43,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import six
 import numpy as np
+import time
 
 import logging
 logger = logging.getLogger(__name__)
@@ -125,3 +126,208 @@ def convolution(array1, array2):
     return np.abs(np.fft.ifftshift(np.fft.ifftn(fft_1*fft_2)) *
                   np.sqrt(np.size(array2)))
 
+
+def pi_modulus(array_in, diffraction_array, pi_modulus_flag):
+    """
+    Transfer sample from real space to q space.
+    Use constraint based on diffraction pattern from experiments.
+
+    Parameters
+    ----------
+    array_in : array
+        reconstructed pattern in real space
+    diffraction_array : array
+        experimental data
+    pi_modulus_flag : str
+        Complex or Real
+
+    Returns
+    -------
+    array :
+        updated pattern in q space
+    """
+    thresh_v = 1e-12
+    diff_tmp = np.fft.ifftshift(np.fft.fftn(np.fft.fftshift(array_in)))
+    index = np.where(diffraction_array > 0)
+    diff_tmp[index] = diffraction_array[index] * diff_tmp[index] / (np.abs(diff_tmp[index]) + thresh_v)
+
+    if pi_modulus_flag == 'Complex':
+        return np.fft.ifftshift(np.fft.ifftn(np.fft.fftshift(diff_tmp)))
+    if pi_modulus_flag == 'Real':
+        return np.abs(np.fft.ifftshift(np.fft.ifftn(np.fft.fftshift(diff_tmp))))
+
+
+def find_support(sample_obj,
+                 sw_sigma, sw_threshold):
+    """
+    Update sample area based on thresholds.
+
+    Parameters
+    ----------
+    sample_obj : array
+        sample for reconstruction
+    sw_sigma : float
+        sigma for gaussian in shrinkwrap method
+    sw_threshold : float
+        threshold used in shrinkwrap method
+
+    Returns
+    -------
+    new_sample : array
+        updated sample
+    s_index : array
+        index for sample area
+    s_out_index : array
+        index not for sample area
+    """
+
+    ga = np.abs(sample_obj)
+    gauss_fun = gauss(sample_obj.shape, sw_sigma)
+    gauss_fun = gauss_fun / np.max(gauss_fun)
+    gb = convolution(ga, gauss_fun)
+    gb_max = np.max(gb)
+    s_index = np.where(gb >= sw_threshold*gb_max)
+    s_out_index = np.where(gb < sw_threshold*gb_max)
+
+    new_sample = np.zeros_like(sample_obj)
+    new_sample[s_index] = 1.0
+    #self.sup = sup.copy()
+    #self.sup_index = s_index
+
+    return new_sample, s_index, s_out_index
+
+
+def pi_support(array_in, index_v):
+    obj_out = array_in.copy()
+    obj_out[index_v] = 0.0
+    return obj_out
+
+
+class CDI(object):
+
+    def __init__(self, diffamp, **kwargs):
+        """
+        Parameters
+        ----------
+        deffmap : array
+            diffraction pattern from experiments
+        kwargs : dict
+            parameters related to cdi reconstruction
+        """
+
+        self.diff_array = np.array(diffamp)     # diffraction data
+
+        self.ndim = self.diff_array.ndim    # 2D or 3D case
+        if self.ndim == 2:
+            self.nx, self.ny = np.shape(self.diff_array)    # array dimension
+        if self.ndim == 3:
+            self.nx, self.ny, self.nz = np.shape(self.diff_array)    # array dimension
+
+        self.beta = kwargs['beta']  # feedback parameter for difference map algorithm, around 1.15
+        self.start_ave = kwargs['start_ave']  # 0.8
+        self.gamma_1 = -1/self.beta
+        self.gamma_2 = 1/self.beta
+
+        self.init_obj_flag = True
+        self.init_sup_flag = True
+        self.sup_radius = 150.
+        self.sup_shape = 'Disk'  # 'Box' or 'Disk'
+
+        self.pi_modulus_flag = kwargs['pi_modulus_flag']  # 'Complex'
+
+        # parameters related to shrink wrap
+        self.shrink_wrap_flag = kwargs['shrink_wrap_flag']
+        self.sw_sigma = 0.5
+        self.sw_threshold = 0.1
+        self.sw_start = 0.2
+        self.sw_end = 0.8
+        self.sw_step = 10
+
+    def get_sample_obj(self):
+        pass
+
+    def init_obj(self):
+        """Initiate phase. Focus on 2D here.
+        """
+        pha_tmp = np.random.uniform(0, 2*np.pi, (self.nx, self.ny))
+        self.obj = (np.fft.ifftshift(np.fft.ifftn(np.fft.fftshift(self.diff_array * np.exp(1j*pha_tmp))))
+                    * np.sqrt(np.size(self.diff_array)))
+
+    def init_sup(self):
+        """ Initiate sample support.
+        """
+        self.sup = np.zeros_like(self.diff_array)
+        if self.ndim == 2:
+            if self.sup_shape == 'Box':
+                self.sup[self.nx/2-self.sup_radius: self.nx/2+self.sup_radius,
+                         self.ny/2-self.sup_radius:self.ny/2+self.sup_radius] = 1.0
+        if self.ndim == 3:
+            if self.sup_shape == 'Box':
+                self.sup[self.nx/2-self.sup_radius:self.nx/2+self.sup_radius,
+                         self.ny/2-self.sup_radius:self.ny/2+self.sup_radius,
+                         self.nz/2-self.sup_radius:self.nz/2+self.sup_radius] = 1.0
+        if self.sup_shape == 'Disk':
+            dummy = _dist(np.shape(self.diff_array))
+            self.sup_index = np.where(dummy <= self.sup_radius)
+            self.sup[self.sup_index] = 1.0
+
+    def recon(self, n_iterations=1000):
+        """
+        Run reconstruction.
+
+        Parameters
+        ---------
+        n_iterations : int
+            number of reconstructions to run.
+        """
+
+        # initiate shape and phase
+        if(self.init_obj_flag):
+            self.init_obj()
+        if(self.init_sup_flag):
+            self.init_sup()
+
+        self.obj_error = np.zeros(n_iterations)
+        self.diff_error = np.zeros(n_iterations)
+
+        ave_i = 0
+        self.time_start = time.time()
+        for n in range(n_iterations):
+            self.obj_old = self.obj.copy()
+
+            self.obj_a = pi_modulus(self.obj, self.diff_array, self.pi_modulus_flag)
+            self.obj_a = (1 + self.gamma_2) * self.obj_a - self.gamma_2 * self.obj
+            self.obj_a = pi_support(self.obj_a, self.sup_index)
+
+            self.obj_b = pi_support(self.obj, self.sup_index)
+            self.obj_b = (1 + self.gamma_1) * self.obj_b - self.gamma_1 * self.obj
+            self.obj_b = pi_modulus(self.obj_b, self.diff_array, self.pi_modulus_flag)
+
+            self.obj = self.obj + self.beta * (self.obj_a - self.obj_b)
+
+            # calculate errors
+            #self.cal_obj_error(n)
+            #self.cal_diff_error(n)
+
+            if self.shrink_wrap_flag:
+                if((n >= (self.sw_start * n_iterations)) and (n <= (self.sw_end * n_iterations))):
+                    if np.mod(n, self.sw_step) == 0:
+                        #self.sup_old = self.sup.copy()
+                        print('refine support with shrinkwrap')
+                        self.obj = find_support(self.obj, self.sw_sigma, self.sw_threshold)
+                        #self.cal_error_sup()
+
+            if n > int(self.start_ave*n_iterations):
+                self.obj_ave += self.obj
+                ave_i += 1
+
+            print('{} object_chi= {}, diff_chi={}'.format(n, self.obj_error[n],
+                                                          self.diff_error[n]))
+
+        self.obj_ave = self.obj_ave / ave_i
+        self.time_end = time.time()
+
+        print('object size: {}'.format(np.shape(self.diff_array)))
+        print('{} iterations takes {} sec'.format(n_iterations, self.time_end - self.time_start))
+
+        return self.obj_ave
