@@ -175,8 +175,8 @@ def find_support(sample_obj,
 
     Returns
     -------
-    new_sample : array
-        updated sample
+    new_sup : array
+        updated sample support
     s_index : array
         index for sample area
     s_out_index : array
@@ -192,12 +192,12 @@ def find_support(sample_obj,
     s_index = np.where(conv_fun >= (sw_threshold*conv_max))
     s_out_index = np.where(conv_fun < (sw_threshold*conv_max))
 
-    new_sample = np.zeros_like(sample_obj)
-    new_sample[s_index] = 1.0
+    new_sup = np.zeros_like(sample_obj)
+    new_sup[s_index] = 1
     #self.sup = sup.copy()
     #self.sup_index = s_index
 
-    return new_sample, s_index, s_out_index
+    return new_sup, s_index, s_out_index
 
 
 def pi_support(sample_obj, index_v):
@@ -359,7 +359,7 @@ class CDI(object):
         self.obj_error = np.zeros(n_iterations)
         self.diff_error = np.zeros(n_iterations)
 
-        obj_ave = np.zeros_like(self.obj)
+        obj_ave = np.zeros_like(self.diff_array)
         ave_i = 0
 
         self.time_start = time.time()
@@ -387,7 +387,7 @@ class CDI(object):
                         #self.sup_old = self.sup.copy()
                         #logger.info('refine support with shrinkwrap')
                         print('refine support with shrinkwrap')
-                        self.obj, self.sup_index, self.sup_out_index = find_support(self.obj,
+                        self.sup, self.sup_index, self.sup_out_index = find_support(self.obj,
                                                                                     self.sw_sigma,
                                                                                     self.sw_threshold)
                         #self.cal_error_sup()
