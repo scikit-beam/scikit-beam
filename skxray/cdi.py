@@ -198,9 +198,69 @@ def find_support(sample_obj,
 
 
 def pi_support(sample_obj, index_v):
-    sample_obj = sample_obj.copy()
+    """
+    Define sample shape by cutting unnecessary values.
+
+    Parameters
+    ----------
+    sample_obj : array
+        sample data
+    index_v : array
+        index to define sample area
+
+    Returns
+    -------
+    array :
+        sample object with proper cut.
+    """
+    sample_obj = np.array(sample_obj)
     sample_obj[index_v] = 0.0
     return sample_obj
+
+
+def cal_sample_error(sample_old, sample_new):
+    """
+    Calculate error in sample space.
+
+    Parameters
+    ----------
+    sample_old : array
+        old sample data
+    sample_new : array
+        new sample data
+
+    Returns
+    -------
+    float :
+        relative error
+    """
+    sample_error = (np.sqrt(np.sum((np.abs(sample_new - sample_old))**2)) /
+                    np.sqrt(np.sum((np.abs(sample_old))**2)))
+    return sample_error
+
+
+def cal_diff_error(sample_obj, diff_array):
+    """
+    Calculate the error in q space.
+
+    Parameters
+    ----------
+    sample_obj : array
+        sample data
+    diff_array : array
+        diffraction pattern
+
+    Returns
+    -------
+    float :
+        relative error in q space
+    """
+
+    fft_norm = np.abs(np.fft.ifftshift(np.fft.fftn(np.fft.fftshift(sample_obj))) /
+                      np.sqrt(np.size(sample_obj)))
+    diff_error = (np.sqrt(np.sum((np.abs(fft_norm - diff_array))**2)) /
+                  np.sqrt(np.sum((np.abs(diff_array))**2)))
+    return diff_error
 
 
 class CDI(object):
@@ -223,6 +283,8 @@ class CDI(object):
         if self.ndim == 3:
             self.nx, self.ny, self.nz = np.shape(self.diff_array)    # array dimension
 
+        self.pi_modulus_flag = kwargs['pi_modulus_flag']  # 'Complex'
+
         self.beta = kwargs['beta']  # feedback parameter for difference map algorithm, around 1.15
         self.start_ave = kwargs['start_ave']  # 0.8
         self.gamma_1 = -1/self.beta
@@ -230,18 +292,16 @@ class CDI(object):
 
         self.init_obj_flag = True
         self.init_sup_flag = True
-        self.sup_radius = 150.
-        self.sup_shape = 'Disk'  # 'Box' or 'Disk'
-
-        self.pi_modulus_flag = kwargs['pi_modulus_flag']  # 'Complex'
+        self.sup_radius = kwargs['support_radius']  # 150
+        self.sup_shape = kwargs['support_shape']  # 'Box' or 'Disk'
 
         # parameters related to shrink wrap
         self.shrink_wrap_flag = kwargs['shrink_wrap_flag']
-        self.sw_sigma = 0.5
-        self.sw_threshold = 0.1
-        self.sw_start = 0.2
-        self.sw_end = 0.8
-        self.sw_step = 10
+        self.sw_sigma = kwargs['sw_sigma']  #0.5
+        self.sw_threshold = kwargs['sw_threshold']  #0.1
+        self.sw_start = kwargs['sw_start']  #0.2
+        self.sw_end = kwargs['sw_end']  #0.8
+        self.sw_step = kwargs['sw_step']  #10
 
     def get_sample_obj(self):
         pass
@@ -271,9 +331,12 @@ class CDI(object):
             self.sup_index = np.where(dummy <= self.sup_radius)
             self.sup[self.sup_index] = 1.0
 
+        self.sup_index = np.where(self.sup == 1.0)
+        self.sup_out_index = np.where(self.sup == 0.0)
+
     def recon(self, n_iterations=1000):
         """
-        Run reconstruction.
+        Run reconstruction with difference map algorithm.
 
         Parameters
         ---------
@@ -290,44 +353,47 @@ class CDI(object):
         self.obj_error = np.zeros(n_iterations)
         self.diff_error = np.zeros(n_iterations)
 
+        obj_ave = np.zeros_like(self.obj)
         ave_i = 0
+
         self.time_start = time.time()
         for n in range(n_iterations):
-            self.obj_old = self.obj.copy()
+            self.obj_old = np.array(self.obj)
 
             self.obj_a = pi_modulus(self.obj, self.diff_array, self.pi_modulus_flag)
             self.obj_a = (1 + self.gamma_2) * self.obj_a - self.gamma_2 * self.obj
-            self.obj_a = pi_support(self.obj_a, self.sup_index)
+            self.obj_a = pi_support(self.obj_a, self.sup_out_index)
 
-            self.obj_b = pi_support(self.obj, self.sup_index)
+            self.obj_b = pi_support(self.obj, self.sup_out_index)
             self.obj_b = (1 + self.gamma_1) * self.obj_b - self.gamma_1 * self.obj
             self.obj_b = pi_modulus(self.obj_b, self.diff_array, self.pi_modulus_flag)
 
             self.obj = self.obj + self.beta * (self.obj_a - self.obj_b)
 
             # calculate errors
-            #self.cal_obj_error(n)
+            self.obj_error[n] = cal_sample_error(self.obj_old, self.obj)
+            self.diff_error[n] = cal_diff_error(self.obj, self.diff_array)
             #self.cal_diff_error(n)
 
-            if self.shrink_wrap_flag:
+            if self.shrink_wrap_flag is True:
                 if((n >= (self.sw_start * n_iterations)) and (n <= (self.sw_end * n_iterations))):
                     if np.mod(n, self.sw_step) == 0:
                         #self.sup_old = self.sup.copy()
-                        print('refine support with shrinkwrap')
+                        logger.info('refine support with shrinkwrap')
                         self.obj = find_support(self.obj, self.sw_sigma, self.sw_threshold)
                         #self.cal_error_sup()
 
             if n > int(self.start_ave*n_iterations):
-                self.obj_ave += self.obj
+                obj_ave += self.obj
                 ave_i += 1
 
             print('{} object_chi= {}, diff_chi={}'.format(n, self.obj_error[n],
                                                           self.diff_error[n]))
 
-        self.obj_ave = self.obj_ave / ave_i
+        obj_ave = obj_ave / ave_i
         self.time_end = time.time()
 
-        print('object size: {}'.format(np.shape(self.diff_array)))
-        print('{} iterations takes {} sec'.format(n_iterations, self.time_end - self.time_start))
+        logger.info('object size: {}'.format(np.shape(self.diff_array)))
+        logger.info('{} iterations takes {} sec'.format(n_iterations, self.time_end - self.time_start))
 
-        return self.obj_ave
+        return obj_ave
