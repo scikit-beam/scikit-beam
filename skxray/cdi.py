@@ -44,6 +44,7 @@ from __future__ import (absolute_import, division, print_function,
 import six
 import numpy as np
 import time
+from scipy import signal
 
 import logging
 logger = logging.getLogger(__name__)
@@ -123,11 +124,12 @@ def convolution(array1, array2):
     fft_norm = lambda x:  np.fft.fftshift(np.fft.fftn(x)) / np.sqrt(np.size(x))
     fft_1 = fft_norm(array1)
     fft_2 = fft_norm(array2)
-    return np.abs(np.fft.ifftshift(np.fft.ifftn(fft_1*fft_2)) *
-                  np.sqrt(np.size(array2)))
+    #return np.abs(np.fft.ifftshift(np.fft.ifftn(fft_1*fft_2)) *
+    #              np.sqrt(np.size(array2)))
+    return signal.fftconvolve(array1, array2, mode='same')
 
 
-def pi_modulus(array_in, diffraction_array, pi_modulus_flag):
+def pi_modulus(array_in, diff_array, pi_modulus_flag):
     """
     Transfer sample from real space to q space.
     Use constraint based on diffraction pattern from experiments.
@@ -136,7 +138,7 @@ def pi_modulus(array_in, diffraction_array, pi_modulus_flag):
     ----------
     array_in : array
         reconstructed pattern in real space
-    diffraction_array : array
+    diff_array : array
         experimental data
     pi_modulus_flag : str
         Complex or Real
@@ -147,14 +149,14 @@ def pi_modulus(array_in, diffraction_array, pi_modulus_flag):
         updated pattern in q space
     """
     thresh_v = 1e-12
-    diff_tmp = np.fft.ifftshift(np.fft.fftn(np.fft.fftshift(array_in)))
-    index = np.where(diffraction_array > 0)
-    diff_tmp[index] = diffraction_array[index] * diff_tmp[index] / (np.abs(diff_tmp[index]) + thresh_v)
+    diff_tmp = np.fft.ifftshift(np.fft.fftn(np.fft.fftshift(array_in))) / np.sqrt(np.size(array_in))
+    index = np.where(diff_array > 0)
+    diff_tmp[index] = diff_array[index] * diff_tmp[index] / (np.abs(diff_tmp[index]) + thresh_v)
 
     if pi_modulus_flag == 'Complex':
-        return np.fft.ifftshift(np.fft.ifftn(np.fft.fftshift(diff_tmp)))
-    if pi_modulus_flag == 'Real':
-        return np.abs(np.fft.ifftshift(np.fft.ifftn(np.fft.fftshift(diff_tmp))))
+        return np.fft.ifftshift(np.fft.ifftn(np.fft.fftshift(diff_tmp))) * np.sqrt(np.size(diff_array))
+    elif pi_modulus_flag == 'Real':
+        return np.abs(np.fft.ifftshift(np.fft.ifftn(np.fft.fftshift(diff_tmp)))) * np.sqrt(np.size(diff_array))
 
 
 def find_support(sample_obj,
@@ -181,13 +183,14 @@ def find_support(sample_obj,
         index not for sample area
     """
 
-    ga = np.abs(sample_obj)
+    sample_obj = np.abs(sample_obj)
     gauss_fun = gauss(sample_obj.shape, sw_sigma)
     gauss_fun = gauss_fun / np.max(gauss_fun)
-    gb = convolution(ga, gauss_fun)
-    gb_max = np.max(gb)
-    s_index = np.where(gb >= sw_threshold*gb_max)
-    s_out_index = np.where(gb < sw_threshold*gb_max)
+    conv_fun = convolution(sample_obj, gauss_fun)
+    conv_max = np.max(conv_fun)
+
+    s_index = np.where(conv_fun >= (sw_threshold*conv_max))
+    s_out_index = np.where(conv_fun < (sw_threshold*conv_max))
 
     new_sample = np.zeros_like(sample_obj)
     new_sample[s_index] = 1.0
@@ -287,24 +290,20 @@ class CDI(object):
 
         self.beta = kwargs['beta']  # feedback parameter for difference map algorithm, around 1.15
         self.start_ave = kwargs['start_ave']  # 0.8
-        self.gamma_1 = -1/self.beta
-        self.gamma_2 = 1/self.beta
 
-        self.init_obj_flag = True
-        self.init_sup_flag = True
+        # initial support
+        self.init_obj_flag = kwargs['init_obj_flag']
+        self.init_sup_flag = kwargs['init_sup_flag']
         self.sup_radius = kwargs['support_radius']  # 150
         self.sup_shape = kwargs['support_shape']  # 'Box' or 'Disk'
 
         # parameters related to shrink wrap
         self.shrink_wrap_flag = kwargs['shrink_wrap_flag']
-        self.sw_sigma = kwargs['sw_sigma']  #0.5
-        self.sw_threshold = kwargs['sw_threshold']  #0.1
-        self.sw_start = kwargs['sw_start']  #0.2
-        self.sw_end = kwargs['sw_end']  #0.8
-        self.sw_step = kwargs['sw_step']  #10
-
-    def get_sample_obj(self):
-        pass
+        self.sw_sigma = kwargs['sw_sigma']  # 0.5
+        self.sw_threshold = kwargs['sw_threshold']  # 0.1
+        self.sw_start = kwargs['sw_start']  # 0.2
+        self.sw_end = kwargs['sw_end']  # 0.8
+        self.sw_step = kwargs['sw_step']  # 10
 
     def init_obj(self):
         """Initiate phase. Focus on 2D here.
@@ -320,19 +319,19 @@ class CDI(object):
         if self.ndim == 2:
             if self.sup_shape == 'Box':
                 self.sup[self.nx/2-self.sup_radius: self.nx/2+self.sup_radius,
-                         self.ny/2-self.sup_radius:self.ny/2+self.sup_radius] = 1.0
+                         self.ny/2-self.sup_radius:self.ny/2+self.sup_radius] = 1
         if self.ndim == 3:
             if self.sup_shape == 'Box':
                 self.sup[self.nx/2-self.sup_radius:self.nx/2+self.sup_radius,
                          self.ny/2-self.sup_radius:self.ny/2+self.sup_radius,
-                         self.nz/2-self.sup_radius:self.nz/2+self.sup_radius] = 1.0
+                         self.nz/2-self.sup_radius:self.nz/2+self.sup_radius] = 1
         if self.sup_shape == 'Disk':
             dummy = _dist(np.shape(self.diff_array))
             self.sup_index = np.where(dummy <= self.sup_radius)
-            self.sup[self.sup_index] = 1.0
+            self.sup[self.sup_index] = 1
 
-        self.sup_index = np.where(self.sup == 1.0)
-        self.sup_out_index = np.where(self.sup == 0.0)
+        self.sup_index = np.where(self.sup == 1)
+        self.sup_out_index = np.where(self.sup == 0)
 
     def recon(self, n_iterations=1000):
         """
@@ -341,8 +340,15 @@ class CDI(object):
         Parameters
         ---------
         n_iterations : int
-            number of reconstructions to run.
+            number of reconstructions to run
+
+        Returns
+        -------
+        array :
+            reconstructed sample object
         """
+        gamma_1 = -1/self.beta
+        gamma_2 = 1/self.beta
 
         # initiate shape and phase
         if(self.init_obj_flag):
@@ -360,15 +366,15 @@ class CDI(object):
         for n in range(n_iterations):
             self.obj_old = np.array(self.obj)
 
-            self.obj_a = pi_modulus(self.obj, self.diff_array, self.pi_modulus_flag)
-            self.obj_a = (1 + self.gamma_2) * self.obj_a - self.gamma_2 * self.obj
-            self.obj_a = pi_support(self.obj_a, self.sup_out_index)
+            obj_a = pi_modulus(self.obj, self.diff_array, self.pi_modulus_flag)
+            obj_a = (1 + gamma_2) * obj_a - gamma_2 * self.obj
+            obj_a = pi_support(obj_a, self.sup_out_index)
 
-            self.obj_b = pi_support(self.obj, self.sup_out_index)
-            self.obj_b = (1 + self.gamma_1) * self.obj_b - self.gamma_1 * self.obj
-            self.obj_b = pi_modulus(self.obj_b, self.diff_array, self.pi_modulus_flag)
+            obj_b = pi_support(self.obj, self.sup_out_index)
+            obj_b = (1 + gamma_1) * obj_b - gamma_1 * self.obj
+            obj_b = pi_modulus(obj_b, self.diff_array, self.pi_modulus_flag)
 
-            self.obj = self.obj + self.beta * (self.obj_a - self.obj_b)
+            self.obj = self.obj + self.beta * (obj_a - obj_b)
 
             # calculate errors
             self.obj_error[n] = cal_sample_error(self.obj_old, self.obj)
@@ -379,11 +385,14 @@ class CDI(object):
                 if((n >= (self.sw_start * n_iterations)) and (n <= (self.sw_end * n_iterations))):
                     if np.mod(n, self.sw_step) == 0:
                         #self.sup_old = self.sup.copy()
-                        logger.info('refine support with shrinkwrap')
-                        self.obj = find_support(self.obj, self.sw_sigma, self.sw_threshold)
+                        #logger.info('refine support with shrinkwrap')
+                        print('refine support with shrinkwrap')
+                        self.obj, self.sup_index, self.sup_out_index = find_support(self.obj,
+                                                                                    self.sw_sigma,
+                                                                                    self.sw_threshold)
                         #self.cal_error_sup()
 
-            if n > int(self.start_ave*n_iterations):
+            if n > self.start_ave*n_iterations:
                 obj_ave += self.obj
                 ave_i += 1
 
