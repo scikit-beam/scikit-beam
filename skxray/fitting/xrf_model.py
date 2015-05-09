@@ -537,34 +537,19 @@ class ModelSpectrum(object):
         """
         setup parameters related to Elastic model
         """
+        param_hints_elastic = ['e_offset', 'e_linear', 'e_quadratic',
+                               'fwhm_offset', 'fwhm_fanoprime', 'coherent_sct_energy']
+
         elastic = ElasticModel(prefix='elastic_')
 
         logger.debug('Started setting up parameters for elastic model')
 
-        # set constraints for the following global parameters
-        elastic.set_param_hint('e_offset',
-                               value=self.compton_param['e_offset'].value,
-                               expr='e_offset')
-        elastic.set_param_hint('e_linear',
-                               value=self.compton_param['e_linear'].value,
-                               expr='e_linear')
-        elastic.set_param_hint('e_quadratic',
-                               value=self.compton_param['e_quadratic'].value,
-                               expr='e_quadratic')
-        elastic.set_param_hint('fwhm_offset',
-                               value=self.compton_param['fwhm_offset'].value,
-                               expr='fwhm_offset')
-        elastic.set_param_hint('fwhm_fanoprime',
-                               value=self.compton_param['fwhm_fanoprime'].value,
-                               expr='fwhm_fanoprime')
-        elastic.set_param_hint('coherent_sct_energy',
-                               value=self.compton_param['coherent_sct_energy'].value,
-                               expr='coherent_sct_energy')
+        # set constraints for the global parameters from the Compton model
+        _copy_model_param_hints(elastic, self.compton_param, param_hints_elastic)
 
-        item_list = ['e_offset', 'e_linear', 'e_quadratic',
-                     'fwhm_offset', 'fwhm_fanoprime',
-                     'coherent_sct_amplitude', 'coherent_sct_energy']
-        for item in item_list:
+        # with_amplitude, parameters can be updated from self.param dict
+        param_hints_elastic.append('coherent_sct_amplitude')
+        for item in param_hints_elastic:
             if item in self.params.keys():
                 _set_parameter_hint(item, self.params[item], elastic)
 
@@ -591,6 +576,7 @@ class ModelSpectrum(object):
         element_mod = None
         param_hints_to_copy = ['e_offset', 'e_linear', 'e_quadratic',
                                'fwhm_offset', 'fwhm_fanoprime']
+
         if elemental_line in K_LINE:
             element = elemental_line.split('_')[0]
             e = Element(element)
@@ -609,6 +595,7 @@ class ModelSpectrum(object):
                     continue
 
                 gauss_mod = ElementModel(prefix=str(element)+'_'+str(line_name)+'_')
+
                 # copy the fixed parameters from the Compton model
                 _copy_model_param_hints(gauss_mod, self.compton_param,
                                         param_hints_to_copy)
@@ -691,21 +678,9 @@ class ModelSpectrum(object):
 
                 gauss_mod = ElementModel(prefix=str(element)+'_'+str(line_name)+'_')
 
-                gauss_mod.set_param_hint('e_offset',
-                                         value=self.compton_param['e_offset'].value,
-                                         expr='e_offset')
-                gauss_mod.set_param_hint('e_linear',
-                                         value=self.compton_param['e_linear'].value,
-                                         expr='e_linear')
-                gauss_mod.set_param_hint('e_quadratic',
-                                         value=self.compton_param['e_quadratic'].value,
-                                         expr='e_quadratic')
-                gauss_mod.set_param_hint('fwhm_offset',
-                                         value=self.compton_param['fwhm_offset'].value,
-                                         expr='fwhm_offset')
-                gauss_mod.set_param_hint('fwhm_fanoprime',
-                                         value=self.compton_param['fwhm_fanoprime'].value,
-                                         expr='fwhm_fanoprime')
+                # copy the fixed parameters from the Compton model
+                _copy_model_param_hints(gauss_mod, self.compton_param,
+                                        param_hints_to_copy)
 
                 gauss_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
 
@@ -773,16 +748,9 @@ class ModelSpectrum(object):
 
                 gauss_mod = ElementModel(prefix=str(element)+'_'+str(line_name)+'_')
 
-                gauss_mod.set_param_hint('e_offset', value=self.compton_param['e_offset'].value,
-                                         expr='e_offset')
-                gauss_mod.set_param_hint('e_linear', value=self.compton_param['e_linear'].value,
-                                         expr='e_linear')
-                gauss_mod.set_param_hint('e_quadratic', value=self.compton_param['e_quadratic'].value,
-                                         expr='e_quadratic')
-                gauss_mod.set_param_hint('fwhm_offset', value=self.compton_param['fwhm_offset'].value,
-                                         expr='fwhm_offset')
-                gauss_mod.set_param_hint('fwhm_fanoprime', value=self.compton_param['fwhm_fanoprime'].value,
-                                         expr='fwhm_fanoprime')
+                # copy the fixed parameters from the Compton model
+                _copy_model_param_hints(gauss_mod, self.compton_param,
+                                        param_hints_to_copy)
 
                 gauss_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
 
@@ -876,21 +844,11 @@ class ModelSpectrum(object):
             # no '-' allowed in prefix name in lmfit
             pre_name = 'pileup_' + elemental_line.replace('-', '_') + '_'
             gauss_mod = ElementModel(prefix=pre_name)
-            gauss_mod.set_param_hint('e_offset',
-                                     value=self.compton_param['e_offset'].value,
-                                     expr='e_offset')
-            gauss_mod.set_param_hint('e_linear',
-                                     value=self.compton_param['e_linear'].value,
-                                     expr='e_linear')
-            gauss_mod.set_param_hint('e_quadratic',
-                                     value=self.compton_param['e_quadratic'].value,
-                                     expr='e_quadratic')
-            gauss_mod.set_param_hint('fwhm_offset',
-                                     value=self.compton_param['fwhm_offset'].value,
-                                     expr='fwhm_offset')
-            gauss_mod.set_param_hint('fwhm_fanoprime',
-                                     value=self.compton_param['fwhm_fanoprime'].value,
-                                     expr='fwhm_fanoprime')
+
+            # copy the fixed parameters from the Compton model
+            _copy_model_param_hints(gauss_mod, self.compton_param,
+                                    param_hints_to_copy)
+
             gauss_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
 
             area_name = pre_name + 'area'
