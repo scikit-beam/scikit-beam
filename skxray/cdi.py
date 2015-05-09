@@ -98,6 +98,27 @@ def gauss(dims, sigma):
     return y / np.sum(y)
 
 
+def _fft_helper(x, option='fft'):
+    """
+    Helper function to calculate normalized fft or ifft.
+
+    Parameters
+    ----------
+    x : array
+    option : str
+        use fft or ifft
+
+    Returns
+    -------
+    array :
+        after fft or ifft
+    """
+    if option == 'fft':
+        return np.fft.ifftshift(np.fft.fftn(np.fft.fftshift(x)))
+    elif option == 'ifft':
+        return np.fft.ifftshift(np.fft.ifftn(np.fft.fftshift(x)))
+
+
 def convolution(array1, array2):
     """
     Calculate convolution of two arrays. Transfer into q space to perform the calculation.
@@ -121,15 +142,13 @@ def convolution(array1, array2):
     `this issue on github <https://github.com/Nikea/scikit-xray/issues/258>`_
     for details.
     """
-    fft_norm = lambda x:  np.fft.fftshift(np.fft.fftn(x)) / np.sqrt(np.size(x))
-    fft_1 = fft_norm(array1)
-    fft_2 = fft_norm(array2)
-    #return np.abs(np.fft.ifftshift(np.fft.ifftn(fft_1*fft_2)) *
-    #              np.sqrt(np.size(array2)))
-    return signal.fftconvolve(array1, array2, mode='same')
+    fft_1 = _fft_helper(array1) / np.sqrt(np.size(array1))
+    fft_2 = _fft_helper(array2) / np.sqrt(np.size(array2))
+    return np.abs(_fft_helper(fft_1*fft_2, option='ifft')) * np.sqrt(np.size(array2))
 
 
-def pi_modulus(array_in, diff_array, pi_modulus_flag):
+def pi_modulus(array_in, diff_array,
+               pi_modulus_flag):
     """
     Transfer sample from real space to q space.
     Use constraint based on diffraction pattern from experiments.
@@ -149,14 +168,14 @@ def pi_modulus(array_in, diff_array, pi_modulus_flag):
         updated pattern in q space
     """
     thresh_v = 1e-12
-    diff_tmp = np.fft.ifftshift(np.fft.fftn(np.fft.fftshift(array_in))) / np.sqrt(np.size(array_in))
+    diff_tmp = _fft_helper(array_in) / np.sqrt(np.size(array_in))
     index = np.where(diff_array > 0)
     diff_tmp[index] = diff_array[index] * diff_tmp[index] / (np.abs(diff_tmp[index]) + thresh_v)
 
     if pi_modulus_flag == 'Complex':
-        return np.fft.ifftshift(np.fft.ifftn(np.fft.fftshift(diff_tmp))) * np.sqrt(np.size(diff_array))
+        return _fft_helper(diff_tmp, option='ifft') * np.sqrt(np.size(diff_array))
     elif pi_modulus_flag == 'Real':
-        return np.abs(np.fft.ifftshift(np.fft.ifftn(np.fft.fftshift(diff_tmp)))) * np.sqrt(np.size(diff_array))
+        return np.abs(_fft_helper(diff_tmp, option='ifft')) * np.sqrt(np.size(diff_array))
 
 
 def find_support(sample_obj,
@@ -186,7 +205,10 @@ def find_support(sample_obj,
     sample_obj = np.abs(sample_obj)
     gauss_fun = gauss(sample_obj.shape, sw_sigma)
     gauss_fun = gauss_fun / np.max(gauss_fun)
+
+    #conv_fun = signal.fftconvolve(sample_obj, gauss_fun, mode='same')
     conv_fun = convolution(sample_obj, gauss_fun)
+
     conv_max = np.max(conv_fun)
 
     s_index = np.where(conv_fun >= (sw_threshold*conv_max))
@@ -194,8 +216,6 @@ def find_support(sample_obj,
 
     new_sup = np.zeros_like(sample_obj)
     new_sup[s_index] = 1
-    #self.sup = sup.copy()
-    #self.sup_index = s_index
 
     return new_sup, s_index, s_out_index
 
@@ -217,29 +237,28 @@ def pi_support(sample_obj, index_v):
         sample object with proper cut.
     """
     sample_obj = np.array(sample_obj)
-    sample_obj[index_v] = 0.0
+    sample_obj[index_v] = 0
     return sample_obj
 
 
-def cal_sample_error(sample_old, sample_new):
+def cal_relative_error(x_old, x_new):
     """
-    Calculate error in sample space.
+    Relative error is calcualted as the ratio of the difference between the new and
+    the original arrays to the norm of the original array.
 
     Parameters
     ----------
-    sample_old : array
-        old sample data
-    sample_new : array
-        new sample data
+    x_old : array
+        previous data set
+    x_new : array
+        new data set
 
     Returns
     -------
     float :
         relative error
     """
-    sample_error = (np.sqrt(np.sum((np.abs(sample_new - sample_old))**2)) /
-                    np.sqrt(np.sum((np.abs(sample_old))**2)))
-    return sample_error
+    return np.linalg.norm(x_new - x_old)/np.linalg.norm(x_old)
 
 
 def cal_diff_error(sample_obj, diff_array):
@@ -258,12 +277,8 @@ def cal_diff_error(sample_obj, diff_array):
     float :
         relative error in q space
     """
-
-    fft_norm = np.abs(np.fft.ifftshift(np.fft.fftn(np.fft.fftshift(sample_obj))) /
-                      np.sqrt(np.size(sample_obj)))
-    diff_error = (np.sqrt(np.sum((np.abs(fft_norm - diff_array))**2)) /
-                  np.sqrt(np.sum((np.abs(diff_array))**2)))
-    return diff_error
+    new_diff = np.abs(_fft_helper(sample_obj)) / np.sqrt(np.size(sample_obj))
+    return cal_relative_error(diff_array, new_diff)
 
 
 class CDI(object):
@@ -294,10 +309,10 @@ class CDI(object):
         # initial support
         self.init_obj_flag = kwargs['init_obj_flag']
         self.init_sup_flag = kwargs['init_sup_flag']
-        self.sup_radius = kwargs['support_radius']  # 150
+        self.sup_radius = kwargs['support_radius']
         self.sup_shape = kwargs['support_shape']  # 'Box' or 'Disk'
 
-        # parameters related to shrink wrap
+        # parameters for shrink wrap
         self.shrink_wrap_flag = kwargs['shrink_wrap_flag']
         self.sw_sigma = kwargs['sw_sigma']  # 0.5
         self.sw_threshold = kwargs['sw_threshold']  # 0.1
@@ -306,10 +321,11 @@ class CDI(object):
         self.sw_step = kwargs['sw_step']  # 10
 
     def init_obj(self):
-        """Initiate phase. Focus on 2D here.
+        """
+        Initiate phase. Focus on 2D case here, and to be extended.
         """
         pha_tmp = np.random.uniform(0, 2*np.pi, (self.nx, self.ny))
-        self.obj = (np.fft.ifftshift(np.fft.ifftn(np.fft.fftshift(self.diff_array * np.exp(1j*pha_tmp))))
+        self.obj = (_fft_helper(self.diff_array * np.exp(1j*pha_tmp), option='ifft')
                     * np.sqrt(np.size(self.diff_array)))
 
     def init_sup(self):
@@ -358,8 +374,10 @@ class CDI(object):
 
         self.obj_error = np.zeros(n_iterations)
         self.diff_error = np.zeros(n_iterations)
+        self.sup_error = np.zeros(n_iterations)
 
-        obj_ave = np.zeros_like(self.diff_array)
+        sup_old = np.zeros_like(self.diff_array)
+        obj_ave = np.zeros_like(self.diff_array).astype(complex)
         ave_i = 0
 
         self.time_start = time.time()
@@ -377,20 +395,19 @@ class CDI(object):
             self.obj = self.obj + self.beta * (obj_a - obj_b)
 
             # calculate errors
-            self.obj_error[n] = cal_sample_error(self.obj_old, self.obj)
+            self.obj_error[n] = cal_relative_error(self.obj_old, self.obj)
             self.diff_error[n] = cal_diff_error(self.obj, self.diff_array)
-            #self.cal_diff_error(n)
 
             if self.shrink_wrap_flag is True:
                 if((n >= (self.sw_start * n_iterations)) and (n <= (self.sw_end * n_iterations))):
                     if np.mod(n, self.sw_step) == 0:
-                        #self.sup_old = self.sup.copy()
                         #logger.info('refine support with shrinkwrap')
-                        print('refine support with shrinkwrap')
-                        self.sup, self.sup_index, self.sup_out_index = find_support(self.obj,
-                                                                                    self.sw_sigma,
-                                                                                    self.sw_threshold)
-                        #self.cal_error_sup()
+                        print('Refine support with shrinkwrap')
+                        sup, self.sup_index, self.sup_out_index = find_support(self.obj,
+                                                                               self.sw_sigma,
+                                                                               self.sw_threshold)
+                        self.sup_error[n] = np.sum(sup_old) #cal_relative_error(sup_old, sup)
+                        sup_old = np.array(sup)
 
             if n > self.start_ave*n_iterations:
                 obj_ave += self.obj
