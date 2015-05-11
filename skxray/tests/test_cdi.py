@@ -7,7 +7,8 @@ from numpy.testing import (assert_equal, assert_array_equal,
                            assert_array_almost_equal, assert_almost_equal)
 
 from skxray.cdi import (_dist, gauss, convolution,
-                        cal_relative_error, find_support, pi_support)
+                        cal_relative_error, find_support, pi_support,
+                        _fft_helper, pi_modulus, cal_diff_error, CDI)
 
 
 def dist_temp(dims):
@@ -74,6 +75,15 @@ def test_convolution():
         assert_almost_equal(0, np.mean(f), decimal=3)
 
 
+def test_fft_helper():
+    x = np.linspace(-2, 2, 100, endpoint=True)
+    g = np.exp(x ** 2 / 2)
+
+    g_fft = _fft_helper(g)
+    g_ifft = _fft_helper(g_fft, option='ifft')
+    assert_array_almost_equal(np.abs(g_ifft), g, decimal=10)
+
+
 def test_relative_error():
     shape_v = [3, 3]
     a1 = np.zeros(shape_v)
@@ -106,3 +116,63 @@ def test_pi_support():
     index = np.where(a1 == 1)
     a2 = pi_support(a1, index)
     assert_equal(np.sum(a2), 0)
+
+
+def cal_diff():
+    """
+    Fft transform of a squared area.
+
+    Returns
+    -------
+    a : array
+        squared sample
+    diff_v : array
+        fft transform of sample area
+    """
+    shapev = [100, 100]
+    r = 20
+    a = np.zeros(shapev)
+    a[shapev[0]//2-r:shapev[0]//2+r, shapev[1]//2-r:shapev[1]//2+r] = 1
+    diff_v = np.abs(_fft_helper(a)) / np.sqrt(np.size(a))
+    return a, diff_v
+
+
+def run_pi_modulus(data_type):
+    a, diff_v = cal_diff()
+    a_new = pi_modulus(a, diff_v, data_type)
+    assert_array_almost_equal(np.abs(a_new), a)
+
+
+def test_pi_modulus():
+    type_list = ['Real', 'Complex']
+    for d in type_list:
+        yield run_pi_modulus, d
+
+
+def test_cal_diff_error():
+    a, diff_v = cal_diff()
+    result = cal_diff_error(a, diff_v)
+    assert_equal(np.sum(result), 0)
+
+
+def test_recon():
+    a, diff_v = cal_diff()
+    total_n = 10
+    cdi_param = {'beta': 1.15,
+                 'start_ave': 0.8,
+                 'pi_modulus_flag': 'Complex',
+                 'init_obj_flag': True,
+                 'init_sup_flag': True,
+                 'support_radius': 20,
+                 'support_shape': 'Box',
+                 'shrink_wrap_flag': False,
+                 'sw_sigma': 0.5,
+                 'sw_threshold': 0.1,
+                 'sw_start': 0.2,
+                 'sw_end': 0.8,
+                 'sw_step': 10}
+    cdi = CDI(diff_v, **cdi_param)
+    outv = cdi.recon(n_iterations=total_n)
+    outv = np.abs(outv)
+    # compare the area of supports
+    assert_almost_equal(np.shape(outv[outv>0.9]), np.shape(a[a>0.9]))

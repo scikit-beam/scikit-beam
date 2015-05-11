@@ -148,7 +148,7 @@ def convolution(array1, array2):
 
 
 def pi_modulus(array_in, diff_array,
-               pi_modulus_flag):
+               pi_modulus_flag, thresh_v=1e-12):
     """
     Transfer sample from real space to q space.
     Use constraint based on diffraction pattern from experiments.
@@ -161,13 +161,14 @@ def pi_modulus(array_in, diff_array,
         experimental data
     pi_modulus_flag : str
         Complex or Real
+    thresh_v : float
+        add small value to avoid the case of dividing something by zero
 
     Returns
     -------
     array :
         updated pattern in q space
     """
-    thresh_v = 1e-12
     diff_tmp = _fft_helper(array_in) / np.sqrt(np.size(array_in))
     index = np.where(diff_array > 0)
     diff_tmp[index] = diff_array[index] * diff_tmp[index] / (np.abs(diff_tmp[index]) + thresh_v)
@@ -206,7 +207,6 @@ def find_support(sample_obj,
     gauss_fun = gauss(sample_obj.shape, sw_sigma)
     gauss_fun = gauss_fun / np.max(gauss_fun)
 
-    #conv_fun = signal.fftconvolve(sample_obj, gauss_fun, mode='same')
     conv_fun = convolution(sample_obj, gauss_fun)
 
     conv_max = np.max(conv_fun)
@@ -243,7 +243,7 @@ def pi_support(sample_obj, index_v):
 
 def cal_relative_error(x_old, x_new):
     """
-    Relative error is calcualted as the ratio of the difference between the new and
+    Relative error is calculated as the ratio of the difference between the new and
     the original arrays to the norm of the original array.
 
     Parameters
@@ -402,7 +402,7 @@ class CDI(object):
                 if((n >= (self.sw_start * n_iterations)) and (n <= (self.sw_end * n_iterations))):
                     if np.mod(n, self.sw_step) == 0:
                         #logger.info('refine support with shrinkwrap')
-                        print('Refine support with shrinkwrap')
+                        logger.info('Refine support with shrinkwrap')
                         sup, self.sup_index, self.sup_out_index = find_support(self.obj,
                                                                                self.sw_sigma,
                                                                                self.sw_threshold)
@@ -413,8 +413,8 @@ class CDI(object):
                 obj_ave += self.obj
                 ave_i += 1
 
-            print('{} object_chi= {}, diff_chi={}'.format(n, self.obj_error[n],
-                                                          self.diff_error[n]))
+            logger.info('{} object_chi= {}, diff_chi={}'.format(n, self.obj_error[n],
+                                                                self.diff_error[n]))
 
         obj_ave = obj_ave / ave_i
         self.time_end = time.time()
