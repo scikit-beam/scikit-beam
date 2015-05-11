@@ -90,7 +90,7 @@ def gauss(dims, sigma):
 
     Returns
     -------
-    Array :
+    arr : array
         ND gaussian
     """
     x = _dist(dims)
@@ -98,25 +98,8 @@ def gauss(dims, sigma):
     return y / np.sum(y)
 
 
-def _fft_helper(x, option='fft'):
-    """
-    Helper function to calculate normalized fft or ifft.
-
-    Parameters
-    ----------
-    x : array
-    option : str
-        use fft or ifft
-
-    Returns
-    -------
-    array :
-        after fft or ifft
-    """
-    if option == 'fft':
-        return np.fft.ifftshift(np.fft.fftn(np.fft.fftshift(x)))
-    elif option == 'ifft':
-        return np.fft.ifftshift(np.fft.ifftn(np.fft.fftshift(x)))
+_fft_helper = lambda x: np.fft.ifftshift(np.fft.fftn(np.fft.fftshift(x)))
+_ifft_helper = lambda x: np.fft.ifftshift(np.fft.ifftn(np.fft.fftshift(x)))
 
 
 def convolution(array1, array2):
@@ -132,7 +115,7 @@ def convolution(array1, array2):
 
     Returns
     -------
-    array :
+    arr : array
         convolution result
 
     Notes
@@ -144,11 +127,11 @@ def convolution(array1, array2):
     """
     fft_1 = _fft_helper(array1) / np.sqrt(np.size(array1))
     fft_2 = _fft_helper(array2) / np.sqrt(np.size(array2))
-    return np.abs(_fft_helper(fft_1*fft_2, option='ifft')) * np.sqrt(np.size(array2))
+    return np.abs(_ifft_helper(fft_1*fft_2) * np.sqrt(np.size(array2)))
 
 
 def pi_modulus(array_in, diff_array,
-               pi_modulus_flag, thresh_v=1e-12):
+               thresh_v=1e-12):
     """
     Transfer sample from real space to q space.
     Use constraint based on diffraction pattern from experiments.
@@ -159,24 +142,19 @@ def pi_modulus(array_in, diff_array,
         reconstructed pattern in real space
     diff_array : array
         experimental data
-    pi_modulus_flag : str
-        Complex or Real
     thresh_v : float
         add small value to avoid the case of dividing something by zero
 
     Returns
     -------
-    array :
+    arr : array
         updated pattern in q space
     """
     diff_tmp = _fft_helper(array_in) / np.sqrt(np.size(array_in))
     index = np.where(diff_array > 0)
     diff_tmp[index] = diff_array[index] * diff_tmp[index] / (np.abs(diff_tmp[index]) + thresh_v)
 
-    if pi_modulus_flag == 'Complex':
-        return _fft_helper(diff_tmp, option='ifft') * np.sqrt(np.size(diff_array))
-    elif pi_modulus_flag == 'Real':
-        return np.abs(_fft_helper(diff_tmp, option='ifft')) * np.sqrt(np.size(diff_array))
+    return _ifft_helper(diff_tmp) * np.sqrt(np.size(diff_array))
 
 
 def find_support(sample_obj,
@@ -325,7 +303,7 @@ class CDI(object):
         Initiate phase. Focus on 2D case here, and to be extended.
         """
         pha_tmp = np.random.uniform(0, 2*np.pi, (self.nx, self.ny))
-        self.obj = (_fft_helper(self.diff_array * np.exp(1j*pha_tmp), option='ifft')
+        self.obj = (_ifft_helper(self.diff_array * np.exp(1j*pha_tmp))
                     * np.sqrt(np.size(self.diff_array)))
 
     def init_sup(self):
@@ -384,15 +362,19 @@ class CDI(object):
         for n in range(n_iterations):
             self.obj_old = np.array(self.obj)
 
-            obj_a = pi_modulus(self.obj, self.diff_array, self.pi_modulus_flag)
+            obj_a = pi_modulus(self.obj, self.diff_array)
+            if self.pi_modulus_flag == 'real':
+                obj_a = np.abs(obj_a)
             obj_a = (1 + gamma_2) * obj_a - gamma_2 * self.obj
             obj_a = pi_support(obj_a, self.sup_out_index)
 
             obj_b = pi_support(self.obj, self.sup_out_index)
             obj_b = (1 + gamma_1) * obj_b - gamma_1 * self.obj
-            obj_b = pi_modulus(obj_b, self.diff_array, self.pi_modulus_flag)
+            obj_b = pi_modulus(obj_b, self.diff_array)
+            if self.pi_modulus_flag == 'real':
+                obj_b = np.abs(obj_b)
 
-            self.obj = self.obj + self.beta * (obj_a - obj_b)
+            self.obj += self.beta * (obj_a - obj_b)
 
             # calculate errors
             self.obj_error[n] = cal_relative_error(self.obj_old, self.obj)
@@ -401,7 +383,6 @@ class CDI(object):
             if self.shrink_wrap_flag is True:
                 if((n >= (self.sw_start * n_iterations)) and (n <= (self.sw_end * n_iterations))):
                     if np.mod(n, self.sw_step) == 0:
-                        #logger.info('refine support with shrinkwrap')
                         logger.info('Refine support with shrinkwrap')
                         sup, self.sup_index, self.sup_out_index = find_support(self.obj,
                                                                                self.sw_sigma,

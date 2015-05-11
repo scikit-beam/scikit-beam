@@ -8,7 +8,7 @@ from numpy.testing import (assert_equal, assert_array_equal,
 
 from skxray.cdi import (_dist, gauss, convolution,
                         cal_relative_error, find_support, pi_support,
-                        _fft_helper, pi_modulus, cal_diff_error, CDI)
+                        _fft_helper, _ifft_helper, pi_modulus, cal_diff_error, CDI)
 
 
 def dist_temp(dims):
@@ -80,7 +80,7 @@ def test_fft_helper():
     g = np.exp(x ** 2 / 2)
 
     g_fft = _fft_helper(g)
-    g_ifft = _fft_helper(g_fft, option='ifft')
+    g_ifft = _ifft_helper(g_fft)
     assert_array_almost_equal(np.abs(g_ifft), g, decimal=10)
 
 
@@ -118,7 +118,7 @@ def test_pi_support():
     assert_equal(np.sum(a2), 0)
 
 
-def cal_diff():
+def make_synthetic_data():
     """
     Fft transform of a squared area.
 
@@ -137,26 +137,20 @@ def cal_diff():
     return a, diff_v
 
 
-def run_pi_modulus(data_type):
-    a, diff_v = cal_diff()
-    a_new = pi_modulus(a, diff_v, data_type)
+def test_pi_modulus():
+    a, diff_v = make_synthetic_data()
+    a_new = pi_modulus(a, diff_v)
     assert_array_almost_equal(np.abs(a_new), a)
 
 
-def test_pi_modulus():
-    type_list = ['Real', 'Complex']
-    for d in type_list:
-        yield run_pi_modulus, d
-
-
 def test_cal_diff_error():
-    a, diff_v = cal_diff()
+    a, diff_v = make_synthetic_data()
     result = cal_diff_error(a, diff_v)
     assert_equal(np.sum(result), 0)
 
 
 def test_recon():
-    a, diff_v = cal_diff()
+    a, diff_v = make_synthetic_data()
     total_n = 10
     cdi_param = {'beta': 1.15,
                  'start_ave': 0.8,
