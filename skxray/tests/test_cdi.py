@@ -8,7 +8,10 @@ from numpy.testing import (assert_equal, assert_array_equal,
 
 from skxray.cdi import (_dist, gauss, convolution,
                         cal_relative_error, find_support, pi_support,
-                        _fft_helper, _ifft_helper, pi_modulus, cal_diff_error, CDI)
+                        _fft_helper, _ifft_helper, pi_modulus,
+                        cal_diff_error, cdi_recon,
+                        generate_random_phase_field,
+                        generate_box_support, generate_disk_support)
 
 
 def dist_temp(dims):
@@ -149,24 +152,56 @@ def test_cal_diff_error():
     assert_equal(np.sum(result), 0)
 
 
+def cal_support(func):
+    def inner(*args):
+        return func(*args)
+    return inner
+
+
+def _box_support_area(sup_radius, shape_v):
+    sup = generate_box_support(sup_radius, shape_v)
+    new_sup = sup[sup != 0]
+    assert_array_equal(new_sup.shape, (2*sup_radius)**len(shape_v))
+
+
+def _disk_support_area(sup_radius, shape_v):
+    sup = generate_disk_support(sup_radius, shape_v)
+    new_sup = sup[sup != 0]
+    assert(new_sup.size < (2*sup_radius)**len(shape_v))
+
+
+def test_support():
+    sup_radius = 20
+    a, diff_v = make_synthetic_data()
+    sup = generate_box_support(sup_radius, diff_v.shape)
+
+    shape_list = [[100, 100], [100, 100, 100]]
+    for v in shape_list:
+        yield _box_support_area, sup_radius, v
+    for v in shape_list:
+        yield _disk_support_area, sup_radius, v
+
+
 def test_recon():
     a, diff_v = make_synthetic_data()
     total_n = 10
+    sup_radius = 20
     cdi_param = {'beta': 1.15,
                  'start_ave': 0.8,
                  'pi_modulus_flag': 'Complex',
-                 'init_obj_flag': True,
-                 'init_sup_flag': True,
-                 'support_radius': 20,
-                 'support_shape': 'Box',
-                 'shrink_wrap_flag': False,
+                 'sw_flag': False,
                  'sw_sigma': 0.5,
-                 'sw_threshold': 0.1,
+                 'sw_threshold': 0.12,
                  'sw_start': 0.2,
                  'sw_end': 0.8,
-                 'sw_step': 10}
-    cdi = CDI(diff_v, **cdi_param)
-    outv = cdi.recon(n_iterations=total_n)
+                 'sw_step': 10,
+                 'n_iterations': total_n}
+
+    # inital phase and support
+    init_phase = generate_random_phase_field(diff_v)
+    sup = generate_box_support(sup_radius, diff_v.shape)
+    # run reconstruction
+    outv, error_dict = cdi_recon(diff_v, init_phase, sup, **cdi_param)
     outv = np.abs(outv)
     # compare the area of supports
-    assert_almost_equal(np.shape(outv[outv>0.9]), np.shape(a[a>0.9]))
+    assert_almost_equal(outv[outv > 0.8].size, a[a > 0.8].size)

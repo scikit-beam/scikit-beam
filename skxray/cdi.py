@@ -361,6 +361,8 @@ def cdi_recon(diff_array, sample_obj, sup, **kwargs):
     pi_modulus_flag = kwargs['pi_modulus_flag']  # 'Complex'
 
     beta = kwargs['beta']  # feedback parameter for difference map algorithm, around 1.15
+    gamma_1 = -1/beta
+    gamma_2 = 1/beta
     start_ave = kwargs['start_ave']  # 0.8
 
     # parameters for shrink wrap
@@ -371,10 +373,8 @@ def cdi_recon(diff_array, sample_obj, sup, **kwargs):
     sw_end = kwargs['sw_end']  # 0.8
     sw_step = kwargs['sw_step']  # 10
 
-    gamma_1 = -1/beta
-    gamma_2 = 1/beta
-
-    #sup_index == np.where(sup == 1)
+    # get support index
+    sup_index = np.where(sup == 1)
     sup_out_index = np.where(sup != 1)
 
     error_dict = {}
