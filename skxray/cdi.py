@@ -211,7 +211,7 @@ def pi_support(sample_obj, index_v):
 
     Returns
     -------
-    array :
+    sample_obj : array
         sample object with proper cut.
     """
     sample_obj = np.array(sample_obj)
