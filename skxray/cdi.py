@@ -259,148 +259,182 @@ def cal_diff_error(sample_obj, diff_array):
     return cal_relative_error(diff_array, new_diff)
 
 
-class CDI(object):
+def generate_random_phase_field(diff_array):
+    """
+    Initiate random phase.
 
-    def __init__(self, diffamp, **kwargs):
-        """
-        Parameters
-        ----------
-        deffmap : array
-            diffraction pattern from experiments
-        kwargs : dict
-            parameters related to cdi reconstruction
-        """
+    Parameters
+    ----------
+    diff_array : array
+        diffraction pattern
 
-        self.diff_array = np.array(diffamp)     # diffraction data
+    Returns
+    -------
+    sample_obj : array
+        sample information with phase
+    """
+    pha_tmp = np.random.uniform(0, 2*np.pi, diff_array.shape)
+    sample_obj = (_ifft_helper(diff_array * np.exp(1j*pha_tmp))
+                  * np.sqrt(np.size(diff_array)))
+    return sample_obj
 
-        self.ndim = self.diff_array.ndim    # 2D or 3D case
-        if self.ndim == 2:
-            self.nx, self.ny = np.shape(self.diff_array)    # array dimension
-        if self.ndim == 3:
-            self.nx, self.ny, self.nz = np.shape(self.diff_array)    # array dimension
 
-        self.pi_modulus_flag = kwargs['pi_modulus_flag']  # 'Complex'
+def generate_box_support(sup_radius, shape_v):
+    """
+    Generate support area as a box for either 2D or 3D cases.
 
-        self.beta = kwargs['beta']  # feedback parameter for difference map algorithm, around 1.15
-        self.start_ave = kwargs['start_ave']  # 0.8
+    Parameters
+    ----------
+    sup_radius : float
+        radius of support
+    shape_v : list
+        shape of diffraction pattern, which can be either 2D or 3D case.
 
-        # initial support
-        self.init_obj_flag = kwargs['init_obj_flag']
-        self.init_sup_flag = kwargs['init_sup_flag']
-        self.sup_radius = kwargs['support_radius']
-        self.sup_shape = kwargs['support_shape']  # 'Box' or 'Disk'
+    Returns
+    -------
+    sup : array
+        support with a box area
+    """
+    sup = np.zeros(shape_v)
+    if len(shape_v) == 2:
+        nx, ny = shape_v
+        sup[nx/2-sup_radius: nx/2+sup_radius,
+            ny/2-sup_radius: ny/2+sup_radius] = 1
+    elif len(shape_v) == 3:
+        nx, ny, nz = shape_v
+        sup[nx/2-sup_radius: nx/2+sup_radius,
+            ny/2-sup_radius: ny/2+sup_radius,
+            nz/2-sup_radius: nz/2+sup_radius] = 1
+    return sup
 
-        # parameters for shrink wrap
-        self.shrink_wrap_flag = kwargs['shrink_wrap_flag']
-        self.sw_sigma = kwargs['sw_sigma']  # 0.5
-        self.sw_threshold = kwargs['sw_threshold']  # 0.1
-        self.sw_start = kwargs['sw_start']  # 0.2
-        self.sw_end = kwargs['sw_end']  # 0.8
-        self.sw_step = kwargs['sw_step']  # 10
 
-    def init_obj(self):
-        """
-        Initiate phase. Focus on 2D case here, and to be extended.
-        """
-        pha_tmp = np.random.uniform(0, 2*np.pi, (self.nx, self.ny))
-        self.obj = (_ifft_helper(self.diff_array * np.exp(1j*pha_tmp))
-                    * np.sqrt(np.size(self.diff_array)))
+def generate_disk_support(sup_radius, shape_v):
+    """
+    Generate support area as a disk for either 2D or 3D cases.
 
-    def init_sup(self):
-        """ Initiate sample support.
-        """
-        self.sup = np.zeros_like(self.diff_array)
-        if self.ndim == 2:
-            if self.sup_shape == 'Box':
-                self.sup[self.nx/2-self.sup_radius: self.nx/2+self.sup_radius,
-                         self.ny/2-self.sup_radius:self.ny/2+self.sup_radius] = 1
-        if self.ndim == 3:
-            if self.sup_shape == 'Box':
-                self.sup[self.nx/2-self.sup_radius:self.nx/2+self.sup_radius,
-                         self.ny/2-self.sup_radius:self.ny/2+self.sup_radius,
-                         self.nz/2-self.sup_radius:self.nz/2+self.sup_radius] = 1
-        if self.sup_shape == 'Disk':
-            dummy = _dist(np.shape(self.diff_array))
-            self.sup_index = np.where(dummy <= self.sup_radius)
-            self.sup[self.sup_index] = 1
+    Parameters
+    ----------
+    sup_radius : float
+        radius of support
+    shape_v : list
+        shape of diffraction pattern, which can be either 2D or 3D case.
 
-        self.sup_index = np.where(self.sup == 1)
-        self.sup_out_index = np.where(self.sup == 0)
+    Returns
+    -------
+    sup : array
+        support with a disk area
+    """
+    sup = np.zeros(shape_v)
+    dummy = _dist(shape_v)
+    sup_index = np.where(dummy <= sup_radius)
+    sup[sup_index] = 1
+    return sup
 
-    def recon(self, n_iterations=1000):
-        """
-        Run reconstruction with difference map algorithm.
 
-        Parameters
-        ---------
-        n_iterations : int
-            number of reconstructions to run
+def cdi_recon(diff_array, sample_obj, sup, **kwargs):
+    """
+    Run reconstruction with difference map algorithm.
 
-        Returns
-        -------
-        array :
-            reconstructed sample object
-        """
-        gamma_1 = -1/self.beta
-        gamma_2 = 1/self.beta
+    Parameters
+    ---------
+    diff_array : array
+        diffraction pattern from experiments
+    sample_obj : array
+        initial sample with phase
+    sup : array
+        initial support
+    kwargs : dict
+        parameters related to cdi reconstruction
 
-        # initiate shape and phase
-        if(self.init_obj_flag):
-            self.init_obj()
-        if(self.init_sup_flag):
-            self.init_sup()
+    Returns
+    -------
+    obj_ave : array
+        reconstructed sample object
+    error_dict : dict
+        error information for all iterations
+    """
 
-        self.obj_error = np.zeros(n_iterations)
-        self.diff_error = np.zeros(n_iterations)
-        self.sup_error = np.zeros(n_iterations)
+    diff_array = np.array(diff_array)     # diffraction data
 
-        sup_old = np.zeros_like(self.diff_array)
-        obj_ave = np.zeros_like(self.diff_array).astype(complex)
-        ave_i = 0
+    n_iterations = kwargs['n_iterations']
 
-        self.time_start = time.time()
-        for n in range(n_iterations):
-            self.obj_old = np.array(self.obj)
+    pi_modulus_flag = kwargs['pi_modulus_flag']  # 'Complex'
 
-            obj_a = pi_modulus(self.obj, self.diff_array)
-            if self.pi_modulus_flag == 'real':
-                obj_a = np.abs(obj_a)
-            obj_a = (1 + gamma_2) * obj_a - gamma_2 * self.obj
-            obj_a = pi_support(obj_a, self.sup_out_index)
+    beta = kwargs['beta']  # feedback parameter for difference map algorithm, around 1.15
+    start_ave = kwargs['start_ave']  # 0.8
 
-            obj_b = pi_support(self.obj, self.sup_out_index)
-            obj_b = (1 + gamma_1) * obj_b - gamma_1 * self.obj
-            obj_b = pi_modulus(obj_b, self.diff_array)
-            if self.pi_modulus_flag == 'real':
-                obj_b = np.abs(obj_b)
+    # parameters for shrink wrap
+    sw_flag = kwargs['sw_flag']
+    sw_sigma = kwargs['sw_sigma']  # 0.5
+    sw_threshold = kwargs['sw_threshold']  # 0.1
+    sw_start = kwargs['sw_start']  # 0.2
+    sw_end = kwargs['sw_end']  # 0.8
+    sw_step = kwargs['sw_step']  # 10
 
-            self.obj += self.beta * (obj_a - obj_b)
+    gamma_1 = -1/beta
+    gamma_2 = 1/beta
 
-            # calculate errors
-            self.obj_error[n] = cal_relative_error(self.obj_old, self.obj)
-            self.diff_error[n] = cal_diff_error(self.obj, self.diff_array)
+    #sup_index == np.where(sup == 1)
+    sup_out_index = np.where(sup != 1)
 
-            if self.shrink_wrap_flag is True:
-                if((n >= (self.sw_start * n_iterations)) and (n <= (self.sw_end * n_iterations))):
-                    if np.mod(n, self.sw_step) == 0:
-                        logger.info('Refine support with shrinkwrap')
-                        sup, self.sup_index, self.sup_out_index = find_support(self.obj,
-                                                                               self.sw_sigma,
-                                                                               self.sw_threshold)
-                        self.sup_error[n] = np.sum(sup_old) #cal_relative_error(sup_old, sup)
-                        sup_old = np.array(sup)
+    error_dict = {}
+    obj_error = np.zeros(n_iterations)
+    diff_error = np.zeros(n_iterations)
+    sup_error = np.zeros(n_iterations)
 
-            if n > self.start_ave*n_iterations:
-                obj_ave += self.obj
-                ave_i += 1
+    sup_old = np.zeros_like(diff_array)
+    obj_ave = np.zeros_like(diff_array).astype(complex)
+    ave_i = 0
 
-            logger.info('{} object_chi= {}, diff_chi={}'.format(n, self.obj_error[n],
-                                                                self.diff_error[n]))
+    time_start = time.time()
+    for n in range(n_iterations):
+        obj_old = np.array(sample_obj)
 
-        obj_ave = obj_ave / ave_i
-        self.time_end = time.time()
+        obj_a = pi_modulus(sample_obj, diff_array)
+        if pi_modulus_flag == 'real':
+            obj_a = np.abs(obj_a)
 
-        logger.info('object size: {}'.format(np.shape(self.diff_array)))
-        logger.info('{} iterations takes {} sec'.format(n_iterations, self.time_end - self.time_start))
+        obj_a = (1 + gamma_2) * obj_a - gamma_2 * sample_obj
+        obj_a = pi_support(obj_a, sup_out_index)
 
-        return obj_ave
+        obj_b = pi_support(sample_obj, sup_out_index)
+        obj_b = (1 + gamma_1) * obj_b - gamma_1 * sample_obj
+
+        obj_b = pi_modulus(obj_b, diff_array)
+        if pi_modulus_flag == 'real':
+            obj_b = np.abs(obj_b)
+
+        sample_obj += beta * (obj_a - obj_b)
+
+        # calculate errors
+        obj_error[n] = cal_relative_error(obj_old, sample_obj)
+        diff_error[n] = cal_diff_error(sample_obj, diff_array)
+
+        if sw_flag is True:
+            if((n >= (sw_start * n_iterations)) and (n <= (sw_end * n_iterations))):
+                if np.mod(n, sw_step) == 0:
+                    logger.info('Refine support with shrinkwrap')
+                    sup, sup_index, sup_out_index = find_support(sample_obj,
+                                                                 sw_sigma,
+                                                                 sw_threshold)
+                    sup_error[n] = np.sum(sup_old) #cal_relative_error(sup_old, sup)
+                    sup_old = np.array(sup)
+
+        if n > start_ave*n_iterations:
+            obj_ave += sample_obj
+            ave_i += 1
+
+        logger.info('{} object_chi= {}, diff_chi={}'.format(n, obj_error[n],
+                                                            diff_error[n]))
+
+    obj_ave = obj_ave / ave_i
+    time_end = time.time()
+
+    logger.info('object size: {}'.format(np.shape(diff_array)))
+    logger.info('{} iterations takes {} sec'.format(n_iterations, time_end - time_start))
+
+    error_dict['obj_error'] = obj_error
+    error_dict['diff_error'] = diff_error
+    error_dict['sup_error'] = sup_error
+
+    return obj_ave, error_dict
