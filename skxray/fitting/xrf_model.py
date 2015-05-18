@@ -221,7 +221,6 @@ def _copy_model_param_hints(target, source, params):
                               expr=label)
 
 
-
 def update_parameter_dict(param, fit_results):
     """
     Update fitting parameters dictionary according to given fitting results,
@@ -573,7 +572,7 @@ class ModelSpectrum(object):
         incident_energy = self.incident_energy
         parameter = self.params
 
-        element_mod = None
+        all_element_mod = None
         param_hints_to_copy = ['e_offset', 'e_linear', 'e_quadratic',
                                'fwhm_offset', 'fwhm_fanoprime']
 
@@ -594,13 +593,13 @@ class ModelSpectrum(object):
                 if e.cs(incident_energy)[line_name] == 0:
                     continue
 
-                gauss_mod = ElementModel(prefix=str(element)+'_'+str(line_name)+'_')
+                element_mod = ElementModel(prefix=str(element)+'_'+str(line_name)+'_')
 
                 # copy the fixed parameters from the Compton model
-                _copy_model_param_hints(gauss_mod, self.compton_param,
+                _copy_model_param_hints(element_mod, self.compton_param,
                                         param_hints_to_copy)
 
-                gauss_mod.set_param_hint('epsilon', value=self.epsilon,
+                element_mod.set_param_hint('epsilon', value=self.epsilon,
                                          vary=False)
 
                 area_name = str(element)+'_'+str(line_name)+'_area'
@@ -608,30 +607,30 @@ class ModelSpectrum(object):
                     default_area = parameter[area_name]['value']
 
                 if line_name == 'ka1':
-                    gauss_mod.set_param_hint('area', value=default_area, vary=True, min=0)
-                    gauss_mod.set_param_hint('delta_center', value=0, vary=False)
-                    gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
+                    element_mod.set_param_hint('area', value=default_area, vary=True, min=0)
+                    element_mod.set_param_hint('delta_center', value=0, vary=False)
+                    element_mod.set_param_hint('delta_sigma', value=0, vary=False)
                 elif line_name == 'ka2':
-                    gauss_mod.set_param_hint('area', value=default_area, vary=True,
+                    element_mod.set_param_hint('area', value=default_area, vary=True,
                                              expr=str(element)+'_ka1_'+'area')
-                    gauss_mod.set_param_hint('delta_sigma', value=0, vary=False,
+                    element_mod.set_param_hint('delta_sigma', value=0, vary=False,
                                              expr=str(element)+'_ka1_'+'delta_sigma')
-                    gauss_mod.set_param_hint('delta_center', value=0, vary=False,
+                    element_mod.set_param_hint('delta_center', value=0, vary=False,
                                              expr=str(element)+'_ka1_'+'delta_center')
                 else:
-                    gauss_mod.set_param_hint('area', value=default_area, vary=True,
+                    element_mod.set_param_hint('area', value=default_area, vary=True,
                                              expr=str(element)+'_ka1_'+'area')
-                    gauss_mod.set_param_hint('delta_center', value=0, vary=False)
-                    gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
+                    element_mod.set_param_hint('delta_center', value=0, vary=False)
+                    element_mod.set_param_hint('delta_sigma', value=0, vary=False)
 
                 # area needs to be adjusted
                 if area_name in parameter:
-                    _set_parameter_hint(area_name, parameter[area_name], gauss_mod)
+                    _set_parameter_hint(area_name, parameter[area_name], element_mod)
 
-                gauss_mod.set_param_hint('center', value=val, vary=False)
+                element_mod.set_param_hint('center', value=val, vary=False)
                 ratio_v = e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ka1']
-                gauss_mod.set_param_hint('ratio', value=ratio_v, vary=False)
-                gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
+                element_mod.set_param_hint('ratio', value=ratio_v, vary=False)
+                element_mod.set_param_hint('ratio_adjust', value=1, vary=False)
                 logger.debug(' {0} {1} peak is at energy {2} with'
                              ' branching ratio {3}.'. format(element, line_name, val, ratio_v))
 
@@ -639,24 +638,24 @@ class ModelSpectrum(object):
                 pos_name = element + '_' + str(line_name)+'_delta_center'
                 if pos_name in parameter:
                     _set_parameter_hint('delta_center', parameter[pos_name],
-                                        gauss_mod)
+                                        element_mod)
 
                 # width needs to be adjusted
                 width_name = element + '_' + str(line_name)+'_delta_sigma'
                 if width_name in parameter:
                     _set_parameter_hint('delta_sigma', parameter[width_name],
-                                        gauss_mod)
+                                        element_mod)
 
                 # branching ratio needs to be adjusted
                 ratio_name = element + '_' + str(line_name) + '_ratio_adjust'
                 if ratio_name in parameter:
                     _set_parameter_hint('ratio_adjust', parameter[ratio_name],
-                                        gauss_mod)
+                                        element_mod)
 
-                if element_mod:
-                    element_mod += gauss_mod
+                if all_element_mod:
+                    all_element_mod += element_mod
                 else:
-                    element_mod = gauss_mod
+                    all_element_mod = element_mod
             logger.debug('Finished building element peak for %s', element)
 
         elif elemental_line in L_LINE:
@@ -676,59 +675,59 @@ class ModelSpectrum(object):
                 if e.cs(incident_energy)[line_name] == 0:
                     continue
 
-                gauss_mod = ElementModel(prefix=str(element)+'_'+str(line_name)+'_')
+                element_mod = ElementModel(prefix=str(element)+'_'+str(line_name)+'_')
 
                 # copy the fixed parameters from the Compton model
-                _copy_model_param_hints(gauss_mod, self.compton_param,
+                _copy_model_param_hints(element_mod, self.compton_param,
                                         param_hints_to_copy)
 
-                gauss_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
+                element_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
 
                 area_name = str(element)+'_'+str(line_name)+'_area'
                 if area_name in parameter:
                     default_area = parameter[area_name]['value']
 
                 if line_name == 'la1':
-                    gauss_mod.set_param_hint('area', value=default_area, vary=True)
+                    element_mod.set_param_hint('area', value=default_area, vary=True)
                 else:
-                    gauss_mod.set_param_hint('area', value=default_area, vary=True,
+                    element_mod.set_param_hint('area', value=default_area, vary=True,
                                              expr=str(element)+'_la1_'+'area')
 
                 # area needs to be adjusted
                 if area_name in parameter:
-                    _set_parameter_hint(area_name, parameter[area_name], gauss_mod)
+                    _set_parameter_hint(area_name, parameter[area_name], element_mod)
 
-                gauss_mod.set_param_hint('center', value=val, vary=False)
-                gauss_mod.set_param_hint('sigma', value=1, vary=False)
-                gauss_mod.set_param_hint('ratio',
+                element_mod.set_param_hint('center', value=val, vary=False)
+                element_mod.set_param_hint('sigma', value=1, vary=False)
+                element_mod.set_param_hint('ratio',
                                          value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1'],
                                          vary=False)
 
-                gauss_mod.set_param_hint('delta_center', value=0, vary=False)
-                gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
-                gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
+                element_mod.set_param_hint('delta_center', value=0, vary=False)
+                element_mod.set_param_hint('delta_sigma', value=0, vary=False)
+                element_mod.set_param_hint('ratio_adjust', value=1, vary=False)
 
                 # position needs to be adjusted
                 pos_name = element+'_'+str(line_name)+'_delta_center'
                 if pos_name in parameter:
                     _set_parameter_hint('delta_center', parameter[pos_name],
-                                        gauss_mod)
+                                        element_mod)
 
                 # width needs to be adjusted
                 width_name = element+'_'+str(line_name)+'_delta_sigma'
                 if width_name in parameter:
                     _set_parameter_hint('delta_sigma', parameter[width_name],
-                                        gauss_mod)
+                                        element_mod)
 
                 # branching ratio needs to be adjusted
                 ratio_name = element+'_'+str(line_name)+'_ratio_adjust'
                 if ratio_name in parameter:
                     _set_parameter_hint('ratio_adjust', parameter[ratio_name],
-                                        gauss_mod)
-                if element_mod:
-                    element_mod += gauss_mod
+                                        element_mod)
+                if all_element_mod:
+                    all_element_mod += element_mod
                 else:
-                    element_mod = gauss_mod
+                    all_element_mod = element_mod
 
         elif elemental_line in M_LINE:
             element = elemental_line.split('_')[0]
@@ -746,63 +745,63 @@ class ModelSpectrum(object):
                 if e.cs(incident_energy)[line_name] == 0:
                     continue
 
-                gauss_mod = ElementModel(prefix=str(element)+'_'+str(line_name)+'_')
+                element_mod = ElementModel(prefix=str(element)+'_'+str(line_name)+'_')
 
                 # copy the fixed parameters from the Compton model
-                _copy_model_param_hints(gauss_mod, self.compton_param,
+                _copy_model_param_hints(element_mod, self.compton_param,
                                         param_hints_to_copy)
 
-                gauss_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
+                element_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
 
                 area_name = str(element)+'_'+str(line_name)+'_area'
                 if area_name in parameter:
                     default_area = parameter[area_name]['value']
 
                 if line_name == 'ma1':
-                    gauss_mod.set_param_hint('area', value=default_area, vary=True)
+                    element_mod.set_param_hint('area', value=default_area, vary=True)
                 else:
-                    gauss_mod.set_param_hint('area', value=default_area, vary=True,
+                    element_mod.set_param_hint('area', value=default_area, vary=True,
                                              expr=str(element)+'_ma1_'+'area')
 
                 # area needs to be adjusted
                 if area_name in parameter:
-                    _set_parameter_hint(area_name, parameter[area_name], gauss_mod)
+                    _set_parameter_hint(area_name, parameter[area_name], element_mod)
 
-                gauss_mod.set_param_hint('center', value=val, vary=False)
-                gauss_mod.set_param_hint('sigma', value=1, vary=False)
-                gauss_mod.set_param_hint('ratio',
+                element_mod.set_param_hint('center', value=val, vary=False)
+                element_mod.set_param_hint('sigma', value=1, vary=False)
+                element_mod.set_param_hint('ratio',
                                          value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ma1'],
                                          vary=False)
 
-                gauss_mod.set_param_hint('delta_center', value=0, vary=False)
-                gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
-                gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
+                element_mod.set_param_hint('delta_center', value=0, vary=False)
+                element_mod.set_param_hint('delta_sigma', value=0, vary=False)
+                element_mod.set_param_hint('ratio_adjust', value=1, vary=False)
 
                 if area_name in parameter:
-                    _set_parameter_hint(area_name, parameter[area_name], gauss_mod)
+                    _set_parameter_hint(area_name, parameter[area_name], element_mod)
 
                 # position needs to be adjusted
                 pos_name = element+'_'+str(line_name)+'_delta_center'
                 if pos_name in parameter:
                     _set_parameter_hint('delta_center', parameter[pos_name],
-                                        gauss_mod)
+                                        element_mod)
 
                 # width needs to be adjusted
                 width_name = element+'_'+str(line_name)+'_delta_sigma'
                 if width_name in parameter:
                     _set_parameter_hint('delta_sigma', parameter[width_name],
-                                        gauss_mod)
+                                        element_mod)
 
                 # branching ratio needs to be adjusted
                 ratio_name = element+'_'+str(line_name)+'_ratio_adjust'
                 if ratio_name in parameter:
                     _set_parameter_hint('ratio_adjust', parameter[ratio_name],
-                                        gauss_mod)
+                                        element_mod)
 
-                if element_mod:
-                    element_mod += gauss_mod
+                if all_element_mod:
+                    all_element_mod += element_mod
                 else:
-                    element_mod = gauss_mod
+                    all_element_mod = element_mod
 
         else:
             logger.debug('Started setting up pileup peaks for {}'.format(
@@ -810,83 +809,55 @@ class ModelSpectrum(object):
 
             element_line1, element_line2 = elemental_line.split('-')
 
-            def get_line_energy(elemental_line):
-                """Return the energy of the first line in K, L or M series.
-                Parameters
-                ----------
-                elemental_line : str
-                    For instance, Eu_L is the format for L lines and Pt_M for M lines.
-                    And for K lines, user needs to define lines like ka1, kb1,
-                    because for K lines, we consider contributions from either ka1
-                    or kb1, while for L or M lines, we only consider the primary peak.
-
-                Returns
-                -------
-                float :
-                    energy of emission line
-                """
-                name, line = elemental_line.split('_')
-                line = line.lower()
-                e = Element(name)
-                if 'k' in line:
-                    e_cen = e.emission_line[line]
-                elif 'l' in line:
-                    # only the first line for L
-                    e_cen = e.emission_line['la1']
-                else:
-                    # only the first line for M
-                    e_cen = e.emission_line['ma1']
-                return e_cen
-
             e1_cen = get_line_energy(element_line1)
             e2_cen = get_line_energy(element_line2)
 
             # no '-' allowed in prefix name in lmfit
             pre_name = 'pileup_' + elemental_line.replace('-', '_') + '_'
-            gauss_mod = ElementModel(prefix=pre_name)
+            element_mod = ElementModel(prefix=pre_name)
 
             # copy the fixed parameters from the Compton model
-            _copy_model_param_hints(gauss_mod, self.compton_param,
+            _copy_model_param_hints(element_mod, self.compton_param,
                                     param_hints_to_copy)
 
-            gauss_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
+            element_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
 
             area_name = pre_name + 'area'
             if area_name in self.params:
                 default_area = self.params[area_name]['value']
 
-            gauss_mod.set_param_hint('area', value=default_area, vary=True, min=0)
-            gauss_mod.set_param_hint('delta_center', value=0, vary=False)
-            gauss_mod.set_param_hint('delta_sigma', value=0, vary=False)
+            element_mod.set_param_hint('area', value=default_area, vary=True, min=0)
+            element_mod.set_param_hint('delta_center', value=0, vary=False)
+            element_mod.set_param_hint('delta_sigma', value=0, vary=False)
 
             # area needs to be adjusted
             if area_name in self.params:
-                _set_parameter_hint(area_name, self.params[area_name], gauss_mod)
+                _set_parameter_hint(area_name, self.params[area_name], element_mod)
 
-            gauss_mod.set_param_hint('center', value=e1_cen+e2_cen, vary=False)
-            gauss_mod.set_param_hint('ratio', value=1.0, vary=False)
-            gauss_mod.set_param_hint('ratio_adjust', value=1, vary=False)
+            element_mod.set_param_hint('center', value=e1_cen+e2_cen, vary=False)
+            element_mod.set_param_hint('ratio', value=1.0, vary=False)
+            element_mod.set_param_hint('ratio_adjust', value=1, vary=False)
 
             # position needs to be adjusted
             pos_name = pre_name + 'delta_center'
             if pos_name in self.params:
                 _set_parameter_hint('delta_center', self.params[pos_name],
-                                    gauss_mod)
+                                    element_mod)
 
             # width needs to be adjusted
             width_name = pre_name + 'delta_sigma'
             if width_name in self.params:
                 _set_parameter_hint('delta_sigma', self.params[width_name],
-                                    gauss_mod)
+                                    element_mod)
 
             # branching ratio needs to be adjusted
             ratio_name = pre_name + 'ratio_adjust'
             if ratio_name in self.params:
                 _set_parameter_hint('ratio_adjust', self.params[ratio_name],
-                                    gauss_mod)
+                                    element_mod)
 
-            element_mod = gauss_mod
-        return element_mod
+            all_element_mod = element_mod
+        return all_element_mod
 
     def assemble_models(self):
         """
@@ -922,6 +893,35 @@ class ModelSpectrum(object):
         result = self.mod.fit(spectrum, pars, x=channel_number, weights=weights,
                               method=method, fit_kws=kwargs)
         return result
+
+
+def get_line_energy(elemental_line):
+    """Return the energy of the first line in K, L or M series.
+    Parameters
+    ----------
+    elemental_line : str
+        For instance, Eu_L is the format for L lines and Pt_M for M lines.
+        And for K lines, user needs to define lines like ka1, kb1,
+        because for K lines, we consider contributions from either ka1
+        or kb1, while for L or M lines, we only consider the primary peak.
+
+    Returns
+    -------
+    float :
+        energy of emission line
+    """
+    name, line = elemental_line.split('_')
+    line = line.lower()
+    e = Element(name)
+    if 'k' in line:
+        e_cen = e.emission_line[line]
+    elif 'l' in line:
+        # only the first line for L
+        e_cen = e.emission_line['la1']
+    else:
+        # only the first line for M
+        e_cen = e.emission_line['ma1']
+    return e_cen
 
 
 def trim(x, y, low, high):
