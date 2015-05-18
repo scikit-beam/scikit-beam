@@ -331,7 +331,10 @@ def generate_disk_support(sup_radius, shape_v):
     return sup
 
 
-def cdi_recon(diff_array, sample_obj, sup, **kwargs):
+def cdi_recon(diff_array, sample_obj, sup,
+              beta=1.15, start_ave=0.8, pi_modulus_flag='Complex',
+              sw_flag=True, sw_sigma=0.5, sw_threshold=0.1, sw_start=0.2,
+              sw_end=0.8, sw_step=10, n_iterations=1000):
     """
     Run reconstruction with difference map algorithm.
 
@@ -343,35 +346,54 @@ def cdi_recon(diff_array, sample_obj, sup, **kwargs):
         initial sample with phase
     sup : array
         initial support
-    kwargs : dict
-        parameters related to cdi reconstruction
+    beta : float, optional
+        feedback parameter for difference map algorithm.
+        default is 1.15.
+    start_ave : float, optional
+        define the point to start doing average.
+        default is 0.8.
+    pi_modulus_flag : str, optional
+        'Complex' or 'Real', defining the way to perform pi_modulus calculation.
+        default is 'Complex'.
+    sw_flag : Bool, optional
+        flag to use shrinkwrap algorithm or not.
+        default is True.
+    sw_sigma : float, optional
+        gaussian width used in sw algorithm.
+        default is 0.5.
+    sw_threshold : float, optional
+        shreshold cut in sw algorithm.
+        default is 0.1.
+    sw_start : float, optional
+        at which point to start to do shrinkwrap.
+        defualt is 0.2
+    sw_end : float, optional
+        at which point to stop shrinkwrap.
+        defualt is 0.8
+    sw_step : float, optional
+        the frequency to perform sw algorithm.
+        defualt is 10
+    n_iterations : int, optional
+        number of iterations to run.
+        default is 1000.
 
     Returns
     -------
     obj_ave : array
         reconstructed sample object
     error_dict : dict
-        error information for all iterations
+        Error information for all iterations. The dict keys include
+        obj_error, diff_error and sup_error. Obj_error is a list of
+        the relative error of sample object. Diff_error is calculated as
+        the difference between new diffraction pattern and the original
+        diffraction pattern. And sup_error stores the size of the
+        sample support.
     """
 
     diff_array = np.array(diff_array)     # diffraction data
 
-    n_iterations = kwargs['n_iterations']
-
-    pi_modulus_flag = kwargs['pi_modulus_flag']  # 'Complex'
-
-    beta = kwargs['beta']  # feedback parameter for difference map algorithm, around 1.15
     gamma_1 = -1/beta
     gamma_2 = 1/beta
-    start_ave = kwargs['start_ave']  # 0.8
-
-    # parameters for shrink wrap
-    sw_flag = kwargs['sw_flag']
-    sw_sigma = kwargs['sw_sigma']  # 0.5
-    sw_threshold = kwargs['sw_threshold']  # 0.1
-    sw_start = kwargs['sw_start']  # 0.2
-    sw_end = kwargs['sw_end']  # 0.8
-    sw_step = kwargs['sw_step']  # 10
 
     # get support index
     sup_index = np.where(sup == 1)
@@ -391,7 +413,7 @@ def cdi_recon(diff_array, sample_obj, sup, **kwargs):
         obj_old = np.array(sample_obj)
 
         obj_a = pi_modulus(sample_obj, diff_array)
-        if pi_modulus_flag == 'real':
+        if pi_modulus_flag.lower() == 'real':
             obj_a = np.abs(obj_a)
 
         obj_a = (1 + gamma_2) * obj_a - gamma_2 * sample_obj
@@ -401,7 +423,7 @@ def cdi_recon(diff_array, sample_obj, sup, **kwargs):
         obj_b = (1 + gamma_1) * obj_b - gamma_1 * sample_obj
 
         obj_b = pi_modulus(obj_b, diff_array)
-        if pi_modulus_flag == 'real':
+        if pi_modulus_flag.lower() == 'real':
             obj_b = np.abs(obj_b)
 
         sample_obj += beta * (obj_a - obj_b)
@@ -417,7 +439,7 @@ def cdi_recon(diff_array, sample_obj, sup, **kwargs):
                     sup, sup_index, sup_out_index = find_support(sample_obj,
                                                                  sw_sigma,
                                                                  sw_threshold)
-                    sup_error[n] = np.sum(sup_old) #cal_relative_error(sup_old, sup)
+                    sup_error[n] = np.sum(sup_old)
                     sup_old = np.array(sup)
 
         if n > start_ave*n_iterations:
@@ -431,7 +453,8 @@ def cdi_recon(diff_array, sample_obj, sup, **kwargs):
     time_end = time.time()
 
     logger.info('object size: {}'.format(np.shape(diff_array)))
-    logger.info('{} iterations takes {} sec'.format(n_iterations, time_end - time_start))
+    logger.info('{} iterations takes {} sec'.format(n_iterations,
+                                                    time_end - time_start))
 
     error_dict['obj_error'] = obj_error
     error_dict['diff_error'] = diff_error

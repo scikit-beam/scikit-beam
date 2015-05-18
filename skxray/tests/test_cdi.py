@@ -186,22 +186,12 @@ def test_recon():
     a, diff_v = make_synthetic_data()
     total_n = 10
     sup_radius = 20
-    cdi_param = {'beta': 1.15,
-                 'start_ave': 0.8,
-                 'pi_modulus_flag': 'Complex',
-                 'sw_flag': False,
-                 'sw_sigma': 0.5,
-                 'sw_threshold': 0.12,
-                 'sw_start': 0.2,
-                 'sw_end': 0.8,
-                 'sw_step': 10,
-                 'n_iterations': total_n}
 
     # inital phase and support
     init_phase = generate_random_phase_field(diff_v)
     sup = generate_box_support(sup_radius, diff_v.shape)
     # run reconstruction
-    outv, error_dict = cdi_recon(diff_v, init_phase, sup, **cdi_param)
+    outv, error_dict = cdi_recon(diff_v, init_phase, sup, sw_flag=False, n_iterations=total_n)
     outv = np.abs(outv)
     # compare the area of supports
     assert_array_equal(outv.shape, a.shape)
