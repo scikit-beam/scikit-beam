@@ -35,7 +35,7 @@
 
 """
     This module will provide analysis codes for static tests for the image
-    data and for the X-ray Speckle Visibility Spectroscopy
+    data and for the X-ray Speckle Visibility Spectroscopy (XSVS)bi
 """
 
 
@@ -91,7 +91,7 @@ def intensity_distribution(image_array, label_array):
     return intensity_distribution
 
 
-def static_test_sets(image_dict, label_array, num):
+def static_test_sets(image_dict, label_array, num=1):
     """
     This will process the averaged intensity for the required ROI for different
     data sets (dictionary for different data sets)
@@ -147,10 +147,6 @@ def static_tests_one_label(images, label_array, num=1):
         for the intensity array of images
         dimensions are : [num_images][len(indices)]
 
-    intensity_value : array
-        intensity of ROI's for the pixel_list
-        for the intensity array of images
-        dimensions are : [num_images][len(indices)]
     """
     labels, indices = corr.extract_label_indices(label_array)
     average_intensity = []
