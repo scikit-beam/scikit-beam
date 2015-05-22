@@ -217,7 +217,8 @@ def time_bin(number=2, number_of_images=50):
     time_bin : list
         time bining
     """
-    time_step = time_bin = [1]
+    time_step = 1
+    time_bin = [1]
 
     while time_step<number_of_images:
         time_step = time_bin[-1]*number
