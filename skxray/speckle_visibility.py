@@ -177,13 +177,13 @@ def static_test(images, label_array):
     -------
     average_intensity : dict
         average intensity of each ROI as a dictionary
-    """
 
+    """
     average_intensity = {}
     num = np.unique(label_array)[1:]
 
     for i in num:
-        average_roi = static_tests_one_label(images, label_array, num)
+        average_roi = static_tests_one_label(images, label_array, i)
         average_intensity[i] = average_roi
 
     return average_intensity
