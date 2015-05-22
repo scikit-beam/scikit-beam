@@ -113,12 +113,13 @@ def static_test_sets(image_dict, label_array, num=1):
     average_intensity : dict
     """
 
-    average_intensity = {}
+    average_intensity_sets = {}
 
     for key, img in dict(image_dict).iteritems():
-        average_intensity[key] = static_tests_one_label(img, label_array, num)
+        average_intensity_sets[key] = static_tests_one_label(img, label_array,
+                                                             num)
 
-    return average_intensity
+    return average_intensity_sets
 
 
 def static_tests_one_label(images, label_array, num=1):
@@ -156,3 +157,55 @@ def static_tests_one_label(images, label_array, num=1):
         average_intensity.append(np.mean(value))
 
     return average_intensity
+
+
+def static_test(images, label_array):
+
+    labels, indices = corr.extract_label_indices(label_array)
+
+    average_intensity = {}
+    num = np.unique(labels)[1:]
+
+    for i in num:
+        average_intensity = static_tests_one_label(images, label_array, num)
+
+
+def static_tests(images, label_array):
+    labels, indices = corr.extract_label_indices(label_array)
+
+    average_intensity = {}
+    for n, img in enumerate(images.operands[0]):
+        value = np.ravel(img)[indices.tolist()]
+
+
+def time_bin(number=2, number_of_images=50):
+    """
+    This will provide the time binning for the integration.
+
+    Parameters
+    ----------
+    number : int, optional
+        time steps for the integration
+        ex:
+        1, 2, 4, 8, 16, ...
+        1, 3, 9, 27, ...
+
+    number_of_images : int, 50
+        number of images
+        
+    Return
+    ------
+    time_bin : list
+        time bining
+    """
+    time_step = time_bin = [1]
+
+    while time_step<number_of_images:
+        time_step = time_bin[-1]*number
+        time_bin.append(time_step)
+    return time_bin
+
+
+
+
+
