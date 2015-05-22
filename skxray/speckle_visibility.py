@@ -160,14 +160,33 @@ def static_tests_one_label(images, label_array, num=1):
 
 
 def static_test(images, label_array):
+    """
+    Averaged intensities for ROIS'
 
-    labels, indices = corr.extract_label_indices(label_array)
+    Parameters
+    ----------
+    images : array
+        iterable of 2D arrays
+        dimensions are: (rr, cc)
+
+    label_array : array
+        labeled array; 0 is background.
+        Each ROI is represented by a distinct label (i.e., integer).
+
+    Returns
+    -------
+    average_intensity : dict
+        average intensity of each ROI as a dictionary
+    """
 
     average_intensity = {}
-    num = np.unique(labels)[1:]
+    num = np.unique(label_array)[1:]
 
     for i in num:
-        average_intensity = static_tests_one_label(images, label_array, num)
+        average_roi = static_tests_one_label(images, label_array, num)
+        average_intensity[i] = average_roi
+
+    return average_intensity
 
 
 def static_tests(images, label_array):
@@ -192,7 +211,7 @@ def time_bin(number=2, number_of_images=50):
 
     number_of_images : int, 50
         number of images
-        
+
     Return
     ------
     time_bin : list
@@ -204,8 +223,3 @@ def time_bin(number=2, number_of_images=50):
         time_step = time_bin[-1]*number
         time_bin.append(time_step)
     return time_bin
-
-
-
-
-
