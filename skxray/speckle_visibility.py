@@ -35,7 +35,7 @@
 
 """
     This module will provide analysis codes for static tests for the image
-    data and for the X-ray Speckle Visibility Spectroscopy (XSVS)bi
+    data and for the X-ray Speckle Visibility Spectroscopy (XSVS)
 """
 
 
@@ -50,15 +50,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 import numpy as np
-from time import time
-
-from ConfigParser import RawConfigParser
-from os.path import isfile
-import os
-from sys import argv, stdout
-import sys
 
 import skxray.correlation as corr
+import skxray.roi as roi
 
 
 def intensity_distribution(image_array, label_array):
@@ -70,14 +64,20 @@ def intensity_distribution(image_array, label_array):
     ----------
     image_array : array
         image data dimensions are: (rr, cc)
+
     label_array : array
         labeled array; 0 is background.
         Each ROI is represented by a distinct label (i.e., integer).
+
     Returns
     -------
     radial_intensity : dict
         radial intensity of each ROI's
     """
+
+    if label_array.shape != image_array.shape:
+        raise ValueError("Shape of the image data should be equal to"
+                         " shape of the labeled array")
 
     labels, indices = corr.extract_label_indices(label_array)
     label_num = np.unique(labels)
@@ -101,6 +101,7 @@ def static_test_sets(image_dict, label_array, num=1):
     Parameters
     ----------
     image_dict : dict
+
     label_array : array
         labeled array; 0 is background.
         Each ROI is represented by a distinct label (i.e., integer).
@@ -124,9 +125,8 @@ def static_test_sets(image_dict, label_array, num=1):
 
 def static_tests_one_label(images, label_array, num=1):
     """
-    This will provide the average intensity values and
-    intensity values of one region of interests for the
-    required intensity array of images.
+    This will provide the average intensity values and intensity values of
+    one ROI for the required intensity array of images.
 
     Parameters
     ----------
@@ -189,15 +189,7 @@ def static_test(images, label_array):
     return average_intensity
 
 
-def static_tests(images, label_array):
-    labels, indices = corr.extract_label_indices(label_array)
-
-    average_intensity = {}
-    for n, img in enumerate(images.operands[0]):
-        value = np.ravel(img)[indices.tolist()]
-
-
-def time_bin(number=2, number_of_images=50):
+def time_bining(number=2, number_of_images=50):
     """
     This will provide the time binning for the integration.
 
@@ -217,10 +209,50 @@ def time_bin(number=2, number_of_images=50):
     time_bin : list
         time bining
     """
-    time_step = 1
+
     time_bin = [1]
 
-    while time_step<number_of_images:
-        time_step = time_bin[-1]*number
-        time_bin.append(time_step)
+    while time_bin[-1]*number<number_of_images:
+        time_bin.append(time_bin[-1]*number)
     return time_bin
+
+
+def max_counts(image_dict, label_array):
+    """
+    This will determine the highest speckle counts occurred in any of the
+    ROI in any of the image.
+
+    Parameters
+    ----------
+    image_dict : dict
+
+    label_array : array
+        labeled array; 0 is background.
+        Each ROI is represented by a distinct label (i.e., integer).
+
+    Returns
+    -------
+    max_counts : int
+        maximum speckle counts
+    """
+    max_cts = 0
+    for key, img_sets in dict(image_dict).iteritems():
+        for n, img in enumerate(img_sets.operands[0]):
+            int_dist = intensity_distribution(img, label_array)
+            for j in range(len(int_dist)):
+                counts = np.max(int_dist.values()[j])
+                if max_cts < counts:
+                    max_cts = counts
+    return max_cts
+
+
+def xsvs(img_dict, label_array, timebin_number=2):
+
+    max_cts = max_counts(img_dict, label_array)
+    number_img_sets = len(img_dict)
+
+    time_bin = time_bining(timebin_number, number_of_images=50)
+    #timebin_level = int(np.log(noframes)/np.log(2)) +1
+    #time_list = [2**i for i in range(timebin_level)]
+
+    labels, indices = corr.extract_label_indices(label_array)
