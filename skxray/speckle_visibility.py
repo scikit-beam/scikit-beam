@@ -42,17 +42,45 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import six
-
+import numpy as np
 from six.moves import zip
 from six import string_types
+
+import skxray.correlation as corr
+import skxray.roi as roi
 
 import logging
 logger = logging.getLogger(__name__)
 
-import numpy as np
 
-import skxray.correlation as corr
-import skxray.roi as roi
+def max_counts(sample_dict, label_array):
+    """
+    This will determine the highest speckle counts occurred in the required
+    ROI's in required images.
+
+    Parameters
+    ----------
+    sample_dict : dict
+        sets of images as a dictionary
+
+    label_array : array
+        labeled array; 0 is background.
+        Each ROI is represented by a distinct label (i.e., integer).
+
+    Returns
+    -------
+    max_counts : int
+        maximum speckle counts
+    """
+    max_cts = 0
+    for key, img_sets in dict(sample_dict).iteritems():
+        for n, img in enumerate(img_sets.operands[0]):
+            int_dist = intensity_distribution(img, label_array)
+            for j in range(len(int_dist)):
+                counts = np.max(int_dist.values()[j])
+                if max_cts < counts:
+                    max_cts = counts
+    return max_cts
 
 
 def intensity_distribution(image_array, label_array):
@@ -85,10 +113,38 @@ def intensity_distribution(image_array, label_array):
     intensity_distribution = {}
 
     for n in label_num:
-        value = (np.ravel(image_array)[indices[labels==n].tolist()])
+        value = (np.ravel(image_array)[indices[labels == n].tolist()])
         intensity_distribution[n] = value
 
     return intensity_distribution
+
+
+def time_bining(number=2, number_of_images=50):
+    """
+    This will provide the time binning for the integration.
+
+    Parameters
+    ----------
+    number : int, optional
+        time steps for the integration
+        ex:
+        1, 2, 4, 8, 16, ...
+        1, 3, 9, 27, ...
+
+    number_of_images : int, 50
+        number of images
+
+    Return
+    ------
+    time_bin : list
+        time bining
+    """
+
+    time_bin = [1]
+
+    while time_bin[-1]*number < number_of_images:
+        time_bin.append(time_bin[-1]*number)
+    return time_bin
 
 
 def static_test_sets_one_label(sample_dict, label_array, num=1):
@@ -124,8 +180,8 @@ def static_test_sets_one_label(sample_dict, label_array, num=1):
 
 def static_test_sets(sample_dict, label_array):
     """
-    This will process the averaged intensity for the required ROI's for different
-    data sets (dictionary for different data sets)
+    This will process the averaged intensity for the required ROI's for
+    different data sets (dictionary for different data sets)
     eg: ring averaged intensity for the required ROI's for different
     image data sets.
 
@@ -220,60 +276,3 @@ def static_test(images, label_array):
         average_intensity[i] = average_roi
 
     return average_intensity
-
-
-def time_bining(number=2, number_of_images=50):
-    """
-    This will provide the time binning for the integration.
-
-    Parameters
-    ----------
-    number : int, optional
-        time steps for the integration
-        ex:
-        1, 2, 4, 8, 16, ...
-        1, 3, 9, 27, ...
-
-    number_of_images : int, 50
-        number of images
-
-    Return
-    ------
-    time_bin : list
-        time bining
-    """
-
-    time_bin = [1]
-
-    while time_bin[-1]*number<number_of_images:
-        time_bin.append(time_bin[-1]*number)
-    return time_bin
-
-
-def max_counts(sample_dict, label_array):
-    """
-    This will determine the highest speckle counts occurred in the required
-    ROI's in required images.
-
-    Parameters
-    ----------
-    sample_dict : dict
-
-    label_array : array
-        labeled array; 0 is background.
-        Each ROI is represented by a distinct label (i.e., integer).
-
-    Returns
-    -------
-    max_counts : int
-        maximum speckle counts
-    """
-    max_cts = 0
-    for key, img_sets in dict(sample_dict).iteritems():
-        for n, img in enumerate(img_sets.operands[0]):
-            int_dist = intensity_distribution(img, label_array)
-            for j in range(len(int_dist)):
-                counts = np.max(int_dist.values()[j])
-                if max_cts < counts:
-                    max_cts = counts
-    return max_cts
