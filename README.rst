@@ -6,6 +6,11 @@
     :target: https://travis-ci.org/Nikea/scikit-xray
     :alt: 'Travis-ci badge'
 
+.. image:: https://landscape.io/github/Nikea/scikit-xray/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/Nikea/scikit-xray/master
+   :alt: Code Health
+   
+   
 .. image:: https://graphs.waffle.io/Nikea/scikit-xray/throughput.svg
  :target: https://waffle.io/Nikea/scikit-xray/metrics
  :alt: 'Throughput Graph'
