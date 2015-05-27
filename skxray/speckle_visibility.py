@@ -91,7 +91,7 @@ def intensity_distribution(image_array, label_array):
     return intensity_distribution
 
 
-def static_test_sets(image_dict, label_array, num=1):
+def static_test_sets_one_label(sample_dict, label_array, num=1):
     """
     This will process the averaged intensity for the required ROI for different
     data sets (dictionary for different data sets)
@@ -100,7 +100,7 @@ def static_test_sets(image_dict, label_array, num=1):
 
     Parameters
     ----------
-    image_dict : dict
+    sample_dict : dict
 
     label_array : array
         labeled array; 0 is background.
@@ -116,10 +116,39 @@ def static_test_sets(image_dict, label_array, num=1):
 
     average_intensity_sets = {}
 
-    for key, img in dict(image_dict).iteritems():
+    for key, img in dict(sample_dict).iteritems():
         average_intensity_sets[key] = static_tests_one_label(img, label_array,
                                                              num)
+    return average_intensity_sets
 
+
+def static_test_sets(sample_dict, label_array):
+    """
+    This will process the averaged intensity for the required ROI's for different
+    data sets (dictionary for different data sets)
+    eg: ring averaged intensity for the required ROI's for different
+    image data sets.
+
+    Parameters
+    ----------
+    sample_dict : dict
+
+    label_array : array
+        labeled array; 0 is background.
+        Each ROI is represented by a distinct label (i.e., integer).
+
+    num : int, optional
+        Required  ROI label
+
+    Returns
+    -------
+    average_intensity : dict
+    """
+
+    average_intensity_sets = {}
+
+    for key, img in dict(sample_dict).iteritems():
+        average_intensity_sets[key] = static_test(img, label_array)
     return average_intensity_sets
 
 
@@ -149,6 +178,10 @@ def static_tests_one_label(images, label_array, num=1):
         dimensions are : [num_images][len(indices)]
 
     """
+    if label_array.shape != images.operands[0].shape[1:]:
+        raise ValueError("Shape of the images should be equal to"
+                         " shape of the label array")
+
     labels, indices = corr.extract_label_indices(label_array)
     average_intensity = []
 
@@ -217,14 +250,14 @@ def time_bining(number=2, number_of_images=50):
     return time_bin
 
 
-def max_counts(image_dict, label_array):
+def max_counts(sample_dict, label_array):
     """
-    This will determine the highest speckle counts occurred in any of the
-    ROI in any of the image.
+    This will determine the highest speckle counts occurred in the required
+    ROI's in required images.
 
     Parameters
     ----------
-    image_dict : dict
+    sample_dict : dict
 
     label_array : array
         labeled array; 0 is background.
@@ -236,7 +269,7 @@ def max_counts(image_dict, label_array):
         maximum speckle counts
     """
     max_cts = 0
-    for key, img_sets in dict(image_dict).iteritems():
+    for key, img_sets in dict(sample_dict).iteritems():
         for n, img in enumerate(img_sets.operands[0]):
             int_dist = intensity_distribution(img, label_array)
             for j in range(len(int_dist)):
@@ -244,15 +277,3 @@ def max_counts(image_dict, label_array):
                 if max_cts < counts:
                     max_cts = counts
     return max_cts
-
-
-def xsvs(img_dict, label_array, timebin_number=2):
-
-    max_cts = max_counts(img_dict, label_array)
-    number_img_sets = len(img_dict)
-
-    time_bin = time_bining(timebin_number, number_of_images=50)
-    #timebin_level = int(np.log(noframes)/np.log(2)) +1
-    #time_list = [2**i for i in range(timebin_level)]
-
-    labels, indices = corr.extract_label_indices(label_array)
