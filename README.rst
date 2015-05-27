@@ -17,4 +17,14 @@ scikit-xray
 
 Examples
 ========
-`scikit-xray-examples <https://github.com/Nikea/sckit-xray-examples>`_
+`scikit-xray-examples repository <https://github
+.com/Nikea/scikit-xray-examples>`_
+
+- `Powder calibration (still needs tilt correction) <https://github
+  .com/Nikea/scikit-xray-examples/blob/master/notebooks/2014-09-15_calibration
+  /D_estimate_demo.ipynb>`_
+- `1-time correlation <https://github
+  .com/Nikea/scikit-xray-examples/blob/master/notebooks/time_correlation
+  /Multi_tau_one_time_correlation_example.ipynb>`_
+- `Differential Phase Contrast <https://github
+  .com/Nikea/scikit-xray-examples/blob/master/demos/dpc/dpc_demo.ipynb>`_
