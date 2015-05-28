@@ -168,6 +168,9 @@ def static_test_sets_one_label(sample_dict, label_array, num=1):
     Returns
     -------
     average_intensity : dict
+
+    combine_averages : array
+        combine intensity averages of one ROI for sets of images
     """
 
     average_intensity_sets = {}
@@ -175,37 +178,10 @@ def static_test_sets_one_label(sample_dict, label_array, num=1):
     for key, img in dict(sample_dict).iteritems():
         average_intensity_sets[key] = static_tests_one_label(img, label_array,
                                                              num)
-    return average_intensity_sets
 
+    combine_averages = np.concatenate(average_intensity_sets.values())
 
-def static_test_sets(sample_dict, label_array):
-    """
-    This will process the averaged intensity for the required ROI's for
-    different data sets (dictionary for different data sets)
-    eg: ring averaged intensity for the required ROI's for different
-    image data sets.
-
-    Parameters
-    ----------
-    sample_dict : dict
-
-    label_array : array
-        labeled array; 0 is background.
-        Each ROI is represented by a distinct label (i.e., integer).
-
-    num : int, optional
-        Required  ROI label
-
-    Returns
-    -------
-    average_intensity : dict
-    """
-
-    average_intensity_sets = {}
-
-    for key, img in dict(sample_dict).iteritems():
-        average_intensity_sets[key] = static_test(img, label_array)
-    return average_intensity_sets
+    return average_intensity_sets, combine_averages
 
 
 def static_tests_one_label(images, label_array, num=1):
@@ -276,3 +252,33 @@ def static_test(images, label_array):
         average_intensity[i] = average_roi
 
     return average_intensity
+
+
+def static_test_sets(sample_dict, label_array):
+    """
+    This will process the averaged intensity for the required ROI's for
+    different data sets (dictionary for different data sets)
+    eg: ring averaged intensity for the required ROI's for different
+    image data sets.
+
+    Parameters
+    ----------
+    sample_dict : dict
+
+    label_array : array
+        labeled array; 0 is background.
+        Each ROI is represented by a distinct label (i.e., integer).
+
+    num : int, optional
+        Required  ROI label
+
+    Returns
+    -------
+    average_intensity : dict
+    """
+
+    average_intensity_sets = {}
+
+    for key, img in dict(sample_dict).iteritems():
+        average_intensity_sets[key] = static_test(img, label_array)
+    return average_intensity_sets

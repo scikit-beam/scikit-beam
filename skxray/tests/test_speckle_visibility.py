@@ -102,23 +102,3 @@ def test_max_counts():
     label_array[img_stack1[0] > 40] = 2
 
     assert_array_equal(60, xsvs.max_counts(sample_dict, label_array))
-
-
-"""def test_static_test_sets():
-    image_dict =
-    label_array =
-    num = 1
-
-
-def test_static_tests_one_label():
-    images =  data.moon()
-    label_array = np.zeros((256, 256))
-
-    # different shapes for the images and labels
-    assert_raises(ValueError,
-                  lambda: xsvs.static_tests_one_label(images, label_array))
-
-
-def static_test():
-    images =
-    label_array ="""
