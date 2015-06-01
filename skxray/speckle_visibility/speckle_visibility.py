@@ -2,6 +2,9 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
+# Developed at the NSLS-II, Brookhaven National Laboratory             #
+# Developed by Sameera K. Abeykoon, May 2015                           #
+#                                                                      #                                                                    #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -34,8 +37,8 @@
 ########################################################################
 
 """
-    This module will provide analysis codes for static tests for the speckle
-    pattern to use in X-ray Speckle Visibility Spectroscopy (XSVS)
+    This module will provide analysis codes for static tests for the
+    speckle pattern to use in X-ray Speckle Visibility Spectroscopy (XSVS)
 """
 
 
@@ -308,6 +311,7 @@ def suitable_center(image, center, inner_radius=10, width=10, mask=None, var=5):
 
     var : float, optional
         varying the selected center value to find the suitable center
+        
     Returns
     -------
     new_center : tuple
