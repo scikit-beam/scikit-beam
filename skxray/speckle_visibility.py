@@ -34,8 +34,8 @@
 ########################################################################
 
 """
-    This module will provide analysis codes for static tests for the image
-    data and for the X-ray Speckle Visibility Spectroscopy (XSVS)
+    This module will provide analysis codes for static tests for the speckle
+    pattern to use in X-ray Speckle Visibility Spectroscopy (XSVS)
 """
 
 
@@ -282,3 +282,58 @@ def static_test_sets(sample_dict, label_array):
     for key, img in dict(sample_dict).iteritems():
         average_intensity_sets[key] = static_test(img, label_array)
     return average_intensity_sets
+
+
+def suitable_center(image, center, inner_radius=10, width=10, mask=None, var=5):
+    """
+    This will find the suitable center for the speckle pattern by finding the
+    intensity distribution for the required ROI which will give the lowest slope
+
+    Parameters
+    ----------
+     image : array
+        image data dimensions are: (rr, cc)
+
+    center : tuple
+        suitable center
+
+    inner_radius : float, optional
+        inner radius of the inner-most ring
+
+    width : float, optional
+        ring thickness
+
+    mask : array, optional
+        boolen array shape image shape
+
+    var : float, optional
+        varying the selected center value to find the suitable center
+    Returns
+    -------
+    new_center : tuple
+        new center for the speckle pattern
+    """
+
+    edges = roi.ring_edges(inner_radius, width, num_rings=1)
+
+    m_value = float('inf')
+    for x in xrange(center[0]-var, center[0]+var):
+        for y in xrange(center[1]-var, center[1]+var):
+            rings = roi.rings(edges, (x, y), image.shape)
+            if mask != None:
+                if mask.shape != image.shape:
+                    raise ValueError("Shape of the mask should be equal to"
+                         " shape of the image")
+                else:
+                    rings = rings*mask
+            labels, indices = corr.extract_label_indices(rings)
+            intensity_dist = intensity_distribution(image, rings)
+
+            a = np.vstract([indices, np.ones(len(indices))])
+
+            m, c = np.linalg.lstsq(a, intensity_dist.values()[0])[0]
+            if m < m_value:
+                m_value = m
+                new_center = (x, y)
+
+    return new_center
