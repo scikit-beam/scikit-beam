@@ -45,6 +45,7 @@ import six
 import numpy as np
 import time
 from scipy import signal
+from scipy.ndimage.filters import gaussian_filter
 
 import logging
 logger = logging.getLogger(__name__)
@@ -102,36 +103,8 @@ _fft_helper = lambda x: np.fft.ifftshift(np.fft.fftn(np.fft.fftshift(x)))
 _ifft_helper = lambda x: np.fft.ifftshift(np.fft.ifftn(np.fft.fftshift(x)))
 
 
-def convolution(array1, array2):
-    """
-    Calculate convolution of two arrays. Transfer into q space to perform the calculation.
-
-    Parameters
-    ----------
-    array1 : array
-        The size of array1 needs to be normalized.
-    array2 : array
-        The size of array2 keeps the same
-
-    Returns
-    -------
-    arr : array
-        convolution result
-
-    Notes
-    -----
-    Another option is to use scipy.signal.fftconvolve. Some differences between
-    the scipy function and this function were found at the boundary.  See
-    `this issue on github <https://github.com/Nikea/scikit-xray/issues/258>`_
-    for details.
-    """
-    fft_1 = _fft_helper(array1) / np.sqrt(np.size(array1))
-    fft_2 = _fft_helper(array2) / np.sqrt(np.size(array2))
-    return np.abs(_ifft_helper(fft_1*fft_2) * np.sqrt(np.size(array2)))
-
-
 def pi_modulus(array_in, diff_array,
-               thresh_v=1e-12):
+               offset_v=1e-12):
     """
     Transfer sample from real space to q space.
     Use constraint based on diffraction pattern from experiments.
@@ -142,7 +115,7 @@ def pi_modulus(array_in, diff_array,
         reconstructed pattern in real space
     diff_array : array
         experimental data
-    thresh_v : float
+    offset_v : float
         add small value to avoid the case of dividing something by zero
 
     Returns
@@ -151,8 +124,8 @@ def pi_modulus(array_in, diff_array,
         updated pattern in q space
     """
     diff_tmp = _fft_helper(array_in) / np.sqrt(np.size(array_in))
-    index = np.where(diff_array > 0)
-    diff_tmp[index] = diff_array[index] * diff_tmp[index] / (np.abs(diff_tmp[index]) + thresh_v)
+    index = diff_array > 0
+    diff_tmp[index] = diff_array[index] * diff_tmp[index] / (np.abs(diff_tmp[index]) + offset_v)
 
     return _ifft_helper(diff_tmp) * np.sqrt(np.size(diff_array))
 
@@ -175,27 +148,19 @@ def find_support(sample_obj,
     -------
     new_sup : array
         updated sample support
-    s_index : array
-        index for sample area
-    s_out_index : array
-        index not for sample area
     """
 
     sample_obj = np.abs(sample_obj)
-    gauss_fun = gauss(sample_obj.shape, sw_sigma)
-    gauss_fun = gauss_fun / np.max(gauss_fun)
-
-    conv_fun = convolution(sample_obj, gauss_fun)
+    conv_fun = gaussian_filter(sample_obj, sw_sigma)
 
     conv_max = np.max(conv_fun)
 
-    s_index = np.where(conv_fun >= (sw_threshold*conv_max))
-    s_out_index = np.where(conv_fun < (sw_threshold*conv_max))
+    s_index = conv_fun >= (sw_threshold*conv_max)
 
     new_sup = np.zeros_like(sample_obj)
     new_sup[s_index] = 1
 
-    return new_sup, s_index, s_out_index
+    return new_sup
 
 
 def pi_support(sample_obj, index_v):
@@ -332,7 +297,7 @@ def generate_disk_support(sup_radius, shape_v):
 
 
 def cdi_recon(diff_array, sample_obj, sup,
-              beta=1.15, start_ave=0.8, pi_modulus_flag='Complex',
+              beta=1.15, start_avg=0.8, pi_modulus_flag='Complex',
               sw_flag=True, sw_sigma=0.5, sw_threshold=0.1, sw_start=0.2,
               sw_end=0.8, sw_step=10, n_iterations=1000):
     """
@@ -349,7 +314,7 @@ def cdi_recon(diff_array, sample_obj, sup,
     beta : float, optional
         feedback parameter for difference map algorithm.
         default is 1.15.
-    start_ave : float, optional
+    start_avg : float, optional
         define the point to start doing average.
         default is 0.8.
     pi_modulus_flag : str, optional
@@ -379,7 +344,7 @@ def cdi_recon(diff_array, sample_obj, sup,
 
     Returns
     -------
-    obj_ave : array
+    obj_avg : array
         reconstructed sample object
     error_dict : dict
         Error information for all iterations. The dict keys include
@@ -396,7 +361,6 @@ def cdi_recon(diff_array, sample_obj, sup,
     gamma_2 = 1/beta
 
     # get support index
-    sup_index = np.where(sup == 1)
     sup_out_index = np.where(sup != 1)
 
     error_dict = {}
@@ -405,8 +369,8 @@ def cdi_recon(diff_array, sample_obj, sup,
     sup_error = np.zeros(n_iterations)
 
     sup_old = np.zeros_like(diff_array)
-    obj_ave = np.zeros_like(diff_array).astype(complex)
-    ave_i = 0
+    obj_avg = np.zeros_like(diff_array).astype(complex)
+    avg_i = 0
 
     time_start = time.time()
     for n in range(n_iterations):
@@ -432,24 +396,23 @@ def cdi_recon(diff_array, sample_obj, sup,
         obj_error[n] = cal_relative_error(obj_old, sample_obj)
         diff_error[n] = cal_diff_error(sample_obj, diff_array)
 
-        if sw_flag is True:
+        if sw_flag:
             if((n >= (sw_start * n_iterations)) and (n <= (sw_end * n_iterations))):
                 if np.mod(n, sw_step) == 0:
                     logger.info('Refine support with shrinkwrap')
-                    sup, sup_index, sup_out_index = find_support(sample_obj,
-                                                                 sw_sigma,
-                                                                 sw_threshold)
+                    sup = find_support(sample_obj, sw_sigma, sw_threshold)
+                    sup_out_index = np.where(sup != 1)
                     sup_error[n] = np.sum(sup_old)
                     sup_old = np.array(sup)
 
-        if n > start_ave*n_iterations:
-            obj_ave += sample_obj
-            ave_i += 1
+        if n > start_avg*n_iterations:
+            obj_avg += sample_obj
+            avg_i += 1
 
         logger.info('{} object_chi= {}, diff_chi={}'.format(n, obj_error[n],
                                                             diff_error[n]))
 
-    obj_ave = obj_ave / ave_i
+    obj_avg = obj_avg / avg_i
     time_end = time.time()
 
     logger.info('object size: {}'.format(np.shape(diff_array)))
@@ -460,4 +423,4 @@ def cdi_recon(diff_array, sample_obj, sup,
     error_dict['diff_error'] = diff_error
     error_dict['sup_error'] = sup_error
 
-    return obj_ave, error_dict
+    return obj_avg, error_dict
