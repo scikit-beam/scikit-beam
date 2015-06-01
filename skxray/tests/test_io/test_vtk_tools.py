@@ -163,6 +163,4 @@ def test_vtk_to_ndarray():
     -------
 
     """
-    for _ in _VTK_TO_NP_dTYPE_DICT.keys():
-
-
+    #for _ in _VTK_TO_NP_dTYPE_DICT.keys():
