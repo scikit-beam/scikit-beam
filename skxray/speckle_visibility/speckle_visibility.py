@@ -287,10 +287,10 @@ def static_test_sets(sample_dict, label_array):
     return average_intensity_sets
 
 
-def suitable_center(image, center, inner_radius=10, width=10, mask=None, var=5):
+def suitable_center(image, est_center, inner_radius=10, width=10, mask=None, var=5):
     """
     This will find the suitable center for the speckle pattern by finding the
-    intensity distribution for the required ROI which will give the lowest slope
+    intensity distribution for the required ROI which will give the lowest slope.
 
     Parameters
     ----------
@@ -314,15 +314,15 @@ def suitable_center(image, center, inner_radius=10, width=10, mask=None, var=5):
         
     Returns
     -------
-    new_center : tuple
-        new center for the speckle pattern
+    center : tuple
+       center for the speckle pattern
     """
 
     edges = roi.ring_edges(inner_radius, width, num_rings=1)
 
     m_value = float('inf')
-    for x in xrange(center[0]-var, center[0]+var):
-        for y in xrange(center[1]-var, center[1]+var):
+    for x in xrange(est_center[0]-var, est_center[0]+var):
+        for y in xrange(est_center[1]-var, est_center[1]+var):
             rings = roi.rings(edges, (x, y), image.shape)
             if mask != None:
                 if mask.shape != image.shape:
@@ -333,11 +333,11 @@ def suitable_center(image, center, inner_radius=10, width=10, mask=None, var=5):
             labels, indices = corr.extract_label_indices(rings)
             intensity_dist = intensity_distribution(image, rings)
 
-            a = np.vstract([indices, np.ones(len(indices))])
+            a = np.vstack([indices, np.ones(len(indices))]).T
 
             m, c = np.linalg.lstsq(a, intensity_dist.values()[0])[0]
             if m < m_value:
                 m_value = m
-                new_center = (x, y)
+                center = (x, y)
 
-    return new_center
+    return center

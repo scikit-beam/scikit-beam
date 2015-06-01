@@ -48,7 +48,7 @@ from nose.tools import assert_equal, assert_true, assert_raises
 
 import skxray.correlation as corr
 import skxray.roi as roi
-import skxray.speckle_visibility as xsvs
+import skxray.speckle_visibility.speckle_visibility as spe_vis
 
 from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
@@ -64,7 +64,7 @@ def test_intensity_distribution():
 
     # different shapes for the images and labels
     assert_raises(ValueError,
-                  lambda: xsvs.intensity_distribution(image_array,
+                  lambda: spe_vis.intensity_distribution(image_array,
                                                       label_array))
 
     images = morphology.diamond(8)
@@ -77,13 +77,13 @@ def test_intensity_distribution():
     edges = roi.ring_edges(inner_radius, width, spacing, num_rings=5)
     rings = roi.rings(edges, center, images.shape)
 
-    intensity_dist = xsvs.intensity_distribution(images, rings)
+    intensity_dist = spe_vis.intensity_distribution(images, rings)
     assert_array_equal(intensity_dist.values()[0], ([1, 1, 1, 1, 1, 1, 1, 1,
                                                      1, 1, 1, 1, 1, 1, 1, 1]))
 
 
 def test_time_bining():
-    time_bin = xsvs.time_bining(number=5, number_of_images=150)
+    time_bin = spe_vis.time_bining(number=5, number_of_images=150)
 
     assert_array_equal(time_bin, [1, 5, 25, 125])
 
@@ -101,4 +101,16 @@ def test_max_counts():
     label_array[img_stack1[0] < 20] = 1
     label_array[img_stack1[0] > 40] = 2
 
-    assert_array_equal(60, xsvs.max_counts(sample_dict, label_array))
+    assert_array_equal(60, spe_vis.max_counts(sample_dict, label_array))
+
+
+def test_suitable_center():
+    pass
+
+
+def test_static_test_sets():
+    pass
+
+
+def test_static_test_sets_one_label():
+    pass
