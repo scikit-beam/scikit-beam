@@ -56,7 +56,7 @@ _defaults = {'con_val_no_bin': 3,
 
 def snip_method(spectrum,
                 e_off, e_lin, e_quad,
-                xmin=0, xmax=2048, epsilon=2.96,
+                xmin=0, xmax=4096, epsilon=2.96,
                 width=0.5, decrease_factor=np.sqrt(2),
                 spectral_binning=None,
                 con_val=None,
@@ -178,7 +178,7 @@ def snip_method(spectrum,
         temp = (background[lo_index.astype(np.int)] +
                 background[hi_index.astype(np.int)]) / 2.
 
-        bg_index  = background > temp
+        bg_index = background > temp
         background[bg_index] = temp[bg_index]
 
     current_width = window_p
@@ -195,7 +195,7 @@ def snip_method(spectrum,
         temp = (background[lo_index.astype(np.int)] +
                 background[hi_index.astype(np.int)]) / 2.
 
-        bg_index  = background > temp
+        bg_index = background > temp
         background[bg_index] = temp[bg_index]
 
         # decrease the width and repeat

@@ -1162,7 +1162,8 @@ def linear_spectrum_fitting(x, y, params,
     # get background
     bg = snip_method(y, fitting_parameters['e_offset']['value'],
                      fitting_parameters['e_linear']['value'],
-                     fitting_parameters['e_quadratic']['value'])
+                     fitting_parameters['e_quadratic']['value'],
+                     width=fitting_parameters['non_fitting_values']['background_width'])
     y = y - bg
 
     if constant_weight is not None:
