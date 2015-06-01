@@ -63,27 +63,28 @@ _VTK_DTYPE_INDEX_DICT = {
     22 : vtk.VTK_UNICODE_STRING
     }
 
-def np_to_vtk(src_data, pixel_spacing=None):
+def np_to_vtk(input_array, pixel_spacing=None):
     """
     This function converts a given numpy array into a VTK object of the same
     type.
 
     Parameters
     ----------
-    src_data : ndarray
-	Complete path to the file to be loaded into memory
+    input_array : ndarray
+    Complete path to the file to be loaded into memory
 
-	pixel_spacing : tuple, optional
-	Tuple containing pixel spacing, or resolution along the three primary
-	axes (x, y, z). If pixel_spacing is not defined then values default to
-	(1,1,1).
+    pixel_spacing : tuple, optional
+    Tuple containing pixel spacing, or resolution along the three primary
+    axes (x, y, z). If pixel_spacing is not defined then values default to
+    (1,1,1).
 
     Returns
     -------
     output : array-like
     """
     dataImporter = vtk.vtkImageImport()
-    dataImporter.CopyImportVoidPointer(src_data, src_data.nbytes)
+    data_string = input_array.tostring()
+    dataImporter.CopyImportVoidPointer(data_string, len(data_string))
     _NP_TO_VTK_dTYPE_DICT = {
         'bool' : dataImporter.SetDataScalarTypeToUnsignedChar(),
         'character' : dataImporter.SetDataScalarTypeToUnsignedChar(),
@@ -98,21 +99,20 @@ def np_to_vtk(src_data, pixel_spacing=None):
         'float32' : dataImporter.SetDataScalarTypeToFloat(),
         'float64' : dataImporter.SetDataScalarTypeToDouble(),
         }
-    src_data_shape = src_data.shape
-    _NP_TO_VTK_dTYPE_DICT[str(src_data.dtype)]
+    input_array_shape = input_array.shape
+    _NP_TO_VTK_dTYPE_DICT[str(input_array.dtype)]
+    dataImporter.SetDataScalarTypeToUnsignedChar()
     dataImporter.SetNumberOfScalarComponents(1)
-    dataImporter.SetDataExtent(0, src_data_shape[2],
-                               0, src_data_shape[1],
-                               0, src_data_shape[0])
-    dataImporter.SetWholeExtent(0, src_data_shape[2],
-                                0, src_data_shape[1],
-                                0, src_data_shape[0])
+    dataImporter.SetDataExtent(0, input_array_shape[2],
+                               0, input_array_shape[1],
+                               0, input_array_shape[0])
+    dataImporter.SetWholeExtent(0, input_array_shape[2],
+                                0, input_array_shape[1],
+                                0, input_array_shape[0])
     if pixel_spacing == None:
-        dataImporter.SetDataSpacing(1,1,1)
-    else:
-        dataImporter.SetDataSpacing(pixel_spacing[0],
-                                    pixel_spacing[1],
-                                    pixel_spacing[2])
+        pixel_spacing = [1, 1, 1]
+    dataImporter.SetDataSpacing(pixel_spacing[0], pixel_spacing[1],
+                                pixel_spacing[2])
     return dataImporter
 
 
@@ -199,14 +199,51 @@ def ipython_vtk_viewer(renderer, width=None, height=None):
     return Image(data)
 
 
-def vtk_viewer(renderer, width=None, height=None):
+# A simple function to be called when the user decides to quit the application.
+def exitCheck(obj, event):
+    if obj.GetEventPending() != 0:
+        obj.SetAbortRender(1)
+
+
+def vtk_vis_props(dataImporter):
+    """
+    Parameters
+    ----------
+    dataImporter : array
+
+    Returns
+    -------
+    volumeProperty : array
+    """
+    dataImporter.SetDataExtent(0, 74, 0, 74, 0, 74)
+    dataImporter.SetWholeExtent(0, 74, 0, 74, 0, 74)
+    alphaChannelFunc = vtk.vtkPiecewiseFunction()
+    alphaChannelFunc.AddPoint(0, 0.0)
+    alphaChannelFunc.AddPoint(50, 0.05)
+    alphaChannelFunc.AddPoint(100, 0.1)
+    alphaChannelFunc.AddPoint(150, 0.2)
+
+    colorFunc = vtk.vtkColorTransferFunction()
+    colorFunc.AddRGBPoint(50, 1.0, 0.0, 0.0)
+    colorFunc.AddRGBPoint(100, 0.0, 1.0, 0.0)
+    colorFunc.AddRGBPoint(150, 0.0, 0.0, 1.0)
+
+    volumeProperty = vtk.vtkVolumeProperty()
+    volumeProperty.SetColor(colorFunc)
+    volumeProperty.SetScalarOpacity(alphaChannelFunc)
+    return volumeProperty
+
+
+def vtk_viewer(volume_data, volumeProperty, width=None, height=None):
     """
     Create a VTK viewer window to display 3D rendered surface and volume
     objects.
 
     Parameters
     ----------
-    renderer :
+    volume_data : array
+
+    volumeProperty : array
 
     width : int, optional
 
@@ -221,10 +258,29 @@ def vtk_viewer(renderer, width=None, height=None):
     if height == None:
         height=300
 
+    # This class describes how the volume is rendered (through ray tracing).
+    compositeFunction = vtk.vtkVolumeRayCastCompositeFunction()
+    # We can finally create our volume. We also have to specify the data for
+    # it, as well as how the data will be rendered.
+    volumeMapper = vtk.vtkVolumeRayCastMapper()
+    volumeMapper.SetVolumeRayCastFunction(compositeFunction)
+    volumeMapper.SetInputConnection(volume_data.GetOutputPort())
+
+    # The class vtkVolume is used to pair the preaviusly declared volume as
+    # well as the properties to be used when rendering that volume.
+    volume = vtk.vtkVolume()
+    volume.SetMapper(volumeMapper)
+    volume.SetProperty(volumeProperty)
+
     #Create renderer instance
     ren = vtk.vtkRenderer()
+    # add the volume to the renderer
+    ren.AddVolume(volume)
+    # set background color
+    ren.SetBackground(0.5,0.5,0.5)
+
     #Create new rendering window
-    renWin = vtkRenderWindow()
+    renWin = vtk.vtkRenderWindow()
     #Create instance
     renWin.AddRenderer(ren)
     #Set Dims
@@ -232,6 +288,7 @@ def vtk_viewer(renderer, width=None, height=None):
     iren = vtk.vtkRenderWindowInteractor()
     iren.SetRenderWindow(renWin)
 
+    renWin.AddObserver("AbortCheckEvent", exitCheck)
     iren.Initialize()
     renWin.Render()
     iren.Start()
@@ -267,3 +324,4 @@ def write_stl(vtk_obj, filename, path=None):
         filename = path+filename
     writer.SetFileName(filename)
     writer.Write()
+

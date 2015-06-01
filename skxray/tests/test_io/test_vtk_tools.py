@@ -10,10 +10,10 @@ data through our pipelines using Numpy Arrays.
 import numpy as np
 import vtk
 from vtk.util import numpy_support
-from skxray.io import np_to_vtk_cnvrt as np2vtk
+from skxray.io.vtk_tools import np_to_vtk as np2vtk
 from numpy.testing import assert_equal
 
-
+dataImporter = vtk.vtkImageImport()
 _NP_TO_VTK_dTYPE_DICT = {
     'bool' : dataImporter.SetDataScalarTypeToUnsignedChar(),
     'character' : dataImporter.SetDataScalarTypeToUnsignedChar(),
@@ -102,7 +102,7 @@ _VTK_DTYPE_INDEX_DICT = {
     }
 
 
-def test_vtk_conversion():
+def test_np_to_vtk_convert():
     """
     This function tests and verifies conversion of synthetic 2D and
     3D numpy arrays to the appropriate and corresponding VTK data object.
@@ -146,7 +146,7 @@ def test_vtk_conversion():
 
 
 
-def test_ndarray_to_vtk_obj():
+def test_vtk_to_ndarray():
     """
     This function automates the saving of volumes as .tiff files using a single
     keyword

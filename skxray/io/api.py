@@ -51,9 +51,11 @@ from skxray.io.gsas_file_reader import gsas_reader
 
 from skxray.io.save_powder_output import gsas_writer
 
-from skxray.io.np_to_vtk_cnvrt import np_to_vtk
+from skxray.io.vtk_tools import np_to_vtk, vtk_to_np, vtk_viewer, write_stl
 
-#from skxray.io.np_to_vtk_cnvrt import vtk_to_np
+from skxray.io.tiff_io import read_tiff, save_tiff
+
 
 __all__ = ['read_netCDF', 'read_binary', 'read_amiraMesh', 'save_output',
-           'gsas_reader', 'gsas_writer', 'np_to_vtk']
+           'gsas_reader', 'gsas_writer', 'np_to_vtk', 'vtk_to_np',
+           'vtk_viewer', 'write_stl', 'read_tiff', 'save_tiff']
