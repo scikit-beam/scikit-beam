@@ -9,9 +9,9 @@ this package and also relevant functions from other scientific packages such as
 scikit-image. Thus, it is a complete solution, curating useful tools from the
 scientific Python community and presenting them in a context for X-ray science.
 
-There are several ways to use scikit-image. Users comfortable with Python,
+There are several ways to use scikit-xray. Users comfortable with Python,
 IPython, or the IPython notebook can use it like any other package. Users
-who prefer drag-and-drop software can access all the tools in scikit-image
+who prefer drag-and-drop software can access all the tools in scikit-xray
 through `vistrails <http://www.vistrails.org/index.php/Main_Page>`__.
 
 Scikit-xray functions accept and return standard Python and numpy datatypes, so

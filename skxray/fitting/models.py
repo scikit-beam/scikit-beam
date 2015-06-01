@@ -53,20 +53,19 @@ from lmfit import Model
 from lmfit.models import GaussianModel as LmGaussianModel
 from lmfit.models import LorentzianModel as LmLorentzianModel
 from .lineshapes import (elastic, compton, gaussian_tail, gausssian_step,
-                         lorentzian2, gaussian, lorentzian
-)
+                         lorentzian2, gaussian, lorentzian)
+
+from skxray.fitting.lineshapes import (elastic, compton, gaussian,
+                                       lorentzian, lorentzian2)
+from skxray.fitting.base.parameter_data import get_para
 
 import logging
 logger = logging.getLogger(__name__)
 
-from skxray.fitting.lineshapes import (elastic, compton, gaussian,
-                                       lorentzian, lorentzian2)
-
-from skxray.fitting.base.parameter_data import get_para
-
 
 def set_default(model_name, func_name):
-    """set values and bounds to Model parameters in lmfit
+    """
+    Set values and bounds to Model parameters in lmfit.
 
     Parameters
     ----------
@@ -107,6 +106,17 @@ def set_default(model_name, func_name):
 
 
 def _gen_class_docs(func):
+    """
+    Parameters
+    ----------
+    func : function
+        function of peak profile
+
+    Returns
+    -------
+    str :
+        documentation of the function
+    """
     return ("Wrap the {} function for fitting within lmfit framework\n".format(func.__name__) +
             func.__doc__)
 
@@ -127,10 +137,10 @@ class ComptonModel(Model):
     __doc__ = _gen_class_docs(compton)
 
     def __init__(self, *args, **kwargs):
+
         super(ComptonModel, self).__init__(compton, *args, **kwargs)
         set_default(self, compton)
         self.set_param_hint('epsilon', value=2.96, vary=False)
-        self.set_param_hint('matrix', value=False, vary=False)
 
 
 class Lorentzian2Model(Model):
@@ -139,5 +149,3 @@ class Lorentzian2Model(Model):
 
     def __init__(self, *args, **kwargs):
         super(Lorentzian2Model, self).__init__(lorentzian2, *args, **kwargs)
-
-

@@ -1,4 +1,3 @@
-#! encoding: utf-8
 # ######################################################################
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
@@ -33,25 +32,69 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-"""
-This module creates a namespace for X-Ray Fluorescence
-"""
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
+import six
+import numpy as np
 import logging
+
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_almost_equal)
+import sys
+
+from nose.tools import assert_equal, assert_true, raises
+
+import skxray.correlation as corr
+import skxray.roi as roi
+
+from skxray.testing.decorators import known_fail_if
+import numpy.testing as npt
+
+from skimage import data
+
 logger = logging.getLogger(__name__)
 
-# import fitting models
-from ..fitting.api import (
-    ConstantModel, LinearModel, QuadraticModel, ParabolicModel,
-    PolynomialModel, VoigtModel, PseudoVoigtModel, Pearson7Model,
-    StudentsTModel, BreitWignerModel, GaussianModel, LorentzianModel,
-    LognormalModel, DampedOscillatorModel, ExponentialGaussianModel,
-    SkewedGaussianModel, DonaichModel, PowerLawModel, ExponentialModel,
-    StepModel, RectangleModel, Lorentzian2Model, ComptonModel, ElasticModel
-)
 
-# import Element objects
-from ..constants.api import XrfElement, emission_line_search
+def test_correlation():
+    num_levels = 4
+    num_bufs = 8  # must be even
+    num_qs = 2  # number of interested roi's (rings)
+    img_dim = (50, 50)  # detector size
 
-# import background subtraction
-from ..fitting.background import snip_method
+    roi_data = np.array(([10, 20, 12, 14], [40, 10, 9, 10]),
+                        dtype=np.int64)
+
+    indices = roi.rectangles(roi_data, img_dim)
+
+    img_stack = np.random.randint(1, 5, size=(500, ) + img_dim)
+
+    img_it = np.nditer(img_stack)
+
+    g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, indices,
+                                             img_it)
+
+    assert_array_almost_equal(lag_steps,  np.array([0, 1, 2, 3, 4, 5, 6, 7, 8,
+                                                   10, 12, 14, 16, 20, 24, 28,
+                                                   32, 40, 48, 56]))
+
+    assert_array_almost_equal(g2[1:, 0], 1.00, decimal=2)
+    assert_array_almost_equal(g2[1:, 1], 1.00, decimal=2)
+
+    coins = data.camera()
+    coins_stack = []
+
+    for i in range(500):
+        coins_stack.append(coins)
+
+    coins_mesh = np.zeros_like(coins)
+    coins_mesh[coins < 30] = 1
+    coins_mesh[coins > 50] = 2
+
+    coin_it = np.nditer((np.asarray(coins_stack)))
+
+    g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, coins_mesh,
+                                             coin_it)
+
+    assert_almost_equal(True, np.all(g2[:, 0], axis=0))
+    assert_almost_equal(True, np.all(g2[:, 1], axis=0))

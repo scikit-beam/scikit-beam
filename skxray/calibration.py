@@ -46,8 +46,8 @@ from collections import deque
 from .constants.api import calibration_standards
 from skxray.feature import (filter_peak_height, peak_refinement,
                            refine_log_quadratic)
-from skxray.core import (pixel_to_phi, pixel_to_radius,
-                        pairwise, bin_edges_to_centers, bin_1D)
+from skxray.core import (angle_grid, radial_grid,
+                         pairwise, bin_edges_to_centers, bin_1D)
 
 
 def estimate_d_blind(name, wavelength, bin_centers, ring_average,
@@ -181,8 +181,8 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
     if nx is None:
         nx = int(np.mean(image.shape) * 2)
 
-    phi = pixel_to_phi(image.shape, calibrated_center, pixel_size).ravel()
-    r = pixel_to_radius(image.shape, calibrated_center, pixel_size).ravel()
+    phi = angle_grid(calibrated_center, image.shape, pixel_size).ravel()
+    r = radial_grid(calibrated_center, image.shape, pixel_size).ravel()
     I = image.ravel()
 
     phi_steps = np.linspace(-np.pi, np.pi, phi_steps, endpoint=True)

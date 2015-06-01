@@ -1,7 +1,11 @@
-#! encoding: utf-8
 # ######################################################################
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
+#                                                                      #
+# @author: Li Li (lili@bnl.gov)                                        #
+# created on 03/27/2015                                                #
+#                                                                      #
+# Original code from Xiaojing Huang (xjhuang@bnl.gov) and Li Li        #
 #                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
@@ -33,25 +37,91 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-"""
-This module creates a namespace for X-Ray Fluorescence
-"""
+
+
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+import six
+import numpy as np
 
 import logging
 logger = logging.getLogger(__name__)
 
-# import fitting models
-from ..fitting.api import (
-    ConstantModel, LinearModel, QuadraticModel, ParabolicModel,
-    PolynomialModel, VoigtModel, PseudoVoigtModel, Pearson7Model,
-    StudentsTModel, BreitWignerModel, GaussianModel, LorentzianModel,
-    LognormalModel, DampedOscillatorModel, ExponentialGaussianModel,
-    SkewedGaussianModel, DonaichModel, PowerLawModel, ExponentialModel,
-    StepModel, RectangleModel, Lorentzian2Model, ComptonModel, ElasticModel
-)
 
-# import Element objects
-from ..constants.api import XrfElement, emission_line_search
+def _dist(dims):
+    """
+    Create array with pixel value equals to the distance from array center.
 
-# import background subtraction
-from ..fitting.background import snip_method
+    Parameters
+    ----------
+    dims : list or tuple
+        shape of array to create
+
+    Returns
+    -------
+    arr : np.ndarray
+        ND array whose pixels are equal to the distance from the center
+        of the array of shape `dims`
+    """
+    dist_sum = []
+    shape = np.ones(len(dims))
+    for idx, d in enumerate(dims):
+        vec = (np.arange(d) - d // 2) ** 2
+        shape[idx] = -1
+        vec = vec.reshape(*shape)
+        shape[idx] = 1
+        dist_sum.append(vec)
+
+    return np.sqrt(np.sum(dist_sum, axis=0))
+
+
+def gauss(dims, sigma):
+    """
+    Generate Gaussian function in 2D or 3D.
+
+    Parameters
+    ----------
+    dims : list or tuple
+        shape of the data
+    sigma : float
+        standard deviation of gaussian function
+
+    Returns
+    -------
+    Array :
+        ND gaussian
+    """
+    x = _dist(dims)
+    y = np.exp(-(x / sigma)**2 / 2)
+    return y / np.sum(y)
+
+
+def convolution(array1, array2):
+    """
+    Calculate convolution of two arrays. Transfer into q space to perform the calculation.
+
+    Parameters
+    ----------
+    array1 : array
+        The size of array1 needs to be normalized.
+    array2 : array
+        The size of array2 keeps the same
+
+    Returns
+    -------
+    array :
+        convolution result
+
+    Notes
+    -----
+    Another option is to use scipy.signal.fftconvolve. Some differences between
+    the scipy function and this function were found at the boundary.  See
+    `this issue on github <https://github.com/Nikea/scikit-xray/issues/258>`_
+    for details.
+    """
+    fft_norm = lambda x:  np.fft.fftshift(np.fft.fftn(x)) / np.sqrt(np.size(x))
+    fft_1 = fft_norm(array1)
+    fft_2 = fft_norm(array2)
+    return np.abs(np.fft.ifftshift(np.fft.ifftn(fft_1*fft_2)) *
+                  np.sqrt(np.size(array2)))
+

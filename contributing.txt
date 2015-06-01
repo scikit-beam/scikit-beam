@@ -44,7 +44,7 @@ Here's the long and short of it:
    * Push your changes back to your fork on GitHub::
 
       git push origin transform-speedups
-      
+
   * **Explain your contribution.** Include a description aimed at someone
      who may not be following the issue closely. If your contribution
      includes new functionality or enhancements, include a link to an
@@ -53,12 +53,12 @@ Here's the long and short of it:
    * Go to GitHub. The new branch will show up with a green Pull Request
      button - click it.
 
-For a more detailed discussion, See `scikit-xray dev guide 
+For a more detailed discussion, See `scikit-xray dev guide
 <https://github.com/Nikea/scikit-xray/tree/master/doc/resource/dev_guide>`_.
 Also see these scikit-image :doc:`detailed documents
 <gitwash/index>` on how to use Git with ``scikit-image``
 (`<http://scikit-image.org/docs/dev/gitwash/index.html>`_) and appropriately
-translate scikit-image/scikit-image to Nikea/scikit-xray. 
+translate scikit-image/scikit-image to Nikea/scikit-xray.
 
 4. Review process:
 
@@ -135,6 +135,9 @@ Guidelines
   gallery.
 * **Never merge your own pull request.**
 * Examples in the gallery should have a maximum figure width of 8 inches.
+* When documenting APIs and/or source code, don’t make assumptions or make
+  implications about race, gender, religion, political orientation or anything
+  else that isn’t relevant to the project.
 
 Stylistic Guidelines
 --------------------
@@ -164,6 +167,7 @@ Stylistic Guidelines
 
 * Use ``Py_ssize_t`` as data type for all indexing, shape and size variables
   in C/C++ and Cython code.
+
 
 Test coverage
 -------------
