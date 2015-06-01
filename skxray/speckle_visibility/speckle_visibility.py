@@ -76,7 +76,7 @@ def max_counts(sample_dict, label_array):
         maximum speckle counts
     """
     max_cts = 0
-    for key, img_sets in dict(sample_dict).items():
+    for key, img_sets in dict(sample_dict).iteritems():
         for n, img in enumerate(img_sets.operands[0]):
             int_dist = intensity_distribution(img, label_array)
             for j in range(len(int_dist)):
@@ -282,7 +282,7 @@ def static_test_sets(sample_dict, label_array):
 
     average_intensity_sets = {}
 
-    for key, img in dict(sample_dict).items():
+    for key, img in dict(sample_dict).iteritems():
         average_intensity_sets[key] = static_test(img, label_array)
     return average_intensity_sets
 
