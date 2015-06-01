@@ -10,7 +10,7 @@ data through our pipelines using Numpy Arrays.
 import numpy as np
 import vtk
 from vtk.util import numpy_support
-from skxray.io.vtk_tools import np_to_vtk as np2vtk
+from skxray.io import vtk_tools
 from numpy.testing import assert_equal
 
 dataImporter = vtk.vtkImageImport()
@@ -30,49 +30,49 @@ _NP_TO_VTK_dTYPE_DICT = {
     }
 
 _NP_TO_VTK_dTYPE_DICT = {
-    np.bool: vtk.VTK_UNSIGNED_CHAR,
-    np.character: vtk.VTK_UNSIGNED_CHAR,
-    np.uint8: vtk.VTK_UNSIGNED_CHAR,
-    np.uint16: vtk.VTK_UNSIGNED_SHORT,
-    np.uint32: vtk.VTK_UNSIGNED_INT,
-    np.uint64: vtk.VTK_UNSIGNED_LONG,
-    np.int8: vtk.VTK_CHAR,
-    np.int16: vtk.VTK_SHORT,
-    np.int32: vtk.VTK_INT,
-    np.int64: vtk.VTK_LONG,
-    np.float32: vtk.VTK_FLOAT,
-    np.float64: vtk.VTK_DOUBLE
+    'bool': vtk.VTK_UNSIGNED_CHAR,
+    'character': vtk.VTK_UNSIGNED_CHAR,
+    'uint8': vtk.VTK_UNSIGNED_CHAR,
+    'uint16': vtk.VTK_UNSIGNED_SHORT,
+    'uint32': vtk.VTK_UNSIGNED_INT,
+    'uint64': vtk.VTK_UNSIGNED_LONG,
+    'int8': vtk.VTK_CHAR,
+    'int16': vtk.VTK_SHORT,
+    'int32': vtk.VTK_INT,
+    'int64': vtk.VTK_LONG,
+    'float32': vtk.VTK_FLOAT,
+    'float64': vtk.VTK_DOUBLE
 }
 
 VTK_ID_TYPE_SIZE = vtk.vtkIdTypeArray().GetDataTypeSize()
 if VTK_ID_TYPE_SIZE == 4:
-    ID_TYPE_CODE = np.int32
+    ID_TYPE_CODE = 'int32'
 elif VTK_ID_TYPE_SIZE == 8:
-    ID_TYPE_CODE = np.int64
+    ID_TYPE_CODE = 'int64'
 
 VTK_LONG_TYPE_SIZE = vtk.vtkLongArray().GetDataTypeSize()
 if VTK_LONG_TYPE_SIZE == 4:
-    LONG_TYPE_CODE = np.int32
-    ULONG_TYPE_CODE = np.uint32
+    LONG_TYPE_CODE = 'int32'
+    ULONG_TYPE_CODE = 'uint32'
 elif VTK_LONG_TYPE_SIZE == 8:
-    LONG_TYPE_CODE = np.int64
-    ULONG_TYPE_CODE = np.uint64
+    LONG_TYPE_CODE = 'int64'
+    ULONG_TYPE_CODE = 'uint64'
 
 _VTK_TO_NP_dTYPE_DICT = {
-    #vtk.VTK_BIT : np.bool,
-    vtk.VTK_CHAR : np.int8,
-    vtk.VTK_UNSIGNED_CHAR : np.uint8,
-    vtk.VTK_SHORT : np.int16,
-    vtk.VTK_UNSIGNED_SHORT : np.uint16,
-    vtk.VTK_INT : np.int32,
-    vtk.VTK_UNSIGNED_INT : np.uint32,
+    #vtk.VTK_BIT : 'bool',
+    vtk.VTK_CHAR : 'int8',
+    vtk.VTK_UNSIGNED_CHAR : 'uint8',
+    vtk.VTK_SHORT : 'int16',
+    vtk.VTK_UNSIGNED_SHORT : 'uint16',
+    vtk.VTK_INT : 'int32',
+    vtk.VTK_UNSIGNED_INT : 'uint32',
     vtk.VTK_LONG : LONG_TYPE_CODE,
-    vtk.VTK_LONG_LONG : np.int64,
+    vtk.VTK_LONG_LONG : 'int64',
     vtk.VTK_UNSIGNED_LONG : ULONG_TYPE_CODE,
-    vtk.VTK_UNSIGNED_LONG_LONG : np.uint64,
+    vtk.VTK_UNSIGNED_LONG_LONG : 'uint64',
     vtk.VTK_ID_TYPE : ID_TYPE_CODE,
-    vtk.VTK_FLOAT : np.float32,
-    vtk.VTK_DOUBLE : np.float64
+    vtk.VTK_FLOAT : 'float32',
+    vtk.VTK_DOUBLE : 'float64'
 }
 
 _VTK_DTYPE_INDEX_DICT = {
@@ -135,11 +135,9 @@ def test_np_to_vtk_convert():
     for _ in _NP_TO_VTK_dTYPE_DICT.keys():
         test_np_array = np.array(10*np.random.rand(3,3,3), dtype=_)
         array_shape = test_np_array.shape
-        vtk_obj = np2vtk.ndarray_to_vtk_obj(test_np_array,
-                                            array_type=_NP_TO_VTK_dTYPE_DICT[_])
-        assert_equal(_VTK_DTYPE_INDEX_DICT[vtk_obj.GetDataType()],
-                     _NP_TO_VTK_dTYPE_DICT[_])
-        np_result = np2vtk.vtk_to_np(vtk_obj, array_shape)
+        vtk_obj = vtk_tools.np_to_vtk(test_np_array)
+        assert_equal(_VTK_TO_NP_dTYPE_DICT[vtk_obj.GetDataScalarType()], _NP_TO_VTK_dTYPE_DICT[str(test_np_array.dtype)])
+        np_result = vtk_tools.vtk_to_np(vtk_obj, array_shape)
         print np_result.dtype
         print np_result.shape
         assert_equal(np_result, test_np_array)
