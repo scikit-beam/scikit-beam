@@ -301,7 +301,8 @@ default_param = {
         'min': -1e-06,
         'tool_tip': 'E(channel) = a0 + a1*channel+ a2*channel**2',
         'value': 0.0},
-    'fwhm_fanoprime': {'bound_type': 'fixed',
+    'fwhm_fanoprime': {
+        'bound_type': 'fixed',
         'description': 'fwhm Coef, b2',
         'max': 0.0001,
         'min': 1e-07,
@@ -323,7 +324,8 @@ default_param = {
             'value': 13.5,
             'default_value': 13.5,
             'description': 'E high [keV]'},
-        'epsilon': 3.51 # electron hole energy
+        'epsilon': 3.51,  # electron hole energy
+        "background_width": 0.5
     }
 }
 
