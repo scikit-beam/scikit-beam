@@ -2,6 +2,13 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
+# Original code:                                                       #
+# @author: Pawel Kwasniewski, European Synchrotron Radiation Facility  #
+# and Andrei Fluerasu, Brookhaven                                      #
+#                                                                      #
+# Developed at the NSLS-II, Brookhaven National Laboratory             #
+# Developed by Sameera K. Abeykoon, May 2015                           #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -69,24 +76,31 @@ def nbinom_distribution(K, M, x):
     ----------
     K : int
         number of photons
+
     M : int
         number of coherent modes
-    x :
+
+    x : array
+
     Returns
     -------
-    Pk :
+    Pk : array
         Negative Binomial (Poisson-Gamma) distribution function
+
     Note
     ----
     These implementation is based on following references
     References: text [1]_, text [2]_
-    .. [1] L. Li, P. Kwasniewski, D. Oris, L Wiegart, L. Cristofolini, C. Carona
-        and A. Fluerasu , "Photon statistics and speckle visibility spectroscopy
-        with partially coherent x-rays" J. Synchrotron Rad., vol 21, p 1288-1295,
-        2014.
-    .. [2] R. Bandyopadhyay, A. S. Gittings, S. S. Suh, P.K. Dixon and D.J. Durian
-       "Speckle-visibilty Spectroscopy: A tool to study time-varying dynamics" Rev.
-       Sci. Instrum. vol 76, p  093110, 2005.
+
+    .. [1] L. Li, P. Kwasniewski, D. Oris, L Wiegart, L. Cristofolini,
+       C. Carona and A. Fluerasu , "Photon statistics and speckle visibility
+       spectroscopy with partially coherent x-rays" J. Synchrotron Rad.,
+       vol 21, p 1288-1295, 2014.
+
+    .. [2] R. Bandyopadhyay, A. S. Gittings, S. S. Suh, P.K. Dixon and
+       D.J. Durian "Speckle-visibilty Spectroscopy: A tool to study
+       time-varying dynamics" Rev. Sci. Instrum. vol 76, p  093110, 2005.
+
     """
     coeff = np.exp(gammaln(x + M) - gammaln(x + 1) - gammaln(M))
 
@@ -99,19 +113,24 @@ def nbinom_distribution(K, M, x):
 def poisson_distribution(K, x):
     """
     Poisson Distribution
+
     Parameters
     ---------
     K : int
         number of photons
-    x :
+
+    x : array
+
     Returns
     -------
-    Poission_D :
+    Poission_D : array
        Poisson Distribution
+
     Note
     ----
     These implementation based on the references under
     nbinom_distribution() function Note
+
     """
     Poission_D = np.exp(-K) * np.power(K, x)/gamma(x + 1)
     return Poission_D
@@ -120,22 +139,28 @@ def poisson_distribution(K, x):
 def gamma_distribution(M, K, x ):
     """
     Gamma distribution function
+
     Parameters
     ----------
     M : int
         number of coherent modes
+
     K : int
         number of photons
-    x :
+
+    x : array
+
     Returns
     -------
     G : array
         Gamma distribution
+
     Note
     ----
     These implementation based on the references under
     nbinom_distribution() function Note
     """
+
     coeff = np.exp(M * np.log(M) + (M - 1) * np.log(x) -
                    gammaln(M) - M * np.log(K))
     Gd = coeff * np.exp(- M * x / K)
@@ -146,19 +171,26 @@ def residuals(M, K, y, x, yerr):
     """
     Residuals function for least squares fitting,
     K may be a fixed parameter
+
     Parameters
     ----------
     M : int
         number of coherent modes
+
     K : int
         number of photons
-    y :
-    x :
-    yerr :
+
+    y : array
+
+    x : array
+
+    yerr : array
+
     Returns
     -------
     residual : array
         Residuals function for least squares fitting
+
     Note
     ----
     These implementation based on the references under
@@ -178,15 +210,21 @@ def eval_binomal_dist(M, K, x):
     ----------
     M : int
         number of coherent modes
+
     K : int
         number of photons
-    x :
+
+    x : array
+
     Returns
     -------
+    eval_result : array
+
     Note
     ----
     These implementation based on the references under
     nbinom_distribution() function Note
     """
+
     eval_result = nbinom_distribution(x, K, M)
     return eval_result

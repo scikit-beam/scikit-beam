@@ -54,7 +54,7 @@ from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
 
 from skimage import data, morphology
-
+from skimage.draw import circle_perimeter
 
 def test_intensity_distribution():
     image_array = data.moon()
@@ -133,3 +133,21 @@ def test_static_test_sets():
 
 def test_static_test_sets_one_label():
     pass
+
+
+def test_circular_average():
+    image = np.zeros((12,12))
+    calib_center = (5, 5)
+    inner_radius = 1
+
+    edges = roi.ring_edges(inner_radius, width=1, spacing=1, num_rings=2)
+    labels = roi.rings(edges, calib_center, image.shape)
+    image[labels==1] = 10
+    image[labels==2] = 10
+    bin_cen, ring_avg = spe_vis.circular_average(image, calib_center, nx=6)
+
+    assert_array_almost_equal(bin_cen, [0.70710678, 2.12132034,
+                                        3.53553391,  4.94974747,  6.36396103,
+                                        7.77817459], decimal=6)
+    assert_array_almost_equal(ring_avg, [8., 2.5, 5.55555556, 0.,
+                                         0., 0.], decimal=6)
