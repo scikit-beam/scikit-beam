@@ -37,8 +37,8 @@
 ########################################################################
 
 """
-    This module will provide analysis codes for static tests for the
-    speckle pattern to use in X-ray Speckle Visibility Spectroscopy (XSVS)
+    This module will provide statistics analysis for the speckle pattern
+    to use in X-ray Speckle Visibility Spectroscopy (XSVS)
 """
 
 
@@ -324,7 +324,7 @@ def suitable_center(image, est_center, inner_radius=10, width=10, mask=None, var
     for x in xrange(est_center[0]-var, est_center[0]+var):
         for y in xrange(est_center[1]-var, est_center[1]+var):
             rings = roi.rings(edges, (x, y), image.shape)
-            if mask != None:
+            if mask is not None:
                 if mask.shape != image.shape:
                     raise ValueError("Shape of the mask should be equal to"
                          " shape of the image")
