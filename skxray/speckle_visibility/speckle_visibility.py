@@ -289,8 +289,8 @@ def static_test_sets(sample_dict, label_array):
 
 def suitable_center(image, est_center, inner_radius=10, width=10, mask=None, var=5):
     """
-    This will find the suitable center for the speckle pattern by finding the
-    intensity distribution for the required ROI which will give the lowest slope.
+    This will find the most suitable center for the speckle pattern using an
+    estimated center.
 
     Parameters
     ----------
@@ -298,7 +298,7 @@ def suitable_center(image, est_center, inner_radius=10, width=10, mask=None, var
         image data dimensions are: (rr, cc)
 
     center : tuple
-        suitable center
+        estimated center
 
     inner_radius : float, optional
         inner radius of the inner-most ring
