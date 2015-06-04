@@ -93,12 +93,14 @@ def test_find_support():
     r = 20
     a = np.zeros(shape_v)
     a[cenv-r:cenv+r, cenv-r:cenv+r] = 1.0
-    sw_sigma = 0.5
-    sw_threshold = 0.01
+    sw_sigma = 0.50
+    sw_threshold = 0.05
 
-    new_sup = find_support(a, sw_sigma, sw_threshold)
+    new_sup_index = find_support(a, sw_sigma, sw_threshold)
+    new_sup = np.zeros_like(a)
+    new_sup[new_sup_index] = 1
     # the area of new support becomes larger
-    assert(np.sum(new_sup) > np.sum(a))
+    assert(np.sum(new_sup) == 1760)
 
 
 def test_pi_support():

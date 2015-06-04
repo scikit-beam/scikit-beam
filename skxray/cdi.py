@@ -116,7 +116,7 @@ def pi_modulus(recon_pattern,
         reconstructed pattern in real space
     diffracted_pattern : array
         diffraction pattern from experiments
-    offset_v : float
+    offset_v : float, optional
         add small value to avoid the case of dividing something by zero
 
     Returns
@@ -147,21 +147,13 @@ def find_support(sample_obj,
 
     Returns
     -------
-    new_sup : array
-        updated sample support
+    array :
+        index of sample support
     """
-
     sample_obj = np.abs(sample_obj)
     conv_fun = gaussian_filter(sample_obj, sw_sigma)
-
     conv_max = np.max(conv_fun)
-
-    s_index = conv_fun >= (sw_threshold*conv_max)
-
-    new_sup = np.zeros_like(sample_obj)
-    new_sup[s_index] = 1
-
-    return new_sup
+    return conv_fun >= (sw_threshold*conv_max)
 
 
 def pi_support(sample_obj, index_v):
@@ -346,15 +338,25 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
         the difference between new diffraction pattern and the original
         diffraction pattern. And sup_error stores the size of the
         sample support.
+
+    References
+    ----------
+
+    .. [1] V. Elser, "Phase retrieval by iterated projections",
+        J. Opt. Soc. Am. A, vol. 20, No. 1, 2003
     """
 
     diffracted_pattern = np.array(diffracted_pattern)     # diffraction data
+
+    real_operation = False
+    if pi_modulus_flag.lower() == 'real':
+        real_operation = True
 
     gamma_1 = -1/beta
     gamma_2 = 1/beta
 
     # get support index
-    sup_out_index = sup < 1
+    outside_sup_index = sup != 1
 
     error_dict = {}
     obj_error = np.zeros(n_iterations)
@@ -370,17 +372,17 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
         obj_old = np.array(sample_obj)
 
         obj_a = pi_modulus(sample_obj, diffracted_pattern)
-        if pi_modulus_flag.lower() == 'real':
+        if real_operation:
             obj_a = np.abs(obj_a)
 
         obj_a = (1 + gamma_2) * obj_a - gamma_2 * sample_obj
-        obj_a = pi_support(obj_a, sup_out_index)
+        obj_a = pi_support(obj_a, outside_sup_index)
 
-        obj_b = pi_support(sample_obj, sup_out_index)
+        obj_b = pi_support(sample_obj, outside_sup_index)
         obj_b = (1 + gamma_1) * obj_b - gamma_1 * sample_obj
 
         obj_b = pi_modulus(obj_b, diffracted_pattern)
-        if pi_modulus_flag.lower() == 'real':
+        if real_operation:
             obj_b = np.abs(obj_b)
 
         sample_obj += beta * (obj_a - obj_b)
@@ -393,8 +395,10 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
             if((n >= (sw_start * n_iterations)) and (n <= (sw_end * n_iterations))):
                 if np.mod(n, sw_step) == 0:
                     logger.info('Refine support with shrinkwrap')
-                    sup = find_support(sample_obj, sw_sigma, sw_threshold)
-                    sup_out_index = sup < 1
+                    sup_index = find_support(sample_obj, sw_sigma, sw_threshold)
+                    sup = np.zeros_like(diffracted_pattern)
+                    sup[sup_index] = 1
+                    outside_sup_index = sup != 1
                     sup_error[n] = np.sum(sup_old)
                     sup_old = np.array(sup)
 
@@ -402,15 +406,14 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
             obj_avg += sample_obj
             avg_i += 1
 
-        logger.info('{} object_chi= {}, diff_chi={}'.format(n, obj_error[n],
-                                                            diff_error[n]))
+        logger.info('%d object_chi= %f, diff_chi=%f' % (n, obj_error[n],
+                                                        diff_error[n]))
 
     obj_avg = obj_avg / avg_i
     time_end = time.time()
 
-    logger.info('object size: {}'.format(np.shape(diffracted_pattern)))
-    logger.info('{} iterations takes {} sec'.format(n_iterations,
-                                                    time_end - time_start))
+    logger.info('%d iterations takes %f sec' % (n_iterations,
+                                                time_end - time_start))
 
     error_dict['obj_error'] = obj_error
     error_dict['diff_error'] = diff_error
