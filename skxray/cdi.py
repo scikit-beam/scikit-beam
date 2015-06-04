@@ -99,10 +99,6 @@ def gauss(dims, sigma):
     return y / np.sum(y)
 
 
-_fft_helper = lambda x: np.fft.ifftshift(np.fft.fftn(np.fft.fftshift(x)))
-_ifft_helper = lambda x: np.fft.ifftshift(np.fft.ifftn(np.fft.fftshift(x)))
-
-
 def pi_modulus(recon_pattern,
                diffracted_pattern,
                offset_v=1e-12):
@@ -121,14 +117,14 @@ def pi_modulus(recon_pattern,
 
     Returns
     -------
-    arr : array
-        updated pattern in q space
+    array :
+        updated pattern in real space
     """
-    diff_tmp = _fft_helper(recon_pattern) / np.sqrt(np.size(recon_pattern))
+    diff_tmp = np.fft.fftn(recon_pattern) / np.sqrt(np.size(recon_pattern))
     index = diffracted_pattern > 0
     diff_tmp[index] = (diffracted_pattern[index] *
                        diff_tmp[index] / (np.abs(diff_tmp[index]) + offset_v))
-    return _ifft_helper(diff_tmp) * np.sqrt(np.size(diffracted_pattern))
+    return np.fft.ifftn(diff_tmp) * np.sqrt(np.size(diffracted_pattern))
 
 
 def find_support(sample_obj,
@@ -213,7 +209,7 @@ def cal_diff_error(sample_obj, diffracted_pattern):
     float :
         relative error in q space
     """
-    new_diff = np.abs(_fft_helper(sample_obj)) / np.sqrt(np.size(sample_obj))
+    new_diff = np.abs(np.fft.fftn(sample_obj)) / np.sqrt(np.size(sample_obj))
     return cal_relative_error(diffracted_pattern, new_diff)
 
 
@@ -232,7 +228,7 @@ def generate_random_phase_field(diffracted_pattern):
         sample information with phase
     """
     pha_tmp = np.random.uniform(0, 2*np.pi, diffracted_pattern.shape)
-    sample_obj = (_ifft_helper(diffracted_pattern * np.exp(1j*pha_tmp))
+    sample_obj = (np.fft.ifftn(diffracted_pattern * np.exp(1j*pha_tmp))
                   * np.sqrt(np.size(diffracted_pattern)))
     return sample_obj
 
@@ -293,7 +289,7 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
     diffracted_pattern : array
         diffraction pattern from experiments
     sample_obj : array
-        initial sample with phase
+        initial sample with phase, complex number
     sup : array
         initial support
     beta : float, optional
@@ -347,6 +343,7 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
     """
 
     diffracted_pattern = np.array(diffracted_pattern)     # diffraction data
+    diffracted_pattern = np.fft.fftshift(diffracted_pattern)
 
     real_operation = False
     if pi_modulus_flag.lower() == 'real':

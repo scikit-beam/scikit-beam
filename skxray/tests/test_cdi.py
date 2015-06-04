@@ -7,8 +7,7 @@ from numpy.testing import (assert_equal, assert_array_equal,
                            assert_array_almost_equal, assert_almost_equal)
 
 from skxray.cdi import (_dist, gauss, cal_relative_error, find_support, pi_support,
-                        _fft_helper, _ifft_helper, pi_modulus,
-                        cal_diff_error, cdi_recon,
+                        pi_modulus, cal_diff_error, cdi_recon,
                         generate_random_phase_field,
                         generate_box_support, generate_disk_support)
 
@@ -66,15 +65,6 @@ def test_gauss():
         assert_almost_equal(0, np.mean(d), decimal=3)
 
 
-def test_fft_helper():
-    x = np.linspace(-2, 2, 100, endpoint=True)
-    g = np.exp(x ** 2 / 2)
-
-    g_fft = _fft_helper(g)
-    g_ifft = _ifft_helper(g_fft)
-    assert_array_almost_equal(np.abs(g_ifft), g, decimal=10)
-
-
 def test_relative_error():
     shape_v = [3, 3]
     a1 = np.zeros(shape_v)
@@ -126,7 +116,7 @@ def make_synthetic_data():
     r = 20
     a = np.zeros(shapev)
     a[shapev[0]//2-r:shapev[0]//2+r, shapev[1]//2-r:shapev[1]//2+r] = 1
-    diff_v = np.abs(_fft_helper(a)) / np.sqrt(np.size(a))
+    diff_v = np.abs(np.fft.fftn(a)) / np.sqrt(np.size(a))
     return a, diff_v
 
 
