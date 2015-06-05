@@ -51,6 +51,7 @@ from six import string_types
 
 import skxray.correlation as corr
 import skxray.roi as roi
+import skxray.core as core
 
 import logging
 logger = logging.getLogger(__name__)
@@ -341,3 +342,46 @@ def suitable_center(image, est_center, inner_radius=10, width=10, mask=None, var
                 center = (x, y)
 
     return center
+
+
+def circular_average(image, calibrated_center, thershold=0,
+                          nx=100, pixel_size=None):
+    """
+    Circular average of the intensity of the image SAXS(small angle
+    x-ray scattering)
+
+    Parameters
+    ----------
+    image : array
+        input image
+
+    calibrated_center : tuple
+        The center in pixels-units (row, col)
+
+    thershold : float, optional
+        threshold value to mask
+
+    nx : int, optional
+        number of bins
+
+    pixel_size : tuple, optional
+        The size of a pixel in real units. (height, width). (mm)
+
+    Returns
+    -------
+    bin_centers : array
+        bin centers from bin edges
+
+    ring_averages : array
+        circular integration of SAXS intensity
+    """
+    radial_val = core.radial_grid(calibrated_center, image.shape)
+
+    bin_edges, sums, counts = core.bin_1D(np.ravel(radial_val),
+                                          np.ravel(image), nx)
+    th_mask = counts > thershold
+    ring_average = sums[th_mask] / counts[th_mask]
+
+    bin_centers = core.bin_edges_to_centers(bin_edges)
+
+    return bin_centers, ring_average
