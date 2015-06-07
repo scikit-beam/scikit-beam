@@ -323,9 +323,6 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
     obj_avg = np.zeros_like(diffracted_pattern).astype(complex)
     avg_i = 0
 
-    obj_a = np.zeros_like(obj_avg)
-    obj_b = np.zeros_like(obj_avg)
-
     time_start = time.time()
     for n in range(n_iterations):
         obj_old = np.array(sample_obj)
