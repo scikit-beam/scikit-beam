@@ -141,7 +141,7 @@ def time_bining(number=2, number_of_images=50):
     Return
     ------
     time_bin : list
-        time bining
+        time binning
     """
 
     time_bin = [1]
@@ -344,11 +344,11 @@ def suitable_center(image, est_center, inner_radius=10, width=10, mask=None, var
     return center
 
 
-def circular_average(image, calibrated_center, thershold=0,
-                          nx=100, pixel_size=None):
+def circular_average(image, calibrated_center, thershold=0, nx=100,
+                     pixel_size=None):
     """
-    Circular average of the intensity of the image SAXS(small angle
-    x-ray scattering)
+    Circular average(radial integration) of the intensity distribution of
+    the image data.
 
     Parameters
     ----------
@@ -375,7 +375,8 @@ def circular_average(image, calibrated_center, thershold=0,
     ring_averages : array
         circular integration of SAXS intensity
     """
-    radial_val = core.radial_grid(calibrated_center, image.shape)
+    radial_val = core.radial_grid(calibrated_center, image.shape,
+                                  pixel_size)
 
     bin_edges, sums, counts = core.bin_1D(np.ravel(radial_val),
                                           np.ravel(image), nx)
