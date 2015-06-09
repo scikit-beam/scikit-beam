@@ -351,8 +351,8 @@ keys_core = {
         "units": "um",
     },
     "voxel_size": {
-        "description": ("3 element tuple defining the (x y z) dimensions of the "
-                         "voxel"),
+        "description": ("3 element tuple defining the (x y z)"
+                        " dimensions of the voxel"),
         "type": tuple,
         "units": "um"
     },
@@ -413,7 +413,7 @@ keys_core = {
     "bounding_box": {
         "description": ("physical extents of the array: useful for " +
                         "volume alignment, transformation, merge and " +
-                         "spatial comparison of multiple volumes"),
+                        "spatial comparison of multiple volumes"),
         "x_min": {
             "description": "minimum spatial coordinate along the x-axis",
             "type": float,
@@ -728,6 +728,123 @@ def wedge_integration(src_data, center, theta_start,
         The integrated intensity under the wedge
     """
     raise NotImplementedError()
+
+
+def radial_integration(image_array, calibrated_center,
+                       x_axis="r", threshold=10, wavelength=None,
+                       pixel_size=None, dist_sample=None,
+                       num_bins=None):
+    """
+    Radial integration : taking the 2D powder image data
+    and convert to 1D
+
+    Parameters
+    ----------
+    image_array : ndarray
+        input image
+
+    calibrated_center : tuple
+        The center in pixels-units (row, col)
+
+    x_axis : {'r', 'two_theta', 'q'}, optional
+         radius (mm), two_theta (degrees) or
+          q (1/Angstroms)
+
+    threshold : float, optional
+        threshold value to mask
+
+    wavelength : float, optional
+        wavelength of the incoming x-rays (Angstroms)
+
+    pixel_size : tuple, optional
+        The size of a pixel in real units.
+        (height, width). (mm)
+
+    dist_sample : float, optional
+        distance from the sample to the detector (mm)
+
+    num_bins : int, optional
+        number of bins
+
+    Returns
+    -------
+    bin_centers : ndarray
+       bin centers from bin edges
+
+    ring_average : ndarray
+        radial integration of intensity
+
+    """
+    # convert to pixels to radius
+    pixel_val = pixel_to_radius(np.shape(image_array), calibrated_center)
+
+    if num_bins is None:
+        num_bins = np.sum(image_array.shape)
+
+    bin_edges, sums, counts = bin_1D(np.ravel(pixel_val),
+                                     np.ravel(image_array),
+                                     nx=num_bins)
+
+    if x_axis != 'r':
+        bin_edges = process_x_val(x_axis, bin_edges, dist_sample, wavelength)
+
+    mask = counts > threshold
+    # getting bin centers from bin edges
+    bin_centers = bin_edges_to_centers(bin_edges)[mask]
+    # radial integration
+    ring_averages = sums[mask] / counts[mask]
+
+    return bin_centers, ring_averages
+
+
+def process_x_val(x_axis, bin_edges, dist_sample, wavelength):
+    """
+    This module will convert the radius array from the calibrated
+    center to two theta or Q space values
+
+    Parameters
+    ----------
+    x_axis : str
+        {'q' or 'two_theta'}
+
+    bin_edges : ndarray
+        radius values from the calibrated center
+        shape (image array shape)
+
+    dist_sample : float
+        distance from the sample to the detector (mm)
+
+    wavelength : float
+        wavelength of the incoming x-rays (Angstroms)
+
+    Returns
+    -------
+    x_val : ndarray
+        x axis values (two theta or Q space)
+        shape (image array shape)
+
+    """
+    if dist_sample is 'None':
+                raise ValueError("Provide sample to detector distance"
+                                 " to find the two theta space values")
+
+    # convert to radius to two theta
+    two_theta_val = radius_to_twotheta(dist_sample, bin_edges)
+
+    if x_axis == "two_theta":
+        x_val = two_theta_val
+    elif x_axis == "q":
+        if wavelength is None:
+                raise ValueError("Provide the wavelength to find"
+                                 " the q space values")
+        # convert to q space values from known two theta values
+        x_val = twotheta_to_q(two_theta_val, wavelength)
+    else:
+        raise ValueError("Could not find x axis values."
+                         " Provide the correct x-axis 'r',"
+                         " 'two_theta' or 'q'")
+
+    return x_val
 
 
 def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
@@ -1057,7 +1174,8 @@ def d_to_q(d):
 
 def q_to_twotheta(q, wavelength):
     """
-    Helper function to convert :math:`q` + :math:`\\lambda` to :math:`2\\theta`.
+    Helper function to convert
+    :math:`q` + :math:`\\lambda` to :math:`2\\theta`.
     The point of this function is to prevent fat-fingered typos.
 
     By definition the relationship is:
@@ -1095,7 +1213,8 @@ def q_to_twotheta(q, wavelength):
 
 def twotheta_to_q(two_theta, wavelength):
     """
-    Helper function to convert :math:`2\\theta` + :math:`\\lambda` to :math:`q`.
+    Helper function to convert
+    :math:`2\\theta` + :math:`\\lambda` to :math:`q`.
     The point of this function is to prevent fat-fingered typos.
 
     By definition the relationship is:
