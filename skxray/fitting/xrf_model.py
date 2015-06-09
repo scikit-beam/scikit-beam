@@ -358,6 +358,7 @@ class ParamController(object):
         Parameters
         ----------
         kind : {'pos', 'width', 'ratio', 'area'}
+            The kind of parameter to add
         element : str
             element name
         constraint : {'lo', 'hi', 'lohi', 'fixed', 'none'}, optional
@@ -377,18 +378,19 @@ class ParamController(object):
         linenames = [
             '{0}_{1}'.format(element, t) for t in transitions]
 
-        PARAM_SUFFIXES = {'pos': '_delta_center',
-                          'width': '_delta_sigma',
-                          'ratio': '_ratio_adjust'}
+        PARAM_SUFFIXES = {'pos': 'delta_center',
+                          'width': 'delta_sigma',
+                          'ratio': 'ratio_adjust'}
         param_suffix = PARAM_SUFFIXES[kind]
 
         for linename in linenames:
             # check if the line is activated
             if linename not in self.element_linenames:
                 continue
-            param_name = str(linename) + param_suffix  # as in lmfit Model
+            # as in lmfit Model
+            param_name = '_'.join((str(linename), param_suffix))
             new_pos = PARAM_DEFAULTS[kind].copy()
-            if constraint:
+            if constraint is not None:
                 self._element_strategy[param_name] = constraint
             self.params.update({param_name: new_pos})
 
@@ -399,19 +401,24 @@ class ParamController(object):
 
         Helper function called in self.add_param
         """
+        base_element, line = element.split('_')
         if element in K_LINE:
-            element = element.split('_')[0]
-            param_name = str(element)+"_ka1_area"
+            post_fix = "ka1_area"
         elif element in L_LINE:
-            element = element.split('_')[0]
-            param_name = str(element)+"_la1_area"
+            post_fix = "la1_area"
         elif element in M_LINE:
-            element = element.split('_')[0]
-            param_name = str(element)+"_ma1_area"
+            post_fix = "ma1_area"
+        else:
+            raise ValueError(
+                "{} is not a well formed element string".format(element))
+
+        param_name = '_'.join((base_element, post_fix))
 
         new_area = PARAM_DEFAULTS['area'].copy()
-        if constraint:
+        if constraint is not None:
             self._element_strategy[param_name] = constraint
+
+        # update parameters in place
         self.params.update({param_name: new_area})
 
 
@@ -428,21 +435,22 @@ def sum_area(elemental_line, result_val):
 
     Returns
     -------
-    float
+    sum_area : float
         the total area
     """
-    def get_value(result_val, element_name, line_name):
-        return (result_val.values[str(element_name)+'_'+line_name+'_area'] *
-                result_val.values[str(element_name)+'_'+line_name+'_ratio'] *
-                result_val.values[str(element_name)+'_'+line_name+'_ratio_adjust'])
-    sumv = 0
+
     element, line = elemental_line.split('_')
     transitions = TRANSITIONS_LOOKUP[line]
 
+    sumv = 0
     for line_n in transitions:
-        full_name = element + '_' + line_n + '_area'
+        partial_name = '_'.join((element, line_n))
+        full_name = '_'.join((partial_name, 'area'))
         if full_name in result_val.values:
-            sumv += get_value(result_val, element, line_n)
+            tmp = 1
+            for post_fix in ['area', 'ratio', 'ratio_adjust']:
+                tmp *= result_val.values['_'.join((partial_name, post_fix))]
+            sumv += tmp
     return sumv
 
 
