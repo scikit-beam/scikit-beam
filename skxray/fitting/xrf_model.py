@@ -398,9 +398,9 @@ class ParamController(object):
         if kind == 'area':
             return self._add_area_param(element, constraint)
 
-        PARAM_SUFFIXES = {'pos': '_delta_center',
-                          'width': '_delta_sigma',
-                          'ratio': '_ratio_adjust'}
+        PARAM_SUFFIXES = {'pos': 'delta_center',
+                          'width': 'delta_sigma',
+                          'ratio': 'ratio_adjust'}
         param_suffix = PARAM_SUFFIXES[kind]
 
         if len(element) <= 4:
@@ -415,16 +415,16 @@ class ParamController(object):
                 # check if the line is activated
                 if linename not in self.element_linenames:
                     continue
-                param_name = str(linename) + param_suffix  # as in lmfit Model
+                param_name = '_'.join((str(linename), param_suffix))  # as in lmfit Model
                 new_pos = PARAM_DEFAULTS[kind].copy()
-                if constraint:
+                if constraint is not None:
                     self._element_strategy[param_name] = constraint
                 self.params.update({param_name: new_pos})
         else:
             linename = 'pileup_'+element.replace('-', '_')
             param_name = linename + param_suffix  # as in lmfit Model
             new_pos = PARAM_DEFAULTS[kind].copy()
-            if constraint:
+            if constraint is not None:
                 self._element_strategy[param_name] = constraint
             self.params.update({param_name: new_pos})
 
@@ -449,7 +449,7 @@ class ParamController(object):
             param_name += '_area'
 
         new_area = PARAM_DEFAULTS['area'].copy()
-        if constraint:
+        if constraint is not None:
             self._element_strategy[param_name] = constraint
         self.params.update({param_name: new_area})
 
