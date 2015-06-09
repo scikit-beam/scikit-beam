@@ -6,7 +6,7 @@ import numpy as np
 from numpy.testing import (assert_equal, assert_array_equal,
                            assert_array_almost_equal, assert_almost_equal)
 
-from skxray.cdi import (_dist, gauss, cal_relative_error, find_support, pi_support,
+from skxray.cdi import (_dist, gauss, find_support,
                         pi_modulus, cal_diff_error, cdi_recon,
                         generate_random_phase_field,
                         generate_box_support, generate_disk_support)
@@ -65,18 +65,6 @@ def test_gauss():
         assert_almost_equal(0, np.mean(d), decimal=3)
 
 
-def test_relative_error():
-    shape_v = [3, 3]
-    a1 = np.zeros(shape_v)
-    a2 = np.ones(shape_v)
-
-    e1 = cal_relative_error(a2, a1)
-    assert_equal(e1, 1)
-
-    e2 = cal_relative_error(a2, a2)
-    assert_equal(e2, 0)
-
-
 def test_find_support():
     shape_v = [100, 100]
     cenv = shape_v[0]/2
@@ -91,14 +79,6 @@ def test_find_support():
     new_sup[new_sup_index] = 1
     # the area of new support becomes larger
     assert(np.sum(new_sup) == 1760)
-
-
-def test_pi_support():
-    a1 = np.ones([2, 2])
-    a1[0, 0] = 1
-    index = np.where(a1 == 1)
-    a2 = pi_support(a1, index)
-    assert_equal(np.sum(a2), 0)
 
 
 def make_synthetic_data():
@@ -171,7 +151,12 @@ def test_recon():
     init_phase = generate_random_phase_field(diff_v)
     sup = generate_box_support(sup_radius, diff_v.shape)
     # run reconstruction
-    outv, error_dict = cdi_recon(diff_v, init_phase, sup, sw_flag=False, n_iterations=total_n)
-    outv = np.abs(outv)
+    outv1, error_dict = cdi_recon(diff_v, init_phase, sup, sw_flag=False,
+                                  n_iterations=total_n, sw_step=2)
+    outv1 = np.abs(outv1)
+
+    outv2, error_dict = cdi_recon(diff_v, init_phase, sup, sw_flag=True,
+                                  n_iterations=total_n, sw_step=2)
+    outv2 = np.abs(outv2)
     # compare the area of supports
-    assert_array_equal(outv.shape, a.shape)
+    assert_array_equal(outv1.shape, outv2.shape)

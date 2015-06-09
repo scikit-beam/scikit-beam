@@ -44,7 +44,6 @@ from __future__ import (absolute_import, division, print_function,
 import six
 import numpy as np
 import time
-from scipy import signal
 from scipy.ndimage.filters import gaussian_filter
 
 import logging
@@ -152,47 +151,6 @@ def find_support(sample_obj,
     return conv_fun >= (sw_threshold*conv_max)
 
 
-def pi_support(sample_obj, index_v):
-    """
-    Define sample shape by cutting unnecessary values.
-
-    Parameters
-    ----------
-    sample_obj : array
-        sample data
-    index_v : array
-        index to define sample area
-
-    Returns
-    -------
-    sample_obj : array
-        sample object with proper cut.
-    """
-    sample_obj = np.array(sample_obj)
-    sample_obj[index_v] = 0
-    return sample_obj
-
-
-def cal_relative_error(x_old, x_new):
-    """
-    Relative error is calculated as the ratio of the difference between the new and
-    the original arrays to the norm of the original array.
-
-    Parameters
-    ----------
-    x_old : array
-        previous data set
-    x_new : array
-        new data set
-
-    Returns
-    -------
-    float :
-        relative error
-    """
-    return np.linalg.norm(x_new - x_old)/np.linalg.norm(x_old)
-
-
 def cal_diff_error(sample_obj, diffracted_pattern):
     """
     Calculate the error in q space.
@@ -210,7 +168,8 @@ def cal_diff_error(sample_obj, diffracted_pattern):
         relative error in q space
     """
     new_diff = np.abs(np.fft.fftn(sample_obj)) / np.sqrt(np.size(sample_obj))
-    return cal_relative_error(diffracted_pattern, new_diff)
+    return (np.linalg.norm(new_diff - diffracted_pattern) /
+            np.linalg.norm(diffracted_pattern))
 
 
 def generate_random_phase_field(diffracted_pattern):
@@ -373,9 +332,10 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
             obj_a = np.abs(obj_a)
 
         obj_a = (1 + gamma_2) * obj_a - gamma_2 * sample_obj
-        obj_a = pi_support(obj_a, outside_sup_index)
+        obj_a[outside_sup_index] = 0  # define support
 
-        obj_b = pi_support(sample_obj, outside_sup_index)
+        obj_b = np.array(sample_obj)
+        obj_b[outside_sup_index] = 0  # define support
         obj_b = (1 + gamma_1) * obj_b - gamma_1 * sample_obj
 
         obj_b = pi_modulus(obj_b, diffracted_pattern)
@@ -385,7 +345,8 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
         sample_obj += beta * (obj_a - obj_b)
 
         # calculate errors
-        obj_error[n] = cal_relative_error(obj_old, sample_obj)
+        obj_error[n] = (np.linalg.norm(sample_obj - obj_old) /
+                        np.linalg.norm(obj_old))
         diff_error[n] = cal_diff_error(sample_obj, diffracted_pattern)
 
         if sw_flag:
