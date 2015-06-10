@@ -426,6 +426,8 @@ class ParamController(object):
             new_pos = PARAM_DEFAULTS[kind].copy()
             if constraint is not None:
                 self._element_strategy[param_name] = constraint
+
+            # update parameter in place
             self.params.update({param_name: new_pos})
 
     def _add_area_param(self, element, constraint=None):
@@ -444,13 +446,18 @@ class ParamController(object):
         elif element in M_LINE:
             element = element.split('_')[0]
             param_name = str(element)+"_ma1_area"
-        else:  #pileup peaks
+        elif '-' in element:  #pileup peaks
             param_name = 'pileup_'+element.replace('-', '_')
             param_name += '_area'
+        else:
+            raise ValueError(
+                "{} is not a well formed element string".format(element))
 
         new_area = PARAM_DEFAULTS['area'].copy()
         if constraint is not None:
             self._element_strategy[param_name] = constraint
+
+        # update parameter in place
         self.params.update({param_name: new_area})
 
 
@@ -467,21 +474,22 @@ def sum_area(elemental_line, result_val):
 
     Returns
     -------
-    float
+    sumv : float
         the total area
     """
-    def get_value(result_val, element_name, line_name):
-        return (result_val.values[str(element_name)+'_'+line_name+'_area'] *
-                result_val.values[str(element_name)+'_'+line_name+'_ratio'] *
-                result_val.values[str(element_name)+'_'+line_name+'_ratio_adjust'])
-    sumv = 0
     element, line = elemental_line.split('_')
     transitions = TRANSITIONS_LOOKUP[line]
 
+    sumv = 0
+
     for line_n in transitions:
-        full_name = element + '_' + line_n + '_area'
+        partial_name = '_'.join((element, line_n))
+        full_name = '_'.join((partial_name, 'area'))
         if full_name in result_val.values:
-            sumv += get_value(result_val, element, line_n)
+            tmp = 1
+            for post_fix in ['area', 'ratio', 'ratio_adjust']:
+                tmp *= result_val.values['_'.join((partial_name, post_fix))]
+            sumv += tmp
     return sumv
 
 
