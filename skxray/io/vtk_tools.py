@@ -12,61 +12,78 @@ HDF5 (.h5 and .hdf5)
 """
 
 import numpy as np
-from vtk.util import numpy_support
 import vtk
 from IPython.display import Image
 
+# Helper checks tests and dictionaries for parsing VTK data types correctly
+VTK_ID_TYPE_SIZE = vtk.vtkIdTypeArray().GetDataTypeSize()
+if VTK_ID_TYPE_SIZE == 4:
+    ID_TYPE_CODE = 'int32'
+elif VTK_ID_TYPE_SIZE == 8:
+    ID_TYPE_CODE = 'int64'
 
-#
-#
-# _VTK_TO_NP_dTYPE_DICT = {
-#     vtk.VTK_BIT:numpy.bool,
-#     vtk.VTK_CHAR:numpy.int8,
-#     vtk.VTK_UNSIGNED_CHAR:numpy.uint8,
-#     vtk.VTK_SHORT:numpy.int16,
-#     vtk.VTK_UNSIGNED_SHORT:numpy.uint16,
-#     vtk.VTK_INT:numpy.int32,
-#     vtk.VTK_UNSIGNED_INT:numpy.uint32,
-#     vtk.VTK_LONG:LONG_TYPE_CODE,
-#     vtk.VTK_LONG_LONG:numpy.int64,
-#     vtk.VTK_UNSIGNED_LONG:ULONG_TYPE_CODE,
-#     vtk.VTK_UNSIGNED_LONG_LONG:numpy.uint64,
-#     vtk.VTK_ID_TYPE:ID_TYPE_CODE,
-#     vtk.VTK_FLOAT:numpy.float32,
-#     vtk.VTK_DOUBLE:numpy.float64
-# }
+VTK_LONG_TYPE_SIZE = vtk.vtkLongArray().GetDataTypeSize()
+if VTK_LONG_TYPE_SIZE == 4:
+    LONG_TYPE_CODE = 'int32'
+    ULONG_TYPE_CODE = 'uint32'
+elif VTK_LONG_TYPE_SIZE == 8:
+    LONG_TYPE_CODE = 'int64'
+    ULONG_TYPE_CODE = 'uint64'
 
+_VTK_TO_NP_dTYPE_DICT = {
+    vtk.VTK_BIT: np.bool,
+    vtk.VTK_SIGNED_CHAR: np.int8,
+    vtk.VTK_UNSIGNED_CHAR: np.uint8,
+    vtk.VTK_SHORT: np.int16,
+    vtk.VTK_UNSIGNED_SHORT: np.uint16,
+    vtk.VTK_INT: np.int32,
+    vtk.VTK_UNSIGNED_INT: np.uint32,
+    vtk.VTK_LONG: LONG_TYPE_CODE,
+    vtk.VTK_LONG_LONG: np.int64,
+    vtk.VTK_UNSIGNED_LONG: ULONG_TYPE_CODE,
+    vtk.VTK_UNSIGNED_LONG_LONG: np.uint64,
+    vtk.VTK_ID_TYPE: ID_TYPE_CODE,
+    vtk.VTK_FLOAT: np.float32,
+    vtk.VTK_DOUBLE: np.float64
+    }
 
 _VTK_DTYPE_INDEX_DICT = {
-    0 : vtk.VTK_VOID,
-    1 : vtk.VTK_BIT,
-    2 : vtk.VTK_CHAR,
-    15 : vtk.VTK_SIGNED_CHAR,
-    3 : vtk.VTK_UNSIGNED_CHAR,
-    4 : vtk.VTK_SHORT,
-    5 : vtk.VTK_UNSIGNED_SHORT,
-    6 : vtk.VTK_INT,
-    7 : vtk.VTK_UNSIGNED_INT,
-    8 : vtk.VTK_LONG,
-    9 : vtk.VTK_UNSIGNED_LONG,
-    10 : vtk.VTK_FLOAT,
-    11 : vtk.VTK_DOUBLE,
-    12 : vtk.VTK_ID_TYPE,
-    13 : vtk.VTK_STRING,
-    14 : vtk.VTK_OPAQUE,
-    16 : vtk.VTK_LONG_LONG,
-    17 : vtk.VTK_UNSIGNED_LONG_LONG,
-    18 : vtk.VTK___INT64,
-    19 : vtk.VTK_UNSIGNED___INT64,
-    20 : vtk.VTK_VARIANT,
-    21 : vtk.VTK_OBJECT,
-    22 : vtk.VTK_UNICODE_STRING
+    0: vtk.VTK_VOID,
+    1: vtk.VTK_BIT,
+    2: vtk.VTK_CHAR,
+    15: vtk.VTK_SIGNED_CHAR,
+    3: vtk.VTK_UNSIGNED_CHAR,
+    4: vtk.VTK_SHORT,
+    5: vtk.VTK_UNSIGNED_SHORT,
+    6: vtk.VTK_INT,
+    7: vtk.VTK_UNSIGNED_INT,
+    8: vtk.VTK_LONG,
+    9: vtk.VTK_UNSIGNED_LONG,
+    10: vtk.VTK_FLOAT,
+    11: vtk.VTK_DOUBLE,
+    12: vtk.VTK_ID_TYPE,
+    13: vtk.VTK_STRING,
+    14: vtk.VTK_OPAQUE,
+    16: vtk.VTK_LONG_LONG,
+    17: vtk.VTK_UNSIGNED_LONG_LONG,
+    18: vtk.VTK___INT64,
+    19: vtk.VTK_UNSIGNED___INT64,
+    20: vtk.VTK_VARIANT,
+    21: vtk.VTK_OBJECT,
+    22: vtk.VTK_UNICODE_STRING
     }
+
 
 def np_to_vtk(input_array, pixel_spacing=None):
     """
-    This function converts a given numpy array into a VTK object of the same
+    This function converts a given numpy ndarray into a VTK object of the same
     type.
+
+    Note: There is a function included in vtk.numpy_support called numpy_to_vtk
+    However, this function is explicitly defined and used for 1D and 2D
+    numpy arrays ONLY.
+
+    For our purposes we HAVE to have a converter that works for numpy ndarrays
 
     Parameters
     ----------
@@ -86,23 +103,27 @@ def np_to_vtk(input_array, pixel_spacing=None):
     data_string = input_array.tostring()
     dataImporter.CopyImportVoidPointer(data_string, len(data_string))
     _NP_TO_VTK_dTYPE_DICT = {
-        'bool' : dataImporter.SetDataScalarTypeToUnsignedChar(),
-        'character' : dataImporter.SetDataScalarTypeToUnsignedChar(),
-        'uint8' : dataImporter.SetDataScalarTypeToUnsignedChar(),
-        'uint16' : dataImporter.SetDataScalarTypeToUnsignedShort(),
-        'uint32' : dataImporter.SetDataScalarTypeToInt(),
-        'uint64' : dataImporter.SetDataScalarTypeToInt(),
-        'int8' : dataImporter.SetDataScalarTypeToShort(),
-        'int16' : dataImporter.SetDataScalarTypeToShort(),
-        'int32' : dataImporter.SetDataScalarTypeToInt(),
-        'int64' : dataImporter.SetDataScalarTypeToInt(),
-        'float32' : dataImporter.SetDataScalarTypeToFloat(),
-        'float64' : dataImporter.SetDataScalarTypeToDouble(),
+        'bool': 3,  # vtk.VTK_UNSIGNED_CHAR
+        #'str': 2,  # vtk.VTK_CHAR
+        'uint8': 3,  # vtk.VTK_UNSIGNED_CHAR
+        'uint16': 5,  # vtk.VTK_UNSIGNED_SHORT
+        'uint32': 7,  # vtk.VTK_UNSIGNED_INT
+        'uint64': 17,  # vtk.VTK_UNSIGNED_LONG_LONG
+        'int8': 15,  # vtk.VTK_SIGNED_CHAR
+        'int16': 4,  # vtk.VTK_SHORT
+        'int32': 6,  # vtk.VTK_INT,
+        'int64': 16,  # vtk.VTK_LONG_LONG,
+        'float32': 10,  # vtk.VTK_FLOAT
+        'float64': 11,  # vtk.VTK_DOUBLE
         }
     input_array_shape = input_array.shape
-    _NP_TO_VTK_dTYPE_DICT[str(input_array.dtype)]
-    dataImporter.SetDataScalarTypeToUnsignedChar()
+    dataImporter.SetDataScalarType(_NP_TO_VTK_dTYPE_DICT[str(
+        input_array.dtype)])
     dataImporter.SetNumberOfScalarComponents(1)
+
+    #TODO: add check function for 1D and 2D arrays. Can use
+    # vtk.numpy_support for those array
+
     dataImporter.SetDataExtent(0, input_array_shape[2],
                                0, input_array_shape[1],
                                0, input_array_shape[0])
@@ -133,10 +154,27 @@ def vtk_to_np(src_data, shape=None):
     -------
 
     """
-    np_obj = numpy_support.vtk_to_numpy(src_data)
+    _VTK_TO_NP_dTYPE_DICT = {
+        #15: 'character',  # vtk.VTK_SIGNED_CHAR
+        3: 'uint8',  # vtk.VTK_UNSIGNED_CHAR
+        5: 'uint16',  # vtk.VTK_UNSIGNED_SHORT
+        7: 'uint32',  # vtk.VTK_UNSIGNED_INT
+        17: 'uint64',  # vtk.VTK_UNSIGNED_LONG_LONG
+        15: 'int8',  # vtk.VTK_SIGNED_CHAR
+        4: 'int16',  # vtk.VTK_SHORT
+        6: 'int32',  # vtk.VTK_INT,
+        16: 'int64',  # vtk.VTK_LONG_LONG,
+        10: 'float32',  # vtk.VTK_FLOAT
+        11: 'float64',  # vtk.VTK_DOUBLE
+    }
+
+    np_obj = np.frombuffer(src_data, dtype=_VTK_TO_NP_dTYPE_DICT[
+        src_data.GetDataScalarType()])
+    #np_obj = numpy_support.vtk_to_numpy(src_data)
     if shape != None:
         np_obj = np.reshape(np_obj, shape)
     return np_obj
+
 
 def ipython_vtk_viewer(renderer, width=None, height=None):
     """
@@ -163,7 +201,7 @@ def ipython_vtk_viewer(renderer, width=None, height=None):
     if width == None:
         width = 400
     if height == None:
-        height=300
+        height = 300
 
     #Create new rendering window
     renderWindow = vtkRenderWindow()
@@ -181,7 +219,7 @@ def ipython_vtk_viewer(renderer, width=None, height=None):
     windowToImageFilter = vtk.vtkWindowToImageFilter()
     #Add renderWindow to the filter object
     windowToImageFilter.SetInput(renderWindow)
-    windowToImageFilter.Update() #Update object
+    windowToImageFilter.Update()  #Update object
 
     #Create vtk PNG writer object thereby allowing creation of PNG images
     # of the vtkWindow rendering
@@ -256,7 +294,7 @@ def vtk_viewer(volume_data, volumeProperty, width=None, height=None):
     if width == None:
         width = 400
     if height == None:
-        height=300
+        height = 300
 
     # This class describes how the volume is rendered (through ray tracing).
     compositeFunction = vtk.vtkVolumeRayCastCompositeFunction()
@@ -277,7 +315,7 @@ def vtk_viewer(volume_data, volumeProperty, width=None, height=None):
     # add the volume to the renderer
     ren.AddVolume(volume)
     # set background color
-    ren.SetBackground(0.5,0.5,0.5)
+    ren.SetBackground(0.5, 0.5, 0.5)
 
     #Create new rendering window
     renWin = vtk.vtkRenderWindow()
@@ -321,7 +359,7 @@ def write_stl(vtk_obj, filename, path=None):
     writer.SetInputConnection(vtk_obj.GetOutputPort())
     writer.SetFileTypeToBinary()
     if path != None:
-        filename = path+filename
+        filename = path + filename
     writer.SetFileName(filename)
     writer.Write()
 
