@@ -54,21 +54,28 @@ import skxray.correlation as corr
 import skxray.roi as roi
 import skxray.core as core
 
+import scipy.ndimage as ndi
+
+try:
+    iteritems = dict.iteritems
+except AttributeError:
+    iteritems = dict.items  # python 3
+
 import logging
 logger = logging.getLogger(__name__)
 
 import numpy as np
 
 
-def max_counts(sample_dict, label_array):
+def max_counts(images_sets, label_array):
     """
     This will determine the highest speckle counts occurred in the required
     ROI's in required images.
 
     Parameters
     ----------
-    sample_dict : dict
-        sets of images as a dictionary
+    images_sets : array
+        sets of images as an array
 
     label_array : array
         labeled array; 0 is background.
@@ -80,13 +87,10 @@ def max_counts(sample_dict, label_array):
         maximum speckle counts
     """
     max_cts = 0
-    for key, img_sets in dict(sample_dict).iteritems():
-        for n, img in enumerate(img_sets.operands[0]):
-            int_dist = intensity_distribution(img, label_array)
-            for j in range(len(int_dist)):
-                counts = np.max(int_dist.values()[j])
-                if max_cts < counts:
-                    max_cts = counts
+    for img_set in images_sets:
+        for n, img in enumerate(img_set.operands[0]):
+            frame_max = ndi.measurements.maximum(img, label_array)
+            max_cts = max(max_cts, frame_max)
     return max_cts
 
 
@@ -128,6 +132,7 @@ def intensity_distribution(image_array, label_array):
 
 def static_test_sets_one_label(sample_dict, label_array, num=1):
     """
+
     This will process the averaged intensity for the required ROI for different
     data sets (dictionary for different data sets)
     eg: ring averaged intensity for the required labeled ring for different
@@ -135,7 +140,7 @@ def static_test_sets_one_label(sample_dict, label_array, num=1):
 
     Parameters
     ----------
-    sample_dict : dict
+    sample_dict : dict:
 
     label_array : array
         labeled array; 0 is background.
@@ -145,6 +150,14 @@ def static_test_sets_one_label(sample_dict, label_array, num=1):
     ------
     time_bin : list
         time binning
+
+    Note
+    ----
+    :math ::
+     a + ar + ar^2 + ar^3 + ar^4 + ...
+
+     a - first term in the series
+     r - is the common ratio
     """
 
     average_intensity_sets = {}
@@ -165,6 +178,7 @@ def static_test_sets(sample_dict, label_array):
     Parameters
     ----------
     sample_dict : dict
+        image sets given as a dictionary
 
     label_array : array
         labeled array; 0 is background.
@@ -176,6 +190,11 @@ def static_test_sets(sample_dict, label_array):
     Returns
     -------
     average_intensity : dict
+        average intensity of one ROI
+        for the intensity array of image sets
+
+    combine_averages : array
+        combine intensity averages of one ROI for sets of images
     """
 
     average_intensity_sets = {}
@@ -243,13 +262,14 @@ def static_test(images, label_array):
     -------
     average_intensity : dict
         average intensity of each ROI as a dictionary
+        {roi 1: average intensities, roi 2 : average intensities}
 
     """
     average_intensity = {}
     num = np.unique(label_array)[1:]
 
     for i in num:
-        average_roi = static_tests_one_label(images, label_array, i)
+        average_roi = static_tests_one_label(images, label_array, num=i+1)
         average_intensity[i] = average_roi
 
     return average_intensity
@@ -347,3 +367,82 @@ def circular_average(image, calibrated_center, thershold=0, nx=100,
     bin_centers = core.bin_edges_to_centers(bin_edges)
 
     return bin_centers, ring_average
+
+
+def static_test_sets(sample_dict, label_array):
+    """
+    This will process the averaged intensity for the required ROI's for
+    different data sets (dictionary for different data sets)
+    eg: ring averaged intensity for the required ROI's for different
+    image data sets.
+
+    Parameters
+    ----------
+    sample_dict : dict
+
+    label_array : array
+        labeled array; 0 is background.
+        Each ROI is represented by a distinct label (i.e., integer).
+
+    num : int, optional
+        Required  ROI label
+
+    Returns
+    -------
+    average_intensity : dict
+        average intensity of each image sets and for each ROI's
+        eg:
+        {image_set1: {roi_1: average intensities, roi_2: average intensities},
+         image_set2: {roi_1: average intensities, roi_2: average intensities}}
+    """
+
+    average_intensity_sets = {}
+
+    for key, img in iteritems(sample_dict):
+        average_intensity_sets[key] = static_test(img, label_array)
+    return average_intensity_sets
+
+
+def circular_average(image, calibrated_center, threshold=0, nx=100,
+                     pixel_size=None):
+    """
+    Circular average(radial integration) of the intensity distribution of
+    the image data.
+
+    Parameters
+    ----------
+    image : array
+        input image
+
+    calibrated_center : tuple
+        The center in pixels-units (row, col)
+
+    threshold : int, optional
+        threshold value to mask
+
+    nx : int, optional
+        number of bins
+
+    pixel_size : tuple, optional
+        The size of a pixel in real units. (height, width). (mm)
+
+    Returns
+    -------
+    bin_centers : array
+        bin centers from bin edges
+        shape [nx]
+
+    ring_averages : array
+        circular integration of intensity
+    """
+    radial_val = core.radial_grid(calibrated_center, image.shape,
+                                  pixel_size)
+
+    bin_edges, sums, counts = core.bin_1D(np.ravel(radial_val),
+                                          np.ravel(image), nx)
+    th_mask = counts > threshold
+    ring_averages = sums[th_mask] / counts[th_mask]
+
+    bin_centers = core.bin_edges_to_centers(bin_edges)
+
+    return bin_centers, ring_averages

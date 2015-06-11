@@ -79,6 +79,10 @@ def xsvs(sample_dict, label_array, timebin_num=2, number_of_img=50):
 
     Returns
     -------
+    speckle_cts_all : array
+
+    speckle_cts_std_dev : array
+
 
     Note
     ----
@@ -112,14 +116,15 @@ def xsvs(sample_dict, label_array, timebin_num=2, number_of_img=50):
     num_pixels = num_pixels[1:]
 
     speckle_cts_all = np.zeros((num_times, num_roi, max_cts), dtype=np.float64)
-    speckle_cts_pow_all = np.zeros((num_times, num_roi, max_cts), dtype=np.float64)
+    speckle_cts_pow_all = np.zeros((num_times, num_roi, max_cts),
+                                   dtype=np.float64)
     bin_edges = xrange(max_cts+1)
 
     for i, samples in dict(sample_dict).iteritems():
         # Ring buffer, a buffer with periodic boundary conditions.
         # Images must be keep for up to maximum delay in buf.
         buf = np.zeros((num_times, timebin_num,
-                        np.sum(num_pixels)), dtype=np.float64)  #// matrix of buffers
+                        np.sum(num_pixels)), dtype=np.float64)
 
         # to track processing each level
         track_level = np.zeros(num_times)
@@ -140,8 +145,8 @@ def xsvs(sample_dict, label_array, timebin_num=2, number_of_img=50):
             # Put the image into the ring buffer.
             buf[0, cur[0] - 1 ] = np.ravel(img)[indices]
 
-            _process(num_roi, 0, cur[0] - 1, buf, img_per_level, labels, max_cts, bin_edges,
-            speckle_cts, speckle_cts_pow, i)
+            _process(num_roi, 0, cur[0] - 1, buf, img_per_level, labels,
+                     max_cts, bin_edges, speckle_cts, speckle_cts_pow, i)
 
             # check whether the number of levels is one, otherwise
             # continue processing the next level
@@ -153,15 +158,17 @@ def xsvs(sample_dict, label_array, timebin_num=2, number_of_img=50):
                     track_level[level] = 1
                     processing = 0
                 else:
-                    prev =  1 + (cur[level - 1] - 2)%timebin_num
-                    cur[level] =  1 + cur[level]%timebin_num
+                    prev =  1 + (cur[level - 1] - 2) % timebin_num
+                    cur[level] = 1 + cur[level] % timebin_num
 
                     buf[level, cur[level]-1] = (buf[level-1,
-                                               prev-1] + buf[level-1, cur[level - 1] - 1])/2
+                                                    prev-1] + buf[level-1,
+                                                                  cur[level - 1] - 1])/2
                     track_level[level] = 0
 
                     _process(num_roi, level, cur[level]-1, buf, img_per_level,
-                             labels, max_cts, bin_edges, speckle_cts, speckle_cts_pow, i)
+                             labels, max_cts, bin_edges, speckle_cts,
+                             speckle_cts_pow, i)
                     level += 1
                     # Checking whether there is next level for processing
                     processing = level < num_times
@@ -171,25 +178,53 @@ def xsvs(sample_dict, label_array, timebin_num=2, number_of_img=50):
                                          speckle_cts_all)/(i + 1)
             speckle_cts_pow_all += (speckle_cts_pow -
                                    speckle_cts_pow_all)/(i + 1)
-            std_dev = np.power((speckle_cts -
+            speckle_cts_std_dev = np.power((speckle_cts -
                                        np.power(speckle_cts_pow, 2)), .5)
 
-    return speckle_cts_all, speckle_cts_pow_all, std_dev
+    return speckle_cts_all,  speckle_cts_std_dev
 
 
-def _process(num_roi, level, bufno, buf, img_per_level, labels, max_cts, bin_edges,
-             speckle_cts, speckle_cts_pow, i):
+def _process(num_roi, level, buf_no, buf, img_per_level, labels, max_cts,
+             bin_edges, speckle_cts, speckle_cts_pow, i):
+    """
+    Parameters
+    ----------
+    num_roi : int
+
+    level : int
+
+    buf_no : int
+
+    buf : array
+
+    img_per_level : int
+
+    labels : array
+
+    max_cts: int
+
+    bin_edges : list
+
+    speckle_cts : array
+
+    speckle_cts_pow : array
+
+    i : int
+
+    """
     img_per_level[level] += 1
 
     for j in xrange(num_roi):
-        roi_data = buf[level, bufno][labels[j+1] ]
+        roi_data = buf[level, buf_no][labels[j+1] ]
 
-        spe_hist, bin_edges = np.histogram(roi_data, bins=bin_edges, normed=True)
+        spe_hist, bin_edges = np.histogram(roi_data, bins=bin_edges,
+                                           normed=True)
         #print spe_hist.shape
         #print spe_hist
 
         speckle_cts[level, j] += (spe_hist -
                               speckle_cts[level, j] )/(img_per_level[level])
+
         speckle_cts_pow[level, j] += (np.power(spe_hist, 2) -
                                          speckle_cts_pow[level, j])/(img_per_level[level])
 
