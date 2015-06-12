@@ -86,7 +86,7 @@ def max_counts(sample_dict, label_array):
         for n, img in enumerate(img_sets.operands[0]):
             int_dist = intensity_distribution(img, label_array)
             for j in range(len(int_dist)):
-                counts = np.max(int_dist.values()[j])
+                counts = np.max(list(int_dist.values())[j])
                 if max_cts < counts:
                     max_cts = counts
     return max_cts

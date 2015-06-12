@@ -78,7 +78,7 @@ def test_intensity_distribution():
     rings = roi.rings(edges, center, images.shape)
 
     intensity_dist = spe_vis.intensity_distribution(images, rings)
-    assert_array_equal(intensity_dist.values()[0], ([1, 1, 1, 1, 1, 1, 1, 1,
+    assert_array_equal(list(intensity_dist.values())[0], ([1, 1, 1, 1, 1, 1, 1, 1,
                                                      1, 1, 1, 1, 1, 1, 1, 1]))
 
 
