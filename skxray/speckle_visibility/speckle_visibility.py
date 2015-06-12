@@ -53,6 +53,11 @@ import skxray.correlation as corr
 import skxray.roi as roi
 import skxray.core as core
 
+try:
+    iteritems = dict.iteritems
+except AttributeError:
+    iteritems = dict.items  # python 3
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -77,7 +82,7 @@ def max_counts(sample_dict, label_array):
         maximum speckle counts
     """
     max_cts = 0
-    for key, img_sets in dict(sample_dict).iteritems():
+    for key, img_sets in iteritems(sample_dict):
         for n, img in enumerate(img_sets.operands[0]):
             int_dist = intensity_distribution(img, label_array)
             for j in range(len(int_dist)):
@@ -179,7 +184,7 @@ def static_test_sets_one_label(sample_dict, label_array, num=1):
 
     average_intensity_sets = {}
 
-    for key, img in dict(sample_dict).iteritems():
+    for key, img in iteritems(sample_dict):
         average_intensity_sets[key] = static_tests_one_label(img, label_array,
                                                              num)
 
@@ -283,106 +288,6 @@ def static_test_sets(sample_dict, label_array):
 
     average_intensity_sets = {}
 
-    for key, img in dict(sample_dict).iteritems():
+    for key, img in iteritems(sample_dict):
         average_intensity_sets[key] = static_test(img, label_array)
     return average_intensity_sets
-
-
-def suitable_center(image, est_center, inner_radius=10, width=10, mask=None, var=5):
-    """
-    This will find the most suitable center for the speckle pattern using an
-    estimated center.
-
-    Parameters
-    ----------
-     image : array
-        image data dimensions are: (rr, cc)
-
-    center : tuple
-        estimated center
-
-    inner_radius : float, optional
-        inner radius of the inner-most ring
-
-    width : float, optional
-        ring thickness
-
-    mask : array, optional
-        boolen array shape image shape
-
-    var : float, optional
-        varying the selected center value to find the suitable center
-        
-    Returns
-    -------
-    center : tuple
-       center for the speckle pattern
-    """
-
-    edges = roi.ring_edges(inner_radius, width, num_rings=1)
-
-    m_value = float('inf')
-    for x in xrange(est_center[0]-var, est_center[0]+var):
-        for y in xrange(est_center[1]-var, est_center[1]+var):
-            rings = roi.rings(edges, (x, y), image.shape)
-            if mask is not None:
-                if mask.shape != image.shape:
-                    raise ValueError("Shape of the mask should be equal to"
-                         " shape of the image")
-                else:
-                    rings = rings*mask
-            labels, indices = corr.extract_label_indices(rings)
-            intensity_dist = intensity_distribution(image, rings)
-
-            a = np.vstack([indices, np.ones(len(indices))]).T
-
-            m, c = np.linalg.lstsq(a, intensity_dist.values()[0])[0]
-            if m < m_value:
-                m_value = m
-                center = (x, y)
-
-    return center
-
-
-def circular_average(image, calibrated_center, thershold=0, nx=100,
-                     pixel_size=None):
-    """
-    Circular average(radial integration) of the intensity distribution of
-    the image data.
-
-    Parameters
-    ----------
-    image : array
-        input image
-
-    calibrated_center : tuple
-        The center in pixels-units (row, col)
-
-    thershold : float, optional
-        threshold value to mask
-
-    nx : int, optional
-        number of bins
-
-    pixel_size : tuple, optional
-        The size of a pixel in real units. (height, width). (mm)
-
-    Returns
-    -------
-    bin_centers : array
-        bin centers from bin edges
-
-    ring_averages : array
-        circular integration of SAXS intensity
-    """
-    radial_val = core.radial_grid(calibrated_center, image.shape,
-                                  pixel_size)
-
-    bin_edges, sums, counts = core.bin_1D(np.ravel(radial_val),
-                                          np.ravel(image), nx)
-    th_mask = counts > thershold
-    ring_average = sums[th_mask] / counts[th_mask]
-
-    bin_centers = core.bin_edges_to_centers(bin_edges)
-
-    return bin_centers, ring_average
