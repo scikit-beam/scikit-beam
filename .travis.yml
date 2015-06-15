@@ -18,7 +18,7 @@ install:
   - conda create -n testenv --yes pip nose python=$TRAVIS_PYTHON_VERSION lmfit xraylib numpy scipy scikit-image netcdf4 six
   - source activate testenv
   - python setup.py install
-  - pip install coveralls
+  - pip install coveralls, pyFAI
 
 script:
   - python run_tests.py
