@@ -53,6 +53,8 @@ import skxray.correlation as corr
 import skxray.roi as roi
 import skxray.core as core
 
+import scipy.ndimage as ndi
+
 try:
     iteritems = dict.iteritems
 except AttributeError:
@@ -62,15 +64,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def max_counts(sample_dict, label_array):
+def max_counts(images_sets, label_array):
     """
     This will determine the highest speckle counts occurred in the required
     ROI's in required images.
 
     Parameters
     ----------
-    sample_dict : dict
-        sets of images as a dictionary
+    images_sets : array
+        sets of images as an array
 
     label_array : array
         labeled array; 0 is background.
@@ -82,13 +84,10 @@ def max_counts(sample_dict, label_array):
         maximum speckle counts
     """
     max_cts = 0
-    for key, img_sets in iteritems(sample_dict):
-        for n, img in enumerate(img_sets.operands[0]):
-            int_dist = intensity_distribution(img, label_array)
-            for j in range(len(int_dist)):
-                counts = np.max(list(int_dist.values())[j])
-                if max_cts < counts:
-                    max_cts = counts
+    for img_set in images_sets:
+        for n, img in enumerate(img_set.operands[0]):
+            frame_max = ndi.measurements.maximum(img, label_array)
+            max_cts = max(max_cts, frame_max)
     return max_cts
 
 
@@ -130,15 +129,18 @@ def intensity_distribution(image_array, label_array):
 
 def time_bining(number=2, number_of_images=50):
     """
-    This will provide the time binning for the integration.
+    This will provide the geometric series for the integration.
+    Last values of the series has to be less than or equal to number
+    of images
+    ex:
+        1, 2, 4, 8, 16, ...
+        1, 3, 9, 27, ...
 
     Parameters
     ----------
     number : int, optional
         time steps for the integration
-        ex:
-        1, 2, 4, 8, 16, ...
-        1, 3, 9, 27, ...
+
 
     number_of_images : int, 50
         number of images
@@ -147,6 +149,14 @@ def time_bining(number=2, number_of_images=50):
     ------
     time_bin : list
         time binning
+
+    Note
+    ----
+    :math ::
+     a + ar + ar^2 + ar^3 + ar^4 + ...
+
+     a - first term in the series
+     r - is the common ratio
     """
 
     time_bin = [1]
@@ -166,6 +176,7 @@ def static_test_sets_one_label(sample_dict, label_array, num=1):
     Parameters
     ----------
     sample_dict : dict
+        image sets given as a dictionary
 
     label_array : array
         labeled array; 0 is background.
@@ -177,6 +188,8 @@ def static_test_sets_one_label(sample_dict, label_array, num=1):
     Returns
     -------
     average_intensity : dict
+        average intensity of one ROI
+        for the intensity array of image sets
 
     combine_averages : array
         combine intensity averages of one ROI for sets of images

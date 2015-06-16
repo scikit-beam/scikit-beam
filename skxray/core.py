@@ -1257,7 +1257,7 @@ def circular_average(image, calibrated_center, thershold=0, nx=100,
         bin centers from bin edges
 
     ring_averages : array
-        circular integration of SAXS intensity
+        circular integration of intensity
     """
     radial_val = radial_grid(calibrated_center, image.shape,
                                   pixel_size)
