@@ -111,18 +111,6 @@ def test_static_test_sets():
 
     samples = {1: np.nditer(img_stack1)}
 
-    label_array = np.zeros((10, 10))
-
-    # different shapes for the images and labels
-    assert_raises(ValueError,
-                  lambda: spe_vis.static_test_sets(samples, label_array))
-
-
-def test_static_test_sets_one_label():
-    img_stack1 = np.random.randint(0, 60, size=(50, ) + (50, 50))
-
-    samples = {1: np.nditer(img_stack1)}
-
     label_array = np.zeros((25, 25))
 
     # different shapes for the images and labels
@@ -166,6 +154,8 @@ def test_static_test_sets_one_label():
                                                    11., 12., 13., 14., 15., 16.,
                                                    17., 18., 19.]))
 
+    average_int_sets = spe_vis.static_test_sets(samples, label_array2)
+
 
 def test_circular_average():
     image = np.zeros((12,12))
@@ -183,5 +173,3 @@ def test_circular_average():
                                         7.77817459], decimal=6)
     assert_array_almost_equal(ring_avg, [8., 2.5, 5.55555556, 0.,
                                          0., 0.], decimal=6)
-
-

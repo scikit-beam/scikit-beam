@@ -306,7 +306,7 @@ def static_test_sets(sample_dict, label_array):
     return average_intensity_sets
 
 
-def circular_average(image, calibrated_center, thershold=0, nx=100,
+def circular_average(image, calibrated_center, threshold=0, nx=100,
                      pixel_size=None):
     """
     Circular average(radial integration) of the intensity distribution of
@@ -342,7 +342,7 @@ def circular_average(image, calibrated_center, thershold=0, nx=100,
 
     bin_edges, sums, counts = core.bin_1D(np.ravel(radial_val),
                                           np.ravel(image), nx)
-    th_mask = counts > thershold
+    th_mask = counts > threshold
     ring_averages = sums[th_mask] / counts[th_mask]
 
     bin_centers = core.bin_edges_to_centers(bin_edges)
