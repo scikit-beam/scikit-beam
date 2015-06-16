@@ -304,3 +304,47 @@ def static_test_sets(sample_dict, label_array):
     for key, img in iteritems(sample_dict):
         average_intensity_sets[key] = static_test(img, label_array)
     return average_intensity_sets
+
+
+def circular_average(image, calibrated_center, thershold=0, nx=100,
+                     pixel_size=None):
+    """
+    Circular average(radial integration) of the intensity distribution of
+    the image data.
+
+    Parameters
+    ----------
+    image : array
+        input image
+
+    calibrated_center : tuple
+        The center in pixels-units (row, col)
+
+    thershold : float, optional
+        threshold value to mask
+
+    nx : int, optional
+        number of bins
+
+    pixel_size : tuple, optional
+        The size of a pixel in real units. (height, width). (mm)
+
+    Returns
+    -------
+    bin_centers : array
+        bin centers from bin edges
+
+    ring_averages : array
+        circular integration of intensity
+    """
+    radial_val = core.radial_grid(calibrated_center, image.shape,
+                                  pixel_size)
+
+    bin_edges, sums, counts = core.bin_1D(np.ravel(radial_val),
+                                          np.ravel(image), nx)
+    th_mask = counts > thershold
+    ring_averages = sums[th_mask] / counts[th_mask]
+
+    bin_centers = core.bin_edges_to_centers(bin_edges)
+
+    return bin_centers, ring_averages
