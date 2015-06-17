@@ -142,28 +142,28 @@ def test_static_test_sets():
      combine_averages) = spe_vis.static_test_sets_one_label(samples,
                                                             label_array1)
 
-    assert_array_equal(average_int_sets.values()[0],
+    assert_array_equal(list(average_int_sets.values())[0],
                        [x for x in range(0, 1000, 100)])
-    assert_array_equal(average_int_sets.values()[1],
+    assert_array_equal(list(average_int_sets.values())[1],
                        [float(x) for x in range(0, 20, 1)])
 
     assert_array_equal(combine_averages, np.array([0., 100., 200., 300., 400.,
                                                    500., 600., 700., 800.,
                                                    900., 0., 1., 2., 3., 4.,
                                                    5., 6., 7., 8., 9., 10.,
-                                                   11., 12., 13., 14., 15., 16.,
-                                                   17., 18., 19.]))
+                                                   11., 12., 13., 14., 15.,
+                                                   16., 17., 18., 19.]))
 
     average_int_sets = spe_vis.static_test_sets(samples, label_array2)
 
-    assert_array_equal(average_int_sets.values()[0].values()[0],
+    assert_array_equal(list(average_int_sets.values())[0].values()[0],
                        [x for x in range(0, 1000, 100)])
-    assert_array_equal(average_int_sets.values()[0].values()[1],
+    assert_array_equal(list(average_int_sets.values())[0].values()[1],
                        [x for x in range(0, 1000, 100)])
 
-    assert_array_equal(average_int_sets.values()[1].values()[0],
+    assert_array_equal(list(average_int_sets.values())[1].values()[0],
                        [float(x) for x in range(0, 20, 1)])
-    assert_array_equal(average_int_sets.values()[1].values()[1],
+    assert_array_equal(list(average_int_sets.values())[1].values()[1],
                        [float(x) for x in range(0, 20, 1)])
 
 

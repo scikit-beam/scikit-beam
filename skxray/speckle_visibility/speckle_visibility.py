@@ -201,7 +201,7 @@ def static_test_sets_one_label(sample_dict, label_array, num=1):
         average_intensity_sets[key] = static_tests_one_label(img, label_array,
                                                              num)
 
-    combine_averages = np.concatenate(average_intensity_sets.values())
+    combine_averages = np.concatenate(list(average_intensity_sets.values()))
 
     return average_intensity_sets, combine_averages
 
