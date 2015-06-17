@@ -66,7 +66,7 @@ def test_intensity_distribution():
     # different shapes for the images and labels
     assert_raises(ValueError,
                   lambda: spe_vis.intensity_distribution(image_array,
-                                                      label_array))
+                                                         label_array))
 
     images = morphology.diamond(8)
 
@@ -120,13 +120,13 @@ def test_static_test_sets():
     images1 = []
     for i in range(10):
         int_array = np.tril(i*np.ones(50))
-        int_array[int_array==0] = i*100
+        int_array[int_array == 0] = i*100
         images1.append(int_array)
 
     images2 = []
     for i in range(20):
         int_array = np.triu(i*np.ones(50))
-        int_array[int_array==0] = i*100
+        int_array[int_array == 0] = i*100
         images2.append(int_array)
 
     samples = {1: np.nditer(np.asarray(images1)),
@@ -156,26 +156,26 @@ def test_static_test_sets():
 
     average_int_sets = spe_vis.static_test_sets(samples, label_array2)
 
-    assert_array_equal(list(average_int_sets.values())[0].values()[0],
+    assert_array_equal(list(list(average_int_sets.values())[0].values())[0],
                        [x for x in range(0, 1000, 100)])
-    assert_array_equal(list(average_int_sets.values())[0].values()[1],
+    assert_array_equal(list(list(average_int_sets.values())[0].values())[1],
                        [x for x in range(0, 1000, 100)])
 
-    assert_array_equal(list(average_int_sets.values())[1].values()[0],
+    assert_array_equal(list(list(average_int_sets.values())[1].values())[0],
                        [float(x) for x in range(0, 20, 1)])
-    assert_array_equal(list(average_int_sets.values())[1].values()[1],
+    assert_array_equal(list(list(average_int_sets.values())[1].values())[1],
                        [float(x) for x in range(0, 20, 1)])
 
 
 def test_circular_average():
-    image = np.zeros((12,12))
+    image = np.zeros((12, 12))
     calib_center = (5, 5)
     inner_radius = 1
 
     edges = roi.ring_edges(inner_radius, width=1, spacing=1, num_rings=2)
     labels = roi.rings(edges, calib_center, image.shape)
-    image[labels==1] = 10
-    image[labels==2] = 10
+    image[labels == 1] = 10
+    image[labels == 2] = 10
     bin_cen, ring_avg = spe_vis.circular_average(image, calib_center, nx=6)
 
     assert_array_almost_equal(bin_cen, [0.70710678, 2.12132034,
