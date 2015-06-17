@@ -264,13 +264,14 @@ def static_test(images, label_array):
     -------
     average_intensity : dict
         average intensity of each ROI as a dictionary
+        {roi 1: average intensities, roi 2 : average intensities}
 
     """
     average_intensity = {}
     num = np.unique(label_array)[1:]
 
     for i in num:
-        average_roi = static_tests_one_label(images, label_array, i)
+        average_roi = static_tests_one_label(images, label_array, num=i+1)
         average_intensity[i] = average_roi
 
     return average_intensity
@@ -297,6 +298,10 @@ def static_test_sets(sample_dict, label_array):
     Returns
     -------
     average_intensity : dict
+        average intensity of each image sets and for each ROI's
+        eg:
+        {image_set1: {roi_1: average intensities, roi_2: average intensities},
+         image_set2: {roi_1: average intensities, roi_2: average intensities}}
     """
 
     average_intensity_sets = {}
@@ -320,7 +325,7 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
     calibrated_center : tuple
         The center in pixels-units (row, col)
 
-    thershold : float, optional
+    threshold : int, optional
         threshold value to mask
 
     nx : int, optional
@@ -333,6 +338,7 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
     -------
     bin_centers : array
         bin centers from bin edges
+        shape [nx]
 
     ring_averages : array
         circular integration of intensity

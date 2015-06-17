@@ -135,7 +135,7 @@ def test_static_test_sets():
     roi_data1 = np.array(([2, 30, 12, 15], ), dtype=np.int64)
     roi_data2 = np.array(([2, 30, 12, 15], [40, 20, 15, 10]), dtype=np.int64)
 
-    label_array1 = roi.rectangles(roi_data1, shape=(50,50))
+    label_array1 = roi.rectangles(roi_data1, shape=(50, 50))
     label_array2 = roi.rectangles(roi_data2, shape=(50, 50))
 
     (average_int_sets,
@@ -143,7 +143,7 @@ def test_static_test_sets():
                                                             label_array1)
 
     assert_array_equal(average_int_sets.values()[0],
-                       [x for x in range(0,1000,100)])
+                       [x for x in range(0, 1000, 100)])
     assert_array_equal(average_int_sets.values()[1],
                        [float(x) for x in range(0, 20, 1)])
 
@@ -155,6 +155,16 @@ def test_static_test_sets():
                                                    17., 18., 19.]))
 
     average_int_sets = spe_vis.static_test_sets(samples, label_array2)
+
+    assert_array_equal(average_int_sets.values()[0].values()[0],
+                       [x for x in range(0, 1000, 100)])
+    assert_array_equal(average_int_sets.values()[0].values()[1],
+                       [x for x in range(0, 1000, 100)])
+
+    assert_array_equal(average_int_sets.values()[1].values()[0],
+                       [float(x) for x in range(0, 20, 1)])
+    assert_array_equal(average_int_sets.values()[1].values()[1],
+                       [float(x) for x in range(0, 20, 1)])
 
 
 def test_circular_average():

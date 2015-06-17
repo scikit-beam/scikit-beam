@@ -46,7 +46,6 @@ import sys
 from nose.tools import assert_equal, assert_true, raises
 
 import skxray.core as core
-import skxray.roi as roi
 
 from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
