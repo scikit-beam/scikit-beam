@@ -52,8 +52,7 @@ from six import string_types
 import skxray.correlation as corr
 import skxray.roi as roi
 import skxray.core as core
-import scipy.ndimage.measurements as meas
-# TODO  check this in skimage
+from scipy.ndimage.measurements import maximum, mean
 
 try:
     iteritems = dict.iteritems
@@ -86,7 +85,7 @@ def roi_max_counts(images_sets, label_array):
     max_cts = 0
     for img_set in images_sets:
         for img in img_set:
-            max_cts = max(max_cts, meas.maximum(img, label_array))
+            max_cts = max(max_cts, maximum(img, label_array))
     return max_cts
 
 
@@ -214,11 +213,11 @@ def mean_intensity(images, labels):
         raise ValueError("Shape of the images should be equal to"
                          " shape of the label array")
 
-    index = np.unique(labels)[1: ]
+    index = np.unique(labels)[1:]
     mean_int = np.zeros((images.shape[0], index.shape[0]))
 
     for n in range(images.shape[0]):
-        mean_int[n] = meas.mean(images[n], labels, index=index)
+        mean_int[n] = mean(images[n], labels, index=index)
 
     return mean_int
 
