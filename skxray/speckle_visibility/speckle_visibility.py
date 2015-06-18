@@ -64,7 +64,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def max_counts(images_sets, label_array):
+def roi_max_counts(images_sets, label_array):
     """
     This will determine the highest speckle counts occurred in the required
     ROI's in required images.
@@ -118,39 +118,31 @@ def roi_pixel_values(image, labels):
         raise ValueError("Shape of the image data should be equal to"
                          " shape of the labeled array")
 
-    #labels, indices = corr.extract_label_indices(label_array)
     label_num = np.unique(labels)[1:]
 
-    #intensity_distribution = {}
-
-    #for n in label_num:
-    #    value = (np.ravel(image_array)[indices[labels == n].tolist()])
-    #    intensity_distribution[n] = value
-
-    return {n: image[labels == n] for n in range(1, np.max(labels))}
+    return {n: image[labels == n] for n in range(1, np.max(labels)+1)}
 
 
-def time_bin_edges(number=2, number_of_images=50):
+def time_series(number=2, number_of_images=50):
     """
     This will provide the geometric series for the integration.
     Last values of the series has to be less than or equal to number
     of images
-    ex:
-        1, 2, 4, 8, 16, ...
-        1, 3, 9, 27, ...
+    ex: number_of_images = 100
+    number = 2, time_series =  1, 2, 4, 8, 16, 32, 64
+    number = 3, time_series =  1, 3, 9, 27, 81
 
     Parameters
     ----------
     number : int, optional
         time steps for the integration
 
-
-    number_of_images : int, 50
+    number_of_images : int, optional
         number of images
 
     Return
     ------
-    time_bin : list
+    time_series : list
         time binning
 
     Note
@@ -162,21 +154,21 @@ def time_bin_edges(number=2, number_of_images=50):
      r - is the common ratio
     """
 
-    time_bin = [1]
+    time_series = [1]
 
-    while time_bin[-1]*number < number_of_images:
-        time_bin.append(time_bin[-1]*number)
-    return time_bin
+    while time_series[-1]*number < number_of_images:
+        time_series.append(time_series[-1]*number)
+    return time_series
 
 
 def mean_intensity_sets(images_set, labels):
     """
-    Mean intensities for ROIS' of the labeled array for image sets
+    Mean intensities for ROIS' of the labeled array for different image sets
 
     Parameters
     ----------
     images : array
-        iterable of 2D arrays
+        iterable of 4D arrays
         dimensions are: (rr, cc)
 
     labels : array
@@ -187,11 +179,14 @@ def mean_intensity_sets(images_set, labels):
     -------
     mean_int_labels : dict
         average intensity of each ROI as a dictionary
-        {roi 1: average intensities, roi 2 : average intensities}
+        shape len(images_sets)
+        eg: 2 image sets,
+        {image set 1 : (len(images in image set 1), number of labels),
+        image set 2 : (len(images in image set 2), number of labels)}
 
     """
-    return {n+1 : mean_intensity(images_set[n],
-                                 labels) for n in range(len(images_set))}
+    return {n+1: mean_intensity(images_set[n],
+                                labels) for n in range(len(images_set))}
 
 
 def mean_intensity(images, labels):
@@ -212,7 +207,7 @@ def mean_intensity(images, labels):
     -------
     mean_int : array
         mean intensity of each ROI for the set of images as an array
-        shape (number of images in the set, number of labels)
+        shape (len(images), number of labels)
 
     """
     if labels.shape != images[0].shape[0:]:
@@ -230,16 +225,21 @@ def mean_intensity(images, labels):
 
 def combine_mean_intensity(mean_int_dict):
     """
+    Combine mean intensities of the images(all images sets) for each ROI
+
     Parameters
     ----------
     mean_int_dict : dict
         mean intensity of each ROI as a dictionary
-        {roi 1: average intensities, roi 2 : average intensities}
+        eg: 2 image sets,
+        {image set 1 : (len(images in image set 1), number of labels),
+        image set 2 : (len(images in image set 2), number of labels)}
 
     Returns
     -------
     combine_mean_int : array
         combine mean intensities of image sets for each ROI of labeled array
+        shape (len(images in all image sets), number of labels)
 
     """
     return np.vstack(list(mean_int_dict.values()))
