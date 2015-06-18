@@ -66,7 +66,7 @@ def test_roi_pixel_values():
     # different shapes for the images and labels
     assert_raises(ValueError,
                   lambda: spe_vis.roi_pixel_values(image_array,
-                                                         label_array))
+                                                   label_array))
 
     images = morphology.diamond(8)
 
