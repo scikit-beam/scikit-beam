@@ -212,9 +212,10 @@ def eval_binomal_dist(M, K, x):
         number of coherent modes
 
     K : int
-        number of photons
+        average number of photons
 
     x : array
+
 
     Returns
     -------
