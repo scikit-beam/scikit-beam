@@ -48,7 +48,7 @@ from nose.tools import assert_equal, assert_true, assert_raises
 
 import skxray.correlation as corr
 import skxray.roi as roi
-import skxray.speckle_visibility.speckle_visibility as spe_vis
+import skxray.speckle_analysis as spe_vis
 
 from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt

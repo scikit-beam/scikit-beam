@@ -37,8 +37,8 @@
 ########################################################################
 
 """
-    This module will provide statistics analysis for the speckle pattern
-    to use in X-ray Speckle Visibility Spectroscopy (XSVS)
+    This module will provide statistical analysis for the speckle patterns
+    
 """
 
 
