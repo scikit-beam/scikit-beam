@@ -284,6 +284,6 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
     th_mask = counts > threshold
     ring_averages = sums[th_mask] / counts[th_mask]
 
-    bin_centers = core.bin_edges_to_centers(bin_edges)
+    bin_centers = core.bin_edges_to_centers(bin_edges)[th_mask]
 
     return bin_centers, ring_averages
