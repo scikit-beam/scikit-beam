@@ -168,7 +168,7 @@ def mean_intensity_sets(images_set, labels):
     ----------
     images : array
         iterable of 4D arrays
-        dimensions are: (rr, cc)
+        shapes is: (len(images_sets), )
 
     labels : array
         labeled array; 0 is background.
