@@ -14,7 +14,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import six
 import numpy as np
-from skxray.img_proc import mathops
+from skxray.image_processing import arithmetic
 from numpy.testing import assert_equal
 
 
@@ -29,7 +29,7 @@ def test_prealloc_passthrough():
     x1 = np.arange(10)
     x2 = np.arange(10)
     scratch_space = np.zeros(x1.shape)
-    for op in [mathops.logical_nand, mathops.logical_sub, mathops.logical_nor]:
+    for op in [arithmetic.logical_nand, arithmetic.logical_sub, arithmetic.logical_nor]:
         yield _helper_prealloc_passthrough, op, x1, x2, scratch_space
 
 
@@ -48,9 +48,9 @@ def test_logical_nor():
     test_1D_array_2 = np.zeros(50, dtype=int)
     test_1D_array_2[20:49] = 10
 
-    assert_equal(mathops.logical_nor(test_array_1, test_array_1),
+    assert_equal(arithmetic.logical_nor(test_array_1, test_array_1),
                  np.logical_not(test_array_1))
-    assert_equal(mathops.logical_nor(test_array_1, test_array_2).sum(),
+    assert_equal(arithmetic.logical_nor(test_array_1, test_array_2).sum(),
                  (np.ones((30, 30, 30), dtype=int).sum() -
                   (np.logical_or(test_array_1, test_array_2).sum())))
 
@@ -74,9 +74,9 @@ def test_logical_nand():
     test_array_8 = np.zeros((90, 90, 90), dtype=int)
     test_array_8[80:89, 80:89, 80:89] = 8
 
-    assert_equal(mathops.logical_nand(test_array_1, test_array_1),
+    assert_equal(arithmetic.logical_nand(test_array_1, test_array_1),
                  np.logical_not(test_array_1))
-    test_result = mathops.logical_nand(test_array_1, test_array_2)
+    test_result = arithmetic.logical_nand(test_array_1, test_array_2)
     assert_equal(test_result[20:39, 20:39, 20:39], True)
 
 
@@ -89,15 +89,15 @@ def test_logical_sub():
     test_array_3 = np.zeros((90, 90, 90), dtype=int)
     test_array_3[40:89, 40:89, 40:89] = 3
 
-    assert_equal(mathops.logical_sub(test_array_1, test_array_1),
+    assert_equal(arithmetic.logical_sub(test_array_1, test_array_1),
                  False)
-    test_result = mathops.logical_sub(test_array_1, test_array_2)
+    test_result = arithmetic.logical_sub(test_array_1, test_array_2)
     assert_equal(test_result[20:39, 20:39, 20:39], False)
     assert_equal(test_result.sum(),
                  (test_array_1.sum() -
                   np.logical_and(test_array_1, test_array_2).sum()))
 
-    test_result = mathops.logical_sub(test_array_1, test_array_3)
+    test_result = arithmetic.logical_sub(test_array_1, test_array_3)
     assert_equal(test_result, test_array_1)
 
 
