@@ -117,8 +117,6 @@ def roi_pixel_values(image, labels):
         raise ValueError("Shape of the image data should be equal to"
                          " shape of the labeled array")
 
-    label_num = np.unique(labels)[1:]
-
     return {n: image[labels == n] for n in range(1, np.max(labels)+1)}
 
 
@@ -204,7 +202,7 @@ def mean_intensity(images, labels):
 
     Returns
     -------
-    mean_int : array
+    mean_intensity : array
         mean intensity of each ROI for the set of images as an array
         shape (len(images), number of labels)
 
@@ -214,12 +212,12 @@ def mean_intensity(images, labels):
                          " shape of the label array")
 
     index = np.unique(labels)[1:]
-    mean_int = np.zeros((images.shape[0], index.shape[0]))
+    mean_intensity = np.zeros((images.shape[0], index.shape[0]))
 
-    for n in range(images.shape[0]):
-        mean_int[n] = mean(images[n], labels, index=index)
+    for n, img in enumerate(images):
+        mean_intensity[n] = mean(img, labels, index=index)
 
-    return mean_int
+    return mean_intensity
 
 
 def combine_mean_intensity(mean_int_dict):
