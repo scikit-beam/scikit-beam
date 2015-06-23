@@ -199,7 +199,7 @@ def hkl_to_q(hkl_arr):
     return np.linalg.norm(hkl_arr, axis=1)
 
 
-def xpd_process_to_q(detector_size, pyfai_kwargs):
+def calibrated_pixels_to_q(detector_size, pyfai_kwargs):
     """
     For a given detector and pyfai calibrated geometry give back the q value
     for each pixel in the detector.

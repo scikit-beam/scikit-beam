@@ -570,11 +570,11 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     y : array
         intensity
     nx : integer, optional
-        number of bins to use
+        number of bins to use defaults to default bin value
     min_x : float, optional
-        Left edge of first bin
+        Left edge of first bin defaults to minimum value of x
     max_x : float, optional
-        Right edge of last bin
+        Right edge of last bin defaults to maximum value of x
 
     Returns
     -------
@@ -616,14 +616,14 @@ def statistics_1D(x, y, stat='mean', nx=None, min_x=None, max_x=None):
     y : array
         intensity
     stat: str or func, optional
-        statistic to be used on the binned values
+        statistic to be used on the binned values defaults to mean
         see scipy.stats.binned_statistic
     nx : integer, optional
-        number of bins to use
+        number of bins to use defaults to default bin value
     min_x : float, optional
-        Left edge of first bin
+        Left edge of first bin defaults to minimum value of x
     max_x : float, optional
-        Right edge of last bin
+        Right edge of last bin defaults to maximum value of x
 
     Returns
     -------
