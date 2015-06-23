@@ -30,7 +30,7 @@ def logical_nand(x1, x2, out=None):
 
     Parameters
     ----------
-    x1, x2 : array_like
+    x1, x2 : array-like
         Input arrays. `x1` and `x2` must be of the same shape.
 
     output : array-like
@@ -68,7 +68,7 @@ def logical_nor(x1, x2, out=None):
 
     Parameters
     ----------
-    x1, x2 : array_like
+    x1, x2 : array-like
         Input arrays. `x1` and `x2` must be of the same shape.
 
     output : array-like
@@ -106,7 +106,7 @@ def logical_sub(x1, x2, out=None):
 
     Parameters
     ----------
-    x1, x2 : array_like
+    x1, x2 : array-like
         Input arrays. `x1` and `x2` must be of the same shape.
 
     output : array-like
