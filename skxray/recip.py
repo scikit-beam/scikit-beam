@@ -47,8 +47,11 @@ import numpy as np
 import logging
 from .core import verbosedict
 import sys
+
 logger = logging.getLogger(__name__)
 import time
+from pyFAI import geometry as geo
+
 try:
     import src.ctrans as ctrans
 except ImportError:
@@ -131,7 +134,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
     if frame_mode is None:
         frame_mode = 4
     else:
-        str_to_int = verbosedict((k, j+1) for j, k
+        str_to_int = verbosedict((k, j + 1) for j, k
                                  in enumerate(process_to_q.frame_mode))
         frame_mode = str_to_int[frame_mode]
     # ensure the ub matrix is an array
@@ -147,7 +150,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
         raise ValueError('It is expected that there should be six angles in '
                          'the setting_angles parameter. You provided {0}'
                          ' angles.'.format(setting_angles.shape[1]))
-    #  *********** Converting to Q   **************
+    # *********** Converting to Q   **************
 
     # starting time for the process
     t1 = time.time()
@@ -161,13 +164,13 @@ def process_to_q(setting_angles, detector_size, pixel_size,
                         dist=dist_sample,
                         wavelength=wavelength,
                         UBinv=np.matrix(ub).I)
-                        # **kwargs)
+    # **kwargs)
 
     # ending time for the process
     t2 = time.time()
     logger.info("Processing time for {0} {1} x {2} images took {3} seconds."
                 "".format(setting_angles.shape[0], detector_size[0],
-                          detector_size[1], (t2-t1)))
+                          detector_size[1], (t2 - t1)))
     return hkl[:, :3]
 
 # Assign frame_mode as an attribute to the process_to_q function so that the
@@ -194,3 +197,27 @@ def hkl_to_q(hkl_arr):
     """
 
     return np.linalg.norm(hkl_arr, axis=1)
+
+
+def calibrated_pixels_to_q(detector_size, pyfai_kwargs):
+    """
+    For a given detector and pyfai calibrated geometry give back the q value
+    for each pixel in the detector.
+
+    Parameters
+    -----------
+    detector_size : tuple
+        2 element tuple defining the number of pixels in the detector. Order is
+        (num_columns, num_rows)
+    pyfai_kwargs: dict
+        The dictionary of pyfai geometry kwargs, given by pyFAI's calibration
+        Ex: dist, poni1, poni2, rot1, rot2, rot3, splineFile, wavelength,
+        detector, pixel1, pixel2
+
+    Returns
+    -------
+    q_val : ndarray
+        Reciprocal values for each pixel shape is [num_rows * num_columns]
+    """
+    a = geo.Geometry(**pyfai_kwargs)
+    return a.qArray(detector_size)
