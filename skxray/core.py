@@ -615,6 +615,9 @@ def statistics_1D(x, y, stat='mean', nx=None, min_x=None, max_x=None):
         position
     y : array
         intensity
+    stat: str or func, optional
+        statistic to be used on the binned values
+        see scipy.stats.binned_statistic
     nx : integer, optional
         number of bins to use
     min_x : float, optional
@@ -628,10 +631,7 @@ def statistics_1D(x, y, stat='mean', nx=None, min_x=None, max_x=None):
         edges of bins, length nx + 1
 
     val : array
-        sum of values in each bin, length nx
-
-    count : array
-        The number of counts in each bin, length nx
+        statistics of values in each bin, length nx
     """
 
     # handle default values
