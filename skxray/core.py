@@ -50,6 +50,7 @@ import sys
 
 from collections import namedtuple, MutableMapping, defaultdict, deque
 import numpy as np
+import scipy.stats
 from itertools import tee
 
 import logging
@@ -602,6 +603,51 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     count, _ = np.histogram(a=x, bins=bins)
     # return the three arrays
     return bins, val, count
+
+
+def statistics_1D(x, y, stat='mean', nx=None, min_x=None, max_x=None):
+    """
+    Bin the values in y based on their x-coordinates
+
+    Parameters
+    ----------
+    x : array
+        position
+    y : array
+        intensity
+    nx : integer, optional
+        number of bins to use
+    min_x : float, optional
+        Left edge of first bin
+    max_x : float, optional
+        Right edge of last bin
+
+    Returns
+    -------
+    edges : array
+        edges of bins, length nx + 1
+
+    val : array
+        sum of values in each bin, length nx
+
+    count : array
+        The number of counts in each bin, length nx
+    """
+
+    # handle default values
+    if min_x is None:
+        min_x = np.min(x)
+    if max_x is None:
+        max_x = np.max(x)
+    if nx is None:
+        nx = _defaults["bins"]
+
+    # use a weighted histogram to get the bin sum
+    bins = np.linspace(start=min_x, stop=max_x, num=nx+1, endpoint=True)
+
+    val, _, _ = scipy.stats.binned_statistic(x, y, statistic=stat, bins=bins)
+    # return the two arrays
+    return bins, val
 
 
 def radial_grid(center, shape, pixel_size=None):
