@@ -163,3 +163,7 @@ def test_circular_average():
                                         7.77817459], decimal=6)
     assert_array_almost_equal(ring_avg, [8., 2.5, 5.55555556, 0.,
                                          0., 0.], decimal=6)
+
+
+def test_roi_speckle_count_waterfall():
+    pass

@@ -38,7 +38,6 @@
 
 """
     This module will provide statistical analysis for the speckle patterns
-    
 """
 
 
@@ -285,3 +284,34 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
     bin_centers = core.bin_edges_to_centers(bin_edges)[th_mask]
 
     return bin_centers, ring_averages
+
+
+def roi_speckle_count_waterfall(images, labels, num=1):
+    """
+    This function will provide data for waterfall plot of speckle counts
+    of pixels within required ROI label.
+
+    Parameters
+    ----------
+    images : array
+        iterable of 2D arrays
+        dimensions are: (rr, cc)
+
+    labels : array
+        labeled array; 0 is background.
+        Each ROI is represented by a distinct label (i.e., integer).
+
+    num : int, optional
+        required ROI
+
+    Returns
+    -------
+    roi_waterfall_data : array
+
+    """
+    roi_waterfall_data = []
+    for n, img in enumerate(images):
+        roi_waterfall_data.append(roi_pixel_values(img,
+                                                   labels == num).values()[0])
+
+    return np.matrix(roi_waterfall_data)
