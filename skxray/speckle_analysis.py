@@ -268,12 +268,12 @@ def roi_kymograph(images, labels, num=1):
 
     Returns
     -------
-    roi_kymograph_data : array
+    roi_kymograph : array
 
     """
-    roi_kymograph_data = []
+    roi_kymograph = []
     for n, img in enumerate(images):
-        roi_kymograph_data.append(roi_pixel_values(img,
-                                                   labels == num).values()[0])
+        roi_kymograph.append(list(roi_pixel_values(img,
+                                                   labels == num).values())[0])
 
-    return np.matrix(roi_kymograph_data)
+    return np.matrix(roi_kymograph)
