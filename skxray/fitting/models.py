@@ -128,7 +128,7 @@ class ElasticModel(Model):
 
     def __init__(self, *args, **kwargs):
         super(ElasticModel, self).__init__(elastic, *args, **kwargs)
-        set_default(self, elastic)
+        #set_default(self, elastic)
         self.set_param_hint('epsilon', value=2.96, vary=False)
 
 
@@ -139,7 +139,7 @@ class ComptonModel(Model):
     def __init__(self, *args, **kwargs):
 
         super(ComptonModel, self).__init__(compton, *args, **kwargs)
-        set_default(self, compton)
+        #set_default(self, compton)
         self.set_param_hint('epsilon', value=2.96, vary=False)
 
 
