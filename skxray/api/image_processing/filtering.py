@@ -58,11 +58,16 @@ from skimage.filters import (
 
 )
 
+from skimage.morphology import (
+    remove_small_objects
+)
+
 __all__ = [
     # image filters
     'gaussian_filter', 'median_filter', 'minimum_filter', 'maximum_filter',
     'gaussian_gradient_magnitude', 'gaussian_laplace', 'laplace',
     'percentile_filter', 'sobel', 'prewitt',  'rank_filter', 'canny',
     'prewitt_h', 'prewitt_v', 'scharr', 'scharr_h', 'scharr_v', 'sobel_v',
-    'sobel_h', 'rank_order', 'roberts', 'roberts_neg_diag', 'roberts_pos_diag',
+    'sobel_h', 'rank_order', 'roberts', 'roberts_neg_diag',
+    'roberts_pos_diag', 'remove_small_objects',
 ]
