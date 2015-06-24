@@ -64,13 +64,13 @@ logger = logging.getLogger(__name__)
 
 def roi_max_counts(images_sets, label_array):
     """
-    This will determine the highest speckle counts occurred in the required
-    ROI's in required images.
+    Return the brightest pixel in any ROI in any image in the image set.
 
     Parameters
     ----------
     images_sets : array
-        sets of images as an array
+        iterable of 4D arrays
+        shapes is: (len(images_sets), )
 
     label_array : array
         labeled array; 0 is background.
@@ -79,7 +79,7 @@ def roi_max_counts(images_sets, label_array):
     Returns
     -------
     max_counts : int
-        maximum speckle counts
+        maximum pixel counts
     """
     max_cts = 0
     for img_set in images_sets:
@@ -117,44 +117,6 @@ def roi_pixel_values(image, labels):
                          " shape of the labeled array")
 
     return {n: image[labels == n] for n in range(1, np.max(labels)+1)}
-
-
-def time_series(number=2, number_of_images=50):
-    """
-    This will provide the geometric series for the integration.
-    Last values of the series has to be less than or equal to number
-    of images
-    ex: number_of_images = 100
-    number = 2, time_series =  1, 2, 4, 8, 16, 32, 64
-    number = 3, time_series =  1, 3, 9, 27, 81
-
-    Parameters
-    ----------
-    number : int, optional
-        time steps for the integration
-
-    number_of_images : int, optional
-        number of images
-
-    Return
-    ------
-    time_series : list
-        time binning
-
-    Note
-    ----
-    :math ::
-     a + ar + ar^2 + ar^3 + ar^4 + ...
-
-     a - first term in the series
-     r - is the common ratio
-    """
-
-    time_series = [1]
-
-    while time_series[-1]*number < number_of_images:
-        time_series.append(time_series[-1]*number)
-    return time_series
 
 
 def mean_intensity_sets(images_set, labels):
@@ -286,10 +248,10 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
     return bin_centers, ring_averages
 
 
-def roi_speckle_count_waterfall(images, labels, num=1):
+def roi_kymograph(images, labels, num=1):
     """
-    This function will provide data for waterfall plot of speckle counts
-    of pixels within required ROI label.
+    This function will provide data for graphical representation of pixels
+    variation over time for required ROI.
 
     Parameters
     ----------
@@ -306,12 +268,12 @@ def roi_speckle_count_waterfall(images, labels, num=1):
 
     Returns
     -------
-    roi_waterfall_data : array
+    roi_kymograph_data : array
 
     """
-    roi_waterfall_data = []
+    roi_kymograph_data = []
     for n, img in enumerate(images):
-        roi_waterfall_data.append(roi_pixel_values(img,
+        roi_kymograph_data.append(roi_pixel_values(img,
                                                    labels == num).values()[0])
 
-    return np.matrix(roi_waterfall_data)
+    return np.matrix(roi_kymograph_data)

@@ -84,12 +84,6 @@ def test_roi_pixel_values():
                                                            1, 1, 1, 1, 1, 1]))
 
 
-def test_time_series():
-    time_series = spe_vis.time_series(number=5, number_of_images=150)
-
-    assert_array_equal(time_series, [1, 5, 25, 125])
-
-
 def test_roi_max_counts():
     img_stack1 = np.random.randint(0, 60, size=(50, ) + (50, 50))
     img_stack2 = np.random.randint(0, 60, size=(100, ) + (50, 50))
@@ -165,5 +159,18 @@ def test_circular_average():
                                          0., 0.], decimal=6)
 
 
-def test_roi_speckle_count_waterfall():
-    pass
+def test_roi_kymograph():
+    calib_center = (25, 25)
+    inner_radius = 5
+
+    edges = roi.ring_edges(inner_radius, width=2, num_rings=1)
+    labels = roi.rings(edges, calib_center, (50, 50))
+
+    images = []
+    for i in range(100):
+        int_array = i*np.ones(labels.shape)
+        images.append(int_array)
+
+    kymograph_data = spe_vis.roi_kymograph(np.asarray(images), labels, num=1)
+
+    assert_almost_equal(kymograph_data[:,0],  np.arange(100).reshape(100, 1))
