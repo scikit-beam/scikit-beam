@@ -51,7 +51,12 @@ from skimage.feature import (
     register_translation, match_descriptors, match_template,
 )
 
+from skimage.transform import (
+    AffineTransform, PiecewiseAffineTransform
+)
+
 __all__ = [
     # image arithmetic
     'register_translation', 'match_descriptors', 'match_template',
+    'AffineTransform', 'PiecewiseAffineTransform',
 ]
