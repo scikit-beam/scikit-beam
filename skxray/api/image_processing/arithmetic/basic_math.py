@@ -47,15 +47,10 @@ logger = logging.getLogger(__name__)
 #Image processing: Image arithmetic
 #-----------------------------------------------------------------------------
 from skxray.image_processing.arithmetic import (
-    add, subtract, multiply, divide, logical_and, logical_or, logical_not,
-    logical_xor,  logical_nand, logical_nor,  logical_sub,
+    add, subtract, multiply, divide,
 )
 
 __all__ = [
     # image arithmetic
     'add', 'subtract', 'multiply', 'divide',
-
-    # logical operations
-    'logical_and', 'logical_or', 'logical_not', 'logical_xor', 'logical_nand',
-    'logical_nor', 'logical_sub',
 ]
