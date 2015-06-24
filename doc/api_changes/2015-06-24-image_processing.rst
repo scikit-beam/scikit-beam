@@ -12,10 +12,6 @@ The categories which are defined in this API change include:
     * basic_math: includes tools for simple image arithmetic
     * logic: includes tools for applying logical operations to input data
   - filtering: image filtering tools
-  - histogram: tools for evaluating image histograms (e.g. for
-    identification of potential thresholding points)
   - morphology: tools for evaluating image, or object,
     morphology (e.g. erosion).
-  - thresholding: image and volume thresholding tools
-  - transformation: image and volume transformation tools (e.g. cropping)
   - registration: image and volume registration tools
