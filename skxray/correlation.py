@@ -119,9 +119,11 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
         raise ValueError("number of channels(number of buffers) in "
                          "multiple-taus (must be even)")
 
-    if labels.shape != images.operands[0].shape[1:]:
-        raise ValueError("Shape of the image stack should be equal to"
-                         " shape of the labels array")
+    if hasattr(images, 'frame_shape'):
+        # Give a user-friendly error if we can detect the shape from pims.
+        if labels.shape != images.frame_shape:
+            raise ValueError("Shape of the image stack should be equal to"
+                             " shape of the labels array")
 
     # get the pixels in each label
     label_mask, pixel_list = extract_label_indices(labels)
@@ -166,7 +168,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
 
     start_time = time.time()  # used to log the computation time (optionally)
 
-    for n, img in enumerate(images.operands[0]):
+    for n, img in enumerate(images):
 
         cur[0] = (1 + cur[0]) % num_bufs  # increment buffer
 
