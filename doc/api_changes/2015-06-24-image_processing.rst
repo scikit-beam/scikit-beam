@@ -18,4 +18,4 @@ The categories which are defined in this API change include:
     morphology (e.g. erosion).
   - thresholding: image and volume thresholding tools
   - transformation: image and volume transformation tools (e.g. cropping)
-
+  - registration: image and volume registration tools
