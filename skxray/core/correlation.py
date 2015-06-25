@@ -84,7 +84,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     Returns
     -------
     g2 : array
-        matrix of one-time correlation
+        matrix of normalized intensity-intensity autocorrelation
         shape (num_levels, number of labels(ROI))
 
     lag_steps : array
@@ -93,6 +93,18 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
 
     Note
     ----
+
+    The normalized intensity-intensity time-autocorrelation function
+    is defined as
+
+    :math ::
+    g2(Q, t) = \\frac{<I(Q, t)I(Q, t + delay)> }{<I(Q, t)>^2}
+
+    ; delay > 0
+
+    Here, I(Q, t) refers to the scattering strength at the momentum
+    transfer vector Q in reciprocal space at time t, and the brackets
+    <...> refer to averages over time t.
 
     This implementation is based on code in the language Yorick
     by Mark Sutton, based on published work. [1]_
@@ -367,3 +379,54 @@ def extract_label_indices(labels):
     label_mask = labels[labels > 0]
 
     return label_mask, pixel_list
+
+
+def fit_auto_corr(lags, beta, relatxation_rate, basline=1):
+    """
+    Parameters
+    ----------
+    lags : array
+        delay time
+
+    beta : float
+        optical contrast (speckle contrast), a sample-independent
+        beamline parameter
+
+    relatxation_rate : float
+        relaxation time associated with the samples dynamics.
+
+    basline : float, optional
+        baseline of one time correlation
+        equal to one for ergodic samples
+
+    Returns
+    -------
+    g2 : array
+        normalized intensity-intensity time autocorreltion
+
+    Note :
+    The intensity-intensity autocorrelation g2 is connected to the intermediate
+    scattering factor(ISF) g1
+
+    :math ::
+        g2(q, t) = \\beta[g1(q, t)]^{2} + g_\\infty
+
+    For a system undergoing  diffusive dynamics,
+
+    :math ::
+        g1(q, t) = e^{-\\Gamma t}
+
+    :math ::
+        g2(q, t) = \\beta e^{-2\\Gamma t} + g_\\infty
+
+    These implementation are based on based on published work. [1]_
+
+     References
+    ----------
+
+    .. [1] L. Li, P. Kwasniewski, D. Orsi, L. Wiegart, L. Cristofolini, C. Caronna
+       and A. Fluerasu, " Photon statistics and speckle visibility spectroscopy with
+       partially coherent X-rays," J. Synchrotron Rad. vol 21, p 1288-1295, 2014
+
+    """
+    return np.exp(-2*relatxation_rate*lags)  + 1
