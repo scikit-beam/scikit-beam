@@ -143,11 +143,17 @@ def mean_intensity_sets(images_set, labels):
         image set 2 : (len(images in image set 2), number of labels)}
 
     """
-    return {n+1: mean_intensity(images_set[n],
-                                labels) for n in range(len(images_set))}
+    mean_intensity_sets = {}
+    for n in range(len(images_set)):
+        mean_intensity, index = mean_intensity(images_set[n], labels)
+        mean_intensity_sets[index] = mean_intensity
+
+    return mean_intensity_sets
+    #return {n+1: mean_intensity(images_set[n],
+    #                            labels) for n in range(len(images_set))}
 
 
-def mean_intensity(images, labels):
+def mean_intensity(images, labels, index=None):
     """
     Mean intensities for ROIS' of the labeled array for set of images
 
@@ -171,14 +177,13 @@ def mean_intensity(images, labels):
     if labels.shape != images[0].shape[0:]:
         raise ValueError("Shape of the images should be equal to"
                          " shape of the label array")
-
-    index = np.unique(labels)[1:]
-    mean_intensity = np.zeros((images.shape[0], index.shape[0]))
+    if index is None:
+        index = np.arange(1, np.max(labels) + 1)
 
     for n, img in enumerate(images):
         mean_intensity[n] = mean(img, labels, index=index)
 
-    return mean_intensity
+    return mean_intensity, index
 
 
 def combine_mean_intensity(mean_int_dict):
@@ -200,6 +205,8 @@ def combine_mean_intensity(mean_int_dict):
         shape (len(images in all image sets), number of labels)
 
     """
+    for n in len(mean_int_dict):
+
     return np.vstack(list(mean_int_dict.values()))
 
 

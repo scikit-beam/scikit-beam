@@ -53,23 +53,20 @@ import skxray.speckle_analysis as spe_vis
 from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
 
-from skimage import data, morphology
+from skimage import morphology
 from skimage.draw import circle_perimeter
 
 
 def test_roi_pixel_values():
-    image_array = data.moon()
+    images = morphology.diamond(8)
     # width incompatible with num_rings
 
     label_array = np.zeros((256, 256))
 
     # different shapes for the images and labels
     assert_raises(ValueError,
-                  lambda: spe_vis.roi_pixel_values(image_array,
+                  lambda: spe_vis.roi_pixel_values(images,
                                                    label_array))
-
-    images = morphology.diamond(8)
-
     # create a label mask
     center = (8., 8.)
     inner_radius = 2.
@@ -78,8 +75,8 @@ def test_roi_pixel_values():
     edges = roi.ring_edges(inner_radius, width, spacing, num_rings=5)
     rings = roi.rings(edges, center, images.shape)
 
-    intensity_dist = spe_vis.roi_pixel_values(images, rings)
-    assert_array_equal(list(intensity_dist.values())[0], ([1, 1, 1, 1, 1,
+    intensity_data = spe_vis.roi_pixel_values(images, rings)
+    assert_array_equal(list(intensity_data.values())[0], ([1, 1, 1, 1, 1,
                                                            1, 1, 1, 1, 1,
                                                            1, 1, 1, 1, 1, 1]))
 
