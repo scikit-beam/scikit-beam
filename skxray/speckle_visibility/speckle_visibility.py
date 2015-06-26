@@ -2,6 +2,9 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
+# Developed at the NSLS-II, Brookhaven National Laboratory             #
+# Developed by Sameera K. Abeykoon, May 2015                           #
+#                                                                      #                                                                    #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -34,8 +37,8 @@
 ########################################################################
 
 """
-    This module will provide analysis codes for static tests for the image
-    data and for the X-ray Speckle Visibility Spectroscopy (XSVS)
+    This module will provide analysis codes for static tests for the
+    speckle pattern to use in X-ray Speckle Visibility Spectroscopy (XSVS)
 """
 
 
@@ -250,30 +253,4 @@ def time_bining(number=2, number_of_images=50):
     return time_bin
 
 
-def max_counts(sample_dict, label_array):
-    """
-    This will determine the highest speckle counts occurred in the required
-    ROI's in required images.
 
-    Parameters
-    ----------
-    sample_dict : dict
-
-    label_array : array
-        labeled array; 0 is background.
-        Each ROI is represented by a distinct label (i.e., integer).
-
-    Returns
-    -------
-    max_counts : int
-        maximum speckle counts
-    """
-    max_cts = 0
-    for key, img_sets in dict(sample_dict).iteritems():
-        for n, img in enumerate(img_sets.operands[0]):
-            int_dist = intensity_distribution(img, label_array)
-            for j in range(len(int_dist)):
-                counts = np.max(int_dist.values()[j])
-                if max_cts < counts:
-                    max_cts = counts
-    return max_cts
