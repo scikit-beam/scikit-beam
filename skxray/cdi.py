@@ -45,6 +45,7 @@ import six
 import numpy as np
 import time
 from scipy.ndimage.filters import gaussian_filter
+import matplotlib.pyplot as plt
 
 import logging
 logger = logging.getLogger(__name__)
@@ -239,7 +240,8 @@ def generate_disk_support(sup_radius, shape_v):
 def cdi_recon(diffracted_pattern, sample_obj, sup,
               beta=1.15, start_avg=0.8, pi_modulus_flag='Complex',
               sw_flag=True, sw_sigma=0.5, sw_threshold=0.1, sw_start=0.2,
-              sw_end=0.8, sw_step=10, n_iterations=1000):
+              sw_end=0.8, sw_step=10, n_iterations=1000,
+              plot_function=None, plot_step=10):
     """
     Run reconstruction with difference map algorithm.
 
@@ -323,6 +325,33 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
     obj_avg = np.zeros_like(diffracted_pattern).astype(complex)
     avg_i = 0
 
+    if plot_function is not None:
+        fig = plt.figure(figsize=(10, 8))
+        plt.ion()
+        plt.show()
+
+        ax0 = fig.add_subplot(2, 2, 1)
+        ax0.set_title('Reconstructed amplitude')
+        im0 = ax0.imshow(np.abs(sample_obj))
+
+        ax1 = fig.add_subplot(2, 2, 2)
+        ax1.set_title('Reconstructed phase')
+        im1 = ax1.imshow(np.angle(sample_obj))
+
+        ax2 = fig.add_subplot(2, 2, 3)
+        ax2.set_ylim([0, 1.2])
+
+        line1, = ax2.plot(obj_error, 'r-')
+        line1.set_label('Object error')
+        line2, = ax2.plot(diff_error, 'g-')
+        line2.set_label('Diffraction error')
+        ax2.legend()
+
+        ax3 = fig.add_subplot(2, 2, 4)
+        ax3.set_title('Total sample erea')
+        ax3.set_ylim([0, np.size(sample_obj)])
+        line3, = ax3.plot(sup_error)
+
     time_start = time.time()
     for n in range(n_iterations):
         obj_old = np.array(sample_obj)
@@ -360,6 +389,10 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
                     sup_error[n] = np.sum(sup_old)
                     sup_old = np.array(sup)
 
+        if plot_function and np.mod(n_iterations, plot_step) == 0:
+            plot_function(sample_obj, obj_error, diff_error, sup_error,
+                         fig, im0, im1, line1, line2, line3)
+
         if n > start_avg*n_iterations:
             obj_avg += sample_obj
             avg_i += 1
@@ -378,3 +411,41 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
     error_dict['sup_error'] = sup_error
 
     return obj_avg, error_dict
+
+
+# class CDIPlot():
+#
+#     def __init__(self, fig, sample_size, error_len):
+#
+#         self.fig = fig
+#         ax0 = self.fig.add_subplot(2, 2, 1)
+#         ax0.set_title('Reconstructed amplitude')
+#         self.im0 = ax0.imshow(np.zeros([sample_size, sample_size]))
+#
+#         ax1 = self.fig.add_subplot(2, 2, 2)
+#         ax1.set_title('Reconstructed phase')
+#         self.im1 = ax1.imshow(np.zeros([sample_size, sample_size]))
+#
+#         ax2 = self.fig.add_subplot(2, 2, 3)
+#         ax2.set_ylim([0, 1.2])
+#         obj_error = np.arange(error_len)
+#         self.line1, = ax2.plot(obj_error, 'r-')
+#         self.line1.set_label('Object error')
+#         self.line2, = ax2.plot(obj_error, 'g-')
+#         self.line2.set_label('Diffraction error')
+#         ax2.legend()
+#
+#         ax3 = self.fig.add_subplot(2, 2, 4)
+#         ax3.set_title('Total sample erea')
+#         ax3.set_ylim([0, sample_size**2])
+#         self.line3, = ax3.plot(obj_error)
+#
+#     def update(self, sample_obj,
+#                obj_error, diff_error, sup_error):
+#         self.im0.set_data(np.abs(sample_obj))
+#         self.im1.set_data(np.angle(sample_obj))
+#         self.line1.set_ydata(obj_error)
+#         self.line2.set_ydata(diff_error)
+#         self.line3.set_ydata(sup_error)
+#         self.fig.canvas.draw()
+#         time.sleep(0.05)
