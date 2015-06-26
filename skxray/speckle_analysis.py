@@ -135,22 +135,25 @@ def mean_intensity_sets(images_set, labels):
 
     Returns
     -------
-    mean_int_labels : dict
+    mean_intensity_dict : dict
         average intensity of each ROI as a dictionary
         shape len(images_sets)
         eg: 2 image sets,
-        {image set 1 : (len(images in image set 1), number of labels),
-        image set 2 : (len(images in image set 2), number of labels)}
+        {image set 1 : len(images in image set 1),
+        image set 2 : len(images in image set 2)}
+
+    index_list : list
+        labels list for each image set
 
     """
-    mean_intensity_sets = {}
+    mean_intensity_dict = {}
+    index_list = []
     for n in range(len(images_set)):
-        mean_intensity, index = mean_intensity(images_set[n], labels)
-        mean_intensity_sets[index] = mean_intensity
+        mean_int, index = mean_intensity(images_set[n], labels)
+        mean_intensity_dict[n] = mean_int
+        index_list.append(index)
 
-    return mean_intensity_sets
-    #return {n+1: mean_intensity(images_set[n],
-    #                            labels) for n in range(len(images_set))}
+    return mean_intensity_dict, index_list
 
 
 def mean_intensity(images, labels, index=None):
@@ -179,24 +182,28 @@ def mean_intensity(images, labels, index=None):
                          " shape of the label array")
     if index is None:
         index = np.arange(1, np.max(labels) + 1)
-
+    print (index)
     for n, img in enumerate(images):
         mean_intensity[n] = mean(img, labels, index=index)
 
     return mean_intensity, index
 
 
-def combine_mean_intensity(mean_int_dict):
+def combine_mean_intensity(mean_int_dict, index_list):
     """
     Combine mean intensities of the images(all images sets) for each ROI
+    if the labels list of all the images are same
 
     Parameters
     ----------
     mean_int_dict : dict
         mean intensity of each ROI as a dictionary
         eg: 2 image sets,
-        {image set 1 : (len(images in image set 1), number of labels),
-        image set 2 : (len(images in image set 2), number of labels)}
+        {image set 1 : (len(images in image set 1),
+        image set 2 : (len(images in image set 2)}
+
+    index_list : list
+        labels list for each image sets
 
     Returns
     -------
@@ -205,7 +212,10 @@ def combine_mean_intensity(mean_int_dict):
         shape (len(images in all image sets), number of labels)
 
     """
-    for n in len(mean_int_dict):
+    if np.all(map(lambda x: x == index_list[0], index_list)):
+        combine_mean_intensity = np.vstack(list(mean_int_dict.values()))
+    else:
+        raise ValueError("Labels list for the image sets are different")
 
     return np.vstack(list(mean_int_dict.values()))
 

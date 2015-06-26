@@ -123,9 +123,12 @@ def test_static_test_sets():
 
     label_array = roi.rectangles(roi_data, shape=(50, 50))
 
-    average_int_sets = spe_vis.mean_intensity_sets(samples, label_array)
+    average_intensity, index = spe_vis.mean_intensity(np.asarray(images1), label_array)
 
-    assert_array_equal((list(average_int_sets.values())[0][:, 0]),
+
+    #average_int_sets, index_list = spe_vis.mean_intensity_sets(samples, label_array)
+
+    """assert_array_equal((list(average_int_sets.values())[0][:, 0]),
                        [float(x) for x in range(0, 1000, 100)])
     assert_array_equal((list(average_int_sets.values())[1][:, 0]),
                        [float(x) for x in range(0, 20, 1)])
@@ -135,7 +138,8 @@ def test_static_test_sets():
     assert_array_equal((list(average_int_sets.values())[1][:, 1]),
                        [float(x) for x in range(0, 2000, 100)])
 
-    combine_mean_int = spe_vis.combine_mean_intensity(average_int_sets)
+    combine_mean_int = spe_vis.combine_mean_intensity(average_int_sets, index_list)"""
+    return average_intensity
 
 
 def test_circular_average():
@@ -171,3 +175,10 @@ def test_roi_kymograph():
     kymograph_data = spe_vis.roi_kymograph(np.asarray(images), labels, num=1)
 
     assert_almost_equal(kymograph_data[:,0],  np.arange(100).reshape(100, 1))
+
+
+if __name__ == "__main":
+    average_intensity = test_static_test_sets()
+    print ("Hi")
+    print (average_intensity)
+
