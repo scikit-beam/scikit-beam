@@ -182,7 +182,8 @@ def mean_intensity(images, labels, index=None):
                          " shape of the label array")
     if index is None:
         index = np.arange(1, np.max(labels) + 1)
-    print (index)
+
+    mean_intensity = np.zeros((images.shape[0], index.shape[0]))
     for n, img in enumerate(images):
         mean_intensity[n] = mean(img, labels, index=index)
 
