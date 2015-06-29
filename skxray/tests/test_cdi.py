@@ -11,6 +11,8 @@ from skxray.cdi import (_dist, gauss, find_support,
                         generate_random_phase_field,
                         generate_box_support, generate_disk_support)
 
+from nose.tools import raises
+
 
 def dist_temp(dims):
     """
@@ -160,3 +162,18 @@ def test_recon():
     outv2 = np.abs(outv2)
     # compare the area of supports
     assert_array_equal(outv1.shape, outv2.shape)
+
+
+@raises(TypeError)
+def test_cdi_plotter():
+    a, diff_v = make_synthetic_data()
+    total_n = 10
+    sup_radius = 20
+
+    # inital phase and support
+    init_phase = generate_random_phase_field(diff_v)
+    sup = generate_box_support(sup_radius, diff_v.shape)
+
+    # assign wrong plot_function
+    outv, error_d = cdi_recon(diff_v, init_phase, sup, sw_flag=True,
+                              n_iterations=total_n, sw_step=2, plot_function=10)
