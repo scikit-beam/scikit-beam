@@ -1228,14 +1228,14 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     return tot_channels, lag_steps
 
 
-def geometric_bin_edges(common_ratio, number_of_images, first_term=1):
+def geometric_series(common_ratio, number_of_images, first_term=1):
     """
     This will provide the geometric series for the integration.
     Last values of the series has to be less than or equal to number
     of images
     ex: number_of_images = 100, first_term =1
-    common_ratio = 2, geometric_bin_edges =  1, 2, 4, 8, 16, 32, 64
-    common_ratio = 3, geometric_bin_edges =  1, 3, 9, 27, 81
+    common_ratio = 2, geometric_series =  1, 2, 4, 8, 16, 32, 64
+    common_ratio = 3, geometric_series =  1, 3, 9, 27, 81
 
     Parameters
     ----------
@@ -1250,8 +1250,8 @@ def geometric_bin_edges(common_ratio, number_of_images, first_term=1):
 
     Return
     ------
-    geometric_bin_edges : list
-        time binning
+    geometric_series : list
+        time series
 
     Note
     ----
@@ -1262,8 +1262,8 @@ def geometric_bin_edges(common_ratio, number_of_images, first_term=1):
      r - is the common ratio
     """
 
-    geometric_bin_edges = [first_term]
+    geometric_series = [first_term]
 
-    while geometric_bin_edges[-1]*common_ratio < number_of_images:
-        geometric_bin_edges.append(geometric_bin_edges[-1]*common_ratio)
-    return geometric_bin_edges
+    while geometric_series[-1]*common_ratio < number_of_images:
+        geometric_series.append(geometric_series[-1]*common_ratio)
+    return geometric_series
