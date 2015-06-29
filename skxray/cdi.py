@@ -284,9 +284,11 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
         number of iterations to run.
         default is 1000.
     plot_function : function, optional
-        plotting function
+        This is a callback function that expects to receive these
+        four objects: sample_obj, obj_error, diff_error, sup_error
     plot_step : int, optional
-        step interval for plotting
+        define plotting frequency, i.e., if plot_step = 10, plot results
+        after every 10 iterations.
 
     Returns
     -------
@@ -366,7 +368,7 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
                     sup_error[n] = np.sum(sup_old)
                     sup_old = np.array(sup)
 
-        if plot_function and np.mod(n_iterations, plot_step) == 0:
+        if plot_function and n_iterations % plot_step == 0:
             plot_function(sample_obj, obj_error, diff_error, sup_error)
 
         if n > start_avg*n_iterations:
