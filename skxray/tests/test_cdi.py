@@ -157,8 +157,8 @@ def test_recon():
                                   n_iterations=total_n, sw_step=2)
     outv1 = np.abs(outv1)
 
-    outv2, error_dict = cdi_recon(diff_v, init_phase, sup, sw_flag=True,
-                                  n_iterations=total_n, sw_step=2)
+    outv2, error_dict = cdi_recon(diff_v, init_phase, sup, pi_modulus_flag='Real',
+                                  sw_flag=True, n_iterations=total_n, sw_step=2)
     outv2 = np.abs(outv2)
     # compare the area of supports
     assert_array_equal(outv1.shape, outv2.shape)
