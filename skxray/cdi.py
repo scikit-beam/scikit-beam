@@ -369,7 +369,7 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
                     sup_error[n] = np.sum(sup_old)
                     sup_old = np.array(sup)
 
-        if cb_function and n_iterations % plot_step == 0:
+        if cb_function and n_iterations % cb_step == 0:
             cb_function(sample_obj, obj_error, diff_error, sup_error)
 
         if n > start_avg*n_iterations:
