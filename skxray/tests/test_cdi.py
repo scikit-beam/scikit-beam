@@ -176,4 +176,4 @@ def test_cdi_plotter():
 
     # assign wrong plot_function
     outv, error_d = cdi_recon(diff_v, init_phase, sup, sw_flag=True,
-                              n_iterations=total_n, sw_step=2, plot_function=10)
+                              n_iterations=total_n, sw_step=2, cb_function=10)

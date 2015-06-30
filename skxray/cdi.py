@@ -45,7 +45,6 @@ import six
 import numpy as np
 import time
 from scipy.ndimage.filters import gaussian_filter
-import matplotlib.pyplot as plt
 
 import logging
 logger = logging.getLogger(__name__)
@@ -241,7 +240,7 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
               beta=1.15, start_avg=0.8, pi_modulus_flag='Complex',
               sw_flag=True, sw_sigma=0.5, sw_threshold=0.1, sw_start=0.2,
               sw_end=0.8, sw_step=10, n_iterations=1000,
-              plot_function=None, plot_step=10):
+              cb_function=None, plot_step=10):
     """
     Run reconstruction with difference map algorithm.
 
@@ -283,7 +282,7 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
     n_iterations : int, optional
         number of iterations to run.
         default is 1000.
-    plot_function : function, optional
+    cb_function : function, optional
         This is a callback function that expects to receive these
         four objects: sample_obj, obj_error, diff_error, sup_error
     plot_step : int, optional
@@ -368,8 +367,8 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
                     sup_error[n] = np.sum(sup_old)
                     sup_old = np.array(sup)
 
-        if plot_function and n_iterations % plot_step == 0:
-            plot_function(sample_obj, obj_error, diff_error, sup_error)
+        if cb_function and n_iterations % plot_step == 0:
+            cb_function(sample_obj, obj_error, diff_error, sup_error)
 
         if n > start_avg*n_iterations:
             obj_avg += sample_obj
@@ -389,4 +388,3 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
     error_dict['sup_error'] = sup_error
 
     return obj_avg, error_dict
-
