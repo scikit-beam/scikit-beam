@@ -239,7 +239,8 @@ def generate_disk_support(sup_radius, shape_v):
 def cdi_recon(diffracted_pattern, sample_obj, sup,
               beta=1.15, start_avg=0.8, pi_modulus_flag='Complex',
               sw_flag=True, sw_sigma=0.5, sw_threshold=0.1, sw_start=0.2,
-              sw_end=0.8, sw_step=10, n_iterations=1000):
+              sw_end=0.8, sw_step=10, n_iterations=1000,
+              cb_function=None, cb_step=10):
     """
     Run reconstruction with difference map algorithm.
 
@@ -281,6 +282,14 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
     n_iterations : int, optional
         number of iterations to run.
         default is 1000.
+    cb_function : function, optional
+        This is a callback function that expects to receive these
+        four objects: sample_obj, obj_error, diff_error, sup_error.
+        Sample_obj is a 2D array. And obj_error, diff_error, and sup_error
+        are 1D array.
+    cb_step : int, optional
+        define plotting frequency, i.e., if plot_step = 10, plot results
+        after every 10 iterations.
 
     Returns
     -------
@@ -359,6 +368,9 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
                     outside_sup_index = sup != 1
                     sup_error[n] = np.sum(sup_old)
                     sup_old = np.array(sup)
+
+        if cb_function and n_iterations % cb_step == 0:
+            cb_function(sample_obj, obj_error, diff_error, sup_error)
 
         if n > start_avg*n_iterations:
             obj_avg += sample_obj
