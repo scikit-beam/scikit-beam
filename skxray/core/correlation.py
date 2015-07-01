@@ -434,16 +434,31 @@ def auto_corr_scat_factor(lags, beta, relatxation_rate, basline=1):
        partially coherent X-rays," J. Synchrotron Rad. vol 21, p 1288-1295, 2014
 
     """
-    return np.exp(-2*relatxation_rate*lags) + 1
+    return beta*np.exp(-2*relatxation_rate*lags) + 1
 
 
-def residual_auto_corr(params, lags, g2_data, eps_data):
+def _residual_auto_corr(params, lags, g2_data, *eps_data):
     """
 
     Parameters
     ----------
-    params : dict
-        parameters dictionary
+    params : dict or Parameters
+        beta - float, optical contrast (speckle contrast),
+        relaxation_rate - float, relaxation time associated with the
+        samples dynamics,
+        baseline -float, optional baseline of one time
+        correlation equal to one for ergodic samples
+        have to give as either dictionary or Parameters
+        eg: One of the following
+        #create a dictionary
+        {'beta': 0.2, 'relaxation_rate':10, 'baseline':1}
+
+        # create a set of Parameters
+        from lmfit import Parameters
+        params = Parameters()
+        params.add('beta',  value=0.2,  min=0, max=0.3)
+        params.add('relaxation_rate', value=10, min=0, max=11)
+        params.add('baseline', value=1)
 
     lags : array
         delay time
@@ -451,21 +466,14 @@ def residual_auto_corr(params, lags, g2_data, eps_data):
     g2_data : array
         normalized intensity-intensity time autocorreltion
 
-    beta : float
-        optical contrast (speckle contrast), a sample-independent
-        beamline parameter
-
-    relatxation_rate : float
-        relaxation time associated with the samples dynamics.
-
-    basline : float, optional
-        baseline of one time correlation
-        equal to one for ergodic samples
+    eps_data : array, optional
+        standard error of the normalized intensity-intensity
+        time autocorreltion
 
     Returns
     -------
     residual : array
-
+        difference between experimental result and the model
     """
     # create set of parameters
     beta = params['beta'].value
@@ -484,7 +492,7 @@ def fit_auto_corr(params, x, data, eps_data):
         parameters dictionary
 
     x : array
-
+       x
 
     data : array
 
@@ -492,8 +500,10 @@ def fit_auto_corr(params, x, data, eps_data):
 
     Returns
     -------
-    fit_result :
+    final_result : array
+        minimized fitting to results using least square model
 
     """
-    return minimize(residual_auto_corr, params, args=(x, data, eps_data))
+    result = minimize(_residual_auto_corr, params, args=(x, data, eps_data))
+    return data + result.residual
 
