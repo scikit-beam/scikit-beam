@@ -49,6 +49,7 @@ from six import string_types
 import skxray.correlation as corr
 import skxray.roi as roi
 import skxray.speckle_analysis as spe_vis
+from skxray.core import bin_edges_to_centers
 
 import logging
 logger = logging.getLogger(__name__)
@@ -221,3 +222,36 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels, max_cts,
                                       speckle_cts_pow[level, j])/(img_per_level[level])
 
     return None # modifies arguments in place!
+
+
+def normalize_bin_edges(bin_edges, mean_int_roi):
+    """
+    Parameters
+    ----------
+    bin_edges : array
+        bin edges for each integration times and each ROI
+        shape (number of integration times, number of ROI's)
+
+    mean_int_roi : array
+        mean intensity of each ROI
+        shape (number of ROI's)
+
+    Returns
+    -------
+    norm_bin_edges : array
+        normalized bin edges
+        shape of the bin_edges
+
+    norm_bin_centers :array
+        normalized bin centers
+        shape of the bin_edges
+    """
+    num_times, num_rings = bin_edges.shape
+    norm_bin_edges = np.zeros((bin_edges.shape), dtype=object)
+    norm_bin_centers = np.zeros((bin_edges.shape), dtype=object)
+    for i in range(num_times):
+        for j in range(num_rings):
+            norm_bin_edges[i, j] = bin_edges[i, j]/(mean_int_roi[j]*2**i)
+            norm_bin_centers[i, j] = bin_edges_to_centers(norm_bin_edges[i, j])
+
+    return norm_bin_edges, norm_bin_centers
