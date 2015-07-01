@@ -383,10 +383,10 @@ def extract_label_indices(labels):
     return label_mask, pixel_list
 
 
-def auto_corr_scat_factor(lags, beta, relatxation_rate, basline=1):
+def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
     """
-    This will returns normalized intensity-intensity time correlation data to be
-    minimized
+    This model will provide normalized intensity-intensity time
+    correlation data to be minimized.
 
     Parameters
     ----------
@@ -397,10 +397,10 @@ def auto_corr_scat_factor(lags, beta, relatxation_rate, basline=1):
         optical contrast (speckle contrast), a sample-independent
         beamline parameter
 
-    relatxation_rate : float
+    relaxation_rate : float
         relaxation time associated with the samples dynamics.
 
-    basline : float, optional
+    baseline : float, optional
         baseline of one time correlation
         equal to one for ergodic samples
 
@@ -434,12 +434,12 @@ def auto_corr_scat_factor(lags, beta, relatxation_rate, basline=1):
        partially coherent X-rays," J. Synchrotron Rad. vol 21, p 1288-1295, 2014
 
     """
-    return beta*np.exp(-2*relatxation_rate*lags) + 1
+    return beta*np.exp(-2*relaxation_rate*lags) + baseline
 
 
 def _residual_auto_corr(params, lags, g2_data, *eps_data):
     """
-
+    This will provide difference between experiment data and the model
     Parameters
     ----------
     params : dict or Parameters
@@ -486,6 +486,8 @@ def _residual_auto_corr(params, lags, g2_data, *eps_data):
 
 def fit_auto_corr(params, x, data, eps_data):
     """
+    Minimize the function and calculate final result
+
     Parameters
     ----------
     params: dict
