@@ -88,7 +88,7 @@ def roi_max_counts(images_sets, label_array):
     return max_cts
 
 
-def roi_pixel_values(image, labels):
+def roi_pixel_values(image, labels, index=None):
     """
     This will provide intensities of the ROI's of the labeled array
     according to the pixel list
@@ -103,6 +103,11 @@ def roi_pixel_values(image, labels):
         labeled array; 0 is background.
         Each ROI is represented by a distinct label (i.e., integer).
 
+    index_list : list, optional
+        labels list
+        eg: 5 ROI's
+        index = [1, 2, 3, 4, 5]
+
     Returns
     -------
     roi_pix : dict
@@ -115,8 +120,11 @@ def roi_pixel_values(image, labels):
     if labels.shape != image.shape:
         raise ValueError("Shape of the image data should be equal to"
                          " shape of the labeled array")
+    if index is None:
+        index = np.arange(1, np.max(labels) + 1)
 
-    return {n: image[labels == n] for n in range(1, np.max(labels)+1)}
+    roi_pix = {n: image[labels == n] for n in index}
+    return roi_pix, index
 
 
 def mean_intensity_sets(images_set, labels):
@@ -169,6 +177,11 @@ def mean_intensity(images, labels, index=None):
     labels : array
         labeled array; 0 is background.
         Each ROI is represented by a distinct label (i.e., integer).
+
+    index : list
+        labels list
+        eg: 5 ROI's
+        index = [1, 2, 3, 4, 5]
 
     Returns
     -------
@@ -289,9 +302,9 @@ def roi_kymograph(images, labels, num=1):
     roi_kymograph : array
 
     """
-    roi_kymograph = []
+    roi_kymo = []
     for n, img in enumerate(images):
-        roi_kymograph.append(list(roi_pixel_values(img,
-                                                   labels == num).values())[0])
+        roi_kymo.append(list(roi_pixel_values(img,
+                                              labels == num)[0].values())[0])
 
-    return np.matrix(roi_kymograph)
+    return np.matrix(roi_kymo)

@@ -75,10 +75,11 @@ def test_roi_pixel_values():
     edges = roi.ring_edges(inner_radius, width, spacing, num_rings=5)
     rings = roi.rings(edges, center, images.shape)
 
-    intensity_data = spe_vis.roi_pixel_values(images, rings)
+    intensity_data, index = spe_vis.roi_pixel_values(images, rings)
     assert_array_equal(list(intensity_data.values())[0], ([1, 1, 1, 1, 1,
                                                            1, 1, 1, 1, 1,
                                                            1, 1, 1, 1, 1, 1]))
+    assert_array_equal([1, 2, 3, 4, 5], index)
 
 
 def test_roi_max_counts():
