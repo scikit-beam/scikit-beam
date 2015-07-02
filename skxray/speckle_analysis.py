@@ -133,9 +133,10 @@ def mean_intensity_sets(images_set, labels):
 
     Parameters
     ----------
-    images : array
-        iterable of 4D arrays
+    images_set : array
+        images sets
         shapes is: (len(images_sets), )
+        one images_set is iterable of 2D arrays dimensions are: (rr, cc)
 
     labels : array
         labeled array; 0 is background.
@@ -279,7 +280,7 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
     return bin_centers, ring_averages
 
 
-def roi_kymograph(images, labels, num=1):
+def roi_kymograph(images, labels, num):
     """
     This function will provide data for graphical representation of pixels
     variation over time for required ROI.
@@ -294,8 +295,8 @@ def roi_kymograph(images, labels, num=1):
         labeled array; 0 is background.
         Each ROI is represented by a distinct label (i.e., integer).
 
-    num : int, optional
-        required ROI
+    num : int
+        required ROI label
 
     Returns
     -------
