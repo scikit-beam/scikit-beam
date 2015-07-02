@@ -3,11 +3,11 @@
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
 # Original code:                                                       #
-# @author: Pawel Kwasniewski, European Synchrotron Radiation Facility  #
-# and Andrei Fluerasu, Brookhaven                                      #
+# @author: Andrei Fluerasu, Brookhaven National Laboratory and         #
+# Pawel Kwasniewski, European Synchrotron Radiation Facility           #
 #                                                                      #
 # Developed at the NSLS-II, Brookhaven National Laboratory             #
-# Developed by Sameera K. Abeykoon, May 2015                           #
+# Developed by Sameera K. Abeykoon, June 2015                          #
 #                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #

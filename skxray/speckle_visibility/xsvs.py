@@ -2,6 +2,9 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
+# Developed at the NSLS-II, Brookhaven National Laboratory             #
+# Developed by Sameera K. Abeykoon and Yugang Zhang, June 2015         #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -55,7 +58,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def xsvs(image_sets, label_array, timebin_num=2):
+def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50):
     """
     Parameters
     ----------
@@ -68,6 +71,9 @@ def xsvs(image_sets, label_array, timebin_num=2):
 
     timebin_num : int, optional
         integration times
+
+    number_of_img : int, optional
+        number of images
 
     Returns
     -------
