@@ -78,9 +78,10 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50):
     Returns
     -------
     speckle_cts_all : array
+        probability of detecting speckles
 
     speckle_cts_std_dev : array
-
+        standard error of probability of detecting speckles
 
     Note
     ----
@@ -120,7 +121,7 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50):
 
     for i in range(num_times):
         for j in range(num_roi):
-            bin_edges[i, j] =  np.arange(max_cts*2**i )
+            bin_edges[i, j] = np.arange(max_cts*2**i)
 
     for i, images in image_sets:
         # Ring buffer, a buffer with periodic boundary conditions.
@@ -160,11 +161,11 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50):
                     track_level[level] = 1
                     processing = 0
                 else:
-                    prev =  1 + (cur[level - 1] - 2)%timebin_num
-                    cur[level] =  1 + cur[level]%timebin_num
+                    prev = 1 + (cur[level - 1] - 2)%timebin_num
+                    cur[level] = 1 + cur[level]%timebin_num
 
                     buf[level, cur[level]-1] = (buf[level-1,
-                                               prev-1] + buf[level-1, cur[level - 1] - 1])
+                                                    prev-1] + buf[level-1, cur[level - 1] - 1])
                     track_level[level] = 0
 
                     _process(num_roi, level, cur[level]-1, buf, img_per_level,
@@ -191,26 +192,37 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels, max_cts,
     Parameters
     ----------
     num_roi : int
+        number of ROI's
 
     level : int
+        current time level(integration time)
 
     buf_no : int
+        current buffer number
 
     buf : array
+        image data array to use for XSVS
 
     img_per_level : int
+        to track how many images processed in each level
 
     labels : array
+        labels of the required region of interests(ROI's)
 
     max_cts: int
+        maximum pixel count
 
-    bin_edges : list
+    bin_edges : array
+        bin edges for each integration times and each ROI
 
     speckle_cts : array
+        probability of detecting speckles
 
     speckle_cts_pow : array
 
+
     i : int
+        image number
 
     """
     img_per_level[level] += 1
@@ -222,7 +234,7 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels, max_cts,
                                            normed=True)
 
         speckle_cts[level, j] += (spe_hist -
-                                  speckle_cts[level, j] )/(img_per_level[level])
+                                  speckle_cts[level, j])/(img_per_level[level])
 
         speckle_cts_pow[level, j] += (np.power(spe_hist, 2) -
                                       speckle_cts_pow[level, j])/(img_per_level[level])
@@ -230,34 +242,38 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels, max_cts,
     return None # modifies arguments in place!
 
 
-def normalize_bin_edges(bin_edges, mean_int_roi):
+def normalize_bin_edges(num_times, num_rois, max_cts, mean_roi):
     """
     Parameters
     ----------
-    bin_edges : array
-        bin edges for each integration times and each ROI
-        shape (number of integration times, number of ROI's)
+    num_times : int
+        number of integration times for XSVS
 
-    mean_int_roi : array
+    num_rois : int
+        number of ROI's
+
+    max_cts : int
+        maximum pixel counts
+
+    mean_roi : array
         mean intensity of each ROI
         shape (number of ROI's)
 
     Returns
     -------
     norm_bin_edges : array
-        normalized bin edges
+        normalized speckle count bin edges
         shape of the bin_edges
 
     norm_bin_centers :array
-        normalized bin centers
+        normalized speckle count bin centers
         shape of the bin_edges
     """
-    num_times, num_rings = bin_edges.shape
-    norm_bin_edges = np.zeros((bin_edges.shape), dtype=object)
-    norm_bin_centers = np.zeros((bin_edges.shape), dtype=object)
+    norm_bin_edges = np.zeros((num_times, num_rois), dtype=object)
+    norm_bin_centers = np.zeros((num_times, num_rois), dtype=object)
     for i in range(num_times):
-        for j in range(num_rings):
-            norm_bin_edges[i, j] = bin_edges[i, j]/(mean_int_roi[j]*2**i)
+        for j in range(num_rois):
+            norm_bin_edges[i, j] = np.arange(max_cts*2**i)/(mean_roi[j]*2**i)
             norm_bin_centers[i, j] = bin_edges_to_centers(norm_bin_edges[i, j])
 
     return norm_bin_edges, norm_bin_centers

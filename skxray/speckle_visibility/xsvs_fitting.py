@@ -53,23 +53,19 @@ from six.moves import zip
 from six import string_types
 
 import logging
-logger = logging.getLogger(__name__)
 
 import numpy as np
 from time import time
 
-from ConfigParser import RawConfigParser
-from os.path import isfile
-import os
-from sys import argv, stdout
-import sys
-
 from scipy.stats import nbinom
-from scipy.optimize import leastsq
 from scipy.special import gamma, gammaln
 
+from lmfit import minimize, Parameters
 
-def nbinom_distribution(K, M, x):
+logger = logging.getLogger(__name__)
+
+
+def negative_binom_distribution(K, M, x):
     """
     Negative Binomial (Poisson-Gamma) distribution function
     Parameters
@@ -81,6 +77,7 @@ def nbinom_distribution(K, M, x):
         number of coherent modes
 
     x : array
+        normalized bin centers
 
     Returns
     -------
@@ -149,6 +146,7 @@ def gamma_distribution(M, K, x ):
         number of photons
 
     x : array
+        normalized bin centers
 
     Returns
     -------
@@ -158,7 +156,7 @@ def gamma_distribution(M, K, x ):
     Note
     ----
     These implementation based on the references under
-    nbinom_distribution() function Note
+    negative_binom_distribution() function Note
     """
 
     coeff = np.exp(M * np.log(M) + (M - 1) * np.log(x) -
@@ -167,7 +165,7 @@ def gamma_distribution(M, K, x ):
     return Gd
 
 
-def residuals(M, K, y, x, yerr):
+def model_residuals(params, y, x, yerr):
     """
     Residuals function for least squares fitting,
     K may be a fixed parameter
@@ -181,31 +179,32 @@ def residuals(M, K, y, x, yerr):
         number of photons
 
     y : array
+        probability of detecting speckles
 
     x : array
+        normalized bin centers
 
     yerr : array
+        standard error of y
 
     Returns
     -------
-    residual : array
+    model_residual : array
         Residuals function for least squares fitting
-
-    Note
-    ----
-    These implementation based on the references under
-    nbinom_distribution() function Note
     """
-    pr = M / (K + M)
+    # create set of parameters
+    M = params['M'].value
+    K = params['K'].value
 
-    residual = (y - np.log10(nbinom_distribution(x, K, M)))/yerr
-    return residual
+    return (y - negative_binom_distribution(K, M, x))/yerr
 
 
-def eval_binomal_dist(M, K, x):
+def eval_binomal_dist(params, x, data, err):
     """
-    Function evaluating the binomial distribution for the given set of
-    input parameters. Redundant - should be removed.
+    Function will minimize difference between probability of the detecting
+    speckles and negative binomial distribution for the given set of
+    input parameters.
+
     Parameters
     ----------
     M : int
@@ -215,17 +214,15 @@ def eval_binomal_dist(M, K, x):
         average number of photons
 
     x : array
+        normalized bin centers
 
+    data : array
+        probability of detecting speckles
 
     Returns
     -------
-    eval_result : array
+    final_result : array
 
-    Note
-    ----
-    These implementation based on the references under
-    nbinom_distribution() function Note
     """
-
-    eval_result = nbinom_distribution(x, K, M)
-    return eval_result
+    eval_result = minimize(model_residuals, params, x, data, err)
+    return data + eval_result.residuals
