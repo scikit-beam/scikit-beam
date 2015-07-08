@@ -65,7 +65,7 @@ from lmfit import minimize, Parameters
 logger = logging.getLogger(__name__)
 
 
-def negative_binom_distribution(K, M, x):
+def negative_binom_distribution(K, M, bin_centers):
     """
     Negative Binomial (Poisson-Gamma) distribution function
     Parameters
@@ -76,12 +76,12 @@ def negative_binom_distribution(K, M, x):
     M : int
         number of coherent modes
 
-    x : array
+    bin_centers : array
         normalized bin centers
 
     Returns
     -------
-    Pk : array
+    poisson_dist : array
         Negative Binomial (Poisson-Gamma) distribution function
 
     Note
@@ -99,15 +99,16 @@ def negative_binom_distribution(K, M, x):
        time-varying dynamics" Rev. Sci. Instrum. vol 76, p  093110, 2005.
 
     """
-    coeff = np.exp(gammaln(x + M) - gammaln(x + 1) - gammaln(M))
+    co_eff = np.exp(gammaln(bin_centers + M) -
+                    gammaln(bin_centers + 1) - gammaln(M))
 
-    Poission_Gamma = coeff * np.power(M / (K + M), M)
-    coeff2 = np.power(K / (M + K), x)
-    Poission_Gamma *= coeff2
-    return Poission_Gamma
+    poisson_gamma = co_eff * np.power(M / (K + M), M)
+    co_eff2 = np.power(K / (M + K), bin_centers)
+    poisson_gamma *= co_eff2
+    return poisson_gamma
 
 
-def poisson_distribution(K, x):
+def poisson_distribution(K, bin_centers):
     """
     Poisson Distribution
 
@@ -116,11 +117,11 @@ def poisson_distribution(K, x):
     K : int
         number of photons
 
-    x : array
+    bin_centers : array
 
     Returns
     -------
-    Poission_D : array
+    poisson_dist : array
        Poisson Distribution
 
     Note
@@ -129,11 +130,11 @@ def poisson_distribution(K, x):
     nbinom_distribution() function Note
 
     """
-    Poission_D = np.exp(-K) * np.power(K, x)/gamma(x + 1)
-    return Poission_D
+    poisson_dist = np.exp(-K) * np.power(K, bin_centers)/gamma(bin_centers + 1)
+    return poisson_dist
 
 
-def gamma_distribution(M, K, x ):
+def gamma_distribution(M, K, bin_centers):
     """
     Gamma distribution function
 
@@ -145,12 +146,12 @@ def gamma_distribution(M, K, x ):
     K : int
         number of photons
 
-    x : array
+    bin_centers : array
         normalized bin centers
 
     Returns
     -------
-    G : array
+    gamma_dist : array
         Gamma distribution
 
     Note
@@ -159,13 +160,13 @@ def gamma_distribution(M, K, x ):
     negative_binom_distribution() function Note
     """
 
-    coeff = np.exp(M * np.log(M) + (M - 1) * np.log(x) -
+    co_eff = np.exp(M * np.log(M) + (M - 1) * np.log(bin_centers) -
                    gammaln(M) - M * np.log(K))
-    Gd = coeff * np.exp(- M * x / K)
-    return Gd
+    gamma_dist = co_eff * np.exp(- M * bin_centers / K)
+    return gamma_dist
 
 
-def model_residuals(params, y, x, yerr):
+def model_residuals(params, bin_centers, y, yerr=1):
     """
     Residuals function for least squares fitting,
     K may be a fixed parameter
@@ -181,10 +182,10 @@ def model_residuals(params, y, x, yerr):
     y : array
         probability of detecting speckles
 
-    x : array
+    bin_centers : array
         normalized bin centers
 
-    yerr : array
+    yerr : array, optional
         standard error of y
 
     Returns
@@ -196,10 +197,10 @@ def model_residuals(params, y, x, yerr):
     M = params['M'].value
     K = params['K'].value
 
-    return (y - negative_binom_distribution(K, M, x))/yerr
+    return (y - negative_binom_distribution(K, M, bin_centers))/yerr
 
 
-def eval_binomal_dist(params, x, data, err):
+def eval_binomal_dist(params, bin_centers, data, err=1):
     """
     Function will minimize difference between probability of the detecting
     speckles and negative binomial distribution for the given set of
@@ -213,16 +214,73 @@ def eval_binomal_dist(params, x, data, err):
     K : int
         average number of photons
 
-    x : array
+    bin_centers : array
         normalized bin centers
 
     data : array
         probability of detecting speckles
+
+    err : array, optional
+        standard error of y
 
     Returns
     -------
     final_result : array
 
     """
-    eval_result = minimize(model_residuals, params, x, data, err)
-    return data + eval_result.residuals
+    result = minimize(model_residuals, params, args=(bin_centers, data, err))
+    return data + result.residual
+
+
+def diffusive_motion_contrast_factor(times, relaxation_rate,
+                                     contrast_factor, cf_baseline=0):
+    """
+    Parameters
+    ----------
+    times : array
+
+
+    relaxation_rate : float
+
+    contrast_factor : float
+
+    cf_baseline : float, optional
+
+    Return
+    ------
+    diff_contrast_factor : array
+
+    """
+    co_eff = (np.exp(-2*relaxation_rate*times) - 1 +
+              2*relaxation_rate*times)/2*(relaxation_rate*times)**2
+
+    return contrast_factor*co_eff + cf_baseline
+
+
+def cf_residuals(params, times, data, err):
+    """
+    Parameters
+    ----------
+    params :
+
+    times : array
+
+    data : array
+
+    err : array
+
+    Returns
+    --------
+    """
+    # create set of parameters
+    relax_rate = params['relaxation_rate'].value
+    cf = params['contrast_factor'].value
+    cf_baseline = params['cf_baseline'].value
+
+    return (data - diffusive_motion_contrast_factor(times, relax_rate,
+                                                    cf, cf_baseline))
+
+
+def minimize_dm_cf(params, times, data, err=1):
+    result = minimize(cf_residuals, params, args=(times, data, err))
+    return data + result.residual
