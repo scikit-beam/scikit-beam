@@ -481,7 +481,7 @@ def _residual_auto_corr(params, lags, g2_data, *eps_data):
     baseline = params['baseline'].value
 
     return (g2_data - auto_corr_scat_factor(lags, beta, relaxation_rate,
-                                            basline=1))/eps_data
+                                            baseline=1))/eps_data
 
 
 def fit_auto_corr(params, x, data, eps_data):
@@ -508,4 +508,3 @@ def fit_auto_corr(params, x, data, eps_data):
     """
     result = minimize(_residual_auto_corr, params, args=(x, data, eps_data))
     return data + result.residual
-
