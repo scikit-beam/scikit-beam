@@ -43,11 +43,11 @@ from __future__ import (absolute_import, division,
 import numpy as np
 from numpy.testing import (assert_allclose, assert_array_almost_equal)
 
-from skxray.fitting.api import (gaussian, gausssian_step, gaussian_tail,
-                                elastic, compton, lorentzian, lorentzian2,
-                                voigt, pvoigt)
+from skxray.fitting import (gaussian, gausssian_step, gaussian_tail,
+                            elastic, compton, lorentzian, lorentzian2,
+                            voigt, pvoigt)
 
-from skxray.fitting.api import (ComptonModel, ElasticModel, GaussianModel)
+from skxray.fitting import (ComptonModel, ElasticModel, GaussianModel)
 
 
 def test_gauss_peak():

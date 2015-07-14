@@ -43,7 +43,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skxray.core.constants import XrfElement
-from skxray.fitting.api import gaussian
+from skxray.fitting import gaussian
 
 
 def get_line(name, incident_energy):

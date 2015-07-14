@@ -41,7 +41,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # import fitting models
-from .fitting.api import (
+from .fitting import (
     ConstantModel, LinearModel, QuadraticModel, ParabolicModel,
     PolynomialModel, VoigtModel, PseudoVoigtModel, Pearson7Model,
     StudentsTModel, BreitWignerModel, GaussianModel, LorentzianModel,
