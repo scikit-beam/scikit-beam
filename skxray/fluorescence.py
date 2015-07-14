@@ -34,12 +34,24 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 """
-This module creates science namespaces
+This module creates a namespace for X-Ray Fluorescence
 """
 
-
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-import six
 import logging
 logger = logging.getLogger(__name__)
+
+# import fitting models
+from .fitting.api import (
+    ConstantModel, LinearModel, QuadraticModel, ParabolicModel,
+    PolynomialModel, VoigtModel, PseudoVoigtModel, Pearson7Model,
+    StudentsTModel, BreitWignerModel, GaussianModel, LorentzianModel,
+    LognormalModel, DampedOscillatorModel, ExponentialGaussianModel,
+    SkewedGaussianModel, DonaichModel, PowerLawModel, ExponentialModel,
+    StepModel, RectangleModel, Lorentzian2Model, ComptonModel, ElasticModel
+)
+
+# import Element objects
+from .core.constants.api import XrfElement, emission_line_search
+
+# import background subtraction
+from .fitting.background import snip_method
