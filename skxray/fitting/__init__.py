@@ -46,45 +46,19 @@ import logging
 logger = logging.getLogger(__name__)
 import numpy as np
 
-from lmfit.models import (ConstantModel, LinearModel, QuadraticModel,
-                          ParabolicModel, PolynomialModel, VoigtModel,
-                          PseudoVoigtModel, Pearson7Model, StudentsTModel,
-                          BreitWignerModel, GaussianModel, LorentzianModel,
-                          LognormalModel, DampedOscillatorModel,
-                          ExponentialGaussianModel, SkewedGaussianModel,
-                          DonaichModel, PowerLawModel, ExponentialModel,
-                          StepModel, RectangleModel, ExpressionModel)
+from .models import (Lorentzian2Model, ComptonModel, ElasticModel,
+                     LmGaussianModel as GaussianModel,
+                     LmLorentzianModel as LorentzianModel)
 
-from .models import (Lorentzian2Model, ComptonModel, ElasticModel)
-
-from lmfit.lineshapes import (pearson7, breit_wigner, damped_oscillator,
-                              logistic, lognormal, students_t, expgaussian,
-                              donaich, skewed_gaussian, skewed_voigt, step,
-                              rectangle, exponential, powerlaw, linear,
-                              parabolic)
 from .lineshapes import (gaussian, lorentzian, lorentzian2, voigt, pvoigt,
                          gaussian_tail, gausssian_step, elastic, compton)
 
-# construct lists of the models that can be used
-model_list = sorted(
-    [ConstantModel, LinearModel, QuadraticModel, ParabolicModel,
-     PolynomialModel, GaussianModel, LorentzianModel, VoigtModel,
-     PseudoVoigtModel, Pearson7Model, StudentsTModel, BreitWignerModel,
-     LognormalModel, DampedOscillatorModel, ExponentialGaussianModel,
-     SkewedGaussianModel, DonaichModel, PowerLawModel, ExponentialModel,
-     StepModel, RectangleModel, Lorentzian2Model, ComptonModel, ElasticModel
-    ], key=lambda s: str(s).split('.')[-1]
-)
-
 # construct a list of the models that can be used
-lineshapes_list = sorted(
-    [gaussian, lorentzian, voigt, pvoigt, pearson7, breit_wigner,
-     damped_oscillator, logistic, lognormal, students_t, expgaussian, donaich,
-     skewed_gaussian, skewed_voigt, step, rectangle, exponential, powerlaw,
-     linear, parabolic, lorentzian2, compton, elastic, gausssian_step,
-     gaussian_tail],
-    key=lambda s: str(s)
-)
+model_list = sorted([Lorentzian2Model, ComptonModel, ElasticModel],
+                    key=lambda s: str(s).split('.')[-1])
+lineshapes_list = sorted([gaussian, lorentzian, lorentzian2, voigt, pvoigt,
+                          gaussian_tail, gausssian_step, elastic, compton],
+                         key=lambda s: str(s))
 
 
 def fit_quad_to_peak(x, y):

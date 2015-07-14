@@ -41,14 +41,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 # import fitting models
-from .fitting import (
-    ConstantModel, LinearModel, QuadraticModel, ParabolicModel,
-    PolynomialModel, VoigtModel, PseudoVoigtModel, Pearson7Model,
-    StudentsTModel, BreitWignerModel, GaussianModel, LorentzianModel,
-    LognormalModel, DampedOscillatorModel, ExponentialGaussianModel,
-    SkewedGaussianModel, DonaichModel, PowerLawModel, ExponentialModel,
-    StepModel, RectangleModel, Lorentzian2Model, ComptonModel, ElasticModel
-)
+from .fitting import (Lorentzian2Model, ComptonModel, ElasticModel,
+                      GaussianModel)
 
 # import Element objects
 from .core.constants import XrfElement, emission_line_search
