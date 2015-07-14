@@ -45,13 +45,15 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
+import copy
+from collections import OrderedDict
+import logging
+
 import numpy as np
 from scipy.optimize import nnls
 import six
-import copy
-from collections import OrderedDict
 
-from skxray.constants.api import XrfElement as Element
+from skxray.core.constants.api import XrfElement as Element
 from skxray.fitting.lineshapes import gaussian
 from skxray.fitting.models import (ComptonModel, ElasticModel,
                                    _gen_class_docs)
@@ -59,7 +61,6 @@ import skxray.fitting.base.parameter_data as sfb_pd
 from skxray.fitting.background import snip_method
 from lmfit import Model
 
-import logging
 logger = logging.getLogger(__name__)
 
 

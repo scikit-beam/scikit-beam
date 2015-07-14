@@ -44,8 +44,8 @@ from numpy.testing import (assert_array_equal, assert_almost_equal)
 
 from nose.tools import assert_equal, assert_true, assert_raises
 
-import skxray.roi as roi
-import skxray.correlation as corr
+import skxray.core.roi as roi
+import skxray.core.correlation as corr
 import skxray.core.utils as core
 
 

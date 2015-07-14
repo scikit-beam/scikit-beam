@@ -44,9 +44,10 @@ import six
 from numpy.testing import (assert_array_equal, assert_raises)
 from nose.tools import assert_equal, assert_not_equal
 
-from skxray.constants.xrf import (XrfElement, emission_line_search,
-                                  XrayLibWrap, XrayLibWrap_Energy)
+from skxray.core.constants.xrf import (XrfElement, emission_line_search,
+                                       XrayLibWrap, XrayLibWrap_Energy)
 from skxray.core.utils import NotInstalledError
+from skxray.core.constants.basic import basic
 
 
 def test_element_data():
@@ -81,11 +82,11 @@ def test_element_finder():
 
 
 def test_XrayLibWrap_notpresent():
-    from skxray.constants import xrf
+    from skxray.core.constants import xrf
     # stash the original xraylib object
     xraylib = xrf.xraylib
     # force the not present exception to be raised by setting xraylib to None
-    xrf.xraylib=None
+    xrf.xraylib = None
     assert_raises(NotInstalledError, xrf.XrfElement, None)
     assert_raises(NotInstalledError, xrf.emission_line_search,
                   None, None, None)
@@ -122,7 +123,6 @@ def test_XrayLibWrap_Energy():
 
 
 def smoke_test_element_creation():
-    from skxray.constants.basic import basic
     prev_element = None
     elements = [elm for abbrev, elm in six.iteritems(basic)
                 if isinstance(abbrev, int)]

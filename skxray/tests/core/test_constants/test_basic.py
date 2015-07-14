@@ -35,64 +35,71 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
+
+
 from __future__ import (absolute_import, division,
                         unicode_literals, print_function)
+
 import six
 import numpy as np
-from numpy.testing import assert_array_almost_equal
+from nose.tools import assert_equal
 
-import skxray.calibration as calibration
-import skxray.calibration as core
-
-
-def _draw_gaussian_rings(shape, calibrated_center, r_list, r_width):
-    R = core.radial_grid(calibrated_center, shape)
-    I = np.zeros_like(R)
-
-    for r in r_list:
-        tmp = 100 * np.exp(-((R - r)/r_width)**2)
-        I += tmp
-
-    return I
+from skxray.core.constants.basic import (BasicElement, element, basic)
 
 
-def test_refine_center():
-    center = np.array((500, 550))
-    I = _draw_gaussian_rings((1000, 1001), center,
-                             [50, 75, 100, 250, 500], 5)
+def smoke_test_element_creation():
+    # grab the set of elements represented by 'Z'
+    elements = sorted([elm for abbrev, elm in six.iteritems(basic)
+                       if isinstance(abbrev, int)])
 
-    nx_opts = [None, 300]
-    for nx in nx_opts:
-        out = calibration.refine_center(I, center+1, (1, 1),
-                                        phi_steps=20, nx=nx, min_x=10,
-                                        max_x=300, window_size=5,
-                                        thresh=0, max_peaks=4)
+    for e in elements:
+        sym = e.sym
+        name = e.name
+        # make sure that the elements can be initialized with Z or any
+        # combination of element symbols or the element name
+        inits = [sym, sym.upper(), sym.lower(), sym.swapcase(), name,
+                 name.upper(), name.lower(), name.swapcase()]
+        # loop over the initialization routines to smoketest element creation
+        for init in inits:
+            elem = BasicElement(init)
 
-        assert np.all(np.abs(center - out) < .1)
+        # create an element with the Z value
+        elem = BasicElement(e.Z)
+        str(elem)
+        # obtain all attribute fields of the Element to ensure it is
+        # behaving correctly
+        for field in element._fields:
+            tuple_attr = getattr(basic[e.Z], field)
+            elem_attr_dct = elem[str(field)]
+            elem_attr = getattr(elem, field)
+            # shield the assertion from any elements whose density is
+            # unknown
+            try:
+                if np.isnan(tuple_attr):
+                    continue
+            except TypeError:
+                pass
+            assert_equal(elem_attr_dct, tuple_attr)
+            assert_equal(elem_attr, tuple_attr)
+            assert_equal(elem_attr_dct, elem_attr)
 
-
-def test_blind_d():
-    gaus = lambda x, center, height, width: (
-                          height * np.exp(-((x-center) / width)**2))
-    name = 'Si'
-    wavelength = .18
-    window_size = 5
-    threshold = .1
-    cal = calibration.calibration_standards[name]
-
-    tan2theta = np.tan(cal.convert_2theta(wavelength))
-
-    D = 200
-    expected_r = D * tan2theta
-
-    bin_centers = np.linspace(0, 50, 2000)
-    I = np.zeros_like(bin_centers)
-    for r in expected_r:
-        I += gaus(bin_centers, r, 100, .2)
-    d, dstd = calibration.estimate_d_blind(name, wavelength, bin_centers,
-                                     I, window_size, len(expected_r),
-                                     threshold)
-    assert np.abs(d - D) < 1e-6
+    # test the comparators
+    for e1, e2 in zip(elements, elements[1:]):
+        # compare prev_element to element
+        assert_equal(e1.__lt__(e2), True)
+        assert_equal(e1 < e2, True)
+        assert_equal(e1.__eq__(e2), False)
+        assert_equal(e1 == e2, False)
+        assert_equal(e1 >= e2, False)
+        assert_equal(e1 > e2, False)
+        # compare element to prev_element
+        assert_equal(e2 < e1, False)
+        assert_equal(e2.__lt__(e1), False)
+        assert_equal(e2 <= e1, False)
+        assert_equal(e2.__eq__(e1), False)
+        assert_equal(e2 == e1, False)
+        assert_equal(e2 >= e1, True)
+        assert_equal(e2 > e1, True)
 
 
 if __name__ == '__main__':

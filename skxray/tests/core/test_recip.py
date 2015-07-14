@@ -38,15 +38,11 @@ from __future__ import (absolute_import, division, print_function,
 
 import six
 import numpy as np
+import numpy.testing as npt
 from nose.tools import raises
 
 from skxray.testing.decorators import known_fail_if
-import numpy.testing as npt
-from numpy.testing import (assert_array_equal, assert_array_almost_equal,
-                           assert_almost_equal)
-
-from nose.tools import assert_equal, assert_true, raises
-from skxray import recip
+from skxray.core import recip
 
 
 @known_fail_if(six.PY3)

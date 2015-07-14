@@ -38,10 +38,11 @@
 
 from __future__ import (absolute_import, division, unicode_literals,
                         print_function)
+
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skxray.constants.api import XrfElement
+from skxray.core.constants.api import XrfElement
 from skxray.fitting.api import gaussian
 
 

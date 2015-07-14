@@ -46,7 +46,7 @@ import numpy as np
 import six
 
 from skxray.core.utils import NotInstalledError
-from .basic import BasicElement, doc_title, doc_params, doc_attrs, doc_ex
+from skxray.core.constants.basic import BasicElement, doc_title, doc_params, doc_attrs, doc_ex
 from skxray.core.utils import verbosedict
 
 logger = logging.getLogger(__name__)

@@ -44,9 +44,8 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
-from nose.tools import (raises, assert_raises)
 
-import skxray.dpc as dpc
+import skxray.core.dpc as dpc
 
 
 def test_image_reduction_default():

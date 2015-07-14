@@ -44,7 +44,7 @@ import numpy as np
 import logging
 logger = logging.getLogger(__name__)
 from scipy.integrate import simps
-from .fitting import fit_quad_to_peak
+from skxray.fitting import fit_quad_to_peak
 
 
 def align_and_scale(energy_list, counts_list, pk_find_fun=None):

@@ -37,12 +37,12 @@
 ########################################################################
 from __future__ import (absolute_import, division,
                         unicode_literals, print_function)
-import six
+
 import numpy as np
 from numpy.testing import assert_array_almost_equal
-
-import skxray.feature as feature
 from nose.tools import assert_raises
+
+import skxray.core.feature as feature
 
 
 def _test_refine_helper(x_data, y_data, center, height,

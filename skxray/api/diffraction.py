@@ -42,11 +42,7 @@ logger = logging.getLogger(__name__)
 
 # import fitting models
 
-from ..recip import process_to_q, hkl_to_q
-
-from ..constants.api import (
-    BasicElement, calibration_standards
-)
+from skxray.core.recip import process_to_q, hkl_to_q
 
 from skxray.core.utils import (
     bin_1D, bin_edges, bin_edges_to_centers, grid3d,
@@ -55,7 +51,7 @@ from skxray.core.utils import (
     angle_grid, radial_grid,
 )
 
-from ..calibration import (
+from skxray.core.calibration import (
     refine_center, estimate_d_blind,
 )
 

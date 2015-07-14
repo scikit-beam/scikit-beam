@@ -1,14 +1,13 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import six
-
 import numpy as np
 import numpy.random
 from nose.tools import assert_equal
 import skimage.draw as skd
-import skxray.image as nimage
 from scipy.ndimage.morphology import binary_dilation
+
+import skxray.core.image as nimage
 
 
 def test_find_ring_center_acorr_1D():

@@ -35,12 +35,11 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import six
 import numpy as np
 from nose.tools import assert_raises
 from numpy.testing import assert_array_almost_equal
 
-from skxray.spectroscopy import (align_and_scale, integrate_ROI,
+from skxray.core.spectroscopy import (align_and_scale, integrate_ROI,
                                 integrate_ROI_spectrum)
 
 

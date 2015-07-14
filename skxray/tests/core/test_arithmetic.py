@@ -12,10 +12,11 @@ data collected at Argonne National Laboratory, Sector 13, GSECars.
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-import six
+
 import numpy as np
-from skxray.image_processing import arithmetic
 from numpy.testing import assert_equal
+
+from skxray.core import arithmetic
 
 
 def _helper_prealloc_passthrough(op, x1, x2, scratch_space):

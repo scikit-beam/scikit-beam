@@ -1,17 +1,15 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import six
 import numpy as np
 from numpy.testing import (assert_equal, assert_array_equal,
                            assert_array_almost_equal, assert_almost_equal)
+from nose.tools import raises
 
-from skxray.cdi import (_dist, gauss, find_support,
+from skxray.core.cdi import (_dist, gauss, find_support,
                         pi_modulus, cal_diff_error, cdi_recon,
                         generate_random_phase_field,
                         generate_box_support, generate_disk_support)
-
-from nose.tools import raises
 
 
 def dist_temp(dims):
