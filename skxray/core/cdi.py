@@ -359,7 +359,8 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
         diff_error[n] = cal_diff_error(sample_obj, diffracted_pattern)
 
         if sw_flag:
-            if((n >= (sw_start * n_iterations)) and (n <= (sw_end * n_iterations))):
+            if((n >= (sw_start * n_iterations)) and
+                   (n <= (sw_end * n_iterations))):
                 if np.mod(n, sw_step) == 0:
                     logger.info('Refine support with shrinkwrap')
                     sup_index = find_support(sample_obj, sw_sigma, sw_threshold)

@@ -45,7 +45,7 @@ import numpy as np
 
 from collections import deque
 
-from skxray.core.fitting import fit_quad_to_peak
+from .fitting import fit_quad_to_peak
 
 
 class PeakRejection(Exception):

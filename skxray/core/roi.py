@@ -48,7 +48,7 @@ import logging
 
 import numpy as np
 
-import skxray.core.utils as core
+from . import utils
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +135,7 @@ def rings(edges, center, shape):
         raise ValueError("edges are expected to be monotonically increasing, "
                          "giving inner and outer radii of each ring from "
                          "r=0 outward")
-    r_coord = core.radial_grid(center, shape).ravel()
+    r_coord = utils.radial_grid(center, shape).ravel()
     label_array = np.digitize(r_coord, edges, right=False)
     # Even elements of label_array are in the space between rings.
     label_array = (np.where(label_array % 2 != 0, label_array, 0) + 1) // 2
@@ -266,7 +266,7 @@ def segmented_rings(edges, segments, center, shape, offset_angle=0):
                          "giving inner and outer radii of each ring from "
                          "r=0 outward")
 
-    agrid = core.angle_grid(center, shape)
+    agrid = utils.angle_grid(center, shape)
 
     agrid[agrid < 0] = 2*np.pi + agrid[agrid < 0]
 

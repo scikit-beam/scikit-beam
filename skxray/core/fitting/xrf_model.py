@@ -53,14 +53,14 @@ import numpy as np
 
 from scipy.optimize import nnls
 import six
+from lmfit import Model
 
-from skxray.core.constants import XrfElement as Element
-from skxray.core.fitting.lineshapes import gaussian
-from skxray.core.fitting.models import (ComptonModel, ElasticModel,
+from ..constants import XrfElement as Element
+from ..fitting.lineshapes import gaussian
+from ..fitting.models import (ComptonModel, ElasticModel,
                                         _gen_class_docs)
 from .base import parameter_data as sfb_pd
 from .background import snip_method
-from lmfit import Model
 
 logger = logging.getLogger(__name__)
 

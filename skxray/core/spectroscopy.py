@@ -46,7 +46,7 @@ from six.moves import zip
 
 logger = logging.getLogger(__name__)
 from scipy.integrate import simps
-from skxray.core.fitting import fit_quad_to_peak
+from .fitting import fit_quad_to_peak
 
 
 def align_and_scale(energy_list, counts_list, pk_find_fun=None):
@@ -132,13 +132,11 @@ def find_largest_peak(x, y, window=None):
     # get the bin with the largest number of counts
     j = np.argmax(y)
     if window is not None:
-        roi = slice(np.max(j - window, 0),
-                j + window + 1)
+        roi = slice(np.max(j - window, 0), j + window + 1)
     else:
         roi = slice(0, -1)
 
-    (w, x0, y0), r2 = fit_quad_to_peak(x[roi],
-                                       np.log(y[roi]))
+    (w, x0, y0), r2 = fit_quad_to_peak(x[roi], np.log(y[roi]))
     return x0, np.exp(y0), 1/np.sqrt(-2*w)
 
 

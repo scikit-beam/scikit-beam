@@ -51,7 +51,7 @@ import logging
 
 import numpy as np
 
-from skxray.core.utils import q_to_d, d_to_q, twotheta_to_q, q_to_twotheta
+from ..utils import q_to_d, d_to_q, twotheta_to_q, q_to_twotheta
 
 logger = logging.getLogger(__name__)
 

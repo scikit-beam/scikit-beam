@@ -336,5 +336,4 @@ def get_para():
        based on different algorithms.
        Use copy for dict.
     """
-    #return para_dict
     return default_param

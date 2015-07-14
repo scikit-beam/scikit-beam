@@ -274,9 +274,9 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
     mid_col = pad_col // 2 + 1
     mid_row = pad_row // 2 + 1
     ax = (2 * np.pi * np.arange(1 - mid_col, pad_col - mid_col + 1) /
-         (pad_col * scan_xstep))
+          (pad_col * scan_xstep))
     ay = (2 * np.pi * np.arange(1 - mid_row, pad_row - mid_row + 1) /
-         (pad_row * scan_ystep))
+          (pad_row * scan_ystep))
 
     kappax, kappay = np.meshgrid(ax, ay)
     div_v = kappax ** 2 * (1 - weighting) + kappay ** 2 * weighting

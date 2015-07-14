@@ -44,15 +44,15 @@ from collections import deque
 import numpy as np
 import scipy.signal
 
-from skxray.core.constants import calibration_standards
-from skxray.core.feature import (filter_peak_height, peak_refinement,
-                           refine_log_quadratic)
-from skxray.core.utils import (angle_grid, radial_grid,
-                         pairwise, bin_edges_to_centers, bin_1D)
+from .constants import calibration_standards
+from .feature import (filter_peak_height, peak_refinement,
+                      refine_log_quadratic)
+from .utils import (angle_grid, radial_grid,
+                    pairwise, bin_edges_to_centers, bin_1D)
 
 
 def estimate_d_blind(name, wavelength, bin_centers, ring_average,
-               window_size, max_peak_count, thresh):
+                     window_size, max_peak_count, thresh):
     """
     Estimate the sample-detector distance
 
@@ -203,7 +203,7 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
         cands = scipy.signal.argrelmax(avg, order=window_size)[0]
         # filter local maximums by size
         cands = filter_peak_height(avg, cands, thresh*np.max(avg),
-                                           window=window_size)
+                                   window=window_size)
         ring_trace.append(bin_centers[cands[:max_peaks]])
 
     tr_len = [len(rt) for rt in ring_trace]

@@ -45,9 +45,10 @@ import logging
 import numpy as np
 import six
 
-from skxray.core.utils import NotInstalledError
-from skxray.core.constants.basic import BasicElement, doc_title, doc_params, doc_attrs, doc_ex
-from skxray.core.utils import verbosedict
+from ..utils import NotInstalledError
+from ..constants.basic import (BasicElement, doc_title, doc_params, doc_attrs,
+                               doc_ex)
+from ..utils import verbosedict
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +66,7 @@ class XraylibNotInstalledError(NotInstalledError):
                     'https://github.com/tschoonj/xraylib '
                     'or https://binstar.org/tacaswell/xraylib '
                     'for help on installing xraylib')
+
     def __init__(self, caller, *args, **kwargs):
         message = ('The call to {} cannot be completed because {}'
                    ''.format(caller, self.message_post))
@@ -102,19 +104,19 @@ else:
                   xraylib.O3_SHELL, xraylib.O4_SHELL, xraylib.O5_SHELL,
                   xraylib.P1_SHELL, xraylib.P2_SHELL, xraylib.P3_SHELL]
 
+    line_dict = verbosedict((k.lower(), v) for k, v in zip(line_name,
+                                                           line_list))
 
-    line_dict = verbosedict((k.lower(), v) for k, v in zip(line_name, line_list))
-
-    shell_dict = verbosedict((k.lower(), v) for k, v in zip(bindingE, shell_list))
-
+    shell_dict = verbosedict((k.lower(), v) for k, v in zip(bindingE,
+                                                            shell_list))
 
     XRAYLIB_MAP = verbosedict({'lines': (line_dict, xraylib.LineEnergy),
                                'cs': (line_dict, xraylib.CS_FluorLine_Kissel),
-                               #'cs': (line_dict, xraylib.CS_FluorLine),
                                'binding_e': (shell_dict, xraylib.EdgeEnergy),
                                'jump': (shell_dict, xraylib.JumpFactor),
                                'yield': (shell_dict, xraylib.FluorYield),
                                })
+
 
 class XrayLibWrap(Mapping):
     """High-level interface to xraylib.

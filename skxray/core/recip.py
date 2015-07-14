@@ -46,7 +46,7 @@ import logging
 
 import numpy as np
 
-from skxray.core.utils import verbosedict
+from .utils import verbosedict
 
 logger = logging.getLogger(__name__)
 import time
