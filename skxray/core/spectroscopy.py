@@ -38,13 +38,15 @@ This module is for spectroscopy specific tools (spectrum fitting etc).
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import six
-from six.moves import zip
-import numpy as np
 import logging
+
+import numpy as np
+
+from six.moves import zip
+
 logger = logging.getLogger(__name__)
 from scipy.integrate import simps
-from skxray.fitting import fit_quad_to_peak
+from skxray.core.fitting import fit_quad_to_peak
 
 
 def align_and_scale(energy_list, counts_list, pk_find_fun=None):

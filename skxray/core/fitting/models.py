@@ -44,22 +44,12 @@
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-import six
-import numpy as np
-import sys
 import inspect
+import logging
 
 from lmfit import Model
-from lmfit.models import GaussianModel as LmGaussianModel
-from lmfit.models import LorentzianModel as LmLorentzianModel
-from .lineshapes import (elastic, compton, gaussian_tail, gausssian_step,
-                         lorentzian2, gaussian, lorentzian)
-
-from skxray.fitting.lineshapes import (elastic, compton, gaussian,
-                                       lorentzian, lorentzian2)
-from skxray.fitting.base.parameter_data import get_para
-
-import logging
+from .lineshapes import (elastic, compton, lorentzian2)
+from .base.parameter_data import get_para
 logger = logging.getLogger(__name__)
 
 
@@ -128,7 +118,6 @@ class ElasticModel(Model):
 
     def __init__(self, *args, **kwargs):
         super(ElasticModel, self).__init__(elastic, *args, **kwargs)
-        #set_default(self, elastic)
         self.set_param_hint('epsilon', value=2.96, vary=False)
 
 
@@ -139,7 +128,6 @@ class ComptonModel(Model):
     def __init__(self, *args, **kwargs):
 
         super(ComptonModel, self).__init__(compton, *args, **kwargs)
-        #set_default(self, compton)
         self.set_param_hint('epsilon', value=2.96, vary=False)
 
 

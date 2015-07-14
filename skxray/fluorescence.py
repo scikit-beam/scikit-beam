@@ -41,11 +41,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # import fitting models
-from .fitting import (Lorentzian2Model, ComptonModel, ElasticModel,
-                      GaussianModel)
 
 # import Element objects
-from .core.constants import XrfElement, emission_line_search
 
 # import background subtraction
-from .fitting.background import snip_method

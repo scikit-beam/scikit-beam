@@ -3,7 +3,7 @@
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
 # @author: Li Li (lili@bnl.gov)                                        #
-# created on 08/06/2014                                                #
+# created on 08/16/2014                                                #
 #                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
@@ -40,65 +40,56 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import six
-
-import logging
-logger = logging.getLogger(__name__)
 import numpy as np
+from numpy.testing import assert_allclose
 
-from .models import (Lorentzian2Model, ComptonModel, ElasticModel,
-                     LmGaussianModel as GaussianModel,
-                     LmLorentzianModel as LorentzianModel)
-
-from .lineshapes import (gaussian, lorentzian, lorentzian2, voigt, pvoigt,
-                         gaussian_tail, gausssian_step, elastic, compton)
-
-# construct a list of the models that can be used
-model_list = sorted([Lorentzian2Model, ComptonModel, ElasticModel],
-                    key=lambda s: str(s).split('.')[-1])
-lineshapes_list = sorted([gaussian, lorentzian, lorentzian2, voigt, pvoigt,
-                          gaussian_tail, gausssian_step, elastic, compton],
-                         key=lambda s: str(s))
+from skxray.core.fitting import snip_method
 
 
-def fit_quad_to_peak(x, y):
+def test_snip_method():
     """
-    Fits a quadratic to the data points handed in
-    to the from y = b[0](x-b[1])**2 + b[2] and R2
-    (measure of goodness of fit)
-
-    Parameters
-    ----------
-    x : ndarray
-        locations
-    y : ndarray
-        values
-
-    Returns
-    -------
-    b : tuple
-       coefficients of form y = b[0](x-b[1])**2 + b[2]
-
-    R2 : float
-      R2 value
-
+    test of background function from xrf fit
     """
 
-    lenx = len(x)
+    xmin = 0
+    xmax = 3000
 
-    # some sanity checks
-    if lenx < 3:
-        raise Exception('insufficient points handed in ')
-    # set up fitting array
-    X = np.vstack((x ** 2, x, np.ones(lenx))).T
-    # use linear least squares fitting
-    beta, _, _, _ = np.linalg.lstsq(X, y)
+    # three gaussian peak
+    xval = np.arange(-20, 20, 0.1)
+    std = 0.01
+    yval1 = np.exp(-xval**2 / 2 / std**2)
+    yval2 = np.exp(-(xval - 10)**2 / 2 / std**2)
+    yval3 = np.exp(-(xval + 10)**2 / 2 / std**2)
 
-    SSerr = np.sum((np.polyval(beta, x) - y)**2)
-    SStot = np.sum((y - np.mean(y))**2)
-    # re-map the returned value to match the form we want
-    ret_beta = (beta[0],
-                -beta[1] / (2 * beta[0]),
-                beta[2] - beta[0] * (beta[1] / (2 * beta[0])) ** 2)
+    # background as exponential
+    a0 = 1.0
+    a1 = 0.1
+    a2 = 0.5
+    bg_true = a0 * np.exp(-xval * a1 + a2)
 
-    return ret_beta, 1 - SSerr / SStot
+    yval = yval1 + yval2 + yval3 + bg_true
+
+    bg = snip_method(yval,
+                     0.0, 1.0, 0.0,
+                     xmin=xmin, xmax=3000,
+                     spectral_binning=None, width=0.1)
+
+    #plt.semilogy(xval, bg_true, xval, bg)
+    #plt.plot(xval, bg_true, xval, bg)
+    #plt.show()
+
+    # ignore the boundary part
+    cutval = 15
+    bg_true_part = bg_true[cutval : -cutval]
+    bg_cal_part = bg[cutval : -cutval]
+
+
+    #assert_array_almost_equal(bg_true_part, bg_cal_part, decimal=2)
+    assert_allclose(bg_true_part, bg_cal_part, rtol=1e-3, atol=1e-1)
+
+    return
+
+
+if __name__ == '__main__':
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

@@ -41,13 +41,12 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 import numpy as np
-from numpy.testing import (assert_allclose, assert_array_almost_equal)
+from numpy.testing import (assert_array_almost_equal)
 
-from skxray.fitting import (gaussian, gausssian_step, gaussian_tail,
-                            elastic, compton, lorentzian, lorentzian2,
-                            voigt, pvoigt)
-
-from skxray.fitting import (ComptonModel, ElasticModel, GaussianModel)
+from skxray.core.fitting import (gaussian, gausssian_step, gaussian_tail,
+                                 elastic, compton, lorentzian, lorentzian2,
+                                 voigt, pvoigt)
+from skxray.core.fitting import (ComptonModel, ElasticModel)
 
 
 def test_gauss_peak():
@@ -246,24 +245,6 @@ def test_pvoigt_peak():
     out = pvoigt(x, a, cen, std, fraction)
 
     assert_array_almost_equal(y_true, out)
-
-
-def test_gauss_model():
-
-    amplitude = 1
-    center  = 0
-    sigma = 1
-    x = np.arange(-3, 3, 0.5)
-    true_param = [amplitude, center, sigma]
-
-    out = gaussian(x, amplitude, center, sigma)
-
-    gauss = GaussianModel()
-    result = gauss.fit(out, x=x,
-                       area=1, center=2, sigma=5)
-
-    fitted_val = [result.values['amplitude'], result.values['center'], result.values['sigma']]
-    assert_array_almost_equal(true_param, fitted_val, decimal=2)
 
 
 def test_elastic_model():

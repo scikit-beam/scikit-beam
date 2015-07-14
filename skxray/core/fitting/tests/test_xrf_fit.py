@@ -2,19 +2,21 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
-import six
-import numpy as np
 import copy
 import logging
+
+import six
+import numpy as np
 from numpy.testing import (assert_equal, assert_array_almost_equal)
 from nose.tools import assert_true, raises, assert_raises
-from skxray.fitting.base.parameter_data import get_para, e_calibration
-from skxray.fitting.xrf_model import (ModelSpectrum, ParamController,
-                                      linear_spectrum_fitting,
-                                      construct_linear_model, trim,
-                                      sum_area, compute_escape_peak,
-                                      register_strategy, update_parameter_dict,
-                                      _set_parameter_hint, _STRATEGY_REGISTRY)
+
+from skxray.core.fitting.base.parameter_data import get_para, e_calibration
+from skxray.core.fitting.xrf_model import (
+    ModelSpectrum, ParamController, linear_spectrum_fitting,
+    construct_linear_model, trim, sum_area, compute_escape_peak,
+    register_strategy,  update_parameter_dict, _set_parameter_hint,
+    _STRATEGY_REGISTRY
+)
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
                     level=logging.INFO,

@@ -40,13 +40,12 @@ from __future__ import (absolute_import, division, print_function,
 import logging
 logger = logging.getLogger(__name__)
 
-import six
 from six.moves import zip
 import numpy as np
 
 from collections import deque
 
-from skxray.fitting import fit_quad_to_peak
+from skxray.core.fitting import fit_quad_to_peak
 
 
 class PeakRejection(Exception):
