@@ -44,7 +44,7 @@ from collections import deque
 import numpy as np
 import scipy.signal
 
-from skxray.core.constants.api import calibration_standards
+from skxray.core.constants import calibration_standards
 from skxray.core.feature import (filter_peak_height, peak_refinement,
                            refine_log_quadratic)
 from skxray.core.utils import (angle_grid, radial_grid,

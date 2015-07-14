@@ -53,7 +53,7 @@ import numpy as np
 from scipy.optimize import nnls
 import six
 
-from skxray.core.constants.api import XrfElement as Element
+from skxray.core.constants import XrfElement as Element
 from skxray.fitting.lineshapes import gaussian
 from skxray.fitting.models import (ComptonModel, ElasticModel,
                                    _gen_class_docs)

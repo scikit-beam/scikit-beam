@@ -51,7 +51,7 @@ from .fitting.api import (
 )
 
 # import Element objects
-from .core.constants.api import XrfElement, emission_line_search
+from .core.constants import XrfElement, emission_line_search
 
 # import background subtraction
 from .fitting.background import snip_method

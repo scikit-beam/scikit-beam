@@ -42,7 +42,7 @@ from __future__ import (absolute_import, division, unicode_literals,
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skxray.core.constants.api import XrfElement
+from skxray.core.constants import XrfElement
 from skxray.fitting.api import gaussian
 
 
