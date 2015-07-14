@@ -15,8 +15,6 @@ import six
 from nose.tools import eq_
 import skxray.io.net_cdf_io as ncd
 
-test_data = '../../../test_data/file_io/netCDF/tst_netCDF_recon.volume'
-
 def test_net_cdf_io():
     """
     Test function for netCDF read function load_netCDF()
