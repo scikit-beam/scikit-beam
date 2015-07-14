@@ -39,15 +39,15 @@
 
 from __future__ import (absolute_import, division,
                         unicode_literals, print_function)
+
 import six
-import numpy as np
 from numpy.testing import (assert_array_equal, assert_raises)
 from nose.tools import assert_equal, assert_not_equal
 
 from skxray.constants.xrf import (XrfElement, emission_line_search,
                                   XrayLibWrap, XrayLibWrap_Energy)
+from skxray.core.utils import NotInstalledError
 
-from skxray.core import NotInstalledError
 
 def test_element_data():
     """

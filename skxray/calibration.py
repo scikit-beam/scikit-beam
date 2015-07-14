@@ -39,14 +39,15 @@ This is the module for calibration functions and data
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import six
+from collections import deque
+
 import numpy as np
 import scipy.signal
-from collections import deque
+
 from .constants.api import calibration_standards
 from skxray.feature import (filter_peak_height, peak_refinement,
                            refine_log_quadratic)
-from skxray.core import (angle_grid, radial_grid,
+from skxray.core.utils import (angle_grid, radial_grid,
                          pairwise, bin_edges_to_centers, bin_1D)
 
 

@@ -42,11 +42,11 @@ calculations.
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-import six
-import numpy as np
 import logging
-from .core import verbosedict
-import sys
+
+import numpy as np
+
+from skxray.core.utils import verbosedict
 
 logger = logging.getLogger(__name__)
 import time

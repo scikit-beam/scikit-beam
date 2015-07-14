@@ -45,13 +45,14 @@ Module for xray scattering
 
 from __future__ import (absolute_import, division,
                         unicode_literals, print_function)
-import numpy as np
-import six
 from collections import namedtuple
 from itertools import repeat
-from ..core import q_to_d, d_to_q, twotheta_to_q, q_to_twotheta, verbosedict
-from .basic import BasicElement
 import logging
+
+import numpy as np
+
+from skxray.core.utils import q_to_d, d_to_q, twotheta_to_q, q_to_twotheta
+
 logger = logging.getLogger(__name__)
 
 

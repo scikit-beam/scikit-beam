@@ -35,22 +35,18 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import six
-import numpy as np
 import logging
+
+import numpy as np
+
 logger = logging.getLogger(__name__)
-from numpy.testing import (assert_array_equal, assert_array_almost_equal,
-                           assert_almost_equal)
-import sys
+from numpy.testing import (assert_array_equal, assert_almost_equal)
 
 from nose.tools import assert_equal, assert_true, assert_raises
 
 import skxray.roi as roi
 import skxray.correlation as corr
-import skxray.core as core
-
-from skxray.testing.decorators import known_fail_if
-import numpy.testing as npt
+import skxray.core.utils as core
 
 
 def test_rectangles():

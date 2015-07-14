@@ -35,9 +35,11 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import logging
+
 import six
 import numpy as np
-import logging
+
 logger = logging.getLogger(__name__)
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
@@ -45,7 +47,7 @@ import sys
 
 from nose.tools import assert_equal, assert_true, raises
 
-import skxray.core as core
+import skxray.core.utils as core
 
 from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
@@ -488,7 +490,7 @@ def test_img_to_relative_fails():
 
 
 def test_img_to_relative_xyi(random_seed=None):
-    from skxray.core import img_to_relative_xyi
+    from skxray.core.utils import img_to_relative_xyi
     # make the RNG deterministic
     if random_seed is not None:
         np.random.seed(42)

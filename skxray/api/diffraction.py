@@ -41,14 +41,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 # import fitting models
-from ..fitting.api import (
-    ConstantModel, LinearModel, QuadraticModel, ParabolicModel,
-    PolynomialModel, VoigtModel, PseudoVoigtModel, Pearson7Model,
-    StudentsTModel, BreitWignerModel, GaussianModel, LorentzianModel,
-    LognormalModel, DampedOscillatorModel, ExponentialGaussianModel,
-    SkewedGaussianModel, DonaichModel, PowerLawModel, ExponentialModel,
-    StepModel, RectangleModel, Lorentzian2Model, ComptonModel, ElasticModel
-)
 
 from ..recip import process_to_q, hkl_to_q
 
@@ -56,7 +48,7 @@ from ..constants.api import (
     BasicElement, calibration_standards
 )
 
-from ..core import (
+from skxray.core.utils import (
     bin_1D, bin_edges, bin_edges_to_centers, grid3d,
     q_to_d, d_to_q,
     q_to_twotheta, twotheta_to_q,

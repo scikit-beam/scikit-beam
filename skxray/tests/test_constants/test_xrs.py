@@ -39,16 +39,14 @@
 
 from __future__ import (absolute_import, division,
                         unicode_literals, print_function)
-import six
+
 import numpy as np
-from numpy.testing import (assert_array_equal, assert_array_almost_equal,
-                           assert_raises)
-from nose.tools import assert_equal, assert_not_equal
+from numpy.testing import (assert_array_equal, assert_array_almost_equal)
+from nose.tools import assert_equal
 
-from skxray.constants.xrs import (PowderStandard, Reflection, HKL,
+from skxray.constants.xrs import (HKL,
                                   calibration_standards)
-
-from skxray.core import q_to_d, d_to_q, NotInstalledError
+from skxray.core.utils import q_to_d, d_to_q
 
 
 def smoke_test_powder_standard():

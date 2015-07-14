@@ -47,13 +47,13 @@ This module is for functions specific to time correlation
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-import six
-import numpy as np
-import numpy.ma as ma
 import logging
 import time
 
-import skxray.core as core
+import numpy as np
+
+import skxray.core.utils as core
+
 logger = logging.getLogger(__name__)
 
 

@@ -42,21 +42,14 @@ simple shapes such as rectangles and concentric circles.
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-import six
 
-from six.moves import zip
-from six import string_types
-
-import time
 import collections
-import sys
-import numpy as np
-import numpy.ma as ma
-
-import skxray.correlation as corr
-import skxray.core as core
-
 import logging
+
+import numpy as np
+
+import skxray.core.utils as core
+
 logger = logging.getLogger(__name__)
 
 

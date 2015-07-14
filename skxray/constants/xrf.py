@@ -39,14 +39,16 @@
 
 from __future__ import (absolute_import, division,
                         unicode_literals, print_function)
+from collections import Mapping
+import logging
+
 import numpy as np
 import six
-from collections import Mapping
 
-from ..core import NotInstalledError
+from skxray.core.utils import NotInstalledError
 from .basic import BasicElement, doc_title, doc_params, doc_attrs, doc_ex
-from skxray.core import verbosedict
-import logging
+from skxray.core.utils import verbosedict
+
 logger = logging.getLogger(__name__)
 
 line_name = ['Ka1', 'Ka2', 'Kb1', 'Kb2', 'La1', 'La2', 'Lb1', 'Lb2',
