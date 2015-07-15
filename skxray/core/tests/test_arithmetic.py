@@ -9,10 +9,7 @@ The files read and written using this function are assumed to
 conform to the format specified for x-ray computed microtomorgraphy
 data collected at Argonne National Laboratory, Sector 13, GSECars.
 """
-
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
+from __future__ import absolute_import, division, print_function
 import numpy as np
 from numpy.testing import assert_equal
 

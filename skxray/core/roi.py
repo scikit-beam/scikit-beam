@@ -38,10 +38,7 @@
 This module contain convenience methods to generate ROI labeled arrays for
 simple shapes such as rectangles and concentric circles.
 """
-
-
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 import collections
 import logging

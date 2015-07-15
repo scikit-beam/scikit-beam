@@ -35,11 +35,7 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-
-
-from __future__ import (absolute_import, division,
-                        unicode_literals, print_function)
-
+from __future__ import absolute_import, division, print_function
 import six
 from numpy.testing import (assert_array_equal, assert_raises)
 from nose.tools import assert_equal, assert_not_equal

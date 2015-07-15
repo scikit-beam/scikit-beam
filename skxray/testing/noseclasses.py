@@ -43,11 +43,7 @@ This module is for decorators related to testing.
 Much of this code is inspired by the code in matplotlib.  Exact copies
 are noted.
 """
-
-
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
+from __future__ import absolute_import, division, print_function
 import six
 
 import os

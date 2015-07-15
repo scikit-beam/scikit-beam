@@ -1,8 +1,4 @@
-from __future__ import (unicode_literals, print_function, absolute_import,
-                        division)
-import six
-import time as ttime
-
+from __future__ import absolute_import, division, print_function
 
 def test_xrf_spectrum_demo():
     # smoketest the demo

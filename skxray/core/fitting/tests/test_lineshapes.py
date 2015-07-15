@@ -35,11 +35,7 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-
-
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
-
+from __future__ import absolute_import, division, print_function
 import numpy as np
 from numpy.testing import (assert_array_almost_equal)
 

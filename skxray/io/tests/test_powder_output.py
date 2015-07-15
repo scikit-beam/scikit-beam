@@ -39,17 +39,12 @@
     (Output into different file formats, .chi, .dat, .xye, gsas)
     Added a test to check the GSAS file reader and file writer
 """
-
-from __future__ import (absolute_import, division,
-                        unicode_literals, print_function)
+from __future__ import absolute_import, division, print_function
 import six
 import os
 import math
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
-from nose.tools import assert_equal, assert_not_equal, raises
-
-from skxray.testing.decorators import known_fail_if
 import skxray.io.save_powder_output as output
 from skxray.io.save_powder_output import gsas_writer
 from skxray.io.gsas_file_reader import gsas_reader

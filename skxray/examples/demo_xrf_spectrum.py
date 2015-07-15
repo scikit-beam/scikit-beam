@@ -35,10 +35,7 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-
-from __future__ import (absolute_import, division, unicode_literals,
-                        print_function)
-
+from __future__ import absolute_import, division, print_function
 import numpy as np
 
 from skxray.core.constants import XrfElement
