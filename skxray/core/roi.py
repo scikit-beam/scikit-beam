@@ -285,7 +285,7 @@ def segmented_rings(edges, segments, center, shape, offset_angle=0):
 
     label_array = np.zeros(shape, dtype=np.int64)
     # radius grid for the image_shape
-    rgrid = core.radial_grid(center, shape)
+    rgrid = utils.radial_grid(center, shape)
 
     # assign indices value according to angles then rings
     len_segments = len(segments)

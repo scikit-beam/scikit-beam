@@ -411,7 +411,7 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
     ffx = _rss_factory(len(ref_fx))
     ffy = _rss_factory(len(ref_fy))
     num_images = len(image_sequence)
-    steps = num_images // 100
+    steps = max(num_images // 100, 1)
     # Same calculation on each diffraction pattern
     for index, im in enumerate(image_sequence):
         i, j = np.unravel_index(index, (scan_rows, scan_cols))

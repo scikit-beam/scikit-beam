@@ -37,7 +37,7 @@
 ########################################################################
 
 # import * is only allowed at the module level
-from skxray.io.api import *
+from skxray.io import *
 
 
 if __name__ == '__main__':
