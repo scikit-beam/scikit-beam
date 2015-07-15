@@ -76,3 +76,9 @@ docs/_build/
 
 #generated documntation files
 doc/resource/api/generated/
+
+# ipython notebook
+.ipynb_checkpoints/
+
+#vim
+*.swp

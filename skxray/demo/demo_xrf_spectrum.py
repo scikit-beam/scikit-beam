@@ -40,13 +40,12 @@ from __future__ import (absolute_import, division, unicode_literals,
                         print_function)
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 from skxray.core.constants import XrfElement
 from skxray.core.fitting import gaussian
 
 
-def get_line(name, incident_energy):
+def get_line(ax, name, incident_energy):
     """
     Plot emission lines for a given element.
 
@@ -63,23 +62,18 @@ def get_line(name, incident_energy):
 
     i_min = 1e-6
 
-    plt.figure(figsize=(8, 6))
-
     for item in ratio:
         for data in lines:
             if item[0] == data[0]:
-                plt.plot([data[1], data[1]],
+                ax.plot([data[1], data[1]],
                          [i_min, item[1]], 'g-', linewidth=2.0)
 
-    plt.xlabel('Energy [KeV]')
-    plt.ylabel('Intensity')
-    plt.show()
-    plt.close()
-
-    return
+    ax.set_title('Emission lines for %s at %s eV' % (name, incident_energy))
+    ax.set_xlabel('Energy [KeV]')
+    ax.set_ylabel('Intensity')
 
 
-def get_spectrum(name, incident_energy, emax=15):
+def get_spectrum(ax, name, incident_energy, emax=15):
     """
     Plot fluorescence spectrum for a given element.
 
@@ -103,13 +97,11 @@ def get_spectrum(name, incident_energy, emax=15):
 
     i_min = 1e-6
 
-    plt.figure(figsize=(8, 6))
-
     for item in ratio:
         for data in lines:
             if item[0] == data[0]:
 
-                plt.plot([data[1], data[1]],
+                ax.plot([data[1], data[1]],
                          [i_min, item[1]], 'g-', linewidth=2.0)
 
     std = 0.1
@@ -120,11 +112,27 @@ def get_spectrum(name, incident_energy, emax=15):
                 spec += gaussian(x, area, data[1], std) * item[1]
 
     #plt.semilogy(x, spec)
+    ax.set_title('Simulated spectrum for %s at %s eV' % (name, incident_energy))
+    ax.set_xlabel('Energy [KeV]')
+    ax.set_ylabel('Intensity')
+    ax.plot(x, spec)
 
-    plt.xlabel('Energy [KeV]')
-    plt.ylabel('Intensity')
-    plt.plot(x, spec)
+
+def run_demo():
+    import matplotlib.pyplot as plt
+    e = XrfElement('Cu')
+    print('Cu ka1 = %s' % e.emission_line['ka1'])
+    print('all Cu emission lines\n{}'.format(e.emission_line.all))
+    print('fluorescence cross section of Cu at 12 eV = %s' % e.cs(12).all)
+    print('showing spectrum for Cu at 12 eV')
+    fig, ax = plt.subplots(nrows=2, ncols=2, sharex=True, sharey=True)
+    ax = ax.ravel()
+    get_line(ax[0], 'Cu', 12)
+    get_spectrum(ax[1], 'Cu', 12)
+    get_line(ax[2], 'Gd', 12)
+    get_spectrum(ax[3], 'Gd', 12)
     plt.show()
-    plt.close()
 
-    return
+
+if __name__ == "__main__":
+    run_demo()
