@@ -40,36 +40,51 @@ This module creates a namespace for X-Ray Diffraction
 import logging
 logger = logging.getLogger(__name__)
 
+from skxray.core.constants import BasicElement
+from skxray.core.constants import calibration_standards
+
 # import fitting models
+from skxray.core.fitting import Lorentzian2Model
+from skxray.core.fitting import gaussian
+from skxray.core.fitting import lorentzian
+from skxray.core.fitting import lorentzian2
+from skxray.core.fitting import voigt
+from skxray.core.fitting import pvoigt
+from skxray.core.fitting import gaussian_tail
+from skxray.core.fitting import gausssian_step
 
-from skxray.core.recip import process_to_q, hkl_to_q
+# import fast conversions to reciprocal space
+from skxray.core.recip import process_to_q
+from skxray.core.recip import hkl_to_q
 
-from skxray.core.utils import (
-    bin_1D, bin_edges, bin_edges_to_centers, grid3d,
-    q_to_d, d_to_q,
-    q_to_twotheta, twotheta_to_q,
-    angle_grid, radial_grid,
-)
+# import utilities for real <-> reciprocal space
+from skxray.core.utils import bin_1D
+from skxray.core.utils import bin_edges
+from skxray.core.utils import bin_edges_to_centers
+from skxray.core.utils import grid3d
+from skxray.core.utils import q_to_d
+from skxray.core.utils import d_to_q
+from skxray.core.utils import q_to_twotheta
+from skxray.core.utils import twotheta_to_q
+from skxray.core.utils import angle_grid
+from skxray.core.utils import radial_grid
 
-from skxray.core.calibration import (
-    refine_center, estimate_d_blind,
-)
+# import calibration functions
+from skxray.core.calibration import refine_center
+from skxray.core.calibration import estimate_d_blind
+
 
 __all__ = [
+    # constants api
+    'BasicElement', 'calibration_standards',
+
     # fitting api
-    'ConstantModel', 'LinearModel', 'QuadraticModel', 'ParabolicModel',
-    'PolynomialModel', 'VoigtModel', 'PseudoVoigtModel', 'Pearson7Model',
-    'StudentsTModel', 'BreitWignerModel', 'GaussianModel', 'LorentzianModel',
-    'LognormalModel', 'DampedOscillatorModel', 'ExponentialGaussianModel',
-    'SkewedGaussianModel', 'DonaichModel', 'PowerLawModel', 'ExponentialModel',
-    'StepModel', 'RectangleModel', 'Lorentzian2Model', 'ComptonModel',
-    'ElasticModel',
+    'Lorentzian2Model', 'gaussian', 'lorentzian', 'lorentzian2', 'voigt',
+    'pvoigt', 'gaussian_tail', 'gausssian_step',
 
     # recip
     'process_to_q', 'hkl_to_q',
 
-    # constants api
-    'BasicElement', 'calibration_standards',
 
     # core
     'bin_1D', 'bin_edges', 'bin_edges_to_centers', 'grid3d', 'q_to_d',

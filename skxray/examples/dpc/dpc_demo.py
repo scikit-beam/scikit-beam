@@ -70,7 +70,10 @@ from pims import ImageSequence
 import zipfile
 
 from skxray.core import dpc
-
+dpc.logger.setLevel(dpc.logging.DEBUG)
+handler = dpc.logging.StreamHandler()
+handler.setLevel(dpc.logging.DEBUG)
+dpc.logger.addHandler(handler)
 
 def load_image(filename):
     """
@@ -109,59 +112,57 @@ def unzip(source_filename, verbose=True):
                       int(idx/num*100), idx+1, len(zf.infolist())))
             zf.extract(member)
 
-# download to this folder
-current_folder = os.sep.join(__file__.split(os.sep)[:-1])
-dpc_demo_data_path = os.path.join(current_folder, 'SOFC')
+def run():
+    # download to this folder
+    current_folder = os.sep.join(__file__.split(os.sep)[:-1])
+    dpc_demo_data_path = os.path.join(current_folder, 'SOFC')
 
-if not os.path.exists(dpc_demo_data_path):
-    sofc_file = os.path.join(current_folder, 'SOFC.zip')
-    print('The required test data directory was not found.'
-          '\nDownloading the test data to %s' % dpc_demo_data_path)
-    # todo make this not print every fraction of a second
-    call(('wget https://www.dropbox.com/s/963c4ymfmbjg5dm/SOFC.zip -P %s' %
-          current_folder),
-         shell=True)
-    # unzip it into this directory
-    unzip(sofc_file)
-
-
-# 1. Set parameters
-start_point = [1, 0]
-first_image = 1
-pixel_size = (55, 55)
-focus_to_det = 1.46e6
-scan_xstep = 0.1
-scan_ystep = 0.1
-scan_rows = 121
-scan_cols = 121
-energy = 19.5
-roi = None
-padding = 0
-weighting = 1.
-bad_pixels = None
-solver = 'Nelder-Mead'
-images = ImageSequence(dpc_demo_data_path + "/*.tif")
-img_size = images[0].shape
-ref_image = np.ones(img_size)
-scale = True
-negate = True
-
-# 2. Use dpc.dpc_runner
-phase, amplitude = dpc.dpc_runner(
-    ref_image, images, start_point, pixel_size, focus_to_det, scan_rows,
-    scan_cols, scan_xstep, scan_ystep, energy, padding, weighting, solver,
-    roi, bad_pixels, negate, scale)
-
-# 3. Save intermediate and final results
-scipy.misc.imsave(os.path.join(current_folder, 'phase.jpg'), phase)
-np.savetxt(os.path.join(current_folder, 'phase.txt'), phase)
-scipy.misc.imsave(os.path.join(current_folder, 'amplitude.jpg'), amplitude)
-np.savetxt(os.path.join(current_folder, 'amplitude.txt'), amplitude)
+    if not os.path.exists(dpc_demo_data_path):
+        sofc_file = os.path.join(current_folder, 'SOFC.zip')
+        print('The required test data directory was not found.'
+              '\nDownloading the test data to %s' % dpc_demo_data_path)
+        # todo make this not print every fraction of a second
+        call(('wget https://www.dropbox.com/s/963c4ymfmbjg5dm/SOFC.zip -P %s' %
+              current_folder),
+             shell=True)
+        # unzip it into this directory
+        unzip(sofc_file)
 
 
+    # 1. Set parameters
+    start_point = [1, 0]
+    first_image = 1
+    pixel_size = (55, 55)
+    focus_to_det = 1.46e6
+    scan_xstep = 0.1
+    scan_ystep = 0.1
+    scan_rows = 121
+    scan_cols = 121
+    energy = 19.5
+    roi = None
+    padding = 0
+    weighting = 1.
+    bad_pixels = None
+    solver = 'Nelder-Mead'
+    images = ImageSequence(dpc_demo_data_path + "/*.tif")
+    img_size = images[0].shape
+    ref_image = np.ones(img_size)
+    scale = True
+    negate = True
+
+    print('running dpc')
+    # 2. Use dpc.dpc_runner
+    phase, amplitude = dpc.dpc_runner(
+        ref_image, images, start_point, pixel_size, focus_to_det, scan_rows,
+        scan_cols, scan_xstep, scan_ystep, energy, padding, weighting, solver,
+        roi, bad_pixels, negate, scale)
+
+    # 3. Save intermediate and final results
+    scipy.misc.imsave(os.path.join(current_folder, 'phase.jpg'), phase)
+    np.savetxt(os.path.join(current_folder, 'phase.txt'), phase)
+    scipy.misc.imsave(os.path.join(current_folder, 'amplitude.jpg'), amplitude)
+    np.savetxt(os.path.join(current_folder, 'amplitude.txt'), amplitude)
 
 
-
-
-
-
+if __name__ == '__main__':
+    run()

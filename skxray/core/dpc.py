@@ -411,7 +411,7 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
     ffx = _rss_factory(len(ref_fx))
     ffy = _rss_factory(len(ref_fy))
     num_images = len(image_sequence)
-    steps = max(num_images // 100, 1)
+    steps = np.max((num_images // 100, 1))
     # Same calculation on each diffraction pattern
     for index, im in enumerate(image_sequence):
         i, j = np.unravel_index(index, (scan_rows, scan_cols))
@@ -432,8 +432,8 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
         gy[i, j] = _gy
         ax[i, j] = _ax
         ay[i, j] = _ay
-        if index % steps == 0:
-            logger.debug('{}%'.format(100*index // num_images))
+        if (index+1) % steps == 0:
+            logger.debug('dpc {}% complete'.format(100*(index+1) // num_images))
 
     if scale:
         if pixel_size[0] != pixel_size[1]:
