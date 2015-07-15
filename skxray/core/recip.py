@@ -50,6 +50,7 @@ from .utils import verbosedict
 
 logger = logging.getLogger(__name__)
 import time
+
 from pyFAI import geometry as geo
 
 try:
