@@ -49,7 +49,6 @@ logger = logging.getLogger(__name__)
 
 
 # It is unclear why this test is so slow. Can we speed this up at all?
-@skip_if(True)
 def test_correlation():
     num_levels = 4
     num_bufs = 8  # must be even
@@ -73,10 +72,14 @@ def test_correlation():
     assert_array_almost_equal(g2[1:, 0], 1.00, decimal=2)
     assert_array_almost_equal(g2[1:, 1], 1.00, decimal=2)
 
+
+def test_image_stack_correlation():
+    num_levels = 1
+    num_bufs = 2  # must be even
     coins = data.camera()
     coins_stack = []
 
-    for i in range(500):
+    for i in range(2):
         coins_stack.append(coins)
 
     coins_mesh = np.zeros_like(coins)
