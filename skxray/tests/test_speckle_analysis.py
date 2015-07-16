@@ -131,14 +131,14 @@ def test_static_test_sets():
     average_int_sets, index_list = spe_vis.mean_intensity_sets(samples,
                                                                label_array)
 
-    assert_array_equal((list(average_int_sets.values())[0][:, 0]),
+    assert_array_equal((list(average_int_sets)[0][:, 0]),
                        [float(x) for x in range(0, 1000, 100)])
-    assert_array_equal((list(average_int_sets.values())[1][:, 0]),
+    assert_array_equal((list(average_int_sets)[1][:, 0]),
                        [float(x) for x in range(0, 20, 1)])
 
-    assert_array_equal((list(average_int_sets.values())[0][:, 1]),
+    assert_array_equal((list(average_int_sets)[0][:, 1]),
                        [float(x) for x in range(0, 10, 1)])
-    assert_array_equal((list(average_int_sets.values())[1][:, 1]),
+    assert_array_equal((list(average_int_sets)[1][:, 1]),
                        [float(x) for x in range(0, 2000, 100)])
 
     # test combine_mean_intensity function
@@ -154,15 +154,13 @@ def test_static_test_sets():
                                                   label_array2)
     index_list2 = [index_list, index2]
 
-    average_int_sets["3"] = average_int2
+    average_int_sets.append(average_int2)
 
     # raise ValueError when there is different labels in different image sets
     #  when trying to combine the values
     assert_raises(ValueError,
                   lambda: spe_vis.combine_mean_intensity(average_int_sets,
                                                          index_list2))
-
-    return average_intensity
 
 
 def test_circular_average():

@@ -144,25 +144,17 @@ def mean_intensity_sets(images_set, labels):
 
     Returns
     -------
-    mean_intensity_dict : dict
-        average intensity of each ROI as a dictionary
+    mean_intensity_list : list
+        average intensity of each ROI as a list
         shape len(images_sets)
-        eg: 2 image sets,
-        {image set 1 : len(images in image set 1),
-        image set 2 : len(images in image set 2)}
 
     index_list : list
         labels list for each image set
 
     """
-    mean_intensity_dict = {}
-    index_list = []
-    for n in range(len(images_set)):
-        mean_int, index = mean_intensity(images_set[n], labels)
-        mean_intensity_dict[n] = mean_int
-        index_list.append(index)
-
-    return mean_intensity_dict, index_list
+    return tuple(map(list,
+                     zip(*[mean_intensity(im,
+                                          labels) for im in images_set])))
 
 
 def mean_intensity(images, labels, index=None):
@@ -172,8 +164,8 @@ def mean_intensity(images, labels, index=None):
     Parameters
     ----------
     images : array
-        iterable of 2D arrays
-        dimensions are: (rr, cc)
+        Intensity array of the images
+        dimensions are: [num_img][num_rows][num_cols]
 
     labels : array
         labeled array; 0 is background.
@@ -204,18 +196,16 @@ def mean_intensity(images, labels, index=None):
     return mean_intensity, index
 
 
-def combine_mean_intensity(mean_int_dict, index_list):
+def combine_mean_intensity(mean_int_list, index_list):
     """
     Combine mean intensities of the images(all images sets) for each ROI
     if the labels list of all the images are same
 
     Parameters
     ----------
-    mean_int_dict : dict
-        mean intensity of each ROI as a dictionary
-        eg: 2 image sets,
-        {image set 1 : (len(images in image set 1),
-        image set 2 : (len(images in image set 2)}
+    mean_int_list : list
+        mean intensity of each ROI as a list
+        shapes is: (len(images_sets), )
 
     index_list : list
         labels list for each image sets
@@ -228,11 +218,11 @@ def combine_mean_intensity(mean_int_dict, index_list):
 
     """
     if np.all(map(lambda x: x == index_list[0], index_list)):
-        combine_mean_intensity = np.vstack(list(mean_int_dict.values()))
+        combine_mean_intensity = np.vstack(list(mean_int_list))
     else:
         raise ValueError("Labels list for the image sets are different")
 
-    return np.vstack(list(mean_int_dict.values()))
+    return combine_mean_intensity
 
 
 def circular_average(image, calibrated_center, threshold=0, nx=100,
@@ -288,8 +278,8 @@ def roi_kymograph(images, labels, num):
     Parameters
     ----------
     images : array
-        iterable of 2D arrays
-        dimensions are: (rr, cc)
+        Intensity array of the images
+        dimensions are: [num_img][num_rows][num_cols]
 
     labels : array
         labeled array; 0 is background.
@@ -301,6 +291,8 @@ def roi_kymograph(images, labels, num):
     Returns
     -------
     roi_kymograph : array
+        data for graphical representation of pixels variation over time
+        for required ROI
 
     """
     roi_kymo = []
