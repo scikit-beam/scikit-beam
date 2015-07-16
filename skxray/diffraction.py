@@ -1,3 +1,4 @@
+#! encoding: utf-8
 # ######################################################################
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
@@ -32,63 +33,64 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-from __future__ import absolute_import, division, print_function
-import numpy as np
+"""
+This module creates a namespace for X-Ray Diffraction
+"""
 
-import six
 import logging
 logger = logging.getLogger(__name__)
 
+from skxray.core.constants import BasicElement
+from skxray.core.constants import calibration_standards
 
-def read_binary(filename, nx, ny, nz, dtype_str, headersize):
-    """
-    docstring, woo!
+# import fitting models
+from skxray.core.fitting import Lorentzian2Model
+from skxray.core.fitting import gaussian
+from skxray.core.fitting import lorentzian
+from skxray.core.fitting import lorentzian2
+from skxray.core.fitting import voigt
+from skxray.core.fitting import pvoigt
+from skxray.core.fitting import gaussian_tail
+from skxray.core.fitting import gausssian_step
 
-    Parameters
-    ----------
-    filename : String
-        The name of the file to open
-    nx : integer
-        The number of data elements in the x-direction
-    ny : integer
-        The number of data elements in the y-direction
-    nz : integer
-        The number of data elements in the z-direction
-    dtype_str : str
-        A valid argument for np.dtype(some_str). See read_binary.dsize
-        attribute
-    headersize : integer
-        The size of the file header in bytes
+# import fast conversions to reciprocal space
+from skxray.core.recip import process_to_q
+from skxray.core.recip import hkl_to_q
 
-    Returns
-    -------
-    data : ndarray
-            data.shape = (x, y, z) if z > 1
-            data.shape = (x, y) if z == 1
-            data.shape = (x,) if y == 1 && z == 1
-    header : String
-            header = file.read(headersize)
-    """
+# import utilities for real <-> reciprocal space
+from skxray.core.utils import bin_1D
+from skxray.core.utils import bin_edges
+from skxray.core.utils import bin_edges_to_centers
+from skxray.core.utils import grid3d
+from skxray.core.utils import q_to_d
+from skxray.core.utils import d_to_q
+from skxray.core.utils import q_to_twotheta
+from skxray.core.utils import twotheta_to_q
+from skxray.core.utils import angle_grid
+from skxray.core.utils import radial_grid
 
-    # open the file
-    with open(filename, "rb") as opened_file:
-        # read the file header
-        header = opened_file.read(headersize)
+# import calibration functions
+from skxray.core.calibration import refine_center
+from skxray.core.calibration import estimate_d_blind
 
-        # read the entire file in as 1D list
-        data = np.fromfile(file=opened_file, dtype=np.dtype(dtype_str),
-                           count=-1)
 
-    # reshape the array to 3D
-    if nz is not 1:
-        data.resize(nx, ny, nz)
-    # unless the 3rd dimension is 1, in which case reshape the array to 2D
-    elif ny is not 1:
-        data.resize(nx, ny)
-    # unless the 2nd dimension is also 1, in which case leave the array as 1D
+__all__ = [
+    # constants api
+    'BasicElement', 'calibration_standards',
 
-    # return the array and the header
-    return data, header
+    # fitting api
+    'Lorentzian2Model', 'gaussian', 'lorentzian', 'lorentzian2', 'voigt',
+    'pvoigt', 'gaussian_tail', 'gausssian_step',
 
-# set an attribute for the dsize params that are valid options
-read_binary.dtype_str = sorted(np.typeDict, key=str)
+    # recip
+    'process_to_q', 'hkl_to_q',
+
+
+    # core
+    'bin_1D', 'bin_edges', 'bin_edges_to_centers', 'grid3d', 'q_to_d',
+    'd_to_q', 'q_to_twotheta', 'twotheta_to_q', 'angle_grid',
+    'radial_grid',
+
+    # calibration
+    'refine_center', 'estimate_d_blind',
+]

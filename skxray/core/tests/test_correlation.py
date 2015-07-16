@@ -33,62 +33,60 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-import numpy as np
-
-import six
 import logging
+
+import numpy as np
+from numpy.testing import (assert_array_almost_equal,
+                           assert_almost_equal)
+from skimage import data
+
+import skxray.core.correlation as corr
+import skxray.core.roi as roi
+from skxray.testing.decorators import skip_if
+
 logger = logging.getLogger(__name__)
 
 
-def read_binary(filename, nx, ny, nz, dtype_str, headersize):
-    """
-    docstring, woo!
+# It is unclear why this test is so slow. Can we speed this up at all?
+def test_correlation():
+    num_levels = 4
+    num_bufs = 8  # must be even
+    num_qs = 2  # number of interested roi's (rings)
+    img_dim = (50, 50)  # detector size
 
-    Parameters
-    ----------
-    filename : String
-        The name of the file to open
-    nx : integer
-        The number of data elements in the x-direction
-    ny : integer
-        The number of data elements in the y-direction
-    nz : integer
-        The number of data elements in the z-direction
-    dtype_str : str
-        A valid argument for np.dtype(some_str). See read_binary.dsize
-        attribute
-    headersize : integer
-        The size of the file header in bytes
+    roi_data = np.array(([10, 20, 12, 14], [40, 10, 9, 10]),
+                        dtype=np.int64)
 
-    Returns
-    -------
-    data : ndarray
-            data.shape = (x, y, z) if z > 1
-            data.shape = (x, y) if z == 1
-            data.shape = (x,) if y == 1 && z == 1
-    header : String
-            header = file.read(headersize)
-    """
+    indices = roi.rectangles(roi_data, img_dim)
 
-    # open the file
-    with open(filename, "rb") as opened_file:
-        # read the file header
-        header = opened_file.read(headersize)
+    img_stack = np.random.randint(1, 5, size=(500, ) + img_dim)
 
-        # read the entire file in as 1D list
-        data = np.fromfile(file=opened_file, dtype=np.dtype(dtype_str),
-                           count=-1)
+    g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, indices,
+                                             img_stack)
 
-    # reshape the array to 3D
-    if nz is not 1:
-        data.resize(nx, ny, nz)
-    # unless the 3rd dimension is 1, in which case reshape the array to 2D
-    elif ny is not 1:
-        data.resize(nx, ny)
-    # unless the 2nd dimension is also 1, in which case leave the array as 1D
+    assert_array_almost_equal(lag_steps,  np.array([0, 1, 2, 3, 4, 5, 6, 7, 8,
+                                                   10, 12, 14, 16, 20, 24, 28,
+                                                   32, 40, 48, 56]))
 
-    # return the array and the header
-    return data, header
+    assert_array_almost_equal(g2[1:, 0], 1.00, decimal=2)
+    assert_array_almost_equal(g2[1:, 1], 1.00, decimal=2)
 
-# set an attribute for the dsize params that are valid options
-read_binary.dtype_str = sorted(np.typeDict, key=str)
+
+def test_image_stack_correlation():
+    num_levels = 1
+    num_bufs = 2  # must be even
+    coins = data.camera()
+    coins_stack = []
+
+    for i in range(4):
+        coins_stack.append(coins)
+
+    coins_mesh = np.zeros_like(coins)
+    coins_mesh[coins < 30] = 1
+    coins_mesh[coins > 50] = 2
+
+    g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, coins_mesh,
+                                             coins_stack)
+
+    assert_almost_equal(True, np.all(g2[:, 0], axis=0))
+    assert_almost_equal(True, np.all(g2[:, 1], axis=0))

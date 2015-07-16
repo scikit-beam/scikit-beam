@@ -2,6 +2,9 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
+# @author: Li Li (lili@bnl.gov)                                        #
+# created on 08/16/2014                                                #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -34,61 +37,55 @@
 ########################################################################
 from __future__ import absolute_import, division, print_function
 import numpy as np
+from numpy.testing import assert_allclose
 
-import six
-import logging
-logger = logging.getLogger(__name__)
+from skxray.core.fitting import snip_method
 
 
-def read_binary(filename, nx, ny, nz, dtype_str, headersize):
+def test_snip_method():
     """
-    docstring, woo!
-
-    Parameters
-    ----------
-    filename : String
-        The name of the file to open
-    nx : integer
-        The number of data elements in the x-direction
-    ny : integer
-        The number of data elements in the y-direction
-    nz : integer
-        The number of data elements in the z-direction
-    dtype_str : str
-        A valid argument for np.dtype(some_str). See read_binary.dsize
-        attribute
-    headersize : integer
-        The size of the file header in bytes
-
-    Returns
-    -------
-    data : ndarray
-            data.shape = (x, y, z) if z > 1
-            data.shape = (x, y) if z == 1
-            data.shape = (x,) if y == 1 && z == 1
-    header : String
-            header = file.read(headersize)
+    test of background function from xrf fit
     """
 
-    # open the file
-    with open(filename, "rb") as opened_file:
-        # read the file header
-        header = opened_file.read(headersize)
+    xmin = 0
+    xmax = 3000
 
-        # read the entire file in as 1D list
-        data = np.fromfile(file=opened_file, dtype=np.dtype(dtype_str),
-                           count=-1)
+    # three gaussian peak
+    xval = np.arange(-20, 20, 0.1)
+    std = 0.01
+    yval1 = np.exp(-xval**2 / 2 / std**2)
+    yval2 = np.exp(-(xval - 10)**2 / 2 / std**2)
+    yval3 = np.exp(-(xval + 10)**2 / 2 / std**2)
 
-    # reshape the array to 3D
-    if nz is not 1:
-        data.resize(nx, ny, nz)
-    # unless the 3rd dimension is 1, in which case reshape the array to 2D
-    elif ny is not 1:
-        data.resize(nx, ny)
-    # unless the 2nd dimension is also 1, in which case leave the array as 1D
+    # background as exponential
+    a0 = 1.0
+    a1 = 0.1
+    a2 = 0.5
+    bg_true = a0 * np.exp(-xval * a1 + a2)
 
-    # return the array and the header
-    return data, header
+    yval = yval1 + yval2 + yval3 + bg_true
 
-# set an attribute for the dsize params that are valid options
-read_binary.dtype_str = sorted(np.typeDict, key=str)
+    bg = snip_method(yval,
+                     0.0, 1.0, 0.0,
+                     xmin=xmin, xmax=3000,
+                     spectral_binning=None, width=0.1)
+
+    #plt.semilogy(xval, bg_true, xval, bg)
+    #plt.plot(xval, bg_true, xval, bg)
+    #plt.show()
+
+    # ignore the boundary part
+    cutval = 15
+    bg_true_part = bg_true[cutval : -cutval]
+    bg_cal_part = bg[cutval : -cutval]
+
+
+    #assert_array_almost_equal(bg_true_part, bg_cal_part, decimal=2)
+    assert_allclose(bg_true_part, bg_cal_part, rtol=1e-3, atol=1e-1)
+
+    return
+
+
+if __name__ == '__main__':
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

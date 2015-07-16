@@ -2,6 +2,9 @@
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
+# @author: Li Li (lili@bnl.gov)                                        #
+# created on 08/19/2014                                                #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -35,60 +38,60 @@
 from __future__ import absolute_import, division, print_function
 import numpy as np
 
-import six
-import logging
-logger = logging.getLogger(__name__)
+import skxray.core.calibration as calibration
+import skxray.core.calibration as core
 
 
-def read_binary(filename, nx, ny, nz, dtype_str, headersize):
-    """
-    docstring, woo!
+def _draw_gaussian_rings(shape, calibrated_center, r_list, r_width):
+    R = core.radial_grid(calibrated_center, shape)
+    I = np.zeros_like(R)
 
-    Parameters
-    ----------
-    filename : String
-        The name of the file to open
-    nx : integer
-        The number of data elements in the x-direction
-    ny : integer
-        The number of data elements in the y-direction
-    nz : integer
-        The number of data elements in the z-direction
-    dtype_str : str
-        A valid argument for np.dtype(some_str). See read_binary.dsize
-        attribute
-    headersize : integer
-        The size of the file header in bytes
+    for r in r_list:
+        tmp = 100 * np.exp(-((R - r)/r_width)**2)
+        I += tmp
 
-    Returns
-    -------
-    data : ndarray
-            data.shape = (x, y, z) if z > 1
-            data.shape = (x, y) if z == 1
-            data.shape = (x,) if y == 1 && z == 1
-    header : String
-            header = file.read(headersize)
-    """
+    return I
 
-    # open the file
-    with open(filename, "rb") as opened_file:
-        # read the file header
-        header = opened_file.read(headersize)
 
-        # read the entire file in as 1D list
-        data = np.fromfile(file=opened_file, dtype=np.dtype(dtype_str),
-                           count=-1)
+def test_refine_center():
+    center = np.array((500, 550))
+    I = _draw_gaussian_rings((1000, 1001), center,
+                             [50, 75, 100, 250, 500], 5)
 
-    # reshape the array to 3D
-    if nz is not 1:
-        data.resize(nx, ny, nz)
-    # unless the 3rd dimension is 1, in which case reshape the array to 2D
-    elif ny is not 1:
-        data.resize(nx, ny)
-    # unless the 2nd dimension is also 1, in which case leave the array as 1D
+    nx_opts = [None, 300]
+    for nx in nx_opts:
+        out = calibration.refine_center(I, center+1, (1, 1),
+                                        phi_steps=20, nx=nx, min_x=10,
+                                        max_x=300, window_size=5,
+                                        thresh=0, max_peaks=4)
 
-    # return the array and the header
-    return data, header
+        assert np.all(np.abs(center - out) < .1)
 
-# set an attribute for the dsize params that are valid options
-read_binary.dtype_str = sorted(np.typeDict, key=str)
+
+def test_blind_d():
+    gaus = lambda x, center, height, width: (
+                          height * np.exp(-((x-center) / width)**2))
+    name = 'Si'
+    wavelength = .18
+    window_size = 5
+    threshold = .1
+    cal = calibration.calibration_standards[name]
+
+    tan2theta = np.tan(cal.convert_2theta(wavelength))
+
+    D = 200
+    expected_r = D * tan2theta
+
+    bin_centers = np.linspace(0, 50, 2000)
+    I = np.zeros_like(bin_centers)
+    for r in expected_r:
+        I += gaus(bin_centers, r, 100, .2)
+    d, dstd = calibration.estimate_d_blind(name, wavelength, bin_centers,
+                                     I, window_size, len(expected_r),
+                                     threshold)
+    assert np.abs(d - D) < 1e-6
+
+
+if __name__ == '__main__':
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
