@@ -165,7 +165,7 @@ def mean_intensity(images, labels, index=None):
     ----------
     images : array
         Intensity array of the images
-        dimensions are: [num_img][num_rows][num_cols]
+        dimensions are: (num_img, num_rows, num_cols)
 
     labels : array
         labeled array; 0 is background.
@@ -281,7 +281,7 @@ def roi_kymograph(images, labels, num):
     ----------
     images : array
         Intensity array of the images
-        dimensions are: [num_img][num_rows][num_cols]
+        dimensions are: (num_img, num_rows, num_cols)
 
     labels : array
         labeled array; 0 is background.
