@@ -1226,3 +1226,44 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     lag_steps = np.append(lag_steps, np.array(lag))
 
     return tot_channels, lag_steps
+
+
+def geometric_series(common_ratio, number_of_images, first_term=1):
+    """
+    This will provide the geometric series for the integration.
+    Last values of the series has to be less than or equal to number
+    of images
+    ex: number_of_images = 100, first_term =1
+    common_ratio = 2, geometric_series =  1, 2, 4, 8, 16, 32, 64
+    common_ratio = 3, geometric_series =  1, 3, 9, 27, 81
+
+    Parameters
+    ----------
+    common_ratio : float
+        common ratio of the series
+
+    number_of_images : int
+        number of images
+
+    first_term : float, optional
+        first term in the series
+
+    Return
+    ------
+    geometric_series : list
+        time series
+
+    Note
+    ----
+    :math ::
+     a + ar + ar^2 + ar^3 + ar^4 + ...
+
+     a - first term in the series
+     r - is the common ratio
+    """
+
+    geometric_series = [first_term]
+
+    while geometric_series[-1]*common_ratio < number_of_images:
+        geometric_series.append(geometric_series[-1]*common_ratio)
+    return geometric_series
