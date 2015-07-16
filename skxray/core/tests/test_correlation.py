@@ -78,7 +78,7 @@ def test_image_stack_correlation():
     coins = data.camera()
     coins_stack = []
 
-    for i in range(2):
+    for i in range(4):
         coins_stack.append(coins)
 
     coins_mesh = np.zeros_like(coins)
