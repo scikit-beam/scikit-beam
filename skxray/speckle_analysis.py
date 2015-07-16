@@ -216,11 +216,11 @@ def combine_mean_intensity(mean_int_list, index_list):
     -------
     combine_mean_int : array
         combine mean intensities of image sets for each ROI of labeled array
-        shape (len(images in all image sets), number of labels)
+        shape (number of images in all image sets, number of labels)
 
     """
     if np.all(map(lambda x: x == index_list[0], index_list)):
-        combine_mean_intensity = list(zip(mean_int_list))
+        combine_mean_intensity = np.vstack(mean_int_list)
     else:
         raise ValueError("Labels list for the image sets are different")
 
