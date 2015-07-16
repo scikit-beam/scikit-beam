@@ -210,6 +210,8 @@ def combine_mean_intensity(mean_int_list, index_list):
     index_list : list
         labels list for each image sets
 
+    img_set_names : list
+
     Returns
     -------
     combine_mean_int : array
@@ -218,7 +220,7 @@ def combine_mean_intensity(mean_int_list, index_list):
 
     """
     if np.all(map(lambda x: x == index_list[0], index_list)):
-        combine_mean_intensity = np.vstack(list(mean_int_list))
+        combine_mean_intensity = list(zip(mean_int_list))
     else:
         raise ValueError("Labels list for the image sets are different")
 
