@@ -77,7 +77,7 @@ def negative_binom_distribution(K, M, bin_centers):
         number of coherent modes
 
     bin_centers : array
-        normalized bin centers
+        normalized speckle count bin centers
 
     Returns
     -------
@@ -118,6 +118,7 @@ def poisson_distribution(K, bin_centers):
         number of photons
 
     bin_centers : array
+        normalized speckle count bin centers
 
     Returns
     -------
@@ -126,7 +127,7 @@ def poisson_distribution(K, bin_centers):
 
     Note
     ----
-    These implementation based on the references under
+    These implementations are based on the references under
     nbinom_distribution() function Note
 
     """
@@ -147,7 +148,7 @@ def gamma_distribution(M, K, bin_centers):
         number of photons
 
     bin_centers : array
-        normalized bin centers
+        normalized speckle count bin centers
 
     Returns
     -------
@@ -156,7 +157,7 @@ def gamma_distribution(M, K, bin_centers):
 
     Note
     ----
-    These implementation based on the references under
+    These implementations are based on the references under
     negative_binom_distribution() function Note
     """
 
@@ -166,7 +167,7 @@ def gamma_distribution(M, K, bin_centers):
     return gamma_dist
 
 
-def model_residuals(params, bin_centers, y, yerr=1):
+def model_residuals(params, bin_centers, y, yerr):
     """
     Residuals function for least squares fitting,
     K may be a fixed parameter
@@ -183,7 +184,7 @@ def model_residuals(params, bin_centers, y, yerr=1):
         probability of detecting speckles
 
     bin_centers : array
-        normalized bin centers
+        normalized speckle count bin centers
 
     yerr : array, optional
         standard error of y
@@ -192,6 +193,11 @@ def model_residuals(params, bin_centers, y, yerr=1):
     -------
     model_residual : array
         Residuals function for least squares fitting
+
+    Note
+    ----
+    These implementations are based on the references under
+    negative_binom_distribution() function Note
     """
     # create set of parameters
     M = params['M'].value
@@ -200,7 +206,7 @@ def model_residuals(params, bin_centers, y, yerr=1):
     return (y - negative_binom_distribution(K, M, bin_centers))/yerr
 
 
-def eval_binomal_dist(params, bin_centers, data, err=1):
+def eval_binomal_dist(params, bin_centers, data, err):
     """
     Function will minimize difference between probability of the detecting
     speckles and negative binomial distribution for the given set of
@@ -215,17 +221,22 @@ def eval_binomal_dist(params, bin_centers, data, err=1):
         average number of photons
 
     bin_centers : array
-        normalized bin centers
+        normalized speckle count bin centers
 
     data : array
         probability of detecting speckles
 
-    err : array, optional
-        standard error of y
+    err : array
+        standard error of data
 
     Returns
     -------
     final_result : array
+
+    Note
+    ----
+    These implementations are based on the references under
+    negative_binom_distribution() function Note
 
     """
     result = minimize(model_residuals, params, args=(bin_centers, data, err))
@@ -235,10 +246,13 @@ def eval_binomal_dist(params, bin_centers, data, err=1):
 def diffusive_motion_contrast_factor(times, relaxation_rate,
                                      contrast_factor, cf_baseline=0):
     """
+    This will provide the speckle contrast factor of samples undergoing
+    a diffusive motion.
+
     Parameters
     ----------
     times : array
-
+        integration times
 
     relaxation_rate : float
 
@@ -249,28 +263,68 @@ def diffusive_motion_contrast_factor(times, relaxation_rate,
     Return
     ------
     diff_contrast_factor : array
+        speckle contrast factor for samples undergoing a diffusive motion
+
+    Note
+    ----
+    integration times more information - geometric_series function in
+    skxray.core module
+
+    These implementations are based on the references under
+    negative_binom_distribution() function Note
 
     """
     co_eff = (np.exp(-2*relaxation_rate*times) - 1 +
-              2*relaxation_rate*times)/2*(relaxation_rate*times)**2
+              2*relaxation_rate*times)/(2*(relaxation_rate*times)**2)
 
     return contrast_factor*co_eff + cf_baseline
 
 
 def cf_residuals(params, times, data, err):
     """
+    The dynamic information of the sample motions extracted by fitting
+    experimental speckle contrast factor.
+
     Parameters
     ----------
-    params :
+    params : dict or Parameters
+        relaxation_rate - float, relaxation time associated with the
+        samples dynamics,
+        contrast_factor - float, optical contrast (speckle contrast),
+        cf_baseline - float, baseline of contrast factor (usually ~zero)
+        Have to give either as a dictionary or Parameters
+        # create a dictionary
+        {'relaxation_rate': 6.7, 'contrast_factor': 0.23, 'cf_baseline':1}
+
+        # create a set of Parameters
+        from lmfit import Parameters
+        params = Parameters()
+        params.add('contrast_factor',  value=0.22,  min=0.19, max=0.0.23)
+        params.add('relaxation_rate', value=6.7, min=6.68, max=6.74)
+        params.add('cf_baseline', value=0)
 
     times : array
+        integration times
 
     data : array
+        contrast factor for sample undergoing diffusive motion
 
     err : array
+        standard error of the contrast factor
 
     Returns
     --------
+    model_residual : array
+        Residuals function for least squares fitting
+
+    Note
+    ----
+    integration times more information - geometric_series function in
+    skxray.core module
+
+    These implementations are based on the references under
+    negative_binom_distribution() function Note
+
     """
     # create set of parameters
     relax_rate = params['relaxation_rate'].value
@@ -281,6 +335,106 @@ def cf_residuals(params, times, data, err):
                                                     cf, cf_baseline))
 
 
-def minimize_dm_cf(params, times, data, err=1):
+def minimize_dm_cf(params, times, data, err):
+    """
+
+    Parameters
+    ----------
+    params :dict or Parameters
+        relaxation_rate - float, relaxation time associated with the
+        samples dynamics,
+        contrast_factor - float, optical contrast (speckle contrast),
+        cf_baseline - float, baseline of contrast factor (usually ~zero)
+        Have to give either as a dictionary or Parameters
+        # create a dictionary
+        {'relaxation_rate': 6.7, 'contrast_factor': 0.23, 'cf_baseline':1}
+
+        # create a set of Parameters
+        from lmfit import Parameters
+        params = Parameters()
+        params.add('contrast_factor',  value=0.22,  min=0.19, max=0.0.23)
+        params.add('relaxation_rate', value=6.7, min=6.68, max=6.74)
+        params.add('cf_baseline', value=0)
+
+    times : array
+        integration times
+
+    data : array
+        contrast factor for sample undergoing diffusive motion
+
+    err : array
+        standard error of the contrast factor
+
+    Returns
+    -------
+     final_result : array
+        minimized fitting to results using least square model
+
+    Note
+    ----
+    integration times more information - geometric_series function in
+    skxray.core module
+
+    These implementations are based on the references under
+    negative_binom_distribution() function Note
+
+    """
     result = minimize(cf_residuals, params, args=(times, data, err))
     return data + result.residual
+
+
+def diffusive_coefficient(relaxation_rates, q_values):
+    """
+    For Brownian samples, the diffusive coefficient can be obtained
+
+    Parameters
+    ---------
+    relaxation_rates : array
+        relaxation rates of the sample Brownian motion
+
+    q_values : array
+        scattering vectors for each relaxation rates
+        (same shape as relaxation_rates)
+
+    Returns
+    -------
+    diff_co : float
+        diffusive coefficient for Brownian samples
+
+    Note
+    ----
+    These implementations are based on the references under
+    negative_binom_distribution() function Note
+
+    """
+    return relaxation_rates/(q_values**2)
+
+
+def diff_co_residuals(params, diff_co, q_values):
+    """
+    Parameters
+    ----------
+    params : dict or Parameters
+        relax_rate - float, relaxation time associated with the
+        samples dynamics,
+
+    diff_co : array
+        diffusive coefficients
+
+    q_values:
+
+    Return
+    ------
+
+    """
+    # create set of parameters
+    relax_rate = params['relaxation_rate'].value
+
+    return (diff_co - diffusive_coefficient(relax_rate, q_values))
+
+
+def minimize_diff_co(params, q_values,  diff_co, err):
+
+    result = minimize(diffusive_coefficient, params, args=(1/q_values**2,
+                                                           diff_co, err))
+    return diff_co + result.residual
