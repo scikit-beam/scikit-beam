@@ -286,17 +286,9 @@ def test_bin_edge2center():
 
 
 def test_small_verbosedict():
-    if six.PY2:
-        expected_string = ("You tried to access the key 'b' "
-                       "which does not exist.  "
-                       "The extant keys are: [u'a']")
-    elif six.PY3:
-        expected_string = ("You tried to access the key 'b' "
-                       "which does not exist.  "
-                       "The extant keys are: ['a']")
-    else:
-        # should never happen....
-        assert(False)
+    expected_string = ("You tried to access the key 'b' "
+                   "which does not exist.  "
+                   "The extant keys are: ['a']")
     dd = core.verbosedict()
     dd['a'] = 1
     assert_equal(dd['a'], 1)
