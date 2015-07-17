@@ -41,7 +41,7 @@ import logging
 logger = logging.getLogger(__name__)
 import numpy as np
 from scipy.optimize import minimize
-
+from clint.textui import progress
 
 def image_reduction(im, roi=None, bad_pixels=None):
     """
@@ -285,7 +285,6 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
 
     return phase
 
-
 def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
                scan_rows, scan_cols, scan_xstep, scan_ystep, energy, padding=0,
                weighting=0.5, solver='Nelder-Mead', roi=None, bad_pixels=None,
@@ -408,9 +407,8 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
     ffx = _rss_factory(len(ref_fx))
     ffy = _rss_factory(len(ref_fy))
     num_images = len(image_sequence)
-    steps = np.max((num_images // 100, 1))
     # Same calculation on each diffraction pattern
-    for index, im in enumerate(image_sequence):
+    for index, im in zip(progress.bar(range(num_images)), image_sequence):
         i, j = np.unravel_index(index, (scan_rows, scan_cols))
 
         # Dimension reduction along x and y direction
@@ -429,8 +427,6 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
         gy[i, j] = _gy
         ax[i, j] = _ax
         ay[i, j] = _ay
-        if (index+1) % steps == 0:
-            logger.debug('dpc {}% complete'.format(100*(index+1) // num_images))
 
     if scale:
         if pixel_size[0] != pixel_size[1]:
