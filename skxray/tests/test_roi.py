@@ -32,29 +32,19 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 import six
 import numpy as np
-import logging
 
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
-import sys
 
-from nose.tools import assert_equal, assert_true, assert_raises
+from nose.tools import assert_raises
 
-import skxray.correlation as corr
-import skxray.roi as roi
-import skxray.speckle_analysis as spe_vis
-
-from skxray.testing.decorators import known_fail_if
-import numpy.testing as npt
+import skxray.core.roi as roi
 
 from skimage import morphology
-from skimage.draw import circle_perimeter
 
 
 def test_roi_pixel_values():
@@ -65,8 +55,7 @@ def test_roi_pixel_values():
 
     # different shapes for the images and labels
     assert_raises(ValueError,
-                  lambda: spe_vis.roi_pixel_values(images,
-                                                   label_array))
+                  lambda: roi.roi_pixel_values(images, label_array))
     # create a label mask
     center = (8., 8.)
     inner_radius = 2.
@@ -75,7 +64,7 @@ def test_roi_pixel_values():
     edges = roi.ring_edges(inner_radius, width, spacing, num_rings=5)
     rings = roi.rings(edges, center, images.shape)
 
-    intensity_data, index = spe_vis.roi_pixel_values(images, rings)
+    intensity_data, index = roi.roi_pixel_values(images, rings)
     assert_array_equal(list(intensity_data.values())[0], ([1, 1, 1, 1, 1,
                                                            1, 1, 1, 1, 1,
                                                            1, 1, 1, 1, 1, 1]))
@@ -95,7 +84,7 @@ def test_roi_max_counts():
     label_array[img_stack1[0] < 20] = 1
     label_array[img_stack1[0] > 40] = 2
 
-    assert_array_equal(60, spe_vis.roi_max_counts(samples, label_array))
+    assert_array_equal(60, roi.roi_max_counts(samples, label_array))
 
 
 def test_static_test_sets():
@@ -105,7 +94,7 @@ def test_static_test_sets():
 
     # different shapes for the images and labels
     assert_raises(ValueError,
-                  lambda: spe_vis.mean_intensity(img_stack1, label_array))
+                  lambda: roi.mean_intensity(img_stack1, label_array))
     images1 = []
     for i in range(10):
         int_array = np.tril(i*np.ones(50))
@@ -125,11 +114,11 @@ def test_static_test_sets():
     label_array = roi.rectangles(roi_data, shape=(50, 50))
 
     # test mean_intensity function
-    average_intensity, index = spe_vis.mean_intensity(np.asarray(images1),
-                                                      label_array)
+    average_intensity, index = roi.mean_intensity(np.asarray(images1),
+                                                  label_array)
     # test mean_intensity_sets function
-    average_int_sets, index_list = spe_vis.mean_intensity_sets(samples,
-                                                               label_array)
+    average_int_sets, index_list = roi.mean_intensity_sets(samples,
+                                                           label_array)
 
     assert_array_equal((list(average_int_sets)[0][:, 0]),
                        [float(x) for x in range(0, 1000, 100)])
@@ -142,16 +131,16 @@ def test_static_test_sets():
                        [float(x) for x in range(0, 2000, 100)])
 
     # test combine_mean_intensity function
-    combine_mean_int = spe_vis.combine_mean_intensity(average_int_sets,
-                                                      index_list)
+    combine_mean_int = roi.combine_mean_intensity(average_int_sets,
+                                                  index_list)
 
     roi_data2 = np.array(([2, 30, 12, 15], [40, 20, 15, 10],
                           [20, 2, 4, 5]), dtype=np.int64)
 
     label_array2 = roi.rectangles(roi_data2, shape=(50, 50))
 
-    average_int2, index2 = spe_vis.mean_intensity(np.asarray(images1),
-                                                  label_array2)
+    average_int2, index2 = roi.mean_intensity(np.asarray(images1),
+                                              label_array2)
     index_list2 = [index_list, index2]
 
     average_int_sets.append(average_int2)
@@ -159,8 +148,8 @@ def test_static_test_sets():
     # raise ValueError when there is different labels in different image sets
     #  when trying to combine the values
     assert_raises(ValueError,
-                  lambda: spe_vis.combine_mean_intensity(average_int_sets,
-                                                         index_list2))
+                  lambda: roi.combine_mean_intensity(average_int_sets,
+                                                     index_list2))
 
 
 def test_circular_average():
@@ -172,7 +161,7 @@ def test_circular_average():
     labels = roi.rings(edges, calib_center, image.shape)
     image[labels == 1] = 10
     image[labels == 2] = 10
-    bin_cen, ring_avg = spe_vis.circular_average(image, calib_center, nx=6)
+    bin_cen, ring_avg = roi.circular_average(image, calib_center, nx=6)
 
     assert_array_almost_equal(bin_cen, [0.70710678, 2.12132034,
                                         3.53553391,  4.94974747,  6.36396103,
@@ -193,6 +182,6 @@ def test_roi_kymograph():
         int_array = i*np.ones(labels.shape)
         images.append(int_array)
 
-    kymograph_data = spe_vis.roi_kymograph(np.asarray(images), labels, num=1)
+    kymograph_data = roi.roi_kymograph(np.asarray(images), labels, num=1)
 
     assert_almost_equal(kymograph_data[:, 0],  np.arange(100).reshape(100, 1))
