@@ -83,8 +83,6 @@ def rectangles(coords, shape):
         top, bottom = np.max([row_coor, 0]), np.min([row_coor + row_val,
                                                      shape[1]])
 
-        area = (right - left) * (bottom - top)
-
         slc1 = slice(left, right)
         slc2 = slice(top, bottom)
 
