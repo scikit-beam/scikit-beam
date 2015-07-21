@@ -53,7 +53,8 @@ logger = logging.getLogger(__name__)
 
 def rectangles(coords, shape):
     """
-    This function wil provide the indices array for rectangle region of interests.
+    This function wil provide the indices array for rectangle region of
+    interests.
 
     Parameters
     ----------
@@ -491,10 +492,10 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
         circular integration of intensity
     """
     radial_val = utils.radial_grid(calibrated_center, image.shape,
-                                  pixel_size)
+                                   pixel_size)
 
     bin_edges, sums, counts = utils.bin_1D(np.ravel(radial_val),
-                                          np.ravel(image), nx)
+                                           np.ravel(image), nx)
     th_mask = counts > threshold
     ring_averages = sums[th_mask] / counts[th_mask]
 

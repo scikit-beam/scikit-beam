@@ -38,6 +38,7 @@ import logging
 import numpy as np
 
 logger = logging.getLogger(__name__)
+
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
 
@@ -143,19 +144,19 @@ def test_rings():
 
     # Test various illegal inputs
     assert_raises(ValueError,
-            lambda: roi.ring_edges(1, 2))  # need num_rings
+                  lambda: roi.ring_edges(1, 2))  # need num_rings
     # width incompatible with num_rings
     assert_raises(ValueError,
-            lambda: roi.ring_edges(1, [1, 2, 3], num_rings=2))
+                  lambda: roi.ring_edges(1, [1, 2, 3], num_rings=2))
     # too few spacings
     assert_raises(ValueError,
-            lambda: roi.ring_edges(1, [1, 2, 3], [1]))
+                  lambda: roi.ring_edges(1, [1, 2, 3], [1]))
     # too many spacings
     assert_raises(ValueError,
-            lambda: roi.ring_edges(1, [1, 2, 3], [1, 2, 3]))
+                  lambda: roi.ring_edges(1, [1, 2, 3], [1, 2, 3]))
     # num_rings conflicts with width, spacing
     assert_raises(ValueError,
-            lambda: roi.ring_edges(1, [1, 2, 3], [1, 2], 5))
+                  lambda: roi.ring_edges(1, [1, 2, 3], [1, 2], 5))
 
 
 def _helper_check(pixel_list, inds, num_pix, edges, center,
@@ -171,8 +172,7 @@ def _helper_check(pixel_list, inds, num_pix, edges, center,
     # get the indices into a grid
     zero_grid = np.zeros((img_dim[0], img_dim[1]))
     for r in range(num_qs):
-        vl = (edges[r][0] <= grid_values) & (grid_values
-                                                  < edges[r][1])
+        vl = (edges[r][0] <= grid_values) & (grid_values < edges[r][1])
         zero_grid[vl] = r + 1
 
     # check the num_pixels
@@ -356,4 +356,3 @@ def test_roi_kymograph():
     kymograph_data = roi.roi_kymograph(np.asarray(images), labels, num=1)
 
     assert_almost_equal(kymograph_data[:, 0],  np.arange(100).reshape(100, 1))
-
