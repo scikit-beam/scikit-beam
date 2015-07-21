@@ -65,9 +65,8 @@ def test_roi_pixel_values():
     rings = roi.rings(edges, center, images.shape)
 
     intensity_data, index = roi.roi_pixel_values(images, rings)
-    assert_array_equal(list(intensity_data.values())[0], ([1, 1, 1, 1, 1,
-                                                           1, 1, 1, 1, 1,
-                                                           1, 1, 1, 1, 1, 1]))
+    assert_array_equal(intensity_data[0], ([1, 1, 1, 1, 1, 1, 1, 1,
+                                            1, 1, 1, 1, 1, 1, 1, 1]))
     assert_array_equal([1, 2, 3, 4, 5], index)
 
 

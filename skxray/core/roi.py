@@ -341,20 +341,20 @@ def roi_pixel_values(image, labels, index=None):
 
     Returns
     -------
-    roi_pix : dict
+    roi_pix : list
         intensities of the ROI's of the labeled array according
         to the pixel list
-        {ROI 1 : intensities of the pixels of ROI 1, ROI 2 : intensities of
-         the pixels of ROI 2}
-    """
 
+    """
     if labels.shape != image.shape:
         raise ValueError("Shape of the image data should be equal to"
                          " shape of the labeled array")
     if index is None:
         index = np.arange(1, np.max(labels) + 1)
 
-    roi_pix = {n: image[labels == n] for n in index}
+    roi_pix = []
+    for n in index:
+        roi_pix.append(image[labels == n])
     return roi_pix, index
 
 
@@ -530,7 +530,7 @@ def roi_kymograph(images, labels, num):
     """
     roi_kymo = []
     for n, img in enumerate(images):
-        roi_kymo.append(list(roi_pixel_values(img,
-                                              labels == num)[0].values())[0])
+        roi_kymo.append((roi_pixel_values(img,
+                                          labels == num)[0])[0])
 
     return np.matrix(roi_kymo)
