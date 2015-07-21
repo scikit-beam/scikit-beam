@@ -42,6 +42,7 @@ from __future__ import absolute_import, division, print_function
 
 import collections
 import logging
+import scipy.ndimage.measurements as ndim
 
 import numpy as np
 
@@ -52,7 +53,8 @@ logger = logging.getLogger(__name__)
 
 def rectangles(coords, shape):
     """
-    This function wil provide the indices array for rectangle region of interests.
+    This function wil provide the indices array for rectangle region of
+    interests.
 
     Parameters
     ----------
@@ -81,8 +83,6 @@ def rectangles(coords, shape):
                                                      shape[0]])
         top, bottom = np.max([row_coor, 0]), np.min([row_coor + row_val,
                                                      shape[1]])
-
-        area = (right - left) * (bottom - top)
 
         slc1 = slice(left, right)
         slc2 = slice(top, bottom)
@@ -178,7 +178,7 @@ def ring_edges(inner_radius, width, spacing=0, num_rings=None):
     >>> ring_edges(inner_radius=1, width=5, num_rings=2)
     [(1, 6), (6, 11)]
     # Make three rings of different widths and spacings.
-    # Since the width and spacings are given individually, the number of 
+    # Since the width and spacings are given individually, the number of
     # rings here is simply inferred.
     >>> ring_edges(inner_radius=1, width=(5, 4, 3), spacing=(1, 2))
     [(1, 6), (7, 11), (13, 16)]
@@ -292,3 +292,246 @@ def segmented_rings(edges, segments, center, shape, offset_angle=0):
         label_array[indices] = ind_grid[indices] + (len_segments - 1) * i
 
     return label_array
+
+
+def roi_max_counts(images_sets, label_array):
+    """
+    Return the brightest pixel in any ROI in any image in the image set.
+
+    Parameters
+    ----------
+    images_sets : array
+        iterable of 4D arrays
+        shapes is: (len(images_sets), )
+
+    label_array : array
+        labeled array; 0 is background.
+        Each ROI is represented by a distinct label (i.e., integer).
+
+    Returns
+    -------
+    max_counts : int
+        maximum pixel counts
+    """
+    max_cts = 0
+    for img_set in images_sets:
+        for img in img_set:
+            max_cts = max(max_cts, ndim.maximum(img, label_array))
+    return max_cts
+
+
+def roi_pixel_values(image, labels, index=None):
+    """
+    This will provide intensities of the ROI's of the labeled array
+    according to the pixel list
+    eg: intensities of the rings of the labeled array
+
+    Parameters
+    ----------
+    image : array
+        image data dimensions are: (rr, cc)
+
+    labels : array
+        labeled array; 0 is background.
+        Each ROI is represented by a distinct label (i.e., integer).
+
+    index_list : list, optional
+        labels list
+        eg: 5 ROI's
+        index = [1, 2, 3, 4, 5]
+
+    Returns
+    -------
+    roi_pix : list
+        intensities of the ROI's of the labeled array according
+        to the pixel list
+
+    """
+    if labels.shape != image.shape:
+        raise ValueError("Shape of the image data should be equal to"
+                         " shape of the labeled array")
+    if index is None:
+        index = np.arange(1, np.max(labels) + 1)
+
+    roi_pix = []
+    for n in index:
+        roi_pix.append(image[labels == n])
+    return roi_pix, index
+
+
+def mean_intensity_sets(images_set, labels):
+    """
+    Mean intensities for ROIS' of the labeled array for different image sets
+
+    Parameters
+    ----------
+    images_set : array
+        images sets
+        shapes is: (len(images_sets), )
+        one images_set is iterable of 2D arrays dimensions are: (rr, cc)
+
+    labels : array
+        labeled array; 0 is background.
+        Each ROI is represented by a distinct label (i.e., integer).
+
+    Returns
+    -------
+    mean_intensity_list : list
+        average intensity of each ROI as a list
+        shape len(images_sets)
+
+    index_list : list
+        labels list for each image set
+
+    """
+    return tuple(map(list,
+                     zip(*[mean_intensity(im,
+                                          labels) for im in images_set])))
+
+
+def mean_intensity(images, labels, index=None):
+    """
+    Mean intensities for ROIS' of the labeled array for set of images
+
+    Parameters
+    ----------
+    images : array
+        Intensity array of the images
+        dimensions are: (num_img, num_rows, num_cols)
+
+    labels : array
+        labeled array; 0 is background.
+        Each ROI is represented by a distinct label (i.e., integer).
+
+    index : list
+        labels list
+        eg: 5 ROI's
+        index = [1, 2, 3, 4, 5]
+
+    Returns
+    -------
+    mean_intensity : array
+        mean intensity of each ROI for the set of images as an array
+        shape (len(images), number of labels)
+
+    """
+    if labels.shape != images[0].shape[0:]:
+        raise ValueError("Shape of the images should be equal to"
+                         " shape of the label array")
+    if index is None:
+        index = np.arange(1, np.max(labels) + 1)
+
+    mean_intensity = np.zeros((images.shape[0], index.shape[0]))
+    for n, img in enumerate(images):
+        mean_intensity[n] = ndim.mean(img, labels, index=index)
+
+    return mean_intensity, index
+
+
+def combine_mean_intensity(mean_int_list, index_list):
+    """
+    Combine mean intensities of the images(all images sets) for each ROI
+    if the labels list of all the images are same
+
+    Parameters
+    ----------
+    mean_int_list : list
+        mean intensity of each ROI as a list
+        shapes is: (len(images_sets), )
+
+    index_list : list
+        labels list for each image sets
+
+    img_set_names : list
+
+    Returns
+    -------
+    combine_mean_int : array
+        combine mean intensities of image sets for each ROI of labeled array
+        shape (number of images in all image sets, number of labels)
+
+    """
+    if np.all(map(lambda x: x == index_list[0], index_list)):
+        combine_mean_intensity = np.vstack(mean_int_list)
+    else:
+        raise ValueError("Labels list for the image sets are different")
+
+    return combine_mean_intensity
+
+
+def circular_average(image, calibrated_center, threshold=0, nx=100,
+                     pixel_size=None):
+    """
+    Circular average(radial integration) of the intensity distribution of
+    the image data.
+
+    Parameters
+    ----------
+    image : array
+        input image
+
+    calibrated_center : tuple
+        The center in pixels-units (row, col)
+
+    threshold : int, optional
+        threshold value to mask
+
+    nx : int, optional
+        number of bins
+
+    pixel_size : tuple, optional
+        The size of a pixel in real units. (height, width). (mm)
+
+    Returns
+    -------
+    bin_centers : array
+        bin centers from bin edges
+        shape [nx]
+
+    ring_averages : array
+        circular integration of intensity
+    """
+    radial_val = utils.radial_grid(calibrated_center, image.shape,
+                                   pixel_size)
+
+    bin_edges, sums, counts = utils.bin_1D(np.ravel(radial_val),
+                                           np.ravel(image), nx)
+    th_mask = counts > threshold
+    ring_averages = sums[th_mask] / counts[th_mask]
+
+    bin_centers = utils.bin_edges_to_centers(bin_edges)[th_mask]
+
+    return bin_centers, ring_averages
+
+
+def roi_kymograph(images, labels, num):
+    """
+    This function will provide data for graphical representation of pixels
+    variation over time for required ROI.
+
+    Parameters
+    ----------
+    images : array
+        Intensity array of the images
+        dimensions are: (num_img, num_rows, num_cols)
+
+    labels : array
+        labeled array; 0 is background.
+        Each ROI is represented by a distinct label (i.e., integer).
+
+    num : int
+        required ROI label
+
+    Returns
+    -------
+    roi_kymograph : array
+        data for graphical representation of pixels variation over time
+        for required ROI
+
+    """
+    roi_kymo = []
+    for n, img in enumerate(images):
+        roi_kymo.append((roi_pixel_values(img,
+                                          labels == num)[0])[0])
+
+    return np.matrix(roi_kymo)
