@@ -1,5 +1,4 @@
-from __future__ import (division, unicode_literals, print_function,
-                        absolute_import)
+from __future__ import absolute_import, division, print_function
 import six
 import os
 import importlib
@@ -41,7 +40,8 @@ def _openess_tester(module):
 def test_openness():
     """
     Ensure that our library does not contain sexist (intentional or otherwise)
-    language. For tips on writing gender-neutrally, see http://www.lawprose.org/blog/?p=499
+    language. For tips on writing gender-neutrally,
+    see http://www.lawprose.org/blog/?p=499
 
     Notes
     -----
@@ -60,8 +60,9 @@ def test_openness():
             yield _everybody_welcome_here, f.read()
 
 
-_IGNORE_FILE_EXT = ['pyc', 'so', 'ipynb']
-_IGNORE_DIRS = ['__pycache__', '.git', 'cover', 'build', 'dist', 'tests']
+_IGNORE_FILE_EXT = ['pyc', 'so', 'ipynb', 'jpg', 'txt', 'zip']
+_IGNORE_DIRS = ['__pycache__', '.git', 'cover', 'build', 'dist', 'tests',
+                '.ipynb_checkpoints', 'SOFC']
 
 
 def get_modules_in_library(library, ignorefileext=None, ignoredirs=None):

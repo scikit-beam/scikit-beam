@@ -39,12 +39,9 @@
     (Output into different file formats, .chi, .dat and .xye)
 
 """
-from __future__ import (absolute_import, division,
-                        unicode_literals, print_function)
+from __future__ import absolute_import, division, print_function
 import numpy as np
-import scipy.io
 import os
-import sys
 import logging
 logger = logging.getLogger(__name__)
 
