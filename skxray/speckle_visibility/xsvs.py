@@ -49,17 +49,25 @@ import numpy as np
 from six.moves import zip
 from six import string_types
 
-import skxray.correlation as corr
-import skxray.roi as roi
-import skxray.speckle_analysis as spe_vis
-from skxray.core import bin_edges_to_centers
+import skxray.core.correlation as corr
+import skxray.core.roi as roi
+from skxray.core.utils import bin_edges_to_centers
 
 import logging
 logger = logging.getLogger(__name__)
 
 
+"""
+    X-ray speckle visibility spectroscopy(XSVS) - Dynamic information of
+    the speckle patterns  are obtained by analyzing the photon statistics
+    and calculating the speckle contrast in single scattering patterns.
+
+    This module will provide XSVS analysis tools
+"""
+
 def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50):
     """
+    This function will provide the speckle count probability density
     Parameters
     ----------
     sample_dict : array
@@ -98,13 +106,13 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50):
        time-varying dynamics" Rev. Sci. Instrum. vol 76, p  093110, 2005.
 
     """
-    max_cts = spe_vis.max_counts(image_sets, label_array)
+    max_cts = roi.max_counts(image_sets, label_array)
 
     # number of ROI's
     num_roi = np.max(label_array)
 
     # create integration times
-    time_bin = spe_vis.time_series(timebin_num, number_of_img)
+    time_bin = roi.geometric_series(timebin_num, number_of_img)
 
     # number of items in the time bin
     num_times = len(time_bin)
