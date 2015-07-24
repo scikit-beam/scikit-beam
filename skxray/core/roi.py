@@ -531,7 +531,6 @@ def roi_kymograph(images, labels, num):
     """
     roi_kymo = []
     for n, img in enumerate(images):
-        roi_kymo.append((roi_pixel_values(img,
-                                          labels == num)[0])[0])
+        roi_kymo.append((roi_pixel_values(img, labels == num)[0])[0])
 
-    return np.matrix(roi_kymo)
+    return np.vstack(roi_kymo)
