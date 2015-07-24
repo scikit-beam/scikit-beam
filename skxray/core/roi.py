@@ -41,12 +41,11 @@ simple shapes such as rectangles and concentric circles.
 from __future__ import absolute_import, division, print_function
 
 import collections
-import logging
 import scipy.ndimage.measurements as ndim
-
 import numpy as np
-
+import pandas as pd
 from . import utils
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -358,38 +357,33 @@ def roi_pixel_values(image, labels, index=None):
         roi_pix.append(image[labels == n])
     return roi_pix, index
 
-
-def mean_intensity_sets(images_set, labels):
-    """
-    Mean intensities for ROIS' of the labeled array for different image sets
-
+def mean_intensity_sets(data_dict, labeled_array):
+    """Create a dataframe with columns as the data sets and rows as the ROIs
+    
     Parameters
     ----------
-    images_set : array
-        images sets
-        shapes is: (len(images_sets), )
-        one images_set is iterable of 2D arrays dimensions are: (rr, cc)
-
-    labels : array
+    data_dict : dict
+        Dictionary of 2-D image stacks. keys are data set names, values are
+        2-D image stacks
+    labeled_array : array
         labeled array; 0 is background.
         Each ROI is represented by a distinct label (i.e., integer).
 
     Returns
     -------
-    mean_intensity_list : list
-        average intensity of each ROI as a list
-        shape len(images_sets)
-
-    index_list : list
-        labels list for each image set
-
+    dataframe : pd.DataFrame
+        Pandas dataframe where the columns are the data sets and the rows are
+        the 1-D roi's
     """
-    return tuple(map(list,
-                     zip(*[mean_intensity(im,
-                                          labels) for im in images_set])))
+    series_dict = {}
+    for name, data in data_dict.items():
+        by_roi, roi_list = _mean_intensity(data, labeled_array)
+        data = [by_roi[:, i] for i in range(by_roi.shape[1])]
+        series_dict[name] = pd.Series(data=data, index=['roi%s' % idx for idx in roi_list])
+    return pd.DataFrame(series_dict)
+    
 
-
-def mean_intensity(images, labels, index=None):
+def _mean_intensity(images, labeled_array, index=None):
     """
     Mean intensities for ROIS' of the labeled array for set of images
 
@@ -399,31 +393,35 @@ def mean_intensity(images, labels, index=None):
         Intensity array of the images
         dimensions are: (num_img, num_rows, num_cols)
 
-    labels : array
+    labeled_array : array
         labeled array; 0 is background.
         Each ROI is represented by a distinct label (i.e., integer).
 
-    index : list
-        labels list
-        eg: 5 ROI's
-        index = [1, 2, 3, 4, 5]
+    index : int, list, optional
+        The ROI's to use. Defaults to using all nonzero labels in the labeled array
 
     Returns
     -------
-    mean_intensity : array
+    mean_intensity : list
         mean intensity of each ROI for the set of images as an array
         shape (len(images), number of labels)
 
     """
-    if labels.shape != images[0].shape[0:]:
+    if labeled_array.shape != images[0].shape[0:]:
         raise ValueError("Shape of the images should be equal to"
                          " shape of the label array")
     if index is None:
-        index = np.arange(1, np.max(labels) + 1)
+        index = np.arange(np.max(labeled_array))+1
+    try:
+        len(index)
+    except TypeError:
+        index = [index]
+    index = np.asarray(index)
 
     mean_intensity = np.zeros((images.shape[0], index.shape[0]))
+    
     for n, img in enumerate(images):
-        mean_intensity[n] = ndim.mean(img, labels, index=index)
+        mean_intensity[n] = ndim.mean(img, labeled_array, index=index)
 
     return mean_intensity, index
 
