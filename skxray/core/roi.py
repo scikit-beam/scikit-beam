@@ -428,7 +428,7 @@ def mean_intensity(images, labels, index=None):
     return mean_intensity, index
 
 
-def combine_mean_intensity(mean_int_list, index_list):
+def combine_mean_intensity(mean_int_list, bad_data_indices):
     """
     Combine mean intensities of the images(all images sets) for each ROI
     if the labels list of all the images are same
@@ -438,25 +438,27 @@ def combine_mean_intensity(mean_int_list, index_list):
     mean_int_list : list
         mean intensity of each ROI as a list
         shapes is: (len(images_sets), )
-
-    index_list : list
-        labels list for each image sets
-
-    img_set_names : list
+    bad_data_indices : int, list
+        The indices of `mean_int_list` and `data_labels` that should be removed
+        before the data set is recombined
 
     Returns
     -------
-    combine_mean_int : array
-        combine mean intensities of image sets for each ROI of labeled array
-        shape (number of images in all image sets, number of labels)
-
+    recombined_rois : list
+        Recombine the data set so that each element in the list is one ROI
     """
-    if np.all(map(lambda x: x == index_list[0], index_list)):
-        combine_mean_intensity = np.vstack(mean_int_list)
-    else:
-        raise ValueError("Labels list for the image sets are different")
-
-    return combine_mean_intensity
+    # force the bad_data_indices into a list
+    if not isinstance(bad_data_indices, list):
+        bad_data_indices = [bad_data_indices]
+    good_data = [d for idx, d in enumerate(mean_int_list)
+                 if idx not in bad_data_indices]
+    # turn the data into a 2-D numpy array and take the transpose
+    data = np.vstack(good_data).T
+    # turn the data back into a list
+    listified = [data[col] for col in range(data.shape[0])]
+    
+    # format and return the list of good data
+    return listified
 
 
 def circular_average(image, calibrated_center, threshold=0, nx=100,
