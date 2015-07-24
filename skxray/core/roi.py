@@ -356,6 +356,7 @@ def roi_pixel_values(image, labels, index=None):
     for n in index:
         roi_pix.append(image[labels == n])
     return roi_pix, index
+    
 
 def mean_intensity_sets(data_dict, labeled_array):
     """Create a dataframe with columns as the data sets and rows as the ROIs
