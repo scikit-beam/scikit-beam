@@ -262,7 +262,8 @@ def test_static_test_sets():
     img_stack1 = np.random.randint(0, 60, size=(50, ) + (50, 50))
 
     label_array = np.zeros((25, 25))
-
+    
+    # TODO fix this test
     # different shapes for the images and labels
     assert_raises(ValueError,
                   lambda: roi.mean_intensity(img_stack1, label_array))
@@ -328,10 +329,19 @@ def test_roi_kymograph():
     labels = roi.rings(edges, calib_center, (50, 50))
 
     images = []
-    for i in range(100):
+    num_images = 100
+    for i in range(num_images):
         int_array = i*np.ones(labels.shape)
         images.append(int_array)
 
     kymograph_data = roi.roi_kymograph(np.asarray(images), labels, num=1)
-
-    assert_almost_equal(kymograph_data[:, 0],  np.arange(100).reshape(100, 1))
+    # make sure the the return array has the expected dimensions
+    expected_shape = (num_images, np.sum(labels[labels==1]))
+    assert kymograph_data.shape[0] == expected_shape[0]
+    assert kymograph_data.shape[1] == expected_shape[1]
+    # make sure we got one element from each image
+    assert np.all(kymograph_data[:, 0] == np.arange(num_images))
+    # given the input data, every row of kymograph_data should be the same
+    # number
+    for row in kymograph_data:
+        assert np.all(row == row[0])
