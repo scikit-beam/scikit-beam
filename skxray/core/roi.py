@@ -480,15 +480,11 @@ def roi_kymograph(images, labels, num):
     Parameters
     ----------
     images : array
-        Intensity array of the images
-        dimensions are: (num_img, num_rows, num_cols)
-
+        Image stack. dimensions are: (num_img, num_rows, num_cols)
     labels : array
-        labeled array; 0 is background.
-        Each ROI is represented by a distinct label (i.e., integer).
-
+        labeled array; 0 is background. Each ROI is represented by an integer
     num : int
-        required ROI label
+        The ROI to turn into a kymograph
 
     Returns
     -------
