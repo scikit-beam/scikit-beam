@@ -285,9 +285,6 @@ def test_static_test_sets():
 
     label_array = roi.rectangles(roi_data, shape=(50, 50))
 
-    # test mean_intensity function
-    average_intensity, index = roi.mean_intensity(np.asarray(images1),
-                                                  label_array)
     # test mean_intensity_sets function
     average_int_sets, index_list = roi.mean_intensity_sets(samples,
                                                            label_array)
