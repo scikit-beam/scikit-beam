@@ -427,39 +427,6 @@ def _mean_intensity(images, labeled_array, index=None):
     return mean_intensity, index
 
 
-def combine_mean_intensity(mean_int_list, bad_data_indices):
-    """
-    Combine mean intensities of the images(all images sets) for each ROI
-    if the labels list of all the images are same
-
-    Parameters
-    ----------
-    mean_int_list : list
-        mean intensity of each ROI as a list
-        shapes is: (len(images_sets), )
-    bad_data_indices : int, list
-        The indices of `mean_int_list` and `data_labels` that should be removed
-        before the data set is recombined
-
-    Returns
-    -------
-    recombined_rois : list
-        Recombine the data set so that each element in the list is one ROI
-    """
-    # force the bad_data_indices into a list
-    if not isinstance(bad_data_indices, list):
-        bad_data_indices = [bad_data_indices]
-    good_data = [d for idx, d in enumerate(mean_int_list)
-                 if idx not in bad_data_indices]
-    # turn the data into a 2-D numpy array and take the transpose
-    data = np.vstack(good_data).T
-    # turn the data back into a list
-    listified = [data[col] for col in range(data.shape[0])]
-    
-    # format and return the list of good data
-    return listified
-
-
 def circular_average(image, calibrated_center, threshold=0, nx=100,
                      pixel_size=None):
     """
