@@ -266,7 +266,7 @@ def test_static_test_sets():
     # TODO fix this test
     # different shapes for the images and labels
     assert_raises(ValueError,
-                  lambda: roi.mean_intensity(img_stack1, label_array))
+                  lambda: roi._mean_intensity(img_stack1, label_array))
     images1 = []
     for i in range(10):
         int_array = np.tril(i*np.ones(50))
@@ -279,13 +279,13 @@ def test_static_test_sets():
         int_array[int_array == 0] = i*100
         images2.append(int_array)
 
-    samples = np.array((np.asarray(images1), np.asarray(images2)))
+    samples = {'sample1': np.asarray(images1), 'sample2': np.asarray(images2)}
 
     roi_data = np.array(([2, 30, 12, 15], [40, 20, 15, 10]), dtype=np.int64)
 
     label_array = roi.rectangles(roi_data, shape=(50, 50))
 
-    # test mean_intensity_sets function
+    # test _mean_intensity_sets function
     average_int_sets, index_list = roi.mean_intensity_sets(samples,
                                                            label_array)
 
