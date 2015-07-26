@@ -321,7 +321,7 @@ def test_circular_average():
                                          0., 0.], decimal=6)
 
 
-def test_roi_kymograph():
+def test_kymograph():
     calib_center = (25, 25)
     inner_radius = 5
 
@@ -334,7 +334,7 @@ def test_roi_kymograph():
         int_array = i*np.ones(labels.shape)
         images.append(int_array)
 
-    kymograph_data = roi.roi_kymograph(np.asarray(images), labels, num=1)
+    kymograph_data = roi.kymograph(np.asarray(images), labels, num=1)
     # make sure the the return array has the expected dimensions
     expected_shape = (num_images, np.sum(labels[labels==1]))
     assert kymograph_data.shape[0] == expected_shape[0]
