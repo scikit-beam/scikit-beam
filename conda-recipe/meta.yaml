@@ -25,6 +25,7 @@ requirements:
     - scikit-image
     - lmfit
     - netcdf4
+    - pandas
 
 test:
   requires:
