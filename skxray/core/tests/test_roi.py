@@ -301,27 +301,6 @@ def test_static_test_sets():
     assert_array_equal((list(average_int_sets)[1][:, 1]),
                        [float(x) for x in range(0, 2000, 100)])
 
-    # test combine_mean_intensity function
-    combine_mean_int = roi.combine_mean_intensity(average_int_sets,
-                                                  index_list)
-
-    roi_data2 = np.array(([2, 30, 12, 15], [40, 20, 15, 10],
-                          [20, 2, 4, 5]), dtype=np.int64)
-
-    label_array2 = roi.rectangles(roi_data2, shape=(50, 50))
-
-    average_int2, index2 = roi.mean_intensity(np.asarray(images1),
-                                              label_array2)
-    index_list2 = [index_list, index2]
-
-    average_int_sets.append(average_int2)
-
-    # raise ValueError when there is different labels in different image sets
-    #  when trying to combine the values
-    assert_raises(ValueError,
-                  lambda: roi.combine_mean_intensity(average_int_sets,
-                                                     index_list2))
-
 
 def test_circular_average():
     image = np.zeros((12, 12))
