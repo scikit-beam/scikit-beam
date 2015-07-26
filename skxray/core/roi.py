@@ -472,7 +472,7 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
     return bin_centers, ring_averages
 
 
-def roi_kymograph(images, labels, num):
+def kymograph(images, labels, num):
     """
     This function will provide data for graphical representation of pixels
     variation over time for required ROI.
