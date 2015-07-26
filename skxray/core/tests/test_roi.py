@@ -263,10 +263,6 @@ def test_static_test_sets():
 
     label_array = np.zeros((25, 25))
     
-    # TODO fix this test
-    # different shapes for the images and labels
-    assert_raises(ValueError,
-                  lambda: roi._mean_intensity(img_stack1, label_array))
     images1 = []
     for i in range(10):
         int_array = np.tril(i*np.ones(50))
