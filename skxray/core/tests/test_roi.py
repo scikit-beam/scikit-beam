@@ -47,7 +47,7 @@ from nose.tools import assert_equal, assert_true, assert_raises
 import skxray.core.roi as roi
 import skxray.core.correlation as corr
 import skxray.core.utils as core
-
+import itertools
 from skimage import morphology
 
 
@@ -282,18 +282,24 @@ def test_static_test_sets():
     label_array = roi.rectangles(roi_data, shape=(50, 50))
 
     # test _mean_intensity_sets function
-    average_int_sets, index_list = roi.mean_intensity_sets(samples,
-                                                           label_array)
+    average_int_sets = roi.mean_intensity_sets(samples, label_array)
 
-    assert_array_equal((list(average_int_sets)[0][:, 0]),
-                       [float(x) for x in range(0, 1000, 100)])
-    assert_array_equal((list(average_int_sets)[1][:, 0]),
-                       [float(x) for x in range(0, 20, 1)])
-
-    assert_array_equal((list(average_int_sets)[0][:, 1]),
-                       [float(x) for x in range(0, 10, 1)])
-    assert_array_equal((list(average_int_sets)[1][:, 1]),
-                       [float(x) for x in range(0, 2000, 100)])
+    return_values = [
+        average_int_sets.sample1.roi1,
+        average_int_sets.sample2.roi1,
+        average_int_sets.sample1.roi2,
+        average_int_sets.sample2.roi2,
+    ]
+    expected_values = [
+        np.asarray([float(x) for x in range(0, 1000, 100)]),
+        np.asarray([float(x) for x in range(0, 20, 1)]),
+        np.asarray([float(x) for x in range(0, 10, 1)]),
+        np.asarray([float(x) for x in range(0, 2000, 100)])
+    ]
+    err_msg = ['roi%s of sample%s is incorrect' % (i, j)
+           for i, j in itertools.product((1, 2), (1, 2))]
+    for returned, expected, err in zip(return_values, expected_values, err_msg):
+        assert_array_equal(returned, expected, err_msg=err, verbose=True)
 
 
 def test_circular_average():
