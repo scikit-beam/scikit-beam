@@ -602,32 +602,30 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
 
 
 def radial_grid(center, shape, pixel_size=None):
-    """
-    Make a grid of radial positions.
+    """Convert a cartesian grid (x,y) to the radius relative to some center
 
     Parameters
     ----------
     center : tuple
         point in image where r=0; may be a float giving subpixel precision.
         Order is (rr, cc).
-
     shape: tuple
         Image shape which is used to determine the maximum extent of output
-        pixel coordinates. Order is (rr, cc).
+        pixel coordinates.
+        Order is (rr, cc).
 
     Returns
     -------
     r : array
-        The L2 norm of the distance of each pixel from the calibrated center.
+        The distance of each pixel from `center`
+        Shape of the array is equal to `shape`
     """
 
     if pixel_size is None:
         pixel_size = (1, 1)
 
-    X, Y = np.meshgrid(pixel_size[1] * (np.arange(shape[1]) -
-                                        center[1]),
-                       pixel_size[0] * (np.arange(shape[0]) -
-                                        center[0]))
+    X, Y = np.meshgrid(pixel_size[1] * (np.arange(shape[1]) - center[1]),
+                       pixel_size[0] * (np.arange(shape[0]) - center[0]))
     return np.sqrt(X*X + Y*Y)
 
 

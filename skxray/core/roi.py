@@ -399,7 +399,8 @@ def _mean_intensity(images, labeled_array, index=None):
         Each ROI is represented by a distinct label (i.e., integer).
 
     index : int, list, optional
-        The ROI's to use. Defaults to using all nonzero labels in the labeled array
+        The ROI's to use. Defaults to using the range 1..N where N is the max
+        of the labeled array + 1
 
     Returns
     -------
@@ -429,35 +430,31 @@ def _mean_intensity(images, labeled_array, index=None):
 
 def circular_average(image, calibrated_center, threshold=0, nx=100,
                      pixel_size=None):
-    """
-    Circular average(radial integration) of the intensity distribution of
-    the image data.
+    """Circular average of the the image data
+    
+    The circular average is also known as the radial integration
 
     Parameters
     ----------
     image : array
-        input image
-
+        Image to compute the average as a function of radius
     calibrated_center : tuple
-        The center in pixels-units (row, col)
-
+        The center of the image in pixel units
+        argument order should be (row, col)
     threshold : int, optional
-        threshold value to mask
-
+        Ignore counts above `threshold`
     nx : int, optional
-        number of bins
-
+        Number of bins in R. Defaults to 100
     pixel_size : tuple, optional
-        The size of a pixel in real units. (height, width). (mm)
+        The size of a pixel (in a real unit, like mm).
+        argument order should be (pixel_height, pixel_width)
 
     Returns
     -------
     bin_centers : array
-        bin centers from bin edges
-        shape [nx]
-
+        The center of each bin in R. shape is (nx, )
     ring_averages : array
-        circular integration of intensity
+        Radial average of the image. shape is (nx, ).
     """
     radial_val = utils.radial_grid(calibrated_center, image.shape,
                                    pixel_size)
