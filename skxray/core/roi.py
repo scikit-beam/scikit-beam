@@ -393,25 +393,26 @@ def _mean_intensity(images, labeled_array, index=None):
     images : array
         Intensity array of the images
         dimensions are: (num_img, num_rows, num_cols)
-
     labeled_array : array
         labeled array; 0 is background.
         Each ROI is represented by a distinct label (i.e., integer).
-
     index : int, list, optional
         The ROI's to use. Defaults to using the range 1..N where N is the max
         of the labeled array + 1
 
     Returns
     -------
-    mean_intensity : list
+    mean_intensity : array
         mean intensity of each ROI for the set of images as an array
-        shape (len(images), number of labels)
-
+        shape is (len(images), len(index))
+    index : list
+        The column labels for `shape`
     """
     if labeled_array.shape != images[0].shape[0:]:
-        raise ValueError("Shape of the images should be equal to"
-                         " shape of the label array")
+        raise ValueError(
+            "`images` shape (%s) needs to be equal to the labeled_array` shape"
+            "(%s)" % (images[0].shape, labeled_array.shape))
+    # handle various input for `index`
     if index is None:
         index = np.arange(np.max(labeled_array))+1
     try:
@@ -419,12 +420,12 @@ def _mean_intensity(images, labeled_array, index=None):
     except TypeError:
         index = [index]
     index = np.asarray(index)
-
-    mean_intensity = np.zeros((images.shape[0], index.shape[0]))
-    
+    # pre-allocate an array for performance
+    # might be able to use list comprehension to make this faster
+    mean_intensity = np.zeros((images.shape[0], len(index)))
     for n, img in enumerate(images):
+        # use a mean that is mask-aware
         mean_intensity[n] = ndim.mean(img, labeled_array, index=index)
-
     return mean_intensity, index
 
 
