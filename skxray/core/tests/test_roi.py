@@ -281,7 +281,6 @@ def test_static_test_sets():
 
     label_array = roi.rectangles(roi_data, shape=(50, 50))
 
-    # test _mean_intensity_sets function
     average_int_sets = roi.mean_intensity_sets(samples, label_array)
 
     return_values = [
