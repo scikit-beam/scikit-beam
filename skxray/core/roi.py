@@ -358,55 +358,30 @@ def roi_pixel_values(image, labels, index=None):
     return roi_pix, index
     
 
-def mean_intensity_sets(data_dict, labeled_array):
-    """Create a dataframe with columns as the data sets and rows as the ROIs
-    
-    Parameters
-    ----------
-    data_dict : dict
-        Dictionary of 2-D image stacks. keys are data set names, values are
-        2-D image stacks
-    labeled_array : array
-        labeled array; 0 is background.
-        Each ROI is represented by a distinct label (i.e., integer).
-
-    Returns
-    -------
-    dataframe : pd.DataFrame
-        Pandas dataframe where the columns are the data sets and the rows are
-        the 1-D roi's
-    """
-    series_dict = {}
-    for name, data in data_dict.items():
-        by_roi, roi_list = _mean_intensity(data, labeled_array)
-        data = [by_roi[:, i] for i in range(by_roi.shape[1])]
-        series_dict[name] = pd.Series(data=data, index=['roi%s' % idx for idx in roi_list])
-    return pd.DataFrame(series_dict)
-    
-
-def _mean_intensity(images, labeled_array, index=None):
-    """
-    Mean intensities for ROIS' of the labeled array for set of images
+def mean_intensity(images, labeled_array, index=None):
+    """Compute the mean intensity for each ROI in the image list
 
     Parameters
     ----------
-    images : array
-        Intensity array of the images
-        dimensions are: (num_img, num_rows, num_cols)
+    images : list
+        List of images
     labeled_array : array
         labeled array; 0 is background.
-        Each ROI is represented by a distinct label (i.e., integer).
+        Each ROI is represented by a nonzero integer. It is not required that
+        the ROI labels are contiguous
     index : int, list, optional
-        The ROI's to use. Defaults to using the range 1..N where N is the max
-        of the labeled array + 1
+        The ROI's to use. If None, this function will extract averages for all
+        ROIs
 
     Returns
     -------
-    mean_intensity : array
-        mean intensity of each ROI for the set of images as an array
-        shape is (len(images), len(index))
+    mean_intensity : list
+        The mean intensity of each ROI for all `images`
+        Dimensions:
+            len(mean_intensity) == len(index)
+            len(mean_intensity[0]) == len(images)
     index : list
-        The column labels for `shape`
+        The labels for each element of the `mean_intensity` list
     """
     if labeled_array.shape != images[0].shape[0:]:
         raise ValueError(
@@ -414,11 +389,13 @@ def _mean_intensity(images, labeled_array, index=None):
             "(%s)" % (images[0].shape, labeled_array.shape))
     # handle various input for `index`
     if index is None:
-        index = np.arange(np.max(labeled_array))+1
+        index = list(np.unique(labeled_array))
+        index.remove(0)
     try:
         len(index)
     except TypeError:
         index = [index]
+    # not sure that this is needed
     index = np.asarray(index)
     # pre-allocate an array for performance
     # might be able to use list comprehension to make this faster
@@ -426,7 +403,11 @@ def _mean_intensity(images, labeled_array, index=None):
     for n, img in enumerate(images):
         # use a mean that is mask-aware
         mean_intensity[n] = ndim.mean(img, labeled_array, index=index)
-    return mean_intensity, index
+    # turn the 2-D array back into a list of arrays because the rows and
+    # columns have different units
+    data = [mean_intensity[:, i] for i in range(mean_intensity.shape[1])]
+    roi_labels = ['roi_%s' % idx for idx in index]
+    return data, roi_labels
 
 
 def circular_average(image, calibrated_center, threshold=0, nx=100,
