@@ -1,13 +1,7 @@
 # ######################################################################
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
-#                                                                      #
-# multi_tau_auto_corr Original code(in Yorick):                        #
-# @author: Mark Sutton                                                 #
-#                                                                      #
-# two_time_corr Original code                                          #
-# @author: Yugang Zhang                                                #
-#                                                                      #
+#                                                                      #                                                                   #
 # Developed at the NSLS-II, Brookhaven National Laboratory             #
 # Developed by Sameera K. Abeykoon, February 2014                      #
 #                                                                      #
@@ -53,7 +47,7 @@ import time
 
 import numpy as np
 
-import skxray.core.utils as core
+from . import utils
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +55,8 @@ logger = logging.getLogger(__name__)
 def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     """
     This function computes one-time correlations.
+
+    multi_tau_auto_corr Original code(in Yorick): @author: Mark Sutton
     
     It uses a scheme to achieve long-time correlations inexpensively
     by downsampling the data, iteratively combining successive frames.
@@ -225,7 +221,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
                        future_intensity_norm[:g_max]))
 
     # Convert from num_levels, num_bufs to lag frames.
-    tot_channels, lag_steps = core.multi_tau_lags(num_levels, num_bufs)
+    tot_channels, lag_steps = utils.multi_tau_lags(num_levels, num_bufs)
     lag_steps = lag_steps[:g_max]
 
     return g2, lag_steps
@@ -356,6 +352,7 @@ def extract_label_indices(labels):
 def two_time(num_levels, num_bufs, labels, images):
     """
     This function computes two-time correlations.
+    two_time_corr Original code : @author: Yugang Zhang
 
     It uses a scheme to achieve long-time correlations inexpensively
     by downsampling the data, iteratively combining successive frames.
@@ -423,7 +420,7 @@ def two_time(num_levels, num_bufs, labels, images):
     start_time = time.time()  # used to log the computation time (optionally)
     #  for two time correlation
 
-    tot_channels, lag_steps = core.multi_tau_lags(num_levels, num_bufs)
+    tot_channels, lag_steps = utils.multi_tau_lags(num_levels, num_bufs)
 
     #for n, img in enumerate(images.operands[0]):   ???
     for n, img in enumerate(images):
