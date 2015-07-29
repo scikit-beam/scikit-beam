@@ -37,27 +37,6 @@
 ########################################################################
 
 """
-    This module will provide analysis codes for
-    X-ray Speckle Visibility Spectroscopy (XSVS)
-"""
-
-
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-import six
-import numpy as np
-from six.moves import zip
-from six import string_types
-
-import skxray.core.correlation as corr
-import skxray.core.roi as roi
-from skxray.core.utils import bin_edges_to_centers
-
-import logging
-logger = logging.getLogger(__name__)
-
-
-"""
     X-ray speckle visibility spectroscopy(XSVS) - Dynamic information of
     the speckle patterns  are obtained by analyzing the photon statistics
     and calculating the speckle contrast in single scattering patterns.
@@ -65,12 +44,36 @@ logger = logging.getLogger(__name__)
     This module will provide XSVS analysis tools
 """
 
-def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50):
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+import six
+import numpy as np
+from six.moves import zip
+from six import string_types
+import time
+
+import skxray.core.correlation as corr
+import skxray.core.roi as roi
+from skxray.core.utils import bin_edges_to_centers, geometric_series
+
+import logging
+logger = logging.getLogger(__name__)
+
+
+def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
+         max_cts=None):
     """
-    This function will provide the speckle count probability density
+    This function will provide the probability density of detecting photons
+    for different integration time.
+
+    The experimental probability density P(K) of detecting photons K is
+    obtained by histogramming the photon counts over an ensemble of
+    equivalent pixels and over a number of speckle patterns recorded
+    with the same integration time T under the same condition.
+
     Parameters
     ----------
-    sample_dict : array
+    image_sets : array
         sets of images
 
     label_array : array
@@ -83,13 +86,16 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50):
     number_of_img : int, optional
         number of images
 
+    max_cts : int, optional
+       the brightest pixel in any ROI in any image in the image set.
+
     Returns
     -------
-    speckle_cts_all : array
-        probability of detecting speckles
+    prob_k_all : array
+        probability density of detecting photons
 
-    speckle_cts_std_dev : array
-        standard error of probability of detecting speckles
+    prob_k_std_dev : array
+        standard error of probability density of detecting photons
 
     Note
     ----
@@ -106,38 +112,44 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50):
        time-varying dynamics" Rev. Sci. Instrum. vol 76, p  093110, 2005.
 
     """
-    max_cts = roi.max_counts(image_sets, label_array)
+    if max_cts is None:
+        max_cts = roi.max_counts(image_sets, label_array)
 
     # number of ROI's
     num_roi = np.max(label_array)
 
     # create integration times
-    time_bin = roi.geometric_series(timebin_num, number_of_img)
+    time_bin = geometric_series(timebin_num, number_of_img)
 
     # number of items in the time bin
     num_times = len(time_bin)
 
+    # find the label's and pixel indices for ROI's
     labels, indices = corr.extract_label_indices(label_array)
+
     # number of pixels per ROI
     num_pixels = np.bincount(labels, minlength=(num_roi+1))[1:]
-    #num_pixels = num_pixels[1:]
 
-    speckle_cts_all = np.zeros([num_times, num_roi], dtype=np.object)
-    speckle_cts_pow_all = np.zeros([num_times, num_roi], dtype=np.object)
-    std_dev = np.zeros([num_times, num_roi], dtype=np.object)
+    # probability of detecting speckles
+    prob_k_all = np.zeros([num_times, num_roi], dtype=np.object)
+    prob_k_pow_all = np.zeros([num_times, num_roi], dtype=np.object)
+    prob_k_std_dev = np.zeros([num_times, num_roi], dtype=np.object)
+
+    # get the bin edges for each time bin for each ROI
     bin_edges = np.zeros((num_times, num_roi), dtype=object)
-
     for i in range(num_times):
         for j in range(num_roi):
             bin_edges[i, j] = np.arange(max_cts*2**i)
 
-    for i, images in image_sets:
+    start_time = time.time()  # used to log the computation time (optionally)
+
+    for i, images in enumerate(image_sets):
         # Ring buffer, a buffer with periodic boundary conditions.
         # Images must be keep for up to maximum delay in buf.
-        buf = np.zeros([num_times, timebin_num] ,
-                       dtype=np.object)  #// matrix of buffers
+        buf = np.zeros([num_times, timebin_num],
+                       dtype=np.object)  # matrix of buffers
 
-        # to track processing each level
+        # to track processing each time level
         track_level = np.zeros(num_times)
 
         # to increment buffer
@@ -146,18 +158,17 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50):
         # to track how many images processed in each level
         img_per_level = np.zeros(num_times, dtype=np.int64)
 
-        speckle_cts = np.zeros([num_times, num_roi],
-                               dtype=np.object)
-        speckle_cts_pow = np.zeros([num_times, num_roi],
-                                   dtype=np.object)
-        for n, img in images:
-            cur[0] = (1 + cur[0])%timebin_num
+        prob_k = np.zeros([num_times, num_roi], dtype=np.object)
+        prob_k_pow = np.zeros([num_times, num_roi], dtype=np.object)
+
+        for n, img in enumerate(images):
+            cur[0] = (1 + cur[0]) % timebin_num
             # read each frame
             # Put the image into the ring buffer.
-            buf[0, cur[0] - 1 ] = (np.ravel(img))[indices]
+            buf[0, cur[0] - 1] = (np.ravel(img))[indices]
 
-            _process(num_roi, 0, cur[0] - 1, buf, img_per_level, labels, max_cts,
-                     bin_edges[0,0], speckle_cts, speckle_cts_pow, i)
+            _process(num_roi, 0, cur[0] - 1, buf, img_per_level, labels,
+                     max_cts, bin_edges[0, 0], prob_k, prob_k_pow)
 
             # check whether the number of levels is one, otherwise
             # continue processing the next level
@@ -169,34 +180,44 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50):
                     track_level[level] = 1
                     processing = 0
                 else:
-                    prev = 1 + (cur[level - 1] - 2)%timebin_num
-                    cur[level] = 1 + cur[level]%timebin_num
+                    prev = 1 + (cur[level - 1] - 2) % timebin_num
+                    cur[level] = 1 + cur[level] % timebin_num
 
                     buf[level, cur[level]-1] = (buf[level-1,
-                                                    prev-1] + buf[level-1, cur[level - 1] - 1])
+                                                    prev-1] +
+                                                buf[level-1,
+                                                    cur[level - 1] - 1])
                     track_level[level] = 0
 
                     _process(num_roi, level, cur[level]-1, buf, img_per_level,
-                             labels, max_cts, bin_edges[level, 0], speckle_cts,
-                             speckle_cts_pow, i)
+                             labels, max_cts, bin_edges[level, 0], prob_k,
+                             prob_k_pow)
                     level += 1
                     # Checking whether there is next level for processing
                     processing = level < num_times
 
+            prob_k_all += (prob_k - prob_k_all)/(i + 1)
+            prob_k_pow_all += (prob_k_pow - prob_k_pow_all)/(i + 1)
 
-            speckle_cts_all += (speckle_cts -
-                                speckle_cts_all)/(i + 1)
-            speckle_cts_pow_all += (speckle_cts_pow -
-                                    speckle_cts_pow_all)/(i + 1)
-            speckle_cts_std_dev = np.power((speckle_cts_all -
-                                            np.power(speckle_cts_all, 2)), .5)
+            prob_k_std_dev = np.power((prob_k_all -
+                                       np.power(prob_k_all, 2)), .5)
 
-    return speckle_cts_all, speckle_cts_std_dev
+    # ending time for the process
+    end_time = time.time()
+
+    logger.info("Processing time for XSVS took {0} seconds."
+                "".format(end_time - start_time))
+    return prob_k_all, prob_k_std_dev
 
 
 def _process(num_roi, level, buf_no, buf, img_per_level, labels, max_cts,
-             bin_edges, speckle_cts, speckle_cts_pow, i):
+             bin_edges, prob_k, prob_k_pow):
     """
+    Internal helper function. This modifies inputs in place.
+
+    This helper function calculate probability of detecting speckles for
+    each integration time.
+
     Parameters
     ----------
     num_roi : int
@@ -223,14 +244,10 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels, max_cts,
     bin_edges : array
         bin edges for each integration times and each ROI
 
-    speckle_cts : array
+    prob_k : array
         probability of detecting speckles
 
-    speckle_cts_pow : array
-
-
-    i : int
-        image number
+    prob_k_pow : array
 
     """
     img_per_level[level] += 1
@@ -241,17 +258,20 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels, max_cts,
         spe_hist, bin_edges = np.histogram(roi_data, bins=bin_edges,
                                            normed=True)
 
-        speckle_cts[level, j] += (spe_hist -
-                                  speckle_cts[level, j])/(img_per_level[level])
+        prob_k[level, j] += (spe_hist -
+                                  prob_k[level, j])/(img_per_level[level])
 
-        speckle_cts_pow[level, j] += (np.power(spe_hist, 2) -
-                                      speckle_cts_pow[level, j])/(img_per_level[level])
+        prob_k_pow[level, j] += (np.power(spe_hist, 2) -
+                                 prob_k_pow[level, j])/(img_per_level[level])
 
-    return None # modifies arguments in place!
+    return None  # modifies arguments in place!
 
 
-def normalize_bin_edges(num_times, num_rois, max_cts, mean_roi):
+def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts=None):
     """
+    This will provide the normalize bin edges and bin centers for each
+    integration times.
+
     Parameters
     ----------
     num_times : int
@@ -271,11 +291,11 @@ def normalize_bin_edges(num_times, num_rois, max_cts, mean_roi):
     -------
     norm_bin_edges : array
         normalized speckle count bin edges
-        shape of the bin_edges
+         shape (num_times, num_rois)
 
     norm_bin_centers :array
         normalized speckle count bin centers
-        shape of the bin_edges
+        shape (num_times, num_rois)
     """
     norm_bin_edges = np.zeros((num_times, num_rois), dtype=object)
     norm_bin_centers = np.zeros((num_times, num_rois), dtype=object)
