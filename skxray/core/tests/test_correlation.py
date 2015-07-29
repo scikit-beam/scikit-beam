@@ -38,11 +38,18 @@ import logging
 import numpy as np
 from numpy.testing import (assert_array_almost_equal,
                            assert_almost_equal)
+
+from nose.tools import assert_raises
+
+from nose.tools import assert_equal, assert_true, raises
+
+from skxray.testing.decorators import known_fail_if, skip_if
+import numpy.testing as npt
+
 from skimage import data
 
 import skxray.core.correlation as corr
 import skxray.core.roi as roi
-from skxray.testing.decorators import skip_if
 
 logger = logging.getLogger(__name__)
 
@@ -90,3 +97,34 @@ def test_image_stack_correlation():
 
     assert_almost_equal(True, np.all(g2[:, 0], axis=0))
     assert_almost_equal(True, np.all(g2[:, 1], axis=0))
+
+    two_time_coins = corr.two_time(num_levels=2, num_bufs=6,
+                                        labels=coins_mesh, images=coins_stack)
+
+    assert_almost_equal(True, np.all(two_time_coins[:, :, 0].diagonal(),
+                                     axis=0))
+    assert_almost_equal(True, np.all(two_time_coins[:, :, 1].diagonal(),
+                                     axis=0))
+
+    # Test various illegal inputs
+    assert_raises(ValueError,
+                  lambda: corr.two_time(1, 13, coins_mesh, coins_stack))
+    # num_levels cannot be 13 must be even
+
+    roi_data = np.array(([10, 20, 12, 14], [40, 10, 9, 10]),
+                        dtype=np.int64)
+    indices = roi.rectangles(roi_data, (50, 50))
+
+    assert_raises(ValueError,
+                  lambda: corr.two_time(1, 4, indices, coins_stack))
+    # shape of the indices has to be equal to shape of the coin_stack
+
+    new_mesh = np.zeros_like(coins)
+
+    new_mesh[coins < 30] = 1
+    new_mesh[coins > 255] = 2
+    new_mesh[coins > 70] = 3
+
+    assert_raises(ValueError,
+                  lambda: corr.two_time(1, 4, new_mesh, coins_stack))
+    # to check whether number of pixels of any of the ROI's are zero

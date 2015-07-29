@@ -1,12 +1,9 @@
 # ######################################################################
-# Original code(in Yorick):                                            #
-# @author: Mark Sutton                                                 #
-#                                                                      #
-# Developed at the NSLS-II, Brookhaven National Laboratory             #
-# Developed by Sameera K. Abeykoon, February 2014                      #
-#                                                                      #
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
+#                                                                      #                                                                   #
+# Developed at the NSLS-II, Brookhaven National Laboratory             #
+# Developed by Sameera K. Abeykoon, February 2014                      #
 #                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
@@ -50,7 +47,7 @@ import time
 
 import numpy as np
 
-import skxray.core.utils as core
+from . import utils
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +55,8 @@ logger = logging.getLogger(__name__)
 def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     """
     This function computes one-time correlations.
+
+    multi_tau_auto_corr Original code(in Yorick): @author: Mark Sutton
     
     It uses a scheme to achieve long-time correlations inexpensively
     by downsampling the data, iteratively combining successive frames.
@@ -78,8 +77,8 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
         labeled array of the same shape as the image stack;
         each ROI is represented by a distinct label (i.e., integer)
 
-    images : iterable of 2D arrays
-        dimensions are: (rr, cc)
+    images : array
+        dimensions are: (rr, cc), iterable of 2D arrays
 
     Returns
     -------
@@ -113,6 +112,9 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     # level has twice the delay times of the next lower one. To save
     # needless copying, of cyclic storage of images in buf is used.
 
+    label_mask, pixel_list, num_rois, num_pixels = _validate_inputs(num_bufs,
+                                                                    labels,
+                                                                    images)
     if num_bufs % 2 != 0:
         raise ValueError("number of channels(number of buffers) in "
                          "multiple-taus (must be even)")
@@ -122,33 +124,6 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
         if labels.shape != images.frame_shape:
             raise ValueError("Shape of the image stack should be equal to"
                              " shape of the labels array")
-
-    # get the pixels in each label
-    label_mask, pixel_list = extract_label_indices(labels)
-
-    num_rois = np.max(label_mask)
-
-    # number of pixels per ROI
-    num_pixels = np.bincount(label_mask, minlength=(num_rois+1))
-    num_pixels = num_pixels[1:]
-
-    if np.any(num_pixels == 0):
-        raise ValueError("Number of pixels of the required roi's"
-                         " cannot be zero, "
-                         "num_pixels = {0}".format(num_pixels))
-
-    # G holds the un normalized auto-correlation result. We
-    # accumulate computations into G as the algorithm proceeds.
-    G = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
-                 dtype=np.float64)
-
-    # matrix of past intensity normalizations
-    past_intensity_norm = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
-                                   dtype=np.float64)
-
-    # matrix of future intensity normalizations
-    future_intensity_norm = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
-                                     dtype=np.float64)
 
     # Ring buffer, a buffer with periodic boundary conditions.
     # Images must be keep for up to maximum delay in buf.
@@ -163,6 +138,19 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
 
     # to track how many images processed in each level
     img_per_level = np.zeros(num_levels, dtype=np.int64)
+
+    # G holds the un normalized auto-correlation result. We
+    # accumulate computations into G as the algorithm proceeds.
+    G = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
+                 dtype=np.float64)
+
+    # matrix of past intensity normalizations
+    past_intensity_norm = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
+                                   dtype=np.float64)
+
+    # matrix of future intensity normalizations
+    future_intensity_norm = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
+                                     dtype=np.float64)
 
     start_time = time.time()  # used to log the computation time (optionally)
 
@@ -219,8 +207,8 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     # ending time for the process
     end_time = time.time()
 
-    logger.info("Processing time for {0} images took {1} seconds."
-                "".format(n, (end_time - start_time)))
+    logger.info("One Time Correlation - Processing time for {0} images took"
+                " {1} seconds." .format(n, (end_time - start_time)))
 
     # the normalization factor
     if len(np.where(past_intensity_norm == 0)[0]) != 0:
@@ -233,7 +221,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
                        future_intensity_norm[:g_max]))
 
     # Convert from num_levels, num_bufs to lag frames.
-    tot_channels, lag_steps = core.multi_tau_lags(num_levels, num_bufs)
+    tot_channels, lag_steps = utils.multi_tau_lags(num_levels, num_bufs)
     lag_steps = lag_steps[:g_max]
 
     return g2, lag_steps
@@ -303,29 +291,21 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
         i_min = num_bufs//2
 
     for i in range(i_min, min(img_per_level[level], num_bufs)):
-        t_index = level*num_bufs/2 + i
 
-        delay_no = (buf_no - i) % num_bufs
-
-        past_img = buf[level, delay_no]
-        future_img = buf[level, buf_no]
+        (t_index, tmp_binned, pi_binned,
+         fi_binned) = _help_process(level, num_bufs, buf_no, i, buf,
+                                    label_mask)
 
         #  get the matrix of auto-correlation function without normalizations
-        tmp_binned = (np.bincount(label_mask,
-                                  weights=past_img*future_img)[1:])
         G[t_index] += ((tmp_binned / num_pixels - G[t_index]) /
                        (img_per_level[level] - i))
 
         # get the matrix of past intensity normalizations
-        pi_binned = (np.bincount(label_mask,
-                                 weights=past_img)[1:])
         past_intensity_norm[t_index] += ((pi_binned/num_pixels
                                          - past_intensity_norm[t_index]) /
                                          (img_per_level[level] - i))
 
         # get the matrix of future intensity normalizations
-        fi_binned = (np.bincount(label_mask,
-                                 weights=future_img)[1:])
         future_intensity_norm[t_index] += ((fi_binned/num_pixels
                                            - future_intensity_norm[t_index]) /
                                            (img_per_level[level] - i))
@@ -367,3 +347,345 @@ def extract_label_indices(labels):
     label_mask = labels[labels > 0]
 
     return label_mask, pixel_list
+
+
+def two_time(num_levels, num_bufs, labels, images):
+    """
+    This function computes two-time correlations.
+    two_time_corr Original code : @author: Yugang Zhang
+
+    It uses a scheme to achieve long-time correlations inexpensively
+    by downsampling the data, iteratively combining successive frames.
+
+    The longest lag time computed is num_levels * num_bufs.
+    ** see comments on multi_tau_auto_corr
+
+    Parameters
+    ----------
+    num_levels : int
+        how many generations of downsampling to perform, i.e.,
+        the depth of the binomial tree of averaged frames
+
+    num_bufs : int, must be even
+        maximum lag step to compute in each generation of
+        downsampling
+
+    labels : array
+        labeled array of the same shape as the image stack;
+        each ROI is represented by a distinct label (i.e., integer)
+
+    images : array
+        dimensions are: (rr, cc), iterable of 2D arrays
+
+    Returns
+    -------
+    two_time_c : array
+        matrix of two_time correlation
+        shape (number of images, number of images, number of labels(ROI))
+    """
+
+    label_mask, pixel_list, num_rois, num_pixels = _validate_inputs(num_bufs,
+                                                                    labels,
+                                                                    images)
+
+    # Ring buffer, a buffer with periodic boundary conditions.
+    # Images must be keep for up to maximum delay in buf.
+    buf = np.zeros((num_levels, num_bufs, np.sum(num_pixels)),
+                   dtype=np.float64)
+
+    # to track processing each level
+    track_level = np.zeros(num_levels)
+
+    # to increment buffer
+    cur = np.ones(num_levels, dtype=np.int64)
+
+    # to track how many images processed in each level
+    img_per_level = np.zeros(num_levels, dtype=np.int64)
+
+    # two time correlation results
+    #two_time_c = np.zeros((images.operands[0].shape[0],    ???
+    #                       images.operands[0].shape[0], num_rois), ???
+    #                      dtype=np.float64)???
+    two_time_c = np.zeros((images[0].shape[0],
+                           images[0].shape[0], num_rois),
+                          dtype=np.float64)
+
+
+    # to count images in each level
+    count_level = np.zeros(num_levels, dtype=np.int64)
+
+    # generate a time frame for each level
+    time_ind = {key: [] for key in range(num_levels)}
+
+    start_time = time.time()  # used to log the computation time (optionally)
+    #  for two time correlation
+
+    tot_channels, lag_steps = utils.multi_tau_lags(num_levels, num_bufs)
+
+    #for n, img in enumerate(images.operands[0]):   ???
+    for n, img in enumerate(images):
+        cur[0] = (1 + cur[0]) % num_bufs  # increment buffer
+
+        count_level[0] = 1 + count_level[0]
+        # current image number
+        current_img_time = n + 1
+
+        # Put the image into the ring buffer.
+        buf[0, cur[0] - 1] = (np.ravel(img))[pixel_list]
+
+        # Compute the two time correlations between the first level
+        # (undownsampled) frames. two_time_c and img_per_level in place!
+        _two_time_process(buf, two_time_c, label_mask, num_bufs, num_pixels,
+                          img_per_level, lag_steps, current_img_time, level=0,
+                          buf_no=cur[0] - 1)
+
+        # time frame for each level
+        time_ind[0].append(current_img_time)
+
+        # check whether the number of levels is one, otherwise
+        # continue processing the next level
+        processing = num_levels > 1
+
+        # Compute the correlations for all higher levels.
+        level = 1
+        while processing:
+            if not track_level[level]:
+                track_level[level] = 1
+                processing = False
+            else:
+                prev = 1 + (cur[level - 1] - 2) % num_bufs
+                cur[level] = 1 + cur[level] % num_bufs
+                count_level[level] = 1 + count_level[level]
+
+                buf[level, cur[level] - 1] = (buf[level - 1, prev - 1] +
+                                              buf[level - 1,
+                                                  cur[level - 1] - 1])/2
+
+                t1_idx = (count_level[level] - 1) * 2
+
+                current_img_time = ((time_ind[level - 1])[t1_idx]
+                                    + (time_ind[level - 1])[t1_idx + 1])/2.
+
+                # time frame for each level
+                time_ind[level].append(current_img_time)
+
+                # make the track_level zero once that level is processed
+                track_level[level] = 0
+
+                # call the _two_time_process function for each multi-tau level
+                # for multi-tau levels greater than one
+                # Again, this is modifying things in place. See comment
+                # on previous call above.
+                _two_time_process(buf, two_time_c, label_mask, num_bufs,
+                                  num_pixels, img_per_level, lag_steps,
+                                  current_img_time, level=level,
+                                  buf_no=cur[level]-1)
+                level += 1
+
+                # Checking whether there is next level for processing
+                processing = level < num_levels
+
+    for q in range(np.max(labels)):
+        x0 = two_time_c[:, :, q]
+        two_time_c[:, :, q] = (np.tril(x0) + np.tril(x0).T
+                               - np.diag(np.diag(x0)))
+
+    # ending time for the two time correlation
+    end_time = time.time()
+
+    logger.info("Two Time Correlation - Processing time for {0} images took"
+                " {1} seconds." .format(n, (end_time - start_time)))
+
+    return two_time_c
+
+
+def _two_time_process(buf, two_time_c, label_mask, num_bufs, num_pixels,
+                      img_per_level, lag_steps, current_img_time, level,
+                      buf_no):
+    """
+    Parameters
+    ----------
+    buf: array
+        image data array to use for two time correlation
+
+    two_time_c: array
+        two time correlation matrix
+
+    label_mask: array
+        Elements not inside any ROI are zero; elements inside each
+        ROI are 1, 2, 3, etc. corresponding to the order they are specified
+        in edges and segments
+
+    num_bufs: int, even
+        number of buffers(channels)
+
+    num_pixels : array
+        number of pixels in certain roi's
+        roi's, dimensions are : [number of roi's]
+
+    img_per_level: array
+        to track how many images processed in each level
+
+    lag_steps : array
+        delay or lag steps for the multiple tau analysis
+        shape num_levels
+
+    current_img_time : int
+        the current image number
+
+    level : int
+        the current multi-tau level
+
+    buf_no : int
+        the current buffer number
+
+    """
+    img_per_level[level] += 1
+
+    # in multi-tau correlation other than first level all other levels
+    #  have to do the half of the correlation
+    if level == 0:
+        i_min = 0
+    else:
+        i_min = num_bufs//2
+
+    for i in range(i_min, min(img_per_level[level], num_bufs)):
+        (t_index, tmp_binned, pi_binned,
+         fi_binned) = _help_process(level, num_bufs, buf_no, i, buf,
+                                    label_mask)
+
+        tind1 = (current_img_time - 1)
+
+        tind2 = (current_img_time - lag_steps[t_index] - 1)
+
+        if not isinstance(current_img_time, int):
+            nshift = 2**(level-1)
+            for i in range(-nshift+1, nshift+1):
+                two_time_c[int(tind1+i),
+                           int(tind2+i)] = (tmp_binned/(pi_binned *
+                                                        fi_binned))*num_pixels
+        else:
+            two_time_c[tind1, tind2] = tmp_binned/(pi_binned *
+                                                   fi_binned)*num_pixels
+    return None
+
+
+def _help_process(level, num_bufs, buf_no, i, buf, label_mask):
+    """
+    This is a helper function for both one time and two time correlation
+    process functions.
+
+    Parameters
+    ----------
+    level : int
+        the current multi-tau level
+
+    num_bufs : int
+        number of buffers(channels)
+
+    buf_no : int
+        the current buffer number
+
+    i : int
+
+    buf : array
+        image data array to use for two time correlation
+
+    label_mask: array
+        Elements not inside any ROI are zero; elements inside each
+        ROI are 1, 2, 3, etc. corresponding to the order they are specified
+        in edges and segments
+
+    Returns
+    -------
+    t_index : float
+        time
+
+    tmp_binned : array
+        matrix of correlation function without normalizations
+
+    pi_binned : array
+        matrix of past intensity normalizations
+
+    fi_binned : array
+        matrix of future intensity normalizations
+    """
+    t_index = level*num_bufs/2 + i
+
+    delay_no = (buf_no - i) % num_bufs
+
+    past_img = buf[level, delay_no]
+    future_img = buf[level, buf_no]
+
+    #  get the matrix of correlation function without normalizations
+    tmp_binned = (np.bincount(label_mask,
+                              weights=past_img*future_img)[1:])
+    # get the matrix of past intensity normalizations
+    pi_binned = (np.bincount(label_mask,
+                             weights=past_img)[1:])
+
+    # get the matrix of future intensity normalizations
+    fi_binned = (np.bincount(label_mask,
+                             weights=future_img)[1:])
+    return t_index, tmp_binned, pi_binned, fi_binned
+
+
+def _validate_inputs(num_bufs, labels, images):
+    """
+    This is a helper function to validate inputs for both one time and
+    two time correlation
+
+    Parameters
+    ----------
+    num_bufs : int, must be even
+        maximum lag step to compute in each generation of
+        downsampling
+
+    labels : array
+        labeled array of the same shape as the image stack;
+        each ROI is represented by a distinct label (i.e., integer)
+
+    images : iterable of 2D arrays
+        dimensions are: (rr, cc)
+
+    Returns
+    -------
+    label_mask : array
+        labels of the required region of interests(ROI's)
+
+    indices : array
+        1D array of indices into the raveled image for all
+        foreground pixels (labeled nonzero)
+        e.g., [5, 6, 7, 8, 14, 15, 21, 22]
+
+    num_rois : array
+        number of ROI's
+
+    num_pixels : array
+        number of pixels in each ROI's
+    """
+    if num_bufs % 2 != 0:
+        raise ValueError("number of channels(number of buffers) in "
+                         "multiple-taus (must be even)")
+
+    if hasattr(images, 'frame_shape'):
+        # Give a user-friendly error if we can detect the shape from pims.
+        if labels.shape != images.frame_shape:
+            raise ValueError("Shape of the image stack should be equal to"
+                             " shape of the labels array")
+
+    # get the pixels in each label
+    label_mask, indices = extract_label_indices(labels)
+
+    num_rois = np.max(label_mask)
+
+    # number of pixels per ROI
+    num_pixels = np.bincount(label_mask, minlength=(num_rois+1))
+    num_pixels = num_pixels[1:]
+
+    if np.any(num_pixels == 0):
+        raise ValueError("Number of pixels of the required roi's"
+                         " cannot be zero, "
+                         "num_pixels = {0}".format(num_pixels))
+
+    return label_mask, indices, num_rois, num_pixels
