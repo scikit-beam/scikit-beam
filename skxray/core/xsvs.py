@@ -95,7 +95,7 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
         probability density of detecting photons
 
     prob_k_std_dev : array
-        standard error of probability density of detecting photons
+        standard deviation of probability density of detecting photons
 
     Note
     ----
@@ -199,7 +199,7 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
             prob_k_all += (prob_k - prob_k_all)/(i + 1)
             prob_k_pow_all += (prob_k_pow - prob_k_pow_all)/(i + 1)
 
-            prob_k_std_dev = np.power((prob_k_all -
+            prob_k_std_dev = np.power((prob_k_pow_all -
                                        np.power(prob_k_all, 2)), .5)
 
     # ending time for the process
@@ -259,7 +259,7 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels, max_cts,
                                            normed=True)
 
         prob_k[level, j] += (spe_hist -
-                                  prob_k[level, j])/(img_per_level[level])
+                             prob_k[level, j])/(img_per_level[level])
 
         prob_k_pow[level, j] += (np.power(spe_hist, 2) -
                                  prob_k_pow[level, j])/(img_per_level[level])
@@ -267,7 +267,7 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels, max_cts,
     return None  # modifies arguments in place!
 
 
-def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts=None):
+def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts):
     """
     This will provide the normalize bin edges and bin centers for each
     integration times.
@@ -280,12 +280,12 @@ def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts=None):
     num_rois : int
         number of ROI's
 
-    max_cts : int
-        maximum pixel counts
-
     mean_roi : array
         mean intensity of each ROI
         shape (number of ROI's)
+
+    max_cts : int
+        maximum pixel counts
 
     Returns
     -------
@@ -297,6 +297,7 @@ def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts=None):
         normalized speckle count bin centers
         shape (num_times, num_rois)
     """
+
     norm_bin_edges = np.zeros((num_times, num_rois), dtype=object)
     norm_bin_centers = np.zeros((num_times, num_rois), dtype=object)
     for i in range(num_times):
