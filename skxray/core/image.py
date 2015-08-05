@@ -97,3 +97,58 @@ def _corr_ax1(input_image):
                                          mode='full')/norm_mask) / 2
              for v in input_image]
     return np.histogram(est_by_row, bins=np.arange(0, dim + 1))
+
+def hist_make(src_data,
+              num_bins,
+              pd_function=False):
+    """
+    This function evaluates the histogram of the source data set and returns
+    bin data consisting of both bin edges and bin averages. This tool is
+    primarily geared for plotting histograms for visual analysis and
+    comparison.
+
+    Parameters
+    ----------
+    src_data : ndarray
+        Can be JxK or IxJxK
+        Specifies the source data set from which you want to evaluate the
+        histogram.
+    num_bins : int
+        Specify the number of bins to include in the histogram as an integer.
+
+    pd_function : bool, optional
+        Identify whether the histogram data should be normalized as a
+        probability density histogram or not.
+        Options:
+            True -- Histogram data is normalized to range from 0 to 1
+            False -- Histogram data reported simply as "counts" (e.g. Voxel
+                     Count)
+
+    Returns
+    -------
+    hist : array
+        1xN array containing all of the actual bin measurements (e.g. voxel
+        counts)
+    bin_avg : array
+        1xN array containing the average intensity value for each bin.
+        NOTE: the length of this array is equal to the length of the hist
+        array
+    bin_edges : array
+        1xN array containing the edge values for each bin
+        NOTE: the length of this array is 1 larger than the length of the
+        hist array (e.g. len(bin_edges) = len(hist) + 1)
+    """
+
+    hist, bin_edges = np.histogram(src_data,
+                                   bins=num_bins,
+                                   density=pd_function)
+    bin_avg = np.empty(len(hist))
+    intensity = iter(bin_edges)
+    row_count = 0
+    for left_bin_edge in bin_edges:
+        right_bin_edge = next(intensity)
+        bin_avg[row_count] = (left_bin_edge + right_bin_edge) / 2
+        row_count += 1
+        if right_bin_edge == bin_edges[len(bin_edges) - 1]:
+            break
+    return hist, bin_edges, bin_avg
