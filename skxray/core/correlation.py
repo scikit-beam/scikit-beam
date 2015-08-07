@@ -409,7 +409,8 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
     g2 : array
         normalized intensity-intensity time autocorreltion
 
-    Note :
+    Notes :
+    -------
     The intensity-intensity autocorrelation g2 is connected to the intermediate
     scattering factor(ISF) g1
 
@@ -426,9 +427,8 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
 
     These implementation are based on published work. [1]_
 
-     References
+    References
     ----------
-
     .. [1] L. Li, P. Kwasniewski, D. Orsi, L. Wiegart, L. Cristofolini, C. Caronna
        and A. Fluerasu, " Photon statistics and speckle visibility spectroscopy with
        partially coherent X-rays," J. Synchrotron Rad. vol 21, p 1288-1295, 2014
