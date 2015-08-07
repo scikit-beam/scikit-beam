@@ -40,8 +40,8 @@ from numpy.testing import (assert_array_almost_equal,
                            assert_almost_equal)
 from skimage import data
 
-import skxray.core.correlation as corr
-import skxray.core.roi as roi
+import skxray.core.utils.correlation as corr
+import skxray.core.utils.roi as roi
 from skxray.testing.decorators import skip_if
 
 logger = logging.getLogger(__name__)

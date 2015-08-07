@@ -52,6 +52,8 @@ import numpy as np
 
 import skxray.core.utils as core
 
+from lmfit import minimize, Parameters
+
 logger = logging.getLogger(__name__)
 
 
@@ -381,8 +383,11 @@ def extract_label_indices(labels):
     return label_mask, pixel_list
 
 
-def fit_auto_corr(lags, beta, relatxation_rate, basline=1):
+def auto_corr_scat_factor(lags, beta, relatxation_rate, basline=1):
     """
+    This will returns normalized intensity-intensity time correlation data to be
+    minimized
+
     Parameters
     ----------
     lags : array
@@ -419,7 +424,7 @@ def fit_auto_corr(lags, beta, relatxation_rate, basline=1):
     :math ::
         g2(q, t) = \\beta e^{-2\\Gamma t} + g_\\infty
 
-    These implementation are based on based on published work. [1]_
+    These implementation are based on published work. [1]_
 
      References
     ----------
@@ -429,4 +434,66 @@ def fit_auto_corr(lags, beta, relatxation_rate, basline=1):
        partially coherent X-rays," J. Synchrotron Rad. vol 21, p 1288-1295, 2014
 
     """
-    return np.exp(-2*relatxation_rate*lags)  + 1
+    return np.exp(-2*relatxation_rate*lags) + 1
+
+
+def residual_auto_corr(params, lags, g2_data, eps_data):
+    """
+
+    Parameters
+    ----------
+    params : dict
+        parameters dictionary
+
+    lags : array
+        delay time
+
+    g2_data : array
+        normalized intensity-intensity time autocorreltion
+
+    beta : float
+        optical contrast (speckle contrast), a sample-independent
+        beamline parameter
+
+    relatxation_rate : float
+        relaxation time associated with the samples dynamics.
+
+    basline : float, optional
+        baseline of one time correlation
+        equal to one for ergodic samples
+
+    Returns
+    -------
+    residual : array
+
+    """
+    # create set of parameters
+    beta = params['beta'].value
+    relaxation_rate = params['relaxation_rate'].value
+    baseline = params['baseline'].value
+
+    return (g2_data - auto_corr_scat_factor(lags, beta, relaxation_rate,
+                                            basline=1))/eps_data
+
+
+def fit_auto_corr(params, x, data, eps_data):
+    """
+    Parameters
+    ----------
+    params: dict
+        parameters dictionary
+
+    x : array
+
+
+    data : array
+
+    eps_data : array
+
+    Returns
+    -------
+    fit_result :
+
+    """
+    return minimize(residual_auto_corr, params, args=(x, data, eps_data))
+
