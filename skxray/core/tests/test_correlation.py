@@ -49,9 +49,9 @@ import numpy.testing as npt
 from skimage import data
 from lmfit import Parameters
 
-import skxray.core.utils.correlation as corr
-import skxray.core.utils.roi as roi
-import skxray.core.core as core
+import skxray.core.correlation as corr
+import skxray.core.roi as roi
+import skxray.core.utils as core
 from skxray.testing.decorators import skip_if
 
 logger = logging.getLogger(__name__)
