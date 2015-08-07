@@ -52,7 +52,7 @@ import numpy as np
 
 import skxray.core.utils as core
 
-from lmfit import minimize, Parameters
+from lmfit import minimize, Model, Parameters
 
 logger = logging.getLogger(__name__)
 
@@ -93,8 +93,8 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
         delay or lag steps for the multiple tau analysis
         shape num_levels
 
-    Note
-    ----
+    Notes
+    -----
 
     The normalized intensity-intensity time-autocorrelation function
     is defined as
@@ -435,76 +435,3 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
 
     """
     return beta*np.exp(-2*relaxation_rate*lags) + baseline
-
-
-def _residual_auto_corr(params, lags, g2_data, *eps_data):
-    """
-    This will provide difference between experiment data and the model
-    Parameters
-    ----------
-    params : dict or Parameters
-        beta - float, optical contrast (speckle contrast),
-        relaxation_rate - float, relaxation time associated with the
-        samples dynamics,
-        baseline -float, optional baseline of one time
-        correlation equal to one for ergodic samples
-        have to give as either dictionary or Parameters
-        eg: One of the following
-        #create a dictionary
-        {'beta': 0.2, 'relaxation_rate':10, 'baseline':1}
-
-        # create a set of Parameters
-        from lmfit import Parameters
-        params = Parameters()
-        params.add('beta',  value=0.2,  min=0, max=0.3)
-        params.add('relaxation_rate', value=10, min=0, max=11)
-        params.add('baseline', value=1)
-
-    lags : array
-        delay time
-
-    g2_data : array
-        normalized intensity-intensity time autocorreltion
-
-    eps_data : array, optional
-        standard error of the normalized intensity-intensity
-        time autocorreltion
-
-    Returns
-    -------
-    residual : array
-        difference between experimental result and the model
-    """
-    # create set of parameters
-    beta = params['beta'].value
-    relaxation_rate = params['relaxation_rate'].value
-    baseline = params['baseline'].value
-
-    return (g2_data - auto_corr_scat_factor(lags, beta, relaxation_rate,
-                                            baseline=1))/eps_data
-
-
-def fit_auto_corr(params, x, data, eps_data):
-    """
-    Minimize the function and calculate final result
-
-    Parameters
-    ----------
-    params: dict
-        parameters dictionary
-
-    x : array
-       x
-
-    data : array
-
-    eps_data : array
-
-    Returns
-    -------
-    final_result : array
-        minimized fitting to results using least square model
-
-    """
-    result = minimize(_residual_auto_corr, params, args=(x, data, eps_data))
-    return data + result.residual

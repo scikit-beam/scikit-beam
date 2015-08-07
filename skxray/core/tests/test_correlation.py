@@ -130,19 +130,3 @@ def test_auto_corr_scat_factor():
 
     assert_array_almost_equal(g2, np.array([1.5, 1.0, 1.0, 1.0, 1.0,
                                             1.0, 1.0, 1.0]), decimal=8)
-
-
-def test_fit_auto_corr():
-    params1 = Parameters()
-    params1.add('beta',  value=0.1699, min=0.089, max=0.22)
-    params1.add('relaxation_rate', value=2.3456)
-    params1.add('baseline', value=1, min=0.8, max=1)
-
-    num_levels, num_bufs = 2, 4
-    tot_channels, lags = core.multi_tau_lags(num_levels, num_bufs)
-    data = np.array([1.369,  1.216,  1.212,  1.208,  1.204,
-        1.199])
-
-    fit_result = corr.fit_auto_corr(params1, lags, data, eps_data=1)
-
-    assert_array_almost_equal(data[1:], fit_result[1:], decimal=3)
