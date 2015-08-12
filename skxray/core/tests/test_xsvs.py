@@ -65,3 +65,26 @@ def test_xsvs():
 
     num_times = 4
     num_rois = 2
+
+
+def test_normalize_bin_edges():
+    num_times = 3
+    num_rois = 2
+    mean_roi = np.arear([2.5, 4.0])
+    max_cts = 5
+
+    bin_edges, bin_cen = xsvs.normalize_bin_edges(num_times, num_rois,
+                                                  mean_roi, max_cts)
+
+    assert_array_almost_equal(bin_edges[0, 0], np.array([0., 0.4, 0.8,
+                                                        1.2, 1.6]))
+
+    assert_array_almost_equal(bin_edges[2, 1], np.array([0., 0.0625, 0.125,
+                                                         0.1875, 0.25, 0.3125,
+                                                         0.375 , 0.4375, 0.5,
+                                                         0.5625, 0.625, 0.6875,
+                                                         0.75, 0.8125, 0.875,
+                                                         0.9375, 1., 1.0625,
+                                                         1.125, 1.1875]))
+
+    assert_array_almost_equal(bin_cen[0, 0], np.array([0.2, 0.6, 1., 1.4]))
