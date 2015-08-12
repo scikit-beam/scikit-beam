@@ -54,7 +54,7 @@ def test_xsvs():
     for i in range(10):
         int_array = np.tril(i*np.ones(10))
         if i==10/2:
-            int_array[int_array == 0] = 20
+           int_array[int_array == 0] = 20
         else:
             int_array[int_array == 0] = i*2
         images.append(int_array)
@@ -66,11 +66,13 @@ def test_xsvs():
     num_times = 4
     num_rois = 2
 
+    
+
 
 def test_normalize_bin_edges():
     num_times = 3
     num_rois = 2
-    mean_roi = np.arear([2.5, 4.0])
+    mean_roi = np.array([2.5, 4.0])
     max_cts = 5
 
     bin_edges, bin_cen = xsvs.normalize_bin_edges(num_times, num_rois,

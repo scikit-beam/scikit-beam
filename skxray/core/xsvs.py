@@ -113,7 +113,7 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
 
     """
     if max_cts is None:
-        max_cts = roi.max_counts(image_sets, label_array)
+        max_cts = roi.roi_max_counts(image_sets, label_array)
 
     # number of ROI's
     num_roi = np.max(label_array)
@@ -130,9 +130,11 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
     # number of pixels per ROI
     num_pixels = np.bincount(labels, minlength=(num_roi+1))[1:]
 
-    # probability of detecting speckles
+    # probability density of detecting speckles
     prob_k_all = np.zeros([num_times, num_roi], dtype=np.object)
+    # square of probability density of detecting speckles
     prob_k_pow_all = np.zeros([num_times, num_roi], dtype=np.object)
+    # standard deviation of probability density of detecting photons
     prob_k_std_dev = np.zeros([num_times, num_roi], dtype=np.object)
 
     # get the bin edges for each time bin for each ROI
@@ -245,10 +247,10 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels, max_cts,
         bin edges for each integration times and each ROI
 
     prob_k : array
-        probability of detecting speckles
+        probability density of detecting speckles
 
     prob_k_pow : array
-
+        squares of probability density of detecting speckles
     """
     img_per_level[level] += 1
 
