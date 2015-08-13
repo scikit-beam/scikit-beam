@@ -65,13 +65,13 @@ from lmfit import minimize, Parameters
 logger = logging.getLogger(__name__)
 
 
-def negative_binom_distribution(bin_centers, K, M):
+def negative_binom_distribution(bin_edges, K, M):
     """
     Negative Binomial (Poisson-Gamma) distribution function
 
     Parameters
     ----------
-    bin_centers : array
+    bin_edges : array
         normalized speckle count bin centers
 
     K : int
@@ -105,16 +105,16 @@ def negative_binom_distribution(bin_centers, K, M):
        time-varying dynamics" Rev. Sci. Instrum. vol 76, p  093110, 2005.
 
     """
-    co_eff = np.exp(gammaln(bin_centers + M) -
-                    gammaln(bin_centers + 1) - gammaln(M))
+    co_eff = np.exp(gammaln(bin_edges + M) -
+                    gammaln(bin_edges + 1) - gammaln(M))
 
     poisson_gamma = co_eff * np.power(M / (K + M), M)
-    co_eff2 = np.power(K / (M + K), bin_centers)
+    co_eff2 = np.power(K / (M + K), bin_edges)
     poisson_gamma *= co_eff2
     return poisson_gamma
 
 
-def poisson_distribution(bin_centers, K):
+def poisson_distribution(bin_edges, K):
     """
     Poisson Distribution
 
@@ -123,7 +123,7 @@ def poisson_distribution(bin_centers, K):
     K : int
         number of photons
 
-    bin_centers : array
+    bin_edges : array
         normalized speckle count bin centers
 
     Returns
@@ -137,17 +137,17 @@ def poisson_distribution(bin_centers, K):
     nbinom_distribution() function Notes
 
     """
-    poisson_dist = np.exp(-K) * np.power(K, bin_centers)/gamma(bin_centers + 1)
+    poisson_dist = np.exp(-K) * np.power(K, bin_edges)/gamma(bin_edges + 1)
     return poisson_dist
 
 
-def gamma_distribution(bin_centers, M, K):
+def gamma_distribution(bin_edges, M, K):
     """
     Gamma distribution function
 
     Parameters
     ----------
-    bin_centers : array
+    bin_edges : array
         normalized speckle count bin centers
 
     M : int
@@ -167,9 +167,9 @@ def gamma_distribution(bin_centers, M, K):
     negative_binom_distribution() function Notes
     """
 
-    co_eff = np.exp(M * np.log(M) + (M - 1) * np.log(bin_centers) -
-                   gammaln(M) - M * np.log(K))
-    gamma_dist = co_eff * np.exp(- M * bin_centers / K)
+    co_eff = np.exp(M * np.log(M) + (M - 1) * np.log(bin_edges) -
+                    gammaln(M) - M * np.log(K))
+    gamma_dist = co_eff * np.exp(- M * bin_edges / K)
     return gamma_dist
 
 
