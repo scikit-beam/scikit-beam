@@ -255,7 +255,7 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels, max_cts,
     img_per_level[level] += 1
 
     for j in xrange(num_roi):
-        roi_data = buf[level, buf_no][labels == j+1 ]
+        roi_data = buf[level, buf_no][labels == j+1]
 
         spe_hist, bin_edges = np.histogram(roi_data, bins=bin_edges,
                                            normed=True)
