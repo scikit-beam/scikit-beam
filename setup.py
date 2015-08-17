@@ -3,6 +3,7 @@
 import setuptools
 from distutils.core import setup, Extension
 from setupext import ext_modules
+import versioneer
 import numpy as np
 import os
 
@@ -15,7 +16,8 @@ def read(fname):
 
 setup(
     name='scikit-xray',
-    version='0.0.3',
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     author='Brookhaven National Lab',
     description="Data analysis tools for X-ray science",
     packages=setuptools.find_packages(exclude=['doc']),
