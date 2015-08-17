@@ -100,13 +100,13 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     is defined as
 
     :math ::
-    g2(Q, t) = \\frac{<I(Q, t)I(Q, t + delay)> }{<I(Q, t)>^2}
+        g_2(q, \tau) = \frac{<I(q, \tau)I(q, \tau + delay)> }{<I(q, \tau)>^2}
 
     ; delay > 0
 
-    Here, I(Q, t) refers to the scattering strength at the momentum
-    transfer vector Q in reciprocal space at time t, and the brackets
-    <...> refer to averages over time t.
+    Here, I(q, t) refers to the scattering strength at the momentum
+    transfer vector q in reciprocal space at time tau, and the brackets
+    <...> refer to averages over time tau.
 
     This implementation is based on code in the language Yorick
     by Mark Sutton, based on published work. [1]_
@@ -298,13 +298,13 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
     Notes
     -----
     :math ::
-        G   = <I(t)I(t + delay)>
+        G   = <I(\tau)I(\tau + delay)>
 
     :math ::
-        past_intensity_norm = <I(t)>
+        past_intensity_norm = <I(\tau)>
 
     :math ::
-        future_intensity_norm = <I(t + delay)>
+        future_intensity_norm = <I(\tau + delay)>
 
     """
     img_per_level[level] += 1
@@ -415,15 +415,15 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
     scattering factor(ISF) g1
 
     :math ::
-        g2(q, t) = \\beta[g1(q, t)]^{2} + g_\\infty
+        g_2(q, \tau) = \beta_1[g_1(q, \tau)]^{2} + g_\infty
 
     For a system undergoing  diffusive dynamics,
 
     :math ::
-        g1(q, t) = e^{-\\Gamma t}
+        g_1(q, \tau) = e^{-\gamma(q) \tau}
 
     :math ::
-        g2(q, t) = \\beta e^{-2\\Gamma t} + g_\\infty
+       g_2(q, \tau) = \beta_1 e^{-2\gamma(q) \tau} + g_\infty
 
     These implementation are based on published work. [1]_
 
