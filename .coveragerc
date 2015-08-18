@@ -6,6 +6,9 @@ omit =
     */site-packages/nose/*
     *test*
     skxray/__init__.py
-    
+    # ignore _version.py and versioneer.py
+    .*version.*
+    *_version.py
+
 exclude_lines =
     def set_default
