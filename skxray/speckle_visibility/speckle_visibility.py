@@ -4,7 +4,7 @@
 #                                                                      #
 # Developed at the NSLS-II, Brookhaven National Laboratory             #
 # Developed by Sameera K. Abeykoon, May 2015                           #
-#                                                                      #                                                                    #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -53,8 +53,8 @@ from six import string_types
 import skxray.correlation as corr
 import skxray.roi as roi
 import skxray.core as core
-
-import scipy.ndimage as ndi
+import scipy.ndimage.measurements as meas
+# TODO  check this in skimage
 
 try:
     iteritems = dict.iteritems
@@ -88,51 +88,54 @@ def max_counts(images_sets, label_array):
     """
     max_cts = 0
     for img_set in images_sets:
-        for n, img in enumerate(img_set.operands[0]):
-            frame_max = ndi.measurements.maximum(img, label_array)
-            max_cts = max(max_cts, frame_max)
+        for img in img_set:
+            max_cts = max(max_cts, meas.maximum(img, label_array))
     return max_cts
 
 
-def intensity_distribution(image_array, label_array):
+def roi_pixel_values(image, labels):
     """
-    This will provide the intensity distribution of the ROI"s
-    eg: radial intensity distributions of a
-    rings of the label array
+    This will provide intensities of the ROI's of the labeled array
+    according to the pixel list
+    eg: intensities of the rings of the labeled array
+
     Parameters
     ----------
-    image_array : array
+    image : array
         image data dimensions are: (rr, cc)
 
-    label_array : array
+    labels : array
         labeled array; 0 is background.
         Each ROI is represented by a distinct label (i.e., integer).
 
     Returns
     -------
-    radial_intensity : dict
-        radial intensity of each ROI's
+    roi_pix : dict
+        intensities of the ROI's of the labeled array according
+        to the pixel list
+        {ROI 1 : intensities of the pixels of ROI 1, ROI 2 : intensities of
+         the pixels of ROI 2}
     """
 
-    if label_array.shape != image_array.shape:
+    if labels.shape != image.shape:
         raise ValueError("Shape of the image data should be equal to"
                          " shape of the labeled array")
 
-    labels, indices = corr.extract_label_indices(label_array)
-    label_num = np.unique(labels)
+    #labels, indices = corr.extract_label_indices(label_array)
+    label_num = np.unique(labels)[1:]
 
-    intensity_distribution = {}
+    #intensity_distribution = {}
 
     for n in label_num:
         value = (np.ravel(image_array)[indices[labels==n].tolist()])
         intensity_distribution[n] = value
 
-    return intensity_distribution
+    return {n: image[labels == n] for n in range(1, np.max(labels))}
+
 
 
 def static_test_sets_one_label(sample_dict, label_array, num=1):
     """
-
     This will process the averaged intensity for the required ROI for different
     data sets (dictionary for different data sets)
     eg: ring averaged intensity for the required labeled ring for different
@@ -168,6 +171,7 @@ def static_test_sets_one_label(sample_dict, label_array, num=1):
     return average_intensity_sets
 
 
+
 def static_test_sets(sample_dict, label_array):
     """
     This will process the averaged intensity for the required ROI's for different
@@ -177,93 +181,66 @@ def static_test_sets(sample_dict, label_array):
 
     Parameters
     ----------
-    sample_dict : dict
-        image sets given as a dictionary
-
-    label_array : array
-        labeled array; 0 is background.
-        Each ROI is represented by a distinct label (i.e., integer).
-
-    num : int, optional
-        Required  ROI label
-
-    Returns
-    -------
-    average_intensity : dict
-        average intensity of one ROI
-        for the intensity array of image sets
-
-    combine_averages : array
-        combine intensity averages of one ROI for sets of images
-    """
-
-    average_intensity_sets = {}
-
-    for key, img in dict(sample_dict).iteritems():
-        average_intensity_sets[key] = static_test(img, label_array)
-    return average_intensity_sets
-
-
-def static_tests_one_label(images, label_array, num=1):
-    """
-    This will provide the average intensity values and intensity values of
-    one ROI for the required intensity array of images.
-
-    Parameters
-    ----------
     images : array
         iterable of 2D arrays
         dimensions are: (rr, cc)
 
-    label_array : array
-        labeled array; 0 is background.
-        Each ROI is represented by a distinct label (i.e., integer).
-
-    num : int, 1
-        Required  ROI label
-
-    Returns
-    -------
-    average_intensity : array
-        average intensity of ROI's
-        for the intensity array of images
-        dimensions are : [num_images][len(indices)]
-
-    """
-    if label_array.shape != images.operands[0].shape[1:]:
-        raise ValueError("Shape of the images should be equal to"
-                         " shape of the label array")
-
-    labels, indices = corr.extract_label_indices(label_array)
-    average_intensity = []
-
-    for n, img in enumerate(images.operands[0]):
-        value = (np.ravel(img)[indices[num].tolist()])
-        average_intensity.append(np.mean(value))
-
-    return average_intensity
-
-
-def static_test(images, label_array):
-    """
-    Averaged intensities for ROIS'
-
-    Parameters
-    ----------
-    images : array
-        iterable of 2D arrays
-        dimensions are: (rr, cc)
-
-    label_array : array
+    labels : array
         labeled array; 0 is background.
         Each ROI is represented by a distinct label (i.e., integer).
 
     Returns
     -------
-    average_intensity : dict
+    mean_int_labels : dict
         average intensity of each ROI as a dictionary
         {roi 1: average intensities, roi 2 : average intensities}
 
+    """
+    return {n+1 : mean_intensity(images_set[n],
+                                 labels) for n in range(len(images_set))}
+
+
+def mean_intensity(images, labels):
+    """
+    Mean intensities for ROIS' of the labeled array for set of images
+
+    Parameters
+    ----------
+    images : array
+        iterable of 2D arrays
+        dimensions are: (rr, cc)
+
+    labels : array
+        labeled array; 0 is background.
+        Each ROI is represented by a distinct label (i.e., integer).
+
+    Returns
+    -------
+    mean_int : array
+        mean intensity of each ROI for the set of images as an array
+        shape (number of images in the set, number of labels)
+
+    """
+    if labels.shape != images[0].shape[0:]:
+        raise ValueError("Shape of the images should be equal to"
+                         " shape of the label array")
+
+    index = np.unique(labels)[1: ]
+    mean_int = np.zeros((images.shape[0], index.shape[0]))
+
+    for n in range(images.shape[0]):
+        mean_int[n] = meas.mean(images[n], labels, index=index)
+
+    return mean_int
+
+
+def combine_mean_intensity(mean_int_dict):
+    """
+    Parameters
+    ----------
+    mean_int_dict : dict
+        mean intensity of each ROI as a dictionary
+        {roi 1: average intensities, roi 2 : average intensities}
     """
     average_intensity = {}
     num = np.unique(label_array)[1:]
@@ -389,18 +366,11 @@ def static_test_sets(sample_dict, label_array):
 
     Returns
     -------
-    average_intensity : dict
-        average intensity of each image sets and for each ROI's
-        eg:
-        {image_set1: {roi_1: average intensities, roi_2: average intensities},
-         image_set2: {roi_1: average intensities, roi_2: average intensities}}
+    combine_mean_int : array
+        combine mean intensities of image sets for each ROI of labeled array
+
     """
-
-    average_intensity_sets = {}
-
-    for key, img in iteritems(sample_dict):
-        average_intensity_sets[key] = static_test(img, label_array)
-    return average_intensity_sets
+    return np.vstack(list(mean_int_dict.values()))
 
 
 def circular_average(image, calibrated_center, threshold=0, nx=100,
