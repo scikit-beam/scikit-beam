@@ -103,10 +103,10 @@ def static_test():
     label_array =
 
 
-def test_time_bin_edges():
-    time_bin = spe_vis.time_bin_edges(number=5, number_of_images=150)
+def test_time_series():
+    time_series = spe_vis.time_series(number=5, number_of_images=150)
 
-    assert_array_equal(time_bin, [1, 5, 25, 125])
+    assert_array_equal(time_series, [1, 5, 25, 125])
 
 
 def test_max_counts():
@@ -124,7 +124,7 @@ def test_max_counts():
     label_array[img_stack1[0] < 20] = 1
     label_array[img_stack1[0] > 40] = 2
 
-    assert_array_equal(60, spe_vis.max_counts(samples, label_array))
+    assert_array_equal(60, spe_vis.roi_max_counts(samples, label_array))
 
 
 def test_static_test_sets():

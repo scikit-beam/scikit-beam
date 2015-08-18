@@ -67,7 +67,7 @@ logger = logging.getLogger(__name__)
 import numpy as np
 
 
-def max_counts(images_sets, label_array):
+def roi_max_counts(images_sets, label_array):
     """
     This will determine the highest speckle counts occurred in the required
     ROI's in required images.
@@ -121,17 +121,15 @@ def roi_pixel_values(image, labels):
         raise ValueError("Shape of the image data should be equal to"
                          " shape of the labeled array")
 
-    #labels, indices = corr.extract_label_indices(label_array)
     label_num = np.unique(labels)[1:]
 
-    #intensity_distribution = {}
+    return {n: image[labels == n] for n in range(1, np.max(labels)+1)}
 
     for n in label_num:
         value = (np.ravel(image_array)[indices[labels==n].tolist()])
         intensity_distribution[n] = value
 
     return {n: image[labels == n] for n in range(1, np.max(labels))}
-
 
 
 def static_test_sets_one_label(sample_dict, label_array, num=1):
@@ -145,13 +143,17 @@ def static_test_sets_one_label(sample_dict, label_array, num=1):
     ----------
     sample_dict : dict:
 
+
     label_array : array
         labeled array; 0 is background.
         Each ROI is represented by a distinct label (i.e., integer).
 
+    number_of_images : int, optional
+        number of images
+
     Return
     ------
-    time_bin : list
+    time_series : list
         time binning
 
     Note
@@ -163,13 +165,11 @@ def static_test_sets_one_label(sample_dict, label_array, num=1):
      r - is the common ratio
     """
 
-    average_intensity_sets = {}
+    time_series = [1]
 
-    for key, img in dict(sample_dict).iteritems():
-        average_intensity_sets[key] = static_tests_one_label(img, label_array,
-                                                             num)
-    return average_intensity_sets
-
+    while time_series[-1]*number < number_of_images:
+        time_series.append(time_series[-1]*number)
+    return time_series
 
 
 def static_test_sets(sample_dict, label_array):
@@ -182,7 +182,7 @@ def static_test_sets(sample_dict, label_array):
     Parameters
     ----------
     images : array
-        iterable of 2D arrays
+        iterable of 4D arrays
         dimensions are: (rr, cc)
 
     labels : array
@@ -193,9 +193,13 @@ def static_test_sets(sample_dict, label_array):
     -------
     mean_int_labels : dict
         average intensity of each ROI as a dictionary
-        {roi 1: average intensities, roi 2 : average intensities}
+        shape len(images_sets)
+        eg: 2 image sets,
+        {image set 1 : (len(images in image set 1), number of labels),
+        image set 2 : (len(images in image set 2), number of labels)}
 
     """
+
     return {n+1 : mean_intensity(images_set[n],
                                  labels) for n in range(len(images_set))}
 
@@ -218,7 +222,7 @@ def mean_intensity(images, labels):
     -------
     mean_int : array
         mean intensity of each ROI for the set of images as an array
-        shape (number of images in the set, number of labels)
+        shape (len(images), number of labels)
 
     """
     if labels.shape != images[0].shape[0:]:
@@ -236,11 +240,13 @@ def mean_intensity(images, labels):
 
 def combine_mean_intensity(mean_int_dict):
     """
+    Combine mean intensities of the images(all images sets) for each ROI
+
     Parameters
     ----------
     mean_int_dict : dict
         mean intensity of each ROI as a dictionary
-        {roi 1: average intensities, roi 2 : average intensities}
+
     """
     average_intensity = {}
     num = np.unique(label_array)[1:]
@@ -363,11 +369,11 @@ def static_test_sets(sample_dict, label_array):
 
     num : int, optional
         Required  ROI label
-
     Returns
     -------
     combine_mean_int : array
         combine mean intensities of image sets for each ROI of labeled array
+        shape (len(images in all image sets), number of labels)
 
     """
     return np.vstack(list(mean_int_dict.values()))
