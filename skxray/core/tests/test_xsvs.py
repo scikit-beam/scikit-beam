@@ -43,7 +43,6 @@ from skimage.morphology import convex_hull_image
 
 import skxray.core.correlation as corr
 import skxray.core.xsvs as xsvs
-import skxray.core.xsvs_fitting as xsvs_fit
 import skxray.core.roi as roi
 from skxray.testing.decorators import skip_if
 
@@ -89,51 +88,3 @@ def test_normalize_bin_edges():
                                                          1.125, 1.1875]))
 
     assert_array_almost_equal(bin_cen[0, 0], np.array([0.2, 0.6, 1., 1.4]))
-
-
-def test_distribution():
-    M = 1.9  # number of coherent modes
-    K = 3.15  # number of photons
-
-    bin_edges = np.array([0., 0.4, 0.8, 1.2, 1.6, 2.0])
-
-    p_k = xsvs_fit.negative_binom_distribution(bin_edges, K, M)
-
-    poission_dist = xsvs_fit.poisson_distribution(bin_edges, K)
-
-    gamma_dist = xsvs_fit.gamma_distribution(bin_edges, M, K)
-
-    assert_array_almost_equal(p_k, np.array([0.15609113, 0.17669628,
-                                             0.18451672, 0.1837303,
-                                             0.17729389, 0.16731627]))
-    assert_array_almost_equal(gamma_dist, np.array([0., 0.13703903, 0.20090424,
-                                                    0.22734693, 0.23139384,
-                                                    0.22222281]))
-    assert_array_almost_equal(poission_dist, np.array([0.04285213, 0.07642648,
-                                                       0.11521053, 0.15411372,
-                                                       0.18795214, 0.21260011]))
-
-
-def test_diffusive_motion_contrast_factor():
-    times = np.array([1, 2, 4, 8])
-    relaxation_rate = 6.40
-    contrast_factor = 0.17
-    cf_baseline = 0
-
-    diff_con_fac = xsvs_fit.diffusive_motion_contrast_factor(times,
-                                                             relaxation_rate,
-                                                             contrast_factor,
-                                                             cf_baseline)
-    assert_array_almost_equal(diff_con_fac, np.array([0.02448731, 0.01276245,
-                                                      0.00651093, 0.00328789]))
-
-
-def test_diffusive_coefficient():
-    relaxation_rates = np.array([6.40, 6.80, 7.30, 7.80])
-    q_values = np.array([0.0026859, 0.00278726, 0.00288861, 0.00298997])
-
-    diff_co = xsvs_fit.diffusive_coefficient(relaxation_rates, q_values)
-
-    assert_array_almost_equal(diff_co, np.array([887156.61579, 875293.9933,
-                                                 874873.0516, 872490.9704]),
-                              decimal=4)
