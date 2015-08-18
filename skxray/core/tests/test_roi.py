@@ -284,10 +284,10 @@ def test_static_test_sets():
     average_int_sets = roi.mean_intensity_sets(samples, label_array)
 
     return_values = [
-        average_int_sets.sample1.roi1,
-        average_int_sets.sample2.roi1,
-        average_int_sets.sample1.roi2,
-        average_int_sets.sample2.roi2,
+        average_int_sets.sample1.roi_1,
+        average_int_sets.sample2.roi_1,
+        average_int_sets.sample1.roi_2,
+        average_int_sets.sample2.roi_2,
     ]
     expected_values = [
         np.asarray([float(x) for x in range(0, 1000, 100)]),
