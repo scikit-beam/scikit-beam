@@ -21,6 +21,7 @@ install:
   - python setup.py install
   - pip install coveralls
   - pip install codecov
+  - pip install pandas
 
 script:
   - python run_tests.py
