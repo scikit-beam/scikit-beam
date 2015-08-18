@@ -1,0 +1,2 @@
+include versioneer.py
+include skxray/_version.py
