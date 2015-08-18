@@ -45,7 +45,6 @@ import scipy.ndimage.measurements as ndim
 import numpy as np
 from . import utils
 import logging
-import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -408,41 +407,6 @@ def mean_intensity(images, labeled_array, index=None):
     data = [mean_intensity[:, i] for i in range(mean_intensity.shape[1])]
     roi_labels = ['roi_%s' % idx for idx in index]
     return data, roi_labels
-
-
-def mean_intensity_sets(image_sets, labeld_array, index=None):
-    """Compute the mean intensity of image sets given as an dictionary
-    Parameters
-    ----------
-    image_sets : dict
-        image sets given as a dictionary
-        Dimensions:
-            len(images_set) == number of different image sets
-            image_sets.values()[0].shape == (num_img, num_rows, num_cols)
-            len(image_sets.values()[0]) == num_img
-        examples
-            image_sets = {'sample1': np.asarray(images1),
-             'sample2': np.asarray(images2)}
-    labeled_array : array
-        labeled array; 0 is background.
-        Each ROI is represented by a nonzero integer. It is not required that
-        the ROI labels are contiguous
-    index : int, list, optional
-        The ROI's to use. If None, this function will extract averages for all
-        ROIs
-
-    Returns
-    -------
-    image_df : dataframe
-        mean intensity of image sets as a tabular data structure according to
-        labeled array and different image sets
-    """
-    roi_data = {}
-    for k, v in sorted(image_sets.items()):
-        intensity, index_list = mean_intensity(v, labeld_array)
-        roi_data[k] = intensity
-    image_df = pd.DataFrame(roi_data, index_list)
-    return image_df
 
 
 def circular_average(image, calibrated_center, threshold=0, nx=100,
