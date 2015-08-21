@@ -67,5 +67,5 @@ test:
     - skxray.io.gsas_file_reader
 
 about:
-  home: http://Nikea.github.io/scikit-xray/
+  home: http://scikit-xray.github.io/scikit-xray/
   license: 3-Clause BSD
