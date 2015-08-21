@@ -66,7 +66,7 @@ Essential Dependencies:
 
 .. code-block:: bash
 
-   git clone https://github.com/Nikea/scikit-xray
+   git clone https://github.com/scikit-xray/scikit-xray
    pip install -e scikit-xray
 
 Updating Your Installation

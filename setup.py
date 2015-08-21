@@ -24,7 +24,7 @@ setup(
     include_dirs=[np.get_include()],
     package_data={'skxray.core.constants': ['data/*.dat']},
     ext_modules=ext_modules,
-    url='http://github.com/Nikea/scikit-xray',
+    url='http://github.com/scikit-xray/scikit-xray',
     keywords='Xray Analysis',
     license='BSD',
     classifiers=['Development Status :: 3 - Alpha',

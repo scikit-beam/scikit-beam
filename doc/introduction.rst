@@ -68,6 +68,6 @@ the following beamlines.
 Credit
 ^^^^^^
 
-Scikit-xray is part of the `Nikea <https://github.com/Nikea>`__ software
+Scikit-xray is part of the `scikit-xray <https://github.com/scikit-xray>`__ software
 organization supported by the 
 `Brookhaven National Lab <http://www.bnl.gov>`__.
