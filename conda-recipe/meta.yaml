@@ -30,21 +30,41 @@ test:
   requires:
     - nose
   imports:
-     - skxray
-     - skxray.core
-     - skxray.calibration
-     - skxray.constants
-     - skxray.constants.api
-     - skxray.dpc
-     - skxray.feature
-     - skxray.image
-     - skxray.recip
-     - skxray.diff_roi_choice
-     - skxray.spectroscopy
-     - skxray.fitting
-     - skxray.fitting.api
-     - skxray.io
-     - skxray.io.api
+    # import all sub-packages and modules
+    - skxray
+    - skxray.diffraction
+    - skxray.fluorescence
+    - skxray._version
+    - skxray.core
+    - skxray.core.utils
+    - skxray.core.dpc
+    - skxray.core.feature
+    - skxray.core.calibration
+    - skxray.core.arithmetic
+    - skxray.core.recip
+    - skxray.core.image
+    - skxray.core.cdi
+    - skxray.core.roi
+    - skxray.core.correlation
+    - skxray.core.spectroscopy
+    - skxray.core.fitting
+    - skxray.core.fitting.xrf_model
+    - skxray.core.fitting.background
+    - skxray.core.fitting.lineshapes
+    - skxray.core.fitting.funcs
+    - skxray.core.fitting.models
+    - skxray.core.fitting.base
+    - skxray.core.fitting.base.parameter_data
+    - skxray.core.constants
+    - skxray.core.constants.basic
+    - skxray.core.constants.xrs
+    - skxray.core.constants.xrf
+    - skxray.io
+    - skxray.io.avizo_io
+    - skxray.io.save_powder_output
+    - skxray.io.binary
+    - skxray.io.net_cdf_io
+    - skxray.io.gsas_file_reader
 
 about:
   home: http://Nikea.github.io/scikit-xray/
