@@ -49,7 +49,10 @@ from .utils import verbosedict
 logger = logging.getLogger(__name__)
 import time
 
-from pyFAI import geometry as geo
+try:
+    from pyFAI import geometry as geo
+except ImportError:
+    geo = None
 
 try:
     import src.ctrans as ctrans
@@ -218,5 +221,8 @@ def calibrated_pixels_to_q(detector_size, pyfai_kwargs):
     q_val : ndarray
         Reciprocal values for each pixel shape is [num_rows * num_columns]
     """
+    if geo is None:
+        raise RuntimeError("You must have pyFAI installed to use this "
+                           "function.")
     a = geo.Geometry(**pyfai_kwargs)
     return a.qArray(detector_size)
