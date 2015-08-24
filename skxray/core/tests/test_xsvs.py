@@ -51,20 +51,22 @@ logger = logging.getLogger(__name__)
 
 def test_xsvs():
     images = []
-    for i in range(10):
-        int_array = np.tril(i*np.ones(10))
-        if i == 10/2:
-            int_array[int_array == 0] = 20
-        else:
-            int_array[int_array == 0] = i*2
+    for i in range(5):
+        int_array = np.tril((i + 2) * np.ones(10))
+        int_array[int_array == 0] = (i + 1)
         images.append(int_array)
 
-    images = np.asarray(images)
-    roi_data = np.array(([4, 2, 2, 2], [0, 5, 2, 2]), dtype=np.int64)
+    images_sets = [np.asarray(images), ]
+    roi_data = np.array(([4, 2, 2, 2], [0, 5, 4, 4]), dtype=np.int64)
     label_array = roi.rectangles(roi_data, shape=images[0].shape)
 
-    num_times = 4
-    num_rois = 2
+    prob_k_all, std = xsvs.xsvs(images_sets, label_array, timebin_num=2,
+                                number_of_img=5, max_cts=None)
+
+    assert_array_almost_equal(prob_k_all[0, 0],
+                              np.array([0., 0., 0.2, 0.2, 0.4]))
+    assert_array_almost_equal(prob_k_all[0, 1],
+                              np.array([0., 0.2, 0.2, 0.2, 0.4]))
 
 
 def test_normalize_bin_edges():

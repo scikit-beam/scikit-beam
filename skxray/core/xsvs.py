@@ -48,8 +48,6 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import six
 import numpy as np
-from six.moves import zip
-from six import string_types
 import time
 
 import skxray.core.correlation as corr
@@ -75,17 +73,13 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
     ----------
     image_sets : array
         sets of images
-
     label_array : array
         labeled array; 0 is background.
         Each ROI is represented by a distinct label (i.e., integer).
-
     timebin_num : int, optional
         integration times
-
     number_of_img : int, optional
         number of images
-
     max_cts : int, optional
        the brightest pixel in any ROI in any image in the image set.
 
@@ -93,7 +87,6 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
     -------
     prob_k_all : array
         probability density of detecting photons
-
     prob_k_std_dev : array
         standard deviation of probability density of detecting photons
 
@@ -224,49 +217,40 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels, max_cts,
     ----------
     num_roi : int
         number of ROI's
-
     level : int
         current time level(integration time)
-
     buf_no : int
         current buffer number
-
     buf : array
         image data array to use for XSVS
-
     img_per_level : int
         to track how many images processed in each level
-
     labels : array
-        labels of the required region of interests(ROI's)
-
+        labels of the required region of interests(ROI's
     max_cts: int
         maximum pixel count
-
     bin_edges : array
         bin edges for each integration times and each ROI
-
     prob_k : array
         probability density of detecting speckles
-
     prob_k_pow : array
         squares of probability density of detecting speckles
     """
     img_per_level[level] += 1
 
-    for j in xrange(num_roi):
+    for j in range(num_roi):
         roi_data = buf[level, buf_no][labels == j+1]
 
         spe_hist, bin_edges = np.histogram(roi_data, bins=bin_edges,
                                            normed=True)
 
-        prob_k[level, j] += (spe_hist -
+        prob_k[level, j] += (np.nan_to_num(spe_hist) -
                              prob_k[level, j])/(img_per_level[level])
 
-        prob_k_pow[level, j] += (np.power(spe_hist, 2) -
+        prob_k_pow[level, j] += (np.power(np.nan_to_num(spe_hist), 2) -
                                  prob_k_pow[level, j])/(img_per_level[level])
 
-    return None  # modifies arguments in place!
+    return  # modifies arguments in place!
 
 
 def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts):
@@ -278,14 +262,11 @@ def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts):
     ----------
     num_times : int
         number of integration times for XSVS
-
     num_rois : int
         number of ROI's
-
     mean_roi : array
         mean intensity of each ROI
         shape (number of ROI's)
-
     max_cts : int
         maximum pixel counts
 
@@ -294,12 +275,10 @@ def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts):
     norm_bin_edges : array
         normalized speckle count bin edges
          shape (num_times, num_rois)
-
     norm_bin_centers :array
         normalized speckle count bin centers
         shape (num_times, num_rois)
     """
-
     norm_bin_edges = np.zeros((num_times, num_rois), dtype=object)
     norm_bin_centers = np.zeros((num_times, num_rois), dtype=object)
     for i in range(num_times):
