@@ -15,8 +15,8 @@
 #include "ctrans.h"
 
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
-  static char *kwlist[] = { "angles", "mode", "ccd_size", "ccd_pixsize", 
-			    "ccd_cen", "dist", "wavelength", 
+  static char *kwlist[] = { "angles", "mode", "ccd_size", "ccd_pixsize",
+			    "ccd_cen", "dist", "wavelength",
 			    "UBinv", "outarray", NULL };
   PyObject *angles = NULL;
   PyObject *_angles = NULL;
@@ -48,7 +48,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 				  &_angles,
 				  &mode,
 				  &ccd.xSize, &ccd.ySize,
-				  &ccd.xPixSize, &ccd.yPixSize, 
+				  &ccd.xPixSize, &ccd.yPixSize,
 				  &ccd.xCen, &ccd.yCen,
 				  &ccd.dist,
 				  &lambda,
@@ -117,7 +117,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
     threadData[t].imstart = stride * t;
     for(i=0;i<3;i++){
       for(j=0;j<3;j++){
-	threadData[t].UBI[j][i] = UBI[j][i];
+	       threadData[t].UBI[j][i] = UBI[j][i];
       }
     }
     if(t == (NTHREADS - 1)){
@@ -127,8 +127,8 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
     }
 
 #ifdef USE_THREADS
-    iret[t] = pthread_create( &thread[t], NULL, 
-			      processImageThread, 
+    iret[t] = pthread_create( &thread[t], NULL,
+			      processImageThread,
 			      (void*) &threadData[t]);
 #else
     processImageThread((void *) &threadData[t]);
@@ -172,17 +172,17 @@ void *processImageThread(void* ptr){
   for(i=data->imstart;i<data->imend;i++){
     // For each image process
     calcDeltaGamma(delgam, data->ccd, data->anglesp[0], data->anglesp[5]);
-    calcQTheta(delgam, data->anglesp[1], data->anglesp[4], data->qOutp, 
+    calcQTheta(delgam, data->anglesp[1], data->anglesp[4], data->qOutp,
 	       data->ndelgam, data->lambda);
     if(data->mode > 1){
-      calcQPhiFromQTheta(data->qOutp, data->ndelgam, 
+      calcQPhiFromQTheta(data->qOutp, data->ndelgam,
 			 data->anglesp[2], data->anglesp[3]);
     }
     if(data->mode == 4){
       calcHKLFromQPhi(data->qOutp, data->ndelgam, data->UBI);
     }
     data->anglesp+=6;
-    data->qOutp+=(data->ndelgam * 4); 
+    data->qOutp+=(data->ndelgam * 4);
   }
   free(delgam);
 #ifdef USE_THREADS
@@ -284,12 +284,12 @@ int calcDeltaGamma(_float *delgam, CCD *ccd, _float delCen, _float gamCen){
   for(j=0;j<ccd->ySize;j++){
     for(i=0;i<ccd->xSize;i++){
       *(delgamp++) = delCen - atan( ((_float)j - ccd->yCen) * yPix);
-      *(delgamp++) = gamCen - atan( ((_float)i - ccd->xCen) * xPix); 
+      *(delgamp++) = gamCen - atan( ((_float)i - ccd->xCen) * xPix);
     }
   }
 
   return true;
-} 
+}
 
 static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   PyObject *gridout = NULL, *Nout = NULL, *standarderror = NULL;
@@ -309,13 +309,13 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   unsigned long n_outside;
   
   if(!PyArg_ParseTupleAndKeywords(args, kwargs, "O(ddd)(ddd)(iii)|i", kwlist,
-				  &_I, 
+				  &_I,
 				  &grid_start[0], &grid_start[1], &grid_start[2],
 				  &grid_stop[0], &grid_stop[1], &grid_stop[2],
 				  &grid_nsteps[0], &grid_nsteps[1], &grid_nsteps[2],
 				  &norm_data)){
     return NULL;
-  }	
+  }
   
   gridI = PyArray_FROMANY(_I, NPY_DOUBLE, 0, 0, NPY_IN_ARRAY);
   if(!gridI){
@@ -341,12 +341,12 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
     goto cleanup;
   }
   
-  n_outside = c_grid3d(PyArray_DATA(gridout), PyArray_DATA(Nout), 
+  n_outside = c_grid3d(PyArray_DATA(gridout), PyArray_DATA(Nout),
 		       PyArray_DATA(standarderror), PyArray_DATA(gridI),
 		       grid_start, grid_stop, data_size, grid_nsteps, norm_data);
   
   Py_XDECREF(gridI);
-  return Py_BuildValue("NNNl", gridout, Nout, standarderror, n_outside); 
+  return Py_BuildValue("NNNl", gridout, Nout, standarderror, n_outside);
   
  cleanup:
   Py_XDECREF(gridI);
@@ -356,8 +356,8 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   return NULL;
 }
 
-unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror, double *data, 
-		       double *grid_start, double *grid_stop, int max_data, 
+unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror, double *data,
+		       double *grid_start, double *grid_stop, int max_data,
 		       int *n_grid, int norm_data){
   int i;
   unsigned long *nout_ptr;
@@ -401,16 +401,16 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
   }
 	
   for(i = 0; i < max_data ; i++){
-    // Calculate the relative position in the grid. 
+    // Calculate the relative position in the grid.
     pos_double[0] = (*data_ptr - grid_start[0]) / grid_len[0];
     data_ptr++;
     pos_double[1] = (*data_ptr - grid_start[1]) / grid_len[1];
     data_ptr++;
     pos_double[2] = (*data_ptr - grid_start[2]) / grid_len[2];
-    if((pos_double[0] >= 0) && (pos_double[0] < 1) && 
+    if((pos_double[0] >= 0) && (pos_double[0] < 1) &&
        (pos_double[1] >= 0) && (pos_double[1] < 1) &&
        (pos_double[2] >= 0) && (pos_double[2] < 1)){
-      data_ptr++;	
+      data_ptr++;
       // Calculate the position in the grid
       grid_pos[0] = (int)(pos_double[0] * n_grid[0]);
       grid_pos[1] = (int)(pos_double[1] * n_grid[1]);
@@ -427,13 +427,13 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
       // Calculate the standard deviation quantities
 
       if(standarderror){
-	if(nout[pos] == 1){
-	  Mk[pos] = *data_ptr;
-	  Qk[pos] = 0.0;
-	} else {
-	  Qk[pos] = Qk[pos] + ((nout[pos] - 1) * pow(*data_ptr - Mk[pos],2) / nout[pos]);
-	  Mk[pos] = Mk[pos] + ((*data_ptr - Mk[pos]) / nout[pos]);
-	}
+      	if(nout[pos] == 1){
+      	  Mk[pos] = *data_ptr;
+      	  Qk[pos] = 0.0;
+      	} else {
+      	  Qk[pos] = Qk[pos] + ((nout[pos] - 1) * pow(*data_ptr - Mk[pos],2) / nout[pos]);
+      	  Mk[pos] = Mk[pos] + ((*data_ptr - Mk[pos]) / nout[pos]);
+      	}
       }
 
       // Increment pointer
@@ -450,9 +450,9 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
   if(norm_data){
     for(i = 0; i < grid_size; i++){
       if(nout[i] > 0){
-	dout[i] = dout[i] / nout[i];
+	       dout[i] = dout[i] / nout[i];
       } else {
-	dout[i] = 0.0;
+	       dout[i] = 0.0;
       }
     }
   }
@@ -462,8 +462,8 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
   if(standarderror){
     for(i=0;i<grid_size;i++){
       if(nout[i] > 1){
-	// standard deviation of the sample distribution
-	standarderror[i] = pow(Qk[pos] / (nout[i] - 1), 0.5) / pow(nout[i], 0.5);
+      	// standard deviation of the sample distribution
+      	standarderror[i] = pow(Qk[pos] / (nout[i] - 1), 0.5) / pow(nout[i], 0.5);
       }
     }
   }

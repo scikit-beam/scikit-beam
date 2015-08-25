@@ -1,7 +1,7 @@
 /*
  
-      This is the header file for ctranc.c file. 
-      process_to_q and process_grid functions in 
+      This is the header file for ctranc.c file.
+      process_to_q and process_grid functions in
       the nsls2/recip.py call  ctranc.c routine for
       fast data analysis.
  
@@ -16,11 +16,11 @@
 #define false 0
 
 #ifndef USE_THREADS
-#define NTHREADS 1 
+#define NTHREADS 1
 #endif
 
 #ifndef NTHREADS
-#defile NTHREADS 2
+#define NTHREADS 2
 #endif
 
 typedef double _float;
@@ -33,7 +33,7 @@ typedef struct {
   _float yCen;
   _float xPixSize;   // X Pixel Size (microns)
   _float yPixSize;   // Y Pixel Size (microns)
-  _float dist;       // Sample - Detector distance. 
+  _float dist;       // Sample - Detector distance.
 } CCD;
 
 typedef struct {
@@ -64,12 +64,11 @@ static char *_ctransDoc = \
 "Python functions to perform gridding (binning) of experimental data.\n\n";
 
 static PyMethodDef _ctransMethods[] = {
-  {"grid3d", (PyCFunction)gridder_3D, METH_VARARGS | METH_KEYWORDS, 
+  {"grid3d", (PyCFunction)gridder_3D, METH_VARARGS | METH_KEYWORDS,
    "Grid the numpy.array object into a regular grid"},
-  {"ccdToQ", (PyCFunction)ccdToQ,  METH_VARARGS | METH_KEYWORDS, 
+  {"ccdToQ", (PyCFunction)ccdToQ,  METH_VARARGS | METH_KEYWORDS,
    "Convert CCD image coordinates into Q values"},
   {NULL, NULL, 0, NULL}     /* Sentinel - marks the end of this structure */
 };
 
 #endif
-
