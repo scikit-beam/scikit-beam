@@ -14,6 +14,10 @@
 #endif
 #include "ctrans.h"
 
+#if PY_MAJOR_VERSION >= 3
+#define IS_PY3K
+#endif
+
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   static char *kwlist[] = { "angles", "mode", "ccd_size", "ccd_pixsize",
 			    "ccd_cen", "dist", "wavelength",
@@ -478,8 +482,27 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
   return n_outside;
 }
 
+#ifndef IS_PY3K
+
+// This struct and the next function are python 3 compatible
+static struct PyModuleDef ctrans =
+{
+   PyModuleDef_HEAD_INIT,
+   "ctrans",
+   "", // _ctransDoc,
+   -1,
+   _ctransMethods
+};
+
+
+PyMODINIT_FUNC PyInit_ctrans(void)  {
+  return PyModule_Create(&ctrans);
+}
+#else
+
+// This is the python 2 version
 PyMODINIT_FUNC initctrans(void)  {
 	(void) Py_InitModule3("ctrans", _ctransMethods, _ctransDoc);
 	import_array();  // Must be present for NumPy.  Called first after above line.
 }
-
+#endif
