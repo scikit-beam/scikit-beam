@@ -1,3 +1,4 @@
+#! encoding: utf-8
 # ######################################################################
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
@@ -32,28 +33,59 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
+"""
+This module is for statistics.
+"""
 from __future__ import absolute_import, division, print_function
-
 import six
+import numpy as np
+import scipy.stats
+from skxray.core.utils import _defaults  # Dan is dubious about this.
+
 import logging
 logger = logging.getLogger(__name__)
 
-try:
-    from .net_cdf_io import load_netCDF
-except ImportError:
-    def load_netCDF(*args, **kwargs):
-        # Die at call time so as not to ruin entire io package.
-        raise ImportError("This function requires netCDF4.")
 
-from .binary import read_binary
+def statistics_1D(x, y, stat='mean', nx=None, min_x=None, max_x=None):
+    """
+    Bin the values in y based on their x-coordinates
 
-from .avizo_io import load_amiramesh
+    Parameters
+    ----------
+    x : array
+        position
+    y : array
+        intensity
+    stat: str or func, optional
+        statistic to be used on the binned values defaults to mean
+        see scipy.stats.binned_statistic
+    nx : integer, optional
+        number of bins to use defaults to default bin value
+    min_x : float, optional
+        Left edge of first bin defaults to minimum value of x
+    max_x : float, optional
+        Right edge of last bin defaults to maximum value of x
 
-from .save_powder_output import save_output
+    Returns
+    -------
+    edges : array
+        edges of bins, length nx + 1
 
-from .gsas_file_reader import gsas_reader
+    val : array
+        statistics of values in each bin, length nx
+    """
 
-from .save_powder_output import gsas_writer
+    # handle default values
+    if min_x is None:
+        min_x = np.min(x)
+    if max_x is None:
+        max_x = np.max(x)
+    if nx is None:
+        nx = _defaults["bins"]
 
-__all__ = ['load_netCDF', 'read_binary', 'load_amiramesh', 'save_output',
-           'gsas_reader', 'gsas_writer']
+    # use a weighted histogram to get the bin sum
+    bins = np.linspace(start=min_x, stop=max_x, num=nx+1, endpoint=True)
+
+    val, _, _ = scipy.stats.binned_statistic(x, y, statistic=stat, bins=bins)
+    # return the two arrays
+    return bins, val

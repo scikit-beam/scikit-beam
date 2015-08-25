@@ -23,8 +23,8 @@ requirements:
     - six
     - xraylib
     - scikit-image
-    - lmfit
-    - netcdf4
+    - lmfit =0.8.1
+    - netcdf4  # optional, required for skxray.io
 
 test:
   requires:
