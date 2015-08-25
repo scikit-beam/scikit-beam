@@ -1,9 +1,9 @@
 ====================
- :mod:`image` Module
+ :mod:`funcs` Module
 ====================
 
 
-.. automodule:: skxray.image
+.. automodule:: skxray.core.fitting.funcs
    :members:
    :show-inheritance:
    :undoc-members:

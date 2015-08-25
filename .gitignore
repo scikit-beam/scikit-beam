@@ -75,7 +75,7 @@ docs/_build/
 *.DAT
 
 #generated documntation files
-doc/resource/api/generated/
+generated/
 
 #ipython notebook
 .ipynb_checkpoints/
@@ -87,3 +87,6 @@ doc/resource/api/generated/
 *.txt
 *.zip
 *.jpg
+
+# ctags
+.tags*

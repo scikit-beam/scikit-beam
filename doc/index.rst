@@ -49,7 +49,7 @@ Scikit-xray is a Python package providing tools for X-ray science.
 For a brief introduction to the ideas behind the package, you can read the
 :ref:`introductory notes <introduction>`.
 
-Users who prefer drag-and-drop software may prefer to use 
+Users who prefer drag-and-drop software may prefer to use
 `vistrails <http://www.vistrails.org/index.php/Main_Page>`__, through which
 all the functionality of scikit-xray is also available.
 (Think LabView for X-ray image processing and data analysis.)
@@ -78,6 +78,8 @@ the `github repository <https://github.com/scikit-xray/scikit-xray>`_.
    whatsnew
    resource/api/index
    resource/dev_guide/index
+   examples
+   tutorial
 
 .. raw:: html
 
