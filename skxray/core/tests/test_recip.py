@@ -38,11 +38,9 @@ import numpy as np
 import numpy.testing as npt
 from nose.tools import raises
 
-from skxray.testing.decorators import known_fail_if
 from skxray.core import recip
 
 
-@known_fail_if(six.PY3)
 def test_process_to_q():
     detector_size = (256, 256)
     pixel_size = (0.0135*8, 0.0135*8)
