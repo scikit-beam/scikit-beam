@@ -12,11 +12,67 @@
 #ifdef USE_THREADS
 #include <pthread.h>
 #endif
-#include "ctrans.h"
 
-#if PY_MAJOR_VERSION >= 3
-#define IS_PY3K
+#define HC_OVER_E 12398.4
+
+#define true -1
+#define false 0
+
+#ifndef USE_THREADS
+#define NTHREADS 1
 #endif
+
+#ifndef NTHREADS
+#define NTHREADS 2
+#endif
+
+typedef double _float;
+typedef int _int;
+
+typedef struct {
+  int xSize;         // X size in pixels.
+  int ySize;         // Y size in pixels.
+  _float xCen;
+  _float yCen;
+  _float xPixSize;   // X Pixel Size (microns)
+  _float yPixSize;   // Y Pixel Size (microns)
+  _float dist;       // Sample - Detector distance.
+} CCD;
+
+typedef struct {
+  CCD *ccd;
+  _float *anglesp;
+  _float *qOutp;
+  int ndelgam;
+  _float lambda;
+  int mode;
+  int imstart;
+  int imend;
+  _float UBI[3][3];
+} imageThreadData;
+
+void *processImageThread(void* ptr);
+int calcQTheta(_float* diffAngles, _float theta, _float mu, _float *qTheta, _int n, _float lambda);
+int calcQPhiFromQTheta(_float *qTheta, _int n, _float chi, _float phi);
+int calcDeltaGamma(_float *delgam, CCD *ccd, _float delCen, _float gamCen);
+int matmulti(_float *val, int n, _float mat[][3], int skip);
+int calcHKLFromQPhi(_float *qPhi, _int n, _float mat[][3]);
+
+unsigned long c_grid3d(double *dout, unsigned long *nout, double *sterr, double *data, double *grid_start, double *grid_stop, int max_data, int *n_grid, int norm_data);
+
+static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs);
+static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs);
+
+static char *_ctransDoc = \
+"Python functions to perform gridding (binning) of experimental data.\n\n";
+
+static PyMethodDef _ctransMethods[] = {
+  {"grid3d", (PyCFunction)gridder_3D, METH_VARARGS | METH_KEYWORDS,
+   "Grid the numpy.array object into a regular grid"},
+  {"ccdToQ", (PyCFunction)ccdToQ,  METH_VARARGS | METH_KEYWORDS,
+   "Convert CCD image coordinates into Q values"},
+  {NULL, NULL, 0, NULL}     /* Sentinel - marks the end of this structure */
+};
 
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   static char *kwlist[] = { "angles", "mode", "ccd_size", "ccd_pixsize",
@@ -482,27 +538,8 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
   return n_outside;
 }
 
-#ifndef IS_PY3K
-
-// This struct and the next function are python 3 compatible
-static struct PyModuleDef ctrans =
-{
-   PyModuleDef_HEAD_INIT,
-   "ctrans",
-   "", // _ctransDoc,
-   -1,
-   _ctransMethods
-};
-
-
-PyMODINIT_FUNC PyInit_ctrans(void)  {
-  return PyModule_Create(&ctrans);
-}
-#else
-
 // This is the python 2 version
 PyMODINIT_FUNC initctrans(void)  {
 	(void) Py_InitModule3("ctrans", _ctransMethods, _ctransDoc);
 	import_array();  // Must be present for NumPy.  Called first after above line.
 }
-#endif

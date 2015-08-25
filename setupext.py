@@ -109,5 +109,4 @@ if setupfile is not None:
 ext_modules = []
 if options['build_ctrans']:
     ext_modules.append(Extension('ctrans', ['src/ctrans.c'],
-                                 depends=['src/ctrans.h'],
                                  **ctrans))
