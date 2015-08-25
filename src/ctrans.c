@@ -68,15 +68,6 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs);
 static char *_ctransDoc = \
 "Python functions to perform gridding (binning) of experimental data.\n\n";
 
-static PyMethodDef _ctransMethods[] = {
-  {"grid3d", (PyCFunction)gridder_3D, METH_VARARGS | METH_KEYWORDS,
-   "Grid the numpy.array object into a regular grid"},
-  {"ccdToQ", (PyCFunction)ccdToQ,  METH_VARARGS | METH_KEYWORDS,
-   "Convert CCD image coordinates into Q values"},
-  {NULL, NULL, 0, NULL}     /* Sentinel - marks the end of this structure */
-};
-
-
 /* Computation functions */
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   static char *kwlist[] = { "angles", "mode", "ccd_size", "ccd_pixsize",
@@ -542,11 +533,11 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
   return n_outside;
 }
 
-// This is the python 2 version
-PyMODINIT_FUNC initctrans(void)  {
-	(void) Py_InitModule3("ctrans", _ctransMethods, _ctransDoc);
-	import_array();  // Must be present for NumPy.  Called first after above line.
-}
+// // This is the python 2 version
+// PyMODINIT_FUNC initctrans(void)  {
+// 	(void) Py_InitModule3("ctrans", _ctransMethods, _ctransDoc);
+// 	import_array();  // Must be present for NumPy.  Called first after above line.
+// }
 struct module_state {
     PyObject *error;
 };
@@ -565,19 +556,27 @@ error_out(PyObject *m) {
     return NULL;
 }
 
-static PyMethodDef myextension_methods[] = {
+static PyMethodDef _ctransMethods[] = {
+  {NULL, NULL, 0, NULL}     /* Sentinel - marks the end of this structure */
+};
+
+static PyMethodDef ctrans_methods[] = {
     {"error_out", (PyCFunction)error_out, METH_NOARGS, NULL},
+    {"grid3d", (PyCFunction)gridder_3D, METH_VARARGS | METH_KEYWORDS,
+     "Grid the numpy.array object into a regular grid"},
+    {"ccdToQ", (PyCFunction)ccdToQ,  METH_VARARGS | METH_KEYWORDS,
+     "Convert CCD image coordinates into Q values"},
     {NULL, NULL}
 };
 
 #if PY_MAJOR_VERSION >= 3
 
-static int myextension_traverse(PyObject *m, visitproc visit, void *arg) {
+static int ctrans_traverse(PyObject *m, visitproc visit, void *arg) {
     Py_VISIT(GETSTATE(m)->error);
     return 0;
 }
 
-static int myextension_clear(PyObject *m) {
+static int ctrans_clear(PyObject *m) {
     Py_CLEAR(GETSTATE(m)->error);
     return 0;
 }
@@ -585,39 +584,40 @@ static int myextension_clear(PyObject *m) {
 
 static struct PyModuleDef moduledef = {
         PyModuleDef_HEAD_INIT,
-        "myextension",
+        "ctrans",
         NULL,
         sizeof(struct module_state),
-        myextension_methods,
+        ctrans_methods,
         NULL,
-        myextension_traverse,
-        myextension_clear,
+        ctrans_traverse,
+        ctrans_clear,
         NULL
 };
 
 #define INITERROR return NULL
 
 PyObject *
-PyInit_myextension(void)
+PyInit_ctrans(void)
 
 #else
 #define INITERROR return
 
 void
-initmyextension(void)
+initctrans(void)
 #endif
 {
 #if PY_MAJOR_VERSION >= 3
     PyObject *module = PyModule_Create(&moduledef);
 #else
-    PyObject *module = Py_InitModule("myextension", myextension_methods);
+    PyObject *module = Py_InitModule("ctrans", ctrans_methods);
 #endif
+    import_array();
 
     if (module == NULL)
         INITERROR;
     struct module_state *st = GETSTATE(module);
 
-    st->error = PyErr_NewException("myextension.Error", NULL, NULL);
+    st->error = PyErr_NewException("ctrans.Error", NULL, NULL);
     if (st->error == NULL) {
         Py_DECREF(module);
         INITERROR;
