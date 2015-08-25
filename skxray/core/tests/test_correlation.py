@@ -42,7 +42,6 @@ from skimage import data
 
 import skxray.core.correlation as corr
 import skxray.core.roi as roi
-from skxray.testing.decorators import skip_if
 
 logger = logging.getLogger(__name__)
 
