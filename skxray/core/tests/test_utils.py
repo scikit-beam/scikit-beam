@@ -47,7 +47,6 @@ from nose.tools import assert_equal, assert_true, raises
 
 import skxray.core.utils as core
 
-from skxray.testing.decorators import known_fail_if
 import numpy.testing as npt
 
 
@@ -186,7 +185,6 @@ def test_bin_edges():
 
 
 
-@known_fail_if(six.PY3)
 def test_grid3d():
     size = 10
     q_max = np.array([1.0, 1.0, 1.0])
@@ -230,7 +228,6 @@ def test_grid3d():
     npt.assert_array_equal(std_err, 0)
 
 
-@known_fail_if(six.PY3)
 def test_process_grid_std_err():
     size = 10
     q_max = np.array([1.0, 1.0, 1.0])
