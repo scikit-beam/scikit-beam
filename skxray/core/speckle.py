@@ -62,7 +62,7 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
          max_cts=None):
     """
     This function will provide the probability density of detecting photons
-    for different integration time.
+    for different integration times.
 
     The experimental probability density P(K) of detecting photons K is
     obtained by histogramming the photon counts over an ensemble of
@@ -71,7 +71,7 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
 
     Parameters
     ----------
-    image_sets : array
+    images : array
         sets of images
     label_array : array
         labeled array; 0 is background.
@@ -90,8 +90,8 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
     prob_k_std_dev : array
         standard deviation of probability density of detecting photons
 
-    Note
-    ----
+    Notes
+    -----
     These implementation is based on following references
     References: text [1]_, text [2]_
 
@@ -111,14 +111,14 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
     # number of ROI's
     num_roi = np.max(label_array)
 
+    # find the label's and pixel indices for ROI's
+    labels, indices = corr.extract_label_indices(label_array)
+
     # create integration times
     time_bin = geometric_series(timebin_num, number_of_img)
 
     # number of items in the time bin
     num_times = len(time_bin)
-
-    # find the label's and pixel indices for ROI's
-    labels, indices = corr.extract_label_indices(label_array)
 
     # number of pixels per ROI
     num_pixels = np.bincount(labels, minlength=(num_roi+1))[1:]
@@ -126,12 +126,12 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
     # probability density of detecting speckles
     prob_k_all = np.zeros([num_times, num_roi], dtype=np.object)
     # square of probability density of detecting speckles
-    prob_k_pow_all = np.zeros([num_times, num_roi], dtype=np.object)
+    prob_k_pow_all = np.zeros_like(prob_k_all)
     # standard deviation of probability density of detecting photons
-    prob_k_std_dev = np.zeros([num_times, num_roi], dtype=np.object)
+    prob_k_std_dev = np.zeros_like(prob_k_all)
 
     # get the bin edges for each time bin for each ROI
-    bin_edges = np.zeros((num_times, num_roi), dtype=object)
+    bin_edges = np.zeros_like(prob_k_all)
     for i in range(num_times):
         for j in range(num_roi):
             bin_edges[i, j] = np.arange(max_cts*2**i)
@@ -153,8 +153,8 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
         # to track how many images processed in each level
         img_per_level = np.zeros(num_times, dtype=np.int64)
 
-        prob_k = np.zeros([num_times, num_roi], dtype=np.object)
-        prob_k_pow = np.zeros([num_times, num_roi], dtype=np.object)
+        prob_k = np.zeros_like(prob_k_all)
+        prob_k_pow = np.zeros_like(prob_k_all)
 
         for n, img in enumerate(images):
             cur[0] = (1 + cur[0]) % timebin_num
@@ -194,14 +194,11 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
             prob_k_all += (prob_k - prob_k_all)/(i + 1)
             prob_k_pow_all += (prob_k_pow - prob_k_pow_all)/(i + 1)
 
-            prob_k_std_dev = np.power((prob_k_pow_all -
-                                       np.power(prob_k_all, 2)), .5)
+    prob_k_std_dev = np.power((prob_k_pow_all -
+                               np.power(prob_k_all, 2)), .5)
 
-    # ending time for the process
-    end_time = time.time()
-
-    logger.info("Processing time for XSVS took {0} seconds."
-                "".format(end_time - start_time))
+    logger.info("Processing time for XSVS took %s seconds."
+                "", (time.time() - start_time))
     return prob_k_all, prob_k_std_dev
 
 
