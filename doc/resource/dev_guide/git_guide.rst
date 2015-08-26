@@ -243,20 +243,20 @@ Remotes
 -------
 
 One of the powerful ideas of distributed version control is that all
-clones of a repository are *technically* equivolent.  However, for
-organizational reasons we desigante one to be the 'canonical'
+clones of a repository are *technically* equivalent.  However, for
+organizational reasons we designate one to be the 'canonical'
 repository, in this case the repository associated with the
-``NSLS-II`` group on github.
+``scikit-xray`` group on github.
 
 In order to get the lastest code from github to your local machine you
 need to tell ``git`` where the other code is.  These locations are, in
-the langague of ``git``, **remotes**.  The first remote we will want to
+the language of ``git``, **remotes**.  The first remote we will want to
 add in the canonical repository::
 
     # make sure you are in the working directory of your local repo
-    cd ~/my_source/repo_name
+    cd ~/<<my_source>>/scikit-xray-examples
     # add the canonical repo as 'upstream'
-    git remote add upstream git@github.com:NSLS-II/repo_name.git
+    git remote add upstream git@github.com:scikit-xray/scikit-xray-examples.git
     # fetch the commits in the new repository
     git fetch upstream
 
@@ -268,8 +268,8 @@ which should print something like: ::
 
     origin  git@github.com:username/repo_name.git (fetch)
     origin  git@github.com:username/repo_name.git (push)
-    upstream        git@github.com:NSLS-II/pyRafters.git (fetch)
-    upstream        git@github.com:NSLS-II/pyRafters.git (push)
+    upstream        git@github.com:scikit-xray/scikit-xray-examples.git (fetch)
+    upstream        git@github.com:scikit-xray/scikit-xray-examples.git (push)
 
 
 which shows two remotes (origin and upstream).  It is recommended to
@@ -281,7 +281,7 @@ re-name ``origin`` -> your github username ::
 which is the convention that will be used throughout.  You can also
 add as a remote the github repositories of other group members, ex ::
 
-   git remote add tacaswell git@github.com:tacaswell/pyRafters.git
+   git remote add tacaswell git@github.com:tacaswell/scikit-xray-examples.git
 
 which will allow you to **fetch** to your local computer any commits
 they have **push**\ ed to github.
