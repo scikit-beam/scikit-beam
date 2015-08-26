@@ -164,43 +164,6 @@ def thresh_bounded(src_data, thresh_value_min, thresh_value_max):
     return output
 
 
-def thresh_adapt(src_data, kernel_size, filter_type='gaussian'):
-    """
-    Applies an adaptive threshold to the source data set.
-    Parameters
-    ----------
-    src_data : ndarray
-        Source data on which to apply the threshold algorithm
-    kernel_size : integer
-        Specify kernel size for automatic thresholding operation
-        Note: Value must be an odd valued integer
-    filter_type : string
-        Filter type options:
-            method : {'generic', 'gaussian', 'mean', 'median'}, optional
-            Method used to determine adaptive threshold for local
-            neighbourhood in weighted mean image.
-            * 'generic': use custom function (see `param` parameter)
-            * 'gaussian': apply gaussian filter (see `param` parameter
-                for custom sigma value)
-            * 'mean': apply arithmetic mean filter
-            * 'median': apply median rank filter
-    Returns
-    -------
-    output_data : ndarray
-        The function returns a binary array where all voxels with values equal
-        to 1 correspond to voxels within the identified threshold range.
-    """
-
-    if type(kernel_size) != int:
-        raise TypeError('Specified value for kernel_size is not an integer!')
-    if (kernel_size % 2) == 0:
-        raise ValueError('Specified kernel_size value is not an odd valued '
-                         'integer!')
-    output_data = sk.threshold_adaptive(src_data, kernel_size, filter_type,
-                                        offset=0, param=None)
-    return output_data
-
-
 def thresh_otsu(src_data):
     """
     This function automatically determines a threshold value for the source
