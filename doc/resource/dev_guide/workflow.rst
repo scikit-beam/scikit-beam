@@ -7,7 +7,7 @@ The basic workflow is that you develop new code on feature branches in
 your local repository.  When you want your code merged into the main
 repository you push your work to ``github`` and create a "Pull
 Request" (PR).  The code is then reviewed and once everyone is happy,
-it will be merged into ``NLSL-II/master``.
+it will be merged into ``scikit-xray/master``.
 
 Rules
 -----
@@ -16,7 +16,7 @@ Rules
      personal github repository
   2. Never work on ``master``, always work on a feature branch
   3. Don't merge your own PR.
-  4. Don't merge ``NSLS-II/master`` into your feature branch
+  4. Don't merge ``scikit-xray/master`` into your feature branch
      as this can make merging back into master tricky.
   5. Commit messages must be at least one sentence and preferably a short
      paragraph.  They should not be longer than 2 paragraphs (if you need to

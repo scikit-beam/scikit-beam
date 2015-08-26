@@ -1,8 +1,8 @@
-========================
- :mod:`constants` Module
-========================
+=============================
+ :mod:`core.constants` Module
+=============================
 
-.. currentmodule:: skxray.constants
+.. currentmodule:: skxray.core.constants.basic
 
 Elemental data
 --------------
@@ -11,11 +11,10 @@ Tools for working with elemental constants.
 .. autosummary::
    :toctree: generated/
 
-   emission_line_search
-   Element
+   BasicElement
 
 
-
+.. currentmodule:: skxray.core.constants.xrf
 
 X-ray fluorescence data
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,6 +30,10 @@ data.  For the most part users should access this data through the
 
    XrayLibWrap
    XrayLibWrap_Energy
+   emission_line_search
+   XrfElement
+   
+.. currentmodule:: skxray.core.constants.xrs
 
 Powder Diffraction Standards
 ----------------------------

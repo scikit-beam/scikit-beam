@@ -1,9 +1,9 @@
 =====================
- :mod:`recip` Module
+ :mod:`models` Module
 =====================
 
 
-.. automodule:: skxray.recip
+.. automodule:: skxray.core.fitting.models
    :members:
    :show-inheritance:
    :undoc-members:

@@ -239,6 +239,11 @@ class PowderStandard(object):
         return len(self._reflections)
 
 
+"""
+Calibration standards
+
+A dictionary holding known powder-pattern calibration standards
+"""
 # Si (Standard Reference Material 640d) data taken from
 # https://www-s.nist.gov/srmors/certificates/640D.pdf?CFID=3219362&CFTOKEN=c031f50442c44e42-57C377F6-BC7A-395A-F39B8F6F2E4D0246&jsessionid=f030c7ded9b463332819566354567a698744
 
@@ -294,8 +299,3 @@ calibration_standards = {
            0.4405, 0.430525121912, 0.427347771314]
     )
 }
-"""
-Calibration standards
-
-A dictionary holding known powder-pattern calibration standards
-"""
