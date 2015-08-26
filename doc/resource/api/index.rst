@@ -23,7 +23,6 @@ Contents:
    core/roi
    core/spectroscopy
    core/utils
-   io
    io/avizo_io
    io/binary
    io/gsas_file_reader
