@@ -47,7 +47,7 @@ from nose.tools import assert_equal, assert_true, assert_raises
 import skxray.core.roi as roi
 import skxray.core.correlation as corr
 import skxray.core.utils as core
-
+import itertools
 from skimage import morphology
 
 
@@ -262,10 +262,7 @@ def test_static_test_sets():
     img_stack1 = np.random.randint(0, 60, size=(50, ) + (50, 50))
 
     label_array = np.zeros((25, 25))
-
-    # different shapes for the images and labels
-    assert_raises(ValueError,
-                  lambda: roi.mean_intensity(img_stack1, label_array))
+    
     images1 = []
     for i in range(10):
         int_array = np.tril(i*np.ones(50))
@@ -278,49 +275,30 @@ def test_static_test_sets():
         int_array[int_array == 0] = i*100
         images2.append(int_array)
 
-    samples = np.array((np.asarray(images1), np.asarray(images2)))
+    samples = {'sample1': np.asarray(images1), 'sample2': np.asarray(images2)}
 
     roi_data = np.array(([2, 30, 12, 15], [40, 20, 15, 10]), dtype=np.int64)
 
     label_array = roi.rectangles(roi_data, shape=(50, 50))
 
-    # test mean_intensity function
-    average_intensity, index = roi.mean_intensity(np.asarray(images1),
-                                                  label_array)
-    # test mean_intensity_sets function
-    average_int_sets, index_list = roi.mean_intensity_sets(samples,
-                                                           label_array)
+    average_int_sets = roi.mean_intensity_sets(samples, label_array)
 
-    assert_array_equal((list(average_int_sets)[0][:, 0]),
-                       [float(x) for x in range(0, 1000, 100)])
-    assert_array_equal((list(average_int_sets)[1][:, 0]),
-                       [float(x) for x in range(0, 20, 1)])
-
-    assert_array_equal((list(average_int_sets)[0][:, 1]),
-                       [float(x) for x in range(0, 10, 1)])
-    assert_array_equal((list(average_int_sets)[1][:, 1]),
-                       [float(x) for x in range(0, 2000, 100)])
-
-    # test combine_mean_intensity function
-    combine_mean_int = roi.combine_mean_intensity(average_int_sets,
-                                                  index_list)
-
-    roi_data2 = np.array(([2, 30, 12, 15], [40, 20, 15, 10],
-                          [20, 2, 4, 5]), dtype=np.int64)
-
-    label_array2 = roi.rectangles(roi_data2, shape=(50, 50))
-
-    average_int2, index2 = roi.mean_intensity(np.asarray(images1),
-                                              label_array2)
-    index_list2 = [index_list, index2]
-
-    average_int_sets.append(average_int2)
-
-    # raise ValueError when there is different labels in different image sets
-    #  when trying to combine the values
-    assert_raises(ValueError,
-                  lambda: roi.combine_mean_intensity(average_int_sets,
-                                                     index_list2))
+    return_values = [
+        average_int_sets.sample1.roi1,
+        average_int_sets.sample2.roi1,
+        average_int_sets.sample1.roi2,
+        average_int_sets.sample2.roi2,
+    ]
+    expected_values = [
+        np.asarray([float(x) for x in range(0, 1000, 100)]),
+        np.asarray([float(x) for x in range(0, 20, 1)]),
+        np.asarray([float(x) for x in range(0, 10, 1)]),
+        np.asarray([float(x) for x in range(0, 2000, 100)])
+    ]
+    err_msg = ['roi%s of sample%s is incorrect' % (i, j)
+           for i, j in itertools.product((1, 2), (1, 2))]
+    for returned, expected, err in zip(return_values, expected_values, err_msg):
+        assert_array_equal(returned, expected, err_msg=err, verbose=True)
 
 
 def test_circular_average():
@@ -341,7 +319,7 @@ def test_circular_average():
                                          0., 0.], decimal=6)
 
 
-def test_roi_kymograph():
+def test_kymograph():
     calib_center = (25, 25)
     inner_radius = 5
 
@@ -349,10 +327,19 @@ def test_roi_kymograph():
     labels = roi.rings(edges, calib_center, (50, 50))
 
     images = []
-    for i in range(100):
+    num_images = 100
+    for i in range(num_images):
         int_array = i*np.ones(labels.shape)
         images.append(int_array)
 
-    kymograph_data = roi.roi_kymograph(np.asarray(images), labels, num=1)
-
-    assert_almost_equal(kymograph_data[:, 0],  np.arange(100).reshape(100, 1))
+    kymograph_data = roi.kymograph(np.asarray(images), labels, num=1)
+    # make sure the the return array has the expected dimensions
+    expected_shape = (num_images, np.sum(labels[labels==1]))
+    assert kymograph_data.shape[0] == expected_shape[0]
+    assert kymograph_data.shape[1] == expected_shape[1]
+    # make sure we got one element from each image
+    assert np.all(kymograph_data[:, 0] == np.arange(num_images))
+    # given the input data, every row of kymograph_data should be the same
+    # number
+    for row in kymograph_data:
+        assert np.all(row == row[0])

@@ -41,12 +41,10 @@ simple shapes such as rectangles and concentric circles.
 from __future__ import absolute_import, division, print_function
 
 import collections
-import logging
 import scipy.ndimage.measurements as ndim
-
 import numpy as np
-
 from . import utils
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -357,139 +355,87 @@ def roi_pixel_values(image, labels, index=None):
     for n in index:
         roi_pix.append(image[labels == n])
     return roi_pix, index
+    
 
-
-def mean_intensity_sets(images_set, labels):
-    """
-    Mean intensities for ROIS' of the labeled array for different image sets
+def mean_intensity(images, labeled_array, index=None):
+    """Compute the mean intensity for each ROI in the image list
 
     Parameters
     ----------
-    images_set : array
-        images sets
-        shapes is: (len(images_sets), )
-        one images_set is iterable of 2D arrays dimensions are: (rr, cc)
-
-    labels : array
+    images : list
+        List of images
+    labeled_array : array
         labeled array; 0 is background.
-        Each ROI is represented by a distinct label (i.e., integer).
+        Each ROI is represented by a nonzero integer. It is not required that
+        the ROI labels are contiguous
+    index : int, list, optional
+        The ROI's to use. If None, this function will extract averages for all
+        ROIs
 
     Returns
     -------
-    mean_intensity_list : list
-        average intensity of each ROI as a list
-        shape len(images_sets)
-
-    index_list : list
-        labels list for each image set
-
-    """
-    return tuple(map(list,
-                     zip(*[mean_intensity(im,
-                                          labels) for im in images_set])))
-
-
-def mean_intensity(images, labels, index=None):
-    """
-    Mean intensities for ROIS' of the labeled array for set of images
-
-    Parameters
-    ----------
-    images : array
-        Intensity array of the images
-        dimensions are: (num_img, num_rows, num_cols)
-
-    labels : array
-        labeled array; 0 is background.
-        Each ROI is represented by a distinct label (i.e., integer).
-
+    mean_intensity : list
+        The mean intensity of each ROI for all `images`
+        Dimensions:
+            len(mean_intensity) == len(index)
+            len(mean_intensity[0]) == len(images)
     index : list
-        labels list
-        eg: 5 ROI's
-        index = [1, 2, 3, 4, 5]
-
-    Returns
-    -------
-    mean_intensity : array
-        mean intensity of each ROI for the set of images as an array
-        shape (len(images), number of labels)
-
+        The labels for each element of the `mean_intensity` list
     """
-    if labels.shape != images[0].shape[0:]:
-        raise ValueError("Shape of the images should be equal to"
-                         " shape of the label array")
+    if labeled_array.shape != images[0].shape[0:]:
+        raise ValueError(
+            "`images` shape (%s) needs to be equal to the labeled_array` shape"
+            "(%s)" % (images[0].shape, labeled_array.shape))
+    # handle various input for `index`
     if index is None:
-        index = np.arange(1, np.max(labels) + 1)
-
-    mean_intensity = np.zeros((images.shape[0], index.shape[0]))
+        index = list(np.unique(labeled_array))
+        index.remove(0)
+    try:
+        len(index)
+    except TypeError:
+        index = [index]
+    # not sure that this is needed
+    index = np.asarray(index)
+    # pre-allocate an array for performance
+    # might be able to use list comprehension to make this faster
+    mean_intensity = np.zeros((images.shape[0], len(index)))
     for n, img in enumerate(images):
-        mean_intensity[n] = ndim.mean(img, labels, index=index)
-
-    return mean_intensity, index
-
-
-def combine_mean_intensity(mean_int_list, index_list):
-    """
-    Combine mean intensities of the images(all images sets) for each ROI
-    if the labels list of all the images are same
-
-    Parameters
-    ----------
-    mean_int_list : list
-        mean intensity of each ROI as a list
-        shapes is: (len(images_sets), )
-
-    index_list : list
-        labels list for each image sets
-
-    img_set_names : list
-
-    Returns
-    -------
-    combine_mean_int : array
-        combine mean intensities of image sets for each ROI of labeled array
-        shape (number of images in all image sets, number of labels)
-
-    """
-    if np.all(map(lambda x: x == index_list[0], index_list)):
-        combine_mean_intensity = np.vstack(mean_int_list)
-    else:
-        raise ValueError("Labels list for the image sets are different")
-
-    return combine_mean_intensity
+        # use a mean that is mask-aware
+        mean_intensity[n] = ndim.mean(img, labeled_array, index=index)
+    # turn the 2-D array back into a list of arrays because the rows and
+    # columns have different units
+    data = [mean_intensity[:, i] for i in range(mean_intensity.shape[1])]
+    roi_labels = ['roi_%s' % idx for idx in index]
+    return data, roi_labels
 
 
 def circular_average(image, calibrated_center, threshold=0, nx=100,
                      pixel_size=None):
-    """
-    Circular average(radial integration) of the intensity distribution of
-    the image data.
+    """Circular average of the the image data
+    
+    The circular average is also known as the radial integration
 
     Parameters
     ----------
     image : array
-        input image
-
+        Image to compute the average as a function of radius
     calibrated_center : tuple
-        The center in pixels-units (row, col)
-
+        The center of the image in pixel units
+        argument order should be (row, col)
     threshold : int, optional
-        threshold value to mask
-
+        Ignore counts above `threshold`
     nx : int, optional
-        number of bins
-
+        Number of bins in R. Defaults to 100
     pixel_size : tuple, optional
-        The size of a pixel in real units. (height, width). (mm)
+        The size of a pixel (in a real unit, like mm).
+        argument order should be (pixel_height, pixel_width)
 
     Returns
     -------
     bin_centers : array
-        bin centers from bin edges
-        shape [nx]
-
+        The center of each bin in R. shape is (nx, )
     ring_averages : array
-        circular integration of intensity
+        Radial average of the image. shape is (nx, ).
     """
     radial_val = utils.radial_grid(calibrated_center, image.shape,
                                    pixel_size)
@@ -504,7 +450,7 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
     return bin_centers, ring_averages
 
 
-def roi_kymograph(images, labels, num):
+def kymograph(images, labels, num):
     """
     This function will provide data for graphical representation of pixels
     variation over time for required ROI.
@@ -512,15 +458,11 @@ def roi_kymograph(images, labels, num):
     Parameters
     ----------
     images : array
-        Intensity array of the images
-        dimensions are: (num_img, num_rows, num_cols)
-
+        Image stack. dimensions are: (num_img, num_rows, num_cols)
     labels : array
-        labeled array; 0 is background.
-        Each ROI is represented by a distinct label (i.e., integer).
-
+        labeled array; 0 is background. Each ROI is represented by an integer
     num : int
-        required ROI label
+        The ROI to turn into a kymograph
 
     Returns
     -------
@@ -531,7 +473,6 @@ def roi_kymograph(images, labels, num):
     """
     roi_kymo = []
     for n, img in enumerate(images):
-        roi_kymo.append((roi_pixel_values(img,
-                                          labels == num)[0])[0])
+        roi_kymo.append((roi_pixel_values(img, labels == num)[0])[0])
 
-    return np.matrix(roi_kymo)
+    return np.vstack(roi_kymo)
