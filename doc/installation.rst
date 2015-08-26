@@ -56,11 +56,14 @@ Essential Dependencies:
 
 * python (both 2 and 3 are supported)
 * setuptools
-* numpy
-* scipy
 * six
-* xraylib
+* numpy
+
+Optional Dependencies:
+
+* scipy
 * scikit-image
+* xraylib
 * lmfit
 * netcdf4
 

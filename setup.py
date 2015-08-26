@@ -23,6 +23,7 @@ setup(
     packages=setuptools.find_packages(exclude=['doc']),
     include_dirs=[np.get_include()],
     package_data={'skxray.core.constants': ['data/*.dat']},
+    install_requires=['six', 'numpy'],  # essential deps only
     ext_modules=ext_modules,
     url='http://github.com/scikit-xray/scikit-xray',
     keywords='Xray Analysis',
