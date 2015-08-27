@@ -108,11 +108,12 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
     if max_cts is None:
         max_cts = roi.roi_max_counts(image_sets, label_array)
 
-    # number of ROI's
-    num_roi = np.max(label_array)
-
     # find the label's and pixel indices for ROI's
     labels, indices = corr.extract_label_indices(label_array)
+
+    # number of ROI's
+    u_labels = list(np.unique(labels))
+    num_roi = len(u_labels)
 
     # create integration times
     time_bin = geometric_series(timebin_num, number_of_img)
@@ -202,8 +203,8 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
     return prob_k_all, prob_k_std_dev
 
 
-def _process(num_roi, level, buf_no, buf, img_per_level, labels, max_cts,
-             bin_edges, prob_k, prob_k_pow):
+def _process(num_roi, level, buf_no, buf, img_per_level, labels,
+             max_cts, bin_edges, prob_k, prob_k_pow):
     """
     Internal helper function. This modifies inputs in place.
 
@@ -223,7 +224,7 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels, max_cts,
     img_per_level : int
         to track how many images processed in each level
     labels : array
-        labels of the required region of interests(ROI's
+        labels of the required region of interests(ROI's)
     max_cts: int
         maximum pixel count
     bin_edges : array
@@ -234,12 +235,13 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels, max_cts,
         squares of probability density of detecting speckles
     """
     img_per_level[level] += 1
+    u_labels = list(np.unique(labels))
 
     for j in range(num_roi):
-        roi_data = buf[level, buf_no][labels == j+1]
+        roi_data = buf[level, buf_no][labels == u_labels[j]]
 
         spe_hist, bin_edges = np.histogram(roi_data, bins=bin_edges,
-                                           normed=True)
+                                           density=True)
 
         prob_k[level, j] += (np.nan_to_num(spe_hist) -
                              prob_k[level, j])/(img_per_level[level])
