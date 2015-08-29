@@ -49,7 +49,6 @@ import skxray.core.correlation as corr
 import skxray.core.utils as core
 import itertools
 from skimage import morphology
-import pandas as pd
 
 
 def test_rectangles():
@@ -287,13 +286,12 @@ def test_static_test_sets():
     for k, v in sorted(samples.items()):
         intensity, index_list = roi.mean_intensity(v, label_array)
         roi_data[k] = intensity
-    average_int_sets = pd.DataFrame(roi_data, index_list)
 
     return_values = [
-        average_int_sets.sample1.roi_1,
-        average_int_sets.sample2.roi_1,
-        average_int_sets.sample1.roi_2,
-        average_int_sets.sample2.roi_2,
+        roi_data.values()[0][0],
+        roi_data.values()[1][0],
+        roi_data.values()[0][1],
+        roi_data.values()[1][1],
     ]
     expected_values = [
         np.asarray([float(x) for x in range(0, 1000, 100)]),
