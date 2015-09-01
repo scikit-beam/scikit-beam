@@ -1082,8 +1082,8 @@ def nnls_fit(spectrum, expected_matrix, weights=None):
     if weights is None:
         [results, residue] = nnls(expected_matrix, spectrum)
     else:
-        a = np.transpose(np.multiply(np.transpose(standard), np.sqrt(weights)))
-        b = np.multiply(experiments, np.sqrt(weights))
+        a = np.transpose(np.multiply(np.transpose(expected_matrix), np.sqrt(weights)))
+        b = np.multiply(spectrum, np.sqrt(weights))
         [results, residue] = nnls(a, b)
 
     return results, residue
