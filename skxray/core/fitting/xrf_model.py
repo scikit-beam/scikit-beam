@@ -1065,7 +1065,8 @@ def nnls_fit(spectrum, expected_matrix, weights=None):
     expected_matrix : array
         2D matrix of activated element spectrum
     weights : array, optional
-        for weighted nnls fitting
+        for weighted nnls fitting. Setting weights as None means fitting
+        without weights.
 
     Returns
     -------
@@ -1078,15 +1079,10 @@ def nnls_fit(spectrum, expected_matrix, weights=None):
     ----
     nnls is chosen as amplitude of each element should not be negative.
     """
-
-    if weights is None:
-        [results, residue] = nnls(expected_matrix, spectrum)
-    else:
-        a = np.transpose(np.multiply(np.transpose(expected_matrix), np.sqrt(weights)))
-        b = np.multiply(spectrum, np.sqrt(weights))
-        [results, residue] = nnls(a, b)
-
-    return results, residue
+    if weights is not None:
+        expected_matrix = np.transpose(np.multiply(np.transpose(expected_matrix), np.sqrt(weights)))
+        spectrum = np.multiply(spectrum, np.sqrt(weights))
+    return nnls(expected_matrix, spectrum)
 
 
 def linear_spectrum_fitting(x, y, params,
@@ -1106,12 +1102,14 @@ def linear_spectrum_fitting(x, y, params,
         spectrum intensity
     param : dict
         fitting parameters
-    elemental_lines : list, option
+    elemental_lines : list, optional
             e.g., ['Na_K', Mg_K', 'Pt_M'] refers to the
             K lines of Sodium, the K lines of Magnesium, and the M
-            lines of Platinum
+            lines of Platinum. If elemental_lines is set as None,
+            all the possible lines activated at given energy will be used.
     weights : array, optional
-        for weighted nnls fitting
+        for weighted nnls fitting. Setting weights as None means fitting
+        without weights.
 
     Returns
     -------
