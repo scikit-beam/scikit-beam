@@ -259,8 +259,6 @@ def test_roi_max_counts():
 
 
 def test_static_test_sets():
-    img_stack1 = np.random.randint(0, 60, size=(50, ) + (50, 50))
-
     label_array = np.zeros((25, 25))
     
     images1 = []
