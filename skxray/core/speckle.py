@@ -211,6 +211,8 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels,
     This helper function calculate probability of detecting speckles for
     each integration time.
 
+    .. warning :: This function mutates the input values.
+
     Parameters
     ----------
     num_roi : int
@@ -249,13 +251,11 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels,
         prob_k_pow[level, j] += (np.power(np.nan_to_num(spe_hist), 2) -
                                  prob_k_pow[level, j])/(img_per_level[level])
 
-    return  # modifies arguments in place!
-
 
 def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts):
     """
-    This will provide the normalize bin edges and bin centers for each
-    integration times.
+    This will provide the normalized bin edges and bin centers for each
+    integration time.
 
     Parameters
     ----------
