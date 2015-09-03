@@ -280,16 +280,16 @@ def test_static_test_sets():
     label_array = roi.rectangles(roi_data, shape=(50, 50))
 
     # get the mean intensities of image sets given as a dictionary
-    roi_data = {}
+    roi_data = []
     for k, v in sorted(samples.items()):
         intensity, index_list = roi.mean_intensity(v, label_array)
-        roi_data[k] = intensity
+        roi_data.append(intensity)
 
     return_values = [
-        list(roi_data.values())[0][0],
-        list(roi_data.values())[1][0],
-        list(roi_data.values())[0][1],
-        list(roi_data.values())[1][1],
+        list(roi_data[0][0]),
+        list(roi_data[1][0]),
+        list(roi_data[0][1]),
+        list(roi_data[1][1]),
     ]
     expected_values = [
         np.asarray([float(x) for x in range(0, 1000, 100)]),
@@ -298,7 +298,7 @@ def test_static_test_sets():
         np.asarray([float(x) for x in range(0, 2000, 100)])
     ]
     err_msg = ['roi%s of sample%s is incorrect' % (i, j)
-           for i, j in itertools.product((1, 2), (1, 2))]
+        for i, j in itertools.product((1, 2), (1, 2))]
     for returned, expected, err in zip(return_values, expected_values, err_msg):
         assert_array_equal(returned, expected, err_msg=err, verbose=True)
 
