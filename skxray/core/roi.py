@@ -374,7 +374,7 @@ def mean_intensity(images, labeled_array, index=None):
 
     Returns
     -------
-    mean_intensity : list
+    mean_intensity : array
         The mean intensity of each ROI for all `images`
         Dimensions:
             len(mean_intensity) == len(index)
@@ -384,7 +384,7 @@ def mean_intensity(images, labeled_array, index=None):
     """
     if labeled_array.shape != images[0].shape[0:]:
         raise ValueError(
-            "`images` shape (%s) needs to be equal to the labeled_array` shape"
+            "`images` shape (%s) needs to be equal to the labeled_array shape"
             "(%s)" % (images[0].shape, labeled_array.shape))
     # handle various input for `index`
     if index is None:
@@ -405,7 +405,7 @@ def mean_intensity(images, labeled_array, index=None):
     # turn the 2-D array back into a list of arrays because the rows and
     # columns have different units
     mean_intensity = [data[:, i] for i in range(data.shape[1])]
-    return mean_intensity, index
+    return np.asarray(mean_intensity), index
 
 
 def circular_average(image, calibrated_center, threshold=0, nx=100,
@@ -465,13 +465,13 @@ def kymograph(images, labels, num):
 
     Returns
     -------
-    roi_kymograph : array
+    kymograph : array
         data for graphical representation of pixels variation over time
         for required ROI
 
     """
-    roi_kymo = []
+    kymo = []
     for n, img in enumerate(images):
-        roi_kymo.append((roi_pixel_values(img, labels == num)[0]))
+        kymo.append((roi_pixel_values(img, labels == num)[0]))
 
-    return np.vstack(roi_kymo)
+    return np.vstack(kymo)

@@ -10,7 +10,6 @@ before_install:
   - chmod +x miniconda.sh
   - ./miniconda.sh -b -p /home/travis/mc
   - export PATH=/home/travis/mc/bin:$PATH
-  - wget https://gist.githubusercontent.com/tacaswell/128bb482f845feb024eb/raw/5cf21dc03a354fc87140d4a75e17cb5c076a0517/.condarc -O /home/travis/.condarc
 
 install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
