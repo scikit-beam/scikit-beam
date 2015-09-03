@@ -355,7 +355,7 @@ def roi_pixel_values(image, labels, index=None):
     for n in index:
         roi_pix.append(image[labels == n])
     return roi_pix, index
-    
+
 
 def mean_intensity(images, labeled_array, index=None):
     """Compute the mean intensity for each ROI in the image list
@@ -411,7 +411,6 @@ def mean_intensity(images, labeled_array, index=None):
 def circular_average(image, calibrated_center, threshold=0, nx=100,
                      pixel_size=None):
     """Circular average of the the image data
-    
     The circular average is also known as the radial integration
 
     Parameters

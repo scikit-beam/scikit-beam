@@ -36,19 +36,18 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 import numpy as np
-
-logger = logging.getLogger(__name__)
+import skxray.core.roi as roi
+import skxray.core.correlation as corr
+import skxray.core.utils as core
+import itertools
+from skimage import morphology
 
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
 
 from nose.tools import assert_equal, assert_true, assert_raises
 
-import skxray.core.roi as roi
-import skxray.core.correlation as corr
-import skxray.core.utils as core
-import itertools
-from skimage import morphology
+logger = logging.getLogger(__name__)
 
 
 def test_rectangles():
@@ -180,8 +179,8 @@ def _helper_check(pixel_list, inds, num_pix, edges, center,
     for r in range(num_qs):
         num_pixels.append(int((np.histogramdd(np.ravel(grid_values), bins=1,
                                               range=[[edges[r][0],
-                                                      (edges[r][1]
-                                                       - 0.000001)]]))[0][0]))
+                                                      (edges[r][1] -
+                                                       0.000001)]]))[0][0]))
     assert_array_equal(num_pix, num_pixels)
 
 
@@ -260,7 +259,6 @@ def test_roi_max_counts():
 
 def test_static_test_sets():
     label_array = np.zeros((25, 25))
-    
     images1 = []
     for i in range(10):
         int_array = np.tril(i*np.ones(50))
@@ -298,9 +296,11 @@ def test_static_test_sets():
         np.asarray([float(x) for x in range(0, 2000, 100)])
     ]
     err_msg = ['roi%s of sample%s is incorrect' % (i, j)
-        for i, j in itertools.product((1, 2), (1, 2))]
-    for returned, expected, err in zip(return_values, expected_values, err_msg):
-        assert_array_equal(returned, expected, err_msg=err, verbose=True)
+               for i, j in itertools.product((1, 2), (1, 2))]
+    for returned, expected, err in zip(return_values,
+                                       expected_values, err_msg):
+        assert_array_equal(returned, expected,
+                           err_msg=err, verbose=True)
 
 
 def test_circular_average():
@@ -336,7 +336,7 @@ def test_kymograph():
 
     kymograph_data = roi.kymograph(np.asarray(images), labels, num=1)
     # make sure the the return array has the expected dimensions
-    expected_shape = (num_images, np.sum(labels[labels==1]))
+    expected_shape = (num_images, np.sum(labels[labels == 1]))
     assert kymograph_data.shape[0] == expected_shape[0]
     assert kymograph_data.shape[1] == expected_shape[1]
     # make sure we got one element from each image
