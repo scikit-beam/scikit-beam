@@ -5,6 +5,9 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-
-   model/background
-   model/physics_peak
+  
+   background
+   funcs
+   lineshapes
+   models
+   xrf_model

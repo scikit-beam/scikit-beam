@@ -10,15 +10,14 @@ before_install:
   - chmod +x miniconda.sh
   - ./miniconda.sh -b -p /home/travis/mc
   - export PATH=/home/travis/mc/bin:$PATH
-  - wget https://gist.githubusercontent.com/tacaswell/128bb482f845feb024eb/raw/5cf21dc03a354fc87140d4a75e17cb5c076a0517/.condarc -O /home/travis/.condarc
 
 install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
-  - conda update conda --yes
-  - conda create -n testenv --yes pip nose python=$TRAVIS_PYTHON_VERSION lmfit xraylib numpy scipy scikit-image netcdf4 six coverage
+  - conda config --set always_yes true
+  - conda update conda
+  - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-image six coverage
+  - conda install -n testenv -c scikit-xray xraylib lmfit netcdf4
   - source activate testenv
-  - pip install pyFAI
-  - pip install fabio
   - python setup.py install
   - pip install coveralls
   - pip install codecov

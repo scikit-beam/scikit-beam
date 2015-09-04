@@ -52,6 +52,8 @@ import numpy as np
 
 import skxray.core.utils as core
 
+from lmfit import minimize, Model, Parameters
+
 logger = logging.getLogger(__name__)
 
 
@@ -84,15 +86,27 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     Returns
     -------
     g2 : array
-        matrix of one-time correlation
+        matrix of normalized intensity-intensity autocorrelation
         shape (num_levels, number of labels(ROI))
 
     lag_steps : array
         delay or lag steps for the multiple tau analysis
         shape num_levels
 
-    Note
-    ----
+    Notes
+    -----
+
+    The normalized intensity-intensity time-autocorrelation function
+    is defined as
+
+    :math ::
+        g_2(q, \tau) = \frac{<I(q, \tau)I(q, \tau + delay)> }{<I(q, \tau)>^2}
+
+    ; delay > 0
+
+    Here, I(q, t) refers to the scattering strength at the momentum
+    transfer vector q in reciprocal space at time tau, and the brackets
+    <...> refer to averages over time tau.
 
     This implementation is based on code in the language Yorick
     by Mark Sutton, based on published work. [1]_
@@ -284,13 +298,13 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
     Notes
     -----
     :math ::
-        G   = <I(t)I(t + delay)>
+        G   = <I(\tau)I(\tau + delay)>
 
     :math ::
-        past_intensity_norm = <I(t)>
+        past_intensity_norm = <I(\tau)>
 
     :math ::
-        future_intensity_norm = <I(t + delay)>
+        future_intensity_norm = <I(\tau + delay)>
 
     """
     img_per_level[level] += 1
@@ -367,3 +381,57 @@ def extract_label_indices(labels):
     label_mask = labels[labels > 0]
 
     return label_mask, pixel_list
+
+
+def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
+    """
+    This model will provide normalized intensity-intensity time
+    correlation data to be minimized.
+
+    Parameters
+    ----------
+    lags : array
+        delay time
+
+    beta : float
+        optical contrast (speckle contrast), a sample-independent
+        beamline parameter
+
+    relaxation_rate : float
+        relaxation time associated with the samples dynamics.
+
+    baseline : float, optional
+        baseline of one time correlation
+        equal to one for ergodic samples
+
+    Returns
+    -------
+    g2 : array
+        normalized intensity-intensity time autocorreltion
+
+    Notes :
+    -------
+    The intensity-intensity autocorrelation g2 is connected to the intermediate
+    scattering factor(ISF) g1
+
+    :math ::
+        g_2(q, \tau) = \beta_1[g_1(q, \tau)]^{2} + g_\infty
+
+    For a system undergoing  diffusive dynamics,
+
+    :math ::
+        g_1(q, \tau) = e^{-\gamma(q) \tau}
+
+    :math ::
+       g_2(q, \tau) = \beta_1 e^{-2\gamma(q) \tau} + g_\infty
+
+    These implementation are based on published work. [1]_
+
+    References
+    ----------
+    .. [1] L. Li, P. Kwasniewski, D. Orsi, L. Wiegart, L. Cristofolini, C. Caronna
+       and A. Fluerasu, " Photon statistics and speckle visibility spectroscopy with
+       partially coherent X-rays," J. Synchrotron Rad. vol 21, p 1288-1295, 2014
+
+    """
+    return beta*np.exp(-2*relaxation_rate*lags) + baseline

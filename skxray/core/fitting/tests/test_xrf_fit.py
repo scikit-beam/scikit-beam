@@ -142,15 +142,24 @@ def test_pre_fit():
 
     param = get_para()
 
-    # with weight pre fit
-    x, y_total, area_v = linear_spectrum_fitting(x0, y0, param)
+    # fit without weights
+    x, y_total, area_v = linear_spectrum_fitting(x0, y0, param, weights=None)
     for v in item_list:
         assert_true(v in y_total)
+    sum1 = np.sum(six.itervalues(y_total))
+    # r squares as a measurement
+    r1 = 1- np.sum((sum1-y0)**2)/np.sum((y0-np.mean(y0))**2)
+    assert_true(r1 > 0.85)
 
-    # no weight pre fit
-    x, y_total, area_v = linear_spectrum_fitting(x0, y0, param, constant_weight=None)
+    # fit with weights
+    w = 1/np.sqrt(y0)
+    x, y_total, area_v = linear_spectrum_fitting(x0, y0, param, weights=1/np.sqrt(y0))
     for v in item_list:
         assert_true(v in y_total)
+    sum2 = np.sum(six.itervalues(y_total))
+    # r squares as a measurement
+    r2 = 1- np.sum((sum2-y0)**2)/np.sum((y0-np.mean(y0))**2)
+    assert_true(r2 > 0.85)
 
 
 def test_escape_peak():

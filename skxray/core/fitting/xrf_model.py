@@ -1054,7 +1054,7 @@ def construct_linear_model(channel_number, params,
     return selected_elements, matv, element_area
 
 
-def nnls_fit(spectrum, expected_matrix):
+def nnls_fit(spectrum, expected_matrix, weights=None):
     """
     Non-negative least squares fitting.
 
@@ -1064,72 +1064,35 @@ def nnls_fit(spectrum, expected_matrix):
         spectrum of experiment data
     expected_matrix : array
         2D matrix of activated element spectrum
+    weights : array, optional
+        for weighted nnls fitting. Setting weights as None means fitting
+        without weights.
 
     Returns
     -------
     results : array
         weights of different element
-    residue : array
+    residue : float
         error
 
     Note
     ----
-    This is merely a domain-specific wrapper of
-    scipy.optimize.nnls. Note that the order of arguments
-    is changed. Confusing for scipy users, perhaps, but
-    more natural for domain-specific users.
+    nnls is chosen as amplitude of each element should not be negative.
     """
-    experiments = spectrum
-    standard = expected_matrix
-
-    [results, residue] = nnls(standard, experiments)
-    return results, residue
-
-
-def weighted_nnls_fit(spectrum, expected_matrix, constant_weight=10):
-    """
-    Non-negative least squares fitting with weight.
-
-    Parameters
-    ----------
-    spectrum : array
-        spectrum of experiment data
-    expected_matrix : array
-        2D matrix of activated element spectrum
-    constant_weight : float
-        value used to calculate weight like so:
-        weights = constant_weight / (constant_weight + spectrum)
-
-    Returns
-    -------
-    results : array
-        weights of different element
-    residue : array
-        error
-    """
-    experiments = spectrum
-    standard = expected_matrix
-
-    weights = constant_weight / (constant_weight + experiments)
-    weights = np.abs(weights)
-    weights = weights/np.max(weights)
-
-    a = np.transpose(np.multiply(np.transpose(standard), np.sqrt(weights)))
-    b = np.multiply(experiments, np.sqrt(weights))
-
-    [results, residue] = nnls(a, b)
-
-    return results, residue
+    if weights is not None:
+        expected_matrix = np.transpose(np.multiply(np.transpose(expected_matrix), np.sqrt(weights)))
+        spectrum = np.multiply(spectrum, np.sqrt(weights))
+    return nnls(expected_matrix, spectrum)
 
 
 def linear_spectrum_fitting(x, y, params,
                             elemental_lines=None,
-                            constant_weight=10):
+                            weights=None):
     """
     Fit a spectrum to a linear model.
 
     This is a convenience function that wraps up construct_linear_model
-    and nnls_fit or weighted_nnls_fit.
+    and nnls_fit.
 
     Parameters
     ----------
@@ -1139,14 +1102,14 @@ def linear_spectrum_fitting(x, y, params,
         spectrum intensity
     param : dict
         fitting parameters
-    elemental_lines : list, option
+    elemental_lines : list, optional
             e.g., ['Na_K', Mg_K', 'Pt_M'] refers to the
             K lines of Sodium, the K lines of Magnesium, and the M
-            lines of Platinum
-    constant_weight : float
-        value used to calculate weight like so:
-        weights = constant_weight / (constant_weight + spectrum)
-        Default is 10. If None, performed unweighted nnls fit.
+            lines of Platinum. If elemental_lines is set as None,
+            all the possible lines activated at given energy will be used.
+    weights : array, optional
+        for weighted nnls fitting. Setting weights as None means fitting
+        without weights.
 
     Returns
     -------
@@ -1173,10 +1136,7 @@ def linear_spectrum_fitting(x, y, params,
                      width=fitting_parameters['non_fitting_values']['background_width'])
     y = y - bg
 
-    if constant_weight is not None:
-        out, res = weighted_nnls_fit(y, matv, constant_weight)
-    else:
-        out, res = nnls_fit(y, matv)
+    out, res = nnls_fit(y, matv, weights=weights)
 
     total_y = out * matv
     total_y = np.transpose(total_y)

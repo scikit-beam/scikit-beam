@@ -38,7 +38,12 @@ import six
 import logging
 logger = logging.getLogger(__name__)
 
-from .net_cdf_io import load_netCDF
+try:
+    from .net_cdf_io import load_netCDF
+except ImportError:
+    def load_netCDF(*args, **kwargs):
+        # Die at call time so as not to ruin entire io package.
+        raise ImportError("This function requires netCDF4.")
 
 from .binary import read_binary
 

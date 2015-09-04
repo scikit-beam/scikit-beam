@@ -38,7 +38,7 @@
 ########################################################################
 from __future__ import absolute_import, division, print_function
 import six
-from collections import namedtuple, Mapping
+from collections import namedtuple
 import functools
 import os
 import logging

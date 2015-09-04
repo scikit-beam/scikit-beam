@@ -38,11 +38,14 @@ import logging
 import numpy as np
 from numpy.testing import (assert_array_almost_equal,
                            assert_almost_equal)
+from nose.tools import assert_raises
+
 from skimage import data
 
 import skxray.core.correlation as corr
 import skxray.core.roi as roi
-from skxray.testing.decorators import skip_if
+import skxray.core.utils as utils
+
 
 logger = logging.getLogger(__name__)
 
@@ -90,3 +93,33 @@ def test_image_stack_correlation():
 
     assert_almost_equal(True, np.all(g2[:, 0], axis=0))
     assert_almost_equal(True, np.all(g2[:, 1], axis=0))
+
+    num_buf = 5
+
+    # check the number of buffers are even
+    assert_raises(ValueError,
+                  lambda: corr.multi_tau_auto_corr(num_levels, num_buf,
+                                                   coins_mesh, coins_stack))
+    # check image shape and labels shape are equal
+    #assert_raises(ValueError,
+    #            lambda : corr.multi_tau_auto_corr(num_levels, num_bufs,
+    #                                                indices, coins_stack))
+
+    # check the number of pixels is zero
+    mesh = np.zeros_like(coins)
+    assert_raises(ValueError,
+                  lambda: corr.multi_tau_auto_corr(num_levels, num_bufs,
+                                                   mesh, coins_stack))
+
+
+def test_auto_corr_scat_factor():
+    num_levels, num_bufs = 3, 4
+    tot_channels, lags = utils.multi_tau_lags(num_levels, num_bufs)
+    beta = 0.5
+    relaxation_rate = 10.0
+    baseline = 1.0
+
+    g2 = corr.auto_corr_scat_factor(lags, beta, relaxation_rate, baseline)
+
+    assert_array_almost_equal(g2, np.array([1.5, 1.0, 1.0, 1.0, 1.0,
+                                            1.0, 1.0, 1.0]), decimal=8)

@@ -27,20 +27,23 @@ listed in the Supported Beamlines section.
 Currently implemented
 =====================
 
-* Differential Phase Contrast
+* `Differential Phase Contrast <https://github.com/scikit-xray/scikit-xray-examples/tree/master/demos/dpc>`_
+* `1-time correlation <https://github.com/scikit-xray/scikit-xray-examples/tree/master/demos/1_time_correlation>`_
+* `Fast 2-D image conversion to Q and gridding <https://github.com/scikit-xray/scikit-xray-examples/tree/master/demos/reciprocal_space>`_
 
 Under active development
 ========================
 
 * Powder Diffraction
 * X-ray Fluorescence
+
+    * `Fitting GUI <https://github.com/NSLS-II-HXN/pyxrf>`_
+    
 * Image Segmentation
 * Tomography
 
-   * Absorption
-   * Fluorescence
-
-* 1-time correlation
+    * Absorption
+    * Fluorescence
 
 Planned
 =======
@@ -49,6 +52,9 @@ Planned
 * Inelastic Scattering
 * Coherent Diffractive Imaging
 * 2-time correlation
+
+    * GPU Implementation
+    
 * XANES (1-D, 2-D)
 
 Supported Beamlines
@@ -61,13 +67,12 @@ the following beamlines.
 * Inelastic X-ray Scattering (IXS)
 * X-ray Powder Diffraction (XPD)
 * Coherent Hard X-ray Scattering (CHX)
-* Coherent Soft X-ray Scattering (CSX)
+* Coherent Soft X-ray Scattering (CSX1)
 * Submicron Resolution X-ray Spectroscopy (SRX)
 * Hard X-ray Nanoprobe (HXN)
 
 Credit
 ^^^^^^
 
-Scikit-xray is part of the `Nikea <https://github.com/Nikea>`__ software
-organization supported by the 
-`Brookhaven National Lab <http://www.bnl.gov>`__.
+Scikit-xray is part of the `scikit-xray <https://github.com/scikit-xray>`__ software
+organization supported by `Brookhaven National Lab <http://www.bnl.gov>`__.

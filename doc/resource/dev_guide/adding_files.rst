@@ -82,7 +82,7 @@ following template: ::
     Any prose you want to add about the module, such as examples, discussion,
     or saying hi to your mom can go here.
 
-    .. automodule:: skxray.utils.fitting
+    .. automodule:: skxray.core.fitting
        :members:
        :show-inheritance:
        :undoc-members:

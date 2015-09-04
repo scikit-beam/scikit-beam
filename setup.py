@@ -3,6 +3,7 @@
 import setuptools
 from distutils.core import setup, Extension
 from setupext import ext_modules
+import versioneer
 import numpy as np
 import os
 
@@ -15,14 +16,16 @@ def read(fname):
 
 setup(
     name='scikit-xray',
-    version='0.0.3',
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     author='Brookhaven National Lab',
     description="Data analysis tools for X-ray science",
     packages=setuptools.find_packages(exclude=['doc']),
     include_dirs=[np.get_include()],
     package_data={'skxray.core.constants': ['data/*.dat']},
+    install_requires=['six', 'numpy'],  # essential deps only
     ext_modules=ext_modules,
-    url='http://github.com/Nikea/scikit-xray',
+    url='http://github.com/scikit-xray/scikit-xray',
     keywords='Xray Analysis',
     license='BSD',
     classifiers=['Development Status :: 3 - Alpha',
