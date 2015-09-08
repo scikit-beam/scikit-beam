@@ -152,7 +152,7 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
         track_level = np.zeros(num_times)
 
         # to increment buffer
-        cur = np.ones(num_times)*timebin_num
+        cur = np.full(num_times, timebin_num)
 
         # to track how many images processed in each level
         img_per_level = np.zeros(num_times, dtype=np.int64)
