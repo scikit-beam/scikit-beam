@@ -398,14 +398,11 @@ def mean_intensity(images, labeled_array, index=None):
     index = np.asarray(index)
     # pre-allocate an array for performance
     # might be able to use list comprehension to make this faster
-    data = np.zeros((images.shape[0], len(index)))
+    mean_intensity = np.zeros((images.shape[0], len(index)))
     for n, img in enumerate(images):
         # use a mean that is mask-aware
-        data[n] = ndim.mean(img, labeled_array, index=index)
-    # turn the 2-D array back into a list of arrays because the rows and
-    # columns have different units
-    mean_intensity = [data[:, i] for i in range(data.shape[1])]
-    return np.asarray(mean_intensity), index
+        mean_intensity[n] = ndim.mean(img, labeled_array, index=index)
+    return mean_intensity, index
 
 
 def circular_average(image, calibrated_center, threshold=0, nx=100,

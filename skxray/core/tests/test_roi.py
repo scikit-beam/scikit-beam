@@ -258,7 +258,6 @@ def test_roi_max_counts():
 
 
 def test_static_test_sets():
-    label_array = np.zeros((25, 25))
     images1 = []
     for i in range(10):
         int_array = np.tril(i*np.ones(50))
@@ -283,16 +282,13 @@ def test_static_test_sets():
         intensity, index_list = roi.mean_intensity(v, label_array)
         roi_data.append(intensity)
 
-    return_values = [
-        list(roi_data[0][0]),
-        list(roi_data[1][0]),
-        list(roi_data[0][1]),
-        list(roi_data[1][1]),
+    return_values = [roi_data[0][:, 0], roi_data[0][:, 1],
+                     roi_data[1][:, 0], roi_data[1][:, 1],
     ]
     expected_values = [
         np.asarray([float(x) for x in range(0, 1000, 100)]),
-        np.asarray([float(x) for x in range(0, 20, 1)]),
         np.asarray([float(x) for x in range(0, 10, 1)]),
+        np.asarray([float(x) for x in range(0, 20, 1)]),
         np.asarray([float(x) for x in range(0, 2000, 100)])
     ]
     err_msg = ['roi%s of sample%s is incorrect' % (i, j)
