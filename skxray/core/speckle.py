@@ -58,37 +58,40 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
+def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
          max_cts=None):
     """
-    This function will provide the probability density of detecting photons
+    This function will provide the probability density of detecting speckles
     for different integration times.
 
-    The experimental probability density P(K) of detecting photons K is
+    The experimental probability density P(K) of detecting speckles K is
     obtained by histogramming the photon counts over an ensemble of
     equivalent pixels and over a number of speckle patterns recorded
     with the same integration time T under the same condition.
 
     Parameters
     ----------
-    images : array
+    image_sets : array
         sets of images
     label_array : array
         labeled array; 0 is background.
         Each ROI is represented by a distinct label (i.e., integer).
+    number_of_img : int
+        number of images (how far to go with integration times when finding
+        the time_bin, using skxray.utils.geometric function)
     timebin_num : int, optional
-        integration times
-    number_of_img : int, optional
-        number of images
+        integration time; default is 2
     max_cts : int, optional
        the brightest pixel in any ROI in any image in the image set.
+       default None; if not provided can be use roi_max_counts function
+       in skxray.roi module
 
     Returns
     -------
     prob_k_all : array
-        probability density of detecting photons
+        probability density of detecting speckles
     prob_k_std_dev : array
-        standard deviation of probability density of detecting photons
+        standard deviation of probability density of detecting speckles
 
     Notes
     -----
@@ -128,7 +131,7 @@ def xsvs(image_sets, label_array, timebin_num=2, number_of_img=50,
     prob_k_all = np.zeros([num_times, num_roi], dtype=np.object)
     # square of probability density of detecting speckles
     prob_k_pow_all = np.zeros_like(prob_k_all)
-    # standard deviation of probability density of detecting photons
+    # standard deviation of probability density of detecting speckles
     prob_k_std_dev = np.zeros_like(prob_k_all)
 
     # get the bin edges for each time bin for each ROI
@@ -239,16 +242,15 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels,
     img_per_level[level] += 1
     u_labels = list(np.unique(labels))
 
-    for j in range(num_roi):
-        roi_data = buf[level, buf_no][labels == u_labels[j]]
-
+    for j, label in enumerate(u_labels):
+        roi_data = buf[level, buf_no][labels == label]
         spe_hist, bin_edges = np.histogram(roi_data, bins=bin_edges,
                                            density=True)
-
-        prob_k[level, j] += (np.nan_to_num(spe_hist) -
+        spe_hist = np.nan_to_num(spe_hist)
+        prob_k[level, j] += (spe_hist -
                              prob_k[level, j])/(img_per_level[level])
 
-        prob_k_pow[level, j] += (np.power(np.nan_to_num(spe_hist), 2) -
+        prob_k_pow[level, j] += (np.power(spe_hist, 2) -
                                  prob_k_pow[level, j])/(img_per_level[level])
 
 
