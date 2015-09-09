@@ -38,7 +38,7 @@
 
 """
     X-ray speckle visibility spectroscopy(XSVS) - Dynamic information of
-    the speckle patterns  are obtained by analyzing the photon statistics
+    the speckle patterns are obtained by analyzing the speckle statistics
     and calculating the speckle contrast in single scattering patterns.
 
     This module will provide XSVS analysis tools
@@ -65,7 +65,7 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
     for different integration times.
 
     The experimental probability density P(K) of detecting speckles K is
-    obtained by histogramming the photon counts over an ensemble of
+    obtained by histogramming the speckle counts over an ensemble of
     equivalent pixels and over a number of speckle patterns recorded
     with the same integration time T under the same condition.
 
@@ -107,6 +107,10 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
        D.J. Durian "Speckle-visibilty Spectroscopy: A tool to study
        time-varying dynamics" Rev. Sci. Instrum. vol 76, p  093110, 2005.
 
+    There is an example in https://github.com/scikit-xray/scikit-xray-examples
+    It will demonstrate the use of these functions in this module for
+    experimental data.
+
     """
     if max_cts is None:
         max_cts = roi.roi_max_counts(image_sets, label_array)
@@ -129,16 +133,17 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
 
     # probability density of detecting speckles
     prob_k_all = np.zeros([num_times, num_roi], dtype=np.object)
+
     # square of probability density of detecting speckles
     prob_k_pow_all = np.zeros_like(prob_k_all)
+
     # standard deviation of probability density of detecting speckles
     prob_k_std_dev = np.zeros_like(prob_k_all)
 
     # get the bin edges for each time bin for each ROI
-    bin_edges = np.zeros_like(prob_k_all)
+    bin_edges = np.zeros(prob_k_all.shape[0], dtype=prob_k_all.dtype)
     for i in range(num_times):
-        for j in range(num_roi):
-            bin_edges[i, j] = np.arange(max_cts*2**i)
+        bin_edges[i] = np.arange(max_cts*2**i)
 
     start_time = time.time()  # used to log the computation time (optionally)
 
@@ -167,7 +172,7 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
             buf[0, cur[0] - 1] = (np.ravel(img))[indices]
 
             _process(num_roi, 0, cur[0] - 1, buf, img_per_level, labels,
-                     max_cts, bin_edges[0, 0], prob_k, prob_k_pow)
+                     max_cts, bin_edges[0], prob_k, prob_k_pow)
 
             # check whether the number of levels is one, otherwise
             # continue processing the next level
@@ -189,7 +194,7 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
                     track_level[level] = 0
 
                     _process(num_roi, level, cur[level]-1, buf, img_per_level,
-                             labels, max_cts, bin_edges[level, 0], prob_k,
+                             labels, max_cts, bin_edges[level], prob_k,
                              prob_k_pow)
                     level += 1
                     # Checking whether there is next level for processing
