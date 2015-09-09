@@ -394,8 +394,6 @@ def mean_intensity(images, labeled_array, index=None):
         len(index)
     except TypeError:
         index = [index]
-    # not sure that this is needed
-    index = np.asarray(index)
     # pre-allocate an array for performance
     # might be able to use list comprehension to make this faster
     mean_intensity = np.zeros((images.shape[0], len(index)))

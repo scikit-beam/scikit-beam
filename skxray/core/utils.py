@@ -609,16 +609,20 @@ def radial_grid(center, shape, pixel_size=None):
     center : tuple
         point in image where r=0; may be a float giving subpixel precision.
         Order is (rr, cc).
-    shape: tuple
+    shape : tuple
         Image shape which is used to determine the maximum extent of output
         pixel coordinates.
         Order is (rr, cc).
+    pixel_size : sequence, optional
+        The physical size of the pixels.
+        len(pixel_size) should be the same as len(shape)
+        defaults to (1,1)
 
     Returns
     -------
     r : array
         The distance of each pixel from `center`
-        Shape of the array is equal to `shape`
+        Shape of the return value is equal to the `shape` input parameter
     """
 
     if pixel_size is None:
