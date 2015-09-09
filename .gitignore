@@ -84,7 +84,6 @@ generated/
 *.swp
 
 #data files
-*.txt
 *.zip
 *.jpg
 

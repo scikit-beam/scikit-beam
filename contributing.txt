@@ -21,8 +21,8 @@ Here's the long and short of it:
 
    * Now, you have remote repositories named:
 
-      - ``upstream``, which refers to the ``scikit-xray`` repository
-      - ``origin``, which refers to your personal fork
+     - ``upstream``, which refers to the ``scikit-xray`` repository
+     - ``origin``, which refers to your personal fork
 
 2. Develop your contribution:
 
@@ -39,13 +39,21 @@ Here's the long and short of it:
 
    * Commit locally as you progress (``git add`` and ``git commit``)
 
-3. To submit your contribution:
+3. Test your contribution
+
+   * at the root of the git repository, execute the following command ::
+      
+      python run_tests.py
+  
+   * Inspect the output to ensure that all tests passed
+  
+4. To submit your contribution:
 
    * Push your changes back to your fork on GitHub::
 
       git push origin transform-speedups
 
-  * **Explain your contribution.** Include a description aimed at someone
+   * **Explain your contribution.** Include a description aimed at someone
      who may not be following the issue closely. If your contribution
      includes new functionality or enhancements, include a link to an
      IPython notebook demonstrating its use. And, as always, include tests.
@@ -222,10 +230,10 @@ Travis-CI checks all unittests in the project to prevent breakage.
 Before sending a pull request, you may want to check that Travis-CI
 successfully passes all tests. To do so,
 
-   * Go to `Travis-CI <http://travis-ci.org/>`__ and follow the Sign In link at the top
+    * Go to `Travis-CI <http://travis-ci.org/>`__ and follow the Sign In link at the top
 
-   * Go to your `profile page <https://travis-ci.org/profile>`__ and switch on your
-   scikit-xray fork
+    * Go to your `profile page <https://travis-ci.org/profile>`__ and switch on your
+      scikit-xray fork
 
 It corresponds to steps one and two in
 `Travis-CI documentation <http://about.travis-ci.org/docs/user/getting-started/>`__

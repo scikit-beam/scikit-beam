@@ -4,11 +4,40 @@
 
 #scikit-xray
 
-[Documentation] (http://scikit-xray.github.io/scikit-xray/)
+**[Documentation] (http://scikit-xray.github.io/scikit-xray/)**
 
-#Examples
+##Examples
 [scikit-xray-examples repository] (https://github.com/scikit-xray/scikit-xray-examples)
 
 - [Powder calibration (still needs tilt correction)](https://github.com/scikit-xray/scikit-xray-examples/blob/master/notebooks/2014-09-15_calibration/D_estimate_demo.ipynb>)
 - [1-time correlation] (https://github.com/scikit-xray/scikit-xray-examples/blob/master/notebooks/time_correlation/Multi_tau_one_time_correlation_example.ipynb)
 - [Differential Phase Contrast] (https://github.com/scikit-xray/scikit-xray-examples/blob/master/demos/dpc/dpc_demo.ipynb)
+
+##Quick start
+
+###install with conda
+
+```
+conda config --add channels scikit-xray
+conda install scikit-xray
+```
+
+###install with pip
+
+```
+git clone git@github.com:scikit-xray/scikit-xray.git
+cd scikit-xray
+python setup.py install
+```
+
+###set up for development
+```
+git clone git@github.com:scikit-xray/scikit-xray.git
+cd scikit-xray
+python setup.py develop
+pip install nose coverage setuptools
+```
+**make sure all the tests pass!**
+```
+python run_tests.py
+```
