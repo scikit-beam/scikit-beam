@@ -61,10 +61,10 @@ logger = logging.getLogger(__name__)
 def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
          max_cts=None):
     """
-    This function will provide the probability density of detecting speckles
+    This function will provide the probability density of detecting photons
     for different integration times.
 
-    The experimental probability density P(K) of detecting speckles K is
+    The experimental probability density P(K) of detecting photons K is
     obtained by histogramming the speckle counts over an ensemble of
     equivalent pixels and over a number of speckle patterns recorded
     with the same integration time T under the same condition.
@@ -89,9 +89,9 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
     Returns
     -------
     prob_k_all : array
-        probability density of detecting speckles
+        probability density of detecting photons
     prob_k_std_dev : array
-        standard deviation of probability density of detecting speckles
+        standard deviation of probability density of detecting photons
 
     Notes
     -----
@@ -131,13 +131,13 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
     # number of pixels per ROI
     num_pixels = np.bincount(labels, minlength=(num_roi+1))[1:]
 
-    # probability density of detecting speckles
+    # probability density of detecting photons
     prob_k_all = np.zeros([num_times, num_roi], dtype=np.object)
 
-    # square of probability density of detecting speckles
+    # square of probability density of detecting photons
     prob_k_pow_all = np.zeros_like(prob_k_all)
 
-    # standard deviation of probability density of detecting speckles
+    # standard deviation of probability density of detecting photons
     prob_k_std_dev = np.zeros_like(prob_k_all)
 
     # get the bin edges for each time bin for each ROI
@@ -216,7 +216,7 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels,
     """
     Internal helper function. This modifies inputs in place.
 
-    This helper function calculate probability of detecting speckles for
+    This helper function calculate probability of detecting photons for
     each integration time.
 
     .. warning :: This function mutates the input values.
@@ -240,9 +240,9 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels,
     bin_edges : array
         bin edges for each integration times and each ROI
     prob_k : array
-        probability density of detecting speckles
+        probability density of detecting photons
     prob_k_pow : array
-        squares of probability density of detecting speckles
+        squares of probability density of detecting photons
     """
     img_per_level[level] += 1
     u_labels = list(np.unique(labels))
