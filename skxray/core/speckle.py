@@ -37,22 +37,21 @@
 ########################################################################
 
 """
-    X-ray speckle visibility spectroscopy(XSVS) - Dynamic information of
-    the speckle patterns are obtained by analyzing the speckle statistics
-    and calculating the speckle contrast in single scattering patterns.
+X-ray speckle visibility spectroscopy(XSVS) - Dynamic information of
+the speckle patterns are obtained by analyzing the speckle statistics
+and calculating the speckle contrast in single scattering patterns.
 
-    This module will provide XSVS analysis tools
+This module will provide XSVS analysis tools
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 import six
 import numpy as np
 import time
 
-import skxray.core.correlation as corr
-import skxray.core.roi as roi
-from skxray.core.utils import bin_edges_to_centers, geometric_series
+from . import correlation as corr
+from . import roi
+from .utils import bin_edges_to_centers, geometric_series
 
 import logging
 logger = logging.getLogger(__name__)
@@ -125,7 +124,7 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
     # create integration times
     time_bin = geometric_series(timebin_num, number_of_img)
 
-    # number of items in the time bin
+    # number of times in the time bin
     num_times = len(time_bin)
 
     # number of pixels per ROI
@@ -176,13 +175,11 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
 
             # check whether the number of levels is one, otherwise
             # continue processing the next level
-            processing = num_times > 1
             level = 1
 
-            while processing:
+            while level < num_times:
                 if not track_level[level]:
                     track_level[level] = 1
-                    processing = 0
                 else:
                     prev = 1 + (cur[level - 1] - 2) % timebin_num
                     cur[level] = 1 + cur[level] % timebin_num
@@ -197,8 +194,6 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
                              labels, max_cts, bin_edges[level], prob_k,
                              prob_k_pow)
                     level += 1
-                    # Checking whether there is next level for processing
-                    processing = level < num_times
 
             prob_k_all += (prob_k - prob_k_all)/(i + 1)
             prob_k_pow_all += (prob_k_pow - prob_k_pow_all)/(i + 1)
@@ -286,7 +281,7 @@ def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts):
         shape (num_times, num_rois)
     """
     norm_bin_edges = np.zeros((num_times, num_rois), dtype=object)
-    norm_bin_centers = np.zeros((num_times, num_rois), dtype=object)
+    norm_bin_centers = np.zeros_like(norm_bin_edges)
     for i in range(num_times):
         for j in range(num_rois):
             norm_bin_edges[i, j] = np.arange(max_cts*2**i)/(mean_roi[j]*2**i)

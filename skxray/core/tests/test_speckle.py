@@ -41,9 +41,8 @@ from numpy.testing import (assert_array_almost_equal,
 
 from skimage.morphology import convex_hull_image
 
-import skxray.core.correlation as corr
-import skxray.core.speckle as xsvs
-import skxray.core.roi as roi
+from .. import speckle as xsvs
+from .. import roi as roi
 from skxray.testing.decorators import skip_if
 
 logger = logging.getLogger(__name__)
