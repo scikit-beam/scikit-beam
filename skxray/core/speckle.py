@@ -83,8 +83,8 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
         integration time; default is 2
     max_cts : int, optional
        the brightest pixel in any ROI in any image in the image set.
-       default None; if not provided can be use roi_max_counts function
-       in skxray.roi module
+       defaults to using skxray.core.roi.roi_max_counts to determine the brightest
+       pixel in any of the ROIs
 
     Returns
     -------
