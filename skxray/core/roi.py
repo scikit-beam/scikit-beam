@@ -469,3 +469,39 @@ def kymograph(images, labels, num):
         kymo.append((roi_pixel_values(img, labels == num)[0]))
 
     return np.vstack(kymo)
+
+
+def extract_label_indices(labels):
+    """
+    This will find the label's required region of interests (roi's),
+    number of roi's count the number of pixels in each roi's and pixels
+    list for the required roi's.
+
+    Parameters
+    ----------
+    labels : array
+        labeled array; 0 is background.
+        Each ROI is represented by a distinct label (i.e., integer).
+
+    Returns
+    -------
+    label_mask : array
+        1D array labeling each foreground pixel
+        e.g., [1, 1, 1, 1, 2, 2, 1, 1]
+
+    indices : array
+        1D array of indices into the raveled image for all
+        foreground pixels (labeled nonzero)
+        e.g., [5, 6, 7, 8, 14, 15, 21, 22]
+    """
+    img_dim = labels.shape
+
+    # TODO Make this tighter.
+    w = np.where(np.ravel(labels) > 0)
+    grid = np.indices((img_dim[0], img_dim[1]))
+    pixel_list = np.ravel((grid[0] * img_dim[1] + grid[1]))[w]
+
+    # discard the zeros
+    label_mask = labels[labels > 0]
+
+    return label_mask, pixel_list

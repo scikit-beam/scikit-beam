@@ -49,7 +49,6 @@ import six
 import numpy as np
 import time
 
-from . import correlation as corr
 from . import roi
 from .utils import bin_edges_to_centers, geometric_series
 
@@ -115,7 +114,7 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
         max_cts = roi.roi_max_counts(image_sets, label_array)
 
     # find the label's and pixel indices for ROI's
-    labels, indices = corr.extract_label_indices(label_array)
+    labels, indices = roi.extract_label_indices(label_array)
 
     # number of ROI's
     u_labels = list(np.unique(labels))
