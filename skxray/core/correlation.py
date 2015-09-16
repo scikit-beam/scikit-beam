@@ -61,7 +61,7 @@ logger = logging.getLogger(__name__)
 def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     """
     This function computes one-time correlations.
-    
+
     It uses a scheme to achieve long-time correlations inexpensively
     by downsampling the data, iteratively combining successive frames.
 

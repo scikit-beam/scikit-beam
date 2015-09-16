@@ -282,8 +282,7 @@ def test_static_test_sets():
         roi_data.append(intensity)
 
     return_values = [roi_data[0][:, 0], roi_data[0][:, 1],
-                     roi_data[1][:, 0], roi_data[1][:, 1],
-    ]
+                     roi_data[1][:, 0], roi_data[1][:, 1], ]
     expected_values = [
         np.asarray([float(x) for x in range(0, 1000, 100)]),
         np.asarray([float(x) for x in range(0, 10, 1)]),
