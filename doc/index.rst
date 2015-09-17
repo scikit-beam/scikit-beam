@@ -75,7 +75,7 @@ the `github repository <https://github.com/scikit-xray/scikit-xray>`_.
 
    introduction
    installation
-   whatsnew
+   whats_new
    resource/api/index
    resource/dev_guide/index
    examples
