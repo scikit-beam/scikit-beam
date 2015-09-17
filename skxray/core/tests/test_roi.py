@@ -36,9 +36,8 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 import numpy as np
-import skxray.core.roi as roi
-import skxray.core.correlation as corr
-import skxray.core.utils as core
+from .. import roi
+from .. import utils as core
 import itertools
 from skimage import morphology
 
@@ -57,7 +56,7 @@ def test_rectangles():
 
     all_roi_inds = roi.rectangles(roi_data, shape)
 
-    roi_inds, pixel_list = corr.extract_label_indices(all_roi_inds)
+    roi_inds, pixel_list = roi.extract_label_indices(all_roi_inds)
 
     ty = np.zeros(shape).ravel()
     ty[pixel_list] = roi_inds
@@ -92,7 +91,7 @@ def test_rings():
     print("edges there is same spacing between rings ", edges)
     label_array = roi.rings(edges, center, img_dim)
     print("label_array there is same spacing between rings", label_array)
-    label_mask, pixel_list = corr.extract_label_indices(label_array)
+    label_mask, pixel_list = roi.extract_label_indices(label_array)
     # number of pixels per ROI
     num_pixels = np.bincount(label_mask, minlength=(np.max(label_mask)+1))
     num_pixels = num_pixels[1:]
@@ -103,7 +102,7 @@ def test_rings():
     print("edges there is same spacing between rings ", edges)
     label_array = roi.rings(edges, center, img_dim)
     print("label_array there is same spacing between rings", label_array)
-    label_mask, pixel_list = corr.extract_label_indices(label_array)
+    label_mask, pixel_list = roi.extract_label_indices(label_array)
     # number of pixels per ROI
     num_pixels = np.bincount(label_mask, minlength=(np.max(label_mask)+1))
     num_pixels = num_pixels[1:]
@@ -114,7 +113,7 @@ def test_rings():
     print("edges when there is different spacing between rings", edges)
     label_array = roi.rings(edges, center, img_dim)
     print("label_array there is different spacing between rings", label_array)
-    label_mask, pixel_list = corr.extract_label_indices(label_array)
+    label_mask, pixel_list = roi.extract_label_indices(label_array)
     # number of pixels per ROI
     num_pixels = np.bincount(label_mask, minlength=(np.max(label_mask)+1))
     num_pixels = num_pixels[1:]
@@ -124,7 +123,7 @@ def test_rings():
     print("edges", edges)
     label_array = roi.rings(edges, center, img_dim)
     print("label_array", label_array)
-    label_mask, pixel_list = corr.extract_label_indices(label_array)
+    label_mask, pixel_list = roi.extract_label_indices(label_array)
     # number of pixels per ROI
     num_pixels = np.bincount(label_mask, minlength=(np.max(label_mask)+1))
     num_pixels = num_pixels[1:]
@@ -283,8 +282,7 @@ def test_static_test_sets():
         roi_data.append(intensity)
 
     return_values = [roi_data[0][:, 0], roi_data[0][:, 1],
-                     roi_data[1][:, 0], roi_data[1][:, 1],
-    ]
+                     roi_data[1][:, 0], roi_data[1][:, 1], ]
     expected_values = [
         np.asarray([float(x) for x in range(0, 1000, 100)]),
         np.asarray([float(x) for x in range(0, 10, 1)]),
