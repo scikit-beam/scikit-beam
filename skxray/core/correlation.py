@@ -103,7 +103,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     :math ::
         g_2(q, t') = \frac{<I(q, t)I(q, t + t')> }{<I(q, t)>^2}
 
-    ; delay > 0
+    ; t' > 0
 
     Here, I(q, t) refers to the scattering strength at the momentum
     transfer vector q in reciprocal space at time t, and the brackets
