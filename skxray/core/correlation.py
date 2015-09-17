@@ -101,13 +101,14 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     is defined as
 
     :math ::
-        g_2(q, \tau) = \frac{<I(q, \tau)I(q, \tau + delay)> }{<I(q, \tau)>^2}
+        g_2(q, t') = \frac{<I(q, t)I(q, t + t')> }{<I(q, t)>^2}
 
-    ; delay > 0
+    ; t' > 0
 
     Here, I(q, t) refers to the scattering strength at the momentum
-    transfer vector q in reciprocal space at time tau, and the brackets
-    <...> refer to averages over time tau.
+    transfer vector q in reciprocal space at time t, and the brackets
+    <...> refer to averages over time t. The quantity t' denotes the
+    delay time
 
     This implementation is based on code in the language Yorick
     by Mark Sutton, based on published work. [1]_
@@ -394,9 +395,10 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
 
     References
     ----------
-    .. [1] L. Li, P. Kwasniewski, D. Orsi, L. Wiegart, L. Cristofolini, C. Caronna
-       and A. Fluerasu, " Photon statistics and speckle visibility spectroscopy with
-       partially coherent X-rays," J. Synchrotron Rad. vol 21, p 1288-1295, 2014
+    .. [1] L. Li, P. Kwasniewski, D. Orsi, L. Wiegart, L. Cristofolini,
+       C. Caronna and A. Fluerasu, " Photon statistics and speckle
+       visibility spectroscopy with partially coherent X-rays,"
+       J. Synchrotron Rad. vol 21, p 1288-1295, 2014
 
     """
     return beta*np.exp(-2*relaxation_rate*lags) + baseline
