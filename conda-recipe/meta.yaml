@@ -1,13 +1,14 @@
 package:
   name: scikit-xray
-  version: v0.0.5
+  version: {{ environ['GIT_DESCRIBE_TAG'] }}.post{{ environ['GIT_DESCRIBE_NUMBER'] }}
+
 source:
   git_url: ../
 
 
 build:
   number: 0
-  string: v0.0.5
+  string: {{ environ.get('GIT_BUILD_STR', '') }}_np{{ np }}py{{ py }}
 
 requirements:
   build:
