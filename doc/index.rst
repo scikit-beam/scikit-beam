@@ -87,6 +87,14 @@ the `github repository <https://github.com/scikit-xray/scikit-xray>`_.
    <div class="col-md-6">
    <h2>Tutorial</h2>
 
+.. toctree::
+   :maxdepth: 1
+
+   tutorial/dpc_demo
+   tutorial/plot_xrf_spectrum
+   tutorial/recip_example
+   tutorial/speckle-plotting
+
 .. raw:: html
 
    </div>
