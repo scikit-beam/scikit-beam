@@ -72,11 +72,11 @@ Here's the long and short of it:
      button - click it.
 
 For a more detailed discussion, See `scikit-xray dev guide
-<https://github.com/Nikea/scikit-xray/tree/master/doc/resource/dev_guide>`_.
+<https://github.com/scikit-xray/scikit-xray/tree/master/doc/resource/dev_guide>`_.
 Also see these scikit-image :doc:`detailed documents
 <gitwash/index>` on how to use Git with ``scikit-image``
 (`<http://scikit-image.org/docs/dev/gitwash/index.html>`_) and appropriately
-translate scikit-image/scikit-image to Nikea/scikit-xray.
+translate scikit-image/scikit-image to scikit-xray/scikit-xray.
 
 4. Review process:
 
@@ -259,4 +259,4 @@ Every time Travis is triggered, it also calls on `Coveralls
 Bugs
 ----
 
-Please `report bugs on GitHub <https://github.com/Nikea/scikit-xray/issues>`_.
+Please `report bugs on GitHub <https://github.com/scikit-xray/scikit-xray/issues>`_.
