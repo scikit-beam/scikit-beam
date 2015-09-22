@@ -15,13 +15,13 @@ Here's the long and short of it:
 
       git clone git@github.com:your-username/scikit-xray.git
       or
-      git clone https://github.com:your-username/scikit-xray.git
+      git clone https://github.com/your-username/scikit-xray.git
 
    * Add the upstream repository::
 
       git remote add upstream git@github.com:scikit-xray/scikit-xray.git
       or
-      git remote add upstream https://github.com:scikit-xray/scikit-xray.git
+      git remote add upstream https://github.com/scikit-xray/scikit-xray.git
 
    * Fetch the upstream repository::
 
@@ -29,7 +29,7 @@ Here's the long and short of it:
 
    * Now, you have remote repositories named:
 
-      git branch -a
+      git remote -v
 
      - ``upstream``, which refers to the ``scikit-xray`` repository
      - ``origin``, which refers to your personal fork
