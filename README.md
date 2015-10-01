@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/scikit-xray/scikit-xray.svg?branch=master)](https://travis-ci.org/scikit-xray/scikit-xray)
 [![codecov.io](http://codecov.io/github/scikit-xray/scikit-xray/coverage.svg?branch=master)](http://codecov.io/github/scikit-xray/scikit-xray?branch=master)
-[![Coverage Status](https://coveralls.io/repos/scikit-xray/scikit-xray/badge.svg?branch=master&service=github)](https://coveralls.io/github/scikit-xray/scikit-xray?branch=master)
+[![Join the chat at https://gitter.im/scikit-xray/scikit-xray](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/scikit-xray/scikit-xray?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # scikit-xray
 
