@@ -215,6 +215,7 @@ def _copy_model_param_hints(target, source, params):
     """
 
     for label in params:
+        logger.debug('set hint for {}'.format(label))
         target.set_param_hint(label,
                               value=source[label].value,
                               expr=label)
@@ -575,7 +576,6 @@ class ModelSpectrum(object):
             value for the initial area of a given element
             default is 1e5, found to be a good value
         """
-
         incident_energy = self.incident_energy
         parameter = self.params
 
@@ -698,7 +698,7 @@ class ModelSpectrum(object):
                     element_mod.set_param_hint('area', value=default_area, vary=True)
                 else:
                     element_mod.set_param_hint('area', value=default_area, vary=True,
-                                             expr=str(element)+'_la1_'+'area')
+                                               expr=str(element)+'_la1_'+'area')
 
                 # area needs to be adjusted
                 if area_name in parameter:
@@ -707,8 +707,8 @@ class ModelSpectrum(object):
                 element_mod.set_param_hint('center', value=val, vary=False)
                 element_mod.set_param_hint('sigma', value=1, vary=False)
                 element_mod.set_param_hint('ratio',
-                                         value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1'],
-                                         vary=False)
+                                           value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1'],
+                                           vary=False)
 
                 element_mod.set_param_hint('delta_center', value=0, vary=False)
                 element_mod.set_param_hint('delta_sigma', value=0, vary=False)
@@ -768,7 +768,7 @@ class ModelSpectrum(object):
                     element_mod.set_param_hint('area', value=default_area, vary=True)
                 else:
                     element_mod.set_param_hint('area', value=default_area, vary=True,
-                                             expr=str(element)+'_ma1_'+'area')
+                                               expr=str(element)+'_ma1_'+'area')
 
                 # area needs to be adjusted
                 if area_name in parameter:
@@ -777,8 +777,8 @@ class ModelSpectrum(object):
                 element_mod.set_param_hint('center', value=val, vary=False)
                 element_mod.set_param_hint('sigma', value=1, vary=False)
                 element_mod.set_param_hint('ratio',
-                                         value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ma1'],
-                                         vary=False)
+                                           value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ma1'],
+                                           vary=False)
 
                 element_mod.set_param_hint('delta_center', value=0, vary=False)
                 element_mod.set_param_hint('delta_sigma', value=0, vary=False)
@@ -1025,10 +1025,14 @@ def construct_linear_model(channel_number, params,
     element_area = {}
 
     for elemental_line in elemental_lines:
+        #print(elemental_line)
         e_model = MS.setup_element_model(elemental_line,
                                          default_area=default_area)
+
+        #MS.assemble_models()
         if e_model:
-            p = e_model.make_params()
+            new_model = MS.compton + MS.elastic + e_model
+            p = new_model.make_params()
             for k, v in six.iteritems(p):
                 if 'area' in k:
                     element_area.update({elemental_line: v.value})
@@ -1043,7 +1047,8 @@ def construct_linear_model(channel_number, params,
     element_area.update({'compton': p['compton_amplitude'].value})
     selected_elements.append('compton')
 
-    p = MS.elastic.make_params()
+    compton_elastic = MS.compton + MS.elastic
+    p = compton_elastic.make_params()
     y_temp = MS.elastic.eval(x=channel_number, params=p)
     matv.append(y_temp)
     element_area.update({'elastic': p['elastic_coherent_sct_amplitude'].value})
