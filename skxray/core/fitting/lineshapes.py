@@ -48,6 +48,11 @@ import numpy as np
 import scipy.special
 import six
 
+from scipy import stats
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 log2 = np.log(2)
 s2pi = np.sqrt(2*np.pi)
@@ -385,3 +390,89 @@ def compton(x, compton_amplitude, coherent_sct_energy,
     counts += value
 
     return counts
+
+
+def gamma_distribution(bin_edges, K, M):
+    """
+    Gamma distribution function
+    Parameters
+    ----------
+    bin_edges : array
+        normalized speckle count bin edges or bin centers
+    K : int
+        number of photons
+    M : int
+        number of coherent modes
+    Returns
+    -------
+    gamma_dist : array
+        Gamma distribution
+    Notes
+    -----
+    These implementations are based on the references under
+    nbinom_distribution() function Notes
+
+    : math ::
+        P(K) =(\frac{M}{<K>})^M \frac{K^(M-1)}{\Gamma(M)}\exp(-M\frac{K}{<K>})
+    """
+
+    gamma_dist = (stats.gamma(M, 0., K/M)).pdf(bin_edges)
+    return gamma_dist
+
+
+def poisson_distribution(bin_edges, K):
+    """
+    Poisson Distribution
+    Parameters
+    ---------
+    K : int
+        number of photons
+    bin_edges : array
+        normalized speckle count bin edges or bin centers
+    Returns
+    -------
+    poisson_dist : array
+       Poisson Distribution
+    Notes
+    -----
+    These implementations are based on the references under
+    nbinom_distribution() function Notes
+    :math ::
+        P(K) = \frac{<K>^K}{K!}\exp(-K)
+
+    """
+    return stats.poisson.pmf(bin_edges, K)
+
+
+def nbinom_distribution(bin_edges, K, M):
+    """
+    Negative Binomial (Poisson-Gamma) distribution function
+    Parameters
+    ----------
+    bin_edges : array
+        normalized speckle count bin centers
+    K : int
+        number of photons
+    M : int
+        number of coherent modes
+    Returns
+    -------
+    nbinmo : array
+        Negative Binomial (Poisson-Gamma) distribution function
+    Notes
+    -----
+    The negative-binomial distribution function
+    :math ::
+        P(K) = \frac{\\Gamma(K + M)} {\\Gamma(K + 1) ||Gamma(M)}(\frac {M} {M + <K>})^M (\frac {<K>}{M + <K>})^K
+
+    These implementation is based on following references
+
+    References: text [1]_
+    .. [1] L. Li, P. Kwasniewski, D. Oris, L Wiegart, L. Cristofolini,
+       C. Carona and A. Fluerasu , "Photon statistics and speckle visibility
+       spectroscopy with partially coherent x-rays" J. Synchrotron Rad.,
+       vol 21, p 1288-1295, 2014.
+
+    """
+    p = M / (M + K)
+    return stats.nbinom.pmf(bin_edges, M, p)

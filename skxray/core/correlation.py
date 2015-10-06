@@ -53,8 +53,6 @@ import numpy as np
 from . import utils as core
 from . import roi
 
-from lmfit import minimize, Model, Parameters
-
 logger = logging.getLogger(__name__)
 
 
