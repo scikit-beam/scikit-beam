@@ -392,7 +392,7 @@ def compton(x, compton_amplitude, coherent_sct_energy,
     return counts
 
 
-def gamma_distribution(bin_edges, K, M):
+def gamma_dist(bin_edges, K, M):
     """
     Gamma distribution function
     Parameters
@@ -420,7 +420,7 @@ def gamma_distribution(bin_edges, K, M):
     return gamma_dist
 
 
-def poisson_distribution(bin_edges, K):
+def poisson_dist(bin_edges, K):
     """
     Poisson Distribution
     Parameters
@@ -438,13 +438,13 @@ def poisson_distribution(bin_edges, K):
     These implementations are based on the references under
     nbinom_distribution() function Notes
     :math ::
-        P(K) = \frac{<K>^K}{K!}\exp(-K)
+        P(K) = \frac{<K>^K}{K!}\exp(-<K>)
 
     """
-    return stats.poisson.pmf(bin_edges, K)
+    return (stats.poisson(K)).pmf(bin_edges)
 
 
-def nbinom_distribution(bin_edges, K, M):
+def nbinom_dist(bin_edges, K, M):
     """
     Negative Binomial (Poisson-Gamma) distribution function
     Parameters
@@ -475,4 +475,4 @@ def nbinom_distribution(bin_edges, K, M):
 
     """
     p = M / (M + K)
-    return stats.nbinom.pmf(bin_edges, M, p)
+    return (stats.nbinom(M, p)).pmf(bin_edges)

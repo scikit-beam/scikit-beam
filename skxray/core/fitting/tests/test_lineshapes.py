@@ -43,6 +43,7 @@ from skxray.core.fitting import (gaussian, gausssian_step, gaussian_tail,
                                  elastic, compton, lorentzian, lorentzian2,
                                  voigt, pvoigt)
 from skxray.core.fitting import (ComptonModel, ElasticModel)
+from skxray.core.fitting import (gamma_dist, poisson_dist, nbinom_dist)
 
 
 def test_gauss_peak():
@@ -326,6 +327,30 @@ def test_compton_model():
     fit_val = [result.values['coherent_sct_energy'], result.values['compton_amplitude']]
 
     assert_array_almost_equal(true_param, fit_val, decimal=2)
+
+
+def test_dist():
+    M = 1.9  # number of coherent modes
+    K = 3.15  # number of photons
+
+    bin_edges = np.array([0., 0.4, 0.8, 1.2, 1.6, 2.0])
+
+    pk_n = nbinom_dist(bin_edges, K, M)
+
+    pk_p = poisson_dist(bin_edges, K)
+
+    pk_g = gamma_dist(bin_edges, K, M)
+
+    #assert_array_almost_equal(pk_n, np.array([0.15609113, 0.17669628,
+    #                                         0.18451672, 0.1837303,
+    #                                         0.17729389, 0.16731627]))
+    assert_array_almost_equal(pk_g, np.array([0., 0.13703903, 0.20090424,
+                                              0.22734693, 0.23139384,
+                                              0.22222281]))
+    assert_array_almost_equal(pk_p,
+                              np.array([0.04285213, 0.07642648,
+                                        0.11521053, 0.15411372,
+                                        0.18795214, 0.21260011]))
 
 
 if __name__ == '__main__':
