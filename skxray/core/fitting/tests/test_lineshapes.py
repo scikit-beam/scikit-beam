@@ -341,9 +341,9 @@ def test_dist():
 
     pk_g = gamma_dist(bin_edges, K, M)
 
-    #assert_array_almost_equal(pk_n, np.array([0.15609113, 0.17669628,
-    #                                         0.18451672, 0.1837303,
-    #                                         0.17729389, 0.16731627]))
+    assert_array_almost_equal(pk_n, np.array([0.15609113, 0.17669628,
+                                              0.18451672, 0.1837303,
+                                              0.17729389, 0.16731627]))
     assert_array_almost_equal(pk_g, np.array([0., 0.13703903, 0.20090424,
                                               0.22734693, 0.23139384,
                                               0.22222281]))

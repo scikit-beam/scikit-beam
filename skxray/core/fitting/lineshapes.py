@@ -49,6 +49,7 @@ import scipy.special
 import six
 
 from scipy import stats
+from scipy.special import gammaln
 import logging
 
 logger = logging.getLogger(__name__)
@@ -420,30 +421,6 @@ def gamma_dist(bin_edges, K, M):
     return gamma_dist
 
 
-def poisson_dist(bin_edges, K):
-    """
-    Poisson Distribution
-    Parameters
-    ---------
-    K : int
-        number of photons
-    bin_edges : array
-        normalized speckle count bin edges or bin centers
-    Returns
-    -------
-    poisson_dist : array
-       Poisson Distribution
-    Notes
-    -----
-    These implementations are based on the references under
-    nbinom_distribution() function Notes
-    :math ::
-        P(K) = \frac{<K>^K}{K!}\exp(-<K>)
-
-    """
-    return (stats.poisson(K)).pmf(bin_edges)
-
-
 def nbinom_dist(bin_edges, K, M):
     """
     Negative Binomial (Poisson-Gamma) distribution function
@@ -457,7 +434,7 @@ def nbinom_dist(bin_edges, K, M):
         number of coherent modes
     Returns
     -------
-    nbinmo : array
+    nbinom : array
         Negative Binomial (Poisson-Gamma) distribution function
     Notes
     -----
@@ -474,5 +451,36 @@ def nbinom_dist(bin_edges, K, M):
        vol 21, p 1288-1295, 2014.
 
     """
-    p = M / (M + K)
-    return (stats.nbinom(M, p)).pmf(bin_edges)
+    co_eff = np.exp(gammaln(bin_edges + M) -
+                    gammaln(bin_edges + 1) - gammaln(M))
+
+    nbinom = co_eff * np.power(M / (K + M), M) * np.power(K / (M + K),
+                                                          bin_edges)
+    return nbinom
+
+
+def poisson_dist(bin_edges, mu, K):
+    """
+    Poisson Distribution
+    Parameters
+    ---------
+    K : int
+        number of photons
+    mu : array
+        shape parameters
+    bin_edges : array
+        normalized speckle count bin edges or bin centers
+    Returns
+    -------
+    poisson_dist : array
+       Poisson Distribution
+    Notes
+    -----
+    These implementations are based on the references under
+    nbinom_distribution() function Notes
+
+    :math ::
+        P(K) = \frac{<K>^K}{K!}\exp(-<K>)
+
+    """
+    return (stats.poisson(bin_edges, mu)).pmf(bin_edges)
