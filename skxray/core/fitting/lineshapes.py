@@ -459,11 +459,11 @@ def nbinom_dist(bin_edges, K, M):
     return nbinom
 
 
-def poisson_dist(bin_edges, mu, K):
+def poisson_dist(bin_edges, K):
     """
     Poisson Distribution
     Parameters
-    ---------
+    ----------
     K : int
         number of photons
     mu : array
@@ -483,4 +483,5 @@ def poisson_dist(bin_edges, mu, K):
         P(K) = \frac{<K>^K}{K!}\exp(-<K>)
 
     """
-    return (stats.poisson(bin_edges, mu)).pmf(bin_edges)
+    #return (stats.poisson(bin_edges, mu)).pmf(bin_edges)
+    return (stats.poisson(bin_edges))
