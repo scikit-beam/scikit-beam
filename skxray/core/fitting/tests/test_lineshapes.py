@@ -43,7 +43,7 @@ from skxray.core.fitting import (gaussian, gausssian_step, gaussian_tail,
                                  elastic, compton, lorentzian, lorentzian2,
                                  voigt, pvoigt)
 from skxray.core.fitting import (ComptonModel, ElasticModel)
-from skxray.core.fitting import (gamma_dist, poisson_dist, nbinom_dist)
+from skxray.core.fitting import (gamma_dist, nbinom_dist, poisson_dist)
 
 
 def test_gauss_peak():
@@ -350,7 +350,7 @@ def test_dist():
     assert_array_almost_equal(pk_p,
                               np.array([0.04285213, 0.07642648,
                                         0.11521053, 0.15411372,
-                                        0.18795214, 0.21260011]))
+                                         0.18795214, 0.21260011]))
 
 
 if __name__ == '__main__':

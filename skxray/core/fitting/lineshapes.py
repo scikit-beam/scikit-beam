@@ -49,7 +49,7 @@ import scipy.special
 import six
 
 from scipy import stats
-from scipy.special import gammaln
+from scipy.special import gamma, gammaln
 import logging
 
 logger = logging.getLogger(__name__)
@@ -393,13 +393,13 @@ def compton(x, compton_amplitude, coherent_sct_energy,
     return counts
 
 
-def gamma_dist(bin_edges, K, M):
+def gamma_dist(bin_values, K, M):
     """
     Gamma distribution function
     Parameters
     ----------
-    bin_edges : array
-        normalized speckle count bin edges or bin centers
+    bin_values : array
+        scattering intensities
     K : int
         number of photons
     M : int
@@ -417,17 +417,17 @@ def gamma_dist(bin_edges, K, M):
         P(K) =(\frac{M}{<K>})^M \frac{K^(M-1)}{\Gamma(M)}\exp(-M\frac{K}{<K>})
     """
 
-    gamma_dist = (stats.gamma(M, 0., K/M)).pdf(bin_edges)
+    gamma_dist = (stats.gamma(M, 0., K/M)).pdf(bin_values)
     return gamma_dist
 
 
-def nbinom_dist(bin_edges, K, M):
+def nbinom_dist(bin_values, K, M):
     """
     Negative Binomial (Poisson-Gamma) distribution function
     Parameters
     ----------
-    bin_edges : array
-        normalized speckle count bin centers
+    bin_values : array
+        scattering bin_values
     K : int
         number of photons
     M : int
@@ -451,25 +451,23 @@ def nbinom_dist(bin_edges, K, M):
        vol 21, p 1288-1295, 2014.
 
     """
-    co_eff = np.exp(gammaln(bin_edges + M) -
-                    gammaln(bin_edges + 1) - gammaln(M))
+    co_eff = np.exp(gammaln(bin_values + M) -
+                    gammaln(bin_values + 1) - gammaln(M))
 
     nbinom = co_eff * np.power(M / (K + M), M) * np.power(K / (M + K),
-                                                          bin_edges)
+                                                          bin_values)
     return nbinom
 
 
-def poisson_dist(bin_edges, K):
+def poisson_dist(bin_values, K):
     """
     Poisson Distribution
     Parameters
-    ----------
+    ---------
     K : int
         number of photons
-    mu : array
-        shape parameters
-    bin_edges : array
-        normalized speckle count bin edges or bin centers
+    bin_values : array
+        scattering bin_values
     Returns
     -------
     poisson_dist : array
@@ -478,10 +476,9 @@ def poisson_dist(bin_edges, K):
     -----
     These implementations are based on the references under
     nbinom_distribution() function Notes
-
     :math ::
-        P(K) = \frac{<K>^K}{K!}\exp(-<K>)
-
+        P(K) = \frac{<K>^K}{K!}\exp(-K)
     """
-    #return (stats.poisson(bin_edges, mu)).pmf(bin_edges)
-    return (stats.poisson(bin_edges))
+    #poisson_dist = stats.poisson.pmf(K, bin_values)
+    poisson_dist = np.exp(-K) * np.power(K, bin_values)/gamma(bin_values + 1)
+    return poisson_dist
