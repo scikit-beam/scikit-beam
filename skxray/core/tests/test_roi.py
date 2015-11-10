@@ -306,7 +306,7 @@ def test_circular_average():
     labels = roi.rings(edges, calib_center, image.shape)
     image[labels == 1] = 10
     image[labels == 2] = 10
-    bin_cen, ring_avg = roi.circular_average(image, calib_center, nx=6)
+    bin_cen, ring_avg = roi.circular_average(image, calib_center)
 
     assert_array_almost_equal(bin_cen, [0.70710678, 2.12132034,
                                         3.53553391,  4.94974747,  6.36396103,
