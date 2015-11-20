@@ -306,13 +306,17 @@ def test_circular_average():
     labels = roi.rings(edges, calib_center, image.shape)
     image[labels == 1] = 10
     image[labels == 2] = 10
-    bin_cen, ring_avg = roi.circular_average(image, calib_center)
+    bin_cen, ring_avg = roi.circular_average(image, calib_center, nx=6)
 
     assert_array_almost_equal(bin_cen, [0.70710678, 2.12132034,
                                         3.53553391,  4.94974747,  6.36396103,
                                         7.77817459], decimal=6)
     assert_array_almost_equal(ring_avg, [8., 2.5, 5.55555556, 0.,
                                          0., 0.], decimal=6)
+
+    bin_cen1, ring_avg1 = roi.circular_average(image, calib_center, min_x=0,
+                                               max_x=10, bin_width=2)
+    assert_array_almost_equal(bin_cen1, [1., 3., 5., 7., 9.])
 
 
 def test_kymograph():

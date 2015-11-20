@@ -404,7 +404,7 @@ def mean_intensity(images, labeled_array, index=None):
 
 
 def circular_average(image, calibrated_center, threshold=0, min_x=None,
-                     max_x=None, bin_width=1., pixel_size=None):
+                     max_x=None, bin_width=1., pixel_size=(1, 1), nx=None):
     """Circular average of the the image data
     The circular average is also known as the radial integration
     Parameters
@@ -416,15 +416,17 @@ def circular_average(image, calibrated_center, threshold=0, min_x=None,
         argument order should be (row, col)
     threshold : int, optional
         Ignore counts above `threshold`
-    min_x : float, optional in pixel units
-        Left edge of first bin defaults to minimum value of R
-    max_x : float, optional in pixel units
-        Right edge of last bin defaults to maximum value of R
-    bin_width : float, optional
-        width of R bin, default is 1.
+    min_x : float, optional number of pixels
+        Left edge of first bin defaults to minimum value of x
+    max_x : float, optional number of pixels
+        Right edge of last bin defaults to maximum value of x
+    bin_width : float, optional number of pixels
+        width of x bin, default is 1.
     pixel_size : tuple, optional
         The size of a pixel (in a real unit, like mm).
         argument order should be (pixel_height, pixel_width)
+    nx : int
+        number of bins in x
     Returns
     -------
     bin_centers : array
@@ -436,14 +438,18 @@ def circular_average(image, calibrated_center, threshold=0, min_x=None,
 
     if min_x is None:
         min_x = np.min(radial_val)
+    else:
+        min_x = min_x * pixel_size[0]
     if max_x is None:
         max_x = np.max(radial_val)
-
-    # Number of bins in x
-    nx = int((max_x - min_x + 1.)/bin_width)
+    else:
+        max_x = max_x * pixel_size[0]
+    if nx is None:
+        nx = int((max_x - min_x)/(bin_width * pixel_size[0]))
 
     bin_edges, sums, counts = utils.bin_1D(np.ravel(radial_val),
-                                           np.ravel(image), nx, min_x=min_x,
+                                           np.ravel(image), nx,
+                                           min_x=min_x,
                                            max_x=max_x)
     th_mask = counts > threshold
     ring_averages = sums[th_mask] / counts[th_mask]
