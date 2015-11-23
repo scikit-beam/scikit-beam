@@ -399,9 +399,11 @@ def gamma_dist(bin_values, K, M):
     Parameters
     ----------
     bin_values : array
-        scattering intensities
+        bin values for detecting photons
+        eg : max photon counts is 8
+        bin_values = np.arange(8+2)
     K : int
-        number of photons
+        mean count of photons
     M : int
         number of coherent modes
     Returns
@@ -414,7 +416,7 @@ def gamma_dist(bin_values, K, M):
     nbinom_distribution() function Notes
 
     : math ::
-        P(K) =(\frac{M}{<K>})^M \frac{K^(M-1)}{\Gamma(M)}\exp(-M\frac{K}{<K>})
+        P(K) = \frac{\Gamma(K + M)} {\Gamma(K + 1)\Gamma(M)}(\frac {M} {M + <K>})^M (\frac {<K>}{M + <K>})^K
     """
 
     gamma_dist = (stats.gamma(M, 0., K/M)).pdf(bin_values)
@@ -427,9 +429,11 @@ def nbinom_dist(bin_values, K, M):
     Parameters
     ----------
     bin_values : array
-        scattering bin_values
+        bin values for detecting photons
+        eg : max photon counts is 8
+        bin_values = np.arange(8+2)
     K : int
-        number of photons
+        mean count of photons
     M : int
         number of coherent modes
     Returns
@@ -440,7 +444,7 @@ def nbinom_dist(bin_values, K, M):
     -----
     The negative-binomial distribution function
     :math ::
-        P(K) = \frac{\\Gamma(K + M)} {\\Gamma(K + 1) ||Gamma(M)}(\frac {M} {M + <K>})^M (\frac {<K>}{M + <K>})^K
+       P(K) =(\frac{M}{<K>})^M \frac{K^(M-1)}{\Gamma(M)}\exp(-M\frac{K}{<K>})
 
     These implementation is based on following references
 
@@ -465,9 +469,11 @@ def poisson_dist(bin_values, K):
     Parameters
     ---------
     K : int
-        number of photons
+        mean count of photons
     bin_values : array
-        scattering bin_values
+        bin values for detecting photons
+        eg : max photon counts is 8
+        bin_values = np.arange(8+2)
     Returns
     -------
     poisson_dist : array
@@ -477,8 +483,8 @@ def poisson_dist(bin_values, K):
     These implementations are based on the references under
     nbinom_distribution() function Notes
     :math ::
-        P(K) = \frac{<K>^K}{K!}\exp(-K)
+        P(K) = \frac{<K>^K}{K!}\exp(-<K>)
     """
-    #poisson_dist = stats.poisson.pmf(K, bin_values)
+
     poisson_dist = np.exp(-K) * np.power(K, bin_values)/gamma(bin_values + 1)
     return poisson_dist
