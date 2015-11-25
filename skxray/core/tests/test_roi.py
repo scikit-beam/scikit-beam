@@ -315,7 +315,7 @@ def test_circular_average():
                                          0., 0.], decimal=6)
 
     bin_cen1, ring_avg1 = roi.circular_average(image, calib_center, min_x=0,
-                                               max_x=10)
+                                               max_x=10, nx=None)
     assert_array_almost_equal(bin_cen1, [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5,
                                          7.5, 8.5])
 
