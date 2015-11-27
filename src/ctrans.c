@@ -1,84 +1,74 @@
 /*
- 
- This is ctranc.c routine. process_to_q and process_grid
- functions in the nsls2/recip.py call  ctranc.c routine for
- fast data analysis.
+ * Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        
+ * National Laboratory. All rights reserved.                            
+ *                                                                      
+ * Redistribution and use in source and binary forms, with or without   
+ * modification, are permitted provided that the following conditions   
+ * are met:                                                             
+ *                                                                      
+ * * Redistributions of source code must retain the above copyright     
+ *   notice, this list of conditions and the following disclaimer.      
+ *                                                                      
+ * * Redistributions in binary form must reproduce the above copyright  
+ *   notice this list of conditions and the following disclaimer in     
+ *   the documentation and/or other materials provided with the         
+ *   distribution.                                                      
+ *                                                                      
+ * * Neither the name of the Brookhaven Science Associates, Brookhaven  
+ *   National Laboratory nor the names of its contributors may be used  
+ *   to endorse or promote products derived from this software without  
+ *   specific prior written permission.                                 
+ *                                                                      
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS  
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT    
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS    
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE       
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,           
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES   
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR   
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)   
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,  
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OTHERWISE) ARISING   
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   
+ * POSSIBILITY OF SUCH DAMAGE.                                          
+ *
+ *
+ *
+ * This is ctranc.c routine. process_to_q and process_grid
+ * functions in the nsls2/recip.py call  ctranc.c routine for
+ * fast data analysis.
  
  */
-#include <Python.h>
-#include <numpy/arrayobject.h>
 #include <stdlib.h>
 #include <math.h>
+
+/* Include python and numpy header files */
+
+#include <Python.h>
+#define NPY_NO_DEPRECATED_API NPY_1_9_API_VERSION
+#include <numpy/arrayobject.h>
+
+/* If useing threading then import pthreads */
 #ifdef USE_THREADS
 #include <pthread.h>
 #endif
 
-/* Set up */
+#include "ctrans.h"
 
-#define HC_OVER_E 12398.4
-
-#define true -1
-#define false 0
-
-#ifndef USE_THREADS
-#define NTHREADS 1
-#endif
-
-#ifndef NTHREADS
-#define NTHREADS 2
-#endif
-
-typedef double _float;
-typedef int _int;
-
-typedef struct {
-  int xSize;         // X size in pixels.
-  int ySize;         // Y size in pixels.
-  _float xCen;
-  _float yCen;
-  _float xPixSize;   // X Pixel Size (microns)
-  _float yPixSize;   // Y Pixel Size (microns)
-  _float dist;       // Sample - Detector distance.
-} CCD;
-
-typedef struct {
-  CCD *ccd;
-  _float *anglesp;
-  _float *qOutp;
-  int ndelgam;
-  _float lambda;
-  int mode;
-  int imstart;
-  int imend;
-  _float UBI[3][3];
-} imageThreadData;
-
-void *processImageThread(void* ptr);
-int calcQTheta(_float* diffAngles, _float theta, _float mu, _float *qTheta, _int n, _float lambda);
-int calcQPhiFromQTheta(_float *qTheta, _int n, _float chi, _float phi);
-int calcDeltaGamma(_float *delgam, CCD *ccd, _float delCen, _float gamCen);
-int matmulti(_float *val, int n, _float mat[][3], int skip);
-int calcHKLFromQPhi(_float *qPhi, _int n, _float mat[][3]);
-
-unsigned long c_grid3d(double *dout, unsigned long *nout, double *sterr, double *data, double *grid_start, double *grid_stop, int max_data, int *n_grid, int norm_data);
-
-static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs);
-static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs);
-
-static char *_ctransDoc = \
-"Python functions to perform gridding (binning) of experimental data.\n\n";
+/* Set global variable to indicate number of threads to create */
+int _n_threads = 1;
 
 /* Computation functions */
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   static char *kwlist[] = { "angles", "mode", "ccd_size", "ccd_pixsize",
-			    "ccd_cen", "dist", "wavelength",
-			    "UBinv", "outarray", NULL };
-  PyObject *angles = NULL;
+			                      "ccd_cen", "dist", "wavelength",
+			                      "UBinv", "outarray", NULL };
+  PyArrayObject *angles = NULL;
   PyObject *_angles = NULL;
+  PyArrayObject *ubinv = NULL;
   PyObject *_ubinv = NULL;
-  PyObject *ubinv = NULL;
   PyObject *_outarray = NULL;
-  PyObject *qOut = NULL;
+  PyArrayObject *qOut = NULL;
   CCD ccd;
   npy_intp dims[2];
   npy_intp nimages;
@@ -86,16 +76,15 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   int ndelgam;
   int mode;
 
-  _float lambda;
+  double lambda;
 
-  _float *anglesp;
-  _float *qOutp;
-  _float *ubinvp;
-  _float UBI[3][3];
+  double *anglesp;
+  double *qOutp;
+  double *ubinvp;
+  double UBI[3][3];
 
 #ifdef USE_THREADS
   pthread_t thread[NTHREADS];
-  int iret[NTHREADS];
 #endif
   imageThreadData threadData[NTHREADS];
 
@@ -112,19 +101,19 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
     return NULL;
   }
 
-  angles = PyArray_FROMANY(_angles, NPY_DOUBLE, 2, 2, NPY_IN_ARRAY);
+  angles = (PyArrayObject*)PyArray_FROMANY(_angles, NPY_DOUBLE, 2, 2, NPY_ARRAY_IN_ARRAY);
   if(!angles){
     PyErr_SetString(PyExc_ValueError, "angles must be a 2-D array of floats");
     goto cleanup;
   }
   
-  ubinv = PyArray_FROMANY(_ubinv, NPY_DOUBLE, 2, 2, NPY_IN_ARRAY);
+  ubinv = (PyArrayObject*)PyArray_FROMANY(_ubinv, NPY_DOUBLE, 2, 2, NPY_ARRAY_IN_ARRAY);
   if(!ubinv){
     PyErr_SetString(PyExc_ValueError, "ubinv must be a 2-D array of floats");
     goto cleanup;
   }
 
-  ubinvp = (_float *)PyArray_DATA(ubinv);
+  ubinvp = (double *)PyArray_DATA(ubinv);
   for(i=0;i<3;i++){
     UBI[i][0] = -1.0 * ubinvp[2];
     UBI[i][1] = ubinvp[1];
@@ -138,25 +127,23 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   dims[0] = nimages * ndelgam;
   dims[1] = 4;
   if(!_outarray){
-    // Create new numpy array
-    // fprintf(stderr, "**** Creating new array\n");
-    qOut = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+    qOut = (PyArrayObject*)PyArray_SimpleNew(2, dims, NPY_DOUBLE);
     if(!qOut){
       goto cleanup;
     }
   } else {
-    qOut = PyArray_FROMANY(_outarray, NPY_DOUBLE, 2, 2, NPY_INOUT_ARRAY);
+    qOut = (PyArrayObject*)PyArray_FROMANY(_outarray, NPY_DOUBLE, 2, 2, NPY_ARRAY_INOUT_ARRAY);
     if(!qOut){
       PyErr_SetString(PyExc_ValueError, "outarray must be a 2-D array of floats");
       goto cleanup;
     }
-    if(PyArray_Size(qOut) != (4 * nimages * ndelgam)){
+    if(PyArray_Size((PyObject*)qOut) != (4 * nimages * ndelgam)){
       PyErr_SetString(PyExc_ValueError, "outarray is of the wrong size");
       goto cleanup;
     }
   }
-  anglesp = (_float *)PyArray_DATA(angles);
-  qOutp = (_float *)PyArray_DATA(qOut);
+  anglesp = (double *)PyArray_DATA(angles);
+  qOutp = (double *)PyArray_DATA(qOut);
 
   stride = nimages / NTHREADS;
   for(t=0;t<NTHREADS;t++){
@@ -182,9 +169,9 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
     }
 
 #ifdef USE_THREADS
-    iret[t] = pthread_create( &thread[t], NULL,
-			      processImageThread,
-			      (void*) &threadData[t]);
+    pthread_create(&thread[t], NULL,
+		        	     processImageThread,
+			             (void*) &threadData[t]);
 #else
     processImageThread((void *) &threadData[t]);
 #endif
@@ -214,9 +201,9 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 void *processImageThread(void* ptr){
   imageThreadData *data;
   int i;
-  _float *delgam;
+  double *delgam;
   data = (imageThreadData*) ptr;
-  delgam = (_float*)malloc(data->ndelgam * sizeof(_float) * 2);
+  delgam = (double*)malloc(data->ndelgam * sizeof(double) * 2);
   if(!delgam){
     fprintf(stderr, "MALLOC ERROR\n");
 #ifdef USE_THREADS
@@ -245,18 +232,18 @@ void *processImageThread(void* ptr){
 #endif
 }
 
-int calcQTheta(_float* diffAngles, _float theta, _float mu, _float *qTheta, _int n, _float lambda){
+int calcQTheta(double* diffAngles, double theta, double mu, double *qTheta, int n, double lambda){
   // Calculate Q in the Theta frame
   // angles -> Six cicle detector angles [delta gamma]
   // theta  -> Theta value at this detector setting
   // mu     -> Mu value at this detector setting
   // qTheta -> Q Values
   // n      -> Number of values to convert
-  _int i;
-  _float *angles;
-  _float *qt;
-  _float kl;
-  _float del, gam;
+  int i;
+  double *angles;
+  double *qt;
+  double kl;
+  double del, gam;
 
   angles = diffAngles;
   qt = qTheta;
@@ -279,8 +266,8 @@ int calcQTheta(_float* diffAngles, _float theta, _float mu, _float *qTheta, _int
   return true;
 }
 
-int calcQPhiFromQTheta(_float *qTheta, _int n, _float chi, _float phi){
-  _float r[3][3];
+int calcQPhiFromQTheta(double *qTheta, int n, double chi, double phi){
+  double r[3][3];
 
   r[0][0] = cos(chi);
   r[0][1] = 0.0;
@@ -297,14 +284,14 @@ int calcQPhiFromQTheta(_float *qTheta, _int n, _float chi, _float phi){
   return true;
 }
 
-int calcHKLFromQPhi(_float *qPhi, _int n, _float mat[][3]){
+int calcHKLFromQPhi(double *qPhi, int n, double mat[][3]){
   matmulti(qPhi, n, mat, 1);
   return true;
 }
 
-int matmulti(_float *val, int n, _float mat[][3], int skip){
-  _float *v;
-  _float qp[3];
+int matmulti(double *val, int n, double mat[][3], int skip){
+  double *v;
+  double qp[3];
   int i,j,k;
 
   v = val;
@@ -326,11 +313,11 @@ int matmulti(_float *val, int n, _float mat[][3], int skip){
   return true;
 }
 
-int calcDeltaGamma(_float *delgam, CCD *ccd, _float delCen, _float gamCen){
+int calcDeltaGamma(double *delgam, CCD *ccd, double delCen, double gamCen){
   // Calculate Delta Gamma Values for CCD
   int i,j;
-  _float *delgamp;
-  _float xPix, yPix;
+  double *delgamp;
+  double xPix, yPix;
 
   xPix = ccd->xPixSize / ccd->dist;
   yPix = ccd->yPixSize / ccd->dist;
@@ -338,8 +325,8 @@ int calcDeltaGamma(_float *delgam, CCD *ccd, _float delCen, _float gamCen){
 
   for(j=0;j<ccd->ySize;j++){
     for(i=0;i<ccd->xSize;i++){
-      *(delgamp++) = delCen - atan( ((_float)j - ccd->yCen) * yPix);
-      *(delgamp++) = gamCen - atan( ((_float)i - ccd->xCen) * xPix);
+      *(delgamp++) = delCen - atan( ((double)j - ccd->yCen) * yPix);
+      *(delgamp++) = gamCen - atan( ((double)i - ccd->xCen) * xPix);
     }
   }
 
@@ -347,8 +334,8 @@ int calcDeltaGamma(_float *delgam, CCD *ccd, _float delCen, _float gamCen){
 }
 
 static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
-  PyObject *gridout = NULL, *Nout = NULL, *standarderror = NULL;
-  PyObject *gridI = NULL;
+  PyArrayObject *gridout = NULL, *Nout = NULL, *standarderror = NULL;
+  PyArrayObject *gridI = NULL;
   PyObject *_I;
   
   static char *kwlist[] = { "data", "xrange", "yrange", "zrange", "norm", NULL };
@@ -372,7 +359,7 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
     return NULL;
   }
   
-  gridI = PyArray_FROMANY(_I, NPY_DOUBLE, 0, 0, NPY_IN_ARRAY);
+  gridI = (PyArrayObject*)PyArray_FROMANY(_I, NPY_DOUBLE, 0, 0, NPY_ARRAY_IN_ARRAY);
   if(!gridI){
     goto cleanup;
   }
@@ -383,15 +370,15 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   dims[1] = grid_nsteps[1];
   dims[2] = grid_nsteps[2];
 
-  gridout = PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
+  gridout = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
   if(!gridout){
     goto cleanup;
   }
-  Nout = PyArray_ZEROS(3, dims, NPY_ULONG, 0);
+  Nout = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_ULONG, 0);
   if(!Nout){
     goto cleanup;
   }
-  standarderror = PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
+  standarderror = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
   if(!standarderror){
     goto cleanup;
   }
@@ -415,8 +402,6 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
 		       double *grid_start, double *grid_stop, int max_data,
 		       int *n_grid, int norm_data){
   int i;
-  unsigned long *nout_ptr;
-  double *dout_ptr;
   double *data_ptr;
   
   double *Mk = NULL;
@@ -424,7 +409,7 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
   int grid_size = 0;
 
   double pos_double[3];
-  double grid_len[3], grid_step[3];
+  double grid_len[3];//, grid_step[3];
   int grid_pos[3];
   int pos = 0;
   unsigned long n_outside = 0;
@@ -446,13 +431,10 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
     }
   }
 
-  dout_ptr = dout;
-  nout_ptr = nout;
-	
   data_ptr = data;
   for(i = 0;i < 3; i++){
     grid_len[i] = grid_stop[i] - grid_start[i];
-    grid_step[i] = grid_len[i] / (n_grid[i]);
+    //grid_step[i] = grid_len[i] / (n_grid[i]);
   }
 	
   for(i = 0; i < max_data ; i++){
@@ -556,10 +538,6 @@ error_out(PyObject *m) {
     return NULL;
 }
 
-static PyMethodDef _ctransMethods[] = {
-  {NULL, NULL, 0, NULL}     /* Sentinel - marks the end of this structure */
-};
-
 static PyMethodDef ctrans_methods[] = {
     {"error_out", (PyCFunction)error_out, METH_NOARGS, NULL},
     {"grid3d", (PyCFunction)gridder_3D, METH_VARARGS | METH_KEYWORDS,
@@ -585,7 +563,7 @@ static int ctrans_clear(PyObject *m) {
 static struct PyModuleDef moduledef = {
         PyModuleDef_HEAD_INIT,
         "ctrans",
-        NULL,
+        "Python functions to perform gridding (binning) of experimental data.\n\n",
         sizeof(struct module_state),
         ctrans_methods,
         NULL,
@@ -609,7 +587,7 @@ initctrans(void)
 #if PY_MAJOR_VERSION >= 3
     PyObject *module = PyModule_Create(&moduledef);
 #else
-    PyObject *module = Py_InitModule("ctrans", ctrans_methods);
+    PyObject *module = Py_InitModule3("ctrans", ctrans_methods, _ctransDoc);
 #endif
     import_array();
 
