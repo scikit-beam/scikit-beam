@@ -40,8 +40,8 @@
 #define true -1
 #define false 0
 
-#ifndef NTHREADS
-#define NTHREADS 2
+#ifndef MAX_THREADS
+#define MAX_THREADS 128
 #endif
 
 typedef struct {
@@ -77,6 +77,8 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *sterr, double 
 
 static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs);
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs);
+static PyObject* get_threads(PyObject *self, PyObject *args);
+static PyObject* set_threads(PyObject *self, PyObject *args);
 
 #if PY_MAJOR_VERSION < 3
 static char *_ctransDoc = \

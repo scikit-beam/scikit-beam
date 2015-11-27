@@ -4,17 +4,11 @@
 # BSD License
 # See LICENSE for full text
 
-"""
-     setupext.py is for c routines
-
-"""
-
 from distutils.core import Extension
 
 ctrans = {}
 ctrans['define_macros'] = []
 ctrans['define_macros'].append(('USE_THREADS', None))
-ctrans['define_macros'].append(('NTHREADS', 1))
 ctrans['define_macros'].append(('DEBUG', None))
 
 

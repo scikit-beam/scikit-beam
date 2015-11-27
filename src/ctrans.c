@@ -59,6 +59,9 @@
 /* Set global variable to indicate number of threads to create */
 int _n_threads = 1;
 
+/* Set a global Error */
+static PyObject *CTransError = NULL;
+
 /* Computation functions */
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   static char *kwlist[] = { "angles", "mode", "ccd_size", "ccd_pixsize",
@@ -85,9 +88,10 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   double UBI[3][3];
 
 #ifdef USE_THREADS
-  pthread_t thread[NTHREADS];
+  pthread_t thread[MAX_THREADS];
 #endif
-  imageThreadData threadData[NTHREADS];
+
+  imageThreadData threadData[MAX_THREADS];
 
   if(!PyArg_ParseTupleAndKeywords(args, kwargs, "Oi(ii)(dd)(dd)ddO|O", kwlist,
 				  &_angles,
@@ -146,8 +150,8 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   anglesp = (double *)PyArray_DATA(angles);
   qOutp = (double *)PyArray_DATA(qOut);
 
-  stride = nimages / NTHREADS;
-  for(t=0;t<NTHREADS;t++){
+  stride = nimages / _n_threads;
+  for(t=0;t<_n_threads;t++){
     // Setup threads
     // Allocate memory for delta/gamma pairs
     
@@ -163,7 +167,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 	       threadData[t].UBI[j][i] = UBI[j][i];
       }
     }
-    if(t == (NTHREADS - 1)){
+    if(t == (_n_threads - 1)){
       threadData[t].imend = nimages;
     } else {
       threadData[t].imend = stride * (t + 1);
@@ -181,7 +185,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   }
 
 #ifdef USE_THREADS
-  for(t=0;t<NTHREADS;t++){
+  for(t=0;t<_n_threads;t++){
     if(pthread_join(thread[t], NULL)){
       fprintf(stderr, "ERROR : Cannot join thread %d", t);
     }
@@ -419,6 +423,8 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
 
   grid_size = n_grid[0] * n_grid[1] * n_grid[2];
 
+  // If we do this with threads .. we can do map reduce
+
   // Allocate arrays for standard error calculation
   
   if(standarderror){
@@ -516,96 +522,84 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
   return n_outside;
 }
 
-struct module_state {
-    PyObject *error;
-};
+static PyObject* get_threads(PyObject *self, PyObject *args){
+  return PyLong_FromLong((long)_n_threads);
+}
 
-#if PY_MAJOR_VERSION >= 3
-#define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
-#else
-#define GETSTATE(m) (&_state)
-static struct module_state _state;
-#endif
-
-static PyObject *
-error_out(PyObject *m) {
-    struct module_state *st = GETSTATE(m);
-    PyErr_SetString(st->error, "something bad happened");
+static PyObject* set_threads(PyObject *self, PyObject *args){
+  int threads;
+  if(!PyArg_ParseTuple(args, "i", &threads)){
     return NULL;
+  }
+  if(threads > MAX_THREADS){
+    PyErr_SetString(CTransError, "Requested number of threads > MAX_THREADS");
+    return NULL;
+  }
+  _n_threads = threads;
+  return PyLong_FromLong((long)_n_threads);
 }
 
 static PyMethodDef ctrans_methods[] = {
-    {"error_out", (PyCFunction)error_out, METH_NOARGS, NULL},
     {"grid3d", (PyCFunction)gridder_3D, METH_VARARGS | METH_KEYWORDS,
      "Grid the numpy.array object into a regular grid"},
     {"ccdToQ", (PyCFunction)ccdToQ,  METH_VARARGS | METH_KEYWORDS,
      "Convert CCD image coordinates into Q values"},
+    {"get_threads", (PyCFunction)get_threads, METH_VARARGS,
+      "Return the number of threads used"},
+    {"set_threads", (PyCFunction)set_threads, METH_VARARGS,
+      "Set the number of threads used"},
     {NULL, NULL}
 };
 
 #if PY_MAJOR_VERSION >= 3
-
-static int ctrans_traverse(PyObject *m, visitproc visit, void *arg) {
-    Py_VISIT(GETSTATE(m)->error);
-    return 0;
-}
-
-static int ctrans_clear(PyObject *m) {
-    Py_CLEAR(GETSTATE(m)->error);
-    return 0;
-}
-
-
 static struct PyModuleDef moduledef = {
     PyModuleDef_HEAD_INIT,
     "ctrans",
     "Python functions to perform gridding (binning) of experimental data.\n\n",
-    sizeof(struct module_state),
+    -1, // we keep state in global vars
     ctrans_methods,
-    NULL,
-    ctrans_traverse,
-    ctrans_clear,
-    NULL
 };
 
-#define INITERROR return NULL
+PyObject* PyInit_ctrans(void) {
 
-PyObject* PyInit_ctrans(void)
+  PyObject *module = PyModule_Create(&moduledef);
+  if(!module){
+    return NULL;
+  }
 
-#else
-#define INITERROR return
-
-void initctrans(void)
-#endif
-{
-#if PY_MAJOR_VERSION >= 3
-    PyObject *module = PyModule_Create(&moduledef);
-#else
-    PyObject *module = Py_InitModule3("ctrans", ctrans_methods, _ctransDoc);
-#endif
-
-    import_array();
+  import_array();
 
 #ifdef USE_THREADS
-    // The following is a glibc extension to get the number
-    // of processors.
-    _n_threads = get_nprocs();
-#ifdef DEBUG
-    fprintf(stderr, "Using %d threads in ctrans\n", _n_threads);
-#endif
+  // The following is a glibc extension to get the number
+  // of processors.
+  _n_threads = get_nprocs();
 #endif
 
-    if (module == NULL)
-        INITERROR;
-    struct module_state *st = GETSTATE(module);
+  CTransError = PyErr_NewException("ctrans.error", NULL, NULL);
+  Py_INCREF(CTransError);
+  PyModule_AddObject(module, "error", CTransError);
 
-    st->error = PyErr_NewException("ctrans.Error", NULL, NULL);
-    if (st->error == NULL) {
-        Py_DECREF(module);
-        INITERROR;
-    }
-
-#if PY_MAJOR_VERSION >= 3
-    return module;
-#endif
+  return module;
 }
+
+#else // We have Python 2 ... 
+
+PyMODINIT_FUNC initctrans(void){
+  PyObject *module = Py_InitModule3("ctrans", ctrans_methods, _ctransDoc);
+  if(!module){
+    return;
+  }
+
+  import_array();
+
+#ifdef USE_THREADS
+  // The following is a glibc extension to get the number
+  // of processors.
+  _n_threads = get_nprocs();
+#endif
+
+  CTransError = PyErr_NewException("ctrans.error", NULL, NULL);
+  Py_INCREF(CTransError);
+  PyModule_AddObject(module, "error", CTransError);
+}
+#endif
