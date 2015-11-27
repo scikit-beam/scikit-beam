@@ -51,6 +51,7 @@
 /* If useing threading then import pthreads */
 #ifdef USE_THREADS
 #include <pthread.h>
+#include <sys/sysinfo.h>
 #endif
 
 #include "ctrans.h"
@@ -399,8 +400,8 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
 }
 
 unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror, double *data,
-		       double *grid_start, double *grid_stop, int max_data,
-		       int *n_grid, int norm_data){
+		                   double *grid_start, double *grid_stop, int max_data,
+		                   int *n_grid, int norm_data){
   int i;
   double *data_ptr;
   
@@ -515,11 +516,6 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
   return n_outside;
 }
 
-// // This is the python 2 version
-// PyMODINIT_FUNC initctrans(void)  {
-// 	(void) Py_InitModule3("ctrans", _ctransMethods, _ctransDoc);
-// 	import_array();  // Must be present for NumPy.  Called first after above line.
-// }
 struct module_state {
     PyObject *error;
 };
@@ -561,27 +557,25 @@ static int ctrans_clear(PyObject *m) {
 
 
 static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "ctrans",
-        "Python functions to perform gridding (binning) of experimental data.\n\n",
-        sizeof(struct module_state),
-        ctrans_methods,
-        NULL,
-        ctrans_traverse,
-        ctrans_clear,
-        NULL
+    PyModuleDef_HEAD_INIT,
+    "ctrans",
+    "Python functions to perform gridding (binning) of experimental data.\n\n",
+    sizeof(struct module_state),
+    ctrans_methods,
+    NULL,
+    ctrans_traverse,
+    ctrans_clear,
+    NULL
 };
 
 #define INITERROR return NULL
 
-PyObject *
-PyInit_ctrans(void)
+PyObject* PyInit_ctrans(void)
 
 #else
 #define INITERROR return
 
-void
-initctrans(void)
+void initctrans(void)
 #endif
 {
 #if PY_MAJOR_VERSION >= 3
@@ -589,7 +583,17 @@ initctrans(void)
 #else
     PyObject *module = Py_InitModule3("ctrans", ctrans_methods, _ctransDoc);
 #endif
+
     import_array();
+
+#ifdef USE_THREADS
+    // The following is a glibc extension to get the number
+    // of processors.
+    _n_threads = get_nprocs();
+#ifdef DEBUG
+    fprintf(stderr, "Using %d threads in ctrans\n", _n_threads);
+#endif
+#endif
 
     if (module == NULL)
         INITERROR;

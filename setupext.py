@@ -15,6 +15,7 @@ ctrans = {}
 ctrans['define_macros'] = []
 ctrans['define_macros'].append(('USE_THREADS', None))
 ctrans['define_macros'].append(('NTHREADS', 1))
+ctrans['define_macros'].append(('DEBUG', None))
 
 
 ext_modules = []
