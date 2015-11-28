@@ -39,6 +39,7 @@
  * fast data analysis.
  
  */
+
 #include <stdlib.h>
 #include <math.h>
 
@@ -57,7 +58,7 @@
 #include "ctrans.h"
 
 /* Set global variable to indicate number of threads to create */
-int _n_threads = 1;
+unsigned int _n_threads = 1;
 
 /* Set a global Error */
 static PyObject *CTransError = NULL;
@@ -76,7 +77,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   CCD ccd;
   npy_intp dims[2];
   npy_intp nimages;
-  int i, j, t, stride;
+  unsigned int i, j, t, stride;
   int ndelgam;
   int mode;
 
@@ -339,78 +340,93 @@ int calcDeltaGamma(double *delgam, CCD *ccd, double delCen, double gamCen){
 }
 
 static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
-  PyArrayObject *gridout = NULL, *Nout = NULL, *standarderror = NULL;
-  PyArrayObject *gridI = NULL;
+  PyArrayObject *gridout = NULL, *Nout = NULL, *stderror = NULL;
+  PyArrayObject *gridI = NULL, *meanout = NULL;
   PyObject *_I;
-  
-  static char *kwlist[] = { "data", "xrange", "yrange", "zrange", "norm", NULL };
   
   npy_intp data_size;
   npy_intp dims[3];
   
   double grid_start[3];
   double grid_stop[3];
-  int grid_nsteps[3];
-  int norm_data = 0;
-  
+  unsigned long grid_nsteps[3];
   unsigned long n_outside;
-  
-  if(!PyArg_ParseTupleAndKeywords(args, kwargs, "O(ddd)(ddd)(iii)|i", kwlist,
+
+  if(!PyArg_ParseTuple(args, "O(ddd)(ddd)(lll)", 
 				  &_I,
 				  &grid_start[0], &grid_start[1], &grid_start[2],
 				  &grid_stop[0], &grid_stop[1], &grid_stop[2],
-				  &grid_nsteps[0], &grid_nsteps[1], &grid_nsteps[2],
-				  &norm_data)){
+				  &grid_nsteps[0], &grid_nsteps[1], &grid_nsteps[2])){
     return NULL;
   }
   
   gridI = (PyArrayObject*)PyArray_FROMANY(_I, NPY_DOUBLE, 0, 0, NPY_ARRAY_IN_ARRAY);
   if(!gridI){
-    goto cleanup;
+    PyErr_SetString(CTransError, "Could not allocate memory (gridI)");
+    return NULL;
   }
   
   data_size = PyArray_DIM(gridI, 0);
-  
+  if(PyArray_DIM(gridI, 1) != 4){
+    PyErr_SetString(CTransError, "Dimension 1 of array must be 4");
+    goto error;
+  }
+
   dims[0] = grid_nsteps[0];
   dims[1] = grid_nsteps[1];
   dims[2] = grid_nsteps[2];
 
   gridout = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
   if(!gridout){
-    goto cleanup;
+    PyErr_SetString(CTransError, "Could not allocate memory (gridout)");
+    goto error;
   }
+
   Nout = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_ULONG, 0);
   if(!Nout){
-    goto cleanup;
+    PyErr_SetString(CTransError, "Could not allocate memory (Nout)");
+    goto error;
   }
-  standarderror = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
-  if(!standarderror){
-    goto cleanup;
+
+  stderror = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
+  if(!stderror){
+    PyErr_SetString(CTransError, "Could not allocate memory (stderror)");
+    goto error;
+  }
+
+  meanout = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
+  if(!meanout){
+    PyErr_SetString(CTransError, "Could not allocate memory (meanout)");
+    goto error;
   }
   
-  n_outside = c_grid3d(PyArray_DATA(gridout), PyArray_DATA(Nout),
-		       PyArray_DATA(standarderror), PyArray_DATA(gridI),
-		       grid_start, grid_stop, data_size, grid_nsteps, norm_data);
+  n_outside = c_grid3d((double*)PyArray_DATA(gridout), (unsigned long*)PyArray_DATA(Nout),
+		       (double*)PyArray_DATA(meanout), (double*)PyArray_DATA(stderror), 
+           (double*)PyArray_DATA(gridI),
+		       grid_start, grid_stop, 
+           (unsigned long)data_size, grid_nsteps);
   
   Py_XDECREF(gridI);
-  return Py_BuildValue("NNNl", gridout, Nout, standarderror, n_outside);
-  
- cleanup:
+  return Py_BuildValue("NNNNl", gridout, meanout, Nout, stderror, n_outside);
+
+error:
   Py_XDECREF(gridI);
   Py_XDECREF(gridout);
+  Py_XDECREF(meanout);
   Py_XDECREF(Nout);
-  Py_XDECREF(standarderror);
+  Py_XDECREF(stderror);
   return NULL;
 }
 
-unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror, double *data,
-		                   double *grid_start, double *grid_stop, int max_data,
-		                   int *n_grid, int norm_data){
-  int i, j;
-  int grid_size = 0;
+unsigned long c_grid3d(double *dout, unsigned long *nout, double *mout,
+                       double *stderror, double *data,
+		                   double *grid_start, double *grid_stop, unsigned long max_data,
+		                   unsigned long *n_grid){
+  unsigned long i, j;
+  unsigned long grid_size = 0;
   double grid_len[3];
-  unsigned long n_outside = 0;
-  int stride;
+  unsigned long stride;
+  unsigned long *nthread = NULL;
 	
   // Some useful quantities
 
@@ -432,41 +448,53 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
   for(i=0;i<_n_threads;i++){
     threadData[i].Mk = NULL;
     threadData[i].Qk = NULL;
-    threadData[i].grid = NULL;
     threadData[i].dout = NULL;
     threadData[i].nout = NULL;
-    threadData[i].n_outside = NULL;
+  }
+
+  nthread = (unsigned long *)malloc(sizeof(unsigned long) * grid_size);
+  if(!nthread){
+    goto error;
+  }
+  for(i=0;i<grid_size;i++){
+    nthread[i] = 0;
   }
 
   stride = max_data / _n_threads;
   for(i=0;i<_n_threads;i++){
-    if(standarderror){
+    threadData[i].Qk = (double*)malloc(sizeof(double) * grid_size);
+    if(!threadData[i].Qk){
+      goto error;
+    }
+    if(i > 0){
       threadData[i].Mk = (double*)malloc(sizeof(double) * grid_size);
       if(!threadData[i].Mk){
-        return n_outside;
-      }
-      threadData[i].Qk = (double*)malloc(sizeof(double) * grid_size);
-      if(!threadData[i].Qk){
-        return n_outside;
-      }
-      threadData[i].grid = (double *)malloc(sizeof(double) * grid_size);
-      if(!threadData[i].grid){
-        return n_outside;
+        goto error;
       }
       threadData[i].dout = (double *)malloc(sizeof(double) * grid_size);
       if(!threadData[i].dout){
-        return n_outside;
+        goto error;
       }
-      threadData[i].nout = (double *)malloc(sizeof(double) * grid_size);
+      threadData[i].nout = (unsigned long *)malloc(sizeof(unsigned long) * grid_size);
       if(!threadData[i].nout){
-        return n_outside;
+        goto error;
       }
-      threadData[i].n_outside = (int *)malloc(sizeof(int) * grid_size);
-      if(!threadData[i].n_outside){
-        return n_outside;
-      }
+    } else {
+      threadData[i].dout = dout;
+      threadData[i].nout = nout;
+      threadData[i].Mk = mout;
     }
 
+    // Clear the arrays ....
+    for(j=0;j<grid_size;j++){
+      threadData[i].Mk[j] = 0.0;
+      threadData[i].Qk[j] = 0.0;
+      threadData[i].dout[j] = 0.0;
+      threadData[i].nout[j] = 0;
+    }
+    threadData[i].n_outside = 0;
+
+    // Setup entry points for threads
     threadData[i].start = stride * i;
     if(i == (_n_threads - 1)){
       threadData[i].end = max_data;
@@ -478,7 +506,6 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
     threadData[i].n_grid = n_grid;
     threadData[i].grid_start = grid_start;
     threadData[i].grid_len = grid_len;
-    threadData[i].n_grid = n_grid;
 
 #ifdef USE_THREADS
     pthread_create(&thread[i], NULL,
@@ -493,73 +520,73 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
   // Wait for threads to finish and then join them
   for(i=0;i<_n_threads;i++){
     if(pthread_join(thread[i], NULL)){
-      fprintf(stderr, "ERROR : Cannot join thread %d", i);
+      fprintf(stderr, "ERROR : Cannot join threads\n");
     }
   }
 #endif
 
   // Combine results
-  for(i=1;i<_n_threads;i++){
-    for(j=0;j<grid_size;j++){
-      nout[j] += threadData[i].nout[j];
-      dout[j] += threadData[i].dout[j];
+  for(j=0;j<grid_size;j++){
+    if(threadData[0].nout[j]){
+      nthread[j]++;
     }
   }
-  
-  // Calculate mean by dividing by the number of data points in each
-  // voxel
-
-  if(norm_data){
-    for(i = 0; i < grid_size; i++){
-      if(nout[i] > 0){
-	       dout[i] = dout[i] / nout[i];
-      } else {
-	       dout[i] = 0.0;
+  for(i=1;i<_n_threads;i++){
+    for(j=0;j<grid_size;j++){
+      threadData[0].nout[j] += threadData[i].nout[j];
+      if(threadData[i].nout[j]){
+        nthread[j]++;
       }
+      threadData[0].dout[j] += threadData[i].dout[j];
+      threadData[0].Qk[j] += threadData[i].Qk[j];
+      threadData[0].Mk[j] += threadData[i].Mk[j];
+      threadData[0].n_outside += threadData[i].n_outside;
     }
   }
 
   // Calculate the sterror
-  
-  if(standarderror){
-    for(i=0;i<grid_size;i++){
-      if(nout[i] > 1){
-      	// standard deviation of the sample distribution
-      	standarderror[i] = pow(threadData[0].Qk[i] / (nout[i] - 1), 0.5) / pow(nout[i], 0.5);
-      }
+
+  for(i=0;i<grid_size;i++){
+    threadData[0].Mk[i] = threadData[0].Mk[i] / nthread[i];
+    threadData[0].Qk[i] = threadData[0].Qk[i] / nthread[i];
+    if(nout[i] > 1){
+      // standard deviation of the sample distribution
+      stderror[i] = pow(threadData[0].Qk[i] / (nout[i] - 1), 0.5) / pow(nout[i], 0.5);
     }
   }
 
 error:
+  if(nthread) free(nthread);
   for(i=0;i<_n_threads;i++){
-    if(threadData[i].Mk) free(threadData[i].Mk);
     if(threadData[i].Qk) free(threadData[i].Qk); 
-    if(threadData[i].grid) free(threadData[i].grid); 
-    if(threadData[i].dout) free(threadData[i].dout); 
-    if(threadData[i].nout) free(threadData[i].nout); 
+    if(i > 0){
+      if(threadData[i].dout) free(threadData[i].dout); 
+      if(threadData[i].nout) free(threadData[i].nout); 
+      if(threadData[i].Mk) free(threadData[i].Mk);
+    }
   }
-  return n_outside;
+
+  return threadData[0].n_outside;
 }
 
 void* grid3DThread(void *ptr){
   gridderThreadData* data = (gridderThreadData*)ptr;
   double pos_double[3];
-  int grid_pos[3];
+  unsigned long grid_pos[3];
   double *grid_start = data->grid_start; 
   double *grid_len = data->grid_len; 
-  int *n_grid = data->n_grid;
+  unsigned long *n_grid = data->n_grid;
   double *Mk = data->Mk;
   double *Qk = data->Qk;
   double *data_ptr = data->data;
   double *dout = data->dout;
-  double *nout = data->nout;
-  int *n_outside = data->n_outside;
-  int pos = 0;
+  unsigned long *nout = data->nout;
+  unsigned long pos = 0;
   
-  int i;
+  unsigned long i;
 
   data_ptr = data_ptr + (data->start * 4);
-  for(i=0; i<data->data_len; i++){
+  for(i=data->start; i<data->end; i++){
     // Calculate the relative position in the grid.
     pos_double[0] = (*data_ptr - grid_start[0]) / grid_len[0];
     data_ptr++;
@@ -581,24 +608,20 @@ void* grid3DThread(void *ptr){
       pos += grid_pos[1] * n_grid[2];
       pos += grid_pos[2];
 
+
       // Store the answer
       dout[pos] = dout[pos] + *data_ptr;
       nout[pos] = nout[pos] + 1;
 
       // Calculate the standard deviation quantities
 
-      if(nout[pos] == 1){
-        Mk[pos] = *data_ptr;
-        Qk[pos] = 0.0;
-      } else {
-        Qk[pos] = Qk[pos] + ((nout[pos] - 1) * pow(*data_ptr - Mk[pos],2) / nout[pos]);
-        Mk[pos] = Mk[pos] + ((*data_ptr - Mk[pos]) / nout[pos]);
-      }
+      Qk[pos] = Qk[pos] + ((nout[pos] - 1) * pow(*data_ptr - Mk[pos],2) / nout[pos]);
+      Mk[pos] = Mk[pos] + ((*data_ptr - Mk[pos]) / nout[pos]);
 
       // Increment pointer
       data_ptr++;
     } else {
-      n_outside++;
+      data->n_outside++;
       data_ptr+=2;
     }
   }
