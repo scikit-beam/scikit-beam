@@ -406,85 +406,103 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
 unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror, double *data,
 		                   double *grid_start, double *grid_stop, int max_data,
 		                   int *n_grid, int norm_data){
-  int i;
-  double *data_ptr;
-  
-  double *Mk = NULL;
-  double *Qk = NULL;
+  int i, j;
   int grid_size = 0;
-
-  double pos_double[3];
-  double grid_len[3];//, grid_step[3];
-  int grid_pos[3];
-  int pos = 0;
+  double grid_len[3];
   unsigned long n_outside = 0;
+  int stride;
 	
   // Some useful quantities
 
   grid_size = n_grid[0] * n_grid[1] * n_grid[2];
+  for(i = 0;i < 3; i++){
+    grid_len[i] = grid_stop[i] - grid_start[i];
+  }
 
   // If we do this with threads .. we can do map reduce
 
+#ifdef USE_THREADS
+  pthread_t thread[MAX_THREADS];
+#endif
+
+  gridderThreadData threadData[MAX_THREADS];
+
   // Allocate arrays for standard error calculation
-  
-  if(standarderror){
-    Mk = (double*)malloc(sizeof(double) * grid_size);
-    if(!Mk){
-      return n_outside;
-    }
-    Qk = (double*)malloc(sizeof(double) * grid_size);
-    if(!Mk){
-      return n_outside;
-    }
+ 
+  for(i=0;i<_n_threads;i++){
+    threadData[i].Mk = NULL;
+    threadData[i].Qk = NULL;
+    threadData[i].grid = NULL;
+    threadData[i].dout = NULL;
+    threadData[i].nout = NULL;
+    threadData[i].n_outside = NULL;
   }
 
-  data_ptr = data;
-  for(i = 0;i < 3; i++){
-    grid_len[i] = grid_stop[i] - grid_start[i];
-    //grid_step[i] = grid_len[i] / (n_grid[i]);
-  }
-	
-  for(i = 0; i < max_data ; i++){
-    // Calculate the relative position in the grid.
-    pos_double[0] = (*data_ptr - grid_start[0]) / grid_len[0];
-    data_ptr++;
-    pos_double[1] = (*data_ptr - grid_start[1]) / grid_len[1];
-    data_ptr++;
-    pos_double[2] = (*data_ptr - grid_start[2]) / grid_len[2];
-    if((pos_double[0] >= 0) && (pos_double[0] < 1) &&
-       (pos_double[1] >= 0) && (pos_double[1] < 1) &&
-       (pos_double[2] >= 0) && (pos_double[2] < 1)){
-      data_ptr++;
-      // Calculate the position in the grid
-      grid_pos[0] = (int)(pos_double[0] * n_grid[0]);
-      grid_pos[1] = (int)(pos_double[1] * n_grid[1]);
-      grid_pos[2] = (int)(pos_double[2] * n_grid[2]);
-      
-      pos =  grid_pos[0] * (n_grid[1] * n_grid[2]);
-      pos += grid_pos[1] * n_grid[2];
-      pos += grid_pos[2];
-
-      // Store the answer
-      dout[pos] = dout[pos] + *data_ptr;
-      nout[pos] = nout[pos] + 1;
-
-      // Calculate the standard deviation quantities
-
-      if(standarderror){
-      	if(nout[pos] == 1){
-      	  Mk[pos] = *data_ptr;
-      	  Qk[pos] = 0.0;
-      	} else {
-      	  Qk[pos] = Qk[pos] + ((nout[pos] - 1) * pow(*data_ptr - Mk[pos],2) / nout[pos]);
-      	  Mk[pos] = Mk[pos] + ((*data_ptr - Mk[pos]) / nout[pos]);
-      	}
+  stride = max_data / _n_threads;
+  for(i=0;i<_n_threads;i++){
+    if(standarderror){
+      threadData[i].Mk = (double*)malloc(sizeof(double) * grid_size);
+      if(!threadData[i].Mk){
+        return n_outside;
       }
+      threadData[i].Qk = (double*)malloc(sizeof(double) * grid_size);
+      if(!threadData[i].Qk){
+        return n_outside;
+      }
+      threadData[i].grid = (double *)malloc(sizeof(double) * grid_size);
+      if(!threadData[i].grid){
+        return n_outside;
+      }
+      threadData[i].dout = (double *)malloc(sizeof(double) * grid_size);
+      if(!threadData[i].dout){
+        return n_outside;
+      }
+      threadData[i].nout = (double *)malloc(sizeof(double) * grid_size);
+      if(!threadData[i].nout){
+        return n_outside;
+      }
+      threadData[i].n_outside = (int *)malloc(sizeof(int) * grid_size);
+      if(!threadData[i].n_outside){
+        return n_outside;
+      }
+    }
 
-      // Increment pointer
-      data_ptr++;
+    threadData[i].start = stride * i;
+    if(i == (_n_threads - 1)){
+      threadData[i].end = max_data;
     } else {
-      n_outside++;
-      data_ptr+=2;
+      threadData[i].end = stride * (i + 1);
+    }
+
+    threadData[i].data = data;
+    threadData[i].n_grid = n_grid;
+    threadData[i].grid_start = grid_start;
+    threadData[i].grid_len = grid_len;
+    threadData[i].n_grid = n_grid;
+
+#ifdef USE_THREADS
+    pthread_create(&thread[i], NULL,
+                   grid3DThread,
+                   (void*) &threadData[i]);
+#else
+    grid3DThread((void *) &threadData[i]);
+#endif
+  }
+
+#ifdef USE_THREADS
+  // Wait for threads to finish and then join them
+  for(i=0;i<_n_threads;i++){
+    if(pthread_join(thread[i], NULL)){
+      fprintf(stderr, "ERROR : Cannot join thread %d", i);
+    }
+  }
+#endif
+
+  // Combine results
+  for(i=1;i<_n_threads;i++){
+    for(j=0;j<grid_size;j++){
+      nout[j] += threadData[i].nout[j];
+      dout[j] += threadData[i].dout[j];
     }
   }
   
@@ -507,19 +525,85 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
     for(i=0;i<grid_size;i++){
       if(nout[i] > 1){
       	// standard deviation of the sample distribution
-      	standarderror[i] = pow(Qk[pos] / (nout[i] - 1), 0.5) / pow(nout[i], 0.5);
+      	standarderror[i] = pow(threadData[0].Qk[i] / (nout[i] - 1), 0.5) / pow(nout[i], 0.5);
       }
     }
   }
 
-  if(Mk){
-    free(Mk);
+error:
+  for(i=0;i<_n_threads;i++){
+    if(threadData[i].Mk) free(threadData[i].Mk);
+    if(threadData[i].Qk) free(threadData[i].Qk); 
+    if(threadData[i].grid) free(threadData[i].grid); 
+    if(threadData[i].dout) free(threadData[i].dout); 
+    if(threadData[i].nout) free(threadData[i].nout); 
   }
-  if(Qk){
-    free(Qk);
-  }
-	
   return n_outside;
+}
+
+void* grid3DThread(void *ptr){
+  gridderThreadData* data = (gridderThreadData*)ptr;
+  double pos_double[3];
+  int grid_pos[3];
+  double *grid_start = data->grid_start; 
+  double *grid_len = data->grid_len; 
+  int *n_grid = data->n_grid;
+  double *Mk = data->Mk;
+  double *Qk = data->Qk;
+  double *data_ptr = data->data;
+  double *dout = data->dout;
+  double *nout = data->nout;
+  int *n_outside = data->n_outside;
+  int pos = 0;
+  
+  int i;
+
+  data_ptr = data_ptr + (data->start * 4);
+  for(i=0; i<data->data_len; i++){
+    // Calculate the relative position in the grid.
+    pos_double[0] = (*data_ptr - grid_start[0]) / grid_len[0];
+    data_ptr++;
+    pos_double[1] = (*data_ptr - grid_start[1]) / grid_len[1];
+    data_ptr++;
+    pos_double[2] = (*data_ptr - grid_start[2]) / grid_len[2];
+    if((pos_double[0] >= 0) && (pos_double[0] < 1) &&
+       (pos_double[1] >= 0) && (pos_double[1] < 1) &&
+       (pos_double[2] >= 0) && (pos_double[2] < 1)){
+      
+      data_ptr++;
+
+      // Calculate the position in the grid
+      grid_pos[0] = (int)(pos_double[0] * n_grid[0]);
+      grid_pos[1] = (int)(pos_double[1] * n_grid[1]);
+      grid_pos[2] = (int)(pos_double[2] * n_grid[2]);
+      
+      pos =  grid_pos[0] * (n_grid[1] * n_grid[2]);
+      pos += grid_pos[1] * n_grid[2];
+      pos += grid_pos[2];
+
+      // Store the answer
+      dout[pos] = dout[pos] + *data_ptr;
+      nout[pos] = nout[pos] + 1;
+
+      // Calculate the standard deviation quantities
+
+      if(nout[pos] == 1){
+        Mk[pos] = *data_ptr;
+        Qk[pos] = 0.0;
+      } else {
+        Qk[pos] = Qk[pos] + ((nout[pos] - 1) * pow(*data_ptr - Mk[pos],2) / nout[pos]);
+        Mk[pos] = Mk[pos] + ((*data_ptr - Mk[pos]) / nout[pos]);
+      }
+
+      // Increment pointer
+      data_ptr++;
+    } else {
+      n_outside++;
+      data_ptr+=2;
+    }
+  }
+
+  return NULL;
 }
 
 static PyObject* get_threads(PyObject *self, PyObject *args){

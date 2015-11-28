@@ -66,7 +66,24 @@ typedef struct {
   double UBI[3][3];
 } imageThreadData;
 
+typedef struct {
+  double *Qk;
+  double *Mk;
+  double *grid;
+  double *grid_start;
+  double *grid_len;
+  int *n_grid;
+  int data_len;
+  double *dout;
+  double *nout;
+  int *n_outside;
+  int end;
+  int start;
+  double *data;
+} gridderThreadData;
+
 void *processImageThread(void* ptr);
+void *grid3DThread(void *ptr);
 int calcQTheta(double* diffAngles, double theta, double mu, double *qTheta, int n, double lambda);
 int calcQPhiFromQTheta(double *qTheta, int n, double chi, double phi);
 int calcDeltaGamma(double *delgam, CCD *ccd, double delCen, double gamCen);
