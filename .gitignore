@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 
+# NFS crud
+.nfs*
+
 # C extensions
 *.so
 
