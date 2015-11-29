@@ -64,12 +64,11 @@ unsigned int _n_threads = 1;
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   static char *kwlist[] = { "angles", "mode", "ccd_size", "ccd_pixsize",
 			                      "ccd_cen", "dist", "wavelength",
-			                      "UBinv", "outarray", NULL };
+			                      "UBinv", NULL };
   PyArrayObject *angles = NULL;
   PyObject *_angles = NULL;
   PyArrayObject *ubinv = NULL;
   PyObject *_ubinv = NULL;
-  PyObject *_outarray = NULL;
   PyArrayObject *qOut = NULL;
   CCD ccd;
   npy_intp dims[2];
@@ -93,7 +92,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 
   imageThreadData threadData[MAX_THREADS];
 
-  if(!PyArg_ParseTupleAndKeywords(args, kwargs, "Oi(ii)(dd)(dd)ddO|O", kwlist,
+  if(!PyArg_ParseTupleAndKeywords(args, kwargs, "Oi(ii)(dd)(dd)ddO", kwlist,
 				  &_angles,
 				  &mode,
 				  &ccd.xSize, &ccd.ySize,
@@ -101,8 +100,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 				  &ccd.xCen, &ccd.yCen,
 				  &ccd.dist,
 				  &lambda,
-				  &_ubinv,
-				  &_outarray)){
+				  &_ubinv)){
     return NULL;
   }
 
@@ -131,23 +129,15 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   nimages = PyArray_DIM(angles, 0);
 
   dims[0] = nimages * ccd.size;
-  dims[1] = 4;
-  if(!_outarray){
-    qOut = (PyArrayObject*)PyArray_SimpleNew(2, dims, NPY_DOUBLE);
-    if(!qOut){
-      goto cleanup;
-    }
-  } else {
-    qOut = (PyArrayObject*)PyArray_FROMANY(_outarray, NPY_DOUBLE, 2, 2, NPY_ARRAY_INOUT_ARRAY);
-    if(!qOut){
-      PyErr_SetString(PyExc_ValueError, "outarray must be a 2-D array of floats");
-      goto cleanup;
-    }
-    if(PyArray_Size((PyObject*)qOut) != (4 * nimages * ccd.size)){
-      PyErr_SetString(PyExc_ValueError, "outarray is of the wrong size");
-      goto cleanup;
-    }
+  dims[1] = 3;
+
+  qOut = (PyArrayObject*)PyArray_ZEROS(2, dims, NPY_DOUBLE, 0);
+  if(!qOut){
+    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (qOut)");
+    goto cleanup;
   }
+
+  
   anglesp = (double *)PyArray_DATA(angles);
   qOutp = (double *)PyArray_DATA(qOut);
 
@@ -205,7 +195,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 
     anglesp += (6 * stride);
     _delgam += (ccd.size * 2 * stride);
-    qOutp += (ccd.size * 4 * stride);
+    qOutp += (ccd.size * 3 * stride);
   }
 
 #ifdef USE_THREADS
@@ -257,7 +247,7 @@ void *processImageThread(void* ptr){
       calcHKLFromQPhi(data->qOutp, data->ccd->size, data->UBI);
     }
     data->anglesp += 6;
-    data->qOutp += (data->ccd->size * 4);
+    data->qOutp += (data->ccd->size * 3);
     data->delgam += (data->ccd->size * 2);
   }
   
@@ -318,7 +308,6 @@ int calcQTheta(double* diffAngles, double theta, double mu, double *qTheta, int 
     *qt = (sin(del - theta) * cos(gam) * kl) + (sin(theta) * cos(mu) * kl);
  
     qt++;
-    qt++;
   }
   
   return true;
@@ -337,17 +326,17 @@ int calcQPhiFromQTheta(double *qTheta, int n, double chi, double phi){
   r[2][1] = -1.0 * sin(phi);
   r[2][2] = cos(phi) * cos(chi);
 
-  matmulti(qTheta, n, r, 1);
+  matmulti(qTheta, n, r);
   
   return true;
 }
 
 int calcHKLFromQPhi(double *qPhi, int n, double mat[][3]){
-  matmulti(qPhi, n, mat, 1);
+  matmulti(qPhi, n, mat);
   return true;
 }
 
-int matmulti(double *val, int n, double mat[][3], int skip){
+int matmulti(double *val, int n, double mat[][3]){
   double *v;
   double qp[3];
   int i,j,k;
@@ -365,7 +354,6 @@ int matmulti(double *val, int n, double mat[][3], int skip){
       v[k] = qp[k];
     }
     v += 3;
-    v += skip;
   }
 
   return true;

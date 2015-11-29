@@ -90,7 +90,7 @@ int calcQTheta(double* diffAngles, double theta, double mu,
                double *qTheta, int n, double lambda);
 int calcQPhiFromQTheta(double *qTheta, int n, double chi, double phi);
 int calcDeltaGamma(double *delgam, CCD *ccd, double delCen, double gamCen);
-int matmulti(double *val, int n, double mat[][3], int skip);
+int matmulti(double *val, int n, double mat[][3]);
 int calcHKLFromQPhi(double *qPhi, int n, double mat[][3]);
 
 int c_grid3d(double *dout, unsigned long *nout, double *mout, 
