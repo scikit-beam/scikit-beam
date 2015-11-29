@@ -47,7 +47,7 @@
 typedef struct {
   int xSize;         // X size in pixels.
   int ySize;         // Y size in pixels.
-  int size;          // Total size for convinience
+  long int size;          // Total size for convinience
   double xCen;
   double yCen;
   double xPixSize;   // X Pixel Size (microns)

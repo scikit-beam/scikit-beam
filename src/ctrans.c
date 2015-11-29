@@ -106,7 +106,6 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
     return NULL;
   }
 
-
   ccd.size = ccd.xSize * ccd.ySize;
 
   angles = (PyArrayObject*)PyArray_FROMANY(_angles, NPY_DOUBLE, 2, 2, NPY_ARRAY_IN_ARRAY);
@@ -205,7 +204,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 #endif
 
     anglesp += (6 * stride);
-    _delgam += (2 * stride);
+    _delgam += (ccd.size * 2 * stride);
     qOutp += (ccd.size * 4 * stride);
   }
 
@@ -261,7 +260,7 @@ void *processImageThread(void* ptr){
     data->qOutp += (data->ccd->size * 4);
     data->delgam += (data->ccd->size * 2);
   }
-
+  
   // Set the retval to zero to show sucsessful processing
   data->retval = 0;
 
