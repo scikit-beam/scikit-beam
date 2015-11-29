@@ -84,6 +84,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   double *qOutp = NULL;
   double *ubinvp = NULL;
   double *delgam = NULL;
+  double *_delgam;
   double UBI[3][3];
 
 #ifdef USE_THREADS
@@ -104,6 +105,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 				  &_outarray)){
     return NULL;
   }
+
 
   ccd.size = ccd.xSize * ccd.ySize;
 
@@ -157,7 +159,9 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
     goto cleanup;
   }
 
+  _delgam = delgam;
   stride = nimages / _n_threads;
+
   for(t=0;t<_n_threads;t++){
     // Setup threads
     // Allocate memory for delta/gamma pairs
@@ -168,7 +172,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
     threadData[t].lambda = lambda;
     threadData[t].mode = mode;
     threadData[t].imstart = stride * t;
-    threadData[t].delgam = delgam;
+    threadData[t].delgam = _delgam;
     threadData[t].retval = 0;
 
     for(i=0;i<3;i++){
@@ -201,7 +205,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 #endif
 
     anglesp += (6 * stride);
-    delgam += (2 * stride);
+    _delgam += (2 * stride);
     qOutp += (ccd.size * 4 * stride);
   }
 

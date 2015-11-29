@@ -954,7 +954,7 @@ def grid3d(q, img_stack,
     t1 = time.time()
 
     # call the c library
-    mean, occupancy, std_err, oob = ctrans.grid3d(q, qmin, qmax, dqn, norm=1)
+    total, mean, occupancy, std_err, oob = ctrans.grid3d(q, qmin, qmax, dqn)
 
     # ending time for the gridding
     t2 = time.time()
