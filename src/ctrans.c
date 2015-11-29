@@ -131,7 +131,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   dims[0] = nimages * ccd.size;
   dims[1] = 3;
 
-  qOut = (PyArrayObject*)PyArray_ZEROS(2, dims, NPY_DOUBLE, 0);
+  qOut = (PyArrayObject*)PyArray_SimpleNew(2, dims, NPY_DOUBLE);
   if(!qOut){
     PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (qOut)");
     goto cleanup;
@@ -397,25 +397,25 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   dims[1] = grid_nsteps[1];
   dims[2] = grid_nsteps[2];
 
-  gridout = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
+  gridout = (PyArrayObject*)PyArray_SimpleNew(3, dims, NPY_DOUBLE);
   if(!gridout){
     PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (gridout)");
     goto error;
   }
 
-  Nout = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_ULONG, 0);
+  Nout = (PyArrayObject*)PyArray_SimpleNew(3, dims, NPY_ULONG);
   if(!Nout){
     PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (Nout)");
     goto error;
   }
 
-  stderror = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
+  stderror = (PyArrayObject*)PyArray_SimpleNew(3, dims, NPY_DOUBLE);
   if(!stderror){
     PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (stderror)");
     goto error;
   }
 
-  meanout = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
+  meanout = (PyArrayObject*)PyArray_SimpleNew(3, dims, NPY_DOUBLE);
   if(!meanout){
     PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (meanout)");
     goto error;
