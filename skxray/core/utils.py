@@ -965,11 +965,10 @@ def grid3d(q, img_stack,
 
     # log some information about the grid at the debug level
     if oob:
-        logger.debug("There are %.2e points outside the grid {0}".format(oob))
-    logger.debug("There are %2e bins in the grid {0}".format(mean.size))
+        logger.debug("There are %.2e points outside the grid", oob)
+    logger.debug("There are %2e bins in the grid", mean.size)
     if empt_nb:
-        logger.debug("There are %.2e values zero in the grid {0}"
-                     "".format(empt_nb))
+        logger.debug("There are %.2e values zero in the grid", empt_nb)
 
     return mean, occupancy, std_err, oob, bounds
 
