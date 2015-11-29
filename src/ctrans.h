@@ -47,6 +47,7 @@
 typedef struct {
   int xSize;         // X size in pixels.
   int ySize;         // Y size in pixels.
+  int size;          // Total size for convinience
   double xCen;
   double yCen;
   double xPixSize;   // X Pixel Size (microns)
@@ -58,12 +59,13 @@ typedef struct {
   CCD *ccd;
   double *anglesp;
   double *qOutp;
-  int ndelgam;
+  double *delgam;
   double lambda;
   int mode;
-  int imstart;
-  int imend;
+  unsigned long imstart;
+  unsigned long imend;
   double UBI[3][3];
+  int retval;
 } imageThreadData;
 
 typedef struct {
@@ -79,17 +81,22 @@ typedef struct {
   unsigned long end;
   unsigned long start;
   double *data;
+  int retval;
 } gridderThreadData;
 
 void *processImageThread(void* ptr);
 void *grid3DThread(void *ptr);
-int calcQTheta(double* diffAngles, double theta, double mu, double *qTheta, int n, double lambda);
+int calcQTheta(double* diffAngles, double theta, double mu, 
+               double *qTheta, int n, double lambda);
 int calcQPhiFromQTheta(double *qTheta, int n, double chi, double phi);
 int calcDeltaGamma(double *delgam, CCD *ccd, double delCen, double gamCen);
 int matmulti(double *val, int n, double mat[][3], int skip);
 int calcHKLFromQPhi(double *qPhi, int n, double mat[][3]);
 
-unsigned long c_grid3d(double *dout, unsigned long *nout, double *mout, double *sterr, double *data, double *grid_start, double *grid_stop, unsigned long max_data, unsigned long *n_grid);
+int c_grid3d(double *dout, unsigned long *nout, double *mout, 
+             double *sterr, double *data, unsigned long *n_outside,
+             double *grid_start, double *grid_stop, unsigned long max_data, 
+             unsigned long *n_grid);
 
 static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs);
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs);

@@ -60,9 +60,6 @@
 /* Set global variable to indicate number of threads to create */
 unsigned int _n_threads = 1;
 
-/* Set a global Error */
-static PyObject *CTransError = NULL;
-
 /* Computation functions */
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   static char *kwlist[] = { "angles", "mode", "ccd_size", "ccd_pixsize",
@@ -77,15 +74,16 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   CCD ccd;
   npy_intp dims[2];
   npy_intp nimages;
-  unsigned int i, j, t, stride;
-  int ndelgam;
+
+  unsigned long i, j, t, stride;
   int mode;
 
   double lambda;
 
-  double *anglesp;
-  double *qOutp;
-  double *ubinvp;
+  double *anglesp = NULL;
+  double *qOutp = NULL;
+  double *ubinvp = NULL;
+  double *delgam = NULL;
   double UBI[3][3];
 
 #ifdef USE_THREADS
@@ -106,6 +104,8 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 				  &_outarray)){
     return NULL;
   }
+
+  ccd.size = ccd.xSize * ccd.ySize;
 
   angles = (PyArrayObject*)PyArray_FROMANY(_angles, NPY_DOUBLE, 2, 2, NPY_ARRAY_IN_ARRAY);
   if(!angles){
@@ -128,9 +128,8 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   }
   
   nimages = PyArray_DIM(angles, 0);
-  ndelgam = ccd.xSize * ccd.ySize;
 
-  dims[0] = nimages * ndelgam;
+  dims[0] = nimages * ccd.size;
   dims[1] = 4;
   if(!_outarray){
     qOut = (PyArrayObject*)PyArray_SimpleNew(2, dims, NPY_DOUBLE);
@@ -143,13 +142,20 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
       PyErr_SetString(PyExc_ValueError, "outarray must be a 2-D array of floats");
       goto cleanup;
     }
-    if(PyArray_Size((PyObject*)qOut) != (4 * nimages * ndelgam)){
+    if(PyArray_Size((PyObject*)qOut) != (4 * nimages * ccd.size)){
       PyErr_SetString(PyExc_ValueError, "outarray is of the wrong size");
       goto cleanup;
     }
   }
   anglesp = (double *)PyArray_DATA(angles);
   qOutp = (double *)PyArray_DATA(qOut);
+
+  // Now create the arrays for delta-gamma pairs
+  delgam = (double*)malloc(nimages * ccd.size * sizeof(double) * 2);
+  if(!delgam){
+    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (delgam)");
+    goto cleanup;
+  }
 
   stride = nimages / _n_threads;
   for(t=0;t<_n_threads;t++){
@@ -159,15 +165,18 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
     threadData[t].ccd = &ccd;
     threadData[t].anglesp = anglesp;
     threadData[t].qOutp = qOutp;
-    threadData[t].ndelgam = ndelgam;
     threadData[t].lambda = lambda;
     threadData[t].mode = mode;
     threadData[t].imstart = stride * t;
+    threadData[t].delgam = delgam;
+    threadData[t].retval = 0;
+
     for(i=0;i<3;i++){
       for(j=0;j<3;j++){
 	       threadData[t].UBI[j][i] = UBI[j][i];
       }
     }
+
     if(t == (_n_threads - 1)){
       threadData[t].imend = nimages;
     } else {
@@ -175,67 +184,107 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
     }
 
 #ifdef USE_THREADS
-    pthread_create(&thread[t], NULL,
-		        	     processImageThread,
-			             (void*) &threadData[t]);
+
+    // Start the thread processing 
+    
+    if(pthread_create(&thread[t], NULL,
+		            	     processImageThread,
+			                 (void*) &threadData[t])){
+      PyErr_SetString(PyExc_RuntimeError, "Unable to create threads.");
+      goto cleanup;
+    }
+
 #else
+
     processImageThread((void *) &threadData[t]);
+
 #endif
+
     anglesp += (6 * stride);
-    qOutp += (ndelgam * 4 * stride);
+    delgam += (2 * stride);
+    qOutp += (ccd.size * 4 * stride);
   }
 
 #ifdef USE_THREADS
+
   for(t=0;t<_n_threads;t++){
     if(pthread_join(thread[t], NULL)){
-      fprintf(stderr, "ERROR : Cannot join thread %d", t);
+      PyErr_SetString(PyExc_RuntimeError, "Unable to join threads.");
+      goto cleanup;
+    }
+     
+    // Check the thread retval
+
+    if(threadData[t].retval){
+      PyErr_SetString(PyExc_RuntimeError, "Processing thread failed");
+      goto cleanup; 
     }
   }
+
 #endif
 
   Py_XDECREF(ubinv);
   Py_XDECREF(angles);
+  if(delgam) free(delgam);
   return Py_BuildValue("N", qOut);
 
  cleanup:
   Py_XDECREF(ubinv);
   Py_XDECREF(angles);
   Py_XDECREF(qOut);
+  if(delgam) free(delgam);
   return NULL;
 }
 
 void *processImageThread(void* ptr){
   imageThreadData *data;
-  int i;
-  double *delgam;
+  unsigned long i;
   data = (imageThreadData*) ptr;
-  delgam = (double*)malloc(data->ndelgam * sizeof(double) * 2);
-  if(!delgam){
-    fprintf(stderr, "MALLOC ERROR\n");
-#ifdef USE_THREADS
-    pthread_exit(NULL);
-#endif
-  }
-  
+
   for(i=data->imstart;i<data->imend;i++){
     // For each image process
-    calcDeltaGamma(delgam, data->ccd, data->anglesp[0], data->anglesp[5]);
-    calcQTheta(delgam, data->anglesp[1], data->anglesp[4], data->qOutp,
-	       data->ndelgam, data->lambda);
+    calcDeltaGamma(data->delgam, data->ccd, data->anglesp[0], data->anglesp[5]);
+    calcQTheta(data->delgam, data->anglesp[1], data->anglesp[4], data->qOutp,
+	       data->ccd->size, data->lambda);
     if(data->mode > 1){
-      calcQPhiFromQTheta(data->qOutp, data->ndelgam,
+      calcQPhiFromQTheta(data->qOutp, data->ccd->size,
 			 data->anglesp[2], data->anglesp[3]);
     }
     if(data->mode == 4){
-      calcHKLFromQPhi(data->qOutp, data->ndelgam, data->UBI);
+      calcHKLFromQPhi(data->qOutp, data->ccd->size, data->UBI);
     }
-    data->anglesp+=6;
-    data->qOutp+=(data->ndelgam * 4);
+    data->anglesp += 6;
+    data->qOutp += (data->ccd->size * 4);
+    data->delgam += (data->ccd->size * 2);
   }
-  free(delgam);
+
+  // Set the retval to zero to show sucsessful processing
+  data->retval = 0;
+
 #ifdef USE_THREADS
   pthread_exit(NULL);
+#else
+  return NULL;
 #endif
+}
+
+int calcDeltaGamma(double *delgam, CCD *ccd, double delCen, double gamCen){
+  // Calculate Delta Gamma Values for CCD
+  int i,j;
+  double *delgamp = delgam;
+  double xPix, yPix;
+
+  xPix = ccd->xPixSize / ccd->dist;
+  yPix = ccd->yPixSize / ccd->dist;
+
+  for(j=0;j<ccd->ySize;j++){
+    for(i=0;i<ccd->xSize;i++){
+      *(delgamp++) = delCen - atan( ((double)j - ccd->yCen) * yPix);
+      *(delgamp++) = gamCen - atan( ((double)i - ccd->xCen) * xPix);
+    }
+  }
+
+  return true;
 }
 
 int calcQTheta(double* diffAngles, double theta, double mu, double *qTheta, int n, double lambda){
@@ -319,25 +368,6 @@ int matmulti(double *val, int n, double mat[][3], int skip){
   return true;
 }
 
-int calcDeltaGamma(double *delgam, CCD *ccd, double delCen, double gamCen){
-  // Calculate Delta Gamma Values for CCD
-  int i,j;
-  double *delgamp;
-  double xPix, yPix;
-
-  xPix = ccd->xPixSize / ccd->dist;
-  yPix = ccd->yPixSize / ccd->dist;
-  delgamp = delgam;
-
-  for(j=0;j<ccd->ySize;j++){
-    for(i=0;i<ccd->xSize;i++){
-      *(delgamp++) = delCen - atan( ((double)j - ccd->yCen) * yPix);
-      *(delgamp++) = gamCen - atan( ((double)i - ccd->xCen) * xPix);
-    }
-  }
-
-  return true;
-}
 
 static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   PyArrayObject *gridout = NULL, *Nout = NULL, *stderror = NULL;
@@ -362,13 +392,13 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   
   gridI = (PyArrayObject*)PyArray_FROMANY(_I, NPY_DOUBLE, 0, 0, NPY_ARRAY_IN_ARRAY);
   if(!gridI){
-    PyErr_SetString(CTransError, "Could not allocate memory (gridI)");
-    return NULL;
+    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (gridI)");
+    goto error;
   }
   
   data_size = PyArray_DIM(gridI, 0);
   if(PyArray_DIM(gridI, 1) != 4){
-    PyErr_SetString(CTransError, "Dimension 1 of array must be 4");
+    PyErr_SetString(PyExc_ValueError, "Dimension 1 of array must be 4");
     goto error;
   }
 
@@ -378,34 +408,40 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
 
   gridout = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
   if(!gridout){
-    PyErr_SetString(CTransError, "Could not allocate memory (gridout)");
+    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (gridout)");
     goto error;
   }
 
   Nout = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_ULONG, 0);
   if(!Nout){
-    PyErr_SetString(CTransError, "Could not allocate memory (Nout)");
+    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (Nout)");
     goto error;
   }
 
   stderror = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
   if(!stderror){
-    PyErr_SetString(CTransError, "Could not allocate memory (stderror)");
+    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (stderror)");
     goto error;
   }
 
   meanout = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
   if(!meanout){
-    PyErr_SetString(CTransError, "Could not allocate memory (meanout)");
+    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (meanout)");
     goto error;
   }
-  
-  n_outside = c_grid3d((double*)PyArray_DATA(gridout), (unsigned long*)PyArray_DATA(Nout),
-		       (double*)PyArray_DATA(meanout), (double*)PyArray_DATA(stderror), 
-           (double*)PyArray_DATA(gridI),
-		       grid_start, grid_stop, 
-           (unsigned long)data_size, grid_nsteps);
-  
+ 
+  int retval;
+  retval = c_grid3d((double*)PyArray_DATA(gridout), (unsigned long*)PyArray_DATA(Nout),
+                    (double*)PyArray_DATA(meanout), (double*)PyArray_DATA(stderror), 
+                    (double*)PyArray_DATA(gridI), &n_outside,
+		                grid_start, grid_stop, (unsigned long)data_size, grid_nsteps);
+
+  if(retval){
+    // We had a runtime error
+    PyErr_SetString(PyExc_RuntimeError, "Gridding process failed to run");
+    goto error;
+  }
+
   Py_XDECREF(gridI);
   return Py_BuildValue("NNNNl", gridout, meanout, Nout, stderror, n_outside);
 
@@ -418,10 +454,10 @@ error:
   return NULL;
 }
 
-unsigned long c_grid3d(double *dout, unsigned long *nout, double *mout,
-                       double *stderror, double *data,
-		                   double *grid_start, double *grid_stop, unsigned long max_data,
-		                   unsigned long *n_grid){
+int c_grid3d(double *dout, unsigned long *nout, double *mout,
+             double *stderror, double *data, unsigned long *n_outside,
+             double *grid_start, double *grid_stop, unsigned long max_data,
+             unsigned long *n_grid){
   unsigned long i, j;
   unsigned long grid_size = 0;
   double grid_len[3];
@@ -506,6 +542,7 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *mout,
     threadData[i].n_grid = n_grid;
     threadData[i].grid_start = grid_start;
     threadData[i].grid_len = grid_len;
+    threadData[i].retval = 0;
 
 #ifdef USE_THREADS
     pthread_create(&thread[i], NULL,
@@ -520,7 +557,10 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *mout,
   // Wait for threads to finish and then join them
   for(i=0;i<_n_threads;i++){
     if(pthread_join(thread[i], NULL)){
-      fprintf(stderr, "ERROR : Cannot join threads\n");
+      goto error;
+    }
+    if(threadData[i].retval){
+      goto error;
     }
   }
 #endif
@@ -555,6 +595,9 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *mout,
     }
   }
 
+  *n_outside = threadData[0].n_outside;
+  return 0;
+
 error:
   if(nthread) free(nthread);
   for(i=0;i<_n_threads;i++){
@@ -565,8 +608,7 @@ error:
       if(threadData[i].Mk) free(threadData[i].Mk);
     }
   }
-
-  return threadData[0].n_outside;
+  return -1;
 }
 
 void* grid3DThread(void *ptr){
@@ -639,7 +681,7 @@ static PyObject* set_threads(PyObject *self, PyObject *args){
     return NULL;
   }
   if(threads > MAX_THREADS){
-    PyErr_SetString(CTransError, "Requested number of threads > MAX_THREADS");
+    PyErr_SetString(PyExc_ValueError, "Requested number of threads > MAX_THREADS");
     return NULL;
   }
   _n_threads = threads;
@@ -682,10 +724,6 @@ PyObject* PyInit_ctrans(void) {
   _n_threads = get_nprocs();
 #endif
 
-  CTransError = PyErr_NewException("ctrans.error", NULL, NULL);
-  Py_INCREF(CTransError);
-  PyModule_AddObject(module, "error", CTransError);
-
   return module;
 }
 
@@ -705,8 +743,5 @@ PyMODINIT_FUNC initctrans(void){
   _n_threads = get_nprocs();
 #endif
 
-  CTransError = PyErr_NewException("ctrans.error", NULL, NULL);
-  Py_INCREF(CTransError);
-  PyModule_AddObject(module, "error", CTransError);
 }
 #endif
