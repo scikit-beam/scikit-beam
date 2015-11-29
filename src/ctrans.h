@@ -96,7 +96,7 @@ int calcHKLFromQPhi(double *qPhi, int n, double mat[][3]);
 int c_grid3d(double *dout, unsigned long *nout, double *mout, 
              double *sterr, double *data, unsigned long *n_outside,
              double *grid_start, double *grid_stop, unsigned long max_data, 
-             unsigned long *n_grid);
+             unsigned long *n_grid, int norm);
 
 static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs);
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs);

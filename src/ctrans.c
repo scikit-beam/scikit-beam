@@ -437,7 +437,7 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   retval = c_grid3d((double*)PyArray_DATA(gridout), (unsigned long*)PyArray_DATA(Nout),
                     (double*)PyArray_DATA(meanout), (double*)PyArray_DATA(stderror), 
                     (double*)PyArray_DATA(gridI), &n_outside,
-		                grid_start, grid_stop, (unsigned long)data_size, grid_nsteps);
+		                grid_start, grid_stop, (unsigned long)data_size, grid_nsteps, 1);
 
   if(retval){
     // We had a runtime error
@@ -460,7 +460,7 @@ error:
 int c_grid3d(double *dout, unsigned long *nout, double *mout,
              double *stderror, double *data, unsigned long *n_outside,
              double *grid_start, double *grid_stop, unsigned long max_data,
-             unsigned long *n_grid){
+             unsigned long *n_grid, int norm){
   unsigned long i, j;
   unsigned long grid_size = 0;
   double grid_len[3];
@@ -569,32 +569,39 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
 #endif
 
   // Combine results
-  for(j=0;j<grid_size;j++){
-    if(threadData[0].nout[j]){
-      nthread[j]++;
+  if(_n_threads > 1){
+    for(j=0;j<grid_size;j++){
+      threadData[0].Qk[j] = (threadData[0].Qk[0] * threadData[0].nout[j]);
+      threadData[0].Mk[j] = (threadData[0].Mk[0] * threadData[0].nout[j]);
     }
   }
+
   for(i=1;i<_n_threads;i++){
     for(j=0;j<grid_size;j++){
       threadData[0].nout[j] += threadData[i].nout[j];
-      if(threadData[i].nout[j]){
-        nthread[j]++;
-      }
       threadData[0].dout[j] += threadData[i].dout[j];
-      threadData[0].Qk[j] += threadData[i].Qk[j];
-      threadData[0].Mk[j] += threadData[i].Mk[j];
-      threadData[0].n_outside += threadData[i].n_outside;
+      threadData[0].Qk[j] += (threadData[i].Qk[j] * threadData[i].nout[j]);
+      threadData[0].Mk[j] += (threadData[i].Mk[j] * threadData[i].nout[j]);
     }
+    threadData[0].n_outside += threadData[i].n_outside;
   }
 
   // Calculate the sterror
 
-  for(i=0;i<grid_size;i++){
-    threadData[0].Mk[i] = threadData[0].Mk[i] / nthread[i];
-    threadData[0].Qk[i] = threadData[0].Qk[i] / nthread[i];
-    if(nout[i] > 1){
-      // standard deviation of the sample distribution
-      stderror[i] = pow(threadData[0].Qk[i] / (nout[i] - 1), 0.5) / pow(nout[i], 0.5);
+  for(j=0;j<grid_size;j++){
+    if(threadData[0].nout[j] == 0){
+      threadData[0].Mk[j] = 0.0;
+      stderror[j] = 0.0;
+    } else {
+      if(_n_threads > 1){
+        threadData[0].Mk[j] = threadData[0].Mk[j] / threadData[0].nout[j];
+        threadData[0].Qk[j] = threadData[0].Qk[j] / threadData[0].nout[j];
+      }
+      stderror[j] = pow(threadData[0].Qk[j] / 
+          (threadData[0].nout[j] - 1), 0.5) / pow(threadData[0].nout[j], 0.5);
+      if(norm){
+        threadData[0].Mk[j] = threadData[0].dout[j] / threadData[0].nout[j];
+      }
     }
   }
 
