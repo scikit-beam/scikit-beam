@@ -60,6 +60,7 @@ except ImportError:
     except ImportError:
         ctrans = None
 
+ctrans.set_threads(1)
 
 md_value = namedtuple("md_value", ['value', 'units'])
 
