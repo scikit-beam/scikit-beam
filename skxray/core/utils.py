@@ -52,15 +52,7 @@ from itertools import tee
 import logging
 logger = logging.getLogger(__name__)
 
-try:
-    import src.ctrans as ctrans
-except ImportError:
-    try:
-        import ctrans
-    except ImportError:
-        ctrans = None
-
-ctrans.set_threads(1)
+import ctrans
 
 md_value = namedtuple("md_value", ['value', 'units'])
 
