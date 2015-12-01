@@ -73,13 +73,12 @@ def test_bin_1D_2():
     # set up simple data
     x = np.linspace(0, 1, 100)
     y = np.arange(100)
-    nx = None
+    nx = core._defaults["bins"]
     min_x = None
     max_x = None
     # make call
     edges, val, count = core.bin_1D(x=x, y=y, nx=nx, min_x=min_x, max_x=max_x)
     # check that values are as expected
-    nx = core._defaults["bins"]
     assert_array_almost_equal(edges,
                               np.linspace(0, 1, nx + 1, endpoint=True))
     assert_array_almost_equal(val,

@@ -590,7 +590,7 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     if max_x is None:
         max_x = np.max(x)
     if nx is None:
-        nx = _defaults["bins"]
+        nx = int(max_x - min_x)
 
     # use a weighted histogram to get the bin sum
     bins = np.linspace(start=min_x, stop=max_x, num=nx+1, endpoint=True)

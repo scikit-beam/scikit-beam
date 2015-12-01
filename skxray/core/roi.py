@@ -416,11 +416,14 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
         argument order should be (row, col)
     threshold : int, optional
         Ignore counts above `threshold`
+        default is zero
     nx : int, optional
         number of bins in x
+        defaults is 100 bins
     pixel_size : tuple, optional
         The size of a pixel (in a real unit, like mm).
         argument order should be (pixel_height, pixel_width)
+        default is (1, 1)
     min_x : float, optional number of pixels
         Left edge of first bin defaults to minimum value of x
     max_x : float, optional number of pixels
@@ -433,17 +436,6 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
         Radial average of the image. shape is (nx, ).
     """
     radial_val = utils.radial_grid(calibrated_center, image.shape, pixel_size)
-
-    if min_x is None:
-        min_x = np.min(radial_val)
-    else:
-        min_x = min_x * pixel_size[0]
-    if max_x is None:
-        max_x = np.max(radial_val)
-    else:
-        max_x = max_x * pixel_size[0]
-    if nx is None:
-        nx = int((max_x - min_x)/(pixel_size[0]))
 
     bin_edges, sums, counts = utils.bin_1D(np.ravel(radial_val),
                                            np.ravel(image), nx,
