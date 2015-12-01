@@ -579,14 +579,17 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
   for(j=0;j<grid_size;j++){
     if(threadData[0].nout[j] == 0){
       threadData[0].Mk[j] = 0.0;
-      stderror[j] = 0.0;
     } else {
       if(_n_threads > 1){
         threadData[0].Mk[j] = threadData[0].Mk[j] / threadData[0].nout[j];
         threadData[0].Qk[j] = threadData[0].Qk[j] / threadData[0].nout[j];
       }
-      stderror[j] = pow(threadData[0].Qk[j] / 
-          (threadData[0].nout[j] - 1), 0.5) / pow(threadData[0].nout[j], 0.5);
+      if(threadData[0].nout[j] > 1){
+        stderror[j] = pow(threadData[0].Qk[j] / 
+            (threadData[0].nout[j] - 1), 0.5) / pow(threadData[0].nout[j], 0.5);
+      } else {
+        stderror[j] = 0.0;
+      }
       if(norm){
         threadData[0].Mk[j] = threadData[0].dout[j] / threadData[0].nout[j];
       }
