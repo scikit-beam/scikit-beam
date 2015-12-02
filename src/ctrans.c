@@ -52,7 +52,7 @@
 /* If useing threading then import pthreads */
 #ifdef USE_THREADS
 #include <pthread.h>
-#include <sys/sysinfo.h>
+#include <unistd.h>
 #endif
 
 #include "ctrans.h"
@@ -453,7 +453,6 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
   unsigned long grid_size = 0;
   double grid_len[3];
   unsigned long stride;
-  unsigned long *nthread = NULL;
 	
   // Some useful quantities
 
@@ -477,14 +476,6 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
     threadData[i].Qk = NULL;
     threadData[i].dout = NULL;
     threadData[i].nout = NULL;
-  }
-
-  nthread = (unsigned long *)malloc(sizeof(unsigned long) * grid_size);
-  if(!nthread){
-    goto error;
-  }
-  for(i=0;i<grid_size;i++){
-    nthread[i] = 0;
   }
 
   stride = max_data / _n_threads;
@@ -559,9 +550,10 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
   // Combine results
   if(_n_threads > 1){
     for(j=0;j<grid_size;j++){
-      threadData[0].Qk[j] = (threadData[0].Qk[0] * threadData[0].nout[j]);
-      threadData[0].Mk[j] = (threadData[0].Mk[0] * threadData[0].nout[j]);
+      threadData[0].Qk[j] = (threadData[0].Qk[j] * threadData[0].nout[j]);
+      threadData[0].Mk[j] = (threadData[0].Mk[j] * threadData[0].nout[j]);
     }
+      //fprintf(stderr, "0 : Qk = %f, N = %ld\n", threadData[0].Qk[j], threadData[0].nout[j]);
   }
 
   for(i=1;i<_n_threads;i++){
@@ -570,6 +562,7 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
       threadData[0].dout[j] += threadData[i].dout[j];
       threadData[0].Qk[j] += (threadData[i].Qk[j] * threadData[i].nout[j]);
       threadData[0].Mk[j] += (threadData[i].Mk[j] * threadData[i].nout[j]);
+      //fprintf(stderr, "%ld : Qk = %f, N = %ld\n", i,threadData[i].Qk[j], threadData[i].nout[j]);
     }
     threadData[0].n_outside += threadData[i].n_outside;
   }
@@ -596,11 +589,23 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
     }
   }
 
+  // Store the number of elements outside the grid
+  
   *n_outside = threadData[0].n_outside;
+
+  // Now free the memory.
+
+  for(i=0;i<_n_threads;i++){
+    free(threadData[i].Qk);
+    if(i > 0){
+      free(threadData[i].Mk);
+      free(threadData[i].dout);
+      free(threadData[i].nout);
+    }
+  }
   return 0;
 
 error:
-  if(nthread) free(nthread);
   for(i=0;i<_n_threads;i++){
     if(threadData[i].Qk) free(threadData[i].Qk); 
     if(i > 0){
@@ -660,6 +665,7 @@ void* grid3DThread(void *ptr){
 
       Qk[pos] = Qk[pos] + ((nout[pos] - 1) * pow(*data_ptr - Mk[pos],2) / nout[pos]);
       Mk[pos] = Mk[pos] + ((*data_ptr - Mk[pos]) / nout[pos]);
+      //fprintf(stderr, "Qk = %f, Mk = %f\n", Qk[pos], Mk[pos]);
 
       // Increment pointer
       data_ptr++;
@@ -670,6 +676,24 @@ void* grid3DThread(void *ptr){
   }
 
   return NULL;
+}
+
+long nproc(void) {
+  long _n;
+#ifdef USE_THREADS 
+
+  _n = sysconf(_SC_NPROCESSORS_ONLN);
+  if(_n > MAX_THREADS){
+    _n = MAX_THREADS;
+  }
+
+#else
+
+  _n = 1;
+
+#endif
+
+  return _n;
 }
 
 static PyObject* get_threads(PyObject *self, PyObject *args){
@@ -718,12 +742,7 @@ PyObject* PyInit_ctrans(void) {
   }
 
   import_array();
-
-#ifdef USE_THREADS
-  // The following is a glibc extension to get the number
-  // of processors.
-  _n_threads = get_nprocs();
-#endif
+  _n_threads = nproc();
 
   return module;
 }
@@ -737,12 +756,6 @@ PyMODINIT_FUNC initctrans(void){
   }
 
   import_array();
-
-#ifdef USE_THREADS
-  // The following is a glibc extension to get the number
-  // of processors.
-  _n_threads = get_nprocs();
-#endif
-
+  _n_threads = nproc();
 }
 #endif

@@ -84,6 +84,8 @@ typedef struct {
   int retval;
 } gridderThreadData;
 
+long nproc(void);
+
 void *processImageThread(void* ptr);
 void *grid3DThread(void *ptr);
 int calcQTheta(double* diffAngles, double theta, double mu, 
