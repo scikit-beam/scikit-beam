@@ -694,3 +694,26 @@ def _validate_inputs(num_bufs, labels, images):
                          "num_pixels = {0}".format(num_pixels))
 
     return label_array, indices, num_rois, num_pixels
+
+
+def one_time_from_two_time(two_time_corr):
+    """
+    Parameters
+    ----------
+    two_time_corr : array
+        matrix of two time correlation
+        shape (number of images, number of images, number of labels(ROI))
+
+    Returns
+    -------
+    one_time_corr : array
+        matrix of one time correlation
+        shape (number of images, number of labels(ROI))
+
+    """
+    one_time_corr = np.zeros((two_time_corr.shape[0], two_time_corr.shape[2]))
+    for i in range(two_time_corr.shape[2]):
+        for j in range(two_time_corr.shape[0]):
+            one_time_corr[j, i] = np.trace(two_time_corr[:, :, i],
+                                           offset=j)/two_time_corr.shape[0]
+    return one_time_corr
