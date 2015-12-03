@@ -702,6 +702,9 @@ static PyObject* get_threads(PyObject *self, PyObject *args){
 
 static PyObject* set_threads(PyObject *self, PyObject *args){
   int threads;
+
+#ifdef USE_THREADS
+
   if(!PyArg_ParseTuple(args, "i", &threads)){
     return NULL;
   }
@@ -711,6 +714,13 @@ static PyObject* set_threads(PyObject *self, PyObject *args){
   }
   _n_threads = threads;
   return PyLong_FromLong((long)_n_threads);
+
+#else
+
+  PyErr_SetString(PyExc_RuntimeError, "Module has been compiled not to use threads.")
+  return NULL;
+
+#endif
 }
 
 static PyMethodDef ctrans_methods[] = {
