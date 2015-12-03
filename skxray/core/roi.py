@@ -404,10 +404,9 @@ def mean_intensity(images, labeled_array, index=None):
 
 
 def circular_average(image, calibrated_center, threshold=0, nx=100,
-                     pixel_size=None):
+                     pixel_size=(1, 1),  min_x=None, max_x=None):
     """Circular average of the the image data
     The circular average is also known as the radial integration
-
     Parameters
     ----------
     image : array
@@ -417,12 +416,18 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
         argument order should be (row, col)
     threshold : int, optional
         Ignore counts above `threshold`
+        default is zero
     nx : int, optional
-        Number of bins in R. Defaults to 100
+        number of bins in x
+        defaults is 100 bins
     pixel_size : tuple, optional
         The size of a pixel (in a real unit, like mm).
         argument order should be (pixel_height, pixel_width)
-
+        default is (1, 1)
+    min_x : float, optional number of pixels
+        Left edge of first bin defaults to minimum value of x
+    max_x : float, optional number of pixels
+        Right edge of last bin defaults to maximum value of x
     Returns
     -------
     bin_centers : array
@@ -430,11 +435,12 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
     ring_averages : array
         Radial average of the image. shape is (nx, ).
     """
-    radial_val = utils.radial_grid(calibrated_center, image.shape,
-                                   pixel_size)
+    radial_val = utils.radial_grid(calibrated_center, image.shape, pixel_size)
 
     bin_edges, sums, counts = utils.bin_1D(np.ravel(radial_val),
-                                           np.ravel(image), nx)
+                                           np.ravel(image), nx,
+                                           min_x=min_x,
+                                           max_x=max_x)
     th_mask = counts > threshold
     ring_averages = sums[th_mask] / counts[th_mask]
 
