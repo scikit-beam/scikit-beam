@@ -314,6 +314,11 @@ def test_circular_average():
     assert_array_almost_equal(ring_avg, [8., 2.5, 5.55555556, 0.,
                                          0., 0.], decimal=6)
 
+    bin_cen1, ring_avg1 = roi.circular_average(image, calib_center, min_x=0,
+                                               max_x=10, nx=None)
+    assert_array_almost_equal(bin_cen1, [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5,
+                                         7.5, 8.5])
+
 
 def test_kymograph():
     calib_center = (25, 25)
