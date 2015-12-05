@@ -13,5 +13,5 @@ ctrans['define_macros'].append(('DEBUG', None))
 
 
 ext_modules = []
-ext_modules.append(Extension('ctrans', ['src/ctrans.c'],
+ext_modules.append(Extension('skxray.core.ctrans', ['src/ctrans.c'],
                              **ctrans))
