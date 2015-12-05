@@ -54,7 +54,7 @@ try:
 except ImportError:
     geo = None
 
-import .ctrans as ctrans
+from . import ctrans
 
 
 def process_to_q(setting_angles, detector_size, pixel_size,
