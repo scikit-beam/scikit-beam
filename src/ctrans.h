@@ -95,6 +95,10 @@ int calcDeltaGamma(double *delgam, CCD *ccd, double delCen, double gamCen);
 int matmulti(double *val, int n, double mat[][3]);
 int calcHKLFromQPhi(double *qPhi, int n, double mat[][3]);
 
+int processImages(double *delgam, double *anglesp, double *qOutp, double lambda, 
+                  int mode, unsigned long nimages, unsigned int n_threads, double *ubinvp,
+                  CCD *ccd);
+
 int c_grid3d(double *dout, unsigned long *nout, double *mout, 
              double *sterr, double *data, unsigned long *n_outside,
              double *grid_start, double *grid_stop, unsigned long max_data, 

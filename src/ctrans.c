@@ -74,7 +74,6 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   npy_intp dims[2];
   npy_intp nimages;
 
-  unsigned long i, j, t, stride;
   int mode;
 
   double lambda;
@@ -83,16 +82,8 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   double *qOutp = NULL;
   double *ubinvp = NULL;
   double *delgam = NULL;
-  double *_delgam;
-  double UBI[3][3];
 
   unsigned int n_threads = _n_threads;
-
-#ifdef USE_THREADS
-  pthread_t thread[MAX_THREADS];
-#endif
-
-  imageThreadData threadData[MAX_THREADS];
 
   if(!PyArg_ParseTupleAndKeywords(args, kwargs, "Oi(ii)(dd)(dd)ddO|i", kwlist,
 				  &_angles,
@@ -142,12 +133,6 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   }
 
   ubinvp = (double *)PyArray_DATA(ubinv);
-  for(i=0;i<3;i++){
-    UBI[i][0] = -1.0 * ubinvp[2];
-    UBI[i][1] = ubinvp[1];
-    UBI[i][2] = ubinvp[0];
-    ubinvp+=3;
-  }
   
   nimages = PyArray_DIM(angles, 0);
 
@@ -171,14 +156,58 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
     goto cleanup;
   }
 
-  _delgam = delgam;
-  stride = nimages / n_threads;
+
+  // Ok now we don't touch Python Object ... Release the GIL
+  Py_BEGIN_ALLOW_THREADS
+
+  if(processImages(delgam, anglesp, qOutp, lambda, mode, (unsigned long)nimages, 
+                n_threads, ubinvp, &ccd)){
+    PyErr_SetString(PyExc_RuntimeError, "Processing data failed");
+    goto cleanup;
+  }
+
+  // Now we have finished with the magic ... Obtain the GIL
+  Py_END_ALLOW_THREADS
+
+  Py_XDECREF(ubinv);
+  Py_XDECREF(angles);
+  if(delgam) free(delgam);
+  return Py_BuildValue("N", qOut);
+
+ cleanup:
+  Py_XDECREF(ubinv);
+  Py_XDECREF(angles);
+  Py_XDECREF(qOut);
+  if(delgam) free(delgam);
+  return NULL;
+}
+
+int processImages(double *delgam, double *anglesp, double *qOutp, double lambda, 
+                  int mode, unsigned long nimages, unsigned int n_threads, double *ubinvp,
+                  CCD *ccd){
+
+  int retval = 0;
+  unsigned long i, j, t;
+  double *_delgam = delgam;
+  unsigned long stride = nimages / n_threads;
+  imageThreadData threadData[MAX_THREADS];
+  double UBI[3][3];
+#ifdef USE_THREADS
+  pthread_t thread[MAX_THREADS];
+#endif
+
+  for(i=0;i<3;i++){
+    UBI[i][0] = -1.0 * ubinvp[2];
+    UBI[i][1] = ubinvp[1];
+    UBI[i][2] = ubinvp[0];
+    ubinvp+=3;
+  }
 
   for(t=0;t<n_threads;t++){
     // Setup threads
     // Allocate memory for delta/gamma pairs
     
-    threadData[t].ccd = &ccd;
+    threadData[t].ccd = ccd;
     threadData[t].anglesp = anglesp;
     threadData[t].qOutp = qOutp;
     threadData[t].lambda = lambda;
@@ -206,8 +235,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
     if(pthread_create(&thread[t], NULL,
 		            	     processImageThread,
 			                 (void*) &threadData[t])){
-      PyErr_SetString(PyExc_RuntimeError, "Unable to create threads.");
-      goto cleanup;
+      return -1;
     }
 
 #else
@@ -217,39 +245,26 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 #endif
 
     anglesp += (6 * stride);
-    _delgam += (ccd.size * 2 * stride);
-    qOutp += (ccd.size * 3 * stride);
+    _delgam += (ccd->size * 2 * stride);
+    qOutp += (ccd->size * 3 * stride);
   }
 
 #ifdef USE_THREADS
 
   for(t=0;t<n_threads;t++){
     if(pthread_join(thread[t], NULL)){
-      PyErr_SetString(PyExc_RuntimeError, "Unable to join threads.");
-      goto cleanup;
+      return -1;
     }
      
     // Check the thread retval
 
     if(threadData[t].retval){
-      PyErr_SetString(PyExc_RuntimeError, "Processing thread failed");
-      goto cleanup; 
+      retval = -1;
     }
   }
 
 #endif
-
-  Py_XDECREF(ubinv);
-  Py_XDECREF(angles);
-  if(delgam) free(delgam);
-  return Py_BuildValue("N", qOut);
-
- cleanup:
-  Py_XDECREF(ubinv);
-  Py_XDECREF(angles);
-  Py_XDECREF(qOut);
-  if(delgam) free(delgam);
-  return NULL;
+  return retval;
 }
 
 void *processImageThread(void* ptr){
@@ -397,7 +412,7 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   unsigned long n_outside;
 
   unsigned int n_threads = _n_threads;
-
+  int retval;
 
   static char *kwlist[] = { "data", "xrange", "yrange", "zrange", "n_threads", NULL }; 
 
@@ -470,12 +485,17 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
     goto error;
   }
  
-  int retval;
+  // Ok now we don't touch Python Object ... Release the GIL
+  Py_BEGIN_ALLOW_THREADS
+
   retval = c_grid3d((double*)PyArray_DATA(gridout), (unsigned long*)PyArray_DATA(Nout),
                     (double*)PyArray_DATA(meanout), (double*)PyArray_DATA(stderror), 
                     (double*)PyArray_DATA(gridI), &n_outside,
 		                grid_start, grid_stop, (unsigned long)data_size, grid_nsteps, 1,
                     n_threads);
+
+  // Ok now get the GIL back
+  Py_END_ALLOW_THREADS
 
   if(retval){
     // We had a runtime error
