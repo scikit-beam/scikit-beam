@@ -809,7 +809,7 @@ static PyMethodDef ctrans_methods[] = {
 #if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef moduledef = {
     PyModuleDef_HEAD_INIT,
-    "skxray.core.ctrans",
+    "ctrans",
     "Python functions to perform gridding (binning) of experimental data.\n\n",
     -1, // we keep state in global vars
     ctrans_methods,
