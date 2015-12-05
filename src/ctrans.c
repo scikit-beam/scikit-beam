@@ -784,7 +784,7 @@ static PyObject* set_threads(PyObject *self, PyObject *args){
     return NULL;
   }
   _n_threads = threads;
-  return PyLong_FromLong((long)_n_threads);
+  return Py_None;
 
 #else
 
