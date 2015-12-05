@@ -52,7 +52,7 @@ from itertools import tee
 import logging
 logger = logging.getLogger(__name__)
 
-import skxray.core.ctrans as ctrans
+from skxray.core import ctrans as ctrans
 
 md_value = namedtuple("md_value", ['value', 'units'])
 
