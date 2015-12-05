@@ -59,7 +59,7 @@ import ctrans
 
 def process_to_q(setting_angles, detector_size, pixel_size,
                  calibrated_center, dist_sample, wavelength, ub,
-                 frame_mode=None):
+                 frame_mode=None, n_threads=0):
     """
     This will compute the hkl values for all pixels in a shape specified by
     detector_size.
@@ -103,6 +103,11 @@ def process_to_q(setting_angles, detector_size, pixel_size,
         'hkl'      : Reciprocal lattice units frame.
         See the `process_to_q.frame_mode` attribute for an exact list of
         valid options.
+
+    n_threads : int, optional
+        Specify the number of threads for the c-module to use in its
+        calculations. A value of zero indicates to use the number of
+        configured cores on the system.
 
     Returns
     -------
@@ -159,7 +164,8 @@ def process_to_q(setting_angles, detector_size, pixel_size,
                         ccd_cen=(calibrated_center),
                         dist=dist_sample,
                         wavelength=wavelength,
-                        UBinv=np.matrix(ub).I)
+                        UBinv=np.matrix(ub).I,
+                        n_threads=n_threads)
 
     # ending time for the process
     t2 = time.time()

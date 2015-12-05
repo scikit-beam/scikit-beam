@@ -64,7 +64,7 @@ unsigned int _n_threads = 1;
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   static char *kwlist[] = { "angles", "mode", "ccd_size", "ccd_pixsize",
 			                      "ccd_cen", "dist", "wavelength",
-			                      "UBinv", NULL };
+			                      "UBinv", "n_threads", NULL };
   PyArrayObject *angles = NULL;
   PyObject *_angles = NULL;
   PyArrayObject *ubinv = NULL;
@@ -86,13 +86,15 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   double *_delgam;
   double UBI[3][3];
 
+  unsigned int n_threads = _n_threads;
+
 #ifdef USE_THREADS
   pthread_t thread[MAX_THREADS];
 #endif
 
   imageThreadData threadData[MAX_THREADS];
 
-  if(!PyArg_ParseTupleAndKeywords(args, kwargs, "Oi(ii)(dd)(dd)ddO", kwlist,
+  if(!PyArg_ParseTupleAndKeywords(args, kwargs, "Oi(ii)(dd)(dd)ddO|i", kwlist,
 				  &_angles,
 				  &mode,
 				  &ccd.xSize, &ccd.ySize,
@@ -100,9 +102,30 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 				  &ccd.xCen, &ccd.yCen,
 				  &ccd.dist,
 				  &lambda,
-				  &_ubinv)){
+				  &_ubinv,
+          &n_threads)){
     return NULL;
   }
+
+#ifdef USE_THREADS
+
+  if(n_threads > MAX_THREADS){
+    PyErr_SetString(PyExc_ValueError, "n_threads > MAX_THREADS");
+    goto cleanup;
+  }
+
+  if(n_threads < 1){
+    n_threads = _n_threads;
+  }
+
+#else
+
+  if(n_threads > 1){
+    PyErr_SetString(PyExc_RuntimeError, "Multithreading support is not compiled in");
+    goto cleanup;
+  }
+
+#endif
 
   ccd.size = ccd.xSize * ccd.ySize;
 
@@ -149,9 +172,9 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   }
 
   _delgam = delgam;
-  stride = nimages / _n_threads;
+  stride = nimages / n_threads;
 
-  for(t=0;t<_n_threads;t++){
+  for(t=0;t<n_threads;t++){
     // Setup threads
     // Allocate memory for delta/gamma pairs
     
@@ -170,7 +193,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
       }
     }
 
-    if(t == (_n_threads - 1)){
+    if(t == (n_threads - 1)){
       threadData[t].imend = nimages;
     } else {
       threadData[t].imend = stride * (t + 1);
@@ -200,7 +223,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 
 #ifdef USE_THREADS
 
-  for(t=0;t<_n_threads;t++){
+  for(t=0;t<n_threads;t++){
     if(pthread_join(thread[t], NULL)){
       PyErr_SetString(PyExc_RuntimeError, "Unable to join threads.");
       goto cleanup;
@@ -373,13 +396,39 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   unsigned long grid_nsteps[3];
   unsigned long n_outside;
 
-  if(!PyArg_ParseTuple(args, "O(ddd)(ddd)(lll)", 
+  unsigned int n_threads = _n_threads;
+
+
+  static char *kwlist[] = { "data", "xrange", "yrange", "zrange", "n_threads", NULL }; 
+
+  if(!PyArg_ParseTupleAndKeywords(args, kwargs, "O(ddd)(ddd)(lll)|i", kwlist, 
 				  &_I,
 				  &grid_start[0], &grid_start[1], &grid_start[2],
 				  &grid_stop[0], &grid_stop[1], &grid_stop[2],
-				  &grid_nsteps[0], &grid_nsteps[1], &grid_nsteps[2])){
+				  &grid_nsteps[0], &grid_nsteps[1], &grid_nsteps[2],
+          &n_threads)){
     return NULL;
   }
+
+#ifdef USE_THREADS
+
+  if(n_threads > MAX_THREADS){
+    PyErr_SetString(PyExc_ValueError, "n_threads > MAX_THREADS");
+    goto error;
+  }
+
+  if(n_threads < 1){
+    n_threads = _n_threads;
+  }
+
+#else
+
+  if(n_threads > 1){
+    PyErr_SetString(PyExc_RuntimeError, "Multithreading support is not compiled in");
+    goto error;
+  }
+
+#endif
   
   gridI = (PyArrayObject*)PyArray_FROMANY(_I, NPY_DOUBLE, 0, 0, NPY_ARRAY_IN_ARRAY);
   if(!gridI){
@@ -425,7 +474,8 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   retval = c_grid3d((double*)PyArray_DATA(gridout), (unsigned long*)PyArray_DATA(Nout),
                     (double*)PyArray_DATA(meanout), (double*)PyArray_DATA(stderror), 
                     (double*)PyArray_DATA(gridI), &n_outside,
-		                grid_start, grid_stop, (unsigned long)data_size, grid_nsteps, 1);
+		                grid_start, grid_stop, (unsigned long)data_size, grid_nsteps, 1,
+                    n_threads);
 
   if(retval){
     // We had a runtime error
@@ -448,7 +498,8 @@ error:
 int c_grid3d(double *dout, unsigned long *nout, double *mout,
              double *stderror, double *data, unsigned long *n_outside,
              double *grid_start, double *grid_stop, unsigned long max_data,
-             unsigned long *n_grid, int norm){
+             unsigned long *n_grid, int norm, unsigned int n_threads){
+
   unsigned long i, j;
   unsigned long grid_size = 0;
   double grid_len[3];
@@ -471,15 +522,15 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
 
   // Allocate arrays for standard error calculation
  
-  for(i=0;i<_n_threads;i++){
+  for(i=0;i<n_threads;i++){
     threadData[i].Mk = NULL;
     threadData[i].Qk = NULL;
     threadData[i].dout = NULL;
     threadData[i].nout = NULL;
   }
 
-  stride = max_data / _n_threads;
-  for(i=0;i<_n_threads;i++){
+  stride = max_data / n_threads;
+  for(i=0;i<n_threads;i++){
     threadData[i].Qk = (double*)malloc(sizeof(double) * grid_size);
     if(!threadData[i].Qk){
       goto error;
@@ -514,7 +565,7 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
 
     // Setup entry points for threads
     threadData[i].start = stride * i;
-    if(i == (_n_threads - 1)){
+    if(i == (n_threads - 1)){
       threadData[i].end = max_data;
     } else {
       threadData[i].end = stride * (i + 1);
@@ -537,7 +588,7 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
 
 #ifdef USE_THREADS
   // Wait for threads to finish and then join them
-  for(i=0;i<_n_threads;i++){
+  for(i=0;i<n_threads;i++){
     if(pthread_join(thread[i], NULL)){
       goto error;
     }
@@ -548,7 +599,7 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
 #endif
 
   // Combine results
-  if(_n_threads > 1){
+  if(n_threads > 1){
     for(j=0;j<grid_size;j++){
       threadData[0].Qk[j] = (threadData[0].Qk[j] * threadData[0].nout[j]);
       threadData[0].Mk[j] = (threadData[0].Mk[j] * threadData[0].nout[j]);
@@ -556,7 +607,7 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
       //fprintf(stderr, "0 : Qk = %f, N = %ld\n", threadData[0].Qk[j], threadData[0].nout[j]);
   }
 
-  for(i=1;i<_n_threads;i++){
+  for(i=1;i<n_threads;i++){
     for(j=0;j<grid_size;j++){
       threadData[0].nout[j] += threadData[i].nout[j];
       threadData[0].dout[j] += threadData[i].dout[j];
@@ -573,7 +624,7 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
     if(threadData[0].nout[j] == 0){
       threadData[0].Mk[j] = 0.0;
     } else {
-      if(_n_threads > 1){
+      if(n_threads > 1){
         threadData[0].Mk[j] = threadData[0].Mk[j] / threadData[0].nout[j];
         threadData[0].Qk[j] = threadData[0].Qk[j] / threadData[0].nout[j];
       }
@@ -595,7 +646,7 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
 
   // Now free the memory.
 
-  for(i=0;i<_n_threads;i++){
+  for(i=0;i<n_threads;i++){
     free(threadData[i].Qk);
     if(i > 0){
       free(threadData[i].Mk);
@@ -606,7 +657,7 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
   return 0;
 
 error:
-  for(i=0;i<_n_threads;i++){
+  for(i=0;i<n_threads;i++){
     if(threadData[i].Qk) free(threadData[i].Qk); 
     if(i > 0){
       if(threadData[i].dout) free(threadData[i].dout); 

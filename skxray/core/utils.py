@@ -827,7 +827,7 @@ def grid3d(q, img_stack,
            nx=None, ny=None, nz=None,
            xmin=None, xmax=None, ymin=None,
            ymax=None, zmin=None, zmax=None,
-           binary_mask=None):
+           binary_mask=None, n_threads=0):
     """Grid irregularly spaced data points onto a regular grid via histogramming
 
     This function will process the set of reciprocal space values (q), the
@@ -865,6 +865,10 @@ def grid3d(q, img_stack,
         Binary mask can be two different shapes.
         - 1: 2-D with binary_mask.shape == np.asarray(img_stack[0]).shape
         - 2: 3-D with binary_mask.shape == np.asarray(img_stack).shape
+    n_threads : int, optional
+        Specify the number of threads for the c-module to use in its
+        calculations. A value of zero indicates to use the number of
+        configured cores on the system.
 
     Returns
     -------
@@ -947,8 +951,9 @@ def grid3d(q, img_stack,
     t1 = time.time()
 
     # call the c library
-    total, mean, occupancy, std_err, oob = ctrans.grid3d(q, qmin, qmax, dqn)
 
+    total, mean, occupancy, std_err, oob = ctrans.grid3d(q, qmin, qmax, dqn,
+                                                         n_threads)
     # ending time for the gridding
     t2 = time.time()
     logger.info("Done processed in {0} seconds".format(t2-t1))
