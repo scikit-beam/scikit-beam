@@ -54,7 +54,7 @@ try:
 except ImportError:
     geo = None
 
-from skxray.core import ctrans as ctrans
+import skxray.core.ctrans as ctrans
 
 
 def process_to_q(setting_angles, detector_size, pixel_size,
