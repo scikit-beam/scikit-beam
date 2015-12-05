@@ -887,7 +887,16 @@ def grid3d(q, img_stack,
         tuple of (min, max, step) for x, y, z in order: [x_bounds,
         y_bounds, z_bounds]
 
+    Notes
+    -----
+    The standard error is calculated "on the fly" on a per thread basis.
+    Therefore, the standard error is not correctly calculated if there is only
+    one value per voxel per thread. The standard error calculation is
+    therefore only valid when the number of values per voxel per thread is
+    greater than one. The n_threads can be used to set the number of cores used
+    to correct this if the standard error is needed to be accurate.
     """
+
     # validate input
     img_stack = np.asarray(img_stack)
     # todo determine if we're going to support masked arrays
