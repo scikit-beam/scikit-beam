@@ -772,9 +772,10 @@ static PyObject* get_threads(PyObject *self, PyObject *args){
 }
 
 static PyObject* set_threads(PyObject *self, PyObject *args){
-  int threads;
 
 #ifdef USE_THREADS
+
+  int threads;
 
   if(!PyArg_ParseTuple(args, "i", &threads)){
     return NULL;
@@ -788,7 +789,7 @@ static PyObject* set_threads(PyObject *self, PyObject *args){
 
 #else
 
-  PyErr_SetString(PyExc_RuntimeError, "Module has been compiled not to use threads.")
+  PyErr_SetString(PyExc_RuntimeError, "Module has been compiled not to use threads.");
   return NULL;
 
 #endif
