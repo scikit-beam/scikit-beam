@@ -15,7 +15,7 @@ import os
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-ext_modules = [Extension('skxray.ext.ctrans', ['src/ctrans.c'])]
+ext_modules = [Extension('ctrans', ['skxray/ext/ctrans.c'])]
 
 setup(
     name='scikit-xray',
@@ -24,6 +24,7 @@ setup(
     author='Brookhaven National Lab',
     description="Data analysis tools for X-ray science",
     packages=setuptools.find_packages(exclude=['doc']),
+    ext_package='skxray.ext',
     include_dirs=[np.get_include()],
     package_data={'skxray.core.constants': ['data/*.dat']},
     install_requires=['six', 'numpy'],  # essential deps only
