@@ -6,6 +6,8 @@
 
 **[Documentation] (http://scikit-xray.github.io/scikit-xray/)**
 
+Test me.
+
 ## Examples
 [scikit-xray-examples repository] (https://github.com/scikit-xray/scikit-xray-examples)
 
