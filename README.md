@@ -44,7 +44,7 @@ cd scikit-xray
 python setup.py develop
 pip install nose coverage setuptools
 ```
-**make sure all the tests pass!**
+**make sure all the tests pass! I don't know what you do if they don't**
 ```
 python run_tests.py
 ```
