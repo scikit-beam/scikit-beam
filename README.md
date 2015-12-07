@@ -6,7 +6,7 @@
 
 **[Documentation] (http://scikit-xray.github.io/scikit-xray/)**
 
-## Examples
+## Examples test
 [scikit-xray-examples repository] (https://github.com/scikit-xray/scikit-xray-examples)
 
 - [Powder calibration (still needs tilt correction)] (https://github.com/scikit-xray/scikit-xray-examples/blob/master/demos/powder_calibration/D_estimate_demo.ipynb)
