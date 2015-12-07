@@ -24,7 +24,7 @@ install:
   - pip install codecov
 
 script:
-  - python run_tests.py
+  - python /home/travis/run_tests.py
 
 after_success:
   - coveralls
