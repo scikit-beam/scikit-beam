@@ -21,10 +21,9 @@ install:
   - python setup.py install
   - pip install coveralls
   - pip install codecov
-  - echo $TRAVIS_BUILD_DIR
 
 script:
-  - cd /home/travis && $TRAVIS_BUILD_DIR/run_tests.py
+  - cd /home/travis && python $TRAVIS_BUILD_DIR/run_tests.py
 
 after_success:
   - coveralls
