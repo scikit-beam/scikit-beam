@@ -248,8 +248,6 @@ def test_process_grid_std_err():
     # make input data (N*5x3)
     data = np.vstack([np.tile(_, 5)
                       for _ in (np.ravel(X), np.ravel(Y), np.ravel(Z))]).T
-    print(data)
-    print(I)
     (mean, occupancy,
      std_err, oob, bounds) = core.grid3d(data, I, **param_dict)
 
@@ -261,7 +259,6 @@ def test_process_grid_std_err():
     # need to convert std -> ste (standard error)
     # according to wikipedia ste = std/sqrt(n), but experimentally, this is
     # implemented as ste = std / srt(n - 1)
-    print( np.std(np.arange(1, 6))/np.sqrt(5 - 1))
     npt.assert_array_equal(std_err,
                            (np.ones_like(occupancy) *
                             np.std(np.arange(1, 6))/np.sqrt(5 - 1)))
