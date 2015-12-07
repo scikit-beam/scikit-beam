@@ -3,6 +3,7 @@
 [![Join the chat at https://gitter.im/scikit-xray/scikit-xray](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/scikit-xray/scikit-xray?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # scikit-xray
+This may be renamed to scikit-beam.
 
 **[Documentation] (http://scikit-xray.github.io/scikit-xray/)**
 
