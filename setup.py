@@ -15,7 +15,7 @@ import os
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-ext_modules = [Extension('ctrans', ['skxray/ext/ctrans.c'],
+ext_modules = [Extension('ctrans', ['src/ctrans.c'],
                          define_macros=[('USE_THREADS', None)])]
 
 setup(
