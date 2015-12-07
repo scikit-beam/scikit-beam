@@ -19,14 +19,12 @@ install:
   - conda install -n testenv -c scikit-xray xraylib lmfit=0.8.3 netcdf4
   - source activate testenv
   - python setup.py install
-#  - cd /tmp && python -c "from skxray.ext import ctrans; print(ctrans)"
   - pip install coveralls
   - pip install codecov
-  - pwd
-  - ls -l 
+  - echo $TRAVIS_BUILD_DIR
 
 script:
-  - python /home/travis/run_tests.py
+  - cd /home/travis && $TRAVIS_BUILD_DIR/run_tests.py
 
 after_success:
   - coveralls
