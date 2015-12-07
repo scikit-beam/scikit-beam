@@ -22,6 +22,7 @@ install:
 #  - cd /tmp && python -c "from skxray.ext import ctrans; print(ctrans)"
   - pip install coveralls
   - pip install codecov
+  - pwd
   - ls -l 
 
 script:
