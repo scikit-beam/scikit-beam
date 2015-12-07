@@ -19,6 +19,7 @@ install:
   - conda install -n testenv -c scikit-xray xraylib lmfit=0.8.3 netcdf4
   - source activate testenv
   - python setup.py install
+  - cd /tmp && python -c "from skxray.ext import ctrans"
   - pip install coveralls
   - pip install codecov
 
