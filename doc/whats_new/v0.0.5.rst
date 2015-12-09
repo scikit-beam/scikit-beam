@@ -10,12 +10,12 @@ New Functionality
 
 API Changes
 ===========
-* :func:`weighted_nnls_fit` was removed from :mod:`skxray.core.fitting.xrf_model`.
+* :func:`weighted_nnls_fit` was removed from :mod:`skbeam.core.fitting.xrf_model`.
   Weighted nnls fitting was combined into :func:`nnls_fit`, which includes
   weights as a new argument.
 
 * :func:`extract_label_indices` is a helper function for labeled arrays and
-  was moved to its new home in `skxray.core.roi` from `skxray.core.correlation`
+  was moved to its new home in `skbeam.core.roi` from `skbeam.core.correlation`
 
 Other updates
 =============

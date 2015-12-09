@@ -2,7 +2,7 @@
  :mod:`core.constants` Module
 =============================
 
-.. currentmodule:: skxray.core.constants.basic
+.. currentmodule:: skbeam.core.constants.basic
 
 Elemental data
 --------------
@@ -14,7 +14,7 @@ Tools for working with elemental constants.
    BasicElement
 
 
-.. currentmodule:: skxray.core.constants.xrf
+.. currentmodule:: skbeam.core.constants.xrf
 
 X-ray fluorescence data
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -33,7 +33,7 @@ data.  For the most part users should access this data through the
    emission_line_search
    XrfElement
    
-.. currentmodule:: skxray.core.constants.xrs
+.. currentmodule:: skbeam.core.constants.xrs
 
 Powder Diffraction Standards
 ----------------------------

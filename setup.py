@@ -34,7 +34,7 @@ setup(
     description="Data analysis tools for X-ray science",
     packages=setuptools.find_packages(exclude=['doc']),
     include_dirs=[np.get_include()],
-    package_data={'skxray.core.constants': ['data/*.dat']},
+    package_data={'skbeam.core.constants': ['data/*.dat']},
     install_requires=['six', 'numpy'],  # essential deps only
     ext_modules=c_ext() + cython_ext(),
     url='http://github.com/scikit-xray/scikit-xray',

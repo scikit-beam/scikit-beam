@@ -3,7 +3,7 @@
 =========================
 
 
-.. automodule:: skxray.io.binary
+.. automodule:: skbeam.io.binary
    :members:
    :show-inheritance:
    :undoc-members:

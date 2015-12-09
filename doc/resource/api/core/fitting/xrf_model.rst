@@ -3,7 +3,7 @@
 =====================
 
 
-.. automodule:: skxray.core.fitting.models
+.. automodule:: skbeam.core.fitting.models
    :members:
    :show-inheritance:
    :undoc-members:

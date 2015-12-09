@@ -3,7 +3,7 @@
 ==================================
 
 
-.. automodule:: skxray.io.gsas_file_reader
+.. automodule:: skbeam.io.gsas_file_reader
    :members:
    :show-inheritance:
    :undoc-members:

@@ -199,31 +199,31 @@ To measure the test coverage, install
 
   $ python run_tests.py
 
-This will print a report with one line for each file in `skxray`,
+This will print a report with one line for each file in `skbeam`,
 detailing the test coverage::
 
   Name                                 Stmts   Miss  Cover   Missing
   ------------------------------------------------------------------
-  skxray.calibration                      48      0   100%
-  skxray.constants                       153      2    99%   783, 836
-  skxray.core                            306    113    63%   63-64, 101-105,
+  skbeam.calibration                      48      0   100%
+  skbeam.constants                       153      2    99%   783, 836
+  skbeam.core                            306    113    63%   63-64, 101-105,
         108, 113-146, 149-162, 167-172, 176, 179, 186-191, 237-240, 245-262,
         266-270, 273-277, 280, 283, 289-294, 298-300, 304-334, 476, 658, 804,
         894-903, 911, 915, 942, 960,
   963, 1158
-  skxray.feature                          58      4    93%   133-136, 177, 216
-  skxray.fitting                          15      1    93%   77
-  skxray.fitting.api                      11      0   100%
-  skxray.fitting.background               51      4    92%   127, 133, 141, 163
-  skxray.fitting.base                      4      0   100%
-  skxray.fitting.base.parameter_data       9      0   100%
-  skxray.fitting.lineshapes               56      1    98%   137
-  skxray.fitting.models                   40      2    95%   126, 156
-  skxray.image                            14      0   100%
-  skxray.io                                2      0   100%
-  skxray.io.net_cdf_io                    15     10    33%   81-105
-  skxray.recip                            35      4    89%   57-58, 142, 147
-  skxray.spectroscopy                     69      2    97%   133, 267
+  skbeam.feature                          58      4    93%   133-136, 177, 216
+  skbeam.fitting                          15      1    93%   77
+  skbeam.fitting.api                      11      0   100%
+  skbeam.fitting.background               51      4    92%   127, 133, 141, 163
+  skbeam.fitting.base                      4      0   100%
+  skbeam.fitting.base.parameter_data       9      0   100%
+  skbeam.fitting.lineshapes               56      1    98%   137
+  skbeam.fitting.models                   40      2    95%   126, 156
+  skbeam.image                            14      0   100%
+  skbeam.io                                2      0   100%
+  skbeam.io.net_cdf_io                    15     10    33%   81-105
+  skbeam.recip                            35      4    89%   57-58, 142, 147
+  skbeam.spectroscopy                     69      2    97%   133, 267
   ------------------------------------------------------------------
   TOTAL                                  886    143    84%
   ----------------------------------------------------------------------

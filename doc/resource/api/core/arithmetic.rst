@@ -2,7 +2,7 @@
  :mod:`core.arithmetic` Module
 =========================
 
-.. automodule:: skxray.core.arithmetic
+.. automodule:: skbeam.core.arithmetic
    :members:
    :show-inheritance:
    :undoc-members:

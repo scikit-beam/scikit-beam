@@ -2,7 +2,7 @@
  :mod:`core` subpackge
 ======================
 
-.. currentmodule:: skxray.core
+.. currentmodule:: skbeam.core
 
 
 Scientific Algorithms

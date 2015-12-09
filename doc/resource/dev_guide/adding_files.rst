@@ -7,7 +7,7 @@ When adding new packages and modules (which map to folders and files)
 to the library you are required to update both the build/install
 system (:file:`setup.py`) and add files to the documentation folder.
 
-All python source code must be under the main :file:`skxray` directory.
+All python source code must be under the main :file:`skbeam` directory.
 Non-python sources goes in the :file:`src` directory.
 
 Build
@@ -24,14 +24,14 @@ done via the :code:`packages` key word argument (kwarg) to :func:`setup` in
 :file:`setup.py`.  If you add a package, then it's dotted-name must be
 added to this list.
 
-e.g. if you add a new package called :code:`utils` to the :code:`skxray` folder,
+e.g. if you add a new package called :code:`utils` to the :code:`skbeam` folder,
 the following setup.py file: ::
 
     setup(
         name='scikit-xray',
         version='0',
         author='Brookhaven National Lab',
-        packages=["skxray"],
+        packages=["skbeam"],
         )
 
     would need to be modified to:
@@ -40,7 +40,7 @@ the following setup.py file: ::
         name='scikit-xray',
         version='0',
         author='Brookhaven National Lab',
-        packages=["skxray", "skxray.utils"],   <------- modification happened here
+        packages=["skbeam", "skbeam.utils"],   <------- modification happened here
         )
 
 Documentation
@@ -51,7 +51,7 @@ the documentation.
 
 Continuing the example from above where a 'utils' source code package was added,
 a folder called :file:`/doc/resource/api/utils` should be added.  Let's also
-presume that you've got :file:`fitting.py` in the :file:`/skxray/utils/`.  In the
+presume that you've got :file:`fitting.py` in the :file:`/skbeam/utils/`.  In the
 documentation :file:`/doc/resource/api/utils` folder, create a file named
 :file:`index.rst` with the contents: ::
 
@@ -82,7 +82,7 @@ following template: ::
     Any prose you want to add about the module, such as examples, discussion,
     or saying hi to your mom can go here.
 
-    .. automodule:: skxray.core.fitting
+    .. automodule:: skbeam.core.fitting
        :members:
        :show-inheritance:
        :undoc-members:
@@ -94,12 +94,12 @@ Testing
 -------
 
 When you add a new module or package please add the corresponding
-files and folders in the :file:`skxray/tests` folder.  Packages get
+files and folders in the :file:`skbeam/tests` folder.  Packages get
 :file:`test_packagename` and modules get :file:`test_module_name.py`
 in the proper directory.
 
 Using the example above, you would create the directory
-:file:`/skxray/tests/test_utils/` and the file :file:`test_fitting.py` in the
+:file:`/skbeam/tests/test_utils/` and the file :file:`test_fitting.py` in the
 :file:`test_utils` folder.
 
 Remember: Write a test for all new functionality!!
