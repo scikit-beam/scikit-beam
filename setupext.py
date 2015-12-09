@@ -15,7 +15,8 @@ import six
 from six.moves import configparser
 import numpy as np
 import copy
-from distutils.core import setup, Extension
+from distutils.core import Extension
+from Cython.Build import cythonize
 
 
 options = {'build_ctrans': False}
@@ -110,3 +111,5 @@ ext_modules = []
 if options['build_ctrans']:
     ext_modules.append(Extension('ctrans', ['src/ctrans.c'],
                                  **ctrans))
+
+ext_modules.append(cythonize("skxray/core/accumulators/*.pyx"))
