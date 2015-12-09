@@ -48,6 +48,12 @@ import numpy as np
 import scipy.special
 import six
 
+from scipy import stats
+from scipy.special import gamma, gammaln
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 log2 = np.log(2)
 s2pi = np.sqrt(2*np.pi)
@@ -385,3 +391,100 @@ def compton(x, compton_amplitude, coherent_sct_energy,
     counts += value
 
     return counts
+
+
+def gamma_dist(bin_values, K, M):
+    """
+    Gamma distribution function
+    Parameters
+    ----------
+    bin_values : array
+        bin values for detecting photons
+        eg : max photon counts is 8
+        bin_values = np.arange(8+2)
+    K : int
+        mean count of photons
+    M : int
+        number of coherent modes
+    Returns
+    -------
+    gamma_dist : array
+        Gamma distribution
+    Notes
+    -----
+    These implementations are based on the references under
+    nbinom_distribution() function Notes
+
+    : math ::
+        P(K) = \frac{\Gamma(K + M)} {\Gamma(K + 1)\Gamma(M)}(\frac {M} {M + <K>})^M (\frac {<K>}{M + <K>})^K
+    """
+
+    gamma_dist = (stats.gamma(M, 0., K/M)).pdf(bin_values)
+    return gamma_dist
+
+
+def nbinom_dist(bin_values, K, M):
+    """
+    Negative Binomial (Poisson-Gamma) distribution function
+    Parameters
+    ----------
+    bin_values : array
+        bin values for detecting photons
+        eg : max photon counts is 8
+        bin_values = np.arange(8+2)
+    K : int
+        mean count of photons
+    M : int
+        number of coherent modes
+    Returns
+    -------
+    nbinom : array
+        Negative Binomial (Poisson-Gamma) distribution function
+    Notes
+    -----
+    The negative-binomial distribution function
+    :math ::
+       P(K) =(\frac{M}{<K>})^M \frac{K^(M-1)}{\Gamma(M)}\exp(-M\frac{K}{<K>})
+
+    These implementation is based on following references
+
+    References: text [1]_
+    .. [1] L. Li, P. Kwasniewski, D. Oris, L Wiegart, L. Cristofolini,
+       C. Carona and A. Fluerasu , "Photon statistics and speckle visibility
+       spectroscopy with partially coherent x-rays" J. Synchrotron Rad.,
+       vol 21, p 1288-1295, 2014.
+
+    """
+    co_eff = np.exp(gammaln(bin_values + M) -
+                    gammaln(bin_values + 1) - gammaln(M))
+
+    nbinom = co_eff * np.power(M / (K + M), M) * np.power(K / (M + K),
+                                                          bin_values)
+    return nbinom
+
+
+def poisson_dist(bin_values, K):
+    """
+    Poisson Distribution
+    Parameters
+    ---------
+    K : int
+        mean count of photons
+    bin_values : array
+        bin values for detecting photons
+        eg : max photon counts is 8
+        bin_values = np.arange(8+2)
+    Returns
+    -------
+    poisson_dist : array
+       Poisson Distribution
+    Notes
+    -----
+    These implementations are based on the references under
+    nbinom_distribution() function Notes
+    :math ::
+        P(K) = \frac{<K>^K}{K!}\exp(-<K>)
+    """
+
+    poisson_dist = np.exp(-K) * np.power(K, bin_values)/gamma(bin_values + 1)
+    return poisson_dist

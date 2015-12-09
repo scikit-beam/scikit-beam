@@ -46,6 +46,8 @@ from .models import (Lorentzian2Model, ComptonModel, ElasticModel)
 from .lineshapes import (gaussian, lorentzian, lorentzian2, voigt, pvoigt,
                          gaussian_tail, gausssian_step, elastic, compton)
 
+from .lineshapes import (gamma_dist, nbinom_dist, poisson_dist)
+
 # construct a list of the models that can be used
 model_list = sorted([Lorentzian2Model, ComptonModel, ElasticModel],
                     key=lambda s: str(s).split('.')[-1])
