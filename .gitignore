@@ -89,6 +89,7 @@ generated/
 
 # ctags
 .tags*
+/tags
 
 # Generated cython files in any subdirectory of /skxray/
 /skxray/**/*.c
