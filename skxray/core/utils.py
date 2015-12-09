@@ -731,7 +731,7 @@ def wedge_integration(src_data, center, theta_start,
 
 def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
     """
-    Generate bin edges.  The last value is the returned array is
+    Generate bin edges.  The last value in the returned array is
     the right edge of the last bin, the rest of the values are the
     left edges of each bin.
 
