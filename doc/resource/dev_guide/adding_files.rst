@@ -28,7 +28,7 @@ e.g. if you add a new package called :code:`utils` to the :code:`skbeam` folder,
 the following setup.py file: ::
 
     setup(
-        name='scikit-xray',
+        name='scikit-beam',
         version='0',
         author='Brookhaven National Lab',
         packages=["skbeam"],
@@ -37,7 +37,7 @@ the following setup.py file: ::
     would need to be modified to:
 
     setup(
-        name='scikit-xray',
+        name='scikit-beam',
         version='0',
         author='Brookhaven National Lab',
         packages=["skbeam", "skbeam.utils"],   <------- modification happened here
@@ -106,4 +106,4 @@ Remember: Write a test for all new functionality!!
 
 Relative Imports
 ----------------
-See the issue (#?) in the scikit-xray repo on github.
+See the issue (#?) in the scikit-beam repo on github.

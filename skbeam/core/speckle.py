@@ -105,7 +105,7 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
        D.J. Durian "Speckle-visibilty Spectroscopy: A tool to study
        time-varying dynamics" Rev. Sci. Instrum. vol 76, p  093110, 2005.
 
-    There is an example in https://github.com/scikit-xray/scikit-xray-examples
+    There is an example in https://github.com/scikit-beam/scikit-beam-examples
     It will demonstrate the use of these functions in this module for
     experimental data.
 

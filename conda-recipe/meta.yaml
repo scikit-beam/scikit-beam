@@ -1,5 +1,5 @@
 package:
-  name: scikit-xray
+  name: scikit-beam
   version: {{ environ['GIT_DESCRIBE_TAG'] }}.post{{ environ['GIT_DESCRIBE_NUMBER'] }}
 
 source:
@@ -68,5 +68,5 @@ test:
     - skbeam.io.gsas_file_reader
 
 about:
-  home: http://scikit-xray.github.io/scikit-xray/
+  home: http://scikit-beam.github.io/scikit-beam/
   license: 3-Clause BSD

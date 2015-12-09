@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# scikit-xray documentation build configuration file, created by
+# scikit-beam documentation build configuration file, created by
 # sphinx-quickstart on Mon Sep 17 09:43:12 2012.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,7 +40,7 @@ extensions = ['sphinx.ext.autodoc',
               'IPython.sphinxext.ipython_console_highlighting',
              ]
 
-extlinks = {'issue': ('https://github.com/scikit-xray/scikit-xray/issues/%s',
+extlinks = {'issue': ('https://github.com/scikit-beam/scikit-beam/issues/%s',
                       'GH')}
 
 # Generate the API documentation when building
@@ -60,7 +60,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'scikit-xray'
+project = u'scikit-beam'
 copyright = u'2014-2015 Brookhaven National Lab'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -196,7 +196,7 @@ html_domain_indices = False
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'scikit-xraydoc'
+htmlhelp_basename = 'scikit-beamdoc'
 
 
 
@@ -216,7 +216,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'scikit-xray.tex', u'scikit-xray Documentation',
+  ('index', 'scikit-beam.tex', u'scikit-beam Documentation',
    u'Brookhaven National Lab', 'manual'),
 ]
 
@@ -246,7 +246,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'scikit-xray', u'scikit-xray Documentation',
+    ('index', 'scikit-beam', u'scikit-beam Documentation',
      [u'Brookhaven National Lab'], 1)
 ]
 
@@ -260,8 +260,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'scikit-xray', u'scikit-xray Documentation',
-   u'Brookhaven National Lab', 'scikit-xray', 'One line description of project.',
+  ('index', 'scikit-beam', u'scikit-beam Documentation',
+   u'Brookhaven National Lab', 'scikit-beam', 'One line description of project.',
    'Miscellaneous'),
 ]
 
@@ -287,13 +287,13 @@ intersphinx_mapping = {'python': ('http://docs.python.org/2.7', None),
 # -- Options for Epub output ----------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'scikit-xray'
+epub_title = u'scikit-beam'
 epub_author = u'Brookhaven National Lab'
 epub_publisher = u'Brookhaven National Lab'
 epub_copyright = u'2014-2015 Brookhaven National Lab'
 
 # The basename for the epub file. It defaults to the project name.
-#epub_basename = u'scikit-xray'
+#epub_basename = u'scikit-beam'
 
 # The HTML theme for the epub output. Since the default themes are not optimized
 # for small screen space, using the same theme for HTML and epub output is

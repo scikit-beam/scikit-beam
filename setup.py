@@ -27,7 +27,7 @@ def cython_ext():
 
 
 setup(
-    name='scikit-xray',
+    name='scikit-beam',
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     author='Brookhaven National Lab',
@@ -37,7 +37,7 @@ setup(
     package_data={'skbeam.core.constants': ['data/*.dat']},
     install_requires=['six', 'numpy'],  # essential deps only
     ext_modules=c_ext() + cython_ext(),
-    url='http://github.com/scikit-xray/scikit-xray',
+    url='http://github.com/scikit-beam/scikit-beam',
     keywords='Xray Analysis',
     license='BSD',
     classifiers=['Development Status :: 3 - Alpha',

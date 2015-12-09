@@ -2,12 +2,11 @@
 [![codecov.io](http://codecov.io/github/scikit-beam/scikit-beam/coverage.svg?branch=master)](http://codecov.io/github/scikit-beam/scikit-beam?branch=master)
 [![Join the chat at https://gitter.im/scikit-beam/scikit-beam](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/scikit-beam/scikit-beam?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-# scikit-xray
-
+# scikit-beam
 **[Documentation] (http://scikit-beam.github.io/scikit-beam/)**
 
 ## Examples
-[scikit-xray-examples repository] (https://github.com/scikit-beam/scikit-beam-examples)
+[scikit-beam-examples repository] (https://github.com/scikit-beam/scikit-beam-examples)
 
 - [Powder calibration (still needs tilt correction)] (https://github.com/scikit-beam/scikit-beam-examples/blob/master/demos/powder_calibration/D_estimate_demo.ipynb)
 - 1-time correlation
@@ -25,8 +24,8 @@
 ### install with conda
 
 ```
-conda config --add channels scikit-xray
-conda install scikit-xray
+conda config --add channels scikit-beam
+conda install scikit-beam
 ```
 
 ### install development version with setuptools
