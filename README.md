@@ -1,10 +1,11 @@
 ## [MAILING LIST] (https://groups.google.com/forum/#!forum/scikit-beam)
- 
+
+# scikit-beam
+
 [![Build Status](https://travis-ci.org/scikit-beam/scikit-beam.svg?branch=master)](https://travis-ci.org/scikit-beam/scikit-beam)
 [![codecov.io](http://codecov.io/github/scikit-beam/scikit-beam/coverage.svg?branch=master)](http://codecov.io/github/scikit-beam/scikit-beam?branch=master)
 [![Join the chat at https://gitter.im/scikit-beam/scikit-beam](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/scikit-beam/scikit-beam?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-# scikit-beam
 **[Documentation] (http://scikit-beam.github.io/scikit-beam/)**
 
 ## Examples
