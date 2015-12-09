@@ -112,4 +112,4 @@ if options['build_ctrans']:
     ext_modules.append(Extension('ctrans', ['src/ctrans.c'],
                                  **ctrans))
 
-ext_modules.append(cythonize("skxray/core/accumulators/*.pyx"))
+ext_modules += cythonize("skxray/core/accumulators/*.pyx")
