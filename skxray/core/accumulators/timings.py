@@ -1,9 +1,9 @@
 import timeit
 import time
-import htest
 import numpy as np
+from skxray.core.accumulators.histogram import hist1d
 
-h = htest.hist1d(10, 0, 10);
+h = hist1d(10, 0, 10);
 x = np.random.random(1000000)*40;
 w = np.ones_like(x)
 xi = x.astype(int)
