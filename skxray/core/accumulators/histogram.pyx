@@ -33,29 +33,15 @@ class histaxis:
         return np.linspace(self.low+0.5*self.binsize, self.high-0.5*self.binsize, self.nbin)
 
 class hist1d:
+
     def __init__(self, nbinx, xlow, xhigh):
         self.data = np.zeros(nbinx)
         #cdef float self.data[nbinx]
         self.nbinx = nbinx
         self.xaxis = histaxis(nbinx, xlow, xhigh)
 
-    def fillnp(self, xval, weight):
-        xbin=self.xaxis.bin(xval)
-        inside = (0 <= xbin) & (xbin < self.nbinx)
-        xbinin = xbin[inside]
-        self.data += np.bincount(xbinin, weight[inside], self.nbinx)
 
-    def fill(self, xval, weight):
-        low = self.xaxis.low
-        binsize = self.xaxis.binsize
-
-        for val, wt in zip(xval, weight):
-            fidx = (val - low) / binsize
-            iidx = np.floor(fidx).astype(int)
-            if iidx >= 0 and iidx < self.nbinx:
-                self.data[iidx] += wt
-
-    def fillcywithcall(self, np.ndarray[hnumtype, ndim=1] xval, np.ndarray[hnumtype, ndim=1] weight):
+    def fill(self, np.ndarray[hnumtype, ndim=1] xval, np.ndarray[hnumtype, ndim=1] weight):
         cdef np.ndarray[np.float_t, ndim=1] data = self.data
         cdef float low = self.xaxis.low
         cdef float high = self.xaxis.high
@@ -68,34 +54,6 @@ class hist1d:
         cdef hnumtype* pw = <hnumtype*> weight.data
         for i in range(xlen):
             fillonecy(px[i], pw[i], pdata, low, high, binsize)
-        return
-
-
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    def fillcy(self, np.ndarray[hnumtype, ndim=1] xval, np.ndarray[hnumtype, ndim=1] weight):
-
-        cdef float low = self.xaxis.low
-        cdef float high = self.xaxis.high
-        cdef float binsize = self.xaxis.binsize
-        cdef int i
-        cdef float fidx
-        cdef int iidx
-        cdef hnumtype xval_i
-
-        cdef int xlen = len(xval)
-
-        cdef np.ndarray[np.float_t, ndim=1] data = self.data
-        cdef int nbinx = self.nbinx
-        for i in range(xlen):
-            xval_i = xval[i]
-            if not (xval_i >= low and xval_i < high):
-                continue
-
-            fidx = (xval_i - low) / binsize
-            iidx = int(fidx)
-            data[iidx] += weight[i]
-
         return
 
 
