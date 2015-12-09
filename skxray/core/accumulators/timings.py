@@ -24,7 +24,8 @@ print("Cython with call:", timethis('h.fillcywithcall(x, w)'))
 print("Numpy", timethis('h.fillnp(x, w)'))
 # print("Python Looping", timethis('h.fill(x, w)'))
 
-hnp = histfromzero(h, 'fillnp', x, w)
+hnp = np.histogram(x, h.nbinx, range=(h.xaxis.low, h.xaxis.high), weights=w)[0]
+assert np.array_equal(hnp, histfromzero(h, 'fillnp', x, w))
 assert np.array_equal(hnp, histfromzero(h, 'fillcy', x, w))
 assert np.array_equal(hnp, histfromzero(h, 'fillcywithcall', x, w))
 
