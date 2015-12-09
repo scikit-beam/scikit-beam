@@ -7,6 +7,8 @@ This may be renamed to scikit-beam.
 
 This will soon be called scikit-beam.
 
+This might soon be renamed scikit-beam.
+
 **[Documentation] (http://scikit-xray.github.io/scikit-xray/)**
 
 ## Examples
@@ -51,3 +53,6 @@ pip install nose coverage setuptools
 ```
 python run_tests.py
 ```
+
+
+another edit
