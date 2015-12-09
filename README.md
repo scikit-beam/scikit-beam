@@ -4,6 +4,8 @@
 
 # scikit-xray
 
+This will soon be called scikit-beam.
+
 **[Documentation] (http://scikit-xray.github.io/scikit-xray/)**
 
 ## Examples
