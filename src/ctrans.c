@@ -785,7 +785,7 @@ static PyObject* set_threads(PyObject *self, PyObject *args){
     return NULL;
   }
   _n_threads = threads;
-  return Py_RETURN_NONE;
+  Py_RETURN_NONE;
 
 #else
 
