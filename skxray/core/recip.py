@@ -59,7 +59,7 @@ from .ext import ctrans
 
 def process_to_q(setting_angles, detector_size, pixel_size,
                  calibrated_center, dist_sample, wavelength, ub,
-                 frame_mode=None, n_threads=0):
+                 frame_mode=None, n_threads=None):
     """
     This will compute the hkl values for all pixels in a shape specified by
     detector_size.
@@ -106,7 +106,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
 
     n_threads : int, optional
         Specify the number of threads for the c-module to use in its
-        calculations. A value of zero indicates to use the number of
+        calculations. A value of None indicates to use the number of
         configured cores on the system.
 
     Returns
@@ -131,6 +131,11 @@ def process_to_q(setting_angles, detector_size, pixel_size,
        1998.
 
     """
+
+    # Set default threads
+    if n_threads is None:
+        n_threads = 0
+
     # set default frame_mode
     if frame_mode is None:
         frame_mode = 4
