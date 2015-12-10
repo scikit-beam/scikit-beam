@@ -279,6 +279,10 @@ def multi_tau_auto_corr_partial_data(num_levels, num_bufs, labels, images, previ
     images : iterable of 2D arrays
         dimensions are: (rr, cc)
 
+    previous : tuple
+        holds last result (g2, lag_steps) of correlation,
+        and current state (G, past_intensity_norm, future_intensity_norm, buf)
+
     Returns
     -------
     g2 : array
@@ -379,10 +383,7 @@ def multi_tau_auto_corr_partial_data(num_levels, num_bufs, labels, images, previ
         start_time = time.time()  # used to log the computation time (optionally)
 
     else:
-        G = previous[2]
-        past_intensity_norm = previous[3]
-        future_intensity_norm = previous[4]
-        buf = previous[5]
+        G, past_intensity_norm, future_intensity_norm, buf = previous[2:]
 
     for n, img in enumerate(images):
 
