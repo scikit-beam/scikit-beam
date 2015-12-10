@@ -2,6 +2,7 @@ import numpy as np
 from numpy.testing import assert_array_equal
 from numpy.testing import assert_array_almost_equal
 from skxray.core.accumulators.histogram import Histogram
+from time import time
 
 
 def _1d_histogram_tester(binlowhighs, x, weights=1):
@@ -65,9 +66,33 @@ def test_2d_histogram():
     for binlowhigh, x, y, w in vals:
         yield _2d_histogram_tester, binlowhigh, x, y, w
 
-
+import itertools
 if __name__ == '__main__':
-    test_1d_histogram()
-    test_2d_histogram()
+    x = [100, 0, 10.01]
+    y = [150, 0, 9.01]
+    xf = np.random.random(1000000)*40
+    yf = np.random.random(1000000)*40
+    xi = xf.astype(int)
+    yi = yf.astype(int)
+    wf = np.linspace(1, 10, len(xf))
+    wi = wf.copy()
+
+    print("Testing 2D histogram timings")
+    for xvals, yvals, weights in itertools.product([xf, xi], [yf, yi], [wf, wi]):
+        print('xvals are of type {}'.format(xvals.dtype))
+        print('yvals are of type {}'.format(yvals.dtype))
+        print('weights are of type {}'.format(weights.dtype))
+        t0 = time()
+        h = Histogram(x, y)
+        h.fill(xvals, yvals, weights=weights)
+        print('skxray = {}'.format(time() - t0))
+        edges = h.edges
+        t0 = time()
+        ynp = np.histogram2d(xvals, yvals, bins=edges, weights=weights)[0]
+        print('numpy = {}'.format(time() - t0))
+        assert_array_almost_equal(h.values, ynp)
+    #
+    # test_1d_histogram()
+    # test_2d_histogram()
 
 #TODO do a better job sampling the variable space
