@@ -1233,3 +1233,92 @@ def _get_activated_line(incident_energy, elemental_line):
                 continue
             line_list.append(str(element)+'_'+str(line_name))
         return line_list
+
+
+def fit_per_line_nnls(row_num, data,
+                      matv, param, use_snip):
+    """
+    Fit experiment data for a given row using nnls algorithm.
+    Parameters
+    ----------
+    row_num : int
+        which row to fit
+    data : array
+        selected one row of experiment spectrum
+    matv : array
+        matrix for regression analysis
+    param : dict
+        fitting parameters
+    use_snip : bool
+        use snip algorithm to remove background or not
+
+    Returns
+    -------
+    array :
+        fitting values for all the elements at a given row. Background is
+        calculated as a summed value. Also residual is included.
+    """
+    logger.info('Row number at {}'.format(row_num))
+    out = []
+    bg_sum = 0
+    for i in range(data.shape[0]):
+        if use_snip is True:
+            bg = snip_method(data[i, :],
+                             param['e_offset']['value'],
+                             param['e_linear']['value'],
+                             param['e_quadratic']['value'],
+                             width=param['non_fitting_values']['background_width'])
+            y = data[i, :] - bg
+            bg_sum = np.sum(bg)
+
+        else:
+            y = data[i, :]
+        result, res = nnls_fit(y, matv, weights=None)
+
+        sst = np.sum((y-np.mean(y))**2)
+        r2 = 1 - res/sst
+        result = list(result) + [bg_sum, r2]
+        out.append(result)
+    return np.array(out)
+
+
+def fit_pixel_multiprocess_nnls(exp_data, matv, param,
+                                use_snip=False):
+    """
+    Multiprocess fit of experiment data.
+    Parameters
+    ----------
+    exp_data : array
+        3D data of experiment spectrum
+    matv : array
+        matrix for regression analysis
+    param : dict
+        fitting parameters
+    use_snip : bool, optional
+        use snip algorithm to remove background or not
+
+    Returns
+    -------
+    dict :
+        fitting values for all the elements
+    """
+    num_processors_to_use = multiprocessing.cpu_count()
+
+    logger.info('cpu count: {}'.format(num_processors_to_use))
+    pool = multiprocessing.Pool(num_processors_to_use)
+
+    result_pool = [pool.apply_async(fit_per_line_nnls,
+                                    (n, exp_data[n, :, :], matv,
+                                     param, use_snip))
+                   for n in range(exp_data.shape[0])]
+
+    results = []
+    for r in result_pool:
+        results.append(r.get())
+
+    pool.terminate()
+    pool.join()
+
+    results = np.array(results)
+
+    return results
