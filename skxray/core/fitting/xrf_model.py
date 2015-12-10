@@ -51,6 +51,7 @@ import numpy as np
 from scipy.optimize import nnls
 import six
 from lmfit import Model
+import multiprocessing
 
 from ..constants import XrfElement as Element
 from ..fitting.lineshapes import gaussian

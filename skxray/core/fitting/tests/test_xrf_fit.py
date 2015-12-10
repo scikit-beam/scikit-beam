@@ -12,7 +12,7 @@ from skxray.core.fitting.xrf_model import (
     ModelSpectrum, ParamController, linear_spectrum_fitting,
     construct_linear_model, trim, sum_area, compute_escape_peak,
     register_strategy,  update_parameter_dict, _set_parameter_hint,
-    _STRATEGY_REGISTRY
+    fit_pixel_multiprocess_nnls, _STRATEGY_REGISTRY
 )
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
@@ -205,3 +205,19 @@ def test_set_param():
 
     input_param = {'bound_type': 'other', 'max': 13.0, 'min': 9.0, 'value': 11.0}
     _set_parameter_hint('coherent_sct_energy', input_param, compton)
+
+
+def test_pixel_fit_multiprocess():
+    param = get_para()
+    y0 = synthetic_spectrum()
+    x = np.arange(len(y0))
+    pileup_peak = ['Si_Ka1-Si_Ka1', 'Si_Ka1-Ce_La1']
+    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak
+    elist, matv, area_v = construct_linear_model(x, param, elemental_lines, default_area=1e5)
+    exp_data = np.zeros([2, 1, len(y0)])
+    for i in range(exp_data.shape[0]):
+        exp_data[i,0,:] = y0
+    results = fit_pixel_multiprocess_nnls(exp_data, matv, param,
+                                          use_snip=True)
+    assert_array_almost_equal(results.shape, [2, 1, len(elist)+2])
+    #print(results.shape)
