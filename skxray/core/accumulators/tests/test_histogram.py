@@ -4,10 +4,10 @@ from numpy.testing import assert_array_almost_equal
 from skxray.core.accumulators.histogram import Histogram
 
 
-def _1d_histogram_tester(binlowhighs, *coords, weights):
+def _1d_histogram_tester(binlowhighs, coords, weights=1):
     h = Histogram(binlowhighs)
     h.fill(coords, weights=weights)
-    ynp = np.histogram(x, h.edges[0], weights=w)[0]
+    ynp = np.histogram(coords[0], h.edges[0], weights=w)[0]
     assert_array_almost_equal(ynp, h.values)
 
 
