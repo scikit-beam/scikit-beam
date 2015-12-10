@@ -125,31 +125,6 @@ class Histogram:
         return
 
 
-    def _fillnd(self, coords, np.ndarray[wnumtype, ndim=1] weight,
-            np.ndarray[xnumtype, ndim=1] dummy):
-        cdef xnumtype* pxa[10]
-        for i, x in enumerate(coords):
-            pxa[i] = <xnumtype*> _getarrayptr(x)
-        cdef np.ndarray[np.float_t, ndim=1] data = self.values
-        cdef float [:] low = self._lows
-        cdef float [:] high = self._highs
-        cdef float [:] binsize = self._binsizes
-        '''
-        cdef int i
-        cdef int xlen = len(xval)
-        cdef np.float_t* pdata = <np.float_t*> data.data
-        cdef xnumtype* px = <xnumtype*> xval.data
-        cdef wnumtype* pw = <wnumtype*> weight.data
-        if weight.size == 1:
-            for i in range(xlen):
-                fillonecy(px[i], pw[0], pdata, low, high, binsize)
-        else:
-            for i in range(xlen):
-                fillonecy(px[i], pw[i], pdata, low, high, binsize)
-        '''
-        return
-
-
     def _fill1d(self, np.ndarray[xnumtype, ndim=1] xval,
                 np.ndarray[wnumtype, ndim=1] weight):
         cdef np.ndarray[np.float_t, ndim=1] data = self.values
@@ -207,6 +182,32 @@ class Histogram:
                 data[xidx][yidx] += pw[i]
                 # pdata[yidx * xlen + xidx] += pw[i]
         return
+
+
+    def _fillnd(self, coords, np.ndarray[wnumtype, ndim=1] weight,
+            np.ndarray[xnumtype, ndim=1] dummy):
+        cdef xnumtype* pxa[10]
+        for i, x in enumerate(coords):
+            pxa[i] = <xnumtype*> _getarrayptr(x)
+        cdef np.ndarray[np.float_t, ndim=1] data = self.values
+        cdef float [:] low = self._lows
+        cdef float [:] high = self._highs
+        cdef float [:] binsize = self._binsizes
+        '''
+        cdef int i
+        cdef int xlen = len(xval)
+        cdef np.float_t* pdata = <np.float_t*> data.data
+        cdef xnumtype* px = <xnumtype*> xval.data
+        cdef wnumtype* pw = <wnumtype*> weight.data
+        if weight.size == 1:
+            for i in range(xlen):
+                fillonecy(px[i], pw[0], pdata, low, high, binsize)
+        else:
+            for i in range(xlen):
+                fillonecy(px[i], pw[i], pdata, low, high, binsize)
+        '''
+        return
+
 
     @property
     def values(self):
