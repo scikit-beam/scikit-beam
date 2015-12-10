@@ -328,31 +328,32 @@ def multi_tau_auto_corr_partial_data(num_levels, num_bufs, labels, images, previ
     # level has twice the delay times of the next lower one. To save
     # needless copying, of cyclic storage of images in buf is used.
 
+
+    if num_bufs % 2 != 0:
+        raise ValueError("number of channels(number of buffers) in "
+                            "multiple-taus (must be even)")
+
+    if hasattr(images, 'frame_shape'):
+        # Give a user-friendly error if we can detect the shape from pims.
+        if labels.shape != images.frame_shape:
+            raise ValueError("Shape of the image stack should be equal to"
+                                " shape of the labels array")
+
+    # get the pixels in each label
+    label_mask, pixel_list = roi.extract_label_indices(labels)
+
+    num_rois = np.max(label_mask)
+
+    # number of pixels per ROI
+    num_pixels = np.bincount(label_mask, minlength=(num_rois+1))
+    num_pixels = num_pixels[1:]
+
+    if np.any(num_pixels == 0):
+            raise ValueError("Number of pixels of the required roi's"
+                            " cannot be zero, "
+                            "num_pixels = {0}".format(num_pixels))
+
     if previous is None:
-        if num_bufs % 2 != 0:
-            raise ValueError("number of channels(number of buffers) in "
-                             "multiple-taus (must be even)")
-
-        if hasattr(images, 'frame_shape'):
-            # Give a user-friendly error if we can detect the shape from pims.
-            if labels.shape != images.frame_shape:
-                raise ValueError("Shape of the image stack should be equal to"
-                                 " shape of the labels array")
-
-        # get the pixels in each label
-        label_mask, pixel_list = roi.extract_label_indices(labels)
-
-        num_rois = np.max(label_mask)
-
-        # number of pixels per ROI
-        num_pixels = np.bincount(label_mask, minlength=(num_rois+1))
-        num_pixels = num_pixels[1:]
-
-        if np.any(num_pixels == 0):
-             raise ValueError("Number of pixels of the required roi's"
-                             " cannot be zero, "
-                             "num_pixels = {0}".format(num_pixels))
-
         # G holds the un normalized auto-correlation result. We
         # accumulate computations into G as the algorithm proceeds.
         G = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
@@ -383,7 +384,8 @@ def multi_tau_auto_corr_partial_data(num_levels, num_bufs, labels, images, previ
         start_time = time.time()  # used to log the computation time (optionally)
 
     else:
-        G, past_intensity_norm, future_intensity_norm, buf = previous[2:]
+        (G, past_intensity_norm, future_intensity_norm, buf,
+        cur, img_per_level, track_level) = previous[2:]
 
     for n, img in enumerate(images):
 
@@ -455,7 +457,8 @@ def multi_tau_auto_corr_partial_data(num_levels, num_bufs, labels, images, previ
     tot_channels, lag_steps = core.multi_tau_lags(num_levels, num_bufs)
     lag_steps = lag_steps[:g_max]
 
-    previous = (g2, lag_steps, G, past_intensity_norm, future_intensity_norm, buf)
+    previous = (g2, lag_steps, G, past_intensity_norm, future_intensity_norm, buf,
+                cur, img_per_level, track_level)
     yield previous
 
 
