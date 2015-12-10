@@ -32,6 +32,18 @@ def test_histint():
     return
 
 
+def test_argtypes():
+    h = Histogram([10, 0, 10.01])
+    h.fill(x, weights=w)
+    h.fill(x, weights=wi)
+    h.fill(xi, weights=w)
+    h.fill(xi, weights=wi)
+    h.fill(x)
+    h.fill(xi)
+    h.fill(x, weights=1.0)
+    return
+
+
 if __name__ == '__main__':
     test_histfloat()
     test_histint()
