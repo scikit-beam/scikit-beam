@@ -10,6 +10,10 @@ import math
 from libc.math cimport floor
 from ..utils import bin_edges_to_centers
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 ctypedef fused xnumtype:
     np.int_t
     np.float_t
@@ -47,6 +51,8 @@ class Histogram:
                 "This class does not yet support higher dimensional histograms "
                 "than 2D"
             )
+        logger.debug('binlowhigh = {}'.format(binlowhigh))
+        logger.debug('args = {}'.format(args))
         nbins = []
         lows = []
         highs = []
@@ -55,17 +61,19 @@ class Histogram:
             lows.append(low)
             highs.append(high)
 
+        logger.debug("nbins = {}".format(nbins))
+
         # create the numpy array to hold the results
         self._values = np.zeros(nbins, dtype=float)
         self.ndims = len(nbins)
-        binsizes = [(high - low) / nbins for high, low, nbins
+        binsizes = [(high - low) / nbin for high, low, nbin
                     in zip(highs, lows, nbins)]
-
+        logger.debug("nbins = {}".format(nbins))
         # store everything in a numpy array
-        self.nbins = np.array(nbins, dtype=np.int).reshape(-1)
-        self.lows = np.array(lows, dtype=np.float).reshape(-1)
-        self.highs = np.array(highs, dtype=np.float).reshape(-1)
-        self.binsizes = np.array(binsizes, dtype=np.float).reshape(-1)
+        self._nbins = np.array(nbins, dtype=np.dtype('i')).reshape(-1)
+        self._lows = np.array(lows, dtype=np.dtype('f')).reshape(-1)
+        self._highs = np.array(highs, dtype=np.dtype('f')).reshape(-1)
+        self._binsizes = np.array(binsizes, dtype=np.dtype('f')).reshape(-1)
 
 
     def reset(self):
@@ -108,7 +116,7 @@ class Histogram:
             self._fill1d(coords[0], weights)
         elif len(coords) == 2:
             # compute a 2D histogram!
-            self._fill2d(coords, weights)
+            self._fill2d(coords[0], coords[1], weights)
         else:
             # do the generalized ND histogram
             raise NotImplementedError()
@@ -117,9 +125,9 @@ class Histogram:
     def _fill1d(self, np.ndarray[xnumtype, ndim=1] xval,
                 np.ndarray[wnumtype, ndim=1] weight):
         cdef np.ndarray[np.float_t, ndim=1] data = self.values
-        cdef float low = self.lows[0]
-        cdef float high = self.highs[0]
-        cdef float binsize = self.binsizes[0]
+        cdef float low = self._lows[0]
+        cdef float high = self._highs[0]
+        cdef float binsize = self._binsizes[0]
         cdef int i
         cdef int xlen = len(xval)
         cdef np.float_t* pdata = <np.float_t*> data.data
@@ -136,14 +144,16 @@ class Histogram:
     def _fill2d(self, np.ndarray[xnumtype, ndim=1] xval,
                 np.ndarray[ynumtype, ndim=1] yval,
                 np.ndarray[wnumtype, ndim=1] weight):
-        cdef np.ndarray[np.float_t, ndim=1] data = self.values
-        cdef float [:] low = self.lows
-        cdef float [:] high = self.highs
-        cdef float [:] binsize = self.nbins
+        # cdef np.ndarray[np.float_t, ndim=2] data = self.values
+        cdef double [:,:] data = self.values
+        cdef float [:] low = self._lows
+        cdef float [:] high = self._highs
+        cdef float [:] binsize = self._binsizes
         cdef int i
         cdef int xlen = len(xval)
         cdef int ylen = len(yval)
-        cdef np.float_t* pdata = <np.float_t*> data.data
+        # cdef float [:,:] pdata =
+        # cdef np.float_t* pdata = <np.float_t*> data.data
         cdef xnumtype* px = <xnumtype*> xval.data
         cdef ynumtype* py = <ynumtype*> yval.data
         cdef wnumtype* pw = <wnumtype*> weight.data
@@ -155,7 +165,8 @@ class Histogram:
                 yidx = find_indices(py[i], low[1], high[1], binsize[1])
                 if yidx == -1:
                     continue
-                pdata[yidx * xlen + xidx] += pw[i]
+                data[xidx][yidx] += pw[0]
+                # pdata[yidx * xlen + xidx] += pw[0]
         else:
             for i in range(xlen):
                 xidx = find_indices(px[i], low[0], high[0], binsize[0])
@@ -164,7 +175,8 @@ class Histogram:
                 yidx = find_indices(py[i], low[1], high[1], binsize[1])
                 if yidx == -1:
                     continue
-                pdata[yidx * xlen + xidx] += pw[i]
+                data[xidx][yidx] += pw[i]
+                # pdata[yidx * xlen + xidx] += pw[i]
         return
 
     @property
@@ -174,7 +186,7 @@ class Histogram:
     @property
     def edges(self):
         return [np.linspace(low, high, nbin+1) for nbin, low, high
-                in zip(self.nbins, self.lows, self.highs)]
+                in zip(self._nbins, self._lows, self._highs)]
 
     @property
     def centers(self):
