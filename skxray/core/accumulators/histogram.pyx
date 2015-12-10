@@ -18,6 +18,10 @@ ctypedef fused wnumtype:
     np.float_t
 
 
+cdef void* _getarrayptr(np.ndarray a):
+    return <void*> a.data
+
+
 class Histogram:
     def __init__(self, binlowhigh, *args):
         """
@@ -95,6 +99,30 @@ class Histogram:
             raise NotImplementedError()
         return
 
+
+    def _fillnd(self, coords, np.ndarray[wnumtype, ndim=1] weight,
+            np.ndarray[hnumtype, ndim=1] dummy):
+        cdef hnumtype* pxa[10]
+        for i, x in enumerate(coords):
+            pxa[i] = <hnumtype*> _getarrayptr(x)
+        cdef np.ndarray[np.float_t, ndim=1] data = self.values
+        '''
+        cdef float [:] lows = self.lows
+        cdef float high = self.highs[0]
+        cdef float binsize = self.binsizes[0]
+        cdef int i
+        cdef int xlen = len(xval)
+        cdef np.float_t* pdata = <np.float_t*> data.data
+        cdef hnumtype* px = <hnumtype*> xval.data
+        cdef wnumtype* pw = <wnumtype*> weight.data
+        if weight.size == 1:
+            for i in range(xlen):
+                fillonecy(px[i], pw[0], pdata, low, high, binsize)
+        else:
+            for i in range(xlen):
+                fillonecy(px[i], pw[i], pdata, low, high, binsize)
+        '''
+        return
 
     def _fill1d(self, np.ndarray[hnumtype, ndim=1] xval,
                 np.ndarray[wnumtype, ndim=1] weight):
