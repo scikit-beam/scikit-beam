@@ -228,7 +228,8 @@ def test_process_grid_std_err():
                   'zmin': q_min[2],
                   'xmax': q_max[0],
                   'ymax': q_max[1],
-                  'zmax': q_max[2]}
+                  'zmax': q_max[2],
+                  'n_threads': 1}
     # slice tricks
     # this make a list of slices, the imaginary value in the
     # step is interpreted as meaning 'this many values'

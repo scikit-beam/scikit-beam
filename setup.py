@@ -2,7 +2,6 @@
 
 import setuptools
 from distutils.core import setup, Extension
-from setupext import ext_modules
 import versioneer
 import numpy as np
 import os
@@ -11,8 +10,13 @@ import os
 # Used for the long_description.  It's nice, because now 1) we have a top level
 # README file and 2) it's easier to type in the README file than to put a raw
 # string in below ...
+
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+ext_modules = [Extension('ctrans', ['src/ctrans.c'],
+                         define_macros=[('USE_THREADS', None)])]
 
 setup(
     name='scikit-xray',
@@ -21,6 +25,7 @@ setup(
     author='Brookhaven National Lab',
     description="Data analysis tools for X-ray science",
     packages=setuptools.find_packages(exclude=['doc']),
+    ext_package='skxray.ext',
     include_dirs=[np.get_include()],
     package_data={'skxray.core.constants': ['data/*.dat']},
     install_requires=['six', 'numpy'],  # essential deps only

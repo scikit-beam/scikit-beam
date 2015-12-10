@@ -52,14 +52,7 @@ from itertools import tee
 import logging
 logger = logging.getLogger(__name__)
 
-try:
-    import src.ctrans as ctrans
-except ImportError:
-    try:
-        import ctrans
-    except ImportError:
-        ctrans = None
-
+from .ext import ctrans
 
 md_value = namedtuple("md_value", ['value', 'units'])
 
@@ -834,7 +827,7 @@ def grid3d(q, img_stack,
            nx=None, ny=None, nz=None,
            xmin=None, xmax=None, ymin=None,
            ymax=None, zmin=None, zmax=None,
-           binary_mask=None):
+           binary_mask=None, n_threads=None):
     """Grid irregularly spaced data points onto a regular grid via histogramming
 
     This function will process the set of reciprocal space values (q), the
@@ -872,6 +865,10 @@ def grid3d(q, img_stack,
         Binary mask can be two different shapes.
         - 1: 2-D with binary_mask.shape == np.asarray(img_stack[0]).shape
         - 2: 3-D with binary_mask.shape == np.asarray(img_stack).shape
+    n_threads : int, optional
+        Specify the number of threads for the c-module to use in its
+        calculations. A value of None indicates to use the number of
+        configured cores on the system.
 
     Returns
     -------
@@ -890,7 +887,19 @@ def grid3d(q, img_stack,
         tuple of (min, max, step) for x, y, z in order: [x_bounds,
         y_bounds, z_bounds]
 
+    Notes
+    -----
+    The standard error is calculated "on the fly" on a per thread basis.
+    Therefore, the standard error is not correctly calculated if there is only
+    one value per voxel per thread. The standard error calculation is
+    therefore only valid when the number of values per voxel per thread is
+    greater than one. The n_threads can be used to set the number of cores used
+    to correct this if the standard error is needed to be accurate.
     """
+
+    if n_threads is None:
+        n_threads = 0
+
     # validate input
     img_stack = np.asarray(img_stack)
     # todo determine if we're going to support masked arrays
@@ -954,8 +963,9 @@ def grid3d(q, img_stack,
     t1 = time.time()
 
     # call the c library
-    mean, occupancy, std_err, oob = ctrans.grid3d(q, qmin, qmax, dqn, norm=1)
 
+    total, mean, occupancy, std_err, oob = ctrans.grid3d(q, qmin, qmax, dqn,
+                                                         n_threads)
     # ending time for the gridding
     t2 = time.time()
     logger.info("Done processed in {0} seconds".format(t2-t1))
