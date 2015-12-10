@@ -10,7 +10,11 @@ import math
 from libc.math cimport floor
 from ..utils import bin_edges_to_centers
 
-ctypedef fused hnumtype:
+ctypedef fused xnumtype:
+    np.int_t
+    np.float_t
+
+ctypedef fused ynumtype:
     np.int_t
     np.float_t
 
@@ -38,9 +42,10 @@ class Histogram:
         -----
         The right most bin is half open
         """
-        if args:
+        if len(args) > 1:
             raise NotImplementedError(
-                "This class does not yet support higher dimensional histograms than 1D"
+                "This class does not yet support higher dimensional histograms "
+                "than 2D"
             )
         nbins = []
         lows = []
@@ -101,13 +106,15 @@ class Histogram:
         if len(coords) == 1:
             # compute a 1D histogram
             self._fill1d(coords[0], weights)
+        elif len(coords) == 2:
+            # compute a 2D histogram!
+            self._fill2d(coords, weights)
         else:
             # do the generalized ND histogram
             raise NotImplementedError()
         return
 
-
-    def _fill1d(self, np.ndarray[hnumtype, ndim=1] xval,
+    def _fill1d(self, np.ndarray[xnumtype, ndim=1] xval,
                 np.ndarray[wnumtype, ndim=1] weight):
         cdef np.ndarray[np.float_t, ndim=1] data = self.values
         cdef float low = self.lows[0]
@@ -116,7 +123,7 @@ class Histogram:
         cdef int i
         cdef int xlen = len(xval)
         cdef np.float_t* pdata = <np.float_t*> data.data
-        cdef hnumtype* px = <hnumtype*> xval.data
+        cdef xnumtype* px = <xnumtype*> xval.data
         cdef wnumtype* pw = <wnumtype*> weight.data
         if weight.size == 1:
             for i in range(xlen):
@@ -124,6 +131,40 @@ class Histogram:
         else:
             for i in range(xlen):
                 fillonecy(px[i], pw[i], pdata, low, high, binsize)
+        return
+
+    def _fill2d(self, np.ndarray[xnumtype, ndim=1] xval,
+                np.ndarray[ynumtype, ndim=1] yval,
+                np.ndarray[wnumtype, ndim=1] weight):
+        cdef np.ndarray[np.float_t, ndim=1] data = self.values
+        cdef float [:] low = self.lows
+        cdef float [:] high = self.highs
+        cdef float [:] binsize = self.nbins
+        cdef int i
+        cdef int xlen = len(xval)
+        cdef int ylen = len(yval)
+        cdef np.float_t* pdata = <np.float_t*> data.data
+        cdef xnumtype* px = <xnumtype*> xval.data
+        cdef ynumtype* py = <ynumtype*> yval.data
+        cdef wnumtype* pw = <wnumtype*> weight.data
+        if weight.size == 1:
+            for i in range(xlen):
+                xidx = find_indices(px[i], low[0], high[0], binsize[0])
+                if xidx == -1:
+                    continue
+                yidx = find_indices(py[i], low[1], high[1], binsize[1])
+                if yidx == -1:
+                    continue
+                pdata[yidx * xlen + xidx] += pw[i]
+        else:
+            for i in range(xlen):
+                xidx = find_indices(px[i], low[0], high[0], binsize[0])
+                if xidx == -1:
+                    continue
+                yidx = find_indices(py[i], low[1], high[1], binsize[1])
+                if yidx == -1:
+                    continue
+                pdata[yidx * xlen + xidx] += pw[i]
         return
 
     @property
@@ -140,13 +181,17 @@ class Histogram:
         return [bin_edges_to_centers(edge) for edge in self.edges]
 
 
-cdef void fillonecy(hnumtype xval, wnumtype weight,
+cdef long find_indices(xnumtype pos, float low, float high, float binsize):
+    if not (low <= pos < high):
+        return -1
+    return int((pos - low) / binsize)
+
+cdef void fillonecy(xnumtype xval, wnumtype weight,
                     np.float_t* pdata,
                     float low, float high, float binsize):
-    if not (low <= xval < high):
+    iidx = find_indices(xval, low, high, binsize)
+    if iidx == -1:
         return
-    cdef int iidx
-    iidx = int((xval - low) / binsize)
     pdata[iidx] += weight
     return
 
