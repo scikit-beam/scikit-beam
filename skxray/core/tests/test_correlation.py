@@ -123,3 +123,36 @@ def test_auto_corr_scat_factor():
 
     assert_array_almost_equal(g2, np.array([1.5, 1.0, 1.0, 1.0, 1.0,
                                             1.0, 1.0, 1.0]), decimal=8)
+
+def random_image(n, batch_size, size):
+    for i in range (1,n):
+       yield np.random.random((batch_size, size, size))
+
+def test_partial_data_correlation():
+    import numpy as np
+
+    batch_size = 5
+    size = 100
+    iter = 5000
+    num_images = batch_size * iter + 1
+    image = random_image(num_images, batch_size, size)
+
+    num_levels = 2
+    num_bufs = 4
+    labels = np.zeros((size, size), dtype=np.int64)
+    labels[2, 2] = 1
+    labels[2, 3] = 1
+    labels[2, 4] = 1
+    labels[3, 2] = 1
+    labels[3, 3] = 1
+    labels[3, 4] = 1
+
+    previous = None
+
+    for i in range (1, iter):
+       img = next(image)
+       previous = next(corr.multi_tau_auto_corr_partial_data(num_levels, num_bufs, labels, img, previous))
+    result = previous
+    assert_array_almost_equal(result[0][1:], np.array([1.0, 1.0, 1.0, 1.0,
+                                            1.0, 1.0]), decimal=8)
+

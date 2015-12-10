@@ -437,12 +437,6 @@ def multi_tau_auto_corr_partial_data(num_levels, num_bufs, labels, images, previ
                 # Checking whether there is next level for processing
                 processing = level < num_levels
 
-    # ending time for the process
-    end_time = time.time()
-
-    logger.info("Processing time for {0} images took {1} seconds."
-                "".format(n, (end_time - start_time)))
-
     # the normalization factor
     if len(np.where(past_intensity_norm == 0)[0]) != 0:
         g_max = np.where(past_intensity_norm == 0)[0][0]
