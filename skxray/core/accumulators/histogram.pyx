@@ -22,10 +22,11 @@ class Histogram:
         Parameters
         ----------
         binlowhigh : iterable
-            binlowhigh[0] is the number of bins
-            binlowhigh[1] is the left most edge
-            binlowhigh[2] is the right most edge
-        args
+            nbin, low, high = binlowhigh
+            nbin is the number of bins
+            low is the left most edge
+            high is the right most edge
+        args : iterable
             Extra instances of binlowhigh that correspond to extra dimensions
             in the Histogram
 
@@ -37,16 +38,18 @@ class Histogram:
             raise NotImplementedError(
                 "This class does not yet support higher dimensional histograms than 1D"
             )
-
-        self.nbins = [binlowhigh[0]]
-        self.lows = [binlowhigh[1]]
-        self.highs = [binlowhigh[2]]
+        bin, low, high = binlowhigh
+        self.nbins = [bin]
+        self.lows = [low]
+        self.highs = [high]
         self._values = np.zeros(self.nbins, dtype=float)
         self.ndims = len(self.nbins)
         self.binsizes = [(high - low) / nbins for high, low, nbins
                          in zip(self.highs, self.lows, self.nbins)]
 
     def reset(self):
+        """Fill the histogram array with 0
+        """
         self._values.fill(0)
 
     def fill(self, *coords, weights=None):
@@ -55,6 +58,8 @@ class Histogram:
         Parameters
         ----------
         coords : iterable of numpy arrays
+            The length of coords is equivalent to the dimensionality of
+            the histogram.
         weights
 
         Returns
