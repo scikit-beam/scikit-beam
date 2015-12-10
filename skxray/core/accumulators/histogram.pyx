@@ -42,14 +42,26 @@ class Histogram:
             raise NotImplementedError(
                 "This class does not yet support higher dimensional histograms than 1D"
             )
-        bin, low, high = binlowhigh
-        self.nbins = [bin]
-        self.lows = [low]
-        self.highs = [high]
-        self._values = np.zeros(self.nbins, dtype=float)
-        self.ndims = len(self.nbins)
-        self.binsizes = [(high - low) / nbins for high, low, nbins
-                         in zip(self.highs, self.lows, self.nbins)]
+        nbins = []
+        lows = []
+        highs = []
+        for bin, low, high in [binlowhigh] + list(args):
+            nbins.append(bin)
+            lows.append(low)
+            highs.append(high)
+
+        # create the numpy array to hold the results
+        self._values = np.zeros(nbins, dtype=float)
+        self.ndims = len(nbins)
+        binsizes = [(high - low) / nbins for high, low, nbins
+                    in zip(highs, lows, nbins)]
+
+        # store everything in a numpy array
+        self.nbins = np.array(nbins, dtype=np.int).reshape(-1)
+        self.lows = np.array(lows, dtype=np.float).reshape(-1)
+        self.highs = np.array(highs, dtype=np.float).reshape(-1)
+        self.binsizes = np.array(binsizes, dtype=np.float).reshape(-1)
+
 
     def reset(self):
         """Fill the histogram array with 0
@@ -129,8 +141,8 @@ class Histogram:
 
 
 cdef void fillonecy(hnumtype xval, wnumtype weight,
-        np.float_t* pdata,
-        float low, float high, float binsize):
+                    np.float_t* pdata,
+                    float low, float high, float binsize):
     if not (low <= xval < high):
         return
     cdef int iidx
