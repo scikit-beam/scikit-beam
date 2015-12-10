@@ -3,11 +3,10 @@ Histogram
 
 General purpose histogram classes.
 """
+
 cimport cython
 import numpy as np
 cimport numpy as np
-import math
-from libc.math cimport floor
 from ..utils import bin_edges_to_centers
 
 ctypedef fused hnumtype:
@@ -50,6 +49,8 @@ class Histogram:
         self.ndims = len(self.nbins)
         self.binsizes = [(high - low) / nbins for high, low, nbins
                          in zip(self.highs, self.lows, self.nbins)]
+        return
+
 
     def reset(self):
         """Fill the histogram array with 0
@@ -138,8 +139,11 @@ cdef void fillonecy(hnumtype xval, wnumtype weight,
     pdata[iidx] += weight
     return
 
+
+
+#TODO implement ND histogram
 #TODO function interface
 #TODO generator interface
 #TODO docs!
-#TODO implement ND histogram
 #TODO examples
+#TODO Can we support ND histogram for mixed coordinate types?
