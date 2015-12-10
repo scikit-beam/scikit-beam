@@ -3,13 +3,16 @@ Histogram
 
 General purpose histogram classes.
 """
-
 cimport cython
 import numpy as np
 cimport numpy as np
 from ..utils import bin_edges_to_centers
 
-ctypedef fused hnumtype:
+import logging
+logger = logging.getLogger(__name__)
+
+
+ctypedef fused xnumtype:
     np.int_t
     np.float_t
 
@@ -45,15 +48,29 @@ class Histogram:
             raise NotImplementedError(
                 "This class does not yet support higher dimensional histograms than 1D"
             )
-        bin, low, high = binlowhigh
-        self.nbins = [bin]
-        self.lows = [low]
-        self.highs = [high]
-        self._values = np.zeros(self.nbins, dtype=float)
-        self.ndims = len(self.nbins)
-        self.binsizes = [(high - low) / nbins for high, low, nbins
-                         in zip(self.highs, self.lows, self.nbins)]
-        return
+        logger.debug('binlowhigh = {}'.format(binlowhigh))
+        logger.debug('args = {}'.format(args))
+        nbins = []
+        lows = []
+        highs = []
+        for bin, low, high in [binlowhigh] + list(args):
+            nbins.append(bin)
+            lows.append(low)
+            highs.append(high)
+
+        logger.debug("nbins = {}".format(nbins))
+
+        # create the numpy array to hold the results
+        self._values = np.zeros(nbins, dtype=float)
+        self.ndims = len(nbins)
+        binsizes = [(high - low) / nbin for high, low, nbin
+                    in zip(highs, lows, nbins)]
+        logger.debug("nbins = {}".format(nbins))
+        # store everything in a numpy array
+        self._nbins = np.array(nbins, dtype=np.dtype('i')).reshape(-1)
+        self._lows = np.array(lows, dtype=np.dtype('f')).reshape(-1)
+        self._highs = np.array(highs, dtype=np.dtype('f')).reshape(-1)
+        self._binsizes = np.array(binsizes, dtype=np.dtype('f')).reshape(-1)
 
 
     def reset(self):
@@ -101,19 +118,19 @@ class Histogram:
 
 
     def _fillnd(self, coords, np.ndarray[wnumtype, ndim=1] weight,
-            np.ndarray[hnumtype, ndim=1] dummy):
-        cdef hnumtype* pxa[10]
+            np.ndarray[xnumtype, ndim=1] dummy):
+        cdef xnumtype* pxa[10]
         for i, x in enumerate(coords):
-            pxa[i] = <hnumtype*> _getarrayptr(x)
+            pxa[i] = <xnumtype*> _getarrayptr(x)
         cdef np.ndarray[np.float_t, ndim=1] data = self.values
+        cdef float [:] low = self._lows
+        cdef float [:] high = self._highs
+        cdef float [:] binsize = self._binsizes
         '''
-        cdef float [:] lows = self.lows
-        cdef float high = self.highs[0]
-        cdef float binsize = self.binsizes[0]
         cdef int i
         cdef int xlen = len(xval)
         cdef np.float_t* pdata = <np.float_t*> data.data
-        cdef hnumtype* px = <hnumtype*> xval.data
+        cdef xnumtype* px = <xnumtype*> xval.data
         cdef wnumtype* pw = <wnumtype*> weight.data
         if weight.size == 1:
             for i in range(xlen):
@@ -124,7 +141,7 @@ class Histogram:
         '''
         return
 
-    def _fill1d(self, np.ndarray[hnumtype, ndim=1] xval,
+    def _fill1d(self, np.ndarray[xnumtype, ndim=1] xval,
                 np.ndarray[wnumtype, ndim=1] weight):
         cdef np.ndarray[np.float_t, ndim=1] data = self.values
         cdef float low = self.lows[0]
@@ -133,7 +150,7 @@ class Histogram:
         cdef int i
         cdef int xlen = len(xval)
         cdef np.float_t* pdata = <np.float_t*> data.data
-        cdef hnumtype* px = <hnumtype*> xval.data
+        cdef xnumtype* px = <xnumtype*> xval.data
         cdef wnumtype* pw = <wnumtype*> weight.data
         if weight.size == 1:
             for i in range(xlen):
@@ -157,7 +174,7 @@ class Histogram:
         return [bin_edges_to_centers(edge) for edge in self.edges]
 
 
-cdef void fillonecy(hnumtype xval, wnumtype weight,
+cdef void fillonecy(xnumtype xval, wnumtype weight,
         np.float_t* pdata,
         float low, float high, float binsize):
     if not (low <= xval < high):
