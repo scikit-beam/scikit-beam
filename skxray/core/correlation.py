@@ -353,8 +353,7 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
     return beta*np.exp(-2*relaxation_rate*lags) + baseline
 
 
-def two_time_corr(labels, images, num_levels=1, num_bufs=5000,
-                  num_frames=5000):
+def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1):
     """
     This function computes two-time correlations.
     Original code : @author: Yugang Zhang
@@ -378,17 +377,17 @@ def two_time_corr(labels, images, num_levels=1, num_bufs=5000,
         each ROI is represented by a distinct label (i.e., integer)
     images : array
         dimensions are: (rr, cc), iterable of 2D arrays
+    num_frames : int
+        number of images to use
+        default is number of images
+    num_bufs : int, must be even
+        maximum lag step to compute in each generation of
+        downsampling
+        default is number of images
     num_levels : int, optional
         how many generations of downsampling to perform, i.e.,
         the depth of the binomial tree of averaged frames
         default is one
-    num_bufs : int, must be even, optional
-        maximum lag step to compute in each generation of
-        downsampling
-        default is number of images
-    num_frames : int, optional
-        number of images to use
-        default is number of images
 
     Returns
     -------
@@ -438,10 +437,8 @@ def two_time_corr(labels, images, num_levels=1, num_bufs=5000,
     # to track how many images processed in each level
     img_per_level = np.zeros(num_levels, dtype=np.int64)
 
-    # two time correlation results
-    two_time = np.zeros((images[0].shape[0],
-                           images[0].shape[0], num_rois),
-                          dtype=np.float64)
+    # two time correlation results (array)
+    two_time = np.zeros((num_frames, num_frames, num_rois), dtype=np.float64)
 
     # to count images in each level
     count_level = np.zeros(num_levels, dtype=np.int64)

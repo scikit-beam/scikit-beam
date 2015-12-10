@@ -46,7 +46,6 @@ import skxray.core.correlation as corr
 import skxray.core.roi as roi
 import skxray.core.utils as utils
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -96,14 +95,12 @@ def test_image_stack_correlation():
 
     num_buf = 5
 
+    indices = np.ones((26, 26), dtype=np.int64)
+
     # check the number of buffers are even
     assert_raises(ValueError,
                   lambda: corr.multi_tau_auto_corr(num_levels, num_buf,
                                                    coins_mesh, coins_stack))
-    # check image shape and labels shape are equal
-    #assert_raises(ValueError,
-    #            lambda : corr.multi_tau_auto_corr(num_levels, num_bufs,
-    #                                                indices, coins_stack))
 
     # check the number of pixels is zero
     mesh = np.zeros_like(coins)
