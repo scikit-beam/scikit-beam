@@ -26,5 +26,5 @@ script:
   - cd /home/travis && python $TRAVIS_BUILD_DIR/run_tests.py
 
 after_success:
-  - coveralls
+  - cd $TRAVIS_BUILD_DIR && coveralls
   - codecov
