@@ -19,7 +19,10 @@ install:
   - conda config --add channels scikit-xray
   - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-image six coverage xraylib lmfit=0.8.3 netcdf4
   - source activate testenv
-  - python setup.py install
+  # need to build_ext -i for the tests so that the .so is local to the source
+  # code.  We could also setup.py develop, but I'm not sure if that is any
+  # better
+  - python setup.py install build_ext -i
   - pip install coveralls
   - pip install codecov
 
