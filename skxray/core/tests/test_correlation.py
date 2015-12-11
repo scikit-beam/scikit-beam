@@ -91,8 +91,8 @@ def test_image_stack_correlation():
     g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, coins_mesh,
                                              coins_stack)
 
-    assert_almost_equal(True, np.all(g2[:, 0], axis=0))
-    assert_almost_equal(True, np.all(g2[:, 1], axis=0))
+    assert np.all(g2[:, 0], axis=0)
+    assert np.all(g2[:, 1], axis=0)
 
     num_buf = 5
 
