@@ -2,7 +2,8 @@ from __future__ import absolute_import, division, print_function
 import six
 import os
 import importlib
-
+import logging
+logger = logging.getLogger(__name__)
 filetypes = ['py', 'txt', 'dat']
 
 blacklisted = [' his ', ' him ', ' guys ', ' guy ']
@@ -25,7 +26,8 @@ def _everybody_welcome_here(string_to_check, blacklisted=blacklisted):
                     "not pass until this language is changed. For tips on "
                     "writing gender-neutrally, see "
                     "http://www.lawprose.org/blog/?p=499. Blacklisted words: "
-                    "%s" % (string_to_check, b, blacklisted))
+                    "%s" % (string_to_check, b, blacklisted)
+                )
 
 
 def _openess_tester(module):
@@ -38,7 +40,8 @@ def _openess_tester(module):
 
 
 def test_openness():
-    """
+    """Testing for sexist language
+
     Ensure that our library does not contain sexist (intentional or otherwise)
     language. For tips on writing gender-neutrally,
     see http://www.lawprose.org/blog/?p=499
@@ -46,7 +49,7 @@ def test_openness():
     Notes
     -----
     Inspired by
-    https://modelviewculture.com/pieces/gendered-language-feature-or-bug-in-software-documentation
+   https://modelviewculture.com/pieces/gendered-language-feature-or-bug-in-software-documentation
     and
     https://modelviewculture.com/pieces/the-open-source-identity-crisis
     """
@@ -56,11 +59,12 @@ def test_openness():
         yield _openess_tester, importlib.import_module(m)
 
     for afile in files:
+        # logger.debug('testing file %s', afile)
         with open(afile, 'r') as f:
             yield _everybody_welcome_here, f.read()
 
 
-_IGNORE_FILE_EXT = ['pyc', 'so', 'ipynb', 'jpg', 'txt', 'zip']
+_IGNORE_FILE_EXT = ['.pyc', '.so', '.ipynb', '.jpg', '.txt', '.zip', '.c']
 _IGNORE_DIRS = ['__pycache__', '.git', 'cover', 'build', 'dist', 'tests',
                 '.ipynb_checkpoints', 'SOFC']
 
@@ -114,7 +118,7 @@ def get_modules_in_library(library, ignorefileext=None, ignoredirs=None):
         if path.split(os.sep)[-1] in ignoredirs:
             continue
         for f in files:
-            file_base, file_ext = f.split('.')
+            file_base, file_ext = os.path.splitext(f)
             if file_ext not in ignorefileext:
                 if file_ext == 'py':
                     mod_path = path[len(top_level)-len(library):].split(os.sep)
@@ -130,4 +134,6 @@ def get_modules_in_library(library, ignorefileext=None, ignoredirs=None):
 
 if __name__ == '__main__':
     import nose
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
+    import sys
+    nose_args = ['-s'] + sys.argv[1:]
+    nose.runmodule(argv=nose_args, exit=False)
