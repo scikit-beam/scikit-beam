@@ -4,6 +4,7 @@ sudo: false
 python:
   - 2.7
   - 3.4
+  - 3.5
 
 before_install:
   - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-3.5.5-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.5.5-Linux-x86_64.sh -O miniconda.sh; fi
@@ -15,16 +16,19 @@ install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
   - conda config --set always_yes true
   - conda update conda
-  - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy scipy=0.15.1 scikit-image six coverage
-  - conda install -n testenv -c scikit-xray xraylib lmfit=0.8.3 netcdf4
+  - conda config --add channels scikit-xray
+  - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-image six coverage xraylib lmfit=0.8.3 netcdf4
   - source activate testenv
-  - python setup.py install
+  # need to build_ext -i for the tests so that the .so is local to the source
+  # code.  We could also setup.py develop, but I'm not sure if that is any
+  # better
+  - python setup.py install build_ext -i
   - pip install coveralls
   - pip install codecov
 
 script:
-  - cd /home/travis && python $TRAVIS_BUILD_DIR/run_tests.py
+  - python run_tests.py
 
 after_success:
-  - cd $TRAVIS_BUILD_DIR && coveralls
+  - coveralls
   - codecov

@@ -146,9 +146,10 @@ def test_pre_fit():
     x, y_total, area_v = linear_spectrum_fitting(x0, y0, param, weights=None)
     for v in item_list:
         assert_true(v in y_total)
-    sum1 = np.sum(six.itervalues(y_total))
+
+    sum1 = np.sum([v for v in y_total.values()], axis=0)
     # r squares as a measurement
-    r1 = 1- np.sum((sum1-y0)**2)/np.sum((y0-np.mean(y0))**2)
+    r1 = 1 - np.sum((sum1-y0)**2)/np.sum((y0-np.mean(y0))**2)
     assert_true(r1 > 0.85)
 
     # fit with weights
@@ -156,9 +157,9 @@ def test_pre_fit():
     x, y_total, area_v = linear_spectrum_fitting(x0, y0, param, weights=1/np.sqrt(y0))
     for v in item_list:
         assert_true(v in y_total)
-    sum2 = np.sum(six.itervalues(y_total))
+    sum2 = np.sum([v for v in y_total.values()], axis=0)
     # r squares as a measurement
-    r2 = 1- np.sum((sum2-y0)**2)/np.sum((y0-np.mean(y0))**2)
+    r2 = 1 - np.sum((sum2-y0)**2)/np.sum((y0-np.mean(y0))**2)
     assert_true(r2 > 0.85)
 
 
