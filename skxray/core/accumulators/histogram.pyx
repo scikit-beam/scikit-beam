@@ -147,7 +147,6 @@ class Histogram:
     def _fill2d(self, np.ndarray[xnumtype, ndim=1] xval,
                 np.ndarray[ynumtype, ndim=1] yval,
                 np.ndarray[wnumtype, ndim=1] weight):
-        # cdef np.ndarray[np.float_t, ndim=2] data = self.values
         cdef double [:,:] data = self.values
         cdef float [:] low = self._lows
         cdef float [:] high = self._highs
@@ -155,31 +154,19 @@ class Histogram:
         cdef int i
         cdef int xlen = len(xval)
         cdef int ylen = len(yval)
-        # cdef float [:,:] pdata =
-        # cdef np.float_t* pdata = <np.float_t*> data.data
-        cdef xnumtype* px = <xnumtype*> xval.data
-        cdef ynumtype* py = <ynumtype*> yval.data
-        cdef wnumtype* pw = <wnumtype*> weight.data
+        cdef int j = 0
         if weight.size == 1:
-            for i in range(xlen):
-                xidx = find_indices(px[i], low[0], high[0], binsize[0])
-                if xidx == -1:
-                    continue
-                yidx = find_indices(py[i], low[1], high[1], binsize[1])
-                if yidx == -1:
-                    continue
-                data[xidx][yidx] += pw[0]
-                # pdata[yidx * xlen + xidx] += pw[0]
-        else:
-            for i in range(xlen):
-                xidx = find_indices(px[i], low[0], high[0], binsize[0])
-                if xidx == -1:
-                    continue
-                yidx = find_indices(py[i], low[1], high[1], binsize[1])
-                if yidx == -1:
-                    continue
-                data[xidx][yidx] += pw[i]
-                # pdata[yidx * xlen + xidx] += pw[i]
+            #
+            j = -1
+
+        for i in range(xlen):
+            xidx = find_indices(xval[i], low[0], high[0], binsize[0])
+            if xidx == -1:
+                continue
+            yidx = find_indices(yval[i], low[1], high[1], binsize[1])
+            if yidx == -1:
+                continue
+            data[xidx][yidx] += weight[i+j*i]
         return
 
 
