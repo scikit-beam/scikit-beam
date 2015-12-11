@@ -132,15 +132,13 @@ class Histogram:
         cdef float high = self._highs[0]
         cdef float binsize = self._binsizes[0]
         cdef int i
-        cdef int j = 0
+        cdef int wstride = 0 if weight.size == 1 else 1
         cdef int xlen = len(xval)
-        if weight.size == 1:
-            j = -1
         for i in range(xlen):
             xidx = find_indices(xval[i], low, high, binsize)
             if xidx == -1:
                 continue
-            data[xidx] += weight[i+j*i]
+            data[xidx] += weight[wstride * i]
         return
 
 
@@ -154,11 +152,7 @@ class Histogram:
         cdef int i
         cdef int xlen = len(xval)
         cdef int ylen = len(yval)
-        cdef int j = 0
-        if weight.size == 1:
-            # then weight is a scalar and we need to do some extra
-            j = -1
-
+        cdef int wstride = 0 if weight.size == 1 else 1
         for i in range(xlen):
             xidx = find_indices(xval[i], low[0], high[0], binsize[0])
             if xidx == -1:
@@ -166,7 +160,7 @@ class Histogram:
             yidx = find_indices(yval[i], low[1], high[1], binsize[1])
             if yidx == -1:
                 continue
-            data[xidx][yidx] += weight[i+j*i]
+            data[xidx][yidx] += weight[wstride * i]
         return
 
 
