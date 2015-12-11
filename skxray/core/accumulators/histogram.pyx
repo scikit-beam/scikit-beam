@@ -132,16 +132,15 @@ class Histogram:
         cdef float high = self._highs[0]
         cdef float binsize = self._binsizes[0]
         cdef int i
+        cdef int j = 0
         cdef int xlen = len(xval)
-        cdef np.float_t* pdata = <np.float_t*> data.data
-        cdef xnumtype* px = <xnumtype*> xval.data
-        cdef wnumtype* pw = <wnumtype*> weight.data
         if weight.size == 1:
-            for i in range(xlen):
-                fillonecy(px[i], pw[0], pdata, low, high, binsize)
-        else:
-            for i in range(xlen):
-                fillonecy(px[i], pw[i], pdata, low, high, binsize)
+            j = -1
+        for i in range(xlen):
+            xidx = find_indices(xval[i], low, high, binsize)
+            if xidx == -1:
+                continue
+            data[xidx] += weight[i+j*i]
         return
 
 
