@@ -71,31 +71,27 @@ import itertools
 if __name__ == '__main__':
     x = [1000, 0, 10.01]
     y = [1000, 0, 9.01]
-    xf = np.random.random(1000000)*10
-    yf = np.random.random(1000000)*9
+    xf = np.random.random(1000000)*10*4
+    yf = np.random.random(1000000)*9*15
     xi = xf.astype(int)
     yi = yf.astype(int)
     wf = np.linspace(1, 10, len(xf))
     wi = wf.copy()
-
+    times = []
     print("Testing 2D histogram timings")
     for xvals, yvals, weights in itertools.product([xf, xi], [yf, yi], [wf, wi]):
-        print('xvals are of type {}'.format(xvals.dtype))
-        print('yvals are of type {}'.format(yvals.dtype))
-        print('weights are of type {}'.format(weights.dtype))
         t0 = time()
         h = Histogram(x, y)
         h.fill(xvals, yvals, weights=weights)
         skxray_time = time() - t0
 
-        print('skxray = {}'.format(skxray_time))
         edges = h.edges
         t0 = time()
         ynp = np.histogram2d(xvals, yvals, bins=edges, weights=weights)[0]
         numpy_time = time() - t0
-        print('numpy = {}'.format(numpy_time))
-        print('skxray is {} faster than numpy'.format(numpy_time / skxray_time))
+        times.append(numpy_time / skxray_time)
         assert_almost_equal(np.sum(h.values), np.sum(ynp))
+    print('skxray is %s times faster than numpy, on average' % np.average(times))
     #
     # test_1d_histogram()
     # test_2d_histogram()

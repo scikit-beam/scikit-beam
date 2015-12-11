@@ -156,7 +156,7 @@ class Histogram:
         cdef int ylen = len(yval)
         cdef int j = 0
         if weight.size == 1:
-            #
+            # then weight is a scalar and we need to do some extra
             j = -1
 
         for i in range(xlen):
