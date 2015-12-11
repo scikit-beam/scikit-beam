@@ -4,7 +4,7 @@
 C or Cython Extensions
 ======================
 
-Astropy supports using C extensions for wrapping C libraries and Cython for
+Scikit-beam supports using C extensions for wrapping C libraries and Cython for
 speeding up computationally-intensive calculations. Both Cython and C extension
 building can be customized using the ``get_extensions`` function of the
 ``setup_package.py`` file. If defined, this function must return a list of
@@ -40,11 +40,11 @@ you probably want to install its header files along side the Python module.
        all of the header files.
 
     2) Use the ``get_package_data`` hook in ``setup_package.py`` to
-       install those header files.  For example, the `astropy.wcs`
+       install those header files.  For example, the `scikit-beam.wcs`
        package has this::
 
            def get_package_data():
-               return {'astropy.wcs': ['include/*.h']}
+               return {'scikit-beam.wcs': ['include/*.h']}
 
 Preventing importing at build time
 ----------------------------------
@@ -55,13 +55,13 @@ import until the build phase has completed. In this cases, the
 ``_ASTROPY_SETUP_`` variable can be used to determine if the package is being
 imported as part of the build and choose to not import problematic modules.
 ``_ASTROPY_SETUP_`` is inserted into the builtins, and is `True` when inside
-of astropy's ``setup.py`` script, and `False` otherwise.
+of scikit-beam's ``setup.py`` script, and `False` otherwise.
 
 For example, suppose there is a subpackage ``foo`` that needs to
 import a module called ``version.py`` at build time in order to set
 some version information, and also has a C extension, ``process``,
 that will not be available in the source tree.  In this case,
-``astropy/foo/__init__.py`` would probably want to check the value of
+``scikit-beam/foo/__init__.py`` would probably want to check the value of
 ``_ASTROPY_SETUP_`` before importing the C extension::
 
     try:

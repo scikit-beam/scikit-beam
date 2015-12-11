@@ -2,7 +2,7 @@
 
 .. _command_history:
 
-Condensed example of contributing code to Astropy
+Condensed example of contributing code to Scikit-beam
 =================================================
 
 There are two versions:

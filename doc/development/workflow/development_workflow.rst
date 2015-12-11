@@ -4,11 +4,11 @@
 How to make a code contribution
 ===============================
 
-This document outlines the process for contributing code to the Astropy
+This document outlines the process for contributing code to the Scikit-beam
 project.
 
 **Already experienced with git? Contributed before?** Jump right to
-:ref:`astropy-git`.
+:ref:`scikit-beam-git`.
 
 Pre-requisites
 ==============
@@ -16,13 +16,13 @@ Pre-requisites
 Before following the steps in this document you need:
 
 + an account on `GitHub`_
-+ a local copy of the astropy source. Instructions for doing that, including the
++ a local copy of the scikit-beam source. Instructions for doing that, including the
   basics you need for setting up git and GitHub, are at :ref:`get_devel`.
 
 Strongly Recommended, but not required
 ======================================
 
-You cannot easily work on the development version of astropy in a python
+You cannot easily work on the development version of scikit-beam in a python
 environment in which you also use the stable version. It can be done |emdash|
 but can only be done *successfully* if you always remember whether the
 development version or stable version is the active one.
@@ -30,13 +30,13 @@ development version or stable version is the active one.
 :ref:`virtual_envs` offer a better solution and take only a few minutes to set
 up. It is well worth your time.
 
-Not sure what your first contribution should be? Take a look at the `Astropy
+Not sure what your first contribution should be? Take a look at the `Scikit-beam
 issue list`_ and grab one labeled "package-novice". These issues are the
-most accessible ones if you are not familiar with the Astropy source
+most accessible ones if you are not familiar with the Scikit-beam source
 code. Issues labeled as "effort-low" are expected to take a few hours (at
 most) to address, while the "effort-medium" ones may take a few days. The
 developers are friendly and want you to help, so don't be shy about asking
-questions on the `astropy-dev mailing list`_.
+questions on the `scikit-beam-dev mailing list`_.
 
 New to `git`_?
 ==============
@@ -51,24 +51,24 @@ minutes to look at these resources:
 * `Git Basics`_, part of a much longer `git book`_.
 
 In practice, you need only a handful of `git`_ commands to make contributions
-to Astropy. There is a more extensive list of :ref:`git-resources` if you
+to Scikit-beam. There is a more extensive list of :ref:`git-resources` if you
 want more background.
 
 Double check your setup
 -----------------------
 
-Before going further, make sure you have set up astropy as described in
+Before going further, make sure you have set up scikit-beam as described in
 :ref:`get_devel`.
 
 In a terminal window, change directory to the one containing your clone of
-Astropy. Then, run ``git remote``; the output should look something like this::
+Scikit-beam. Then, run ``git remote``; the output should look something like this::
 
     your-github-username
-    astropy
+    scikit-beam
 
 If that works, also run ``git fetch --all``. If it runs without errors then
 your installation is working and you have a complete list of all branches in
-your clone, ``your-github-username`` and ``astropy``.
+your clone, ``your-github-username`` and ``scikit-beam``.
 
 About names in `git`_
 ---------------------
@@ -80,16 +80,16 @@ your clone of git knows about with ``git branch -a`` you will see there are
 *three* different branches called ``master``::
 
     * master                              # this is master in your local repo
-    remotes/your-github-username/master   # master on your fork of Astropy on GitHub
-    remotes/astropy/master                # the official development branch of Astropy
+    remotes/your-github-username/master   # master on your fork of Scikit-beam on GitHub
+    remotes/scikit-beam/master                # the official development branch of Scikit-beam
 
 The naming scheme used by `git`_ will also be used here. A plain branch name,
-like ``master`` means a branch in your local copy of Astropy. A branch on a
-remote, like ``astropy`` , is labeled by that remote, ``astropy/master``.
+like ``master`` means a branch in your local copy of Scikit-beam. A branch on a
+remote, like ``scikit-beam`` , is labeled by that remote, ``scikit-beam/master``.
 
 This duplication of names can get very confusing for maintainers when trying
 to merge code contributions into the official master branch,
-``astropy/master``. As a result, you should never do any work in your master
+``scikit-beam/master``. As a result, you should never do any work in your master
 branch, ``master``. Always work on a branch instead.
 
 Essential `git`_ commands
@@ -97,11 +97,11 @@ Essential `git`_ commands
 
 A full `git`_ tutorial is beyond the scope of this document but this list
 describes the few ``git`` commands you are likely to encounter in contributing
-to Astropy:
+to Scikit-beam:
 
-* ``git fetch`` gets the latest development version of Astropy, which you will
+* ``git fetch`` gets the latest development version of Scikit-beam, which you will
   use as the basis for making your changes.
-* ``git branch`` makes a logically separate copy of Astropy to keep track of
+* ``git branch`` makes a logically separate copy of Scikit-beam to keep track of
   your changes.
 * ``git add`` stages files you have changed or created for addition to `git`_.
 * ``git commit`` adds your staged changes to the repository.
@@ -120,22 +120,22 @@ If something goes wrong
 walks you through recovering from `git`_ mistakes is the
 `git choose-your-own-adventure`_.
 
-.. _astropy-git:
+.. _scikit-beam-git:
 
-Astropy Guidelines for `git`_
+Scikit-beam Guidelines for `git`_
 =============================
 
 * Don't use your ``master`` branch for anything.
 * Make a new branch, called a *feature branch*, for each separable set of
   changes: "one task, one branch" (`ipython git workflow`_).
 * Start that new *feature branch* from the most current development version
-  of astropy (instructions are below).
+  of scikit-beam (instructions are below).
 * Name your branch for the purpose of the changes, for example
   ``bugfix-for-issue-14`` or ``refactor-database-code``.
 * Make frequent commits, and always include a commit message. Each commit
   should represent one logical set of changes.
-* Ask on the `astropy-dev mailing list`_ if you get stuck.
-* Never merge changes from ``astropy/master`` into your feature branch. If
+* Ask on the `scikit-beam-dev mailing list`_ if you get stuck.
+* Never merge changes from ``scikit-beam/master`` into your feature branch. If
   changes in the development version require changes to our code you can
   :ref:`rebase`.
 
@@ -143,14 +143,14 @@ In addition there are a couple of `git`_ naming conventions used in this
 document:
 
 * Change the name of the remote ``origin`` to ``your-github-username``.
-* Name the remote that is the primary Astropy repository
-  ``astropy``; in prior versions of this documentation it was referred to as
+* Name the remote that is the primary Scikit-beam repository
+  ``scikit-beam``; in prior versions of this documentation it was referred to as
   ``upstream``.
 
 Workflow
 ========
 
-These, conceptually, are the steps you will follow in contributing to Astropy:
+These, conceptually, are the steps you will follow in contributing to Scikit-beam:
 
 #. :ref:`fetch-latest`
 #. :ref:`make-feature-branch`; you will make your changes on this branch.
@@ -159,7 +159,7 @@ These, conceptually, are the steps you will follow in contributing to Astropy:
    frequent, small commits.
 #. :ref:`add-changelog`
 #. :ref:`push-to-github`
-#. From GitHub, :ref:`pull-request` to let the Astropy maintainers know
+#. From GitHub, :ref:`pull-request` to let the Scikit-beam maintainers know
    you have contributions to review.
 #. :ref:`revise and push` in response to comments on the pull
    request. Pushing those changes to GitHub automatically updates the
@@ -169,25 +169,25 @@ This way of working helps to keep work well organized, with readable history.
 This in turn makes it easier for project maintainers (that might be you) to
 see what you've done, and why you did it.
 
-A worked example that follows these steps for fixing an Astropy issue is at
-:ref:`astropy-fix-example`.
+A worked example that follows these steps for fixing an Scikit-beam issue is at
+:ref:`scikit-beam-fix-example`.
 
 Some additional topics related to `git`_ are in :ref:`additional-git`.
 
 .. _fetch-latest:
 
-Fetch the latest Astropy
+Fetch the latest Scikit-beam
 ========================
 
-From time to time you should fetch the development version (i.e. Astropy
-``astropy/master``) changes from GitHub::
+From time to time you should fetch the development version (i.e. Scikit-beam
+``scikit-beam/master``) changes from GitHub::
 
-   git fetch astropy
+   git fetch scikit-beam
 
 This will pull down any commits you don't have, and set the remote branches to
 point to the latest commit. For example, 'trunk' is the branch referred to by
-``astropy/master``, and if there have been commits since
-you last checked, ``astropy/master`` will change after you do the fetch.
+``scikit-beam/master``, and if there have been commits since
+you last checked, ``scikit-beam/master`` will change after you do the fetch.
 
 .. _make-feature-branch:
 
@@ -208,14 +208,14 @@ Choose an informative name for the branch to remind yourself and the rest of us
 what the changes in the branch are for. Branch names like ``add-ability-to-fly``
 or ``buxfix-for-issue-42`` clearly describe the purpose of the branch.
 
-Always make your branch from ``astropy/master`` so that you are basing your
-changes on the latest version of Astropy::
+Always make your branch from ``scikit-beam/master`` so that you are basing your
+changes on the latest version of Scikit-beam::
 
     # Update the mirror of trunk
-    git fetch astropy
+    git fetch scikit-beam
 
-    # Make new feature branch starting at astropy/master
-    git branch my-new-feature astropy/master
+    # Make new feature branch starting at scikit-beam/master
+    git branch my-new-feature scikit-beam/master
     git checkout my-new-feature
 
 Connect the branch to GitHub
@@ -223,7 +223,7 @@ Connect the branch to GitHub
 
 At this point you have made and checked out a new branch, but `git`_ does not
 know it should be connected to your fork on GitHub. You need that connection
-for your proposed changes to be managed by the Astropy maintainers on GitHub.
+for your proposed changes to be managed by the Scikit-beam maintainers on GitHub.
 
 To connect your local branch to GitHub, you `git push`_ this new branch up to
 your GitHub repo with the ``--set-upstream`` option::
@@ -231,7 +231,7 @@ your GitHub repo with the ``--set-upstream`` option::
    git push --set-upstream your-github-username my-new-feature
 
 From now on git will know that ``my-new-feature`` is related to the
-``your-github-username/my-new-feature`` branch in your GitHub fork of Astropy.
+``your-github-username/my-new-feature`` branch in your GitHub fork of Scikit-beam.
 
 You will still need to ``git push`` your changes to GitHub periodically. The
 setup in this section will make that easier.
@@ -243,11 +243,11 @@ Install your branch
 
 Ideally you should set up a python virtual environment just for this fix;
 instructions for doing to are at :ref:`virtual_envs`. Doing so ensures you
-will not corrupt your main astropy install and makes it very easy to recover
+will not corrupt your main scikit-beam install and makes it very easy to recover
 from mistakes.
 
 Once you have activated that environment you need to install the version of
-Astropy you are working on. Do that with:
+Scikit-beam you are working on. Do that with:
 
 .. code-block:: bash
 
@@ -262,7 +262,7 @@ or:
     # depending on your system.
 
 If you are using python 3 you will need to re-install after making changes to
-the Astropy source code. Re-installing goes much faster than the initial install
+the Scikit-beam source code. Re-installing goes much faster than the initial install
 because it typically does not require new compilation.
 
 .. _edit-flow:
@@ -274,7 +274,7 @@ Conceptually, you will:
 
 #. Make changes to one or more files and/or add a new file.
 #. Check that your changes do not break existing code.
-#. Add documentation to your code and, as appropriate, to the Astropy
+#. Add documentation to your code and, as appropriate, to the Scikit-beam
    documentation.
 #. Ideally, also make sure your changes do not break the documentation.
 #. Add tests of the code you contribute.
@@ -285,24 +285,24 @@ Conceptually, you will:
 In more detail
 --------------
 
-#. Make some changes to one or more files. You should follow the Astropy
+#. Make some changes to one or more files. You should follow the Scikit-beam
    :ref:`code-guide`. Each logical set of changes should be treated as one
-   commit. For example, if you are fixing a known bug in Astropy and notice
+   commit. For example, if you are fixing a known bug in Scikit-beam and notice
    a different bug while implementing your fix, implement the fix to that new
    bug as a different set of changes.
 
 #. Test that your changes do not lead to *regressions*, i.e. that your
-   changes do not break existing code, by running the Astropy tests. You can
-   run all of the Astropy tests from ipython with::
+   changes do not break existing code, by running the Scikit-beam tests. You can
+   run all of the Scikit-beam tests from ipython with::
 
-     import astropy
-     astropy.test()
+     import scikit-beam
+     scikit-beam.test()
 
-   If your change involves only a small part of Astropy, e.g. Time, you can
+   If your change involves only a small part of Scikit-beam, e.g. Time, you can
    run just those tests::
 
-     import astropy
-     astropy.test('time')
+     import scikit-beam
+     scikit-beam.test('time')
 
 #. Make sure your code includes appropriate docstrings, described at
    :ref:`doc-rules`. If appropriate, as when you are adding a new feature,
@@ -311,7 +311,7 @@ In more detail
 
 #. If you have sphinx installed, you can also check that
    the documentation builds and looks correct by running, from the
-   ``astropy`` directory::
+   ``scikit-beam`` directory::
 
      python setup.py build_docs
 
@@ -327,11 +327,11 @@ In more detail
    :ref:`testing-guidelines`, but if you have no experience writing tests or
    with the `py.test`_ testing framework submit your changes without adding
    tests, but mention in the pull request that you have not written tests. An
-   example of writing a test is in :ref:`astropy-fix-example`.
+   example of writing a test is in :ref:`scikit-beam-fix-example`.
 
 #. Stage your changes using ``git add`` and commit them using ``git commit``.
-   An example of doing that, based on the fix for an actual Astropy issue, is
-   at :ref:`astropy-fix-example`.
+   An example of doing that, based on the fix for an actual Scikit-beam issue, is
+   at :ref:`scikit-beam-fix-example`.
 
    .. note::
         Make your `git`_ commit messages short and descriptive. If a commit
@@ -352,9 +352,9 @@ Add a changelog entry
 Add an entry to the file ``CHANGES.rst`` briefly describing the change you
 made. Include the pull request number if the change fixes an issue. An
 example entry, for the changes which fixed
-`issue 1845 <https://github.com/astropy/astropy/pull/1845>`_, is::
+`issue 1845 <https://github.com/scikit-beam/scikit-beam/pull/1845>`_, is::
 
-  - `astropy.wcs.Wcs.printwcs` will no longer warn that `cdelt` is
+  - `scikit-beam.wcs.Wcs.printwcs` will no longer warn that `cdelt` is
     being ignored when none was present in the FITS file. [#1845]
 
 If the change is a new feature, rather than an existing issue, you will not be
@@ -378,10 +378,10 @@ A *pull request* on GitHub is a request to merge the changes you have made into
 another repository.
 
 When you are ready to ask for someone to review your code and consider merging
-it into Astropy:
+it into Scikit-beam:
 
-#. Go to the URL of your fork of Astropy, e.g.,
-   ``https://github.com/your-user-name/astropy``.
+#. Go to the URL of your fork of Scikit-beam, e.g.,
+   ``https://github.com/your-user-name/scikit-beam``.
 
 #. Use the 'Switch Branches' dropdown menu to select the branch with your
    changes:
@@ -415,15 +415,15 @@ to GitHub. GitHub will automatically update your pull request.
 Rebase, but only if asked
 =========================
 
-Sometimes the maintainers of Astropy will ask you to *rebase* your changes
-before they are merged into the main Astropy repository.
+Sometimes the maintainers of Scikit-beam will ask you to *rebase* your changes
+before they are merged into the main Scikit-beam repository.
 
 Conceptually, rebasing means taking your changes and applying them to the latest
-version of the development branch of the official astropy as though that was the
+version of the development branch of the official scikit-beam as though that was the
 version you had originally branched from.
 
 Behind the scenes, `git`_ is deleting the changes and branch you made, making the
-changes others made to the development branch of Astropy, then re-making your
+changes others made to the development branch of Scikit-beam, then re-making your
 branch from the development branch and applying your changes to your branch.
 This results in re-writing the history of commits, which is why you should do it
 only if asked.
@@ -435,8 +435,8 @@ start make a branch to serve as a backup copy of your work::
 
 The actual rebasing is usually easy::
 
-    git fetch astropy/master  # get the latest development astropy
-    git rebase astropy/master my-new-feature
+    git fetch scikit-beam/master  # get the latest development scikit-beam
+    git rebase scikit-beam/master my-new-feature
 
 You are more likely to run into *conflicts* here--places where the changes you
 made conflict with changes that someone else made--than anywhere else. Ask for
@@ -461,5 +461,5 @@ branch you made::
 .. _Interactive tutorial: http://try.github.io/
 .. _Git Basics: http://git-scm.com/book/en/Getting-Started-Git-Basics
 .. _git book: http://git-scm.com/book/
-.. _Astropy issue list: https://github.com/astropy/astropy/issues
+.. _Scikit-beam issue list: https://github.com/scikit-beam/scikit-beam/issues
 .. _git choose-your-own-adventure: http://sethrobertson.github.io/GitFixUm/fixup.html

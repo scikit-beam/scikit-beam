@@ -1,14 +1,14 @@
 :orphan:
 
 .. include:: links.inc
-.. _astropy-fix-example:
+.. _scikit-beam-fix-example:
 
 ==============================================
-Contributing code to Astropy, a worked example
+Contributing code to Scikit-beam, a worked example
 ==============================================
 
 This example is based on fixing `Issue 1761`_ from the list
-of `Astropy issues on GitHub <https://github.com/astropy/astropy/issues>`_.
+of `Scikit-beam issues on GitHub <https://github.com/scikit-beam/scikit-beam/issues>`_.
 It resulted in `pull request 1917`_.
 
 The issue title was "len() does not work for coordinates" with description
@@ -30,39 +30,39 @@ There is also a very exciting terminal-cast at :ref:`terminal_cast`.
 Before you begin
 ----------------
 
-Make sure you have a local copy of astropy set up as described in
+Make sure you have a local copy of scikit-beam set up as described in
 :ref:`get_devel`. In a nutshell, the output of ``git remote -v``, run in the
-directory where your local of Astropy resides, should be something like this::
+directory where your local of Scikit-beam resides, should be something like this::
 
-    astropy   git://github.com/astropy/astropy.git (fetch)
-    astropy   git://github.com/astropy/astropy.git (push)
-    your-user-name     git@github.com:your-user-name/astropy.git (fetch)
-    your-user-name     git@github.com:your-user-name/astropy.git (push)
+    scikit-beam   git://github.com/scikit-beam/scikit-beam.git (fetch)
+    scikit-beam   git://github.com/scikit-beam/scikit-beam.git (push)
+    your-user-name     git@github.com:your-user-name/scikit-beam.git (fetch)
+    your-user-name     git@github.com:your-user-name/scikit-beam.git (push)
 
 The precise form of the URLs for ``your-user-name`` depends on the
 authentication method you set up with GitHub.
 
-The important point is that ``astropy`` should point to the official Astropy
-repo and ``your-user-name`` should point to *your* copy of Astropy on GitHub.
+The important point is that ``scikit-beam`` should point to the official Scikit-beam
+repo and ``your-user-name`` should point to *your* copy of Scikit-beam on GitHub.
 
 
-Grab the latest updates to astropy
+Grab the latest updates to scikit-beam
 ----------------------------------
 
 A few steps in this tutorial take only a single command. They are broken out
 separately to outline the process in words as well as code.
 
-Inform your local copy of Astropy about the latest changes in the development
+Inform your local copy of Scikit-beam about the latest changes in the development
 version with::
 
-    git fetch astropy
+    git fetch scikit-beam
 
 Set up an isolated workspace
 ----------------------------
 + Make a new `git`_ branch for fixing this issue, check it out, and let my
   GitHub account know about this branch::
 
-    git branch fix-1761 astropy/master   # branch based on latest from GitHub
+    git branch fix-1761 scikit-beam/master   # branch based on latest from GitHub
     git checkout fix-1761                   # switch to this branch
     git push --set-upstream origin fix-1761 # tell my github acct about it
 
@@ -87,7 +87,7 @@ provide a way to keep your work organized.
 Tests first, please
 -------------------
 
-It would be hard to overstate the importance of testing to Astropy. Tests are
+It would be hard to overstate the importance of testing to Scikit-beam. Tests are
 what gives you confidence that new code does what it should and that it
 doesn't break old code.
 
@@ -95,13 +95,13 @@ You should at least run the relevant tests before you make any changes to make
 sure that your python environment is set up properly.
 
 The first challenge is figuring out where to look for relevant tests. `Issue
-1761`_ is a problem in the `~astropy.coordinates` package, so the tests for
-it are in ``astropy/coordinates/tests``. The rest of Astropy has a similar
+1761`_ is a problem in the `~scikit-beam.coordinates` package, so the tests for
+it are in ``scikit-beam/coordinates/tests``. The rest of Scikit-beam has a similar
 layout, described at :ref:`testing-guidelines`.
 
 Change to that directory and run the current tests with::
 
-    cd astropy/coordinates/test
+    cd scikit-beam/coordinates/test
     py.test
 
 The tests all pass, so I need to write a new test to expose this bug.
@@ -122,10 +122,10 @@ There are several files with tests in them, though::
 
 `Issue 1761`_ affects arrays of coordinates, so it seems sensible to put the
 new test in ``test_arrays.py``. As with all of the steps, if you are not
-sure, ask on the `astropy-dev mailing list`_.
+sure, ask on the `scikit-beam-dev mailing list`_.
 
 The goal at this point may be a little counter-intuitive: write a test that we
-know will fail with the current code. This test allows Astropy to check,
+know will fail with the current code. This test allows Scikit-beam to check,
 in an automated way, whether our fix actually works and to make sure future
 changes to code do not break our fix.
 
@@ -170,7 +170,7 @@ we just wrote is one logical change, so we will commit it. You could, if you
 prefer, wait and commit this test along with your fix.
 
 For this tutorial I'll commit the test separately. If you aren't sure what to
-do, ask on `astropy-dev mailing list`_.
+do, ask on `scikit-beam-dev mailing list`_.
 
 Check what was changed
 ++++++++++++++++++++++
@@ -199,10 +199,10 @@ For more extensive changes it can be useful to use ``git diff`` to see what
 changes have been made::
 
     $ git diff
-    diff --git a/astropy/coordinates/tests/test_arrays.py b/astropy/coordinates/test
+    diff --git a/scikit-beam/coordinates/tests/test_arrays.py b/scikit-beam/coordinates/test
     index 2785b59..7eecfbb 100644
-    --- a/astropy/coordinates/tests/test_arrays.py
-    +++ b/astropy/coordinates/tests/test_arrays.py
+    --- a/scikit-beam/coordinates/tests/test_arrays.py
+    +++ b/scikit-beam/coordinates/tests/test_arrays.py
     @@ -278,3 +278,14 @@ def test_array_indexing():
          assert c2.equinox == c1.equinox
          assert c3.equinox == c1.equinox
@@ -282,7 +282,7 @@ Use ``git status`` to get a recap of where we are so far::
 
     nothing to commit, working directory clean
 
-In other words, we have made a change to our local copy of astropy but we
+In other words, we have made a change to our local copy of scikit-beam but we
 have not pushed (transferred) that change to our GitHub account.
 
 Fix the issue
@@ -293,7 +293,7 @@ Write the code
 
 Now that we have a test written, we'll fix the issue. A full discussion of
 the fix is beyond the scope of this tutorial, but the fix is to add a
-``__len__`` method to ``astropy.coordinates.SphericalCoordinatesBase`` in
+``__len__`` method to ``scikit-beam.coordinates.SphericalCoordinatesBase`` in
 ``coordsystems.py``. All of the spherical coordinate systems inherit from
 this base class and it is this base class that implements the
 ``__getitem__`` method that allows indexing of coordinate arrays.
@@ -313,14 +313,14 @@ There are a few levels at which you want to test:
 + Do the rest of the coordinate tests still pass? Check by running ``py.test``
   in the ``coordinates`` directory. In this case, yes--we have not broken
   anything!
-+ Do all of the astropy tests still succeed? Check by moving to the top level
++ Do all of the scikit-beam tests still succeed? Check by moving to the top level
   directory (the one that contains ``setup.py``) and run ``python setup.py
   test``. This may take several minutes depending on the speed of your system.
   Success again!
 
 .. note::
     Tests that are skipped or xfailed are fine. A fail or an error is not
-    fine. If you get stuck, ask on `astropy-dev mailing list`_ for help!
+    fine. If you get stuck, ask on `scikit-beam-dev mailing list`_ for help!
 
 Stage and commit your change
 ++++++++++++++++++++++++++++
@@ -339,7 +339,7 @@ are still in the top level directory and check the ``git status``::
       (use "git add <file>..." to update what will be committed)
       (use "git checkout -- <file>..." to discard changes in working directory)
 
-        modified:   astropy/coordinates/coordsystems.py
+        modified:   scikit-beam/coordinates/coordsystems.py
 
     no changes added to commit (use "git add" and/or "git commit -a")
 
@@ -348,7 +348,7 @@ long as you are in one of the directories in the repo, that is).
 
 Stage the change with::
 
-    git add astropy/coordinates/coordsystems.py
+    git add scikit-beam/coordinates/coordsystems.py
 
 For this commit it is helpful to use a multi-line commit message that will
 automatically close the issue on GitHub when this change is accepted. The
@@ -371,15 +371,15 @@ However you do it, the message after committing should look like this::
     Closes #1761
 
 You can check the commit messages by running ``git log``. If the commit
-message doesn't look right, ask about fixing it at `astropy-dev mailing list`_.
+message doesn't look right, ask about fixing it at `scikit-beam-dev mailing list`_.
 
-Push your changes to your GitHub fork of astropy
+Push your changes to your GitHub fork of scikit-beam
 ------------------------------------------------
 
 This one is easy: ``git push``
 
-This copies the changes made on your computer to your copy of Astropy on
-GitHub. At this point none of the Astropy maintainers know anything about
+This copies the changes made on your computer to your copy of Scikit-beam on
+GitHub. At this point none of the Scikit-beam maintainers know anything about
 your change.
 
 We'll take care of that in a moment with a "pull request", but first...
@@ -400,7 +400,7 @@ them. In this case they also provide an opportunity to illustrate a feature
 of the `py.test`_ framework.
 
 I'll move back to the directory containing the tests with
-``cd astropy/coordinates/tests`` to make it a bit easier to run just the test
+``cd scikit-beam/coordinates/tests`` to make it a bit easier to run just the test
 I want.
 
 The second case is easier, so I'll handle that one first following the cycle
@@ -466,7 +466,7 @@ Commit any additional changes
 
 Follow the cycle you saw above:
 
-+ Check that **all** Astropy tests still pass; see :ref:`test_changes`
++ Check that **all** Scikit-beam tests still pass; see :ref:`test_changes`
 + ``git status`` to see what needs to be staged and committed
 + ``git add`` to stage the changes
 + ``git commit`` to commit the changes
@@ -474,7 +474,7 @@ Follow the cycle you saw above:
 The `git`_ commands, without their output, are::
 
     git status
-    git add astropy/coordinates/tests/test_arrays.py
+    git add scikit-beam/coordinates/tests/test_arrays.py
     git commit -m"Add tests of len() for scalar coordinate and length 1 coordinate"
 
 Edit the changelog
@@ -501,12 +501,12 @@ it at the `Sphinx primer`_); look at other entries and imitate.
 
 For this issue the entry was the line that starts ``- Implemented``::
 
-    - ``astropy.coordinates``
+    - ``scikit-beam.coordinates``
 
       - Implemented `len()` for coordinate objects. [#1761]
 
 Starting the line with a ``-`` makes a bulleted list item, indenting it makes
-it a sublist of ``astropy.coordinates`` and putting ``len()`` in single
+it a sublist of ``scikit-beam.coordinates`` and putting ``len()`` in single
 backticks makes that text render in a typewriter font.
 
 Commit your changes to the CHANGES.rst
@@ -530,8 +530,8 @@ Ask for your changes to be merged with a pull request
 -----------------------------------------------------
 
 This stage requires to go to your GitHub account and navigate to *your* copy
-of astropy; the url will be something like
-``https://github.com/your-user-name/astropy``.
+of scikit-beam; the url will be something like
+``https://github.com/your-user-name/scikit-beam``.
 
 Once there, select the branch that contains your fix from the branches
 dropdown:
@@ -556,7 +556,7 @@ You may be asked to make changes in the discussion of the pull request. Make
 those changes in your local copy, commit them to your local repo and push them
 to GitHub. GitHub will automatically update your pull request.
 
-.. _Issue 1761: https://github.com/astropy/astropy/issues/1917
-.. _pull request 1917: https://github.com/astropy/astropy/issues/1917
+.. _Issue 1761: https://github.com/scikit-beam/scikit-beam/issues/1917
+.. _pull request 1917: https://github.com/scikit-beam/scikit-beam/issues/1917
 .. _Sphinx primer: http://sphinx-doc.org/rest.html
-.. _test commit: https://github.com/mwcraig/astropy/commit/cf7d5ac15d7c63ae28dac638c6484339bac5f8de
+.. _test commit: https://github.com/mwcraig/scikit-beam/commit/cf7d5ac15d7c63ae28dac638c6484339bac5f8de

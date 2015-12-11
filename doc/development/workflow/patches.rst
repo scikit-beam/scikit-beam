@@ -17,10 +17,10 @@ If you haven't already configured git::
 Then, the workflow is the following::
 
    # Get the repository if you don't have it
-   git clone git://github.com/astropy/astropy.git
+   git clone git://github.com/scikit-beam/scikit-beam.git
 
    # Make a branch for your patching
-   cd astropy
+   cd scikit-beam
    git branch the-fix-im-thinking-of
    git checkout the-fix-im-thinking-of
 
@@ -40,7 +40,7 @@ Then, the workflow is the following::
    # Make the patch files
    git format-patch -M -C master
 
-Then, send the generated patch files to the `astropy-dev mailing list`_ |emdash|
+Then, send the generated patch files to the `scikit-beam-dev mailing list`_ |emdash|
 where we will thank you warmly.
 
 In detail
@@ -56,10 +56,10 @@ In detail
    checked to :ref:`check_git_install`.
 
 #. If you don't already have one, clone a copy of the
-   Astropy_ repository::
+   Scikit-beam_ repository::
 
-      git clone git://github.com/astropy/astropy.git
-      cd astropy
+      git clone git://github.com/scikit-beam/scikit-beam.git
+      cd scikit-beam
 
 #. Make a 'feature branch'. This will be where you work on your bug fix. It's
    nice and safe and leaves you with access to an unmodified copy of the code
@@ -102,7 +102,7 @@ In detail
       0001-BF-added-tests-for-Funny-bug.patch
       0002-BF-added-fix-for-Funny-bug.patch
 
-   Send these files to the `astropy-dev mailing list`_.
+   Send these files to the `scikit-beam-dev mailing list`_.
 
 When you are done, to switch back to the main copy of the
 code, just return to the ``master`` branch::

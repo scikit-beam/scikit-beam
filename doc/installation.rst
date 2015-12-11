@@ -18,6 +18,8 @@ common scientific Python packages built in.
 2. Install scikit-beam
 """"""""""""""""""""""
 
+TODO: make this actually work!
+
 Open a command prompt. On Windows, you can use the "Anaconda Command Prompt"
 installed by Anaconda or Start > Applications > Command Prompt. On a Mac, look
 for Applications > Utilities > Terminal. Type these commands:
@@ -28,7 +30,7 @@ for Applications > Utilities > Terminal. Type these commands:
    conda config --add channels scikit-beam
    # to install the latest stable release
    conda install scikit-beam
-   
+
 The above installs scikit-beam and all its requirements. Our tutorials also use
 the IPython notebook. To install that as well, type
 
@@ -38,7 +40,7 @@ the IPython notebook. To install that as well, type
 
 3. Try it out!
 """"""""""""""
-    
+
 Finally, to try it out, type
 
 .. code-block:: bash

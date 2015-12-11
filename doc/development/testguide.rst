@@ -8,13 +8,13 @@ Testing Guidelines
 ==================
 
 This section describes the testing framework and format standards for tests in
-Astropy core packages (this also serves as recommendations for affiliated
+Scikit-beam core packages (this also serves as recommendations for affiliated
 packages).
 
 Testing Framework
 =================
 
-The testing framework used by Astropy is the `py.test`_ framework.
+The testing framework used by Scikit-beam is the `py.test`_ framework.
 
 .. _py.test: http://pytest.org/latest/
 .. _pytest.main: http://pytest.org/latest/builtin.html#pytest.main
@@ -24,11 +24,11 @@ The testing framework used by Astropy is the `py.test`_ framework.
 Running Tests
 =============
 
-There are currently three different ways to invoke Astropy tests. Each
+There are currently three different ways to invoke Scikit-beam tests. Each
 method invokes `py.test`_ to run the tests but offers different options when
 calling.
 
-In addition to running the Astropy tests, these methods can also be called
+In addition to running the Scikit-beam tests, these methods can also be called
 so that they check Python source code for `PEP8 compliance
 <http://www.python.org/dev/peps/pep-0008/>`_. All of the PEP8 testing
 options require the `pytest-pep8 plugin
@@ -38,8 +38,8 @@ separately.
 setup.py test
 -------------
 
-The safest way to run the astropy test suite is via the setup command ``test``.
-This is invoked by running ``python setup.py test`` while in the astropy source
+The safest way to run the scikit-beam test suite is via the setup command ``test``.
+This is invoked by running ``python setup.py test`` while in the scikit-beam source
 code directory. Run ``python setup.py test --help`` to see the options to the
 test command.
 
@@ -49,7 +49,7 @@ turn off regular testing and enable PEP8 testing.
 .. note::
 
     This method of running the tests defaults to the version of `py.test`_
-    that is bundled with Astropy. To use the locally-installed version, you
+    that is bundled with Scikit-beam. To use the locally-installed version, you
     can set the ``ASTROPY_USE_SYSTEM_PYTEST`` environment variable, eg.::
 
         > ASTROPY_USE_SYSTEM_PYTEST=1 python setup.py test
@@ -58,7 +58,7 @@ py.test
 -------
 
 An alternative way to run tests from the command line is to switch to the source
-code directory of astropy and simply type::
+code directory of scikit-beam and simply type::
 
     py.test
 
@@ -101,49 +101,49 @@ default regular tests will also be run but these can be turned off by adding
     `py.test`_ rather than the bundled one, and hence will fail if the local
     version it is not up-to-date enough (`py.test`_ 2.2 as of this writing).
 
-.. _astropy.test():
+.. _scikit-beam.test():
 
-astropy.test()
+scikit-beam.test()
 --------------
 
-AstroPy includes a standalone version of py.test that allows to tests
+Scikit-beam includes a standalone version of py.test that allows to tests
 to be run even if py.test is not installed. Tests can be run from within
-AstroPy with::
+Scikit-beam with::
 
-    import astropy
-    astropy.test()
+    import scikit-beam
+    scikit-beam.test()
 
-This will run all the default tests for AstroPy.
+This will run all the default tests for Scikit-beam.
 
 Tests for a specific package can be run by specifying the package in the call
 to the ``test()`` function::
 
-    astropy.test('io.fits')
+    scikit-beam.test('io.fits')
 
-This method works only with package names that can be mapped to Astropy
+This method works only with package names that can be mapped to Scikit-beam
 directories. As an alternative you can test a specific directory or file
 with the ``test_path`` option::
 
-  astropy.test(test_path='wcs/tests/test_wcs.py')
+  scikit-beam.test(test_path='wcs/tests/test_wcs.py')
 
 The ``test_path`` must be specified either relative to the working directory
 or absolutely.
 
-By default `astropy.test()`_ will skip tests which retrieve data from the
+By default `scikit-beam.test()`_ will skip tests which retrieve data from the
 internet. To turn these tests on use the ``remote_data`` flag::
 
-    astropy.test('io.fits', remote_data=True)
+    scikit-beam.test('io.fits', remote_data=True)
 
 In addition, the ``test`` function supports any of the options that can be
 passed to `pytest.main() <http://pytest.org/latest/builtin.html#pytest.main>`_,
 and convenience options ``verbose=`` and ``pastebin=``.
 
 Enable PEP8 compliance testing with ``pep8=True`` in the call to
-``astropy.test``. This will enable PEP8 checking and disable regular tests.
+``scikit-beam.test``. This will enable PEP8 checking and disable regular tests.
 
 .. note::
     This method of running the tests defaults to the version of
-    `py.test`_ that is bundled with Astropy. To use the locally-installed
+    `py.test`_ that is bundled with Scikit-beam. To use the locally-installed
     version, you should set the ``ASTROPY_USE_SYSTEM_PYTEST`` environment
     variable (see :doc:`/config/index`) or the `py.test`_ method described
     above.
@@ -160,16 +160,16 @@ locally without pushing to a continuous integration system.
 
 Tox works by detecting the presence of a file called ``tox.ini`` in the root of
 a Python project and using that to configure the desired virtualenvs and start
-the tests.  So to run the Astropy tests on multiple Python versions using tox,
+the tests.  So to run the Scikit-beam tests on multiple Python versions using tox,
 simply install Tox::
 
     $ pip install tox
 
-and then from the root of an Astropy repository clone run::
+and then from the root of an Scikit-beam repository clone run::
 
     $ tox
 
-The Astropy tox configuration currently tests against Python versions 2.6, 2.7,
+The Scikit-beam tox configuration currently tests against Python versions 2.6, 2.7,
 3.2, and 3.3.  Tox will automatically skip any Python versions you do not have
 installed, but best results are achieved if you first install all supported
 Python versions and make sure they are on your ``$PATH``.
@@ -199,15 +199,15 @@ example, to run only the ``wcs`` tests from the commandline::
 
 Or from Python::
 
-    >>> import astropy
-    >>> astropy.test(package="wcs")
+    >>> import scikit-beam
+    >>> scikit-beam.test(package="wcs")
 
 You can also specify a single file to test from the commandline::
 
-    python setup.py test -t astropy/wcs/tests/test_wcs.py
+    python setup.py test -t scikit-beam/wcs/tests/test_wcs.py
 
 When the ``-t`` option is given a relative path, it is relative to the
-installed root of astropy.  When ``-t`` is given a relative path to a
+installed root of scikit-beam.  When ``-t`` is given a relative path to a
 documentation ``.rst`` file to test, it is relative to the root of the
 documentation, i.e. the ``docs`` directory in the source tree.  For
 example::
@@ -217,7 +217,7 @@ example::
 Testing for open files
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Astropy can test whether any of the unit tests inadvertently leave any
+Scikit-beam can test whether any of the unit tests inadvertently leave any
 files open.  Since this greatly slows down the time it takes to run
 the tests, it is turned off by default.
 
@@ -227,13 +227,13 @@ To use it from the commandline, do::
 
 To use it from Python, do::
 
-    >>> import astropy
-    >>> astropy.test(open_files=True)
+    >>> import scikit-beam
+    >>> scikit-beam.test(open_files=True)
 
 Test coverage reports
 ^^^^^^^^^^^^^^^^^^^^^
 
-Astropy can use `coverage.py <http://nedbatchelder.com/code/coverage/>`_ to
+Scikit-beam can use `coverage.py <http://nedbatchelder.com/code/coverage/>`_ to
 generate test coverage reports.  To generate a test coverage report, use::
 
     python setup.py test --coverage
@@ -241,13 +241,13 @@ generate test coverage reports.  To generate a test coverage report, use::
 There is a `coveragerc
 <http://nedbatchelder.com/code/coverage/config.html>`_ file that
 defines files to omit as well as lines to exclude.  It is installed
-along with astropy so that the ``astropy`` testing framework can use
-it.  In the source tree, it is at ``astropy/tests/coveragerc``.
+along with scikit-beam so that the ``scikit-beam`` testing framework can use
+it.  In the source tree, it is at ``scikit-beam/tests/coveragerc``.
 
 Running tests in parallel
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-It is possible to speed up astropy's tests using the `pytest-xdist
+It is possible to speed up scikit-beam's tests using the `pytest-xdist
 <https://pypi.python.org/pypi/pytest-xdist>`_ plugin.  This plugin can be
 installed using `pip`_::
 
@@ -263,8 +263,8 @@ processes as cores on your machine.
 
 Similarly, this feature can be invoked from Python::
 
-    >>> import astropy
-    >>> astropy.test(parallel=4)
+    >>> import scikit-beam
+    >>> scikit-beam.test(parallel=4)
 
 Writing tests
 =============
@@ -327,7 +327,7 @@ Each package should include a suite of unit tests, covering as many of
 the public methods/functions as possible. These tests should be
 included inside each sub-package, e.g::
 
-    astropy/io/fits/tests/
+    scikit-beam/io/fits/tests/
 
 ``tests`` directories should contain an ``__init__.py`` file so that
 the tests can be imported and so that they can use relative imports.
@@ -337,7 +337,7 @@ Interoperability tests
 
 Tests involving two or more sub-packages should be included in::
 
-    astropy/tests/
+    scikit-beam/tests/
 
 Regression tests
 ----------------
@@ -350,24 +350,24 @@ Working with data files
 -----------------------
 
 Tests that need to make use of a data file should use the
-`~astropy.utils.data.get_pkg_data_fileobj` or
-`~astropy.utils.data.get_pkg_data_filename` functions.  These functions
-search locally first, and then on the astropy data server or an arbitrary
+`~scikit-beam.utils.data.get_pkg_data_fileobj` or
+`~scikit-beam.utils.data.get_pkg_data_filename` functions.  These functions
+search locally first, and then on the scikit-beam data server or an arbitrary
 URL, and return a file-like object or a local filename, respectively.  They
 automatically cache the data locally if remote data is obtained, and from
 then on the local copy will be used transparently.  See the next section for
 note specific to dealing with the cache in tests.
 
 They also support the use of an MD5 hash to get a specific version of a data
-file.  This hash can be obtained prior to submitting a file to the astropy
-data server by using the `~astropy.utils.data.compute_hash` function on a
+file.  This hash can be obtained prior to submitting a file to the scikit-beam
+data server by using the `~scikit-beam.utils.data.compute_hash` function on a
 local copy of the file.
 
 Tests that may retrieve remote data should be marked with the
 ``@remote_data`` decorator, or, if a doctest, flagged with the
 ``REMOTE_DATA`` flag.  Tests marked in this way will be skipped by default
-by ``astropy.test()`` to prevent test runs from taking too long. These
-tests can be run by ``astropy.test()`` by adding the
+by ``scikit-beam.test()`` to prevent test runs from taking too long. These
+tests can be run by ``scikit-beam.test()`` by adding the
 ``remote_data=True`` flag.  Turn on the remote data tests at the
 command line with ``py.test --remote-data``.
 
@@ -388,7 +388,7 @@ Examples
     def test_2():
         """Test version using a remote file."""
         #this is the hash for a particular version of a file stored on the
-        #astropy data server.
+        #scikit-beam data server.
         datafile = get_data_filename('hash/94935ac31d585f68041c08f87d1a19d4')
         # do the test
 
@@ -406,16 +406,16 @@ large, we will need to design a mechanism for removing test data immediately.
 Tests that use the file cache
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-By default, the Astropy test runner sets up a clean file cache in a temporary
+By default, the Scikit-beam test runner sets up a clean file cache in a temporary
 directory that is used only for that test run and then destroyed.  This is to
 ensure consistency between test runs, as well as to not clutter users' caches
-(i.e. the cache directory returned by `~astropy.config.get_cache_dir`) with
+(i.e. the cache directory returned by `~scikit-beam.config.get_cache_dir`) with
 test files.
 
 However, some test authors (especially for affiliated packages) may find it
 desirable to cache files downloaded during a test run in a more permanent
 location (e.g. for large data sets).  To this end the
-`~astropy.config.set_temp_cache` helper may be used.  It can be used either as
+`~scikit-beam.config.set_temp_cache` helper may be used.  It can be used either as
 a context manager within a test to temporarily set the cache to a custom
 location, or as a *decorator* that takes effect for an entire test function
 (not including setup or teardown, which would have to be decorated separately).
@@ -629,21 +629,21 @@ You may need to adjust the relative import to work for the depth of
 your module.  ``tests.helper`` imports ``pytest`` either from the
 user's system or ``extern.pytest`` if the user does not have py.test
 installed. This is so that users need not install py.test to run
-AstroPy's tests.
+Scikit-beam's tests.
 
 
 Testing warnings
 ----------------
 
 In order to test that warnings are triggered as expected in certain
-situations, you can use the `astropy.tests.helper.catch_warnings`
+situations, you can use the `scikit-beam.tests.helper.catch_warnings`
 context manager.  Unlike the `warnings.catch_warnings` context manager
 in the standard library, this one will reset all warning state before
 hand so one is assured to get the warnings reported, regardless of
 what errors may have been emitted by other tests previously.  Here is
 a real-world example::
 
-  from astropy.tests.helper import catch_warnings
+  from scikit-beam.tests.helper import catch_warnings
 
   with catch_warnings(MergeConflictWarning) as warning_lines:
       # Test code which triggers a MergeConflictWarning
@@ -658,8 +658,8 @@ a real-world example::
    Within `py.test`_ there is also the option of using the ``recwarn``
    function argument to test that warnings are triggered.  This method has
    been found to be problematic in at least one case (`pull request 1174
-   <https://github.com/astropy/astropy/pull/1174#issuecomment-20249309>`_)
-   so the `astropy.tests.helper.catch_warnings` context manager is
+   <https://github.com/scikit-beam/scikit-beam/pull/1174#issuecomment-20249309>`_)
+   so the `scikit-beam.tests.helper.catch_warnings` context manager is
    preferred.
 
 Testing configuration parameters
@@ -670,7 +670,7 @@ are reset to their default values when the test runner starts up.
 
 Sometimes you'll want to test the behavior of code when a certain
 configuration item is set to a particular value.  In that case, you
-can use the `astropy.config.ConfigItem.set_temp` context manager to
+can use the `scikit-beam.config.ConfigItem.set_temp` context manager to
 temporarily set a configuration item to that value, test within that
 context, and have it automatically return to its original value.
 
@@ -687,7 +687,7 @@ Testing with Unicode literals
 Python 2 can run code in two modes: by default, string literals are
 8-bit `bytes` objects.  However, when ``from __future__ import
 unicode_literals`` is used, string literals are `unicode` objects.  In
-order to ensure that astropy supports user code written in both
+order to ensure that scikit-beam supports user code written in both
 styles, the testing framework has a special feature to run a module
 containing tests in both modes.  Simply add the comment::
 
@@ -745,17 +745,17 @@ doctests and execute them as part of a project's automated test suite.  This
 way we can automatically ensure that all doctest-like examples in our
 docstrings are correct.
 
-The Astropy test suite automatically detects and runs any doctests in
-the Astropy source code or documentation, or in affiliated packages
-using the Astropy test running framework. For example doctests and
+The Scikit-beam test suite automatically detects and runs any doctests in
+the Scikit-beam source code or documentation, or in affiliated packages
+using the Scikit-beam test running framework. For example doctests and
 detailed documentation on how to write them, see the full
 :mod:`doctest` documentation.
 
 .. note::
 
    Since the narrative Sphinx documentation is not installed alongside
-   the astropy source code, it can only be tested by running ``python
-   setup.py test``, not by ``import astropy; astropy.test()``.
+   the scikit-beam source code, it can only be tested by running ``python
+   setup.py test``, not by ``import scikit-beam; scikit-beam.test()``.
 
 Skipping doctests
 -----------------
@@ -783,7 +783,7 @@ skip a doctest:
 
      >>> datafile = get_data_filename('hash/94935')  # doctest: +REMOTE_DATA
 
-2. Astropy's test framework adds support for a special ``__doctest_skip__``
+2. Scikit-beam's test framework adds support for a special ``__doctest_skip__``
    variable that can be placed at the module level of any module to list
    functions, classes, and methods in that module whose doctests should not
    be run.  That is, if it doesn't make sense to run a function's example
@@ -881,7 +881,7 @@ the tests are being run on (different Python versions, different OS, etc.) the
 exact number of digits shown can differ.  Because doctests work by comparing
 strings this can cause such tests to fail.
 
-To address this issue Astropy's test framework includes support for a
+To address this issue Scikit-beam's test framework includes support for a
 ``FLOAT_CMP`` flag that can be used with doctests.  For example:
 
 .. code-block:: none
@@ -900,20 +900,11 @@ doctest.  The values are otherwise compared exactly, so more significant
 Continuous integration
 ----------------------
 
-Astropy uses `Travis <https://travis-ci.org/astropy/astropy>`_ for continuous
+Scikit-beam uses `Travis <https://travis-ci.org/scikit-beam/scikit-beam>`_ for continuous
 integration (CI) on Linux and OSX setups, and `Appveyor
-<https://ci.appveyor.com/project/Astropy/astropy>`_ on Windows. These
+<https://ci.appveyor.com/project/Scikit-beam/scikit-beam>`_ on Windows. These
 continuously test the package for each commit and pull request that is pushed
 to GitHub to notice when something breaks.
 
-Astropy and many affiliated packages use an external package called
-`ci-helpers <https://github.com/astropy/astropy-helpers>`_ to provide
-support for the generic parts of the CI systems. ``ci-helpers`` consists of
-a set of scripts that are used by the ``.travis.yml`` and ``appveyor.yml``
-files to setting up the conda environment, and installing dependencies.
-
 Dependencies can be customized for different packages using the appropriate
-environmental variables in ``.travis.yml`` and ``appveyor.yml``. For more
-details on how to set up this machinery, see the `package-template
-<https://github.com/astropy/package-template>`_ and `ci-helpers`_.
-
+environmental variables in ``.travis.yml`` and ``appveyor.yml``.

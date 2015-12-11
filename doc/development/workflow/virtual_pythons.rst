@@ -7,7 +7,7 @@
 Python virtual environments
 ===========================
 
-If you plan to do regular work on astropy you should do your development in
+If you plan to do regular work on scikit-beam you should do your development in
 a python virtual environment. Conceptually a virtual environment is a
 duplicate of the python environment you normally work in with as many (or as
 few) of the packages from your normal environment included in that virtual
@@ -94,7 +94,7 @@ you want in your virtual environment?
 Including them in your virtual environment doesn't take much extra space--they
 are linked into the virtual environment instead of being copied. Within the
 virtual environment you can install new versions of packages like Numpy or
-Astropy that override the versions installed in your normal python environment.
+Scikit-beam that override the versions installed in your normal python environment.
 
 The easiest way to get started is to include in your virtual environment the
 packages installed in your your normal python environment; the instructions

@@ -22,13 +22,13 @@ Make sure that pull requests do not contain a messy history with merges, etc. If
 Integrating changes manually
 ****************************
 
-First, check out the ``astropy`` repository. The instructions in :ref:`set_upstream_master` add a remote that has read-only
+First, check out the ``scikit-beam`` repository. The instructions in :ref:`set_upstream_master` add a remote that has read-only
 access to the upstream repo.  Being a maintainer, you've got read-write access.
 
 It's good to have your upstream remote have a scary name, to remind you that
 it's a read-write remote::
 
-    git remote add upstream-rw git@github.com:astropy/astropy.git
+    git remote add upstream-rw git@github.com:scikit-beam/scikit-beam.git
     git fetch upstream-rw
 
 Let's say you have some changes that need to go into trunk
@@ -37,7 +37,7 @@ Let's say you have some changes that need to go into trunk
 The changes are in some branch that you are currently on. For example, you are
 looking at someone's changes like this::
 
-    git remote add someone git://github.com/someone/astropy.git
+    git remote add someone git://github.com/someone/scikit-beam.git
     git fetch someone
     git branch cool-feature --track someone/cool-feature
     git checkout cool-feature
@@ -169,10 +169,10 @@ followed by IPython:
 Updating and Maintaining the Changelog
 **************************************
 
-The Astropy "changelog" is kept in the file ``CHANGES.rst`` at the root of the
+The Scikit-beam "changelog" is kept in the file ``CHANGES.rst`` at the root of the
 repository.  As the filename extension suggests this is a reStructured Text
 file.  The purpose of this file is to give a technical, but still user (and
-developer) oriented overview of what changes were made to Astropy between each
+developer) oriented overview of what changes were made to Scikit-beam between each
 public release.  The idea is that it's a little more to the point and easier to
 follow than trying to read through full git log.  It lists all new features
 added between versions, so that a user can easily find out from reading the
@@ -186,9 +186,9 @@ Adding to the changelog
 There are two approaches one may take to adding a new entry to the changelog,
 each with certain pros and cons.  Before describing the two specific approaches
 it should be said that *all* additions to the changelog should be made first
-in the 'master' branch.  This is because every release of Astropy includes a
+in the 'master' branch.  This is because every release of Scikit-beam includes a
 copy of the changelog, and it should list all the changes in every prior
-version of Astropy.  For example, when Astropy v0.3.0 is released, in addition
+version of Scikit-beam.  For example, when Scikit-beam v0.3.0 is released, in addition
 to the changes new to that version the changelog should have all the changes
 from every v0.2.x version (and earlier) released up to that point.
 

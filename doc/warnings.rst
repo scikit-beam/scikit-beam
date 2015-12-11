@@ -6,7 +6,7 @@ Python warnings system
 
 .. doctest-skip-all
 
-Astropy uses the Python :mod:`warnings` module to issue warning messages.  The
+Scikit-beam uses the Python :mod:`warnings` module to issue warning messages.  The
 details of using the warnings module are general to Python, and apply to any
 Python software that uses this system.  The user can suppress the warnings
 using the python command line argument ``-W"ignore"`` when starting an
@@ -21,11 +21,11 @@ follows::
 
 It is also possible to suppress warnings from within a python script.  For
 instance, the warnings issued from a single call to the
-`astropy.io.fits.writeto` function may be suppressed from within a Python
+`scikit-beam.io.fits.writeto` function may be suppressed from within a Python
 script using the `warnings.filterwarnings` function as follows::
 
      >>> import warnings
-     >>> from astropy.io import fits
+     >>> from scikit-beam.io import fits
      >>> warnings.filterwarnings('ignore', category=UserWarning, append=True)
      >>> fits.writeto(filename, data, clobber=True)
 
@@ -34,40 +34,40 @@ for simple call `warnings.simplefilter`::
 
     >>> warnings.simplefilter('ignore', UserWarning)
 
-Astropy includes its own warning classes,
-`~astropy.utils.exceptions.AstropyWarning` and
-`~astropy.utils.exceptions.AstropyUserWarning`.  All warnings from Astropy are
+Scikit-beam includes its own warning classes,
+`~scikit-beam.utils.exceptions.Scikit-beamWarning` and
+`~scikit-beam.utils.exceptions.Scikit-beamUserWarning`.  All warnings from Scikit-beam are
 based on these warning classes (see below for the distinction between them). One
-can thus ignore all warnings from Astropy (while still allowing through
+can thus ignore all warnings from Scikit-beam (while still allowing through
 warnings from other libraries like Numpy) by using something like::
 
-    >>> from astropy.utils.exceptions import AstropyWarning
-    >>> warnings.simplefilter('ignore', category=AstropyWarning)
+    >>> from scikit-beam.utils.exceptions import Scikit-beamWarning
+    >>> warnings.simplefilter('ignore', category=Scikit-beamWarning)
 
 Warning filters may also be modified just within a certain context using the
 `warnings.catch_warnings` context manager::
 
     >>> with warnings.catch_warnings():
-    ...     warnings.simplefilter('ignore', AstropyWarning)
+    ...     warnings.simplefilter('ignore', Scikit-beamWarning)
     ...     fits.writeto(filename, data, clobber=True)
 
-As mentioned above, there are actually *two* base classes for Astropy warnings.
-The main distinction is that `~astropy.utils.exceptions.AstropyUserWarning` is
+As mentioned above, there are actually *two* base classes for Scikit-beam warnings.
+The main distinction is that `~scikit-beam.utils.exceptions.Scikit-beamUserWarning` is
 for warnings that are *intended* for typical users (e.g. "Warning: Ambiguous
 unit", something that might be because of improper input).  In contrast,
-`~astropy.utils.exceptions.AstropyWarning` warnings that are *not*
-`~astropy.utils.exceptions.AstropyUserWarning` may be for lower-level warnings
-more useful for developers writing code that *uses* Astropy (e.g., the
+`~scikit-beam.utils.exceptions.Scikit-beamWarning` warnings that are *not*
+`~scikit-beam.utils.exceptions.Scikit-beamUserWarning` may be for lower-level warnings
+more useful for developers writing code that *uses* Scikit-beam (e.g., the
 deprecation warnings discussed below).  So if you're a user that just wants to
 silence everything, the code above will suffice, but if you are a developer and
 want to hide development-related warnings from your users, you may wish to still
-allow through `~astropy.utils.exceptions.AstropyUserWarning`.
+allow through `~scikit-beam.utils.exceptions.Scikit-beamUserWarning`.
 
-Astropy also issues warnings when deprecated API features are used.  If you
+Scikit-beam also issues warnings when deprecated API features are used.  If you
 wish to *squelch* deprecation warnings, you can start Python with
 ``-Wi::Deprecation``.  This sets all deprecation warnings to ignored.  There is
-also an Astropy-specific `~astropy.utils.exceptions.AstropyDeprecationWarning`
-which can be used to disable deprecation warnings from Astropy only.
+also an Scikit-beam-specific `~scikit-beam.utils.exceptions.Scikit-beamDeprecationWarning`
+which can be used to disable deprecation warnings from Scikit-beam only.
 
 See `the CPython documentation
 <http://docs.python.org/2/using/cmdline.html#cmdoption-W>`__ for more

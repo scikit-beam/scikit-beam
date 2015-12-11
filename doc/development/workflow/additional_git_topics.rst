@@ -46,10 +46,10 @@ If you want to work on some stuff with other people, where you are all
 committing into the same repository, or even the same branch, then just
 share it via GitHub.
 
-First fork Astropy into your account, as from :ref:`fork_a_copy`.
+First fork Scikit-beam into your account, as from :ref:`fork_a_copy`.
 
 Then, go to your forked repository GitHub page, e.g.,
-``http://github.com/your-user-name/astropy``
+``http://github.com/your-user-name/scikit-beam``
 
 Click on the 'Admin' button, and add anyone else to the repo as a
 collaborator:
@@ -58,7 +58,7 @@ collaborator:
 
 Now all those people can do::
 
-    git clone git@githhub.com:your-user-name/astropy.git
+    git clone git@githhub.com:your-user-name/scikit-beam.git
 
 Remember that links starting with ``git@`` use the ssh protocol and are
 read-write; links starting with ``git://`` are read-only.
@@ -159,7 +159,7 @@ remote called ``origin``, you use this command to force-push::
 
 Note that this will overwrite the branch on GitHub, i.e. this is one of the few
 ways you can actually lose commits with git. Also note that it is never allowed
-to force push to the main astropy repo (typically called ``upstream``), because
+to force push to the main scikit-beam repo (typically called ``upstream``), because
 this would re-write commit history and thus cause problems for all others.
 
 .. _recovering-from-mess-up:
@@ -289,7 +289,7 @@ attaching code containing the fix for the issue. This can currently only be
 done using the GitHub API (there's no button or anything on the web
 site that does it, at least as of 2/6/2012). There are two options to do this,
 both of which only work if you own the repository or have the ability to commit
-directly to it (for Astropy, that means being an Astropy maintainer):
+directly to it (for Scikit-beam, that means being an Scikit-beam maintainer):
 
 * You can use the script at https://gist.github.com/1750715, which will
   do this for you automatically |emdash| just download the script and run it as
@@ -300,15 +300,15 @@ directly to it (for Astropy, that means being an Astropy maintainer):
   <https://github.com/defunkt/hub>`_ by GitHub. Once installed, you can
   attach a branch to a pull request by doing::
 
-          hub pull-request -i <ID> -b astropy:master -h <USER>:<BRANCH>
+          hub pull-request -i <ID> -b scikit-beam:master -h <USER>:<BRANCH>
 
   where ``<ID>`` is the ID of the issue, ``<USER>`` is the username, and
   ``<BRANCH>`` is the name of the branch you want to attach to the
   issue. For example::
 
-          hub pull-request -i 42 -b astropy:master -h galahad:feature
+          hub pull-request -i 42 -b scikit-beam:master -h galahad:feature
 
-  will attach the ``feature`` branch from ``galahad``'s Astropy
+  will attach the ``feature`` branch from ``galahad``'s Scikit-beam
   repository to issue 42.
 
   The ``hub`` command can do a lot more to interact with GitHub, so be
@@ -322,7 +322,7 @@ directly to it (for Astropy, that means being an Astropy maintainer):
 Merge commits and cherry picks
 ------------------------------
 
-Let's say that you have a fork (origin) on GitHub of the main Astropy
+Let's say that you have a fork (origin) on GitHub of the main Scikit-beam
 repository (upstream).  Your fork is up to date with upstream's master branch
 and you've made some commits branching off from it on your own branch::
 
@@ -347,14 +347,14 @@ the pull request is accepted and merged.  When GitHub merges the pull request
 it's basically doing the following in the upstream repository::
 
     $ git checkout master
-    $ git remote add yourfork file:///path/to/your/fork/astropy
+    $ git remote add yourfork file:///path/to/your/fork/scikit-beam
     $ git fetch yourfork
     $ git merge --no-ff yourfork/issue-branch
 
 
 Because it always uses ``--no-ff`` we always get a merge commit (it is possible
 to manually do a fast-forward merge of a pull request, but we rarely ever do
-that).  Now the main Astropy repository looks like this::
+that).  Now the main Scikit-beam repository looks like this::
 
 
     upstream:

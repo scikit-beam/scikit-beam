@@ -10,7 +10,7 @@ environments that allow installing and experimenting with Python packages
 without disrupting your production Python environment.  When using commands
 such as ``python setup.py develop``, for example, it is strongly recommended to
 do so within a virtualenv.  This is generally preferable to installing a
-development version of Astropy into your system site-packages and having to
+development version of Scikit-beam into your system site-packages and having to
 keep track of whether or not your environment is in a "known good"
 configuration for production/science use.
 
@@ -20,7 +20,7 @@ production environment.
 
 We won't provide a full tutorial on using virtualenv here |emdash| the
 virtualenv documentation linked to above is a better place to start.  But here
-is a quick overview on how to set up a virtualenv for Astropy development with
+is a quick overview on how to set up a virtualenv for Scikit-beam development with
 your default Python version:
 
 #. Install virtualenv::
@@ -38,9 +38,9 @@ your default Python version:
 
        $ mkdir ~/.virtualenvs
 
-#. Create the Astropy virtualenv::
+#. Create the Scikit-beam virtualenv::
 
-       $ virtualenv --distribute --system-site-packages ~/.virtualenvs/astropy-dev
+       $ virtualenv --distribute --system-site-packages ~/.virtualenvs/scikit-beam-dev
 
    The ``--system-site-packages`` option inherits all packages already
    installed in your system site-packages directory; this frees you from having
@@ -51,28 +51,28 @@ your default Python version:
 
 #. Activate the virtualenv::
 
-       $ source ~/.virtualenvs/astropy-dev/bin/activate
+       $ source ~/.virtualenvs/scikit-beam-dev/bin/activate
 
    or if you're using a csh-variant::
 
-       $ source ~/.virtualenvs/astropy-dev/bin/activate.csh
+       $ source ~/.virtualenvs/scikit-beam-dev/bin/activate.csh
 
    virtualenv works on Windows too |emdash| see the documentation for details.
 
 #. If the virtualenv successfully activated its name should appear in your
    shell prompt::
 
-       (astropy-dev) $
+       (scikit-beam-dev) $
 
    The virtualenv can be disabled at any time by entering::
 
-       (astropy-dev) $ deactivate
+       (scikit-beam-dev) $ deactivate
 
 #. Now as long as the virtualenv is activated, packages you install with
    ``pip``, or by manually running ``python setup.py install`` will
    automatically install into your virtualenv instead of the system
-   site-packages.  Consider installing Astropy in develop mode into the
-   virtualenv as described :ref:`activate_development_astropy`.
+   site-packages.  Consider installing Scikit-beam in develop mode into the
+   virtualenv as described :ref:`activate_development_scikit-beam`.
 
 Using virtualenv with IPython
 -----------------------------

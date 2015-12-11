@@ -2,14 +2,14 @@
 .. _doc-rules:
 
 =======================
-Astropy Docstring Rules
+Scikit-beam Docstring Rules
 =======================
 
 The original source for these docstring standards is the NumPy_ project, and
 the associated numpydoc_ tools. The most up-to-date version of these standards
 can be found at `numpy's github site
 <http://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt>`_. The
-guidelines below have been adapted to the Astropy package.
+guidelines below have been adapted to the Scikit-beam package.
 
 
 Overview
@@ -32,7 +32,7 @@ Use a code checker:
  * `pyflakes <http://pypi.python.org/pypi/pyflakes>`_
  * `pep8.py <https://github.com/jcrocholl/pep8>`_
 
-The following import conventions are used throughout the Astropy source
+The following import conventions are used throughout the Scikit-beam source
 and documentation::
 
    import numpy as np
@@ -69,7 +69,7 @@ triple double quotes, i.e.::
 
 NumPy_ and SciPy_ have defined a common convention for docstrings that
 provides for consistency, while also allowing our toolchain to produce
-well-formatted reference guides. This format should be used for Astropy
+well-formatted reference guides. This format should be used for Scikit-beam
 docstrings.
 
 This docstring standard uses `re-structured text (reST)
@@ -121,7 +121,7 @@ The sections of the docstring are:
    A section (use if applicable) to warn users that the object is deprecated.
    Section contents should include:
 
-   * In what Astropy version the object was deprecated, and when it will
+   * In what Scikit-beam version the object was deprecated, and when it will
      be removed.
 
    * Reason for deprecation if this is useful information (e.g., object
@@ -133,10 +133,6 @@ The sections of the docstring are:
    underlined section header.
 
    ::
-
-     .. note:: Deprecated in Astropy 1.2
-               `ndobj_old` will be removed in Astropy 2.0, it is replaced by
-               `ndobj_new` because the latter works also with array subclasses.
 
 3. **Extended summary**
 
@@ -229,7 +225,7 @@ The sections of the docstring are:
    docstrings further explain parameters used by this function are good
    candidates.
 
-   As an example, for a hypothetical function ``astropy.wcs.world2pix``
+   As an example, for a hypothetical function ``scikit-beam.wcs.world2pix``
    converting sky to pixel coordinates, we would have::
 
      See Also
@@ -240,7 +236,7 @@ The sections of the docstring are:
    and the tree is searched upwards for a match.
 
    Prefix functions from other sub-modules appropriately. E.g., whilst
-   documenting a hypothetical ``astropy.vo`` module, refer to a function in
+   documenting a hypothetical ``scikit-beam.vo`` module, refer to a function in
    ``table`` by
 
    ::
@@ -249,7 +245,7 @@ The sections of the docstring are:
 
    When referring to an entirely different module::
 
-     astropy.coords : Coordinate handling routines
+     scikit-beam.coords : Coordinate handling routines
 
    Functions may be listed without descriptions, and this is preferable if the
    functionality is clear from the function name::
@@ -341,25 +337,25 @@ The sections of the docstring are:
    lines. Comments explaining the examples should have blank lines both above
    and below them::
 
-     >>> astropy.wcs.world2pix(233.2, -12.3)
+     >>> scikit-beam.wcs.world2pix(233.2, -12.3)
      (134.5, 233.1)
 
      Comment explaining the second example
 
-     >>> astropy.coords.fk5_to_gal("00:42:44.33 +41:16:07.5")
+     >>> scikit-beam.coords.fk5_to_gal("00:42:44.33 +41:16:07.5")
      (121.1743, -21.5733)
 
    For tests with a result that is random or platform-dependent, mark the
    output as such::
 
-     >>> astropy.coords.randomize_position(244.9, 44.2, radius=0.1)
+     >>> scikit-beam.coords.randomize_position(244.9, 44.2, radius=0.1)
      (244.855, 44.13)  # random
 
    It is not necessary to use the doctest markup ``<BLANKLINE>`` to indicate
    empty lines in the output. The examples may assume that ``import numpy as
    np`` is executed before the example code.
 
-.. We need to consider whether to add a doctest= option to astropy.test to
+.. We need to consider whether to add a doctest= option to scikit-beam.test to
 .. enable automated testing of the examples as in Numpy.
 
 Documenting classes
@@ -438,7 +434,7 @@ sections in the method docstring.
 Documenting class instances
 ---------------------------
 
-Instances of classes that are part of the Astropy API may require some care.
+Instances of classes that are part of the Scikit-beam API may require some care.
 To give these instances a useful docstring, we do the following:
 
 * Single instance: If only a single instance of a class is exposed, document
@@ -521,7 +517,7 @@ output. New paragraphs are marked with a blank line.
 
 Use *italics*, **bold**, and ``courier`` if needed in any explanations (but
 not for variable names and doctest code or multi-line code). Variable, module
-and class names should be written between single back-ticks (```astropy```).
+and class names should be written between single back-ticks (```scikit-beam```).
 
 A more extensive example of reST markup can be found in `this example document
 <http://docutils.sourceforge.net/docs/user/rst/demo.txt>`_; the `quick

@@ -15,31 +15,16 @@ both for the core package and for affiliated packages.
 Interface and Dependencies
 --------------------------
 
-* All code must be compatible with Python 2.6, 2.7, as well as 3.3 and
-  later.  The use of `six`_ for writing code that is portable between Python
-  2.x and 3.x is encouraged going forward.  However, much of our affiliate code
-  may still use `2to3`_ to process Python 2.x files to be compatible with
-  Python 3.x.
+* All code must be compatible with Python 3.4 and later, as well as 2.7.
+  The use of `six`_ for writing code that is portable between Python
+  2.7 and 3.x is required.
 
 .. _six: http://pythonhosted.org/six/
-.. _2to3: https://docs.python.org/2/library/2to3.html
-
-  Packages that use ``six`` must include the following in their
-  ``setup_package.py`` file::
-
-      def requires_2to3():
-          return False
 
   Code that uses ``six`` should use the following preamble::
 
         from __future__ import (absolute_import, division, print_function,
                                 unicode_literals)
-
-  Code that uses ``2to3`` may limit the ``__future__`` statement to
-  only the following, if necessary (though using all 4 is still
-  preferred)::
-
-        from __future__ import print_function, division
 
   Additional information on writing code using ``six`` that is
   compatible with both Python 2.x and 3.x is in the section
@@ -52,7 +37,7 @@ Interface and Dependencies
   2.6).
 
 * The core package and affiliated packages should be importable with
-  no dependencies other than components already in the Astropy core,
+  no dependencies other than components already in the Scikit-beam core,
   the `Python Standard Library
   <http://docs.python.org/release/2.6/library/index.html>`_, and
   NumPy_ |minimum_numpy_version| or later.
@@ -78,7 +63,7 @@ Interface and Dependencies
       try:
           from opdep import Superclass
       except ImportError:
-          warn(AstropyWarning('opdep is not present, so <functionality below> will not work.'))
+          warn(Scikit-beamWarning('opdep is not present, so <functionality below> will not work.'))
           class SuperClass(object): pass
 
       class Whatever(Superclass):
@@ -86,9 +71,9 @@ Interface and Dependencies
 
 * General utilities necessary for but not specific to the package or
   sub-package should be placed in the ``packagename.utils`` module. These
-  utilities will be moved to the :mod:`astropy.utils` module when the
+  utilities will be moved to the :mod:`scikit-beam.utils` module when the
   package is integrated into the core package. If a utility is already
-  present in :mod:`astropy.utils`, the package should always use that
+  present in :mod:`scikit-beam.utils`, the package should always use that
   utility instead of re-implementing it in ``packagename.utils`` module.
 
 
@@ -114,18 +99,18 @@ Data and Configuration
 
 * Packages can include data in a directory named ``data`` inside a subpackage
   source directory as long as it is less than about 100 kb. These data should
-  always be accessed via the :func:`astropy.utils.data.get_pkg_data_fileobj` or
-  :func:`astropy.utils.data.get_pkg_data_filename` functions. If the data
+  always be accessed via the :func:`scikit-beam.utils.data.get_pkg_data_fileobj` or
+  :func:`scikit-beam.utils.data.get_pkg_data_filename` functions. If the data
   exceeds this size, it should be hosted outside the source code repository,
-  either at a third-party location on the internet or the astropy data server.
+  either at a third-party location on the internet or the scikit-beam data server.
   In either case, it should always be downloaded using the
-  :func:`astropy.utils.data.get_pkg_data_fileobj` or
-  :func:`astropy.utils.data.get_pkg_data_filename` functions. If a specific
+  :func:`scikit-beam.utils.data.get_pkg_data_fileobj` or
+  :func:`scikit-beam.utils.data.get_pkg_data_filename` functions. If a specific
   version of a data file is needed, the hash mechanism described in
-  :mod:`astropy.utils.data` should be used.
+  :mod:`scikit-beam.utils.data` should be used.
 
 * All persistent configuration should use the
-  `astropy.config.ConfigurationItem` mechanism.  Such configuration items
+  `scikit-beam.config.ConfigurationItem` mechanism.  Such configuration items
   should be placed at the top of the module or package that makes use of them,
   and supply a description sufficient for users to understand what the setting
   changes.
@@ -147,7 +132,7 @@ errors should follow these rules:
 * For warnings, one should always use ``warnings.warn(message, warning_class)``. These get redirected to ``log.warn`` by default, but one
   can still use the standard warning-catching mechanism and custom warning
   classes. The warning class should be either
-  :class:`~astropy.utils.exceptions.AstropyUserWarning` or inherit from it.
+  :class:`~scikit-beam.utils.exceptions.Scikit-beamUserWarning` or inherit from it.
 
 * For informational and debugging messages, one should always use
   ``log.info(message)`` and ``log.debug(message)``.
@@ -156,7 +141,7 @@ The logging system uses the built-in Python `logging
 <http://docs.python.org/library/logging.html>`_ module. The logger can
 be imported using::
 
-    from astropy import log
+    from scikit-beam import log
 
 Coding Style/Conventions
 ------------------------
@@ -171,7 +156,7 @@ Coding Style/Conventions
   characters).  Please try to maintain the style when adding or modifying code.
 
 * One exception is to be made from the PEP8 style: new style relative imports
-  of the form ``from . import modname`` are allowed and required for Astropy,
+  of the form ``from . import modname`` are allowed and required for Scikit-beam,
   as opposed to absolute (as PEP8 suggests) or the simpler ``import modname``
   syntax. This is primarily due to improved relative import support since PEP8
   was developed, and to simplify the process of moving modules.
@@ -181,9 +166,9 @@ Coding Style/Conventions
             See :doc:`codeguide_emacs` for some configuration options for Emacs
             that helps in ensuring conformance to PEP8.
 
-* Astropy source code should contain a comment at the beginning of the file (or
+* Scikit-beam source code should contain a comment at the beginning of the file (or
   immediately after the ``#!/usr/bin env python`` command, if relevant)
-  pointing to the license for the Astropy source code.  This line should say::
+  pointing to the license for the Scikit-beam source code.  This line should say::
 
       # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
@@ -246,7 +231,7 @@ characters to the console or to files will not work.  However, for
 those that have a correctly configured Unicode environment, we should
 allow them to opt-in to take advantage of Unicode output when
 appropriate.  Therefore, there is a global configuration option,
-``astropy.conf.unicode_output`` to enable Unicode output of values, set
+``scikit-beam.conf.unicode_output`` to enable Unicode output of values, set
 to `False` by default.
 
 The following conventions should be used for classes that define the
@@ -264,13 +249,13 @@ to refer to `str` on Python 2 and `bytes` on Python 3.
   instance" containing only 7-bit characters.
 
 - ``__unicode__`` on Python 2 / ``__str__`` on Python 3: Return a "unicode
-  instance".  If ``astropy.conf.unicode_output`` is `False`, it must contain
-  only 7-bit characters.  If ``astropy.conf.unicode_output`` is `True`, it
+  instance".  If ``scikit-beam.conf.unicode_output`` is `False`, it must contain
+  only 7-bit characters.  If ``scikit-beam.conf.unicode_output`` is `True`, it
   may contain non-ascii characters when applicable.
 
 - ``__format__``: Return a "unicode instance".  If
-  ``astropy.UNICODE_OUTPUT`` is `False`, it must contain only 7-bit
-  characters.  If ``astropy.conf.unicode_output`` is `True`, it may contain
+  ``scikit-beam.UNICODE_OUTPUT`` is `False`, it must contain only 7-bit
+  characters.  If ``scikit-beam.conf.unicode_output`` is `True`, it may contain
   non-ascii characters when applicable.
 
 For classes that are expected to roundtrip through strings (unicode or
@@ -288,8 +273,8 @@ Python 2 and 3 cross-version compatibility::
 
     from __future__ import unicode_literals
 
-    from astropy.extern import six
-    from astropy import conf
+    from scikit-beam.extern import six
+    from scikit-beam import conf
 
     class FloatList(object):
         def __init__(self, init):
@@ -310,7 +295,7 @@ Python 2 and 3 cross-version compatibility::
             __str__ = __bytes__
 
         def __unicode__(self):
-            if astropy.conf.unicode_output:
+            if scikit-beam.conf.unicode_output:
                 return '‖'.join(six.text_type(x) for x in self.x)
             else:
                 return self.__bytes__().decode('ascii')
@@ -318,12 +303,12 @@ Python 2 and 3 cross-version compatibility::
             __str__ = __unicode__
 
 Additionally, there is a test helper,
-``astropy.test.helper.assert_follows_unicode_guidelines`` to ensure that a
+``scikit-beam.test.helper.assert_follows_unicode_guidelines`` to ensure that a
 class follows the Unicode guidelines outlined above.  The following
 example test will test that our example class above is compliant::
 
     def test_unicode_guidelines():
-        from astropy.test.helper import assert_follows_unicode_guidelines
+        from scikit-beam.test.helper import assert_follows_unicode_guidelines
         assert_follows_unicode_guidelines(FloatList(b'5|4|3|2'), roundtrip=True)
 
 Including C Code
@@ -341,10 +326,10 @@ Including C Code
   the ``.pyx`` file.
 
 * If a C extension has a dependency on an external C library, the source code
-  for the library should be bundled with the Astropy core, provided the
-  license for the C library is compatible with the Astropy license.
+  for the library should be bundled with the Scikit-beam core, provided the
+  license for the C library is compatible with the Scikit-beam license.
   Additionally, the package must be compatible with using a system-installed
-  library in place of the library included in Astropy.
+  library in place of the library included in Scikit-beam.
 
 * In cases where C extensions are needed but Cython_ cannot be used, the `PEP 7
   Style Guide for C Code <http://www.python.org/dev/peps/pep-0007/>`_ is
@@ -359,7 +344,7 @@ Including C Code
 Writing portable code for Python 2 and 3
 ----------------------------------------
 
-As of astropy 0.3, the `six`_ library is included to allow supporting Python
+As of scikit-beam 0.3, the `six`_ library is included to allow supporting Python
 2 and 3 from a single code base.  The use of the `2to3`_ tool has been
 phased out in favor of using ``six``.
 
@@ -390,9 +375,9 @@ lot*::
 
     from ..extern import six
 
-(where ``extern`` refers to ``astropy.extern``).  Do not import `six`_
+(where ``extern`` refers to ``scikit-beam.extern``).  Do not import `six`_
 from the top-level: only import the copy of `six`_ included with
-astropy.
+scikit-beam.
 
 Finding places to use six
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -404,7 +389,7 @@ However, the `2to3`_ commandline tool can also be used to locate places
 that require special handling with `six`_.  Starting from Python 2
 code, or code that is known to work on both Python 2 and 3 by
 processing it with the `2to3`_ tool (which is most of the existing code
-in astropy), simply run `2to3`_ on the file to display the changes it
+in scikit-beam), simply run `2to3`_ on the file to display the changes it
 would make in diff format.  This diff can be used to highlight places
 that need to be updated to use `six`_.
 
@@ -533,7 +518,7 @@ Compatibility between versions of Numpy
 In general, code should aim to be compatible with the lowest supported version
 of NumPy_.  Sometimes, however, it is inefficient to code repeatedly around
 bugs in earlier versions. For those cases, code can be added to
-`astropy.utils.compat.numpy`; see the corresponding :ref:`instructions
+`scikit-beam.utils.compat.numpy`; see the corresponding :ref:`instructions
 <numpy-compatibility>` for details.
 
 Requirements Specific to Affiliated Packages
@@ -551,10 +536,10 @@ Requirements Specific to Affiliated Packages
   <http://pypi.python.org/pypi>`_, with proper metadata for downloading and
   installing the source package.
 
-* The ``astropy`` root package name should not be used by affiliated
+* The ``scikit-beam`` root package name should not be used by affiliated
   packages - it is reserved for use by the core package. Recommended naming
   conventions for an affiliated package are either simply ``packagename``
-  or ``awastropy.packagename`` ("affiliated with Astropy").
+  or ``awscikit-beam.packagename`` ("affiliated with Scikit-beam").
 
 Examples
 --------

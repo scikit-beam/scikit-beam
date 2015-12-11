@@ -14,11 +14,11 @@ Try the development version
     this. You will not need to do this every time you want to contribute;
     most of it is one-time setup. You can count on one hand the number of
     `git`_ commands you will need to regularly use to keep your local copy
-    of `Astropy`_ up to date. If you find this taking more than an hour email
-    the :ref:`astropy developers list for help <getting_help>`
+    of `Scikit-beam`_ up to date. If you find this taking more than an hour email
+    the :ref:`scikit-beam developers list for help <getting_help>`
 
 
-Trying out the development version of Astropy is useful in three ways:
+Trying out the development version of Scikit-beam is useful in three ways:
 
 * More users testing new features helps uncover bugs before the feature is
   released.
@@ -26,14 +26,14 @@ Trying out the development version of Astropy is useful in three ways:
   development version. Knowing whether that is the case can make your bug
   reports more useful.
 * You will need to go through all of these steps before contributing any
-  code to Astropy. Practicing now will save you time later if you plan to
+  code to Scikit-beam. Practicing now will save you time later if you plan to
   contribute.
 
 Overview
 --------
 
 Conceptually, there are several steps to getting a working copy of the latest
-version of Astropy on your computer:
+version of Scikit-beam on your computer:
 
 #. :ref:`fork_a_copy`; this copy is called a *fork* (if you don't have an
    account on `github`_ yet, go there now and make one).
@@ -41,7 +41,7 @@ version of Astropy on your computer:
 #. :ref:`clone_your_fork`; this is called making a *clone* of the repository.
 #. :ref:`set_upstream_master`
 #. :ref:`make_a_branch`; this is called making a *branch*.
-#. :ref:`activate_development_astropy`
+#. :ref:`activate_development_scikit-beam`
 #. :ref:`test_installation`
 #. :ref:`try_devel`
 #. :ref:`deactivate_development`
@@ -51,7 +51,7 @@ Step-by-step instructions
 
 .. _fork_a_copy:
 
-Make your own copy of Astropy on GitHub
+Make your own copy of Scikit-beam on GitHub
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In the language of `GitHub`_, making a copy of someone's code is called making
@@ -60,7 +60,7 @@ history.
 
 #. Log into your `GitHub`_ account.
 
-#. Go to the `Astropy GitHub`_ home page.
+#. Go to the `Scikit-beam GitHub`_ home page.
 
 #. Click on the *fork* button:
 
@@ -68,7 +68,7 @@ history.
 
    After a short pause and an animation of Octocat scanning a book on a
    flatbed scanner, you should find yourself at the home page for your own
-   forked copy of Astropy_.
+   forked copy of Scikit-beam_.
 
 .. _check_git_install:
 
@@ -98,7 +98,7 @@ essential items:
   `using SSH keys instead <https://help.github.com/articles/generating-ssh-keys>`_
 
 We also recommend setting up `git`_ so that when you copy changes from your
-computer to `GitHub`_ only the copy (called a *branch*) of Astropy that you are
+computer to `GitHub`_ only the copy (called a *branch*) of Scikit-beam that you are
 working on gets pushed up to GitHub.  *If* your version of git is 1.7.11 or,
 greater, you can do that with::
 
@@ -116,60 +116,60 @@ might push up branches you do not intend to push.
     computer.
 
     If you set up password caching (the default method) the URLs will look like
-    ``https://github.com/your-user-name/astropy.git``.
+    ``https://github.com/your-user-name/scikit-beam.git``.
 
     If you set up SSH keys the URLs you use for making copies will look
-    something like ``git@github.com:your-user-name/astropy.git``.
+    something like ``git@github.com:your-user-name/scikit-beam.git``.
 
 
 .. _clone_your_fork:
 
-Copy your fork of Astropy from GitHub to your computer
+Copy your fork of Scikit-beam from GitHub to your computer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 One of the commands below will make a complete copy of your `GitHub`_ fork
-of `Astropy`_ in a directory called ``astropy``; which form you use depends
+of `Scikit-beam`_ in a directory called ``scikit-beam``; which form you use depends
 on what kind of authentication you set up in the previous step::
 
     # Use this form if you setup SSH keys...
-    $ git clone git@github.com:your-user-name/astropy.git
+    $ git clone git@github.com:your-user-name/scikit-beam.git
     # ...otherwise use this form:
-    $ git clone https://github.com/your-user-name/astropy.git
+    $ git clone https://github.com/your-user-name/scikit-beam.git
 
 If there is an error at this stage it is probably an error in setting up
 authentication.
 
 .. _set_upstream_master:
 
-Tell git where to look for changes in the development version of Astropy
+Tell git where to look for changes in the development version of Scikit-beam
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Right now your local copy of `Astropy`_ doesn't know where the development
-version of `Astropy`_ is. There is no easy way to keep your local copy up to
+Right now your local copy of `Scikit-beam`_ doesn't know where the development
+version of `Scikit-beam`_ is. There is no easy way to keep your local copy up to
 date. In `git`_ the name for another location of the same repository is a
 *remote*. The repository that contains the latest "official" development
 version is traditionally called the *upstream* remote, but here we use a
-more meaningful name for the remote: *astropy*.
+more meaningful name for the remote: *scikit-beam*.
 
-Change into the ``astropy`` directory you created in the previous step and
-let `git`_ know about about the astropy remote::
+Change into the ``scikit-beam`` directory you created in the previous step and
+let `git`_ know about about the scikit-beam remote::
 
-    cd astropy
-    git remote add astropy git://github.com/astropy/astropy.git
+    cd scikit-beam
+    git remote add scikit-beam git://github.com/scikit-beam/scikit-beam.git
 
 You can check that everything is set up properly so far by asking `git`_ to
 show you all of the remotes it knows about for your local repository of
-`Astropy`_ with ``git remote -v``, which should display something like::
+`Scikit-beam`_ with ``git remote -v``, which should display something like::
 
-    astropy   git://github.com/astropy/astropy.git (fetch)
-    astropy   git://github.com/astropy/astropy.git (push)
-    origin     git@github.com:your-user-name/astropy.git (fetch)
-    origin     git@github.com:your-user-name/astropy.git (push)
+    scikit-beam   git://github.com/scikit-beam/scikit-beam.git (fetch)
+    scikit-beam   git://github.com/scikit-beam/scikit-beam.git (push)
+    origin     git@github.com:your-user-name/scikit-beam.git (fetch)
+    origin     git@github.com:your-user-name/scikit-beam.git (push)
 
 Note that `git`_ already knew about one remote, called *origin*; that is your
-fork of Astropy on `GitHub`_.
+fork of Scikit-beam on `GitHub`_.
 
-To make more explicit that origin is really *your* fork of Astropy, rename that
+To make more explicit that origin is really *your* fork of Scikit-beam, rename that
 remote to your `GitHub`_ user name::
 
   git remote rename origin your-user-name
@@ -185,7 +185,7 @@ calls these workspaces *branches*.
 
 Your repository already has several branches; see them if you want by running
 ``git branch -a``. Most of them are on ``remotes/origin``; in other words,
-they exist on your remote copy of Astropy on GitHub.
+they exist on your remote copy of Scikit-beam on GitHub.
 
 There is one special branch, called *master*. Right now it is the one you are
 working on; you can tell because it has a marker next to it in your list of
@@ -197,64 +197,64 @@ To avoid potential confusion down the road, make your own branch now; this
 one you can call anything you like (when making contributions you should use
 a meaningful more name)::
 
-    git branch my-own-astropy
+    git branch my-own-scikit-beam
 
 You are *not quite* done yet. Git knows about this new branch; run
 ``git branch`` and you get::
 
     * master
-      my-own-astropy
+      my-own-scikit-beam
 
 The ``*`` indicates you are still working on master. To work on your branch
-instead you need to *check out* the branch ``my-own-astropy``. Do that with::
+instead you need to *check out* the branch ``my-own-scikit-beam``. Do that with::
 
-    git checkout my-own-astropy
+    git checkout my-own-scikit-beam
 
 and you should be rewarded with::
 
-    Switched to branch 'my-own-astropy'
+    Switched to branch 'my-own-scikit-beam'
 
-.. _activate_development_astropy:
+.. _activate_development_scikit-beam:
 
-"Activate" the development version of astropy
+"Activate" the development version of scikit-beam
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Right now you have the development version of `Astropy`_, but python will not
+Right now you have the development version of `Scikit-beam`_, but python will not
 see it. Though there are more sophisticated ways of managing multiple versions
-of `Astropy`_, for now this straightforward way will work (if you want to jump
+of `Scikit-beam`_, for now this straightforward way will work (if you want to jump
 ahead to the more sophisticated method look at :ref:`virtual_envs`).
 
 .. note::
     There are a couple of circumstances in which this quick method of
-    activating your copy of `Astropy`_ will NOT work and you need to go
+    activating your copy of `Scikit-beam`_ will NOT work and you need to go
     straight to using a virtual python environment:
 
     + You use Python 3.
-    + You want to work on C or Cython code in `Astropy`_.
+    + You want to work on C or Cython code in `Scikit-beam`_.
 
-In the directory where your copy of `Astropy`_ is type::
+In the directory where your copy of `Scikit-beam`_ is type::
 
     python setup.py develop
 
 Several pages of output will follow the first time you do this; this wouldn't
 be a bad time to get a fresh cup of coffee. At the end of it you should see
-something like  ``Finished processing dependencies for astropy==0.3.dev6272``.
+something like  ``Finished processing dependencies for scikit-beam==0.3.dev6272``.
 
 To make sure it has been activated **change to a different directory outside of
-the astropy distribution** and try this in python::
+the scikit-beam distribution** and try this in python::
 
-    >>> import astropy
-    >>> astropy.__version__  # doctest: +SKIP
+    >>> import scikit-beam
+    >>> scikit-beam.__version__  # doctest: +SKIP
     '0.3.dev6272'
 
 The actual version number will be different than in this example, but it
 should have dev in the name.
 
 .. warning::
-    Right now every time you run Python, the development version of astropy
+    Right now every time you run Python, the development version of scikit-beam
     will be used. That is fine for testing but you should make sure you change
-    back to the stable version unless you are developing astropy. If you want
-    to develop astropy, there is a better way of separating the development
+    back to the stable version unless you are developing scikit-beam. If you want
+    to develop scikit-beam, there is a better way of separating the development
     version from the version you do science with. That method, using a
     `virtualenv`_, is discussed at :ref:`virtual_envs`.
 
@@ -266,14 +266,14 @@ should have dev in the name.
 Test your development copy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Testing is an important part of making sure `Astropy`_ produces reliable,
+Testing is an important part of making sure `Scikit-beam`_ produces reliable,
 reproducible results. Before you try out a new feature or think you have found
 a bug make sure the tests run properly on your system.
 
 If the test *don't* complete successfully, that is itself a bug--please
-`report it <http://github.com/astropy/astropy/issues>`_.
+`report it <http://github.com/scikit-beam/scikit-beam/issues>`_.
 
-To run the tests, navigate back to the directory your copy of astropy is in on
+To run the tests, navigate back to the directory your copy of scikit-beam is in on
 your computer, then, at the shell prompt, type::
 
     python setup.py test
@@ -285,7 +285,7 @@ this::
     4741 passed, 85 skipped, 11 xfailed
 
 Skips and xfails are fine, but if there are errors or failures please
-`report them <http://github.com/astropy/astropy/issues>`_.
+`report them <http://github.com/scikit-beam/scikit-beam/issues>`_.
 
 .. _try_devel:
 
@@ -293,13 +293,13 @@ Try out the development version
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are going through this to ramp up to making more contributions to
-`Astropy`_ you don't actually have to do anything here.
+`Scikit-beam`_ you don't actually have to do anything here.
 
 If you are doing this because you have found a bug and are checking that it
 still exists in the development version, try running your code.
 
 Or, just for fun, try out one of the
-`new features <http://astropy.readthedocs.org/en/latest/changelog.html>`_ in
+`new features <http://scikit-beam.readthedocs.org/en/latest/changelog.html>`_ in
 the development version.
 
 Either way, once you are done, make sure you do the next step.
@@ -310,7 +310,7 @@ Either way, once you are done, make sure you do the next step.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Be sure to turn the development version off before you go back to doing
-science work with Astropy.
+science work with Scikit-beam.
 
 Navigate to the directory where your local copy of the development version is,
 then run::
@@ -318,10 +318,10 @@ then run::
     python setup.py develop -u
 
 You should really confirm it is deactivated by **changing to a different
-directory outside of the astropy distribution** and running this in python::
+directory outside of the scikit-beam distribution** and running this in python::
 
-    >>> import astropy
-    >>> astropy.__version__  # doctest: +SKIP
+    >>> import scikit-beam
+    >>> scikit-beam.__version__  # doctest: +SKIP
     '0.2.5'
 
 The actual version number you see will likely be different than this example,
