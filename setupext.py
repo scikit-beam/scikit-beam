@@ -112,4 +112,8 @@ if options['build_ctrans']:
     ext_modules.append(Extension('ctrans', ['src/ctrans.c'],
                                  **ctrans))
 
-ext_modules += cythonize("skxray/core/accumulators/*.pyx")
+eca = ['-Wno-unused-function', '-Wno-unreachable-code']
+ext_histogram = Extension("*", ["skxray/core/accumulators/*.pyx"],
+        extra_compile_args=eca
+        )
+ext_modules += cythonize(ext_histogram)
