@@ -186,8 +186,7 @@ class Histogram:
         # numerical data type
         numtypes = [np.dtype(int), np.dtype(float)]
         numtypeindex = {tp : i for i, tp in enumerate(numtypes)}
-        ctypeindices = [numtypeindex.get(c.dtype, MAX_DIMENSIONS)
-                for c in coords]
+        ctypeindices = [numtypeindex.get(c.dtype, 999) for c in coords]
         coordsorder = np.argsort(ctypeindices, kind='mergesort')
         mylows = self._lows[coordsorder]
         myhighs = self._highs[coordsorder]
