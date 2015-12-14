@@ -69,6 +69,7 @@ def test_2d_histogram():
         [[ten, ten], xi, yi, 1],
         [[ten, nine], xf, yf, wi],
         [[ten, nine], xi, yi, wf],
+        [[ten, nine], xf, yi, wi],
     ]
     for binlowhigh, x, y, w in vals:
         yield _2d_histogram_tester, binlowhigh, x, y, w
