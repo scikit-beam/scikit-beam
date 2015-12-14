@@ -52,11 +52,9 @@ class Histogram:
         -----
         The right most bin is half open
         """
-        if len(args) > 1:
-            raise NotImplementedError(
-                "This class does not yet support higher dimensional histograms "
-                "than 2D"
-            )
+        if 1 + len(args) > MAX_DIMENSIONS:
+            emsg = "Cannot create histogram of more than {} dimensions."
+            raise ValueError(emsg.format(MAX_DIMENSIONS))
         logger.debug('binlowhigh = {}'.format(binlowhigh))
         logger.debug('args = {}'.format(args))
         nbins = []
@@ -87,6 +85,7 @@ class Histogram:
         """
         self._values.fill(0)
 
+
     def fill(self, *coords, weights=1):
         """
 
@@ -114,13 +113,12 @@ class Histogram:
                 emsg = "Coordinate arrays must have the same length."
                 raise ValueError(emsg)
         if len(weights) != 1 and len(weights) != nexpected:
-            emsg = "Weights must be scalar or have the same length as coordinates."
+            emsg = ("Weights must be scalar or have the same length "
+                    "as coordinates.")
             raise ValueError(emsg)
-
         if self._always_use_fillnd:
             self._fillnd(coords, weights)
             return
-
         if len(coords) == 1:
             # compute a 1D histogram
             self._fill1d(coords[0], weights)
@@ -218,7 +216,7 @@ class Histogram:
             for k in range(aint_count):
                 j = k
                 xidx = find_indices(aint_ptr[k][i],
-                        low[j], high[j], binsize[j])
+                                    low[j], high[j], binsize[j])
                 if xidx == -1:
                     didx = -1
                     break
@@ -228,7 +226,7 @@ class Histogram:
             for k in range(afloat_count):
                 j = k + aint_count
                 xidx = find_indices(afloat_ptr[k][i],
-                        low[j], high[j], binsize[j])
+                                    low[j], high[j], binsize[j])
                 if xidx == -1:
                     didx = -1
                     break
@@ -259,6 +257,7 @@ cdef long find_indices(xnumtype pos, float low, float high, float binsize):
         return -1
     return int((pos - low) / binsize)
 
+
 cdef void fillonecy(xnumtype xval, wnumtype weight,
                     np.float_t* pdata,
                     float low, float high, float binsize):
@@ -269,8 +268,6 @@ cdef void fillonecy(xnumtype xval, wnumtype weight,
     return
 
 
-
-#TODO implement ND histogram
 #TODO function interface
 #TODO generator interface
 #TODO docs!
