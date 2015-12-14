@@ -177,15 +177,15 @@ class Histogram:
         cdef np.float_t* afloat_ptr[MAX_DIMENSIONS + 1]
         cdef int afloat_stride[MAX_DIMENSIONS]
         cdef int afloat_count = 0
-        istrides = np.asarray(self._values.strides, dtype=np.int32)
-        istrides //= self._values.itemsize
-        cdef int [:] dataindexstrides = istrides
         # determine order of coordinate arrays according to their
         # numerical data type
         numtypes = [np.dtype(int), np.dtype(float)]
         numtypeindex = {tp : i for i, tp in enumerate(numtypes)}
         ctypeindices = [numtypeindex.get(c.dtype, 999) for c in coords]
         coordsorder = np.argsort(ctypeindices, kind='mergesort')
+        istrides = np.asarray(self._values.strides, dtype=np.int32)[coordsorder]
+        istrides //= self._values.itemsize
+        cdef int [:] dataindexstrides = istrides
         mylows = self._lows[coordsorder]
         myhighs = self._highs[coordsorder]
         mybinsizes = self._binsizes[coordsorder]
