@@ -11,6 +11,7 @@ from ..utils import bin_edges_to_centers
 import logging
 logger = logging.getLogger(__name__)
 
+DEF MAX_DIMENSIONS = 10
 
 ctypedef fused xnumtype:
     np.int_t
@@ -30,6 +31,9 @@ cdef void* _getarrayptr(np.ndarray a):
 
 
 class Histogram:
+
+    _always_use_fillnd = False      # FIXME remove this
+
     def __init__(self, binlowhigh, *args):
         """
 
@@ -48,11 +52,9 @@ class Histogram:
         -----
         The right most bin is half open
         """
-        if len(args) > 1:
-            raise NotImplementedError(
-                "This class does not yet support higher dimensional histograms "
-                "than 2D"
-            )
+        if 1 + len(args) > MAX_DIMENSIONS:
+            emsg = "Cannot create histogram of more than {} dimensions."
+            raise ValueError(emsg.format(MAX_DIMENSIONS))
         logger.debug('binlowhigh = {}'.format(binlowhigh))
         logger.debug('args = {}'.format(args))
         nbins = []
@@ -83,6 +85,7 @@ class Histogram:
         """
         self._values.fill(0)
 
+
     def fill(self, *coords, weights=1):
         """
 
@@ -110,9 +113,12 @@ class Histogram:
                 emsg = "Coordinate arrays must have the same length."
                 raise ValueError(emsg)
         if len(weights) != 1 and len(weights) != nexpected:
-            emsg = "Weights must be scalar or have the same length as coordinates."
+            emsg = ("Weights must be scalar or have the same length "
+                    "as coordinates.")
             raise ValueError(emsg)
-
+        if self._always_use_fillnd:
+            self._fillnd(coords, weights)
+            return
         if len(coords) == 1:
             # compute a 1D histogram
             self._fill1d(coords[0], weights)
@@ -121,7 +127,7 @@ class Histogram:
             self._fill2d(coords[0], coords[1], weights)
         else:
             # do the generalized ND histogram
-            raise NotImplementedError()
+            self._fillnd(coords, weights)
         return
 
 
@@ -164,28 +170,72 @@ class Histogram:
         return
 
 
-    def _fillnd(self, coords, np.ndarray[wnumtype, ndim=1] weight,
-            np.ndarray[xnumtype, ndim=1] dummy):
-        cdef xnumtype* pxa[10]
-        for i, x in enumerate(coords):
-            pxa[i] = <xnumtype*> _getarrayptr(x)
-        cdef np.ndarray[np.float_t, ndim=1] data = self.values
-        cdef float [:] low = self._lows
-        cdef float [:] high = self._highs
-        cdef float [:] binsize = self._binsizes
-        '''
-        cdef int i
-        cdef int xlen = len(xval)
-        cdef np.float_t* pdata = <np.float_t*> data.data
-        cdef xnumtype* px = <xnumtype*> xval.data
-        cdef wnumtype* pw = <wnumtype*> weight.data
-        if weight.size == 1:
-            for i in range(xlen):
-                fillonecy(px[i], pw[0], pdata, low, high, binsize)
-        else:
-            for i in range(xlen):
-                fillonecy(px[i], pw[i], pdata, low, high, binsize)
-        '''
+    def _fillnd(self, coords, np.ndarray[wnumtype, ndim=1] weight):
+        # allocate pointer arrays per each supported numerical types
+        cdef np.int_t* aint_ptr[MAX_DIMENSIONS]
+        cdef int aint_stride[MAX_DIMENSIONS]
+        cdef int aint_count = 0
+        cdef np.float_t* afloat_ptr[MAX_DIMENSIONS + 1]
+        cdef int afloat_stride[MAX_DIMENSIONS]
+        cdef int afloat_count = 0
+        # determine order of coordinate arrays according to their
+        # numerical data type
+        numtypes = [np.dtype(int), np.dtype(float)]
+        numtypeindex = {tp : i for i, tp in enumerate(numtypes)}
+        ctypeindices = [numtypeindex.get(x.dtype, 999) for x in coords]
+        coordsorder = np.argsort(ctypeindices, kind='mergesort')
+        istrides = np.asarray(self._values.strides, dtype=np.int32)[coordsorder]
+        istrides //= self._values.itemsize
+        cdef int [:] dataindexstrides = istrides
+        mylows = self._lows[coordsorder]
+        myhighs = self._highs[coordsorder]
+        mybinsizes = self._binsizes[coordsorder]
+        cdef float [:] low = mylows
+        cdef float [:] high = myhighs
+        cdef float [:] binsize = mybinsizes
+        cdef np.float_t* data = <np.float_t*> _getarrayptr(self._values)
+        # distribute coordinates in each dimension according to their
+        # numerical type.  follow the same order as in numtypes.
+        for x, dstride in zip(coords, dataindexstrides):
+            if x.dtype == np.int:
+                aint_ptr[aint_count] = <np.int_t*> _getarrayptr(x)
+                aint_stride[aint_count] = dstride
+                aint_count += 1
+            elif x.dtype == np.float:
+                afloat_ptr[afloat_count] = <np.float_t*> _getarrayptr(x)
+                afloat_stride[afloat_count] = dstride
+                afloat_count += 1
+            else:
+                emsg = "Numpy arrays of type {} are not supported."
+                raise TypeError(emsg.format(x.dtype))
+        cdef int i, j, k
+        cdef int wstride = 0 if weight.size == 1 else 1
+        cdef int xlen = len(coords[0])
+        cdef int xidx, widx, didx
+        for i in range(xlen):
+            didx = 0
+            for k in range(aint_count):
+                j = k
+                xidx = find_indices(aint_ptr[k][i],
+                                    low[j], high[j], binsize[j])
+                if xidx == -1:
+                    didx = -1
+                    break
+                didx += dataindexstrides[j] * xidx
+            if didx == -1:
+                continue
+            for k in range(afloat_count):
+                j = k + aint_count
+                xidx = find_indices(afloat_ptr[k][i],
+                                    low[j], high[j], binsize[j])
+                if xidx == -1:
+                    didx = -1
+                    break
+                didx += dataindexstrides[j] * xidx
+            if didx == -1:
+                continue
+            widx = wstride * i
+            data[didx] += weight[widx]
         return
 
 
@@ -208,6 +258,7 @@ cdef long find_indices(xnumtype pos, float low, float high, float binsize):
         return -1
     return int((pos - low) / binsize)
 
+
 cdef void fillonecy(xnumtype xval, wnumtype weight,
                     np.float_t* pdata,
                     float low, float high, float binsize):
@@ -218,8 +269,6 @@ cdef void fillonecy(xnumtype xval, wnumtype weight,
     return
 
 
-
-#TODO implement ND histogram
 #TODO function interface
 #TODO generator interface
 #TODO docs!
