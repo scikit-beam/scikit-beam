@@ -171,6 +171,7 @@ class Histogram:
 
 
     def _fillnd(self, coords, np.ndarray[wnumtype, ndim=1] weight):
+        # allocate pointer arrays per each supported numerical types
         cdef np.int_t* aint_ptr[MAX_DIMENSIONS]
         cdef int aint_stride[MAX_DIMENSIONS]
         cdef int aint_count = 0
@@ -181,7 +182,7 @@ class Histogram:
         # numerical data type
         numtypes = [np.dtype(int), np.dtype(float)]
         numtypeindex = {tp : i for i, tp in enumerate(numtypes)}
-        ctypeindices = [numtypeindex.get(c.dtype, 999) for c in coords]
+        ctypeindices = [numtypeindex.get(x.dtype, 999) for x in coords]
         coordsorder = np.argsort(ctypeindices, kind='mergesort')
         istrides = np.asarray(self._values.strides, dtype=np.int32)[coordsorder]
         istrides //= self._values.itemsize
