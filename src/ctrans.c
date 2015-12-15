@@ -1,105 +1,91 @@
 /*
- 
- This is ctranc.c routine. process_to_q and process_grid
- functions in the nsls2/recip.py call  ctranc.c routine for
- fast data analysis.
+ * Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        
+ * National Laboratory. All rights reserved.                            
+ *                                                                      
+ * Redistribution and use in source and binary forms, with or without   
+ * modification, are permitted provided that the following conditions   
+ * are met:                                                             
+ *                                                                      
+ * * Redistributions of source code must retain the above copyright     
+ *   notice, this list of conditions and the following disclaimer.      
+ *                                                                      
+ * * Redistributions in binary form must reproduce the above copyright  
+ *   notice this list of conditions and the following disclaimer in     
+ *   the documentation and/or other materials provided with the         
+ *   distribution.                                                      
+ *                                                                      
+ * * Neither the name of the Brookhaven Science Associates, Brookhaven  
+ *   National Laboratory nor the names of its contributors may be used  
+ *   to endorse or promote products derived from this software without  
+ *   specific prior written permission.                                 
+ *                                                                      
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS  
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT    
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS    
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE       
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,           
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES   
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR   
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)   
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,  
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OTHERWISE) ARISING   
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   
+ * POSSIBILITY OF SUCH DAMAGE.                                          
+ *
+ *
+ *
+ * This is ctranc.c routine. process_to_q and process_grid
+ * functions in the nsls2/recip.py call  ctranc.c routine for
+ * fast data analysis.
  
  */
-#include <Python.h>
-#include <numpy/arrayobject.h>
+
 #include <stdlib.h>
 #include <math.h>
+
+/* Include python and numpy header files */
+
+#include <Python.h>
+#define NPY_NO_DEPRECATED_API NPY_1_9_API_VERSION
+#include <numpy/arrayobject.h>
+
+/* If useing threading then import pthreads */
 #ifdef USE_THREADS
 #include <pthread.h>
+#include <unistd.h>
 #endif
 
-/* Set up */
+#include "ctrans.h"
 
-#define HC_OVER_E 12398.4
-
-#define true -1
-#define false 0
-
-#ifndef USE_THREADS
-#define NTHREADS 1
-#endif
-
-#ifndef NTHREADS
-#define NTHREADS 2
-#endif
-
-typedef double _float;
-typedef int _int;
-
-typedef struct {
-  int xSize;         // X size in pixels.
-  int ySize;         // Y size in pixels.
-  _float xCen;
-  _float yCen;
-  _float xPixSize;   // X Pixel Size (microns)
-  _float yPixSize;   // Y Pixel Size (microns)
-  _float dist;       // Sample - Detector distance.
-} CCD;
-
-typedef struct {
-  CCD *ccd;
-  _float *anglesp;
-  _float *qOutp;
-  int ndelgam;
-  _float lambda;
-  int mode;
-  int imstart;
-  int imend;
-  _float UBI[3][3];
-} imageThreadData;
-
-void *processImageThread(void* ptr);
-int calcQTheta(_float* diffAngles, _float theta, _float mu, _float *qTheta, _int n, _float lambda);
-int calcQPhiFromQTheta(_float *qTheta, _int n, _float chi, _float phi);
-int calcDeltaGamma(_float *delgam, CCD *ccd, _float delCen, _float gamCen);
-int matmulti(_float *val, int n, _float mat[][3], int skip);
-int calcHKLFromQPhi(_float *qPhi, _int n, _float mat[][3]);
-
-unsigned long c_grid3d(double *dout, unsigned long *nout, double *sterr, double *data, double *grid_start, double *grid_stop, int max_data, int *n_grid, int norm_data);
-
-static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs);
-static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs);
-
-static char *_ctransDoc = \
-"Python functions to perform gridding (binning) of experimental data.\n\n";
+/* Set global variable to indicate number of threads to create */
+unsigned int _n_threads = 1;
 
 /* Computation functions */
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   static char *kwlist[] = { "angles", "mode", "ccd_size", "ccd_pixsize",
-			    "ccd_cen", "dist", "wavelength",
-			    "UBinv", "outarray", NULL };
-  PyObject *angles = NULL;
+			                      "ccd_cen", "dist", "wavelength",
+			                      "UBinv", "n_threads", NULL };
+  PyArrayObject *angles = NULL;
   PyObject *_angles = NULL;
+  PyArrayObject *ubinv = NULL;
   PyObject *_ubinv = NULL;
-  PyObject *ubinv = NULL;
-  PyObject *_outarray = NULL;
-  PyObject *qOut = NULL;
+  PyArrayObject *qOut = NULL;
   CCD ccd;
   npy_intp dims[2];
   npy_intp nimages;
-  int i, j, t, stride;
-  int ndelgam;
+
   int mode;
 
-  _float lambda;
+  double lambda;
 
-  _float *anglesp;
-  _float *qOutp;
-  _float *ubinvp;
-  _float UBI[3][3];
+  double *anglesp = NULL;
+  double *qOutp = NULL;
+  double *ubinvp = NULL;
+  double *delgam = NULL;
 
-#ifdef USE_THREADS
-  pthread_t thread[NTHREADS];
-  int iret[NTHREADS];
-#endif
-  imageThreadData threadData[NTHREADS];
+  unsigned int n_threads = _n_threads;
 
-  if(!PyArg_ParseTupleAndKeywords(args, kwargs, "Oi(ii)(dd)(dd)ddO|O", kwlist,
+  if(!PyArg_ParseTupleAndKeywords(args, kwargs, "Oi(ii)(dd)(dd)ddO|i", kwlist,
 				  &_angles,
 				  &mode,
 				  &ccd.xSize, &ccd.ySize,
@@ -108,155 +94,242 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 				  &ccd.dist,
 				  &lambda,
 				  &_ubinv,
-				  &_outarray)){
+          &n_threads)){
     return NULL;
   }
 
-  angles = PyArray_FROMANY(_angles, NPY_DOUBLE, 2, 2, NPY_IN_ARRAY);
+#ifdef USE_THREADS
+
+  if(n_threads > MAX_THREADS){
+    PyErr_SetString(PyExc_ValueError, "n_threads > MAX_THREADS");
+    goto cleanup;
+  }
+
+  if(n_threads < 1){
+    n_threads = _n_threads;
+  }
+
+#else
+
+  if(n_threads > 1){
+    PyErr_SetString(PyExc_RuntimeError, "Multithreading support is not compiled in");
+    goto cleanup;
+  }
+
+#endif
+
+  ccd.size = ccd.xSize * ccd.ySize;
+
+  angles = (PyArrayObject*)PyArray_FROMANY(_angles, NPY_DOUBLE, 2, 2, NPY_ARRAY_IN_ARRAY);
   if(!angles){
     PyErr_SetString(PyExc_ValueError, "angles must be a 2-D array of floats");
     goto cleanup;
   }
   
-  ubinv = PyArray_FROMANY(_ubinv, NPY_DOUBLE, 2, 2, NPY_IN_ARRAY);
+  ubinv = (PyArrayObject*)PyArray_FROMANY(_ubinv, NPY_DOUBLE, 2, 2, NPY_ARRAY_IN_ARRAY);
   if(!ubinv){
     PyErr_SetString(PyExc_ValueError, "ubinv must be a 2-D array of floats");
     goto cleanup;
   }
 
-  ubinvp = (_float *)PyArray_DATA(ubinv);
-  for(i=0;i<3;i++){
-    UBI[i][0] = -1.0 * ubinvp[2];
-    UBI[i][1] = ubinvp[1];
-    UBI[i][2] = ubinvp[0];
-    ubinvp+=3;
-  }
+  ubinvp = (double *)PyArray_DATA(ubinv);
   
   nimages = PyArray_DIM(angles, 0);
-  ndelgam = ccd.xSize * ccd.ySize;
 
-  dims[0] = nimages * ndelgam;
-  dims[1] = 4;
-  if(!_outarray){
-    // Create new numpy array
-    // fprintf(stderr, "**** Creating new array\n");
-    qOut = PyArray_SimpleNew(2, dims, NPY_DOUBLE);
-    if(!qOut){
-      goto cleanup;
-    }
-  } else {
-    qOut = PyArray_FROMANY(_outarray, NPY_DOUBLE, 2, 2, NPY_INOUT_ARRAY);
-    if(!qOut){
-      PyErr_SetString(PyExc_ValueError, "outarray must be a 2-D array of floats");
-      goto cleanup;
-    }
-    if(PyArray_Size(qOut) != (4 * nimages * ndelgam)){
-      PyErr_SetString(PyExc_ValueError, "outarray is of the wrong size");
-      goto cleanup;
-    }
-  }
-  anglesp = (_float *)PyArray_DATA(angles);
-  qOutp = (_float *)PyArray_DATA(qOut);
+  dims[0] = nimages * ccd.size;
+  dims[1] = 3;
 
-  stride = nimages / NTHREADS;
-  for(t=0;t<NTHREADS;t++){
-    // Setup threads
-    // Allocate memory for delta/gamma pairs
-    
-    threadData[t].ccd = &ccd;
-    threadData[t].anglesp = anglesp;
-    threadData[t].qOutp = qOutp;
-    threadData[t].ndelgam = ndelgam;
-    threadData[t].lambda = lambda;
-    threadData[t].mode = mode;
-    threadData[t].imstart = stride * t;
-    for(i=0;i<3;i++){
-      for(j=0;j<3;j++){
-	       threadData[t].UBI[j][i] = UBI[j][i];
-      }
-    }
-    if(t == (NTHREADS - 1)){
-      threadData[t].imend = nimages;
-    } else {
-      threadData[t].imend = stride * (t + 1);
-    }
-
-#ifdef USE_THREADS
-    iret[t] = pthread_create( &thread[t], NULL,
-			      processImageThread,
-			      (void*) &threadData[t]);
-#else
-    processImageThread((void *) &threadData[t]);
-#endif
-    anglesp += (6 * stride);
-    qOutp += (ndelgam * 4 * stride);
+  qOut = (PyArrayObject*)PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+  if(!qOut){
+    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (qOut)");
+    goto cleanup;
   }
 
-#ifdef USE_THREADS
-  for(t=0;t<NTHREADS;t++){
-    if(pthread_join(thread[t], NULL)){
-      fprintf(stderr, "ERROR : Cannot join thread %d", t);
-    }
+  
+  anglesp = (double *)PyArray_DATA(angles);
+  qOutp = (double *)PyArray_DATA(qOut);
+
+  // Now create the arrays for delta-gamma pairs
+  delgam = (double*)malloc(nimages * ccd.size * sizeof(double) * 2);
+  if(!delgam){
+    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (delgam)");
+    goto cleanup;
   }
-#endif
+
+
+  // Ok now we don't touch Python Object ... Release the GIL
+  Py_BEGIN_ALLOW_THREADS
+
+  if(processImages(delgam, anglesp, qOutp, lambda, mode, (unsigned long)nimages, 
+                n_threads, ubinvp, &ccd)){
+    PyErr_SetString(PyExc_RuntimeError, "Processing data failed");
+    goto cleanup;
+  }
+
+  // Now we have finished with the magic ... Obtain the GIL
+  Py_END_ALLOW_THREADS
 
   Py_XDECREF(ubinv);
   Py_XDECREF(angles);
+  if(delgam) free(delgam);
   return Py_BuildValue("N", qOut);
 
  cleanup:
   Py_XDECREF(ubinv);
   Py_XDECREF(angles);
   Py_XDECREF(qOut);
+  if(delgam) free(delgam);
   return NULL;
+}
+
+int processImages(double *delgam, double *anglesp, double *qOutp, double lambda, 
+                  int mode, unsigned long nimages, unsigned int n_threads, double *ubinvp,
+                  CCD *ccd){
+
+  int retval = 0;
+  unsigned long i, j, t;
+  double *_delgam = delgam;
+  unsigned long stride = nimages / n_threads;
+  imageThreadData threadData[MAX_THREADS];
+  double UBI[3][3];
+#ifdef USE_THREADS
+  pthread_t thread[MAX_THREADS];
+#endif
+
+  for(i=0;i<3;i++){
+    UBI[i][0] = -1.0 * ubinvp[2];
+    UBI[i][1] = ubinvp[1];
+    UBI[i][2] = ubinvp[0];
+    ubinvp+=3;
+  }
+
+  for(t=0;t<n_threads;t++){
+    // Setup threads
+    // Allocate memory for delta/gamma pairs
+    
+    threadData[t].ccd = ccd;
+    threadData[t].anglesp = anglesp;
+    threadData[t].qOutp = qOutp;
+    threadData[t].lambda = lambda;
+    threadData[t].mode = mode;
+    threadData[t].imstart = stride * t;
+    threadData[t].delgam = _delgam;
+    threadData[t].retval = 0;
+
+    for(i=0;i<3;i++){
+      for(j=0;j<3;j++){
+	       threadData[t].UBI[j][i] = UBI[j][i];
+      }
+    }
+
+    if(t == (n_threads - 1)){
+      threadData[t].imend = nimages;
+    } else {
+      threadData[t].imend = stride * (t + 1);
+    }
+
+#ifdef USE_THREADS
+
+    // Start the thread processing 
+    
+    if(pthread_create(&thread[t], NULL,
+		            	     processImageThread,
+			                 (void*) &threadData[t])){
+      return -1;
+    }
+
+#else
+
+    processImageThread((void *) &threadData[t]);
+
+#endif
+
+    anglesp += (6 * stride);
+    _delgam += (ccd->size * 2 * stride);
+    qOutp += (ccd->size * 3 * stride);
+  }
+
+#ifdef USE_THREADS
+
+  for(t=0;t<n_threads;t++){
+    if(pthread_join(thread[t], NULL)){
+      return -1;
+    }
+     
+    // Check the thread retval
+
+    if(threadData[t].retval){
+      retval = -1;
+    }
+  }
+
+#endif
+  return retval;
 }
 
 void *processImageThread(void* ptr){
   imageThreadData *data;
-  int i;
-  _float *delgam;
+  unsigned long i;
   data = (imageThreadData*) ptr;
-  delgam = (_float*)malloc(data->ndelgam * sizeof(_float) * 2);
-  if(!delgam){
-    fprintf(stderr, "MALLOC ERROR\n");
-#ifdef USE_THREADS
-    pthread_exit(NULL);
-#endif
-  }
-  
+
   for(i=data->imstart;i<data->imend;i++){
     // For each image process
-    calcDeltaGamma(delgam, data->ccd, data->anglesp[0], data->anglesp[5]);
-    calcQTheta(delgam, data->anglesp[1], data->anglesp[4], data->qOutp,
-	       data->ndelgam, data->lambda);
+    calcDeltaGamma(data->delgam, data->ccd, data->anglesp[0], data->anglesp[5]);
+    calcQTheta(data->delgam, data->anglesp[1], data->anglesp[4], data->qOutp,
+	       data->ccd->size, data->lambda);
     if(data->mode > 1){
-      calcQPhiFromQTheta(data->qOutp, data->ndelgam,
+      calcQPhiFromQTheta(data->qOutp, data->ccd->size,
 			 data->anglesp[2], data->anglesp[3]);
     }
     if(data->mode == 4){
-      calcHKLFromQPhi(data->qOutp, data->ndelgam, data->UBI);
+      calcHKLFromQPhi(data->qOutp, data->ccd->size, data->UBI);
     }
-    data->anglesp+=6;
-    data->qOutp+=(data->ndelgam * 4);
+    data->anglesp += 6;
+    data->qOutp += (data->ccd->size * 3);
+    data->delgam += (data->ccd->size * 2);
   }
-  free(delgam);
+  
+  // Set the retval to zero to show sucsessful processing
+  data->retval = 0;
+
 #ifdef USE_THREADS
   pthread_exit(NULL);
+#else
+  return NULL;
 #endif
 }
 
-int calcQTheta(_float* diffAngles, _float theta, _float mu, _float *qTheta, _int n, _float lambda){
+int calcDeltaGamma(double *delgam, CCD *ccd, double delCen, double gamCen){
+  // Calculate Delta Gamma Values for CCD
+  int i,j;
+  double *delgamp = delgam;
+  double xPix, yPix;
+
+  xPix = ccd->xPixSize / ccd->dist;
+  yPix = ccd->yPixSize / ccd->dist;
+
+  for(j=0;j<ccd->ySize;j++){
+    for(i=0;i<ccd->xSize;i++){
+      *(delgamp++) = delCen - atan( ((double)j - ccd->yCen) * yPix);
+      *(delgamp++) = gamCen - atan( ((double)i - ccd->xCen) * xPix);
+    }
+  }
+
+  return true;
+}
+
+int calcQTheta(double* diffAngles, double theta, double mu, double *qTheta, int n, double lambda){
   // Calculate Q in the Theta frame
   // angles -> Six cicle detector angles [delta gamma]
   // theta  -> Theta value at this detector setting
   // mu     -> Mu value at this detector setting
   // qTheta -> Q Values
   // n      -> Number of values to convert
-  _int i;
-  _float *angles;
-  _float *qt;
-  _float kl;
-  _float del, gam;
+  int i;
+  double *angles;
+  double *qt;
+  double kl;
+  double del, gam;
 
   angles = diffAngles;
   qt = qTheta;
@@ -273,14 +346,13 @@ int calcQTheta(_float* diffAngles, _float theta, _float mu, _float *qTheta, _int
     *qt = (sin(del - theta) * cos(gam) * kl) + (sin(theta) * cos(mu) * kl);
  
     qt++;
-    qt++;
   }
   
   return true;
 }
 
-int calcQPhiFromQTheta(_float *qTheta, _int n, _float chi, _float phi){
-  _float r[3][3];
+int calcQPhiFromQTheta(double *qTheta, int n, double chi, double phi){
+  double r[3][3];
 
   r[0][0] = cos(chi);
   r[0][1] = 0.0;
@@ -292,19 +364,19 @@ int calcQPhiFromQTheta(_float *qTheta, _int n, _float chi, _float phi){
   r[2][1] = -1.0 * sin(phi);
   r[2][2] = cos(phi) * cos(chi);
 
-  matmulti(qTheta, n, r, 1);
+  matmulti(qTheta, n, r);
   
   return true;
 }
 
-int calcHKLFromQPhi(_float *qPhi, _int n, _float mat[][3]){
-  matmulti(qPhi, n, mat, 1);
+int calcHKLFromQPhi(double *qPhi, int n, double mat[][3]){
+  matmulti(qPhi, n, mat);
   return true;
 }
 
-int matmulti(_float *val, int n, _float mat[][3], int skip){
-  _float *v;
-  _float qp[3];
+int matmulti(double *val, int n, double mat[][3]){
+  double *v;
+  double qp[3];
   int i,j,k;
 
   v = val;
@@ -320,142 +392,320 @@ int matmulti(_float *val, int n, _float mat[][3], int skip){
       v[k] = qp[k];
     }
     v += 3;
-    v += skip;
   }
 
   return true;
 }
 
-int calcDeltaGamma(_float *delgam, CCD *ccd, _float delCen, _float gamCen){
-  // Calculate Delta Gamma Values for CCD
-  int i,j;
-  _float *delgamp;
-  _float xPix, yPix;
-
-  xPix = ccd->xPixSize / ccd->dist;
-  yPix = ccd->yPixSize / ccd->dist;
-  delgamp = delgam;
-
-  for(j=0;j<ccd->ySize;j++){
-    for(i=0;i<ccd->xSize;i++){
-      *(delgamp++) = delCen - atan( ((_float)j - ccd->yCen) * yPix);
-      *(delgamp++) = gamCen - atan( ((_float)i - ccd->xCen) * xPix);
-    }
-  }
-
-  return true;
-}
 
 static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
-  PyObject *gridout = NULL, *Nout = NULL, *standarderror = NULL;
-  PyObject *gridI = NULL;
+  PyArrayObject *gridout = NULL, *Nout = NULL, *stderror = NULL;
+  PyArrayObject *gridI = NULL, *meanout = NULL;
   PyObject *_I;
-  
-  static char *kwlist[] = { "data", "xrange", "yrange", "zrange", "norm", NULL };
   
   npy_intp data_size;
   npy_intp dims[3];
   
   double grid_start[3];
   double grid_stop[3];
-  int grid_nsteps[3];
-  int norm_data = 0;
-  
+  unsigned long grid_nsteps[3];
   unsigned long n_outside;
-  
-  if(!PyArg_ParseTupleAndKeywords(args, kwargs, "O(ddd)(ddd)(iii)|i", kwlist,
+
+  unsigned int n_threads = _n_threads;
+  int retval;
+
+  static char *kwlist[] = { "data", "xrange", "yrange", "zrange", "n_threads", NULL }; 
+
+  if(!PyArg_ParseTupleAndKeywords(args, kwargs, "O(ddd)(ddd)(lll)|i", kwlist, 
 				  &_I,
 				  &grid_start[0], &grid_start[1], &grid_start[2],
 				  &grid_stop[0], &grid_stop[1], &grid_stop[2],
 				  &grid_nsteps[0], &grid_nsteps[1], &grid_nsteps[2],
-				  &norm_data)){
+          &n_threads)){
     return NULL;
   }
+
+#ifdef USE_THREADS
+
+  if(n_threads > MAX_THREADS){
+    PyErr_SetString(PyExc_ValueError, "n_threads > MAX_THREADS");
+    goto error;
+  }
+
+  if(n_threads < 1){
+    n_threads = _n_threads;
+  }
+
+#else
+
+  if(n_threads > 1){
+    PyErr_SetString(PyExc_RuntimeError, "Multithreading support is not compiled in");
+    goto error;
+  }
+
+#endif
   
-  gridI = PyArray_FROMANY(_I, NPY_DOUBLE, 0, 0, NPY_IN_ARRAY);
+  gridI = (PyArrayObject*)PyArray_FROMANY(_I, NPY_DOUBLE, 0, 0, NPY_ARRAY_IN_ARRAY);
   if(!gridI){
-    goto cleanup;
+    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (gridI)");
+    goto error;
   }
   
   data_size = PyArray_DIM(gridI, 0);
-  
+  if(PyArray_DIM(gridI, 1) != 4){
+    PyErr_SetString(PyExc_ValueError, "Dimension 1 of array must be 4");
+    goto error;
+  }
+
   dims[0] = grid_nsteps[0];
   dims[1] = grid_nsteps[1];
   dims[2] = grid_nsteps[2];
 
-  gridout = PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
+  gridout = (PyArrayObject*)PyArray_SimpleNew(3, dims, NPY_DOUBLE);
   if(!gridout){
-    goto cleanup;
+    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (gridout)");
+    goto error;
   }
-  Nout = PyArray_ZEROS(3, dims, NPY_ULONG, 0);
+
+  Nout = (PyArrayObject*)PyArray_SimpleNew(3, dims, NPY_ULONG);
   if(!Nout){
-    goto cleanup;
+    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (Nout)");
+    goto error;
   }
-  standarderror = PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
-  if(!standarderror){
-    goto cleanup;
+
+  stderror = (PyArrayObject*)PyArray_SimpleNew(3, dims, NPY_DOUBLE);
+  if(!stderror){
+    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (stderror)");
+    goto error;
   }
-  
-  n_outside = c_grid3d(PyArray_DATA(gridout), PyArray_DATA(Nout),
-		       PyArray_DATA(standarderror), PyArray_DATA(gridI),
-		       grid_start, grid_stop, data_size, grid_nsteps, norm_data);
-  
+
+  meanout = (PyArrayObject*)PyArray_SimpleNew(3, dims, NPY_DOUBLE);
+  if(!meanout){
+    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (meanout)");
+    goto error;
+  }
+ 
+  // Ok now we don't touch Python Object ... Release the GIL
+  Py_BEGIN_ALLOW_THREADS
+
+  retval = c_grid3d((double*)PyArray_DATA(gridout), (unsigned long*)PyArray_DATA(Nout),
+                    (double*)PyArray_DATA(meanout), (double*)PyArray_DATA(stderror), 
+                    (double*)PyArray_DATA(gridI), &n_outside,
+		                grid_start, grid_stop, (unsigned long)data_size, grid_nsteps, 1,
+                    n_threads);
+
+  // Ok now get the GIL back
+  Py_END_ALLOW_THREADS
+
+  if(retval){
+    // We had a runtime error
+    PyErr_SetString(PyExc_RuntimeError, "Gridding process failed to run");
+    goto error;
+  }
+
   Py_XDECREF(gridI);
-  return Py_BuildValue("NNNl", gridout, Nout, standarderror, n_outside);
-  
- cleanup:
+  return Py_BuildValue("NNNNl", gridout, meanout, Nout, stderror, n_outside);
+
+error:
   Py_XDECREF(gridI);
   Py_XDECREF(gridout);
+  Py_XDECREF(meanout);
   Py_XDECREF(Nout);
-  Py_XDECREF(standarderror);
+  Py_XDECREF(stderror);
   return NULL;
 }
 
-unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror, double *data,
-		       double *grid_start, double *grid_stop, int max_data,
-		       int *n_grid, int norm_data){
-  int i;
-  unsigned long *nout_ptr;
-  double *dout_ptr;
-  double *data_ptr;
-  
-  double *Mk = NULL;
-  double *Qk = NULL;
-  int grid_size = 0;
+int c_grid3d(double *dout, unsigned long *nout, double *mout,
+             double *stderror, double *data, unsigned long *n_outside,
+             double *grid_start, double *grid_stop, unsigned long max_data,
+             unsigned long *n_grid, int norm, unsigned int n_threads){
 
-  double pos_double[3];
-  double grid_len[3], grid_step[3];
-  int grid_pos[3];
-  int pos = 0;
-  unsigned long n_outside = 0;
+  unsigned long i, j;
+  unsigned long grid_size = 0;
+  double grid_len[3];
+  unsigned long stride;
 	
   // Some useful quantities
 
   grid_size = n_grid[0] * n_grid[1] * n_grid[2];
-
-  // Allocate arrays for standard error calculation
-  
-  if(standarderror){
-    Mk = (double*)malloc(sizeof(double) * grid_size);
-    if(!Mk){
-      return n_outside;
-    }
-    Qk = (double*)malloc(sizeof(double) * grid_size);
-    if(!Mk){
-      return n_outside;
-    }
-  }
-
-  dout_ptr = dout;
-  nout_ptr = nout;
-	
-  data_ptr = data;
   for(i = 0;i < 3; i++){
     grid_len[i] = grid_stop[i] - grid_start[i];
-    grid_step[i] = grid_len[i] / (n_grid[i]);
   }
-	
-  for(i = 0; i < max_data ; i++){
+
+  // If we do this with threads .. we can do map reduce
+
+#ifdef USE_THREADS
+  pthread_t thread[MAX_THREADS];
+#endif
+
+  gridderThreadData threadData[MAX_THREADS];
+
+  // Allocate arrays for standard error calculation
+ 
+  for(i=0;i<n_threads;i++){
+    threadData[i].Mk = NULL;
+    threadData[i].Qk = NULL;
+    threadData[i].dout = NULL;
+    threadData[i].nout = NULL;
+  }
+
+  stride = max_data / n_threads;
+  for(i=0;i<n_threads;i++){
+    threadData[i].Qk = (double*)malloc(sizeof(double) * grid_size);
+    if(!threadData[i].Qk){
+      goto error;
+    }
+    if(i > 0){
+      threadData[i].Mk = (double*)malloc(sizeof(double) * grid_size);
+      if(!threadData[i].Mk){
+        goto error;
+      }
+      threadData[i].dout = (double *)malloc(sizeof(double) * grid_size);
+      if(!threadData[i].dout){
+        goto error;
+      }
+      threadData[i].nout = (unsigned long *)malloc(sizeof(unsigned long) * grid_size);
+      if(!threadData[i].nout){
+        goto error;
+      }
+    } else {
+      threadData[i].dout = dout;
+      threadData[i].nout = nout;
+      threadData[i].Mk = mout;
+    }
+
+    // Clear the arrays ....
+    for(j=0;j<grid_size;j++){
+      threadData[i].Mk[j] = 0.0;
+      threadData[i].Qk[j] = 0.0;
+      threadData[i].dout[j] = 0.0;
+      threadData[i].nout[j] = 0;
+    }
+    threadData[i].n_outside = 0;
+
+    // Setup entry points for threads
+    threadData[i].start = stride * i;
+    if(i == (n_threads - 1)){
+      threadData[i].end = max_data;
+    } else {
+      threadData[i].end = stride * (i + 1);
+    }
+
+    threadData[i].data = data;
+    threadData[i].n_grid = n_grid;
+    threadData[i].grid_start = grid_start;
+    threadData[i].grid_len = grid_len;
+    threadData[i].retval = 0;
+
+#ifdef USE_THREADS
+    pthread_create(&thread[i], NULL,
+                   grid3DThread,
+                   (void*) &threadData[i]);
+#else
+    grid3DThread((void *) &threadData[i]);
+#endif
+  }
+
+#ifdef USE_THREADS
+  // Wait for threads to finish and then join them
+  for(i=0;i<n_threads;i++){
+    if(pthread_join(thread[i], NULL)){
+      goto error;
+    }
+    if(threadData[i].retval){
+      goto error;
+    }
+  }
+#endif
+
+  // Combine results
+  if(n_threads > 1){
+    for(j=0;j<grid_size;j++){
+      threadData[0].Qk[j] = (threadData[0].Qk[j] * threadData[0].nout[j]);
+      threadData[0].Mk[j] = (threadData[0].Mk[j] * threadData[0].nout[j]);
+    }
+      //fprintf(stderr, "0 : Qk = %f, N = %ld\n", threadData[0].Qk[j], threadData[0].nout[j]);
+  }
+
+  for(i=1;i<n_threads;i++){
+    for(j=0;j<grid_size;j++){
+      threadData[0].nout[j] += threadData[i].nout[j];
+      threadData[0].dout[j] += threadData[i].dout[j];
+      threadData[0].Qk[j] += (threadData[i].Qk[j] * threadData[i].nout[j]);
+      threadData[0].Mk[j] += (threadData[i].Mk[j] * threadData[i].nout[j]);
+      //fprintf(stderr, "%ld : Qk = %f, N = %ld\n", i,threadData[i].Qk[j], threadData[i].nout[j]);
+    }
+    threadData[0].n_outside += threadData[i].n_outside;
+  }
+
+  // Calculate the sterror
+
+  for(j=0;j<grid_size;j++){
+    if(threadData[0].nout[j] == 0){
+      threadData[0].Mk[j] = 0.0;
+    } else {
+      if(n_threads > 1){
+        threadData[0].Mk[j] = threadData[0].Mk[j] / threadData[0].nout[j];
+        threadData[0].Qk[j] = threadData[0].Qk[j] / threadData[0].nout[j];
+      }
+      if(threadData[0].nout[j] > 1){
+        stderror[j] = pow(threadData[0].Qk[j] / 
+            (threadData[0].nout[j] - 1), 0.5) / pow(threadData[0].nout[j], 0.5);
+      } else {
+        stderror[j] = 0.0;
+      }
+      if(norm){
+        threadData[0].Mk[j] = threadData[0].dout[j] / threadData[0].nout[j];
+      }
+    }
+  }
+
+  // Store the number of elements outside the grid
+  
+  *n_outside = threadData[0].n_outside;
+
+  // Now free the memory.
+
+  for(i=0;i<n_threads;i++){
+    free(threadData[i].Qk);
+    if(i > 0){
+      free(threadData[i].Mk);
+      free(threadData[i].dout);
+      free(threadData[i].nout);
+    }
+  }
+  return 0;
+
+error:
+  for(i=0;i<n_threads;i++){
+    if(threadData[i].Qk) free(threadData[i].Qk); 
+    if(i > 0){
+      if(threadData[i].dout) free(threadData[i].dout); 
+      if(threadData[i].nout) free(threadData[i].nout); 
+      if(threadData[i].Mk) free(threadData[i].Mk);
+    }
+  }
+  return -1;
+}
+
+void* grid3DThread(void *ptr){
+  gridderThreadData* data = (gridderThreadData*)ptr;
+  double pos_double[3];
+  unsigned long grid_pos[3];
+  double *grid_start = data->grid_start; 
+  double *grid_len = data->grid_len; 
+  unsigned long *n_grid = data->n_grid;
+  double *Mk = data->Mk;
+  double *Qk = data->Qk;
+  double *data_ptr = data->data;
+  double *dout = data->dout;
+  unsigned long *nout = data->nout;
+  unsigned long pos = 0;
+  
+  unsigned long i;
+
+  data_ptr = data_ptr + (data->start * 4);
+  for(i=data->start; i<data->end; i++){
     // Calculate the relative position in the grid.
     pos_double[0] = (*data_ptr - grid_start[0]) / grid_len[0];
     data_ptr++;
@@ -465,7 +715,9 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
     if((pos_double[0] >= 0) && (pos_double[0] < 1) &&
        (pos_double[1] >= 0) && (pos_double[1] < 1) &&
        (pos_double[2] >= 0) && (pos_double[2] < 1)){
+      
       data_ptr++;
+
       // Calculate the position in the grid
       grid_pos[0] = (int)(pos_double[0] * n_grid[0]);
       grid_pos[1] = (int)(pos_double[1] * n_grid[1]);
@@ -475,155 +727,117 @@ unsigned long c_grid3d(double *dout, unsigned long *nout, double *standarderror,
       pos += grid_pos[1] * n_grid[2];
       pos += grid_pos[2];
 
+
       // Store the answer
       dout[pos] = dout[pos] + *data_ptr;
       nout[pos] = nout[pos] + 1;
 
       // Calculate the standard deviation quantities
 
-      if(standarderror){
-      	if(nout[pos] == 1){
-      	  Mk[pos] = *data_ptr;
-      	  Qk[pos] = 0.0;
-      	} else {
-      	  Qk[pos] = Qk[pos] + ((nout[pos] - 1) * pow(*data_ptr - Mk[pos],2) / nout[pos]);
-      	  Mk[pos] = Mk[pos] + ((*data_ptr - Mk[pos]) / nout[pos]);
-      	}
-      }
+      Qk[pos] = Qk[pos] + ((nout[pos] - 1) * pow(*data_ptr - Mk[pos],2) / nout[pos]);
+      Mk[pos] = Mk[pos] + ((*data_ptr - Mk[pos]) / nout[pos]);
+      //fprintf(stderr, "Qk = %f, Mk = %f\n", Qk[pos], Mk[pos]);
 
       // Increment pointer
       data_ptr++;
     } else {
-      n_outside++;
+      data->n_outside++;
       data_ptr+=2;
     }
   }
-  
-  // Calculate mean by dividing by the number of data points in each
-  // voxel
 
-  if(norm_data){
-    for(i = 0; i < grid_size; i++){
-      if(nout[i] > 0){
-	       dout[i] = dout[i] / nout[i];
-      } else {
-	       dout[i] = 0.0;
-      }
-    }
-  }
-
-  // Calculate the sterror
-  
-  if(standarderror){
-    for(i=0;i<grid_size;i++){
-      if(nout[i] > 1){
-      	// standard deviation of the sample distribution
-      	standarderror[i] = pow(Qk[pos] / (nout[i] - 1), 0.5) / pow(nout[i], 0.5);
-      }
-    }
-  }
-
-  if(Mk){
-    free(Mk);
-  }
-  if(Qk){
-    free(Qk);
-  }
-	
-  return n_outside;
+  return NULL;
 }
 
-// // This is the python 2 version
-// PyMODINIT_FUNC initctrans(void)  {
-// 	(void) Py_InitModule3("ctrans", _ctransMethods, _ctransDoc);
-// 	import_array();  // Must be present for NumPy.  Called first after above line.
-// }
-struct module_state {
-    PyObject *error;
-};
+long nproc(void) {
+  long _n;
+#ifdef USE_THREADS 
 
-#if PY_MAJOR_VERSION >= 3
-#define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+  _n = sysconf(_SC_NPROCESSORS_ONLN);
+  if(_n > MAX_THREADS){
+    _n = MAX_THREADS;
+  }
+
 #else
-#define GETSTATE(m) (&_state)
-static struct module_state _state;
+
+  _n = 1;
+
 #endif
 
-static PyObject *
-error_out(PyObject *m) {
-    struct module_state *st = GETSTATE(m);
-    PyErr_SetString(st->error, "something bad happened");
-    return NULL;
+  return _n;
 }
 
-static PyMethodDef _ctransMethods[] = {
-  {NULL, NULL, 0, NULL}     /* Sentinel - marks the end of this structure */
-};
+static PyObject* get_threads(PyObject *self, PyObject *args){
+  return PyLong_FromLong((long)_n_threads);
+}
+
+static PyObject* set_threads(PyObject *self, PyObject *args){
+
+#ifdef USE_THREADS
+
+  int threads;
+
+  if(!PyArg_ParseTuple(args, "i", &threads)){
+    return NULL;
+  }
+  if(threads > MAX_THREADS){
+    PyErr_SetString(PyExc_ValueError, "Requested number of threads > MAX_THREADS");
+    return NULL;
+  }
+  _n_threads = threads;
+  Py_RETURN_NONE;
+
+#else
+
+  PyErr_SetString(PyExc_RuntimeError, "Module has been compiled not to use threads.");
+  return NULL;
+
+#endif
+}
 
 static PyMethodDef ctrans_methods[] = {
-    {"error_out", (PyCFunction)error_out, METH_NOARGS, NULL},
     {"grid3d", (PyCFunction)gridder_3D, METH_VARARGS | METH_KEYWORDS,
      "Grid the numpy.array object into a regular grid"},
     {"ccdToQ", (PyCFunction)ccdToQ,  METH_VARARGS | METH_KEYWORDS,
      "Convert CCD image coordinates into Q values"},
+    {"get_threads", (PyCFunction)get_threads, METH_VARARGS,
+      "Return the number of threads used"},
+    {"set_threads", (PyCFunction)set_threads, METH_VARARGS,
+      "Set the number of threads used"},
     {NULL, NULL}
 };
 
 #if PY_MAJOR_VERSION >= 3
-
-static int ctrans_traverse(PyObject *m, visitproc visit, void *arg) {
-    Py_VISIT(GETSTATE(m)->error);
-    return 0;
-}
-
-static int ctrans_clear(PyObject *m) {
-    Py_CLEAR(GETSTATE(m)->error);
-    return 0;
-}
-
-
 static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "ctrans",
-        NULL,
-        sizeof(struct module_state),
-        ctrans_methods,
-        NULL,
-        ctrans_traverse,
-        ctrans_clear,
-        NULL
+    PyModuleDef_HEAD_INIT,
+    "ctrans",
+    "Python functions to perform gridding (binning) of experimental data.\n\n",
+    -1, // we keep state in global vars
+    ctrans_methods,
 };
 
-#define INITERROR return NULL
+PyObject* PyInit_ctrans(void) {
 
-PyObject *
-PyInit_ctrans(void)
+  PyObject *module = PyModule_Create(&moduledef);
+  if(!module){
+    return NULL;
+  }
 
-#else
-#define INITERROR return
+  import_array();
+  _n_threads = nproc();
 
-void
-initctrans(void)
-#endif
-{
-#if PY_MAJOR_VERSION >= 3
-    PyObject *module = PyModule_Create(&moduledef);
-#else
-    PyObject *module = Py_InitModule("ctrans", ctrans_methods);
-#endif
-    import_array();
-
-    if (module == NULL)
-        INITERROR;
-    struct module_state *st = GETSTATE(module);
-
-    st->error = PyErr_NewException("ctrans.Error", NULL, NULL);
-    if (st->error == NULL) {
-        Py_DECREF(module);
-        INITERROR;
-    }
-
-#if PY_MAJOR_VERSION >= 3
-    return module;
-#endif
+  return module;
 }
+
+#else // We have Python 2 ... 
+
+PyMODINIT_FUNC initctrans(void){
+  PyObject *module = Py_InitModule3("ctrans", ctrans_methods, _ctransDoc);
+  if(!module){
+    return;
+  }
+
+  import_array();
+  _n_threads = nproc();
+}
+#endif
