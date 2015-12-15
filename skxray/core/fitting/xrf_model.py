@@ -1323,3 +1323,75 @@ def fit_pixel_multiprocess_nnls(exp_data, matv, param,
     results = np.array(results)
 
     return results
+
+
+def calculate_area(e_select, matv, results,
+                   param, first_peak_area=False):
+    """
+    Parameters
+    ----------
+    e_select : list
+        elements
+    matv : 2D array
+        matrix constains elemental profile as columns
+    results : 3D array
+        x, y positions, and each element's weight on third dim
+    param : dict
+        parameters of fitting
+    first_peak_area : Bool, optional
+        get overal peak area or only the first peak area, such as Ar_Ka1
+
+    Returns
+    -------
+    dict :
+        dict of each 2D elemental distribution
+    """
+    total_list = e_select + ['snip_bkg'] + ['r_squared']
+    mat_sum = np.sum(matv, axis=0)
+
+    result_map = dict()
+    for i in range(len(e_select)):
+        if first_peak_area is not True:
+            result_map.update({total_list[i]: results[:, :, i]*mat_sum[i]})
+        else:
+            if total_list[i] not in K_LINE+L_LINE+M_LINE:
+                ratio_v = 1
+            else:
+                ratio_v = get_branching_ratio(total_list[i],
+                                              param['coherent_sct_energy']['value'])
+            result_map.update({total_list[i]: results[:, :, i]*mat_sum[i]*ratio_v})
+
+    # add background and res
+    result_map.update({total_list[-2]: results[:, :, -2]})
+    result_map.update({total_list[-1]: results[:, :, -1]})
+
+    return result_map
+
+
+def get_branching_ratio(elemental_line, energy):
+    """
+    Calculate the ratio of branching ratio, such as ratio of
+    branching ratio of Ka1 to sum of br of all K lines.
+
+    Parameters
+    ----------
+    elemental_line : str
+        e.g., 'Mg_K', refers to the K lines of Magnesium
+    energy : float
+        incident energy in keV
+
+    Returns
+    -------
+    float :
+        calculated ratio
+    """
+
+    name, line = elemental_line.split('_')
+    e = Element(name)
+    transition_lines = TRANSITIONS_LOOKUP[line.upper()]
+
+    sum_v = 0
+    for v in transition_lines:
+        sum_v += e.cs(energy)[v]
+    ratio_v = e.cs(energy)[transition_lines[0]]/sum_v
+    return ratio_v

@@ -284,14 +284,14 @@ default_param = {
         'max': 0.011,
         'min': 0.009,
         'tool_tip': 'E(channel) = a0 + a1*channel+ a2*channel**2',
-        'value': 0.009532},
+        'value': 0.01},
     'e_offset': {
         'bound_type': 'lohi',
         'description': 'E Calib. Coef, a0',
         'max': 0.015,
-        'min': 0.006,
+        'min': -0.01,
         'tool_tip': 'E(channel) = a0 + a1*channel+ a2*channel**2',
-        'value': 0.007826},
+        'value': 0.0},
     'e_quadratic': {
         'bound_type': 'lohi',
         'description': 'E Calib. Coef, a2',
