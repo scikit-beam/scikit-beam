@@ -26,7 +26,7 @@ def synthetic_spectrum():
     pileup_peak = ['Si_Ka1-Si_Ka1', 'Si_Ka1-Ce_La1']
     elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak
     elist, matv, area_v = construct_linear_model(x, param, elemental_lines, default_area=1e5)
-    return np.sum(matv, 1) + 1e-6  # avoid zero values
+    return np.sum(matv, 1)
 
 
 def test_param_controller_fail():
@@ -78,7 +78,7 @@ def test_fit():
     MS = ModelSpectrum(param, elemental_lines)
     MS.assemble_models()
 
-    result = MS.model_fit(x, y, weights=1/np.sqrt(y), maxfev=200)
+    result = MS.model_fit(x, y, weights=1/np.sqrt(y+1), maxfev=200)
 
     # check area of each element
     for k, v in six.iteritems(result.values):
@@ -106,16 +106,6 @@ def test_fit():
         if 'area' in k:
             assert_equal(v['value'], result.values[k])
 
-    # MS = ModelSpectrum(new_params, elemental_lines)
-    # MS.assemble_models()
-    #
-    # result = MS.model_fit(x, y, weights=1/np.sqrt(y), maxfev=200)
-    # # check area of each element
-    # for k, v in six.iteritems(result.values):
-    #     if 'area' in k:
-    #         # error smaller than 0.1%
-    #         assert_true((v-1e5)/1e5 < 1e-3)
-
 
 def test_register():
     new_strategy = e_calibration
@@ -136,6 +126,7 @@ def test_register_error():
 
 
 def test_pre_fit():
+    # No pre-defined elements. Use all possible elements activated at given energy
     y0 = synthetic_spectrum()
     x0 = np.arange(len(y0))
     # the following items should appear
@@ -154,8 +145,8 @@ def test_pre_fit():
     assert_true(r1 > 0.85)
 
     # fit with weights
-    w = 1/np.sqrt(y0)
-    x, y_total, area_v = linear_spectrum_fitting(x0, y0, param, weights=1/np.sqrt(y0))
+    w = 1/np.sqrt(y0+1)
+    x, y_total, area_v = linear_spectrum_fitting(x0, y0, param, weights=w)
     for v in item_list:
         assert_true(v in y_total)
     sum2 = np.sum([v for v in y_total.values()], axis=0)
@@ -223,9 +214,6 @@ def test_pixel_fit_multiprocess():
         exp_data[i,0,:] = y0
     results = fit_pixel_multiprocess_nnls(exp_data, matv, param,
                                           use_snip=True)
-    for k,v in six.iteritems(area_v):
-        print(k, v)
-    print(results[:,:,2])
     # output area of dict
     result_map = calculate_area(elist, matv, results,
                                 param, first_peak_area=True)
