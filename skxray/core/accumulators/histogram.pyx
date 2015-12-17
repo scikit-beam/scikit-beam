@@ -68,16 +68,16 @@ class Histogram:
         logger.debug("nbins = {}".format(nbins))
 
         # create the numpy array to hold the results
-        self._values = np.zeros(nbins, dtype=float)
+        self._values = np.zeros(nbins, dtype=np.float64)
         self.ndims = len(nbins)
         binsizes = [(high - low) / nbin for high, low, nbin
                     in zip(highs, lows, nbins)]
         logger.debug("nbins = {}".format(nbins))
         # store everything in a numpy array
         self._nbins = np.array(nbins, dtype=np.dtype('i')).reshape(-1)
-        self._lows = np.array(lows, dtype=np.dtype('f')).reshape(-1)
-        self._highs = np.array(highs, dtype=np.dtype('f')).reshape(-1)
-        self._binsizes = np.array(binsizes, dtype=np.dtype('f')).reshape(-1)
+        self._lows = np.array(lows, dtype=np.dtype('d')).reshape(-1)
+        self._highs = np.array(highs, dtype=np.dtype('d')).reshape(-1)
+        self._binsizes = np.array(binsizes, dtype=np.dtype('d')).reshape(-1)
 
 
     def reset(self):
@@ -134,9 +134,9 @@ class Histogram:
     def _fill1d(self, np.ndarray[xnumtype, ndim=1] xval,
                 np.ndarray[wnumtype, ndim=1] weight):
         cdef np.ndarray[np.float_t, ndim=1] data = self.values
-        cdef float low = self._lows[0]
-        cdef float high = self._highs[0]
-        cdef float binsize = self._binsizes[0]
+        cdef double low = self._lows[0]
+        cdef double high = self._highs[0]
+        cdef double binsize = self._binsizes[0]
         cdef int i
         cdef int wstride = 0 if weight.size == 1 else 1
         cdef int xlen = len(xval)
@@ -152,9 +152,9 @@ class Histogram:
                 np.ndarray[ynumtype, ndim=1] yval,
                 np.ndarray[wnumtype, ndim=1] weight):
         cdef double [:,:] data = self.values
-        cdef float [:] low = self._lows
-        cdef float [:] high = self._highs
-        cdef float [:] binsize = self._binsizes
+        cdef double [:] low = self._lows
+        cdef double [:] high = self._highs
+        cdef double [:] binsize = self._binsizes
         cdef int i
         cdef int xlen = len(xval)
         cdef int ylen = len(yval)
@@ -190,9 +190,9 @@ class Histogram:
         mylows = self._lows[coordsorder]
         myhighs = self._highs[coordsorder]
         mybinsizes = self._binsizes[coordsorder]
-        cdef float [:] low = mylows
-        cdef float [:] high = myhighs
-        cdef float [:] binsize = mybinsizes
+        cdef double [:] low = mylows
+        cdef double [:] high = myhighs
+        cdef double [:] binsize = mybinsizes
         cdef np.float_t* data = <np.float_t*> _getarrayptr(self._values)
         # distribute coordinates in each dimension according to their
         # numerical type.  follow the same order as in numtypes.
@@ -253,7 +253,7 @@ class Histogram:
         return [bin_edges_to_centers(edge) for edge in self.edges]
 
 
-cdef long find_indices(xnumtype pos, float low, float high, float binsize):
+cdef long find_indices(xnumtype pos, double low, double high, double binsize):
     if not (low <= pos < high):
         return -1
     return int((pos - low) / binsize)
@@ -261,7 +261,7 @@ cdef long find_indices(xnumtype pos, float low, float high, float binsize):
 
 cdef void fillonecy(xnumtype xval, wnumtype weight,
                     np.float_t* pdata,
-                    float low, float high, float binsize):
+                    double low, double high, double binsize):
     iidx = find_indices(xval, low, high, binsize)
     if iidx == -1:
         return
