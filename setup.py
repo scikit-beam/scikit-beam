@@ -16,15 +16,35 @@ from Cython.Build import cythonize
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-ext_modules = [Extension('ctrans', ['src/ctrans.c'],
-                         define_macros=[('USE_THREADS', None)])]
 
-eca = ['-Wno-unused-function', '-Wno-unreachable-code']
-ext_histogram = Extension("*", ["skxray/core/accumulators/*.pyx"],
-        extra_compile_args=eca
-        )
+def c_ext():
+    return [Extension('skxray.ext.ctrans', ['src/ctrans.c'],
+                      define_macros=[('USE_THREADS', None)])]
 
-ext_modules += cythonize(ext_histogram)
+
+def cython_ext():
+    """Walk through the directory tree and find cython files to compile
+
+    Returns
+    -------
+    list
+        List of compiled cython extensions
+    """
+    cython_extensions = []
+    eca = ['-Wno-unused-function', '-Wno-unreachable-code']
+    for parent, folders, files in os.walk('skxray'):
+        for f in files:
+            if f.endswith('.pyx'):
+                # skxray/core/accumulators -> skxray.core.accumulators.histogram
+                parent_name = parent.replace('/', '.') + '.' + \
+                              os.path.splitext(f)[0]
+                ext_name = os.path.join(parent, f)
+                print(parent_name, ext_name)
+                e = Extension(parent_name, [ext_name],
+                              extra_compile_args=eca)
+                # cython_extensions.append(*cythonize(ext_name))
+                cython_extensions += cythonize(e)
+    return cython_extensions
 
 setup(
     name='scikit-xray',
@@ -33,11 +53,10 @@ setup(
     author='Brookhaven National Lab',
     description="Data analysis tools for X-ray science",
     packages=setuptools.find_packages(exclude=['doc']),
-    ext_package='skxray.ext',
     include_dirs=[np.get_include()],
     package_data={'skxray.core.constants': ['data/*.dat']},
     install_requires=['six', 'numpy'],  # essential deps only
-    ext_modules=ext_modules,
+    ext_modules=c_ext() + cython_ext(),
     url='http://github.com/scikit-xray/scikit-xray',
     keywords='Xray Analysis',
     license='BSD',
@@ -50,5 +69,5 @@ setup(
                  "Topic :: Software Development :: Libraries",
                  "Intended Audience :: Science/Research",
                  "Intended Audience :: Developers",
-                 ], requires=['numpy']
+                 ],
     )
