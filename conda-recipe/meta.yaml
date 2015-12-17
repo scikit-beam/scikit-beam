@@ -16,6 +16,7 @@ requirements:
     - setuptools
     - numpy
     - six
+    - cython
   run:
     - python
     - numpy

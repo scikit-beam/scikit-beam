@@ -5,6 +5,7 @@ from distutils.core import setup, Extension
 import versioneer
 import numpy as np
 import os
+from Cython.Build import cythonize
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -17,6 +18,13 @@ def read(fname):
 
 ext_modules = [Extension('ctrans', ['src/ctrans.c'],
                          define_macros=[('USE_THREADS', None)])]
+
+eca = ['-Wno-unused-function', '-Wno-unreachable-code']
+ext_histogram = Extension("*", ["skxray/core/accumulators/*.pyx"],
+        extra_compile_args=eca
+        )
+
+ext_modules += cythonize(ext_histogram)
 
 setup(
     name='scikit-xray',
