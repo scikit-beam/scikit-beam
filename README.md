@@ -1,27 +1,24 @@
-[![Build Status](https://travis-ci.org/scikit-xray/scikit-xray.svg?branch=master)](https://travis-ci.org/scikit-xray/scikit-xray)
-[![codecov.io](http://codecov.io/github/scikit-xray/scikit-xray/coverage.svg?branch=master)](http://codecov.io/github/scikit-xray/scikit-xray?branch=master)
-[![Join the chat at https://gitter.im/scikit-xray/scikit-xray](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/scikit-xray/scikit-xray?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/scikit-beam/scikit-beam.svg?branch=master)](https://travis-ci.org/scikit-beam/scikit-beam)
+[![codecov.io](http://codecov.io/github/scikit-beam/scikit-beam/coverage.svg?branch=master)](http://codecov.io/github/scikit-beam/scikit-beam?branch=master)
+[![Join the chat at https://gitter.im/scikit-beam/scikit-beam](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/scikit-beam/scikit-beam?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # scikit-xray
-This may be renamed to scikit-beam.
 
-This will soon be called scikit-beam.
-
-**[Documentation] (http://scikit-xray.github.io/scikit-xray/)**
+**[Documentation] (http://scikit-beam.github.io/scikit-beam/)**
 
 ## Examples
-[scikit-xray-examples repository] (https://github.com/scikit-xray/scikit-xray-examples)
+[scikit-xray-examples repository] (https://github.com/scikit-beam/scikit-beam-examples)
 
-- [Powder calibration (still needs tilt correction)] (https://github.com/scikit-xray/scikit-xray-examples/blob/master/demos/powder_calibration/D_estimate_demo.ipynb)
+- [Powder calibration (still needs tilt correction)] (https://github.com/scikit-beam/scikit-beam-examples/blob/master/demos/powder_calibration/D_estimate_demo.ipynb)
 - 1-time correlation
-  - [dir] (https://github.com/scikit-xray/scikit-xray-examples/tree/master/demos/1_time_correlation)
-  - [Jupyter notebook] (https://github.com/scikit-xray/scikit-xray-examples/blob/master/demos/1_time_correlation/Multi_tau_one_time_correlation_example.ipynb)
+  - [dir] (https://github.com/scikit-beam/scikit-beam-examples/tree/master/demos/1_time_correlation)
+  - [Jupyter notebook] (https://github.com/scikit-beam/scikit-beam-examples/blob/master/demos/1_time_correlation/Multi_tau_one_time_correlation_example.ipynb)
 - Differential Phase Contrast
-  - [dir] (https://github.com/scikit-xray/scikit-xray-examples/blob/master/demos/dpc)
-  - [Jupyter notebook] (https://github.com/scikit-xray/scikit-xray-examples/blob/master/demos/dpc/dpc_demo.ipynb)
-- [Fast conversion to reciprocal space] (https://github.com/scikit-xray/scikit-xray-examples/blob/master/demos/reciprocal_space/recip_example.ipynb)
-- [X-Ray Speckle Visibility Spectroscopy] (https://github.com/scikit-xray/scikit-xray-examples/blob/master/demos/speckle/speckle-plotting.ipynb)
-- [Basic Plotting of X-Ray Fluorescence Elemental Lines] (https://github.com/scikit-xray/scikit-xray-examples/blob/master/demos/xrf/plot_xrf_spectrum.ipynb)
+  - [dir] (https://github.com/scikit-beam/scikit-beam-examples/blob/master/demos/dpc)
+  - [Jupyter notebook] (https://github.com/scikit-beam/scikit-beam-examples/blob/master/demos/dpc/dpc_demo.ipynb)
+- [Fast conversion to reciprocal space] (https://github.com/scikit-beam/scikit-beam-examples/blob/master/demos/reciprocal_space/recip_example.ipynb)
+- [X-Ray Speckle Visibility Spectroscopy] (https://github.com/scikit-beam/scikit-beam-examples/blob/master/demos/speckle/speckle-plotting.ipynb)
+- [Basic Plotting of X-Ray Fluorescence Elemental Lines] (https://github.com/scikit-beam/scikit-beam-examples/blob/master/demos/xrf/plot_xrf_spectrum.ipynb)
 
 ## Quick start
 
@@ -32,18 +29,18 @@ conda config --add channels scikit-xray
 conda install scikit-xray
 ```
 
-### install with pip
+### install development version with setuptools
 
 ```
-git clone git@github.com:scikit-xray/scikit-xray.git
-cd scikit-xray
+git clone git@github.com:scikit-beam/scikit-beam.git
+cd scikit-beam
 python setup.py install
 ```
 
 ### set up for development
 ```
-git clone git@github.com:scikit-xray/scikit-xray.git
-cd scikit-xray
+git clone git@github.com:scikit-beam/scikit-beam.git
+cd scikit-beam
 python setup.py develop
 pip install nose coverage setuptools
 ```
