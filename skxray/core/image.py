@@ -97,3 +97,106 @@ def _corr_ax1(input_image):
                                          mode='full')/norm_mask) / 2
              for v in input_image]
     return np.histogram(est_by_row, bins=np.arange(0, dim + 1))
+
+def hist_make(src_data,
+              num_bins,
+              pd_convert=False):
+    """
+    This function evaluates the histogram of the source data set and returns
+    bin data consisting of both bin edges and bin averages. This tool is
+    primarily geared for plotting histograms for visual analysis and
+    comparison.
+
+    Parameters
+    ----------
+    src_data : ndarray
+        Can be JxK or IxJxK
+        Specifies the source data set from which you want to evaluate the
+        histogram.
+    num_bins : int
+        Specify the number of bins to include in the histogram as an integer.
+
+    pd_convert : bool, optional
+        Identify whether the histogram data should be normalized as a
+        probability density histogram or not.
+        Options:
+            True -- Histogram data is normalized to range from 0 to 1
+            False -- Histogram data reported simply as "counts" (e.g. Voxel
+                     Count)
+
+    Returns
+    -------
+    hist : array
+        1xN array containing all of the actual bin measurements (e.g. voxel
+        counts)
+    bin_avg : array
+        1xN array containing the average intensity value for each bin.
+        NOTE: the length of this array is equal to the length of the hist
+        array
+    bin_edges : array
+        1xN array containing the edge values for each bin
+        NOTE: the length of this array is 1 larger than the length of the
+        hist array (e.g. len(bin_edges) = len(hist) + 1)
+    """
+
+    hist, bin_edges = np.histogram(src_data,
+                                   bins=num_bins,
+                                   density=pd_convert)
+    bin_avg = np.mean([bin_edges[1:], bin_edges[:-1]], axis=0)
+    return hist, bin_edges, bin_avg
+
+def rescale_intensity(src_data, new_max=254., new_min=0., out_dType='uint8'):
+    """
+    The purpose of this function is to allow easy conversion, scaling, or 
+    expansion of data set intensity ranges for additional histogram analysis
+    or data manipulation.
+
+    Parameters
+    ----------
+    src_data : ndarray
+        Specifies the data set you want to rescale
+    
+    new_max : float
+        Specify the new maximum value for the data set. Default 
+        value is 254.
+    new_min : float
+        Specify the new minimum value for the data set. Default 
+        value is 0.
+    out_dType : np.dtype
+        Specify the desired data type for the output. The default 
+        resulting data type is 'uint8'. If desired resulting data type is
+        something other than 'uint8' then specify the desired data type here. 
+        Recognizable options include:
+            'int8'
+            'int16'
+            'int32'
+            'int64'
+            'uint16'
+            'uint32'
+            'uint64'
+            'float16'
+            'float32'
+            'float64'
+
+    Returns
+    -------
+    result : ndarray
+        Output array can be an MxN (2D) or MxNxO (3D) numpy array
+        Returns the resulting array to the designated variable
+    """
+    src_float = np.float32(src_data)
+    max_value = np.amax(src_float)
+    min_value = np.amin(src_float)
+    if min_value < 0:
+        normalizing_const = max_value - min_value + 1
+    else:
+        normalizing_const = max_value
+    normalized_data = src_float / normalizing_const
+    if np.amin(normalized_data) != 0:
+        normal_shift = np.amin(normalized_data)
+        normalized_data = normalized_data - normal_shift
+    scale_factor = new_max - new_min + 1
+    result = normalized_data * scale_factor
+    result += new_min
+    result = result.astype(out_dType)
+    return result
