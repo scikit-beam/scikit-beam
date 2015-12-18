@@ -175,10 +175,8 @@ class Histogram:
     def _fillnd(self, coords, np.ndarray[wnumtype, ndim=1] weight):
         # allocate pointer arrays per each supported numerical types
         cdef np.int_t* aint_ptr[MAX_DIMENSIONS]
-        cdef int aint_stride[MAX_DIMENSIONS]
         cdef int aint_count = 0
         cdef np.float_t* afloat_ptr[MAX_DIMENSIONS + 1]
-        cdef int afloat_stride[MAX_DIMENSIONS]
         cdef int afloat_count = 0
         # determine order of coordinate arrays according to their
         # numerical data type
@@ -186,9 +184,12 @@ class Histogram:
         numtypeindex = {tp : i for i, tp in enumerate(numtypes)}
         ctypeindices = [numtypeindex.get(x.dtype, 999) for x in coords]
         coordsorder = np.argsort(ctypeindices, kind='mergesort')
-        istrides = np.asarray(self._values.strides, dtype=np.int32)[coordsorder]
+        istrides = np.asarray(self._values.strides)[coordsorder]
         istrides //= self._values.itemsize
-        cdef int [:] dataindexstrides = istrides
+        cdef int dataindexstrides[MAX_DIMENSIONS]
+        cdef int i
+        for i in range(self.ndims):
+            dataindexstrides[i] = istrides[i]
         mylows = self._lows[coordsorder]
         myhighs = self._highs[coordsorder]
         mybinsizes = self._binsizes[coordsorder]
@@ -198,19 +199,17 @@ class Histogram:
         cdef np.float_t* data = <np.float_t*> _getarrayptr(self._values)
         # distribute coordinates in each dimension according to their
         # numerical type.  follow the same order as in numtypes.
-        for x, dstride in zip(coords, dataindexstrides):
+        for x in coords:
             if x.dtype == np.int:
                 aint_ptr[aint_count] = <np.int_t*> _getarrayptr(x)
-                aint_stride[aint_count] = dstride
                 aint_count += 1
             elif x.dtype == np.float:
                 afloat_ptr[afloat_count] = <np.float_t*> _getarrayptr(x)
-                afloat_stride[afloat_count] = dstride
                 afloat_count += 1
             else:
                 emsg = "Numpy arrays of type {} are not supported."
                 raise TypeError(emsg.format(x.dtype))
-        cdef int i, j, k
+        cdef int j, k
         cdef int wstride = 0 if weight.size == 1 else 1
         cdef int xlen = len(coords[0])
         cdef int xidx, widx, didx
