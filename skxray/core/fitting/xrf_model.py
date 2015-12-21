@@ -1320,9 +1320,7 @@ def fit_pixel_multiprocess_nnls(exp_data, matv, param,
     pool.terminate()
     pool.join()
 
-    results = np.array(results)
-
-    return results
+    return np.array(results)
 
 
 def calculate_area(e_select, matv, results,
@@ -1357,8 +1355,8 @@ def calculate_area(e_select, matv, results,
             if total_list[i] not in K_LINE+L_LINE+M_LINE:
                 ratio_v = 1
             else:
-                ratio_v = get_branching_ratio(total_list[i],
-                                              param['coherent_sct_energy']['value'])
+                ratio_v = get_relative_cs_ratio(total_list[i],
+                                                param['coherent_sct_energy']['value'])
             result_map.update({total_list[i]: results[:, :, i]*mat_sum[i]*ratio_v})
 
     # add background and res
@@ -1368,10 +1366,11 @@ def calculate_area(e_select, matv, results,
     return result_map
 
 
-def get_branching_ratio(elemental_line, energy):
+def get_relative_cs_ratio(elemental_line, energy):
     """
-    Calculate the ratio of branching ratio, such as ratio of
-    branching ratio of Ka1 to sum of br of all K lines.
+    At given energy, multiple elemental lines may be activated. This function is
+    used to calculate the ratio of the first line's cross section (cs) to
+    the summed cross section from all the lines.
 
     Parameters
     ----------
@@ -1385,7 +1384,6 @@ def get_branching_ratio(elemental_line, energy):
     float :
         calculated ratio
     """
-
     name, line = elemental_line.split('_')
     e = Element(name)
     transition_lines = TRANSITIONS_LOOKUP[line.upper()]
@@ -1393,5 +1391,4 @@ def get_branching_ratio(elemental_line, energy):
     sum_v = 0
     for v in transition_lines:
         sum_v += e.cs(energy)[v]
-    ratio_v = e.cs(energy)[transition_lines[0]]/sum_v
-    return ratio_v
+    return e.cs(energy)[transition_lines[0]]/sum_v
