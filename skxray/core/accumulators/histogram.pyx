@@ -67,17 +67,19 @@ class Histogram:
 
         logger.debug("nbins = {}".format(nbins))
 
+        # numerical type for internal floating point arrays
+        fpdtp = np.dtype(float)
         # create the numpy array to hold the results
-        self._values = np.zeros(nbins, dtype=np.float64)
+        self._values = np.zeros(nbins, dtype=fpdtp)
         self.ndims = len(nbins)
         binsizes = [(high - low) / nbin for high, low, nbin
                     in zip(highs, lows, nbins)]
         logger.debug("nbins = {}".format(nbins))
         # store everything in a numpy array
         self._nbins = np.array(nbins, dtype=np.dtype('i')).reshape(-1)
-        self._lows = np.array(lows, dtype=np.dtype('d')).reshape(-1)
-        self._highs = np.array(highs, dtype=np.dtype('d')).reshape(-1)
-        self._binsizes = np.array(binsizes, dtype=np.dtype('d')).reshape(-1)
+        self._lows = np.array(lows, dtype=fpdtp).reshape(-1)
+        self._highs = np.array(highs, dtype=fpdtp).reshape(-1)
+        self._binsizes = np.array(binsizes, dtype=fpdtp).reshape(-1)
 
 
     def reset(self):
@@ -134,9 +136,9 @@ class Histogram:
     def _fill1d(self, np.ndarray[xnumtype, ndim=1] xval,
                 np.ndarray[wnumtype, ndim=1] weight):
         cdef np.ndarray[np.float_t, ndim=1] data = self.values
-        cdef double low = self._lows[0]
-        cdef double high = self._highs[0]
-        cdef double binsize = self._binsizes[0]
+        cdef np.float_t low = self._lows[0]
+        cdef np.float_t high = self._highs[0]
+        cdef np.float_t binsize = self._binsizes[0]
         cdef int i
         cdef int wstride = 0 if weight.size == 1 else 1
         cdef int xlen = len(xval)
@@ -151,10 +153,10 @@ class Histogram:
     def _fill2d(self, np.ndarray[xnumtype, ndim=1] xval,
                 np.ndarray[ynumtype, ndim=1] yval,
                 np.ndarray[wnumtype, ndim=1] weight):
-        cdef double [:,:] data = self.values
-        cdef double [:] low = self._lows
-        cdef double [:] high = self._highs
-        cdef double [:] binsize = self._binsizes
+        cdef np.float_t [:,:] data = self.values
+        cdef np.float_t [:] low = self._lows
+        cdef np.float_t [:] high = self._highs
+        cdef np.float_t [:] binsize = self._binsizes
         cdef int i
         cdef int xlen = len(xval)
         cdef int ylen = len(yval)
@@ -173,10 +175,8 @@ class Histogram:
     def _fillnd(self, coords, np.ndarray[wnumtype, ndim=1] weight):
         # allocate pointer arrays per each supported numerical types
         cdef np.int_t* aint_ptr[MAX_DIMENSIONS]
-        cdef int aint_stride[MAX_DIMENSIONS]
         cdef int aint_count = 0
         cdef np.float_t* afloat_ptr[MAX_DIMENSIONS + 1]
-        cdef int afloat_stride[MAX_DIMENSIONS]
         cdef int afloat_count = 0
         # determine order of coordinate arrays according to their
         # numerical data type
@@ -184,31 +184,32 @@ class Histogram:
         numtypeindex = {tp : i for i, tp in enumerate(numtypes)}
         ctypeindices = [numtypeindex.get(x.dtype, 999) for x in coords]
         coordsorder = np.argsort(ctypeindices, kind='mergesort')
-        istrides = np.asarray(self._values.strides, dtype=np.int32)[coordsorder]
+        istrides = np.asarray(self._values.strides)[coordsorder]
         istrides //= self._values.itemsize
-        cdef int [:] dataindexstrides = istrides
+        cdef int dataindexstrides[MAX_DIMENSIONS]
+        cdef int i
+        for i in range(self.ndims):
+            dataindexstrides[i] = istrides[i]
         mylows = self._lows[coordsorder]
         myhighs = self._highs[coordsorder]
         mybinsizes = self._binsizes[coordsorder]
-        cdef double [:] low = mylows
-        cdef double [:] high = myhighs
-        cdef double [:] binsize = mybinsizes
+        cdef np.float_t [:] low = mylows
+        cdef np.float_t [:] high = myhighs
+        cdef np.float_t [:] binsize = mybinsizes
         cdef np.float_t* data = <np.float_t*> _getarrayptr(self._values)
         # distribute coordinates in each dimension according to their
         # numerical type.  follow the same order as in numtypes.
-        for x, dstride in zip(coords, dataindexstrides):
+        for x in coords:
             if x.dtype == np.int:
                 aint_ptr[aint_count] = <np.int_t*> _getarrayptr(x)
-                aint_stride[aint_count] = dstride
                 aint_count += 1
             elif x.dtype == np.float:
                 afloat_ptr[afloat_count] = <np.float_t*> _getarrayptr(x)
-                afloat_stride[afloat_count] = dstride
                 afloat_count += 1
             else:
                 emsg = "Numpy arrays of type {} are not supported."
                 raise TypeError(emsg.format(x.dtype))
-        cdef int i, j, k
+        cdef int j, k
         cdef int wstride = 0 if weight.size == 1 else 1
         cdef int xlen = len(coords[0])
         cdef int xidx, widx, didx
