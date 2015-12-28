@@ -23,28 +23,31 @@ def c_ext():
 
 
 def cython_ext():
-    """Walk through the directory tree and find cython files to compile
-
-    Returns
-    -------
-    list
-        List of compiled cython extensions
-    """
-    cython_extensions = []
-    eca = ['-Wno-unused-function', '-Wno-unreachable-code']
-    for parent, folders, files in os.walk('skxray'):
-        for f in files:
-            if f.endswith('.pyx'):
-                # skxray/core/accumulators -> skxray.core.accumulators.histogram
-                parent_name = parent.replace('/', '.') + '.' + \
-                              os.path.splitext(f)[0]
-                ext_name = os.path.join(parent, f)
-                print(parent_name, ext_name)
-                e = Extension(parent_name, [ext_name],
-                              extra_compile_args=eca)
-                # cython_extensions.append(*cythonize(ext_name))
-                cython_extensions += cythonize(e)
-    return cython_extensions
+    return [cythonize("**/*.pyx")]
+#
+# def cython_ext():
+#     """Walk through the directory tree and find cython files to compile
+#
+#     Returns
+#     -------
+#     list
+#         List of compiled cython extensions
+#     """
+#     cython_extensions = []
+#     eca = ['-Wno-unused-function', '-Wno-unreachable-code']
+#     for parent, folders, files in os.walk('skxray'):
+#         for f in files:
+#             if f.endswith('.pyx'):
+#                 # skxray/core/accumulators -> skxray.core.accumulators.histogram
+#                 parent_name = parent.replace('/', '.') + '.' + \
+#                               os.path.splitext(f)[0]
+#                 ext_name = os.path.join(parent, f)
+#                 print(parent_name, ext_name)
+#                 e = Extension(parent_name, [ext_name],
+#                               extra_compile_args=eca)
+#                 # cython_extensions.append(*cythonize(ext_name))
+#                 cython_extensions += cythonize(e)
+#     return cython_extensions
 
 setup(
     name='scikit-xray',
