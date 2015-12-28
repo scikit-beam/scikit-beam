@@ -85,12 +85,12 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     Returns
     -------
     g2 : array
-        matrix of normalized intensity-intensity autocorrelation
-        shape (num_levels, number of labels(ROI))
+        Matrix of normalized intensity-intensity autocorrelation.
+        Shape is (num_levels, np.unique(labels)))
 
     lag_steps : array
-        delay or lag steps for the multiple tau analysis
-        shape num_levels
+        Delay or lag steps for the multiple tau analysis.
+        Shape is num_levels
 
     Notes
     -----
@@ -108,8 +108,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     <...> refer to averages over time t. The quantity t' denotes the
     delay time
 
-    This implementation is based on code in the language Yorick
-    by Mark Sutton, based on published work. [1]_
+    This implementation is based on published work. [1]_
 
     References
     ----------
@@ -118,7 +117,6 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
         "Area detector based photon correlation in the regime of
         short data batches: Data reduction for dynamic x-ray
         scattering," Rev. Sci. Instrum., vol 70, p 3274-3289, 2000.
-
     """
     # In order to calculate correlations for `num_bufs`, images must be
     # kept for up to the maximum lag step. These are stored in the array
