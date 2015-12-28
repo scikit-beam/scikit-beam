@@ -166,7 +166,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
                    dtype=np.float64)
 
     # to track processing each level
-    track_level = np.zeros(num_levels)
+    track_level = np.zeros(num_levels, dtype=bool)
 
     # to increment buffer
     cur = np.ones(num_levels, dtype=np.int64)
@@ -200,7 +200,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
         level = 1
         while processing:
             if not track_level[level]:
-                track_level[level] = 1
+                track_level[level] = True
                 processing = False
             else:
                 prev = 1 + (cur[level - 1] - 2) % num_bufs
@@ -211,7 +211,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
                                                   cur[level - 1] - 1])/2
 
                 # make the track_level zero once that level is processed
-                track_level[level] = 0
+                track_level[level] = False
 
                 # call the _process function for each multi-tau level
                 # for multi-tau levels greater than one
