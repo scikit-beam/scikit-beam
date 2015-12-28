@@ -36,8 +36,8 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 import numpy as np
-from .. import roi
-from .. import utils as core
+from skxray.core import roi
+from skxray import utils
 import itertools
 from skimage import morphology
 
@@ -165,7 +165,7 @@ def _helper_check(pixel_list, inds, num_pix, edges, center,
     data = ty.reshape(img_dim[0], img_dim[1])
 
     # get the grid values from the center
-    grid_values = core.radial_grid(img_dim, center)
+    grid_values = utils.radial_grid(img_dim, center)
 
     # get the indices into a grid
     zero_grid = np.zeros((img_dim[0], img_dim[1]))
