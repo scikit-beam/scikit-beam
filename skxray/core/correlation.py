@@ -206,9 +206,8 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
                 prev = 1 + (cur[level - 1] - 2) % num_bufs
                 cur[level] = 1 + cur[level] % num_bufs
 
-                buf[level, cur[level] - 1] = (buf[level - 1, prev - 1] +
-                                              buf[level - 1,
-                                                  cur[level - 1] - 1])/2
+                buffer = (buf[level-1, prev-1] + buf[level-1, cur[level-1]-1])/2
+                buf[level, cur[level] - 1] = buffer
 
                 # make the track_level zero once that level is processed
                 track_level[level] = False
