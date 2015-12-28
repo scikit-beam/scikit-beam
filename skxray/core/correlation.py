@@ -212,9 +212,8 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
                 # make the track_level zero once that level is processed
                 track_level[level] = False
 
-                # call the _process function for each multi-tau level
-                # for multi-tau levels greater than one
-                # Again, this is modifying things in place. See comment
+                # call the _process function for each multi-tau level greater
+                # than one. This is modifying things in place. See comment
                 # on previous call above.
                 _process(buf, G, past_intensity_norm,
                          future_intensity_norm, label_mask,
