@@ -37,7 +37,8 @@
 ########################################################################
 
 
-# import * is only allowed at the module level
+# smoketest the api
+from skxray.core.constants import *
 
 if __name__ == '__main__':
     import nose
