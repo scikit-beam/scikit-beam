@@ -99,19 +99,16 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
         future_intensity_norm = <I(\tau + delay)>
     """
     img_per_level[level] += 1
-
-    # in multi-tau correlation other than first level all other levels
-    #  have to do the half of the correlation
-    if level == 0:
-        i_min = 0
-    else:
-        i_min = num_bufs // 2
+    # in multi-tau correlation, the subsequent levels have half as many
+    # buffers as the first
+    i_min = num_bufs // 2 if level else 0
 
     for i in range(i_min, min(img_per_level[level], num_bufs)):
+        # compute the index into the autocorrelation matrix
         t_index = level * num_bufs / 2 + i
 
         delay_no = (buf_no - i) % num_bufs
-
+        # get the images for correlating
         past_img = buf[level, delay_no]
         future_img = buf[level, buf_no]
 
