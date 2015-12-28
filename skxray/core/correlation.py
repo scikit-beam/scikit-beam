@@ -105,10 +105,10 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
     if level == 0:
         i_min = 0
     else:
-        i_min = num_bufs//2
+        i_min = num_bufs // 2
 
     for i in range(i_min, min(img_per_level[level], num_bufs)):
-        t_index = level*num_bufs/2 + i
+        t_index = level * num_bufs / 2 + i
 
         delay_no = (buf_no - i) % num_bufs
 
@@ -210,7 +210,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
     num_rois = np.max(label_mask)
 
     # number of pixels per ROI
-    num_pixels = np.bincount(label_mask, minlength=(num_rois+1))
+    num_pixels = np.bincount(label_mask, minlength=(num_rois + 1))
     num_pixels = num_pixels[1:]
 
     if np.any(num_pixels == 0):
@@ -220,7 +220,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
 
     # G holds the un normalized auto-correlation result. We
     # accumulate computations into G as the algorithm proceeds.
-    G = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
+    G = np.zeros(((num_levels + 1) * num_bufs / 2, num_rois),
                  dtype=np.float64)
 
     # matrix of past intensity normalizations
@@ -275,8 +275,10 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
                 prev = 1 + (cur[level - 1] - 2) % num_bufs
                 cur[level] = 1 + cur[level] % num_bufs
 
-                buf[level, cur[level] - 1] = (buf[level-1, prev-1] +
-                                              buf[level-1, cur[level-1]-1])/2
+                buf[level, cur[level] - 1] = (
+                    (buf[level - 1, prev - 1] +
+                     buf[level - 1, cur[level - 1] - 1]) / 2
+                )
 
                 # make the track_level zero once that level is processed
                 track_level[level] = False
@@ -287,7 +289,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
                 processing_func(buf, G, past_intensity_norm,
                                 future_intensity_norm, label_mask,
                                 num_bufs, num_pixels, img_per_level,
-                                level=level, buf_no=cur[level]-1,)
+                                level=level, buf_no=cur[level] - 1, )
                 level += 1
 
                 # Checking whether there is next level for processing
@@ -368,4 +370,4 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
        J. Synchrotron Rad. vol 21, p 1288-1295, 2014
 
     """
-    return beta*np.exp(-2*relaxation_rate*lags) + baseline
+    return beta * np.exp(-2 * relaxation_rate * lags) + baseline
