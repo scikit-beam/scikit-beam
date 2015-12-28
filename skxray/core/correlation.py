@@ -56,7 +56,102 @@ from . import roi
 logger = logging.getLogger(__name__)
 
 
-def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
+def _process(buf, G, past_intensity_norm, future_intensity_norm,
+             label_mask, num_bufs, num_pixels, img_per_level, level, buf_no):
+    """
+    Internal helper function. This modifies inputs in place.
+
+    This helper function calculates G, past_intensity_norm and
+    future_intensity_norm at each level, symmetric normalization is used.
+
+    Parameters
+    ----------
+    buf : array
+        image data array to use for correlation
+
+    G : array
+        matrix of auto-correlation function without
+        normalizations
+
+    past_intensity_norm : array
+        matrix of past intensity normalizations
+
+    future_intensity_norm : array
+        matrix of future intensity normalizations
+
+    label_mask : array
+        labels of the required region of interests(roi's)
+
+    num_bufs : int, even
+        number of buffers(channels)
+
+    num_pixels : array
+        number of pixels in certain roi's
+        roi's, dimensions are : [number of roi's]X1
+
+    img_per_level : array
+        to track how many images processed in each level
+
+    level : int
+        the current multi-tau level
+
+    buf_no : int
+        the current buffer number
+
+    Notes
+    -----
+    :math ::
+        G   = <I(\tau)I(\tau + delay)>
+
+    :math ::
+        past_intensity_norm = <I(\tau)>
+
+    :math ::
+        future_intensity_norm = <I(\tau + delay)>
+
+    """
+    img_per_level[level] += 1
+
+    # in multi-tau correlation other than first level all other levels
+    #  have to do the half of the correlation
+    if level == 0:
+        i_min = 0
+    else:
+        i_min = num_bufs//2
+
+    for i in range(i_min, min(img_per_level[level], num_bufs)):
+        t_index = level*num_bufs/2 + i
+
+        delay_no = (buf_no - i) % num_bufs
+
+        past_img = buf[level, delay_no]
+        future_img = buf[level, buf_no]
+
+        #  get the matrix of auto-correlation function without normalizations
+        tmp_binned = (np.bincount(label_mask,
+                                  weights=past_img*future_img)[1:])
+        G[t_index] += ((tmp_binned / num_pixels - G[t_index]) /
+                       (img_per_level[level] - i))
+
+        # get the matrix of past intensity normalizations
+        pi_binned = (np.bincount(label_mask,
+                                 weights=past_img)[1:])
+        past_intensity_norm[t_index] += ((pi_binned/num_pixels
+                                         - past_intensity_norm[t_index]) /
+                                         (img_per_level[level] - i))
+
+        # get the matrix of future intensity normalizations
+        fi_binned = (np.bincount(label_mask,
+                                 weights=future_img)[1:])
+        future_intensity_norm[t_index] += ((fi_binned/num_pixels
+                                           - future_intensity_norm[t_index]) /
+                                           (img_per_level[level] - i))
+
+    return None  # modifies arguments in place!
+
+
+def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
+                        processing_func=_process):
     """
     This function computes one-time correlations.
 
@@ -187,10 +282,10 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
         # (undownsampled) frames. This modifies G,
         # past_intensity_norm, future_intensity_norm,
         # and img_per_level in place!
-        _process(buf, G, past_intensity_norm,
-                 future_intensity_norm, label_mask,
-                 num_bufs, num_pixels, img_per_level,
-                 level=0, buf_no=cur[0] - 1)
+        processing_func(buf, G, past_intensity_norm,
+                        future_intensity_norm, label_mask,
+                        num_bufs, num_pixels, img_per_level,
+                        level=0, buf_no=cur[0] - 1)
 
         # check whether the number of levels is one, otherwise
         # continue processing the next level
@@ -212,13 +307,13 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
                 # make the track_level zero once that level is processed
                 track_level[level] = False
 
-                # call the _process function for each multi-tau level greater
+                # call processing_func for each multi-tau level greater
                 # than one. This is modifying things in place. See comment
                 # on previous call above.
-                _process(buf, G, past_intensity_norm,
-                         future_intensity_norm, label_mask,
-                         num_bufs, num_pixels, img_per_level,
-                         level=level, buf_no=cur[level]-1,)
+                processing_func(buf, G, past_intensity_norm,
+                                future_intensity_norm, label_mask,
+                                num_bufs, num_pixels, img_per_level,
+                                level=level, buf_no=cur[level]-1,)
                 level += 1
 
                 # Checking whether there is next level for processing
@@ -245,100 +340,6 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     lag_steps = lag_steps[:g_max]
 
     return g2, lag_steps
-
-
-def _process(buf, G, past_intensity_norm, future_intensity_norm,
-             label_mask, num_bufs, num_pixels, img_per_level, level, buf_no):
-    """
-    Internal helper function. This modifies inputs in place.
-
-    This helper function calculates G, past_intensity_norm and
-    future_intensity_norm at each level, symmetric normalization is used.
-
-    Parameters
-    ----------
-    buf : array
-        image data array to use for correlation
-
-    G : array
-        matrix of auto-correlation function without
-        normalizations
-
-    past_intensity_norm : array
-        matrix of past intensity normalizations
-
-    future_intensity_norm : array
-        matrix of future intensity normalizations
-
-    label_mask : array
-        labels of the required region of interests(roi's)
-
-    num_bufs : int, even
-        number of buffers(channels)
-
-    num_pixels : array
-        number of pixels in certain roi's
-        roi's, dimensions are : [number of roi's]X1
-
-    img_per_level : array
-        to track how many images processed in each level
-
-    level : int
-        the current multi-tau level
-
-    buf_no : int
-        the current buffer number
-
-    Notes
-    -----
-    :math ::
-        G   = <I(\tau)I(\tau + delay)>
-
-    :math ::
-        past_intensity_norm = <I(\tau)>
-
-    :math ::
-        future_intensity_norm = <I(\tau + delay)>
-
-    """
-    img_per_level[level] += 1
-
-    # in multi-tau correlation other than first level all other levels
-    #  have to do the half of the correlation
-    if level == 0:
-        i_min = 0
-    else:
-        i_min = num_bufs//2
-
-    for i in range(i_min, min(img_per_level[level], num_bufs)):
-        t_index = level*num_bufs/2 + i
-
-        delay_no = (buf_no - i) % num_bufs
-
-        past_img = buf[level, delay_no]
-        future_img = buf[level, buf_no]
-
-        #  get the matrix of auto-correlation function without normalizations
-        tmp_binned = (np.bincount(label_mask,
-                                  weights=past_img*future_img)[1:])
-        G[t_index] += ((tmp_binned / num_pixels - G[t_index]) /
-                       (img_per_level[level] - i))
-
-        # get the matrix of past intensity normalizations
-        pi_binned = (np.bincount(label_mask,
-                                 weights=past_img)[1:])
-        past_intensity_norm[t_index] += ((pi_binned/num_pixels
-                                         - past_intensity_norm[t_index]) /
-                                         (img_per_level[level] - i))
-
-        # get the matrix of future intensity normalizations
-        fi_binned = (np.bincount(label_mask,
-                                 weights=future_img)[1:])
-        future_intensity_norm[t_index] += ((fi_binned/num_pixels
-                                           - future_intensity_norm[t_index]) /
-                                           (img_per_level[level] - i))
-
-    return None  # modifies arguments in place!
 
 
 def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
