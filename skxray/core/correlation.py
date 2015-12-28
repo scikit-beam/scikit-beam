@@ -174,9 +174,9 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     # to track how many images processed in each level
     img_per_level = np.zeros(num_levels, dtype=np.int64)
 
-    start_time = time.time()  # used to log the computation time (optionally)
+    start_time = time.time()  # log computation time to INFO
 
-    for n, img in enumerate(images):
+    for img in images:
 
         cur[0] = (1 + cur[0]) % num_bufs  # increment buffer
 
@@ -230,7 +230,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     end_time = time.time()
 
     logger.info("Processing time for {0} images took {1} seconds."
-                "".format(n, (end_time - start_time)))
+                "".format(len(images), (end_time - start_time)))
 
     # the normalization factor
     if len(np.where(past_intensity_norm == 0)[0]) != 0:
