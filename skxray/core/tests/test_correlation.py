@@ -60,7 +60,7 @@ def test_correlation():
 
     indices = roi.rectangles(roi_data, img_dim)
 
-    img_stack = np.random.randint(1, 5, size=(500, ) + img_dim)
+    img_stack = np.random.randint(1, 5, size=(64, ) + img_dim)
 
     g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, indices,
                                              img_stack)
