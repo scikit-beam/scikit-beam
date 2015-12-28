@@ -23,7 +23,7 @@ def c_ext():
 
 
 def cython_ext():
-    return [cythonize("**/*.pyx")]
+    return cythonize("**/*.pyx")
 #
 # def cython_ext():
 #     """Walk through the directory tree and find cython files to compile
