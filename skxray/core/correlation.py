@@ -115,25 +115,11 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
         past_img = buf[level, delay_no]
         future_img = buf[level, buf_no]
 
-        #  get the matrix of auto-correlation function without normalizations
-        tmp_binned = (np.bincount(label_mask,
-                                  weights=past_img*future_img)[1:])
-        G[t_index] += ((tmp_binned / num_pixels - G[t_index]) /
-                       (img_per_level[level] - i))
-
-        # get the matrix of past intensity normalizations
-        pi_binned = (np.bincount(label_mask,
-                                 weights=past_img)[1:])
-        past_intensity_norm[t_index] += ((pi_binned/num_pixels
-                                         - past_intensity_norm[t_index]) /
-                                         (img_per_level[level] - i))
-
-        # get the matrix of future intensity normalizations
-        fi_binned = (np.bincount(label_mask,
-                                 weights=future_img)[1:])
-        future_intensity_norm[t_index] += ((fi_binned/num_pixels
-                                           - future_intensity_norm[t_index]) /
-                                           (img_per_level[level] - i))
+        for w, arr in zip([past_img*future_img, past_img, future_img],
+                          [G, past_intensity_norm, future_intensity_norm]):
+            binned = np.bincount(label_mask, weights=w)[1:]
+            arr[t_index] += ((binned / num_pixels - arr[t_index]) /
+                             (img_per_level[level] - i))
 
     return None  # modifies arguments in place!
 
