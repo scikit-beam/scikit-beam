@@ -155,12 +155,10 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
                  dtype=np.float64)
 
     # matrix of past intensity normalizations
-    past_intensity_norm = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
-                                   dtype=np.float64)
+    past_intensity_norm = np.zeros_like(G)
 
     # matrix of future intensity normalizations
-    future_intensity_norm = np.zeros(((num_levels + 1)*num_bufs/2, num_rois),
-                                     dtype=np.float64)
+    future_intensity_norm = np.zeros_like(G)
 
     # Ring buffer, a buffer with periodic boundary conditions.
     # Images must be keep for up to maximum delay in buf.
