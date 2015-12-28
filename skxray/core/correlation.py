@@ -180,8 +180,8 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
 
         cur[0] = (1 + cur[0]) % num_bufs  # increment buffer
 
-        # Put the image into the ring buffer.
-        buf[0, cur[0] - 1] = (np.ravel(img))[pixel_list]
+        # Put the ROI pixels into the ring buffer.
+        buf[0, cur[0] - 1] = np.ravel(img)[pixel_list]
 
         # Compute the correlations between the first level
         # (undownsampled) frames. This modifies G,
