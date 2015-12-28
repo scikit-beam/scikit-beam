@@ -58,43 +58,34 @@ logger = logging.getLogger(__name__)
 
 def _process(buf, G, past_intensity_norm, future_intensity_norm,
              label_mask, num_bufs, num_pixels, img_per_level, level, buf_no):
-    """
-    Internal helper function. This modifies inputs in place.
+    """Internal helper function.
 
     This helper function calculates G, past_intensity_norm and
     future_intensity_norm at each level, symmetric normalization is used.
+
+    .. warning :: This modifies inputs in place.
 
     Parameters
     ----------
     buf : array
         image data array to use for correlation
-
     G : array
-        matrix of auto-correlation function without
-        normalizations
-
+        matrix of auto-correlation function without normalizations
     past_intensity_norm : array
         matrix of past intensity normalizations
-
     future_intensity_norm : array
         matrix of future intensity normalizations
-
     label_mask : array
-        labels of the required region of interests(roi's)
-
+        labeled array where all nonzero values are ROIs
     num_bufs : int, even
         number of buffers(channels)
-
     num_pixels : array
         number of pixels in certain roi's
         roi's, dimensions are : [number of roi's]X1
-
     img_per_level : array
         to track how many images processed in each level
-
     level : int
         the current multi-tau level
-
     buf_no : int
         the current buffer number
 
@@ -102,13 +93,10 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
     -----
     :math ::
         G   = <I(\tau)I(\tau + delay)>
-
     :math ::
         past_intensity_norm = <I(\tau)>
-
     :math ::
         future_intensity_norm = <I(\tau + delay)>
-
     """
     img_per_level[level] += 1
 
