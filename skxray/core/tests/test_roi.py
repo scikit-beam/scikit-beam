@@ -37,7 +37,7 @@ import logging
 
 import numpy as np
 from skxray.core import roi
-from skxray import utils
+from skxray.core import utils
 import itertools
 from skimage import morphology
 
