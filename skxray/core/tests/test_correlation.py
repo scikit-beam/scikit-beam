@@ -36,7 +36,7 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 import numpy as np
-from numpy.testing import (assert_array_almost_equal,
+from numpy.testing import (assert_array_almost_equal, assert_array_equal
                            assert_almost_equal)
 from nose.tools import assert_raises
 
@@ -67,7 +67,7 @@ def test_correlation():
     g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, indices,
                                              img_stack)
 
-    assert_array_almost_equal(lag_steps,  np.array([0, 1, 2, 3, 4, 5, 6, 7, 8,
+    assert_array_equal(lag_steps,  np.array([0, 1, 2, 3, 4, 5, 6, 7, 8,
                                                    10, 12, 14, 16, 20, 24, 28,
                                                    32, 40, 48, 56]))
 
