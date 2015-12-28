@@ -123,3 +123,7 @@ def test_auto_corr_scat_factor():
 
     assert_array_almost_equal(g2, np.array([1.5, 1.0, 1.0, 1.0, 1.0,
                                             1.0, 1.0, 1.0]), decimal=8)
+
+if __name__ == '__main__':
+    import nose
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
