@@ -49,6 +49,31 @@ import skxray.core.utils as utils
 logger = logging.getLogger(__name__)
 
 
+class FakeStack:
+    """Fake up a big pile of images that are identical
+    """
+    def __init__(self, ref_img, maxlen):
+        """
+
+        Parameters
+        ----------
+        ref_img : array
+            The reference image that will be returned `maxlen` times
+        maxlen : int
+            The maximum number of images to fake up
+        """
+        self.img = ref_img
+        self.maxlen = maxlen
+
+    def __len__(self):
+        return self.maxlen
+
+    def __getitem__(self, item):
+        if item > len(self):
+            raise IndexError
+        return self.img
+
+
 # It is unclear why this test is so slow. Can we speed this up at all?
 def test_correlation():
     num_levels = 4
@@ -74,20 +99,18 @@ def test_correlation():
 
 
 def test_image_stack_correlation():
-    num_levels = 1
-    num_bufs = 2  # must be even
-    coins = data.camera()
-    coins_stack = []
+    num_levels = 4
+    num_bufs = 4  # must be even
+    xdim = 256
+    ydim = 512
+    img_stack = FakeStack(ref_img=np.ones((xdim, ydim), dtype=int), maxlen=20)
 
-    for i in range(4):
-        coins_stack.append(coins)
+    rois = np.zeros_like(img_stack[0])
+    rois[0:xdim//10, 0:ydim//10] = 1
+    rois[xdim//10:xdim//5, ydim//10:ydim//5] = 2
 
-    coins_mesh = np.zeros_like(coins)
-    coins_mesh[coins < 30] = 1
-    coins_mesh[coins > 50] = 2
-
-    g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, coins_mesh,
-                                             coins_stack)
+    g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, rois,
+                                             img_stack)
 
     assert np.all(g2[:, 0], axis=0)
     assert np.all(g2[:, 1], axis=0)
@@ -95,19 +118,16 @@ def test_image_stack_correlation():
     num_buf = 5
 
     # check the number of buffers are even
-    assert_raises(ValueError,
-                  lambda: corr.multi_tau_auto_corr(num_levels, num_buf,
-                                                   coins_mesh, coins_stack))
+    assert_raises(ValueError, corr.multi_tau_auto_corr, num_levels, num_buf,
+                  rois, img_stack)
     # check image shape and labels shape are equal
-    #assert_raises(ValueError,
-    #            lambda : corr.multi_tau_auto_corr(num_levels, num_bufs,
-    #                                                indices, coins_stack))
+    assert_raises(ValueError, corr.multi_tau_auto_corr, num_levels, num_bufs,
+                  rois, img_stack)
 
     # check the number of pixels is zero
-    mesh = np.zeros_like(coins)
-    assert_raises(ValueError,
-                  lambda: corr.multi_tau_auto_corr(num_levels, num_bufs,
-                                                   mesh, coins_stack))
+    rois = np.zeros_like(img_stack[0])
+    assert_raises(ValueError, corr.multi_tau_auto_corr, num_levels, num_bufs,
+                  rois, img_stack)
 
 
 def test_auto_corr_scat_factor():

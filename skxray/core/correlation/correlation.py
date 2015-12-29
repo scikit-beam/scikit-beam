@@ -50,8 +50,9 @@ import time
 
 import numpy as np
 
-from . import utils as core
-from . import roi
+from .. import utils as core
+from .. import roi
+import pdb
 
 logger = logging.getLogger(__name__)
 
@@ -111,12 +112,12 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
         # get the images for correlating
         past_img = buf[level, delay_no]
         future_img = buf[level, buf_no]
-
         for w, arr in zip([past_img*future_img, past_img, future_img],
                           [G, past_intensity_norm, future_intensity_norm]):
             binned = np.bincount(label_mask, weights=w)[1:]
             arr[t_index] += ((binned / num_pixels - arr[t_index]) /
                              (img_per_level[level] - i))
+            pdb.set_trace()
 
     return None  # modifies arguments in place!
 
@@ -134,19 +135,26 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
     Parameters
     ----------
     num_levels : int
-        how many generations of downsampling to perform, i.e.,
-        the depth of the binomial tree of averaged frames
+        how many generations of downsampling to perform, i.e., the depth of
+        the binomial tree of averaged frames
 
     num_bufs : int, must be even
-        maximum lag step to compute in each generation of
-        downsampling
+        maximum lag step to compute in each generation of downsampling
 
     labels : array
-        labeled array of the same shape as the image stack;
-        each ROI is represented by a distinct label (i.e., integer)
+        Labeled array of the same shape as the image stack.
+        Each ROI is represented by sequential integers starting at one.  For
+        example, if you have four ROIs, they must be labeled 1, 2, 3,
+        4. Background is labeled as 0
 
     images : iterable of 2D arrays
         dimensions are: (rr, cc)
+
+    processing_func : function
+        The function used in the inner loop of multi_tau_auto_corr.
+        Defaults to the reference python implementation (note that it is
+        optimized for clarity, not speed) in
+        skxray.core.correlation.correlation:_process
 
     Returns
     -------
@@ -192,8 +200,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
     # needless copying, of cyclic storage of images in buf is used.
 
     if num_bufs % 2 != 0:
-        raise ValueError("number of channels(number of buffers) in "
-                         "multiple-taus (must be even)")
+        raise ValueError("num_bufs must be even. You provided %s" % num_bufs)
 
     if hasattr(images, 'frame_shape'):
         # Give a user-friendly error if we can detect the shape from pims.
@@ -207,9 +214,11 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
     num_rois = np.max(label_mask)
 
     # number of pixels per ROI
-    num_pixels = np.bincount(label_mask, minlength=(num_rois + 1))
+    # Problem: This logic means that the ROIs **must** be integers that start
+    # with 1 and are sequential.
+    num_pixels = np.bincount(label_mask)
     num_pixels = num_pixels[1:]
-
+    # pdb.set_trace()
     if np.any(num_pixels == 0):
         raise ValueError("Number of pixels of the required roi's"
                          " cannot be zero, "
@@ -368,3 +377,5 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
 
     """
     return beta * np.exp(-2 * relaxation_rate * lags) + baseline
+
+
