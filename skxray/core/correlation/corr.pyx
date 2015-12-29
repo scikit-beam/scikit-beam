@@ -51,10 +51,13 @@ cdef _process(np.ndarray[double, ndim=3] buf,
     img_per_level[level] += 1
     # in multi-tau correlation, the subsequent levels have half as many
     # buffers as the first
-    cdef int i_min = num_bufs // 2 if level else 0
-    cdef int t_index
-    cdef int delay_no
-    cdef int i
+    cdef long i_min = 0
+    if level:
+        i_min = num_bufs // 2
+    # cdef long i_min = num_bufs / 2 if level else 0
+    cdef long t_index
+    cdef long delay_no
+    cdef long i
     cdef np.ndarray past_img, future_img, corr
     # cdef np.float_t [:,:,:] data = buf
 
@@ -67,11 +70,20 @@ cdef _process(np.ndarray[double, ndim=3] buf,
         past_img = buf[level][delay_no]
         future_img = buf[level][buf_no]
         corr = past_img * future_img
-        for w, arr in zip([corr, past_img, future_img],
-                          [G, past_intensity_norm, future_intensity_norm]):
-            binned = np.bincount(label_mask, weights=w)
-            arr[t_index] += ((binned / num_pixels - arr[t_index]) /
-                             (img_per_level[level] - i))
+
+        binned = np.bincount(label_mask, weights=corr)
+        G[t_index] += ((binned / num_pixels - G[t_index]) /
+                         (img_per_level[level] - i))
+
+        binned = np.bincount(label_mask, weights=past_img)
+        past_intensity_norm[t_index] += (
+            (binned / num_pixels - past_intensity_norm[t_index]) /
+            (img_per_level[level] - i))
+
+        binned = np.bincount(label_mask, weights=future_img)
+        future_intensity_norm[t_index] += (
+            (binned / num_pixels - future_intensity_norm[t_index]) /
+            (img_per_level[level] - i))
 
     return None  # modifies arguments in place!
 
