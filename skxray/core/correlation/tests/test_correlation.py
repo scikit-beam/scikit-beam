@@ -120,9 +120,6 @@ def test_image_stack_correlation():
     # check the number of buffers are even
     assert_raises(ValueError, corr.multi_tau_auto_corr, num_levels, num_buf,
                   rois, img_stack)
-    # check image shape and labels shape are equal
-    assert_raises(ValueError, corr.multi_tau_auto_corr, num_levels, num_bufs,
-                  rois, img_stack)
 
     # check the number of pixels is zero
     rois = np.zeros_like(img_stack[0])
