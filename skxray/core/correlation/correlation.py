@@ -115,6 +115,7 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
         for w, arr in zip([past_img*future_img, past_img, future_img],
                           [G, past_intensity_norm, future_intensity_norm]):
             binned = np.bincount(label_mask, weights=w)[1:]
+            # pdb.set_trace()
             arr[t_index] += ((binned / num_pixels - arr[t_index]) /
                              (img_per_level[level] - i))
 
@@ -213,15 +214,14 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
     num_rois = np.max(label_mask)
 
     # number of pixels per ROI
-    # Problem: This logic means that the ROIs **must** be integers that start
-    # with 1 and are sequential.
+    # TODO: Verify that this logic is ok.  It means that the ROIs **must** be
+    # integers that start with 1 and are sequential. Best option is to map the
+    # indices onto a sequential list of integers
+    labels = np.unique(label_mask)
+    for n, label in enumerate(labels):
+        label_mask[label_mask == label] = n
     num_pixels = np.bincount(label_mask)
-    num_pixels = num_pixels[1:]
     # pdb.set_trace()
-    if np.any(num_pixels == 0):
-        raise ValueError("Number of pixels of the required roi's"
-                         " cannot be zero, "
-                         "num_pixels = {0}".format(num_pixels))
 
     # G holds the un normalized auto-correlation result. We
     # accumulate computations into G as the algorithm proceeds.
