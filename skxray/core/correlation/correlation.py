@@ -211,17 +211,18 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
     # get the pixels in each label
     label_mask, pixel_list = roi.extract_label_indices(labels)
 
-    num_rois = np.max(label_mask)
-
     # number of pixels per ROI
     # TODO: Verify that this logic is ok.  It means that the ROIs **must** be
     # integers that start with 1 and are sequential. Best option is to map the
-    # indices onto a sequential list of integers
+    # indices onto a sequential list of integers starting at 1
     labels = np.unique(label_mask)
     for n, label in enumerate(labels):
-        label_mask[label_mask == label] = n
+        label_mask[label_mask == label] = n+1
     num_pixels = np.bincount(label_mask)
+    num_pixels = num_pixels[1:]
     # pdb.set_trace()
+
+    num_rois = len(labels)
 
     # G holds the un normalized auto-correlation result. We
     # accumulate computations into G as the algorithm proceeds.

@@ -103,11 +103,13 @@ def test_image_stack_correlation():
     num_bufs = 4  # must be even
     xdim = 256
     ydim = 512
-    img_stack = FakeStack(ref_img=np.ones((xdim, ydim), dtype=int), maxlen=20)
+    img_stack = FakeStack(ref_img=np.zeros((xdim, ydim), dtype=int), maxlen=20)
 
     rois = np.zeros_like(img_stack[0])
-    rois[0:xdim//10, 0:ydim//10] = 1
-    rois[xdim//10:xdim//5, ydim//10:ydim//5] = 2
+    # make sure that the ROIs can be any integers greater than 1. They do not
+    # have to start at 1 and be continuous
+    rois[0:xdim//10, 0:ydim//10] = 5
+    rois[xdim//10:xdim//5, ydim//10:ydim//5] = 3
 
     g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, rois,
                                              img_stack)
@@ -115,16 +117,16 @@ def test_image_stack_correlation():
     assert np.all(g2[:, 0], axis=0)
     assert np.all(g2[:, 1], axis=0)
 
+    # Make sure that an odd number of buffers raises a Value Error
     num_buf = 5
-
-    # check the number of buffers are even
     assert_raises(ValueError, corr.multi_tau_auto_corr, num_levels, num_buf,
                   rois, img_stack)
 
-    # check the number of pixels is zero
+    # If there are no ROIs, g2 should be an empty array
     rois = np.zeros_like(img_stack[0])
-    assert_raises(ValueError, corr.multi_tau_auto_corr, num_levels, num_bufs,
-                  rois, img_stack)
+    g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, rois,
+                                             img_stack)
+    assert np.all(g2 == [])
 
 
 def test_auto_corr_scat_factor():
