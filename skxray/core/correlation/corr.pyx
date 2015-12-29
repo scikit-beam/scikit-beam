@@ -1,7 +1,12 @@
-
+from __future__ import division
 import numpy as np
+cimport cython
 cimport numpy as np
+cdef inline int int_max(int a, int b): return a if a >= b else b
+cdef inline int int_min(int a, int b): return a if a <= b else b
 
+
+@cython.boundscheck(False)
 cdef _process(np.ndarray[double, ndim=3] buf,
               np.ndarray[double, ndim=2] G,
               np.ndarray[double, ndim=2] past_intensity_norm,
@@ -46,19 +51,25 @@ cdef _process(np.ndarray[double, ndim=3] buf,
     img_per_level[level] += 1
     # in multi-tau correlation, the subsequent levels have half as many
     # buffers as the first
-    i_min = num_bufs // 2 if level else 0
+    cdef int i_min = num_bufs // 2 if level else 0
+    cdef int t_index
+    cdef int delay_no
+    cdef int i
+    cdef np.ndarray past_img, future_img, corr
+    # cdef np.float_t [:,:,:] data = buf
 
-    for i in range(i_min, min(img_per_level[level], num_bufs)):
+    for i in range(i_min, int_min(img_per_level[level], num_bufs)):
         # compute the index into the autocorrelation matrix
-        t_index = level * num_bufs / 2 + i
+        t_index = level * num_bufs // 2 + i
 
         delay_no = (buf_no - i) % num_bufs
         # get the images for correlating
-        past_img = buf[level, delay_no]
-        future_img = buf[level, buf_no]
-        for w, arr in zip([past_img*future_img, past_img, future_img],
+        past_img = buf[level][delay_no]
+        future_img = buf[level][buf_no]
+        corr = past_img * future_img
+        for w, arr in zip([corr, past_img, future_img],
                           [G, past_intensity_norm, future_intensity_norm]):
-            binned = np.bincount(label_mask, weights=w)[1:]
+            binned = np.bincount(label_mask, weights=w)
             arr[t_index] += ((binned / num_pixels - arr[t_index]) /
                              (img_per_level[level] - i))
 

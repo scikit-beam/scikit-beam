@@ -115,7 +115,7 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
         future_img = buf[level, buf_no]
         for w, arr in zip([past_img*future_img, past_img, future_img],
                           [G, past_intensity_norm, future_intensity_norm]):
-            binned = np.bincount(label_mask, weights=w)[1:]
+            binned = np.bincount(label_mask, weights=w)
             # pdb.set_trace()
             arr[t_index] += ((binned / num_pixels - arr[t_index]) /
                              (img_per_level[level] - i))
@@ -218,14 +218,14 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
     # indices onto a sequential list of integers starting at 1
     labels = np.unique(label_mask)
     for n, label in enumerate(labels):
-        label_mask[label_mask == label] = n+1
+        label_mask[label_mask == label] = n
     num_pixels = np.bincount(label_mask)
-    num_pixels = num_pixels[1:]
+    # num_pixels = num_pixels[1:]
     # pdb.set_trace()
 
     num_rois = len(labels)
 
-    # G holds the un normalized auto-correlation result. We
+    # G holds the un normalized auto- correlation result. We
     # accumulate computations into G as the algorithm proceeds.
     G = np.zeros(((num_levels + 1) * num_bufs / 2, num_rois),
                  dtype=np.float64)

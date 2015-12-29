@@ -39,12 +39,12 @@ import numpy as np
 from numpy.testing import (assert_array_almost_equal, assert_array_equal)
 from nose.tools import assert_raises
 
-from skimage import data
-
 import skxray.core.correlation as corr
 import skxray.core.roi as roi
 import skxray.core.utils as utils
-from skxray.core.correlation.corr import process_wrapper as cythonprocess
+from skxray.core.correlation.corr import process_wrapper as cyprocess
+from skxray.core.correlation.correlation import _process as pyprocess
+import itertools
 
 logger = logging.getLogger(__name__)
 
@@ -74,9 +74,15 @@ class FakeStack:
         return self.img
 
 
+def test_multi_tau():
+    for proc, func in itertools.product(
+            [pyprocess, cyprocess],
+            [_correlation, _image_stack_correlation]):
+        yield func, proc
+
 
 # It is unclear why this test is so slow. Can we speed this up at all?
-def test_correlation():
+def _correlation(processing_func):
     num_levels = 4
     num_bufs = 8  # must be even
     img_dim = (50, 50)  # detector size
@@ -90,7 +96,7 @@ def test_correlation():
 
     g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, indices,
                                              img_stack,
-                                             processing_func=cythonprocess)
+                                             processing_func=processing_func)
 
     assert_array_equal(lag_steps,  np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 10,
                                              12, 14, 16, 20, 24, 28, 32, 40,
@@ -100,7 +106,7 @@ def test_correlation():
     assert_array_almost_equal(g2[1:, 1], 1.00, decimal=2)
 
 
-def test_image_stack_correlation():
+def _image_stack_correlation(processing_func):
     num_levels = 4
     num_bufs = 4  # must be even
     xdim = 256
@@ -115,7 +121,7 @@ def test_image_stack_correlation():
 
     g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, rois,
                                              img_stack,
-                                             processing_func=cythonprocess)
+                                             processing_func=processing_func)
 
     assert np.all(g2[:, 0], axis=0)
     assert np.all(g2[:, 1], axis=0)
@@ -123,13 +129,13 @@ def test_image_stack_correlation():
     # Make sure that an odd number of buffers raises a Value Error
     num_buf = 5
     assert_raises(ValueError, corr.multi_tau_auto_corr, num_levels, num_buf,
-                  rois, img_stack, processing_func=cythonprocess)
+                  rois, img_stack, processing_func=processing_func)
 
     # If there are no ROIs, g2 should be an empty array
     rois = np.zeros_like(img_stack[0])
     g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, rois,
                                              img_stack,
-                                             processing_func=cythonprocess)
+                                             processing_func=processing_func)
     assert np.all(g2 == [])
 
 
