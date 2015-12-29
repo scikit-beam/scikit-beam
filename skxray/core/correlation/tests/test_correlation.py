@@ -44,7 +44,7 @@ from skimage import data
 import skxray.core.correlation as corr
 import skxray.core.roi as roi
 import skxray.core.utils as utils
-
+from skxray.core.correlation.corr import process_wrapper as cythonprocess
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +74,7 @@ class FakeStack:
         return self.img
 
 
+
 # It is unclear why this test is so slow. Can we speed this up at all?
 def test_correlation():
     num_levels = 4
@@ -88,7 +89,8 @@ def test_correlation():
     img_stack = np.random.randint(1, 5, size=(64, ) + img_dim)
 
     g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, indices,
-                                             img_stack)
+                                             img_stack,
+                                             processing_func=cythonprocess)
 
     assert_array_equal(lag_steps,  np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 10,
                                              12, 14, 16, 20, 24, 28, 32, 40,
@@ -112,7 +114,8 @@ def test_image_stack_correlation():
     rois[xdim//10:xdim//5, ydim//10:ydim//5] = 3
 
     g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, rois,
-                                             img_stack)
+                                             img_stack,
+                                             processing_func=cythonprocess)
 
     assert np.all(g2[:, 0], axis=0)
     assert np.all(g2[:, 1], axis=0)
@@ -120,12 +123,13 @@ def test_image_stack_correlation():
     # Make sure that an odd number of buffers raises a Value Error
     num_buf = 5
     assert_raises(ValueError, corr.multi_tau_auto_corr, num_levels, num_buf,
-                  rois, img_stack)
+                  rois, img_stack, processing_func=cythonprocess)
 
     # If there are no ROIs, g2 should be an empty array
     rois = np.zeros_like(img_stack[0])
     g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, rois,
-                                             img_stack)
+                                             img_stack,
+                                             processing_func=cythonprocess)
     assert np.all(g2 == [])
 
 

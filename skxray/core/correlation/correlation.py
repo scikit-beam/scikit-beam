@@ -53,6 +53,7 @@ import numpy as np
 from .. import utils as core
 from .. import roi
 import pdb
+from .corr import process_wrapper
 
 logger = logging.getLogger(__name__)
 
@@ -265,7 +266,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
         processing_func(buf, G, past_intensity_norm,
                         future_intensity_norm, label_mask,
                         num_bufs, num_pixels, img_per_level,
-                        level=0, buf_no=cur[0] - 1)
+                        0, buf_no=cur[0] - 1)
 
         # check whether the number of levels is one, otherwise
         # continue processing the next level
@@ -295,7 +296,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
                 processing_func(buf, G, past_intensity_norm,
                                 future_intensity_norm, label_mask,
                                 num_bufs, num_pixels, img_per_level,
-                                level=level, buf_no=cur[level] - 1, )
+                                level, buf_no=cur[level] - 1, )
                 level += 1
 
                 # Checking whether there is next level for processing
