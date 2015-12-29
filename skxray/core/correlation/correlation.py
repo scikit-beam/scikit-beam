@@ -117,7 +117,6 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
             binned = np.bincount(label_mask, weights=w)[1:]
             arr[t_index] += ((binned / num_pixels - arr[t_index]) /
                              (img_per_level[level] - i))
-            pdb.set_trace()
 
     return None  # modifies arguments in place!
 

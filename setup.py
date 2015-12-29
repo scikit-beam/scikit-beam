@@ -24,7 +24,7 @@ def c_ext():
 
 def cython_ext():
     return cythonize("**/*.pyx")
-#
+
 
 setup(
     name='scikit-xray',
