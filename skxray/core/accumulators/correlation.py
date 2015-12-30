@@ -28,6 +28,7 @@ class MultiTauCorrelation:
         self._level = 0
         self._processed = -1
         self._processing = False
+        self._prev = None
         self._processing_func = pyprocess
         self._new_levels_bufs_or_labels(num_levels, num_bufs, labels)
 
@@ -153,6 +154,7 @@ class MultiTauCorrelation:
         self._processing = self._num_levels > 1
 
         self._level = 1
+        self._prev = None
         while self._processing:
             if not self._track_level[self._level]:
                 self._track_level[self._level] = True

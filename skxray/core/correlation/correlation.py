@@ -279,6 +279,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
 
         # Compute the correlations for all higher levels.
         level = 1
+        prev = None
         while processing:
             if not track_level[level]:
                 track_level[level] = True
