@@ -119,7 +119,6 @@ def _process(buf, G, past_intensity_norm, future_intensity_norm,
             # pdb.set_trace()
             arr[t_index] += ((binned / num_pixels - arr[t_index]) /
                              (img_per_level[level] - i))
-
     return None  # modifies arguments in place!
 
 
@@ -223,11 +222,9 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
     # num_pixels = num_pixels[1:]
     # pdb.set_trace()
 
-    num_rois = len(labels)
-
     # G holds the un normalized auto- correlation result. We
     # accumulate computations into G as the algorithm proceeds.
-    G = np.zeros(((num_levels + 1) * num_bufs / 2, num_rois),
+    G = np.zeros(((num_levels + 1) * num_bufs / 2, len(labels)),
                  dtype=np.float64)
 
     # matrix of past intensity normalizations
@@ -263,10 +260,11 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
         # (undownsampled) frames. This modifies G,
         # past_intensity_norm, future_intensity_norm,
         # and img_per_level in place!
+        buf_no = cur[0] - 1
         processing_func(buf, G, past_intensity_norm,
                         future_intensity_norm, label_mask,
                         num_bufs, num_pixels, img_per_level,
-                        0, buf_no=cur[0] - 1)
+                        0, buf_no=buf_no)
 
         # check whether the number of levels is one, otherwise
         # continue processing the next level
@@ -293,10 +291,11 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
                 # call processing_func for each multi-tau level greater
                 # than one. This is modifying things in place. See comment
                 # on previous call above.
+                buf_no = cur[level] - 1
                 processing_func(buf, G, past_intensity_norm,
                                 future_intensity_norm, label_mask,
                                 num_bufs, num_pixels, img_per_level,
-                                level, buf_no=cur[level] - 1, )
+                                level, buf_no=buf_no)
                 level += 1
 
                 # Checking whether there is next level for processing
@@ -322,7 +321,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
     tot_channels, lag_steps = core.multi_tau_lags(num_levels, num_bufs)
     lag_steps = lag_steps[:g_max]
 
-    return g2, lag_steps
+    return g2, lag_steps, G, buf, past_intensity_norm, future_intensity_norm
 
 
 def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
