@@ -8,11 +8,11 @@ pd.set_option('display.expand_frame_repr', False)
 
 
 def test_against_reference_implementation():
-    num_levels = 4
+    num_levels = 6
     num_bufs = 4  # must be even
     xdim = 256
     ydim = 512
-    stack_size = 20
+    stack_size = 100
     # img_stack = np.zeros((stack_size, xdim, ydim), dtype=int)
     img_stack = np.random.randint(1, 10, ((stack_size, xdim, ydim)))
     rois = np.zeros_like(img_stack[0])
