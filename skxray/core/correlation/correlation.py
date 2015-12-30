@@ -62,7 +62,7 @@ intermediate_data = namedtuple(
     'intermediate_data',
     ['image_num', 'max_images', 'G', 'buf', 'past_intensity_norm',
      'future_intensity_norm', 'label_mask', 'num_bufs', 'num_pixels',
-     'img_per_level', 'level', 'buf_no'])
+     'img_per_level', 'level', 'buf_no', 'prev', 'cur', 'track_level'])
 
 
 def _process(buf, G, past_intensity_norm, future_intensity_norm,
