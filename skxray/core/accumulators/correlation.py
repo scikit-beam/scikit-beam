@@ -122,12 +122,13 @@ class MultiTauCorrelation:
         # reset all boolean values
         self._processing = False
 
-    def get_current_state(self):
+    @property
+    def intermediate_data(self):
         return intermediate_data(
             self._processed, -1, self._G, self._buf, self._past_intensity,
             self._future_intensity, self._label_mask, self._num_bufs,
             self._num_pixels, self._img_per_level, self._level, self._buf_no,
-            self._prev, self._cur, self._track_level
+            self._prev, self._cur, self._track_level, self.g2, self.lag_steps
         )
 
     def process(self, img):

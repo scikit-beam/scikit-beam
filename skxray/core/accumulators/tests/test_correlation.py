@@ -29,7 +29,7 @@ def test_against_reference_implementation():
     res2 = []
     for img in img_stack:
         mt.process(img)
-        res2.append(mt.get_current_state())
+        res2.append(mt.intermediate_data)
 
     equal = []
     for accum, full in zip(res2, res):
