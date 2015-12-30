@@ -45,3 +45,14 @@ def test_against_reference_implementation():
     # compare the results
     assert np.all(mt.g2 == g2)
     assert np.all(mt.lag_steps == lag_steps)
+
+    # reset the partial data correlator and check the results again
+    mt.reset()
+    for img in img_stack:
+        mt.process(img)
+
+    # compare the results
+    assert np.all(mt.g2 == g2)
+    assert np.all(mt.lag_steps == lag_steps)
+
+    raise
