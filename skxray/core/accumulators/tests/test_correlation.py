@@ -54,5 +54,3 @@ def test_against_reference_implementation():
     # compare the results
     assert np.all(mt.g2 == g2)
     assert np.all(mt.lag_steps == lag_steps)
-
-    raise
