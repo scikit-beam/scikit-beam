@@ -229,6 +229,11 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
     # num_pixels = num_pixels[1:]
     # pdb.set_trace()
 
+    try:
+        num_images = len(images)
+    except TypeError:
+        num_images = -1
+
     # G holds the un normalized auto- correlation result. We
     # accumulate computations into G as the algorithm proceeds.
     G = np.zeros(((num_levels + 1) * num_bufs / 2, len(labels)),
@@ -309,15 +314,15 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
                 # Checking whether there is next level for processing
                 processing = level < num_levels
         yield intermediate_data(
-            img_num, len(images), G, buf, past_intensity_norm,
+            img_num, num_images, G, buf, past_intensity_norm,
             future_intensity_norm, label_mask, num_bufs, num_pixels,
-            img_per_level, level, buf_no)
+            img_per_level, level, buf_no, prev, cur, track_level)
 
     # ending time for the process
     end_time = time.time()
 
     logger.info("Processing time for {0} images took {1} seconds."
-                "".format(len(images), (end_time - start_time)))
+                "".format(img_num, (end_time - start_time)))
 
     # the normalization factor
     if len(np.where(past_intensity_norm == 0)[0]) != 0:
