@@ -77,10 +77,10 @@ class MultiTauCorrelation:
                            len(self._label_mapping)), dtype=np.float64)
 
         # matrix of past intensity normalizations
-        self._past_intensity_norm = np.zeros_like(self._G)
+        self._past_intensity = np.zeros_like(self._G)
 
         # matrix of future intensity normalizations
-        self._future_intensity_norm = np.zeros_like(self._G)
+        self._future_intensity = np.zeros_like(self._G)
 
         # Ring buffer, a buffer with periodic boundary conditions.
         # Images must be keep for up to maximum delay in buf.
@@ -109,8 +109,8 @@ class MultiTauCorrelation:
         """Clear the internal state"""
         # zero out all the arrays
         self._G[:] = 0
-        self._past_intensity_norm[:] = 0
-        self._future_intensity_norm[:] = 0
+        self._past_intensity[:] = 0
+        self._future_intensity[:] = 0
         self._buf[:] = 0
         self._track_level[:] = 0
         self._cur[:] = 0
@@ -124,9 +124,10 @@ class MultiTauCorrelation:
 
     def get_current_state(self):
         return intermediate_data(
-            self._processed, -1, self._G, self._buf, self._past_intensity_norm,
-            self._future_intensity_norm, self._label_mask, self._num_bufs,
-            self._num_pixels, self._img_per_level, self._level, self._buf_no
+            self._processed, -1, self._G, self._buf, self._past_intensity,
+            self._future_intensity, self._label_mask, self._num_bufs,
+            self._num_pixels, self._img_per_level, self._level, self._buf_no,
+            self._prev, self._cur, self._track_level
         )
 
     def process(self, img):
@@ -144,8 +145,8 @@ class MultiTauCorrelation:
         # past_intensity_norm, future_intensity_norm,
         # and img_per_level in place!
         self._processing_func(
-            self._buf, self._G, self._past_intensity_norm,
-            self._future_intensity_norm, self._label_mask,
+            self._buf, self._G, self._past_intensity,
+            self._future_intensity, self._label_mask,
             self._num_bufs, self._num_pixels, self._img_per_level,
             self._level, buf_no=self._buf_no)
 
@@ -179,8 +180,8 @@ class MultiTauCorrelation:
                 # on previous call above.
                 self._buf_no = self._cur[self._level] - 1
                 self._processing_func(
-                        self._buf, self._G, self._past_intensity_norm,
-                        self._future_intensity_norm, self._label_mask,
+                        self._buf, self._G, self._past_intensity,
+                        self._future_intensity, self._label_mask,
                         self._num_bufs, self._num_pixels,
                         self._img_per_level, self._level,
                         buf_no=self._buf_no)
@@ -189,14 +190,16 @@ class MultiTauCorrelation:
                 # Checking whether there is next level for processing
                 self._processing = self._level < self._num_levels
 
-        # the normalization factor
-        if len(np.where(self._past_intensity_norm == 0)[0]) != 0:
-            self._g_max = np.where(self._past_intensity_norm == 0)[0][0]
+        # If any past intensities are zero, then g2 cannot be normalized at
+        # those levels. This if/else code block is basically preventing
+        # divide-by-zero errors.
+        if len(np.where(self._past_intensity == 0)[0]) != 0:
+            self._g_max = np.where(self._past_intensity == 0)[0][0]
         else:
-            self._g_max = self._past_intensity_norm.shape[0]
+            self._g_max = self._past_intensity.shape[0]
 
-        # g2 is normalized G
+        # Normalize g2 by the product of past_intensity and future_intensity
         self._g2 = (self._G[:self._g_max] /
-                    (self._past_intensity_norm[:self._g_max] *
-                     self._future_intensity_norm[:self._g_max]))
+                    (self._past_intensity[:self._g_max] *
+                     self._future_intensity[:self._g_max]))
         self._processed += 1
