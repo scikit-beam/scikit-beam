@@ -49,6 +49,7 @@ import logging
 import time
 
 import numpy as np
+from collections import namedtuple
 
 from .. import utils as core
 from .. import roi
@@ -56,6 +57,12 @@ import pdb
 from .corr import process_wrapper
 
 logger = logging.getLogger(__name__)
+
+intermediate_data = namedtuple(
+    'intermediate_data',
+    ['image_num', 'max_images', 'G', 'buf', 'past_intensity_norm',
+     'future_intensity_norm', 'label_mask', 'num_bufs', 'num_pixels',
+     'img_per_level', 'level', 'buf_no'])
 
 
 def _process(buf, G, past_intensity_norm, future_intensity_norm,
@@ -249,7 +256,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
 
     start_time = time.time()  # log computation time to INFO
 
-    for img in images:
+    for img_num, img in enumerate(images):
 
         cur[0] = (1 + cur[0]) % num_bufs  # increment buffer
 
@@ -300,6 +307,10 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
 
                 # Checking whether there is next level for processing
                 processing = level < num_levels
+        yield intermediate_data(
+            img_num, len(images), G, buf, past_intensity_norm,
+            future_intensity_norm, label_mask, num_bufs, num_pixels,
+            img_per_level, level, buf_no)
 
     # ending time for the process
     end_time = time.time()
@@ -321,7 +332,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
     tot_channels, lag_steps = core.multi_tau_lags(num_levels, num_bufs)
     lag_steps = lag_steps[:g_max]
 
-    return g2, lag_steps, G, buf, past_intensity_norm, future_intensity_norm
+    yield g2, lag_steps
 
 
 def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):

@@ -1,15 +1,8 @@
 from ..roi import extract_label_indices
 import numpy as np
 from collections import namedtuple
-from ..correlation.correlation import _process as pyprocess
+from ..correlation.correlation import _process as pyprocess, intermediate_data
 from ..utils import multi_tau_lags
-
-
-intermediate_data = namedtuple('multi_tau',
-                               ['G', 'past_intensity_norm',
-                                'future_intensity_norm', 'cur', 'buf',
-                                'level', 'buf_number', 'track_level',
-                                'img_per_level', 'g2', 'num_bufs', 'lag_steps'])
 
 
 class MultiTauCorrelation:
@@ -33,6 +26,7 @@ class MultiTauCorrelation:
         """
         self._g2 = None
         self._level = 0
+        self._processed = -1
         self._processing = False
         self._processing_func = pyprocess
         self._new_levels_bufs_or_labels(num_levels, num_bufs, labels)
@@ -123,20 +117,20 @@ class MultiTauCorrelation:
         # reset all scalar values
         self._buf_no = 0
         self._level = 0
+        self._processed = -1
         # reset all boolean values
         self._processing = False
 
     def get_current_state(self):
         return intermediate_data(
-                self._G, self._past_intensity_norm,
-                self._future_intensity_norm, self._cur, self._buf,
-                self._level, self._buf_no, self._track_level,
-                self._img_per_level, self._g2, self._num_bufs, self.lag_steps
+            self._processed, -1, self._G, self._buf, self._past_intensity_norm,
+            self._future_intensity_norm, self._label_mask, self._num_bufs,
+            self._num_pixels, self._img_per_level, self._level, self._buf_no
         )
 
     def process(self, img):
         # Compute the correlations for all higher levels.
-        self._level = 1
+        self._level = 0
 
         # increment buffer
         self._cur[0] = (1 + self._cur[0]) % self._num_bufs
@@ -158,6 +152,7 @@ class MultiTauCorrelation:
         # continue processing the next level
         self._processing = self._num_levels > 1
 
+        self._level = 1
         while self._processing:
             if not self._track_level[self._level]:
                 self._track_level[self._level] = True
@@ -202,3 +197,4 @@ class MultiTauCorrelation:
         self._g2 = (self._G[:self._g_max] /
                     (self._past_intensity_norm[:self._g_max] *
                      self._future_intensity_norm[:self._g_max]))
+        self._processed += 1

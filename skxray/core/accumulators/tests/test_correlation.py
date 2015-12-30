@@ -1,6 +1,10 @@
-from skxray.core.correlation import multi_tau_auto_corr
+from skxray.core.correlation.correlation import (multi_tau_auto_corr,
+                                                 intermediate_data)
 from skxray.core.accumulators.correlation import MultiTauCorrelation
 import numpy as np
+import pandas as pd
+# turn off auto wrapping of pandas dataframes
+pd.set_option('display.expand_frame_repr', False)
 
 
 def test_against_reference_implementation():
@@ -17,16 +21,27 @@ def test_against_reference_implementation():
     rois[0:xdim//10, 0:ydim//10] = 5
     rois[xdim//10:xdim//5, ydim//10:ydim//5] = 3
     # run the correlation with the reference implementation
-    ret = multi_tau_auto_corr(num_levels, num_bufs, rois, img_stack)
-    g2, lag_steps, G, buf, past_intensity_norm, future_intensity_norm = ret
+    gen = multi_tau_auto_corr(num_levels, num_bufs, rois, img_stack)
+    res = list(gen)
+    g2, lag_steps = res[-1]
     # run the correlation with the accumulator version
     mt = MultiTauCorrelation(num_levels, num_bufs, rois)
+    res2 = []
     for img in img_stack:
         mt.process(img)
+        res2.append(mt.get_current_state())
+
+    equal = []
+    for accum, full in zip(res2, res):
+        for accum_item, full_item in zip(accum, full):
+            equal.append(np.all(accum_item == full_item))
+
+    equal = [np.all(accum_item == full_item)
+             for accum, full in zip(res2, res)
+             for accum_item, full_item in zip(accum, full)]
+    df = pd.DataFrame(np.asarray(equal).reshape(len(res2), len(res2[0])),
+                      columns=intermediate_data._fields)
 
     # compare the results
     assert np.all(mt.g2 == g2)
     assert np.all(mt.lag_steps == lag_steps)
-    #TODO Figure out why mt._future_intensity_norm is different from
-    # future_intensity_norm
-    raise
