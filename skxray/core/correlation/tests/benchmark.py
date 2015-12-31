@@ -1,5 +1,5 @@
-from skxray.core.correlation.corr import process_wrapper as cyprocess
-from skxray.core.correlation.correlation import _process as pyprocess
+from skxray.core.correlation.cyprocess import cyprocess
+from skxray.core.correlation.pyprocess import pyprocess
 from skxray.core.correlation.tests.test_correlation import FakeStack
 from skxray.core.correlation import multi_tau_auto_corr
 from skxray.core import roi

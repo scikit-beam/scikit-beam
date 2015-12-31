@@ -34,8 +34,8 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 
 
-def pyproces(buf, G, past_intensity_norm, future_intensity_norm,
-             label_mask, num_bufs, num_pixels, img_per_level, level, buf_no):
+def pyprocess(buf, G, past_intensity_norm, future_intensity_norm,
+              label_mask, num_bufs, num_pixels, img_per_level, level, buf_no):
     """Internal helper function.
 
     This helper function calculates G, past_intensity_norm and

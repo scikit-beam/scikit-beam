@@ -37,7 +37,7 @@ from __future__ import absolute_import, division, print_function
 
 from skxray.core.utils import multi_tau_lags
 from skxray.core.roi import extract_label_indices
-from skxray.core.correlation.pyprocess import pyproces
+from skxray.core.correlation.pyprocess import pyprocess
 from collections import namedtuple
 import numpy as np
 
@@ -176,7 +176,7 @@ def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
     if _state is None:
         _state = InternalCorrelationState(num_levels, num_bufs, labels)
     if processing_func is None:
-        processing_func = pyproces
+        processing_func = pyprocess
     # create a shorthand reference to the results and state named tuple
     s = _state
     # stash the number of pixels in the mask

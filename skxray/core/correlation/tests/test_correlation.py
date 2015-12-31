@@ -43,7 +43,7 @@ import skxray.core.correlation as corr
 import skxray.core.roi as roi
 import skxray.core.utils as utils
 from skxray.core.correlation.cyprocess import cyprocess
-from skxray.core.correlation.pyprocess import pyproces
+from skxray.core.correlation.pyprocess import pyprocess
 import itertools
 
 logger = logging.getLogger(__name__)
@@ -77,7 +77,7 @@ class FakeStack:
 
 def test_multi_tau():
     for proc, func in itertools.product(
-            [pyproces, cyprocess],
+            [pyprocess, cyprocess],
             [_image_stack_correlation]):
         yield func, proc
 
