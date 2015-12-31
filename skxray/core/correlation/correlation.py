@@ -58,7 +58,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
                         processing_func=_process):
     """Wraps generator implementation of multi-tau
 
-    See skxray.core.accumulators.correlation.lazy_correlation
+    See docstring for skxray.core.accumulators.correlation.lazy_correlation
     """
     gen = lazy_multi_tau(images, num_levels, num_bufs, labels,
                          processing_func)

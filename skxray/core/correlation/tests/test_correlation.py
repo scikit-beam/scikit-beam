@@ -78,33 +78,8 @@ class FakeStack:
 def test_multi_tau():
     for proc, func in itertools.product(
             [pyprocess, cyprocess],
-            [_correlation, _image_stack_correlation]):
+            [_image_stack_correlation]):
         yield func, proc
-
-
-# It is unclear why this test is so slow. Can we speed this up at all?
-def _correlation(processing_func):
-    num_levels = 4
-    num_bufs = 8  # must be even
-    img_dim = (50, 50)  # detector size
-
-    roi_data = np.array(([10, 20, 12, 14], [40, 10, 9, 10]),
-                        dtype=np.int64)
-
-    indices = roi.rectangles(roi_data, img_dim)
-
-    img_stack = np.random.randint(1, 5, size=(64,) + img_dim)
-
-    g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, indices,
-                                             img_stack,
-                                             processing_func=processing_func)
-
-    assert_array_equal(lag_steps, np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 10,
-                                            12, 14, 16, 20, 24, 28, 32, 40,
-                                            48, 56]))
-
-    assert_array_almost_equal(g2[1:, 0], 1.00, decimal=2)
-    assert_array_almost_equal(g2[1:, 1], 1.00, decimal=2)
 
 
 def _image_stack_correlation(processing_func):
@@ -112,20 +87,18 @@ def _image_stack_correlation(processing_func):
     num_bufs = 4  # must be even
     xdim = 256
     ydim = 512
-    img_stack = FakeStack(ref_img=np.zeros((xdim, ydim), dtype=int), maxlen=20)
-
-    rois = np.zeros_like(img_stack[0])
+    stack_size = 100
+    img_stack = np.random.randint(1, 10, (stack_size, xdim, ydim))
+    rois = np.zeros((xdim, ydim), dtype=np.int)
     # make sure that the ROIs can be any integers greater than 1. They do not
     # have to start at 1 and be continuous
     rois[0:xdim // 10, 0:ydim // 10] = 5
     rois[xdim // 10:xdim // 5, ydim // 10:ydim // 5] = 3
 
-    g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, rois,
-                                             img_stack,
-                                             processing_func=processing_func)
+    g2, lag_steps = corr.multi_tau_auto_corr(
+        num_levels, num_bufs, rois, img_stack, processing_func=processing_func)
 
-    assert np.all(g2[:, 0], axis=0)
-    assert np.all(g2[:, 1], axis=0)
+    assert np.average(g2[1:]-1) < 0.001
 
     # Make sure that an odd number of buffers raises a Value Error
     num_buf = 5

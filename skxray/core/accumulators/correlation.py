@@ -233,6 +233,9 @@ def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
         short data batches: Data reduction for dynamic x-ray
         scattering," Rev. Sci. Instrum., vol 70, p 3274-3289, 2000.
     """
+    if num_bufs % 2 != 0:
+        raise ValueError("There must be an even number of `num_bufs`. You "
+                         "provided %s" % num_bufs)
     if _state is None:
         _state = InternalCorrelationState(num_levels, num_bufs, labels)
 
