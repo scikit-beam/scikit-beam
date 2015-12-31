@@ -1,3 +1,4 @@
+"""Python implementation of the multi-tau correlation with partial data"""
 # ######################################################################
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
