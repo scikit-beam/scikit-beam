@@ -1,9 +1,10 @@
 from skxray.core.correlation.cyprocess import cyprocess
 from skxray.core.correlation.pyprocess import pyprocess
 from skxray.core.correlation.tests.test_correlation import FakeStack
-from skxray.core.accumulators.correlation import lazy_multi_tau as  pytau
+from skxray.core.accumulators.correlation import lazy_multi_tau as pytau
 from skxray.core.accumulators.cycorrelation import lazy_multi_tau as cytau
 from skxray.core import roi
+from numpy.testing import assert_array_almost_equal, assert_array_equal
 import itertools
 import numpy as np
 import time as ttime
@@ -58,6 +59,8 @@ if __name__ == "__main__":
         pyg2, pylag, pytime = pycall(num_levels, num_bufs, rois, img_stack)
         cyg2, cylag, cytime = cycall(num_levels, num_bufs, rois, img_stack)
 
+        assert_array_almost_equal(pyg2, cyg2)
+        assert_array_equal(pylag, cylag)
         # bench = [x, y, z, occupancy, nroi, np.round(pytime, decimals=5),
         #          np.round(cytime, decimals=5),
         #          np.round(cytime/pytime, decimals=5)]

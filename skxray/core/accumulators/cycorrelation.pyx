@@ -47,9 +47,7 @@ results = namedtuple(
         ['g2', 'lag_steps', 'internal_state']
 )
 
-
-cdef class InternalCorrelationState:
-
+cdef class InternalState:
     cdef np.ndarray buf
     cdef np.ndarray G
     cdef np.ndarray past_intensity
@@ -59,23 +57,21 @@ cdef class InternalCorrelationState:
     cdef np.ndarray track_level
     cdef np.ndarray cur
     cdef np.ndarray pixel_list
-    cdef dict label_mapping
     cdef np.int_t processed
+    cdef np.ndarray g2
 
-    def __init__(self, num_levels, num_bufs, labels):
-        self.label_mask, self.pixel_list = extract_label_indices(labels)
-        # map the indices onto a sequential list of integers starting at 1
-        self.label_mapping = {label: n for n, label in enumerate(
-                np.unique(self.label_mask))}
-        # remap the label mask to go from 0 -> max(_labels)
-        for label, n in self.label_mapping.items():
-            self.label_mask[self.label_mask == label] = n
-
+    def __cinit__(self, np.int_t num_levels, np.int_t num_bufs,
+                  np.ndarray[np.int_t, ndim=2] labels,
+                  np.ndarray[np.int_t, ndim=1] label_mask,
+                  np.ndarray[np.int_t, ndim=1] pixel_list,
+                  np.int_t num_rois):
+        self.pixel_list = pixel_list
+        self.label_mask = label_mask
         # G holds the un normalized auto- correlation result. We
         # accumulate computations into G as the algorithm proceeds.
-        self.G = np.zeros(((num_levels + 1) * num_bufs / 2,
-                           len(self.label_mapping)),
-                          dtype=np.float64)
+        self.G = np.zeros(((num_levels + 1) * num_bufs / 2, num_rois),
+                            dtype=np.float64)
+        self.g2 = np.zeros_like(self.G)
         # matrix for normalizing G into g2
         self.past_intensity = np.zeros_like(self.G)
         # matrix for normalizing G into g2
@@ -94,7 +90,7 @@ cdef class InternalCorrelationState:
         self.processed = 0
 
 
-cpdef lazy_multi_tau(np.ndarray[np.float_t, ndim=2] image,
+def lazy_multi_tau(np.ndarray[np.float_t, ndim=2] image,
                    long num_levels, long num_bufs,
                    np.ndarray[np.int_t, ndim=2] labels,
                    _state=None):
@@ -162,17 +158,30 @@ cpdef lazy_multi_tau(np.ndarray[np.float_t, ndim=2] image,
         raise ValueError("There must be an even number of `num_bufs`. You "
                          "provided %s" % num_bufs)
     if _state is None:
-        _state = InternalCorrelationState(num_levels, num_bufs, labels)
+        label_mask, pixel_list = extract_label_indices(labels)
+        # map the indices onto a sequential list of integers starting at 1
+        label_mapping = {label: n for n, label in enumerate(
+                np.unique(label_mask))}
+        # remap the label mask to go from 0 -> max(_labels)
+        for label, n in label_mapping.items():
+            label_mask[label_mask == label] = n
+        _state = InternalState(num_levels, num_bufs, labels, label_mask,
+                               pixel_list, len(label_mapping))
     # create a shorthand reference to the results and state named tuple
-    s = _state
+    cdef InternalState s = _state
     # stash the number of pixels in the mask
-    num_pixels = np.bincount(s.label_mask)
+    cdef np.ndarray num_pixels = np.bincount(s.label_mask)
     # Convert from num_levels, num_bufs to lag frames.
+    cdef np.int_t tot_channels
+    cdef np.int_t g_max
+    cdef np.ndarray g2
+    cdef np.ndarray lag_steps
+
     tot_channels, lag_steps = multi_tau_lags(num_levels, num_bufs)
 
     # iterate over the images to compute multi-tau correlation
     # Compute the correlations for all higher levels.
-    level = 0
+    cdef np.int_t level = 0
 
     # increment buffer
     s.cur[0] = (1 + s.cur[0]) % num_bufs
@@ -190,7 +199,7 @@ cpdef lazy_multi_tau(np.ndarray[np.float_t, ndim=2] image,
 
     # check whether the number of levels is one, otherwise
     # continue processing the next level
-    processing = num_levels > 1
+    cdef int processing = num_levels > 1
 
     level = 1
     while processing:
@@ -233,9 +242,9 @@ cpdef lazy_multi_tau(np.ndarray[np.float_t, ndim=2] image,
         g_max = s.past_intensity.shape[0]
 
     # Normalize g2 by the product of past_intensity and future_intensity
-    g2 = (s.G[:g_max] /
-          (s.past_intensity[:g_max] *
-           s.future_intensity[:g_max]))
+    s.g2 = (s.G[:g_max] /
+            (s.past_intensity[:g_max] *
+             s.future_intensity[:g_max]))
 
     s.processed += 1
-    return results(g2, lag_steps[:g_max], s)
+    return results(s.g2, lag_steps[:g_max], s)
