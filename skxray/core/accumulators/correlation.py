@@ -47,6 +47,7 @@ results = namedtuple(
         ['g2', 'lag_steps', 'internal_state']
 )
 
+#TODO turn this in to a namedtuple and a function
 
 class InternalCorrelationState:
     __slots__ = [
