@@ -49,13 +49,13 @@ import logging
 
 import numpy as np
 
-from ..accumulators.correlation import lazy_multi_tau, _process
+from ..accumulators.correlation import lazy_multi_tau
 
 logger = logging.getLogger(__name__)
 
 
 def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
-                        processing_func=_process):
+                        processing_func=None):
     """Wraps generator implementation of multi-tau
 
     See docstring for skxray.core.accumulators.correlation.lazy_correlation

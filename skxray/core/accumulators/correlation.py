@@ -37,6 +37,7 @@ from __future__ import absolute_import, division, print_function
 
 from skxray.core.utils import multi_tau_lags
 from skxray.core.roi import extract_label_indices
+from skxray.core.correlation.pyprocess import pyproces
 from collections import namedtuple
 import numpy as np
 
@@ -104,72 +105,8 @@ class InternalCorrelationState:
         self.processed = 0
 
 
-def _process(buf, G, past_intensity_norm, future_intensity_norm,
-             label_mask, num_bufs, num_pixels, img_per_level, level, buf_no):
-    """Internal helper function.
-
-    This helper function calculates G, past_intensity_norm and
-    future_intensity_norm at each level, symmetric normalization is used.
-
-    .. warning :: This modifies inputs in place.
-
-    Parameters
-    ----------
-    buf : array
-        image data array to use for correlation
-    G : array
-        matrix of auto-correlation function without normalizations
-    past_intensity_norm : array
-        matrix of past intensity normalizations
-    future_intensity_norm : array
-        matrix of future intensity normalizations
-    label_mask : array
-        labeled array where all nonzero values are ROIs
-    num_bufs : int, even
-        number of buffers(channels)
-    num_pixels : array
-        number of pixels in certain roi's
-        roi's, dimensions are : [number of roi's]X1
-    img_per_level : array
-        to track how many images processed in each level
-    level : int
-        the current multi-tau level
-    buf_no : int
-        the current buffer number
-
-    Notes
-    -----
-    :math ::
-        G   = <I(\tau)I(\tau + delay)>
-    :math ::
-        past_intensity_norm = <I(\tau)>
-    :math ::
-        future_intensity_norm = <I(\tau + delay)>
-    """
-    img_per_level[level] += 1
-    # in multi-tau correlation, the subsequent levels have half as many
-    # buffers as the first
-    i_min = num_bufs // 2 if level else 0
-
-    for i in range(i_min, min(img_per_level[level], num_bufs)):
-        # compute the index into the autocorrelation matrix
-        t_index = level * num_bufs / 2 + i
-
-        delay_no = (buf_no - i) % num_bufs
-        # get the images for correlating
-        past_img = buf[level, delay_no]
-        future_img = buf[level, buf_no]
-        for w, arr in zip([past_img*future_img, past_img, future_img],
-                          [G, past_intensity_norm, future_intensity_norm]):
-            binned = np.bincount(label_mask, weights=w)
-            # pdb.set_trace()
-            arr[t_index] += ((binned / num_pixels - arr[t_index]) /
-                             (img_per_level[level] - i))
-    return None  # modifies arguments in place!
-
-
 def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
-                   processing_func=_process, _state=None):
+                   processing_func=None, _state=None):
     """Generator implementation of 1-time multi-tau correlation
 
     Parameters
@@ -192,7 +129,7 @@ def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
     images : iterable of 2D arrays
     _processing_func : function, optional
         The processing function for the internals of the lazy correlator.
-        Defaults to skxray.core.accumulators.correlation._process
+        Defaults to skxray.core.correlation.pyprocess._process
     _state : namedtuple, optional
         _state is a bucket for all of the internal state of the generator.
         It is part of the `results` object that is yielded from this
@@ -238,7 +175,8 @@ def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
                          "provided %s" % num_bufs)
     if _state is None:
         _state = InternalCorrelationState(num_levels, num_bufs, labels)
-
+    if processing_func is None:
+        processing_func = pyproces
     # create a shorthand reference to the results and state named tuple
     s = _state
     # stash the number of pixels in the mask

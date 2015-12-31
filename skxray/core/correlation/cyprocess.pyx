@@ -88,11 +88,11 @@ cdef _process(np.ndarray[double, ndim=3] buf,
     return None  # modifies arguments in place!
 
 
-def cython_process(buf, G, past_intensity_norm, future_intensity_norm,
-                   label_mask, num_bufs, num_pixels, img_per_level, level,
-                   buf_no):
+def cyprocess(buf, G, past_intensity_norm, future_intensity_norm,
+              label_mask, num_bufs, num_pixels, img_per_level, level,
+              buf_no):
     _process(buf, G, past_intensity_norm, future_intensity_norm,
-             label_mask, num_bufs, num_pixels, img_per_level, level,
-             buf_no)
+              label_mask, num_bufs, num_pixels, img_per_level, level,
+              buf_no)
 
 

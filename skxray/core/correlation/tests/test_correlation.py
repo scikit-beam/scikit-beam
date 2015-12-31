@@ -42,8 +42,8 @@ from nose.tools import assert_raises
 import skxray.core.correlation as corr
 import skxray.core.roi as roi
 import skxray.core.utils as utils
-from skxray.core.correlation.corr import process_wrapper as cyprocess
-from skxray.core.correlation.correlation import _process as pyprocess
+from skxray.core.correlation.cyprocess import cyprocess
+from skxray.core.correlation.pyprocess import pyproces
 import itertools
 
 logger = logging.getLogger(__name__)
@@ -77,7 +77,7 @@ class FakeStack:
 
 def test_multi_tau():
     for proc, func in itertools.product(
-            [pyprocess, cyprocess],
+            [pyproces, cyprocess],
             [_image_stack_correlation]):
         yield func, proc
 
