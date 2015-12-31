@@ -1,3 +1,4 @@
+from __future__ import absolute_import, print_function, division
 from skxray.core.correlation.correlation import multi_tau_auto_corr
 from skxray.core.accumulators.correlation import (MultiTauCorrelation,
                                                   intermediate_data)
@@ -56,11 +57,33 @@ def setup():
 def test_generator_against_reference():
     return
     # run the correlation with the reference implementation
-    g2, lag_steps = multi_tau_auto_corr(num_levels, num_bufs, rois, img_stack)
-    gen = lazy_correlation(num_levels, num_bufs, img_stack, rois)
-    all_res = list(gen)
-    final_res = all_res[-1]
-    assert np.all(final_res.g2 == g2)
-    assert np.all(final_res.lag_steps == lag_steps)
+    full_g2, full_lag_steps = multi_tau_auto_corr(num_levels, num_bufs, rois,
+                                                  img_stack)
+    full_gen = lazy_correlation(img_stack, num_levels, num_bufs, rois)
+    full_res = list(full_gen)
+    assert np.all(full_res.g2 == full_g2)
+    assert np.all(full_res.lag_steps == full_lag_steps)
 
+    # now let's do half the correlation and compare
+    midpoint = stack_size//2
+    # compute the correlation with the reference implementation on the first
+    # half of the image stack
+    first_half_g2, first_half_lag_steps = multi_tau_auto_corr(
+            num_levels, num_bufs, rois, img_stack[:midpoint])
+    # and compute it with the generator implementation on the first half
+    first_half_gen = lazy_correlation(img_stack[:midpoint], num_levels, num_bufs, rois)
+    first_half_res = list(first_half_gen)
+    # compare the results
+    assert np.all(first_half_res[-1].g2 == first_half_g2)
+    assert np.all(first_half_res[-1].lag_steps == first_half_lag_steps)
 
+    # now continue on the second half
+    second_half_gen = lazy_correlation(
+            num_lvels, num_bufs, img_stack[midpoint:], rois,
+            _state=first_half_res.internal_state)
+    second_half_res = list(second_half_gen)
+
+    # and make sure the results are the same as running the generator on the
+    # full stack of images
+    assert np.all(second_half_res[-1].g2 == full_res.g2)
+    assert np.all(second_half_res[-1].lag_steps == full_res.lag_steps)
