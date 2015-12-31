@@ -1,6 +1,6 @@
-from skxray.core.correlation.correlation import (multi_tau_auto_corr,
-                                                 intermediate_data)
-from skxray.core.accumulators.correlation import MultiTauCorrelation
+from skxray.core.correlation.correlation import multi_tau_auto_corr
+from skxray.core.accumulators.correlation import (MultiTauCorrelation,
+                                                  intermediate_data)
 import numpy as np
 import pandas as pd
 # turn off auto wrapping of pandas dataframes
@@ -21,26 +21,11 @@ def test_against_reference_implementation():
     rois[0:xdim//10, 0:ydim//10] = 5
     rois[xdim//10:xdim//5, ydim//10:ydim//5] = 3
     # run the correlation with the reference implementation
-    gen = multi_tau_auto_corr(num_levels, num_bufs, rois, img_stack)
-    res = list(gen)
-    g2, lag_steps = res[-1]
+    g2, lag_steps = multi_tau_auto_corr(num_levels, num_bufs, rois, img_stack)
     # run the correlation with the accumulator version
     mt = MultiTauCorrelation(num_levels, num_bufs, rois)
-    res2 = []
     for img in img_stack:
         mt.process(img)
-        res2.append(mt.intermediate_data)
-
-    equal = []
-    for accum, full in zip(res2, res):
-        for accum_item, full_item in zip(accum, full):
-            equal.append(np.all(accum_item == full_item))
-
-    equal = [np.all(accum_item == full_item)
-             for accum, full in zip(res2, res)
-             for accum_item, full_item in zip(accum, full)]
-    df = pd.DataFrame(np.asarray(equal).reshape(len(res2), len(res2[0])),
-                      columns=intermediate_data._fields)
 
     # compare the results
     assert np.all(mt.g2 == g2)

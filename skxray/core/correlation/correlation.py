@@ -49,21 +49,11 @@ import logging
 import time
 
 import numpy as np
-from collections import namedtuple
 
 from .. import utils as core
 from .. import roi
-import pdb
-from .corr import process_wrapper
 
 logger = logging.getLogger(__name__)
-
-intermediate_data = namedtuple(
-    'intermediate_data',
-    ['image_num', 'max_images', 'G', 'buf', 'past_intensity_norm',
-     'future_intensity_norm', 'label_mask', 'num_bufs', 'num_pixels',
-     'img_per_level', 'level', 'buf_no', 'prev', 'cur', 'track_level', 'g2',
-     'lag_steps'])
 
 
 def _process(buf, G, past_intensity_norm, future_intensity_norm,
@@ -318,28 +308,23 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
                 # Checking whether there is next level for processing
                 processing = level < num_levels
 
-        # the normalization factor
-        if len(np.where(past_intensity_norm == 0)[0]) != 0:
-            g_max = np.where(past_intensity_norm == 0)[0][0]
-        else:
-            g_max = past_intensity_norm.shape[0]
-
-        # g2 is normalized G
-        g2 = (G[:g_max] / (past_intensity_norm[:g_max] *
-                           future_intensity_norm[:g_max]))
-        yield intermediate_data(
-            img_num, num_images, G, buf, past_intensity_norm,
-            future_intensity_norm, label_mask, num_bufs, num_pixels,
-            img_per_level, level, buf_no, prev, cur, track_level, g2,
-            lag_steps)
-
     # ending time for the process
     end_time = time.time()
 
-    logger.info("Processing time for {0} images took {1} seconds."
-                "".format(img_num, (end_time - start_time)))
+    logger.info("Processing time for %s images took %s seconds.",
+                img_num, (end_time - start_time))
 
-    yield g2, lag_steps[:g_max]
+    # the normalization factor
+    if len(np.where(past_intensity_norm == 0)[0]) != 0:
+        g_max = np.where(past_intensity_norm == 0)[0][0]
+    else:
+        g_max = past_intensity_norm.shape[0]
+
+    # g2 is normalized G
+    g2 = (G[:g_max] / (past_intensity_norm[:g_max] *
+                       future_intensity_norm[:g_max]))
+
+    return g2, lag_steps[:g_max]
 
 
 def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):

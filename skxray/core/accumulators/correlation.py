@@ -1,8 +1,16 @@
 from ..roi import extract_label_indices
 import numpy as np
 from collections import namedtuple
-from ..correlation.correlation import _process as pyprocess, intermediate_data
+from ..correlation.correlation import _process as pyprocess
 from ..utils import multi_tau_lags
+
+
+intermediate_data = namedtuple(
+    'intermediate_data',
+    ['image_num', 'max_images', 'G', 'buf', 'past_intensity_norm',
+     'future_intensity_norm', 'label_mask', 'num_bufs', 'num_pixels',
+     'img_per_level', 'level', 'buf_no', 'prev', 'cur', 'track_level', 'g2',
+     'lag_steps'])
 
 
 class MultiTauCorrelation:
