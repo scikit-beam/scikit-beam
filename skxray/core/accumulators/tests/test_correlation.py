@@ -57,8 +57,8 @@ def test_generator_against_reference():
                                                   img_stack)
     full_gen = lazy_correlation(img_stack, num_levels, num_bufs, rois)
     full_res = list(full_gen)
-    assert np.all(full_res.g2 == full_g2)
-    assert np.all(full_res.lag_steps == full_lag_steps)
+    assert np.all(full_res[-1].g2 == full_g2)
+    assert np.all(full_res[-1].lag_steps == full_lag_steps)
 
     # now let's do half the correlation and compare
     midpoint = stack_size//2
@@ -76,10 +76,10 @@ def test_generator_against_reference():
     # now continue on the second half
     second_half_gen = lazy_correlation(
             img_stack[midpoint:], num_levels, num_bufs, rois,
-            _state=first_half_res.internal_state)
+            _state=first_half_res[-1].internal_state)
     second_half_res = list(second_half_gen)
 
     # and make sure the results are the same as running the generator on the
     # full stack of images
-    assert np.all(second_half_res[-1].g2 == full_res.g2)
-    assert np.all(second_half_res[-1].lag_steps == full_res.lag_steps)
+    assert np.all(second_half_res[-1].g2 == full_res[-1].g2)
+    assert np.all(second_half_res[-1].lag_steps == full_res[-1].lag_steps)
