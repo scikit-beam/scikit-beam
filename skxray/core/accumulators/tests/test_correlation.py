@@ -5,9 +5,6 @@ from skxray.core.accumulators.correlation import (MultiTauCorrelation,
 from skxray.core.accumulators.corr_gen import lazy_correlation
 import numpy as np
 
-# turn off auto wrapping of pandas dataframes
-pd.set_option('display.expand_frame_repr', False)
-
 num_levels = None
 num_bufs = None
 xdim = None
@@ -55,7 +52,6 @@ def setup():
 
 
 def test_generator_against_reference():
-    return
     # run the correlation with the reference implementation
     full_g2, full_lag_steps = multi_tau_auto_corr(num_levels, num_bufs, rois,
                                                   img_stack)

@@ -1,4 +1,5 @@
-# # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
+# ######################################################################
+# Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
@@ -30,215 +31,205 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OTHERWISE) ARISING   #
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
+########################################################################
 from __future__ import absolute_import, division, print_function
-from skxray.core import roi, utils
-from skxray.core.correlation.correlation import _process
+
+from skxray.core.utils import multi_tau_lags
+from skxray.core.roi import extract_label_indices
+from collections import namedtuple
 import numpy as np
-import time as ttime
+
+correlation_state = namedtuple(
+        'correlation_state',
+        ['buf', 'G', 'past_intensity', 'future_intensity',
+         'label_mask', 'num_bufs', 'num_pixels', 'img_per_level', 'level',
+         'buf_no', 'track_level', 'cur', 'pixel_list'])
 
 
-def multi_tau_auto_corr_partial_data(num_levels, num_bufs, labels, images,
-                                     previous=None):
-    """
-    This function computes one-time correlations.
+class InternalCorrelationState:
+    pass
 
-    It uses a scheme to achieve long-time correlations inexpensively
-    by downsampling the data, iteratively combining successive frames.
 
-    The longest lag time computed is num_levels * num_bufs.
+results = namedtuple(
+        'correlation_results',
+        ['g2', 'lag_steps', 'internal_state']
+)
+
+
+def _process(_state: correlation_state):
+    corr._process(_state.buf, _state.G, _state.past_intensity_norm,
+                  _state.future_intensity_norm, _state.label_mask,
+                  _state.num_bufs, _state.num_pixels, _state.img_per_level,
+                  _state.level, _state.buf_no)
+
+
+def _init_correlation_state(num_levels, num_bufs, labels):
+    # get the pixels in each label
+    label_mask, pixel_list = extract_label_indices(labels)
+    # map the indices onto a sequential list of integers starting at 1
+    label_mapping = {label: n for n, label in enumerate(
+            np.unique(label_mask))}
+    # remap the label mask to go from 0 -> max(_labels)
+    for label, n in label_mapping.items():
+        label_mask[label_mask == label] = n
+    num_pixels = np.bincount(label_mask)
+
+    # G holds the un normalized auto- correlation result. We
+    # accumulate computations into G as the algorithm proceeds.
+    G = np.zeros(((num_levels + 1) * num_bufs / 2, len(label_mapping)),
+                 dtype=np.float64)
+
+    return correlation_state(
+        G=G,
+        # Ring buffer, a buffer with periodic boundary conditions.
+        # Images must be keep for up to maximum delay in buf.
+        buf=np.zeros((num_levels, num_bufs, len(pixel_list)),
+                     dtype=np.float64),
+        # matrix for normalizing G into g2
+        past_intensity=np.zeros_like(G),
+        # matrix for normalizing G into g2
+        future_intensity=np.zeros_like(G),
+        # the 1-D list that keeps track of which pixels in `pixel_list`
+        # correspond to which ROI
+        label_mask=label_mask,
+        # the 1-D list that indexes into the raveled image to get all pixels
+        # in ROIs
+        pixel_list=pixel_list,
+        num_bufs=num_bufs,
+        num_pixels=num_pixels,
+        # to track how many images processed in each level
+        img_per_level=np.zeros(num_levels, dtype=np.int64),
+        # the current level being computed
+        level=0,
+        # the current position in the ring buffer
+        buf_no=0,
+        # to track which levels have already been processed
+        track_level=np.zeros(num_levels, dtype=bool),
+        # to increment buffer
+        cur=np.ones(num_levels, dtype=np.int64)
+    )
+
+
+
+def lazy_correlation(image_iterable, num_levels, num_bufs, labels,
+                     _state: correlation_state = None):
+    """Generator implementation of 1-time multi-tau correlation
 
     Parameters
     ----------
     num_levels : int
-        how many generations of downsampling to perform, i.e.,
-        the depth of the binomial tree of averaged frames
-
+        how many generations of downsampling to perform, i.e., the depth of
+        the binomial tree of averaged frames
     num_bufs : int, must be even
-        maximum lag step to compute in each generation of
-        downsampling
-
+        maximum lag step to compute in each generation of downsampling
     labels : array
-        labeled array of the same shape as the image stack;
-        each ROI is represented by a distinct label (i.e., integer)
-
+        Labeled array of the same shape as the image stack.
+        Each ROI is represented by sequential integers starting at one.  For
+        example, if you have four ROIs, they must be labeled 1, 2, 3,
+        4. Background is labeled as 0
+    labels : array
+        Labeled array of the same shape as the image stack.
+        Each ROI is represented by sequential integers starting at one.  For
+        example, if you have four ROIs, they must be labeled 1, 2, 3,
+        4. Background is labeled as 0
     images : iterable of 2D arrays
-        dimensions are: (rr, cc)
+    _state : namedtuple, optional
+        _state is a bucket for all of the internal state of the generator.
+        It is part of the `results` object that is yielded from this
+        generator
 
-    previous : tuple
-        holds last result (g2, lag_steps) of correlation,
-        and current state (G, past_intensity_norm, future_intensity_norm, buf)
-
-    Returns
-    -------
-    g2 : array
-        matrix of normalized intensity-intensity autocorrelation
-        shape (num_levels, number of labels(ROI))
-
-    lag_steps : array
-        delay or lag steps for the multiple tau analysis
-        shape num_levels
-
-    Notes
-    -----
-
-    The normalized intensity-intensity time-autocorrelation function
-    is defined as
-
-    :math ::
-        g_2(q, t') = \frac{<I(q, t)I(q, t + t')> }{<I(q, t)>^2}
-
-    ; t' > 0
-
-    Here, I(q, t) refers to the scattering strength at the momentum
-    transfer vector q in reciprocal space at time t, and the brackets
-    <...> refer to averages over time t. The quantity t' denotes the
-    delay time
-
-    This implementation is based on code in the language Yorick
-    by Mark Sutton, based on published work. [1]_
-
-    References
-    ----------
-
-    .. [1] D. Lumma, L. B. Lurio, S. G. J. Mochrie and M. Sutton,
-        "Area detector based photon correlation in the regime of
-        short data batches: Data reduction for dynamic x-ray
-        scattering," Rev. Sci. Instrum., vol 70, p 3274-3289, 2000.
-
+    Yields
+    ------
+    state : namedtuple
+        A 'results' object that contains:
+        - the normalized correlation, `g2`
+        - the times at which the correlation was computed, `lag_steps`
+        - and all of the internal state, `final_state`, which is a
+          `correlation_state` namedtuple
     """
-    # In order to calculate correlations for `num_bufs`, images must be
-    # kept for up to the maximum lag step. These are stored in the array
-    # buffer. This algorithm only keeps number of buffers and delays but
-    # several levels of delays number of levels are kept in buf. Each
-    # level has twice the delay times of the next lower one. To save
-    # needless copying, of cyclic storage of images in buf is used.
+    if _state is None:
+        _state = _init_correlation_state(num_levels, num_bufs, labels)
 
-    if num_bufs % 2 != 0:
-        raise ValueError("number of channels(number of buffers) in "
-                         "multiple-taus (must be even)")
+    # create a shorthand reference to the results and state named tuple
+    s = _state
+    # Convert from num_levels, num_bufs to lag frames.
+    tot_channels, lag_steps = multi_tau_lags(num_levels, num_bufs)
+    # create the results namedtuple
+    r = results(np.zeros_like(s.past_intensity), lag_steps, _state)
 
-    if hasattr(images, 'frame_shape'):
-        # Give a user-friendly error if we can detect the shape from pims.
-        if labels.shape != images.frame_shape:
-            raise ValueError("Shape of the image stack should be equal to"
-                             " shape of the labels array")
+    # iterate over the images to compute multi-tau correlation
+    for image in image_iterable:
+        # Compute the correlations for all higher levels.
+        s.level = 0
 
-    # get the pixels in each label
-    label_mask, pixel_list = roi.extract_label_indices(labels)
+        # increment buffer
+        s.cur[0] = (1 + s.cur[0]) % s.num_bufs
 
-    num_rois = np.max(label_mask)
-
-    # number of pixels per ROI
-    num_pixels = np.bincount(label_mask, minlength=(num_rois + 1))
-    num_pixels = num_pixels[1:]
-
-    if np.any(num_pixels == 0):
-        raise ValueError("Number of pixels of the required roi's"
-                         " cannot be zero, "
-                         "num_pixels = {0}".format(num_pixels))
-
-    if previous is None:
-        # G holds the un normalized auto-correlation result. We
-        # accumulate computations into G as the algorithm proceeds.
-        G = np.zeros(((num_levels + 1) * num_bufs / 2, num_rois),
-                     dtype=np.float64)
-
-        # matrix of past intensity normalizations
-        past_intensity_norm = np.zeros(
-                ((num_levels + 1) * num_bufs / 2, num_rois),
-                dtype=np.float64)
-
-        # matrix of future intensity normalizations
-        future_intensity_norm = np.zeros(
-                ((num_levels + 1) * num_bufs / 2, num_rois),
-                dtype=np.float64)
-
-        # Ring buffer, a buffer with periodic boundary conditions.
-        # Images must be keep for up to maximum delay in buf.
-        buf = np.zeros((num_levels, num_bufs, np.sum(num_pixels)),
-                       dtype=np.float64)
-
-        # to track processing each level
-        track_level = np.zeros(num_levels)
-
-        # to increment buffer
-        cur = np.ones(num_levels, dtype=np.int64)
-
-        # to track how many images processed in each level
-        img_per_level = np.zeros(num_levels, dtype=np.int64)
-
-        start_time = ttime.time()  # used to log the computation time (
-        # optionally)
-
-    else:
-        (G, past_intensity_norm, future_intensity_norm, buf,
-         cur, img_per_level, track_level) = previous[2:]
-
-    for n, img in enumerate(images):
-
-        cur[0] = (1 + cur[0]) % num_bufs  # increment buffer
-
-        # Put the image into the ring buffer.
-        buf[0, cur[0] - 1] = (np.ravel(img))[pixel_list]
-
+        # Put the ROI pixels into the ring buffer.
+        s.buf[0, s.cur[0] - 1] = np.ravel(image)[s.pixel_list]
+        s.buf_no = s.cur[0] - 1
         # Compute the correlations between the first level
         # (undownsampled) frames. This modifies G,
         # past_intensity_norm, future_intensity_norm,
         # and img_per_level in place!
-        _process(buf, G, past_intensity_norm,
-                 future_intensity_norm, label_mask,
-                 num_bufs, num_pixels, img_per_level,
-                 level=0, buf_no=cur[0] - 1)
+        s.processing_func(
+            s.buf, s.G, s.past_intensity,
+            s.future_intensity, s.label_mask,
+            s.num_bufs, s.num_pixels, s.img_per_level,
+            s.level, s.buf_no)
 
         # check whether the number of levels is one, otherwise
         # continue processing the next level
-        processing = num_levels > 1
+        s.processing = s.num_levels > 1
 
-        # Compute the correlations for all higher levels.
-        level = 1
-        while processing:
-            if not track_level[level]:
-                track_level[level] = 1
-                processing = False
+        s.level = 1
+        s.prev = None
+        while s.processing:
+            if not s.track_level[s.level]:
+                s.track_level[s.level] = True
+                s.processing = False
             else:
-                prev = 1 + (cur[level - 1] - 2) % num_bufs
-                cur[level] = 1 + cur[level] % num_bufs
+                s.prev = (1 + (s.cur[s.level - 1] - 2) %
+                          s.num_bufs)
+                s.cur[s.level] = (
+                    1 + s.cur[s.level] % s.num_bufs)
 
-                buf[level, cur[level] - 1] = (buf[level - 1, prev - 1] +
-                                              buf[level - 1,
-                                                  cur[level - 1] - 1]) / 2
+                # TODO clean this up. it is hard to understand
+                s.buf[s.level, s.cur[s.level] - 1] = ((
+                        s.buf[s.level - 1, s.prev - 1] +
+                        s.buf[s.level - 1, s.cur[s.level - 1] - 1]
+                    ) / 2
+                )
 
                 # make the track_level zero once that level is processed
-                track_level[level] = 0
+                s.track_level[s.level] = False
 
-                # call the _process function for each multi-tau level
-                # for multi-tau levels greater than one
-                # Again, this is modifying things in place. See comment
+                # call processing_func for each multi-tau level greater
+                # than one. This is modifying things in place. See comment
                 # on previous call above.
-                _process(buf, G, past_intensity_norm,
-                         future_intensity_norm, label_mask,
-                         num_bufs, num_pixels, img_per_level,
-                         level=level, buf_no=cur[level] - 1, )
-                level += 1
+                s.buf_no = s.cur[s.level] - 1
+                s.processing_func(
+                        s.buf, s.G, s.past_intensity,
+                        s.future_intensity, s.label_mask,
+                        s.num_bufs, s.num_pixels,
+                        s.img_per_level, s.level,
+                        s.buf_no)
+                s.level += 1
 
                 # Checking whether there is next level for processing
-                processing = level < num_levels
+                s.processing = s.level < s.num_levels
 
-    # the normalization factor
-    if len(np.where(past_intensity_norm == 0)[0]) != 0:
-        g_max = np.where(past_intensity_norm == 0)[0][0]
-    else:
-        g_max = past_intensity_norm.shape[0]
+        # If any past intensities are zero, then g2 cannot be normalized at
+        # those levels. This if/else code block is basically preventing
+        # divide-by-zero errors.
+        if len(np.where(s.past_intensity == 0)[0]) != 0:
+            s.g_max = np.where(s.past_intensity == 0)[0][0]
+        else:
+            s.g_max = s.past_intensity.shape[0]
 
-    # g2 is normalized G
-    g2 = (G[:g_max] / (past_intensity_norm[:g_max] *
-                       future_intensity_norm[:g_max]))
-
-    # Convert from num_levels, num_bufs to lag frames.
-    tot_channels, lag_steps = utils.multi_tau_lags(num_levels, num_bufs)
-    lag_steps = lag_steps[:g_max]
-
-    previous = (
-        g2, lag_steps, G, past_intensity_norm, future_intensity_norm, buf,
-        cur, img_per_level, track_level)
-    yield previous
+        # Normalize g2 by the product of past_intensity and future_intensity
+        r.g2 = (s.G[:s.g_max] /
+                (s.past_intensity[:s.g_max] *
+                 s.future_intensity[:s.g_max]))
+        s.processed += 1
+        yield r
