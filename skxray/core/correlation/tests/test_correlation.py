@@ -153,32 +153,6 @@ def test_auto_corr_scat_factor():
                                             1.0, 1.0, 1.0]), decimal=8)
 
 
-def test_partial_data_correlation():
-    batch_size = 100
-    size = 50
-    img_stack = np.random.randint(1, 10, (batch_size, size, size))
-
-    num_levels = 2
-    num_bufs = 4
-    labels = np.zeros((size, size), dtype=np.int64)
-    labels[2:10, 5:15] = 1
-
-    # make sure it works with a generator
-    img_gen = (img for img in img_stack)
-    res1, = corr.multi_tau_auto_corr_partial_data(num_levels, num_bufs, labels,
-                                                  img_gen)
-    # make sure we are basically at 1
-    assert np.average(res1[0][1:] - 1) < 0.01
-
-    # compute correlation for the first half
-    img_gen = (img for img in img_stack[:batch_size // 2])
-    res2, = corr.multi_tau_auto_corr_partial_data(num_levels, num_bufs, labels,
-                                                  img_gen)
-    res3, = corr.multi_tau_auto_corr_partial_data(num_levels, num_bufs, labels,
-                                                  img_stack[batch_size // 2:])
-    assert_array_almost_equal(res1[0], res3[0], decimal=2)
-
-
 if __name__ == '__main__':
     import nose
 
