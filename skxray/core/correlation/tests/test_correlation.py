@@ -52,6 +52,7 @@ logger = logging.getLogger(__name__)
 class FakeStack:
     """Fake up a big pile of images that are identical
     """
+
     def __init__(self, ref_img, maxlen):
         """
 
@@ -92,15 +93,15 @@ def _correlation(processing_func):
 
     indices = roi.rectangles(roi_data, img_dim)
 
-    img_stack = np.random.randint(1, 5, size=(64, ) + img_dim)
+    img_stack = np.random.randint(1, 5, size=(64,) + img_dim)
 
     g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, indices,
                                              img_stack,
                                              processing_func=processing_func)
 
-    assert_array_equal(lag_steps,  np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 10,
-                                             12, 14, 16, 20, 24, 28, 32, 40,
-                                             48, 56]))
+    assert_array_equal(lag_steps, np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 10,
+                                            12, 14, 16, 20, 24, 28, 32, 40,
+                                            48, 56]))
 
     assert_array_almost_equal(g2[1:, 0], 1.00, decimal=2)
     assert_array_almost_equal(g2[1:, 1], 1.00, decimal=2)
@@ -116,8 +117,8 @@ def _image_stack_correlation(processing_func):
     rois = np.zeros_like(img_stack[0])
     # make sure that the ROIs can be any integers greater than 1. They do not
     # have to start at 1 and be continuous
-    rois[0:xdim//10, 0:ydim//10] = 5
-    rois[xdim//10:xdim//5, ydim//10:ydim//5] = 3
+    rois[0:xdim // 10, 0:ydim // 10] = 5
+    rois[xdim // 10:xdim // 5, ydim // 10:ydim // 5] = 3
 
     g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, rois,
                                              img_stack,
@@ -151,6 +152,34 @@ def test_auto_corr_scat_factor():
     assert_array_almost_equal(g2, np.array([1.5, 1.0, 1.0, 1.0, 1.0,
                                             1.0, 1.0, 1.0]), decimal=8)
 
+
+def test_partial_data_correlation():
+    batch_size = 100
+    size = 50
+    img_stack = np.random.randint(1, 10, (batch_size, size, size))
+
+    num_levels = 2
+    num_bufs = 4
+    labels = np.zeros((size, size), dtype=np.int64)
+    labels[2:10, 5:15] = 1
+
+    # make sure it works with a generator
+    img_gen = (img for img in img_stack)
+    res1, = corr.multi_tau_auto_corr_partial_data(num_levels, num_bufs, labels,
+                                                  img_gen)
+    # make sure we are basically at 1
+    assert np.average(res1[0][1:] - 1) < 0.01
+
+    # compute correlation for the first half
+    img_gen = (img for img in img_stack[:batch_size // 2])
+    res2, = corr.multi_tau_auto_corr_partial_data(num_levels, num_bufs, labels,
+                                                  img_gen)
+    res3, = corr.multi_tau_auto_corr_partial_data(num_levels, num_bufs, labels,
+                                                  img_stack[batch_size // 2:])
+    assert_array_almost_equal(res1[0], res3[0], decimal=2)
+
+
 if __name__ == '__main__':
     import nose
+
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

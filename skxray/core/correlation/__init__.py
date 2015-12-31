@@ -1,1 +1,2 @@
-from .correlation import multi_tau_auto_corr, auto_corr_scat_factor
+from .correlation import (multi_tau_auto_corr, auto_corr_scat_factor,
+                          multi_tau_auto_corr_partial_data)
