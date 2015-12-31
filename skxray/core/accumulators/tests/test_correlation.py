@@ -1,7 +1,5 @@
 from __future__ import absolute_import, print_function, division
 from skxray.core.correlation.correlation import multi_tau_auto_corr
-from skxray.core.accumulators.correlation import (MultiTauCorrelation,
-                                                  intermediate_data)
 from skxray.core.accumulators.corr_gen import lazy_correlation
 import numpy as np
 
@@ -12,28 +10,6 @@ ydim = None
 stack_size = None
 img_stack = None
 rois = None
-
-
-def test_against_reference_implementation():
-    # run the correlation with the reference implementation
-    g2, lag_steps = multi_tau_auto_corr(num_levels, num_bufs, rois, img_stack)
-    # run the correlation with the accumulator version
-    mt = MultiTauCorrelation(num_levels, num_bufs, rois)
-    for img in img_stack:
-        mt.process(img)
-
-    # compare the results
-    assert np.all(mt.g2 == g2)
-    assert np.all(mt.lag_steps == lag_steps)
-
-    # reset the partial data correlator and check the results again
-    mt.reset()
-    for img in img_stack:
-        mt.process(img)
-
-    # compare the results
-    assert np.all(mt.g2 == g2)
-    assert np.all(mt.lag_steps == lag_steps)
 
 
 def setup():
