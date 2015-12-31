@@ -1,7 +1,8 @@
 from skxray.core.correlation.cyprocess import cyprocess
 from skxray.core.correlation.pyprocess import pyprocess
 from skxray.core.correlation.tests.test_correlation import FakeStack
-from skxray.core.correlation import multi_tau_auto_corr
+from skxray.core.accumulators.correlation import lazy_multi_tau as  pytau
+from skxray.core.accumulators.cycorrelation import lazy_multi_tau as cytau
 from skxray.core import roi
 import itertools
 import numpy as np
@@ -16,15 +17,24 @@ def make_ring_array(xdim, ydim, fraction_roi, num_rois):
     return roi.rings(edges=ring_pairs, center=(xdim//2, ydim//2), shape=(xdim, ydim))
 
 
-def timer(num_levels, num_bufs, rois, img_stack, func):
+def cycall(num_levels, num_bufs, rois, img_stack):
     t0 = ttime.time()
-    g2, lag_steps = multi_tau_auto_corr(num_levels, num_bufs, rois,
-                                        img_stack, func)
-    return g2, lag_steps, ttime.time() - t0
+    state = None
+    for img in img_stack:
+        res = cytau(img, num_levels, num_bufs, rois, state)
+        state = res.internal_state
+    return res.g2, res.lag_steps, ttime.time() - t0
+
+
+def pycall(num_levels, num_bufs, rois, img_stack):
+    t0 = ttime.time()
+    gen = pytau(img_stack, num_levels, num_bufs, rois)
+    res = list(gen)[-1]
+    return res.g2, res.lag_steps, ttime.time() - t0
 
 
 if __name__ == "__main__":
-    processing_funcs = {'python': pyprocess, 'cython': cyprocess}
+    correlation_funcs = {'python': pytau, 'cython': cytau}
     xdim = [128, 512]
     zdim = [10, 100]
     fraction_roi = [.001, .01, .1, .5, 1]
@@ -41,14 +51,12 @@ if __name__ == "__main__":
     for x, z, occupancy, nroi in itertools.product(
             xdim, zdim, fraction_roi, num_rois):
         # make the image stack
-        img_stack = FakeStack(ref_img=np.zeros((x, x), dtype=int),
+        img_stack = FakeStack(ref_img=np.zeros((x, x), dtype=float),
                               maxlen=z)
 
         rois = make_ring_array(x, x, occupancy, nroi)
-        pyg2, pylag, pytime = timer(num_levels, num_bufs, rois, img_stack,
-                                    pyprocess)
-        cyg2, cylag, cytime = timer(num_levels, num_bufs, rois, img_stack,
-                                    cyprocess)
+        pyg2, pylag, pytime = pycall(num_levels, num_bufs, rois, img_stack)
+        cyg2, cylag, cytime = cycall(num_levels, num_bufs, rois, img_stack)
 
         # bench = [x, y, z, occupancy, nroi, np.round(pytime, decimals=5),
         #          np.round(cytime, decimals=5),
