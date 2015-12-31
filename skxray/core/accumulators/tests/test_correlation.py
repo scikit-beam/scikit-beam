@@ -79,7 +79,7 @@ def test_generator_against_reference():
 
     # now continue on the second half
     second_half_gen = lazy_correlation(
-            num_lvels, num_bufs, img_stack[midpoint:], rois,
+            img_stack[midpoint:], num_levels, num_bufs, rois,
             _state=first_half_res.internal_state)
     second_half_res = list(second_half_gen)
 
