@@ -62,8 +62,9 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images,
     """
     gen = lazy_multi_tau(images, num_levels, num_bufs, labels,
                          processing_func)
-    final_res = list(gen)[-1]
-    return final_res.g2, final_res.lag_steps
+    for result in gen:
+        pass
+    return result.g2, result.lag_steps
 
 
 def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
