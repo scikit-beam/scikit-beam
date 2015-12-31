@@ -1,6 +1,6 @@
 from __future__ import absolute_import, print_function, division
 from skxray.core.correlation.correlation import multi_tau_auto_corr
-from skxray.core.accumulators.correlation import lazy_correlation
+from skxray.core.accumulators.correlation import lazy_multi_tau
 import numpy as np
 
 num_levels = None
@@ -31,7 +31,7 @@ def test_generator_against_reference():
     # run the correlation with the reference implementation
     full_g2, full_lag_steps = multi_tau_auto_corr(num_levels, num_bufs, rois,
                                                   img_stack)
-    full_gen = lazy_correlation(img_stack, num_levels, num_bufs, rois)
+    full_gen = lazy_multi_tau(img_stack, num_levels, num_bufs, rois)
     full_res = list(full_gen)
     assert np.all(full_res[-1].g2 == full_g2)
     assert np.all(full_res[-1].lag_steps == full_lag_steps)
@@ -43,14 +43,14 @@ def test_generator_against_reference():
     first_half_g2, first_half_lag_steps = multi_tau_auto_corr(
             num_levels, num_bufs, rois, img_stack[:midpoint])
     # and compute it with the generator implementation on the first half
-    first_half_gen = lazy_correlation(img_stack[:midpoint], num_levels, num_bufs, rois)
+    first_half_gen = lazy_multi_tau(img_stack[:midpoint], num_levels, num_bufs, rois)
     first_half_res = list(first_half_gen)
     # compare the results
     assert np.all(first_half_res[-1].g2 == first_half_g2)
     assert np.all(first_half_res[-1].lag_steps == first_half_lag_steps)
 
     # now continue on the second half
-    second_half_gen = lazy_correlation(
+    second_half_gen = lazy_multi_tau(
             img_stack[midpoint:], num_levels, num_bufs, rois,
             _state=first_half_res[-1].internal_state)
     second_half_res = list(second_half_gen)
