@@ -1,6 +1,6 @@
 from __future__ import absolute_import, print_function, division
 from skxray.core.correlation.correlation import multi_tau_auto_corr
-from skxray.core.accumulators.corr_gen import lazy_correlation
+from skxray.core.accumulators.correlation import lazy_correlation
 import numpy as np
 
 num_levels = None
