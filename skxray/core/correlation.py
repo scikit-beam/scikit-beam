@@ -49,7 +49,7 @@ import logging
 
 import numpy as np
 
-from ..accumulators.correlation import lazy_multi_tau
+from .accumulators.correlation import lazy_multi_tau
 
 logger = logging.getLogger(__name__)
 

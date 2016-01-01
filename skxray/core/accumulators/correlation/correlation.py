@@ -35,9 +35,9 @@
 ########################################################################
 from __future__ import absolute_import, division, print_function
 
-from skxray.core.utils import multi_tau_lags
-from skxray.core.roi import extract_label_indices
-from skxray.core.correlation.pyprocess import pyprocess
+from ...utils import multi_tau_lags
+from ...roi import extract_label_indices
+from .pyprocess import pyprocess
 from collections import namedtuple
 import numpy as np
 

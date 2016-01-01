@@ -36,81 +36,35 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 import numpy as np
-from numpy.testing import (assert_array_almost_equal, assert_array_equal)
-from nose.tools import assert_raises
+from numpy.testing import assert_array_almost_equal
 
-import skxray.core.correlation as corr
-import skxray.core.roi as roi
 import skxray.core.utils as utils
-from skxray.core.correlation.cyprocess import cyprocess
-from skxray.core.correlation.pyprocess import pyprocess
-import itertools
+from skxray.core.accumulators.correlation import lazy_multi_tau
+from skxray.core.correlation import multi_tau_auto_corr, auto_corr_scat_factor
 
 logger = logging.getLogger(__name__)
 
 
-class FakeStack:
-    """Fake up a big pile of images that are identical
-    """
-
-    def __init__(self, ref_img, maxlen):
-        """
-
-        Parameters
-        ----------
-        ref_img : array
-            The reference image that will be returned `maxlen` times
-        maxlen : int
-            The maximum number of images to fake up
-        """
-        self.img = ref_img
-        self.maxlen = maxlen
-
-    def __len__(self):
-        return self.maxlen
-
-    def __getitem__(self, item):
-        if item > len(self):
-            raise IndexError
-        return self.img
-
-
-def test_multi_tau():
-    for proc, func in itertools.product(
-            [pyprocess, cyprocess],
-            [_image_stack_correlation]):
-        yield func, proc
-
-
-def _image_stack_correlation(processing_func):
-    num_levels = 4
+def test_image_stack_correlation():
+    num_levels = 6
     num_bufs = 4  # must be even
     xdim = 256
     ydim = 512
     stack_size = 100
     img_stack = np.random.randint(1, 10, (stack_size, xdim, ydim))
-    rois = np.zeros((xdim, ydim), dtype=np.int)
+    rois = np.zeros_like(img_stack[0])
     # make sure that the ROIs can be any integers greater than 1. They do not
     # have to start at 1 and be continuous
-    rois[0:xdim // 10, 0:ydim // 10] = 5
-    rois[xdim // 10:xdim // 5, ydim // 10:ydim // 5] = 3
+    rois[0:xdim//10, 0:ydim//10] = 5
+    rois[xdim//10:xdim//5, ydim//10:ydim//5] = 3
 
-    g2, lag_steps = corr.multi_tau_auto_corr(
-        num_levels, num_bufs, rois, img_stack, processing_func=processing_func)
-
-    assert np.average(g2[1:]-1) < 0.001
-
-    # Make sure that an odd number of buffers raises a Value Error
-    num_buf = 5
-    assert_raises(ValueError, corr.multi_tau_auto_corr, num_levels, num_buf,
-                  rois, img_stack, processing_func=processing_func)
-
-    # If there are no ROIs, g2 should be an empty array
-    rois = np.zeros_like(img_stack[0])
-    g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, rois,
-                                             img_stack,
-                                             processing_func=processing_func)
-    assert np.all(g2 == [])
+    # run the correlation with the reference implementation
+    full_g2, full_lag_steps = multi_tau_auto_corr(num_levels, num_bufs, rois,
+                                                  img_stack)
+    full_gen = lazy_multi_tau(img_stack, num_levels, num_bufs, rois)
+    full_res = list(full_gen)
+    assert np.all(full_res[-1].g2 == full_g2)
+    assert np.all(full_res[-1].lag_steps == full_lag_steps)
 
 
 def test_auto_corr_scat_factor():
@@ -120,7 +74,7 @@ def test_auto_corr_scat_factor():
     relaxation_rate = 10.0
     baseline = 1.0
 
-    g2 = corr.auto_corr_scat_factor(lags, beta, relaxation_rate, baseline)
+    g2 = auto_corr_scat_factor(lags, beta, relaxation_rate, baseline)
 
     assert_array_almost_equal(g2, np.array([1.5, 1.0, 1.0, 1.0, 1.0,
                                             1.0, 1.0, 1.0]), decimal=8)
