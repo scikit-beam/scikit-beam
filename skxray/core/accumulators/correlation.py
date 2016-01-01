@@ -43,67 +43,67 @@ import numpy as np
 
 
 results = namedtuple(
-        'correlation_results',
-        ['g2', 'lag_steps', 'internal_state']
+    'correlation_results',
+    ['g2', 'lag_steps', 'internal_state']
 )
 
-#TODO turn this in to a namedtuple and a function
 
-class InternalCorrelationState:
-    __slots__ = [
-        'buf',
-        'G',
-        'past_intensity',
-        'future_intensity',
-        'img_per_level',
-        'label_mask',
-        # 'num_levels',
-        # 'num_bufs',
-        # 'num_pixels',
-        # 'level',
-        # 'buf_no',
-        'track_level',
-        'cur',
-        'pixel_list',
-        'label_mapping',
-        'processed',
-        # 'processing',
-        # 'prev',
-        # 'g2',
-        # 'g_max',
-        '__repr__',
-    ]
+_internal_state = namedtuple(
+    'correlation_state',
+    ['buf',
+     'G',
+     'past_intensity',
+     'future_intensity',
+     'img_per_level',
+     'label_mask',
+     'track_level',
+     'cur',
+     'pixel_list',
+     'label_mapping',
+     ]
+)
 
-    def __init__(self, num_levels, num_bufs, labels):
-        self.label_mask, self.pixel_list = extract_label_indices(labels)
-        # map the indices onto a sequential list of integers starting at 1
-        self.label_mapping = {label: n for n, label in enumerate(
-                np.unique(self.label_mask))}
-        # remap the label mask to go from 0 -> max(_labels)
-        for label, n in self.label_mapping.items():
-            self.label_mask[self.label_mask == label] = n
 
-        # G holds the un normalized auto- correlation result. We
-        # accumulate computations into G as the algorithm proceeds.
-        self.G = np.zeros(((num_levels + 1) * num_bufs / 2,
-                           len(self.label_mapping)),
-                          dtype=np.float64)
-        # matrix for normalizing G into g2
-        self.past_intensity = np.zeros_like(self.G)
-        # matrix for normalizing G into g2
-        self.future_intensity = np.zeros_like(self.G)
-        # Ring buffer, a buffer with periodic boundary conditions.
-        # Images must be keep for up to maximum delay in buf.
-        self.buf = np.zeros((num_levels, num_bufs, len(self.pixel_list)),
-                             dtype=np.float64)
-        # to track how many images processed in each level
-        self.img_per_level = np.zeros(num_levels, dtype=np.int64)
-        # to track which levels have already been processed
-        self.track_level = np.zeros(num_levels, dtype=bool)
-        # to increment buffer
-        self.cur = np.ones(num_levels, dtype=np.int64)
-        # whether or not to process higher levels in multi-tau
-        self.processed = 0
+def _init_state(num_levels, num_bufs, labels):
+    label_mask, pixel_list = extract_label_indices(labels)
+    # map the indices onto a sequential list of integers starting at 1
+    label_mapping = {label: n for n, label in enumerate(
+            np.unique(label_mask))}
+    # remap the label mask to go from 0 -> max(_labels)
+    for label, n in label_mapping.items():
+        label_mask[label_mask == label] = n
+
+    # G holds the un normalized auto- correlation result. We
+    # accumulate computations into G as the algorithm proceeds.
+    G = np.zeros(((num_levels + 1) * num_bufs / 2, len(label_mapping)),
+                 dtype=np.float64)
+    # matrix for normalizing G into g2
+    past_intensity = np.zeros_like(G)
+    # matrix for normalizing G into g2
+    future_intensity = np.zeros_like(G)
+    # Ring buffer, a buffer with periodic boundary conditions.
+    # Images must be keep for up to maximum delay in buf.
+    buf = np.zeros((num_levels, num_bufs, len(pixel_list)),
+                   dtype=np.float64)
+    # to track how many images processed in each level
+    img_per_level = np.zeros(num_levels, dtype=np.int64)
+    # to track which levels have already been processed
+    track_level = np.zeros(num_levels, dtype=bool)
+    # to increment buffer
+    cur = np.ones(num_levels, dtype=np.int64)
+
+    return _internal_state(
+        buf,
+        G,
+        past_intensity,
+        future_intensity,
+        img_per_level,
+        label_mask,
+        track_level,
+        cur,
+        pixel_list,
+        label_mapping,
+    )
 
 
 def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
@@ -175,7 +175,7 @@ def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
         raise ValueError("There must be an even number of `num_bufs`. You "
                          "provided %s" % num_bufs)
     if _state is None:
-        _state = InternalCorrelationState(num_levels, num_bufs, labels)
+        _state = _init_state(num_levels, num_bufs, labels)
     if processing_func is None:
         processing_func = pyprocess
     # create a shorthand reference to the results and state named tuple
@@ -253,5 +253,4 @@ def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
               (s.past_intensity[:g_max] *
                s.future_intensity[:g_max]))
 
-        s.processed += 1
         yield results(g2, lag_steps[:g_max], s)

@@ -43,8 +43,8 @@ import numpy as np
 cimport numpy as np
 
 results = namedtuple(
-        'correlation_results',
-        ['g2', 'lag_steps', 'internal_state']
+    'correlation_results',
+    ['g2', 'lag_steps', 'internal_state']
 )
 
 cdef class InternalState:
