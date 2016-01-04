@@ -41,12 +41,10 @@ from .pyprocess import pyprocess
 from collections import namedtuple
 import numpy as np
 
-
 results = namedtuple(
     'correlation_results',
     ['g2', 'lag_steps', 'internal_state']
 )
-
 
 _internal_state = namedtuple(
     'correlation_state',
@@ -65,6 +63,22 @@ _internal_state = namedtuple(
 
 
 def _init_state(num_levels, num_bufs, labels):
+    """Initialize a stateful namedtuple for the generator-based multi-tau
+
+    Parameters
+    ----------
+    num_levels : int
+    num_bufs : int
+    labels : array
+        Two dimensional labeled array that contains ROI information
+
+    Returns
+    -------
+    internal_state : namedtuple
+        The namedtuple that contains all the state information that
+        `lazy_multi_tau` requires so that it can be used to pick up processing
+        after it was interrupted
+    """
     label_mask, pixel_list = extract_label_indices(labels)
     # map the indices onto a sequential list of integers starting at 1
     label_mapping = {label: n for n, label in enumerate(
@@ -138,8 +152,9 @@ def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
 
     Yields
     ------
-    state : namedtuple
-        A 'results' object that contains:
+    namedtuple
+        A `results` object is yielded after every image has been processed. This
+        `reults` object contains:
         - the normalized correlation, `g2`
         - the times at which the correlation was computed, `lag_steps`
         - and all of the internal state, `final_state`, which is a
@@ -147,7 +162,6 @@ def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
 
     Notes
     -----
-
     The normalized intensity-intensity time-autocorrelation function
     is defined as
 
@@ -165,7 +179,6 @@ def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
 
     References
     ----------
-
     .. [1] D. Lumma, L. B. Lurio, S. G. J. Mochrie and M. Sutton,
         "Area detector based photon correlation in the regime of
         short data batches: Data reduction for dynamic x-ray
