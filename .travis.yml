@@ -1,6 +1,14 @@
 language: python
 sudo: false
 
+addons:
+  apt_packages:
+      - pandoc
+env:
+  global:
+    - GH_REF: github.com/scikit-beam/scikit-beam.git
+    - secure: "KzntGlmLDUZlAB8ZiSRBtONJypv4atrnFxl+THCW8kg6YbiODcCxG9cez7mfmh63wpJ54+zeGvgGljeVvjb7bjB2p+4hZy+mLoP9xoE1w5qF4XaQ5YTOYaSQqCeWa5cEIi+854gFX7gOfW5qL+EJf7h3HtmndI15zaU5gOPjSDU="
+
 python:
   - 2.7
   - 3.4
@@ -19,9 +27,9 @@ install:
   - conda config --add channels scikit-xray
   - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4
   - source activate testenv
-  # need to build_ext -i for the tests so that the .so is local to the source
-  # code.  We could also setup.py develop, but I'm not sure if that is any
-  # better
+  # # need to build_ext -i for the tests so that the .so is local to the source
+  # # code.  We could also setup.py develop, but I'm not sure if that is any
+  # # better
   - python setup.py install build_ext -i
   - pip install coveralls
   - pip install codecov
@@ -32,3 +40,12 @@ script:
 after_success:
   - coveralls
   - codecov
+  - if [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PYTHON_VERSION == 3.5 ] && [ $TRAVIS_PULL_REQUEST == 'false' ]; then
+      conda install sphinx numpydoc ipython jupyter pip matplotlib;
+      pip install sphinx_bootstrap_theme;
+      cd ..;
+      git clone https://github.com/scikit-beam/scikit-beam-examples.git;
+      cd scikit-beam/doc;
+      chmod +x deploy.sh;
+      ./deploy.sh;
+    fi;
