@@ -20,7 +20,7 @@
     </style>
 
 
-scikit-xray: Data Analysis Tools for X-ray Science
+scikit-beam: Data Analysis Tools for X-ray Science
 ==================================================
 
 .. raw:: html
