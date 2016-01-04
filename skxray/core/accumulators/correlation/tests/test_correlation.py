@@ -1,7 +1,6 @@
 from __future__ import absolute_import, print_function, division
 from skxray.core.accumulators.correlation import lazy_multi_tau
 from skxray.core.accumulators.correlation .pyprocess import pyprocess
-from skxray.core.accumulators.correlation .cyprocess import cyprocess
 
 import numpy as np
 
@@ -31,7 +30,7 @@ def setup():
 
 
 def test_lazy_multi_tau():
-    for func in [pyprocess, cyprocess]:
+    for func in [pyprocess, ]:
         yield _lazy_multi_tau, func
 
 
