@@ -5,6 +5,7 @@ from skxray.core.accumulators.correlation .cyprocess import cyprocess
 
 import numpy as np
 
+np.random.seed(seed=2015)
 num_levels = None
 num_bufs = None
 xdim = None
@@ -21,7 +22,7 @@ def setup():
     xdim = 256
     ydim = 512
     stack_size = 100
-    img_stack = np.random.randint(1, 10, (stack_size, xdim, ydim))
+    img_stack = np.random.randint(1, 3, (stack_size, xdim, ydim))
     rois = np.zeros_like(img_stack[0])
     # make sure that the ROIs can be any integers greater than 1. They do not
     # have to start at 1 and be continuous
@@ -38,7 +39,7 @@ def _lazy_multi_tau(processing_func):
     setup()
     # run the correlation on the full stack
     full_gen = lazy_multi_tau(
-        num_levels, num_bufs, rois, img_stack, processing_func=processing_func)
+        img_stack, num_levels, num_bufs, rois, processing_func=processing_func)
     for full_result in full_gen:
         pass
 
@@ -48,14 +49,14 @@ def _lazy_multi_tau(processing_func):
 
     # run the correlation on the first half
     gen_first_half = lazy_multi_tau(
-        num_levels, num_bufs, rois, img_stack[:stack_size//2],
+        img_stack[:stack_size//2], num_levels, num_bufs, rois,
         processing_func=processing_func)
     for first_half_result in gen_first_half:
         pass
     # run the correlation on the second half by passing in the state from the
     # first half
     gen_second_half = lazy_multi_tau(
-        num_levels, num_bufs, rois, img_stack[stack_size//2:],
+        img_stack[stack_size//2:], num_levels, num_bufs, rois,
         processing_func=processing_func,
         _state=first_half_result.internal_state
     )
