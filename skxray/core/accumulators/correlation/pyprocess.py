@@ -36,7 +36,7 @@ import numpy as np
 
 def pyprocess(buf, G, past_intensity_norm, future_intensity_norm,
               label_mask, num_bufs, num_pixels, img_per_level, level, buf_no):
-    """Internal helper function.
+    """Reference implementation of the inner loop of multi-tau correlation
 
     This helper function calculates G, past_intensity_norm and
     future_intensity_norm at each level, symmetric normalization is used.
