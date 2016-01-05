@@ -12,8 +12,10 @@ git init
 touch .nojekyll
 
 # inside this git repo we'll pretend to be a new user
-git config user.name "Eric Dill"
-git config user.email "edilL@bnl.gov"
+git config --global user.name "Eric Dill"
+git config --global user.email "edill@bnl.gov"
+git config credential.helper "store --file=.git/credentials"
+echo "https://${GH_TOKEN}:@github.com" > .git/credentials
 
 # The first and only commit to this new Git repo contains all the
 # files present with the commit message "Deploy to GitHub Pages".
