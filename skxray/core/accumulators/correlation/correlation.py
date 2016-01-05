@@ -121,7 +121,7 @@ def _init_state(num_levels, num_bufs, labels):
 
 
 def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
-                   processing_func=None, _state=None):
+                   processing_func=None, internal_state=None):
     """Generator implementation of 1-time multi-tau correlation
 
     Parameters
@@ -145,10 +145,10 @@ def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
     _processing_func : function, optional
         The processing function for the internals of the lazy correlator.
         Defaults to skxray.core.correlation.pyprocess._process
-    _state : namedtuple, optional
-        _state is a bucket for all of the internal state of the generator.
-        It is part of the `results` object that is yielded from this
-        generator
+    internal_state : namedtuple, optional
+        internal_state is a bucket for all of the internal state of the
+        generator. It is part of the `results` object that is yielded from
+        this generator
 
     Yields
     ------
@@ -187,12 +187,12 @@ def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
     if num_bufs % 2 != 0:
         raise ValueError("There must be an even number of `num_bufs`. You "
                          "provided %s" % num_bufs)
-    if _state is None:
-        _state = _init_state(num_levels, num_bufs, labels)
+    if internal_state is None:
+        internal_state = _init_state(num_levels, num_bufs, labels)
     if processing_func is None:
         processing_func = pyprocess
     # create a shorthand reference to the results and state named tuple
-    s = _state
+    s = internal_state
     # stash the number of pixels in the mask
     num_pixels = np.bincount(s.label_mask)
     # Convert from num_levels, num_bufs to lag frames.
@@ -261,9 +261,6 @@ def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
         else:
             g_max = s.past_intensity.shape[0]
 
-        # Normalize g2 by the product of past_intensity and future_intensity
-        g2 = (s.G[:g_max] /
-              (s.past_intensity[:g_max] *
-               s.future_intensity[:g_max]))
-
+        g2 = (s.G[:g_max] / (s.past_intensity[:g_max] *
+                             s.future_intensity[:g_max]))
         yield results(g2, lag_steps[:g_max], s)
