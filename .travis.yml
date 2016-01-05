@@ -6,10 +6,12 @@ addons:
       - pandoc
 env:
   global:
-    - GH_REF: github.com/ericdill/scikit-beam.git
-    - secure: "iBBPkIXkg0FCHDPEd3tbT/k09/bvcZGA0+uXUlL52UkOJwfu565JZKEPSHwJcP9xHrEfDbokevv/OIT1a0ZA4ZsgLQSb+fw6zc7FDxRgUVtcNpvkUSbY8zOV6IyK3rXMqrLvvdzvKM7wv/0C+8ys3/8aX0OMFn/fs0SHBR9Po+A="
+    - GH_REF: github.com/scikit-beam/scikit-beam.git
+    - secure: "A5gJ+qdPuf8BNUNkFC0XzMZaKAgDIQWwVoHGOslXFgjLvtluk0XOPWUqKhXf0jAII/pf40nGGo55wqNKpimhAO8oUBBeP9wM9JPf7l0KaZlAfzdDBdXDa2iwAdtiviAF54uJ7MvTzslCjcER+I8iJZUQylowDJ5fEe+yvLqOfy4="
 
 python:
+  - 2.7
+  - 3.4
   - 3.5
 
 before_install:
@@ -19,39 +21,29 @@ before_install:
   - export PATH=/home/travis/mc/bin:$PATH
 
 install:
-  - echo 'pass'
-  # - export GIT_FULL_HASH=`git rev-parse HEAD`
-  # - conda config --set always_yes true
-  # - conda update conda
-  # - conda config --add channels scikit-xray
-  # - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4
-  # - source activate testenv
-  # # need to build_ext -i for the tests so that the .so is local to the source
-  # # code.  We could also setup.py develop, but I'm not sure if that is any
-  # # better
-  # - python setup.py install build_ext -i
-  # - pip install coveralls
-  # - pip install codecov
+  - export GIT_FULL_HASH=`git rev-parse HEAD`
+  - conda config --set always_yes true
+  - conda update conda
+  - conda config --add channels scikit-xray
+  - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4
+  - source activate testenv
+  # need to build_ext -i for the tests so that the .so is local to the source
+  # code.  We could also setup.py develop, but I'm not sure if that is any
+  # better
+  - python setup.py install build_ext -i
+  - pip install coveralls
+  - pip install codecov
 
 script:
-  - echo 'script'
-  # - python run_tests.py
+  - python run_tests.py
 
 after_success:
-  # notes on how to auto build docs
-  # https://gist.github.com/domenic/ec8b0fc8ab45f39403dd
-
-
+  - coveralls
+  - codecov
   - if [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PYTHON_VERSION == 3.5 ]; then
-      which pip;
       conda create -n docs_env python=$TRAVIS_PYTHON_VERSION sphinx numpydoc ipython jupyter pip matplotlib --yes;
       source activate docs_env;
-      conda info -e;
-      which pip;
       pip install sphinx_bootstrap_theme;
-      conda info -e;
-      conda list;
-      python -c "import sphinx_bootstrap_theme; print(sphinx_bootstrap_theme)";
       cd ..;
       git clone https://github.com/scikit-beam/scikit-beam-examples.git;
       cd scikit-beam/doc;
