@@ -1,6 +1,5 @@
 from __future__ import absolute_import, print_function, division
 from skxray.core.accumulators.correlation import lazy_multi_tau
-from skxray.core.accumulators.correlation .pyprocess import pyprocess
 
 import numpy as np
 
@@ -30,15 +29,10 @@ def setup():
 
 
 def test_lazy_multi_tau():
-    for func in [pyprocess, ]:
-        yield _lazy_multi_tau, func
-
-
-def _lazy_multi_tau(processing_func):
     setup()
     # run the correlation on the full stack
     full_gen = lazy_multi_tau(
-        img_stack, num_levels, num_bufs, rois, processing_func=processing_func)
+        img_stack, num_levels, num_bufs, rois)
     for full_result in full_gen:
         pass
 
@@ -48,16 +42,14 @@ def _lazy_multi_tau(processing_func):
 
     # run the correlation on the first half
     gen_first_half = lazy_multi_tau(
-        img_stack[:stack_size//2], num_levels, num_bufs, rois,
-        processing_func=processing_func)
+        img_stack[:stack_size//2], num_levels, num_bufs, rois)
     for first_half_result in gen_first_half:
         pass
     # run the correlation on the second half by passing in the state from the
     # first half
     gen_second_half = lazy_multi_tau(
         img_stack[stack_size//2:], num_levels, num_bufs, rois,
-        processing_func=processing_func,
-        _state=first_half_result.internal_state
+        internal_state=first_half_result.internal_state
     )
 
     for second_half_result in gen_second_half:
