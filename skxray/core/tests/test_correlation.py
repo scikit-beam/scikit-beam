@@ -36,80 +36,73 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 import numpy as np
-from numpy.testing import (assert_array_almost_equal,
-                           assert_almost_equal)
-from nose.tools import assert_raises
+from numpy.testing import assert_array_almost_equal
 
-from skimage import data
-
-import skxray.core.correlation as corr
-import skxray.core.roi as roi
 import skxray.core.utils as utils
-
+from skxray.core.correlation import (multi_tau_auto_corr,
+                                     auto_corr_scat_factor,
+                                     lazy_multi_tau)
 
 logger = logging.getLogger(__name__)
 
 
-# It is unclear why this test is so slow. Can we speed this up at all?
-def test_correlation():
-    num_levels = 4
-    num_bufs = 8  # must be even
-    num_qs = 2  # number of interested roi's (rings)
-    img_dim = (50, 50)  # detector size
-
-    roi_data = np.array(([10, 20, 12, 14], [40, 10, 9, 10]),
-                        dtype=np.int64)
-
-    indices = roi.rectangles(roi_data, img_dim)
-
-    img_stack = np.random.randint(1, 5, size=(500, ) + img_dim)
-
-    g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, indices,
-                                             img_stack)
-
-    assert_array_almost_equal(lag_steps,  np.array([0, 1, 2, 3, 4, 5, 6, 7, 8,
-                                                   10, 12, 14, 16, 20, 24, 28,
-                                                   32, 40, 48, 56]))
-
-    assert_array_almost_equal(g2[1:, 0], 1.00, decimal=2)
-    assert_array_almost_equal(g2[1:, 1], 1.00, decimal=2)
+def setup():
+    global num_levels, num_bufs, xdim, ydim, stack_size, img_stack, rois
+    num_levels = 6
+    num_bufs = 4  # must be even
+    xdim = 256
+    ydim = 512
+    stack_size = 100
+    img_stack = np.random.randint(1, 3, (stack_size, xdim, ydim))
+    rois = np.zeros_like(img_stack[0])
+    # make sure that the ROIs can be any integers greater than 1. They do not
+    # have to start at 1 and be continuous
+    rois[0:xdim//10, 0:ydim//10] = 5
+    rois[xdim//10:xdim//5, ydim//10:ydim//5] = 3
 
 
-def test_image_stack_correlation():
-    num_levels = 1
-    num_bufs = 2  # must be even
-    coins = data.camera()
-    coins_stack = []
+def test_lazy_vs_original():
+    setup()
+    # run the correlation on the full stack
+    full_gen = lazy_multi_tau(
+        img_stack, num_levels, num_bufs, rois)
+    for gen_result in full_gen:
+        pass
 
-    for i in range(4):
-        coins_stack.append(coins)
+    g2, lag_steps = multi_tau_auto_corr(num_levels, num_bufs, rois, img_stack)
 
-    coins_mesh = np.zeros_like(coins)
-    coins_mesh[coins < 30] = 1
-    coins_mesh[coins > 50] = 2
+    assert np.all(g2 == gen_result.g2)
+    assert np.all(lag_steps == gen_result.lag_steps)
 
-    g2, lag_steps = corr.multi_tau_auto_corr(num_levels, num_bufs, coins_mesh,
-                                             coins_stack)
 
-    assert np.all(g2[:, 0], axis=0)
-    assert np.all(g2[:, 1], axis=0)
+def test_lazy_multi_tau():
+    setup()
+    # run the correlation on the full stack
+    full_gen = lazy_multi_tau(
+        img_stack, num_levels, num_bufs, rois)
+    for full_result in full_gen:
+        pass
 
-    num_buf = 5
+    # make sure we have essentially zero correlation in the images,
+    # since they are random integers
+    assert np.average(full_result.g2-1) < 0.01
 
-    # check the number of buffers are even
-    assert_raises(ValueError,
-                  lambda: corr.multi_tau_auto_corr(num_levels, num_buf,
-                                                   coins_mesh, coins_stack))
-    # check image shape and labels shape are equal
-    #assert_raises(ValueError,
-    #            lambda : corr.multi_tau_auto_corr(num_levels, num_bufs,
-    #                                                indices, coins_stack))
+    # run the correlation on the first half
+    gen_first_half = lazy_multi_tau(
+        img_stack[:stack_size//2], num_levels, num_bufs, rois)
+    for first_half_result in gen_first_half:
+        pass
+    # run the correlation on the second half by passing in the state from the
+    # first half
+    gen_second_half = lazy_multi_tau(
+        img_stack[stack_size//2:], num_levels, num_bufs, rois,
+        internal_state=first_half_result.internal_state
+    )
 
-    # check the number of pixels is zero
-    mesh = np.zeros_like(coins)
-    assert_raises(ValueError,
-                  lambda: corr.multi_tau_auto_corr(num_levels, num_bufs,
-                                                   mesh, coins_stack))
+    for second_half_result in gen_second_half:
+        pass
+
+    assert np.all(full_result.g2 == second_half_result.g2)
 
 
 def test_auto_corr_scat_factor():
@@ -119,7 +112,13 @@ def test_auto_corr_scat_factor():
     relaxation_rate = 10.0
     baseline = 1.0
 
-    g2 = corr.auto_corr_scat_factor(lags, beta, relaxation_rate, baseline)
+    g2 = auto_corr_scat_factor(lags, beta, relaxation_rate, baseline)
 
     assert_array_almost_equal(g2, np.array([1.5, 1.0, 1.0, 1.0, 1.0,
                                             1.0, 1.0, 1.0]), decimal=8)
+
+
+if __name__ == '__main__':
+    import nose
+
+    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
