@@ -26,7 +26,7 @@ def synthetic_spectrum():
     pileup_peak = ['Si_Ka1-Si_Ka1', 'Si_Ka1-Ce_La1']
     elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak
     elist, matv, area_v = construct_linear_model(x, param, elemental_lines, default_area=1e5)
-    return np.sum(matv, 1)
+    return np.sum(matv, 1)  #In case that y0 might be zero at certain points.
 
 
 def test_param_controller_fail():
@@ -232,6 +232,8 @@ def test_pixel_fit_multiprocess():
     for k, v in six.iteritems(result_map):
         assert_equal(v[0, 0], v[1, 0])
         if k in ['snip_bkg', 'r_squared']:
+            # bkg is not a fitting parameter, and r_squared is just a statistical output.
+            # Only compare the fitting parameters, such as area of each peak.
             continue
         # compare with default value 1e5, and get difference < 1%
         assert_true(abs(v[0,0]*0.01-default_area)/default_area < 1e-2)  # difference < 1%

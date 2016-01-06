@@ -1290,7 +1290,8 @@ def fit_pixel_multiprocess_nnls(exp_data, matv, param,
     Parameters
     ----------
     exp_data : array
-        3D data of experiment spectrum
+        3D data of experiment spectrum, 
+        with x,y positions as the first 2-dim, and energy as the third one.
     matv : array
         matrix for regression analysis
     param : dict
