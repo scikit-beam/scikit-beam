@@ -1236,14 +1236,11 @@ def _get_activated_line(incident_energy, elemental_line):
         return line_list
 
 
-def fit_per_line_nnls(row_num, data,
-                      matv, param, use_snip):
-    """
-    Fit experiment data for a given row using nnls algorithm.
+def fit_per_line_nnls(data, matv, param, use_snip):
+    """Fit experiment data for a given row using nnls algorithm.
+
     Parameters
     ----------
-    row_num : int
-        which row to fit
     data : array
         selected one row of experiment spectrum
     matv : array
@@ -1259,7 +1256,6 @@ def fit_per_line_nnls(row_num, data,
         fitting values for all the elements at a given row. Background is
         calculated as a summed value. Also residual is included.
     """
-    logger.info('Row number at {}'.format(row_num))
     out = []
     bg_sum = 0
     for i in range(data.shape[0]):
@@ -1283,6 +1279,19 @@ def fit_per_line_nnls(row_num, data,
     return np.array(out)
 
 
+def _log_and_fit(row_num, *args):
+    """Wrapper around fit_per_line_nnls to log the row num that is being used
+
+    Parameters
+    ----------
+    row_num : int
+        The row number that is being computed
+    args
+        The arguments to `fit_per_line_nnls`
+    """
+    logger.info('Row number at {}'.format(row_num))
+    return fit_per_line_nnls(*args)
+
 def fit_pixel_multiprocess_nnls(exp_data, matv, param,
                                 use_snip=False):
     """
@@ -1290,7 +1299,7 @@ def fit_pixel_multiprocess_nnls(exp_data, matv, param,
     Parameters
     ----------
     exp_data : array
-        3D data of experiment spectrum, 
+        3D data of experiment spectrum,
         with x,y positions as the first 2-dim, and energy as the third one.
     matv : array
         matrix for regression analysis
@@ -1309,7 +1318,7 @@ def fit_pixel_multiprocess_nnls(exp_data, matv, param,
     logger.info('cpu count: {}'.format(num_processors_to_use))
     pool = multiprocessing.Pool(num_processors_to_use)
 
-    result_pool = [pool.apply_async(fit_per_line_nnls,
+    result_pool = [pool.apply_async(_log_and_fit,
                                     (n, exp_data[n, :, :], matv,
                                      param, use_snip))
                    for n in range(exp_data.shape[0])]
