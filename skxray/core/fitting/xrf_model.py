@@ -51,6 +51,7 @@ import numpy as np
 from scipy.optimize import nnls
 import six
 from lmfit import Model
+import multiprocessing
 
 from ..constants import XrfElement as Element
 from ..fitting.lineshapes import gaussian
@@ -1233,3 +1234,166 @@ def _get_activated_line(incident_energy, elemental_line):
                 continue
             line_list.append(str(element)+'_'+str(line_name))
         return line_list
+
+
+def fit_per_line_nnls(data, matv, param, use_snip):
+    """Fit experiment data for a given row using nnls algorithm.
+
+    Parameters
+    ----------
+    data : array
+        selected one row of experiment spectrum
+    matv : array
+        matrix for regression analysis
+    param : dict
+        fitting parameters
+    use_snip : bool
+        use snip algorithm to remove background or not
+
+    Returns
+    -------
+    array :
+        fitting values for all the elements at a given row. Background is
+        calculated as a summed value. Also residual is included.
+    """
+    out = []
+    bg_sum = 0
+    for y in data:
+        if use_snip:
+            bg = snip_method(y,
+                             param['e_offset']['value'],
+                             param['e_linear']['value'],
+                             param['e_quadratic']['value'],
+                             width=param['non_fitting_values']['background_width'])
+            bg_sum = np.sum(bg)
+            result, res = nnls_fit(y - bg, matv, weights=None)
+        else:
+            result, res = nnls_fit(y - bg, matv, weights=None)
+
+        sst = np.sum((y-np.mean(y))**2)
+        r2 = 1 - res/sst
+        result = list(result) + [bg_sum, r2]
+        out.append(result)
+    return np.array(out)
+
+
+def _log_and_fit(row_num, *args):
+    """Wrapper around fit_per_line_nnls to log the row num that is being used
+
+    Parameters
+    ----------
+    row_num : int
+        The row number that is being computed
+    args
+        The arguments to `fit_per_line_nnls`
+    """
+    logger.info('Row number at {}'.format(row_num))
+    return fit_per_line_nnls(*args)
+
+def fit_pixel_multiprocess_nnls(exp_data, matv, param,
+                                use_snip=False):
+    """
+    Multiprocess fit of experiment data.
+    Parameters
+    ----------
+    exp_data : array
+        3D data of experiment spectrum,
+        with x,y positions as the first 2-dim, and energy as the third one.
+    matv : array
+        matrix for regression analysis
+    param : dict
+        fitting parameters
+    use_snip : bool, optional
+        use snip algorithm to remove background or not
+
+    Returns
+    -------
+    array
+        Fitting values for all the elements
+    """
+    num_processors_to_use = multiprocessing.cpu_count()
+
+    logger.info('cpu count: {}'.format(num_processors_to_use))
+    pool = multiprocessing.Pool(num_processors_to_use)
+
+    result_pool = [
+        pool.apply_async(_log_and_fit, (n, data, matv,param, use_snip))
+        for n, data in enumerate(exp_data)]
+
+    results = [r.get() for r in result_pool]
+
+    pool.terminate()
+    pool.join()
+
+    return np.array(results)
+
+
+def calculate_area(e_select, matv, results,
+                   param, first_peak_area=False):
+    """
+    Parameters
+    ----------
+    e_select : list
+        elements
+    matv : 2D array
+        matrix constains elemental profile as columns
+    results : 3D array
+        x, y positions, and each element's weight on third dim
+    param : dict
+        parameters of fitting
+    first_peak_area : Bool, optional
+        get overal peak area or only the first peak area, such as Ar_Ka1
+
+    Returns
+    -------
+    dict :
+        dict of each 2D elemental distribution
+    """
+    total_list = e_select + ['snip_bkg'] + ['r_squared']
+    mat_sum = np.sum(matv, axis=0)
+
+    result_map = dict()
+    for i in range(len(e_select)):
+        if first_peak_area is not True:
+            result_map.update({total_list[i]: results[:, :, i]*mat_sum[i]})
+        else:
+            if total_list[i] not in K_LINE+L_LINE+M_LINE:
+                ratio_v = 1
+            else:
+                ratio_v = get_relative_cs_ratio(total_list[i],
+                                                param['coherent_sct_energy']['value'])
+            result_map.update({total_list[i]: results[:, :, i]*mat_sum[i]*ratio_v})
+
+    # add background and res
+    result_map.update({total_list[-2]: results[:, :, -2]})
+    result_map.update({total_list[-1]: results[:, :, -1]})
+
+    return result_map
+
+
+def get_relative_cs_ratio(elemental_line, energy):
+    """
+    At given energy, multiple elemental lines may be activated. This function is
+    used to calculate the ratio of the first line's cross section (cs) to
+    the summed cross section from all the lines.
+
+    Parameters
+    ----------
+    elemental_line : str
+        e.g., 'Mg_K', refers to the K lines of Magnesium
+    energy : float
+        incident energy in keV
+
+    Returns
+    -------
+    float :
+        calculated ratio
+    """
+    name, line = elemental_line.split('_')
+    e = Element(name)
+    transition_lines = TRANSITIONS_LOOKUP[line.upper()]
+
+    sum_v = 0
+    for v in transition_lines:
+        sum_v += e.cs(energy)[v]
+    return e.cs(energy)[transition_lines[0]]/sum_v
