@@ -1258,19 +1258,17 @@ def fit_per_line_nnls(data, matv, param, use_snip):
     """
     out = []
     bg_sum = 0
-    for i in range(data.shape[0]):
-        if use_snip is True:
-            bg = snip_method(data[i, :],
+    for y in data:
+        if use_snip:
+            bg = snip_method(y,
                              param['e_offset']['value'],
                              param['e_linear']['value'],
                              param['e_quadratic']['value'],
                              width=param['non_fitting_values']['background_width'])
-            y = data[i, :] - bg
             bg_sum = np.sum(bg)
-
+            result, res = nnls_fit(y - bg, matv, weights=None)
         else:
-            y = data[i, :]
-        result, res = nnls_fit(y, matv, weights=None)
+            result, res = nnls_fit(y - bg, matv, weights=None)
 
         sst = np.sum((y-np.mean(y))**2)
         r2 = 1 - res/sst
@@ -1310,22 +1308,19 @@ def fit_pixel_multiprocess_nnls(exp_data, matv, param,
 
     Returns
     -------
-    dict :
-        fitting values for all the elements
+    array
+        Fitting values for all the elements
     """
     num_processors_to_use = multiprocessing.cpu_count()
 
     logger.info('cpu count: {}'.format(num_processors_to_use))
     pool = multiprocessing.Pool(num_processors_to_use)
 
-    result_pool = [pool.apply_async(_log_and_fit,
-                                    (n, exp_data[n, :, :], matv,
-                                     param, use_snip))
-                   for n in range(exp_data.shape[0])]
+    result_pool = [
+        pool.apply_async(_log_and_fit, (n, data, matv,param, use_snip))
+        for n, data in enumerate(exp_data)]
 
-    results = []
-    for r in result_pool:
-        results.append(r.get())
+    results = [r.get() for r in result_pool]
 
     pool.terminate()
     pool.join()
