@@ -38,7 +38,7 @@
 
 
 # smoketest the api
-from skxray.core.constants import *
+from skbeam.core.constants import *
 
 if __name__ == '__main__':
     import nose

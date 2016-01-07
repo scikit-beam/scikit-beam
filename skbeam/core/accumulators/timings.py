@@ -1,7 +1,7 @@
 import timeit
 import time
 import numpy as np
-from skxray.core.accumulators.histogram import Histogram
+from skbeam.core.accumulators.histogram import Histogram
 
 h = Histogram((10, 0, 10.1), (7, 0, 7.1));
 x = np.random.random(1000000)*40

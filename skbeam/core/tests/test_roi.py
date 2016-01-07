@@ -36,8 +36,8 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 import numpy as np
-from skxray.core import roi
-from skxray.core import utils
+from skbeam.core import roi
+from skbeam.core import utils
 import itertools
 from skimage import morphology
 

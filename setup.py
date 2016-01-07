@@ -18,7 +18,7 @@ def read(fname):
 
 
 def c_ext():
-    return [Extension('skxray.ext.ctrans', ['src/ctrans.c'],
+    return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'],
                       define_macros=[('USE_THREADS', None)])]
 
 

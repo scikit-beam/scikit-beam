@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_array_equal
 from numpy.testing import assert_array_almost_equal
 from numpy.testing import assert_almost_equal
-from skxray.core.accumulators.histogram import Histogram
+from skbeam.core.accumulators.histogram import Histogram
 from time import time
 
 
@@ -90,15 +90,15 @@ if __name__ == '__main__':
         t0 = time()
         h = Histogram(x, y)
         h.fill(xvals, yvals, weights=weights)
-        skxray_time = time() - t0
+        skbeam_time = time() - t0
 
         edges = h.edges
         t0 = time()
         ynp = np.histogram2d(xvals, yvals, bins=edges, weights=weights)[0]
         numpy_time = time() - t0
-        times.append(numpy_time / skxray_time)
+        times.append(numpy_time / skbeam_time)
         assert_almost_equal(np.sum(h.values), np.sum(ynp))
-    print('skxray is %s times faster than numpy, on average' % np.average(times))
+    print('skbeam is %s times faster than numpy, on average' % np.average(times))
     #
     # test_1d_histogram()
     # test_2d_histogram()
