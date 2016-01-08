@@ -47,10 +47,9 @@ help:
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 
 clean:
-	# rm -rf $(BUILDDIR)/*
-	# rm -rf tutorial/*_files/
-	# rm -rf tutorial/*.rst
-	git clean -xfd ../doc
+	rm -rf $(BUILDDIR)/*
+	rm -rf tutorial/*_files/
+	rm -rf tutorial/*.rst
 
 notebooks:
 	make -C tutorial notebooks
