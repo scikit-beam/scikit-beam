@@ -3,7 +3,7 @@
 ============================
 
 
-.. automodule:: skxray.io.net_cdf_io
+.. automodule:: skbeam.io.net_cdf_io
    :members:
    :show-inheritance:
    :undoc-members:

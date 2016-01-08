@@ -3,7 +3,7 @@ import os
 path = os.getcwd()
 
 to_import = []
-for tup in os.walk('../skxray'):
+for tup in os.walk('../skbeam'):
     if 'test' in tup[0]:
         continue
     print(tup)

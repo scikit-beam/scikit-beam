@@ -12,9 +12,9 @@ NOTE: You need pandoc v1.13.2 in order for the notebooks to render correctly.
       way] (https://github.com/jupyter/nbconvert/issues/97)
       Binaries can be found [here] (https://github.com/jgm/pandoc/releases/tag/1.13.2)
 
-Then you `make notebooks` and `make html` in the `/scikit-xray/doc` folder.  
+Then you `make notebooks` and `make html` in the `/scikit-beam/doc` folder.  
 This will convert the example notebooks into html and generate the html for
 the API documentation.
 
-Inspect the output at `/scikit-xray/doc/_build/html/index.html`. If everything
+Inspect the output at `/scikit-beam/doc/_build/html/index.html`. If everything
 looks good, run `make gh-pages`

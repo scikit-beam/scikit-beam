@@ -3,7 +3,7 @@
 =========================
 
 
-.. automodule:: skxray.core.image
+.. automodule:: skbeam.core.image
    :members:
    :show-inheritance:
    :undoc-members:

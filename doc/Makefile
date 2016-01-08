@@ -88,17 +88,17 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/scikit-xray.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/scikit-beam.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/scikit-xray.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/scikit-beam.qhc"
 
 devhelp:
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/scikit-xray"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/scikit-xray"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/scikit-beam"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/scikit-beam"
 	@echo "# devhelp"
 
 epub:

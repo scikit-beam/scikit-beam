@@ -3,7 +3,7 @@
 ================================
 
 
-.. automodule:: skxray.core.spectroscopy
+.. automodule:: skbeam.core.spectroscopy
    :members:
    :show-inheritance:
    :undoc-members:

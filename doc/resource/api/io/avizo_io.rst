@@ -3,7 +3,7 @@
 ==========================
 
 
-.. automodule:: skxray.io.avizo_io
+.. automodule:: skbeam.io.avizo_io
    :members:
    :show-inheritance:
    :undoc-members:

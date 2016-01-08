@@ -3,7 +3,7 @@
 =========================
 
 
-.. automodule:: skxray.core.fitting.lineshapes
+.. automodule:: skbeam.core.fitting.lineshapes
    :members:
    :show-inheritance:
    :undoc-members:

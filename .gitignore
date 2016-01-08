@@ -94,5 +94,5 @@ generated/
 .tags*
 /tags
 
-# Generated cython files in any subdirectory of /skxray/
-/skxray/**/*.c
+# Generated cython files in any subdirectory of /skbeam/
+/skbeam/**/*.c

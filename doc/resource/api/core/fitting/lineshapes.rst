@@ -3,7 +3,7 @@
 =========================
 
 
-.. automodule:: skxray.core.fitting.background
+.. automodule:: skbeam.core.fitting.background
    :members:
    :show-inheritance:
    :undoc-members:

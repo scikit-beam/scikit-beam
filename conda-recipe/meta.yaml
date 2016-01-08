@@ -1,5 +1,5 @@
 package:
-  name: scikit-xray
+  name: scikit-beam
   version: {{ environ['GIT_DESCRIBE_TAG'] }}.post{{ environ['GIT_DESCRIBE_NUMBER'] }}
 
 source:
@@ -25,48 +25,48 @@ requirements:
     - xraylib
     - scikit-image
     - lmfit ==0.8.3
-    - netcdf4  # optional, required for skxray.io
+    - netcdf4  # optional, required for skbeam.io
 
 test:
   requires:
     - nose
   imports:
     # import all sub-packages and modules
-    - skxray
-    - skxray.diffraction
-    - skxray.fluorescence
-    - skxray._version
-    - skxray.core
-    - skxray.core.utils
-    - skxray.core.dpc
-    - skxray.core.feature
-    - skxray.core.calibration
-    - skxray.core.arithmetic
-    - skxray.core.recip
-    - skxray.core.image
-    - skxray.core.cdi
-    - skxray.core.roi
-    - skxray.core.correlation
-    - skxray.core.spectroscopy
-    - skxray.core.fitting
-    - skxray.core.fitting.xrf_model
-    - skxray.core.fitting.background
-    - skxray.core.fitting.lineshapes
-    - skxray.core.fitting.funcs
-    - skxray.core.fitting.models
-    - skxray.core.fitting.base
-    - skxray.core.fitting.base.parameter_data
-    - skxray.core.constants
-    - skxray.core.constants.basic
-    - skxray.core.constants.xrs
-    - skxray.core.constants.xrf
-    - skxray.io
-    - skxray.io.avizo_io
-    - skxray.io.save_powder_output
-    - skxray.io.binary
-    - skxray.io.net_cdf_io
-    - skxray.io.gsas_file_reader
+    - skbeam
+    - skbeam.diffraction
+    - skbeam.fluorescence
+    - skbeam._version
+    - skbeam.core
+    - skbeam.core.utils
+    - skbeam.core.dpc
+    - skbeam.core.feature
+    - skbeam.core.calibration
+    - skbeam.core.arithmetic
+    - skbeam.core.recip
+    - skbeam.core.image
+    - skbeam.core.cdi
+    - skbeam.core.roi
+    - skbeam.core.correlation
+    - skbeam.core.spectroscopy
+    - skbeam.core.fitting
+    - skbeam.core.fitting.xrf_model
+    - skbeam.core.fitting.background
+    - skbeam.core.fitting.lineshapes
+    - skbeam.core.fitting.funcs
+    - skbeam.core.fitting.models
+    - skbeam.core.fitting.base
+    - skbeam.core.fitting.base.parameter_data
+    - skbeam.core.constants
+    - skbeam.core.constants.basic
+    - skbeam.core.constants.xrs
+    - skbeam.core.constants.xrf
+    - skbeam.io
+    - skbeam.io.avizo_io
+    - skbeam.io.save_powder_output
+    - skbeam.io.binary
+    - skbeam.io.net_cdf_io
+    - skbeam.io.gsas_file_reader
 
 about:
-  home: http://scikit-xray.github.io/scikit-xray/
+  home: http://scikit-beam.github.io/scikit-beam/
   license: 3-Clause BSD

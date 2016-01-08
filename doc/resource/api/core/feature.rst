@@ -2,7 +2,7 @@
  :mod:`core.feature` Module
 ===========================
 
-.. automodule:: skxray.core.feature
+.. automodule:: skbeam.core.feature
    :members:
    :show-inheritance:
    :undoc-members:

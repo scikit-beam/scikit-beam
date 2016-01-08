@@ -1,11 +1,11 @@
 [run]
-source=scikit-xray
+source=scikit-beam
 [report]
 omit =
     */python?.?/*
     */site-packages/nose/*
     *test*
-    skxray/__init__.py
+    skbeam/__init__.py
     # ignore _version.py and versioneer.py
     .*version.*
     *_version.py
