@@ -68,11 +68,11 @@ copyright = u'2014-2015 Brookhaven National Lab'
 # built documents.
 #
 try:
-    import skxray
+    import skbeam
 except ImportError:
-    msg = "Error: scikit-xray must be installed before building the documentation"
+    msg = "Error: scikit-beam must be installed before building the documentation"
     sys.exit(msg)
-release = version = skxray.__version__
+release = version = skbeam.__version__
 
 # The full version, including alpha/beta/rc tags.
 
