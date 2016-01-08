@@ -12,13 +12,6 @@ if not os.path.exists(copy_to_dir):
 # force checkout the master branch, then build the docs
 subprocess.check_output(git_checkout_master_cmd, cwd=notebooks_dir)
 
-<<<<<<< HEAD
-c.NbConvertApp.notebooks = [
-    os.path.join(path, f) for (path, folders, files) in os.walk(notebooks_dir) for f in files
-    if f.endswith('.ipynb')
-]
-
-=======
 notebooks = [
     os.path.join(path, f) for (path, folders, files) in os.walk(notebooks_dir)
     for f in files if f.endswith('.ipynb')
@@ -35,4 +28,3 @@ example_names = ['tutorial/%s' % os.path.splitext(f)[0]
 template = template.render(examples=example_names)
 with open('../index.rst', 'w') as f:
     f.write(template)
->>>>>>> e1fc9e0... Try to programmatically generate all notebooks
