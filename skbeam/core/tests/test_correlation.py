@@ -71,7 +71,7 @@ def test_lazy_vs_original():
 
     g2, lag_steps = multi_tau_auto_corr(num_levels, num_bufs, rois, img_stack)
 
-    assert np.all(g2 == gen_result.g2)
+    assert np.all(g2 == gen_result.correlation_results)
     assert np.all(lag_steps == gen_result.lag_steps)
 
 
@@ -85,7 +85,7 @@ def test_lazy_one_time():
 
     # make sure we have essentially zero correlation in the images,
     # since they are random integers
-    assert np.average(full_result.g2-1) < 0.01
+    assert np.average(full_result.correlation_results-1) < 0.01
 
     # run the correlation on the first half
     gen_first_half = lazy_one_time(
@@ -102,7 +102,8 @@ def test_lazy_one_time():
     for second_half_result in gen_second_half:
         pass
 
-    assert np.all(full_result.g2 == second_half_result.g2)
+    assert np.all(full_result.correlation_results ==
+                  second_half_result.correlation_results)
 
 
 def test_auto_corr_scat_factor():
