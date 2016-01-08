@@ -41,7 +41,7 @@ from numpy.testing import assert_array_almost_equal
 import skbeam.core.utils as utils
 from skbeam.core.correlation import (multi_tau_auto_corr,
                                      auto_corr_scat_factor,
-                                     lazy_multi_tau)
+                                     lazy_one_time)
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ def setup():
 def test_lazy_vs_original():
     setup()
     # run the correlation on the full stack
-    full_gen = lazy_multi_tau(
+    full_gen = lazy_one_time(
         img_stack, num_levels, num_bufs, rois)
     for gen_result in full_gen:
         pass
@@ -75,10 +75,10 @@ def test_lazy_vs_original():
     assert np.all(lag_steps == gen_result.lag_steps)
 
 
-def test_lazy_multi_tau():
+def test_lazy_one_time():
     setup()
     # run the correlation on the full stack
-    full_gen = lazy_multi_tau(
+    full_gen = lazy_one_time(
         img_stack, num_levels, num_bufs, rois)
     for full_result in full_gen:
         pass
@@ -88,13 +88,13 @@ def test_lazy_multi_tau():
     assert np.average(full_result.g2-1) < 0.01
 
     # run the correlation on the first half
-    gen_first_half = lazy_multi_tau(
+    gen_first_half = lazy_one_time(
         img_stack[:stack_size//2], num_levels, num_bufs, rois)
     for first_half_result in gen_first_half:
         pass
     # run the correlation on the second half by passing in the state from the
     # first half
-    gen_second_half = lazy_multi_tau(
+    gen_second_half = lazy_one_time(
         img_stack[stack_size//2:], num_levels, num_bufs, rois,
         internal_state=first_half_result.internal_state
     )
