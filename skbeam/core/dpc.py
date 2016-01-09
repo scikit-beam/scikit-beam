@@ -280,7 +280,7 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
 
 
 def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
-               scan_rows, scan_cols, scan_xstep, scan_ystep, energy,
+               scan_rows, scan_cols, scan_xstep, scan_ystep,
                solver='Nelder-Mead', roi=None, bad_pixels=None,
                dpc_state=None):
     """
@@ -302,20 +302,11 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
         or y direction) of the sample transmission function at one scanning
         point.
 
-    pixel_size : tuple
-        Physical pixel (a rectangle) size of the detector in um.
-
-    focus_to_det : float
-        Focus to detector distance in um.
-
     scan_rows : int
         Number of scanned rows.
 
     scan_cols : int
         Number of scanned columns.
-
-    energy : float
-        Energy of the scanning x-ray in keV.
 
     solver : str, optional
         Type of solver, one of the following (default 'Nelder-Mead'):
@@ -396,22 +387,28 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
         dpc_state.ay[i, j] = _ay
         yield dpc_state
 
+
 def reconstruct_phase_from_partial_info(
-    dpc_state, scan_xstep, scan_ystep, pixel_size=None, focus_to_det=None,
-    negate=True, scale=True, padding=0, weighting=0.5):
+    dpc_state, energy, focus_to_det, scan_xstep, scan_ystep, pixel_size=None,
+    focus_to_det=None, negate=True, scale=True, padding=0, weighting=0.5):
     """Using the partial results from dpc_runner, reconstruct the phase image
 
     Parameters
     ----------
     dpc_state : namedtuple
         The thing yielded from `dpc_runner`
+    energy : float
+        Energy of the scanning x-ray in keV.
+    focus_to_det : float
+        Focus to detector distance in um.
     scan_xstep : float
         Scanning step size in x direction (in micro-meter).
     scan_ystep : float
         Scanning step size in y direction (in micro-meter).
     pixel_size : Number, optional
-        The size of the detector pixels.  Pixels must be square. If a pixel
-        size is provided, it is assumed that you want to scale the image.
+        The size of the detector pixels.  Pixels must be square. If
+        `pixel_size and `focus_to_det` are provided, it is assumed that you
+        want to scale the image.
     focus_to_det : Number, optional
         The distance from the focal point of the beam to the detector.
         Must be provided as a pair with `pixel_size`.
