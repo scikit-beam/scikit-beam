@@ -41,6 +41,7 @@ import logging
 logger = logging.getLogger(__name__)
 import numpy as np
 from scipy.optimize import minimize
+from collections import namedtuple
 
 
 def image_reduction(im, roi=None, bad_pixels=None):
@@ -278,9 +279,14 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
 
     return phase
 
+# holy hacks, Batman!  'index' here is a single element list so
+# that I can keep track of how many images have been computed
+dpc_internal_state = namedtuple('dpc_internal_state',
+                                ['ax', 'ay', 'gx', 'gy', 'ref_fx', 'ref_fy',
+                                 'index'])
 
-def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
-               scan_rows, scan_cols, scan_xstep, scan_ystep,
+def dpc_runner(ref, image_sequence, start_point,
+               scan_rows, scan_cols,
                solver='Nelder-Mead', roi=None, bad_pixels=None,
                dpc_state=None):
     """
@@ -352,7 +358,7 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
         ref_fx = np.fft.fftshift(np.fft.ifft(refx))
         ref_fy = np.fft.fftshift(np.fft.ifft(refy))
 
-        return dpc_state(ax, ay, gx, gy, ref_fx, ref_fy)
+        return dpc_internal_state(ax, ay, gx, gy, ref_fx, ref_fy, [0])
 
     if dpc_state is None:
         dpc_state = initialize_state(scan_rows, scan_cols, ref, roi,
@@ -367,7 +373,7 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
     steps = np.max((num_images // 100, 1))
     # Same calculation on each diffraction pattern
     for im in image_sequence:
-        i, j = np.unravel_index(index, (scan_rows, scan_cols))
+        i, j = np.unravel_index(dpc_state.index[0], (scan_rows, scan_cols))
 
         # Dimension reduction along x and y direction
         imx, imy = image_reduction(im, roi, bad_pixels)
@@ -385,11 +391,12 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
         dpc_state.gy[i, j] = _gy
         dpc_state.ax[i, j] = _ax
         dpc_state.ay[i, j] = _ay
+        dpc_state.index[0] += 1
         yield dpc_state
 
 
 def reconstruct_phase_from_partial_info(
-    dpc_state, energy, focus_to_det, scan_xstep, scan_ystep, pixel_size=None,
+    dpc_state, energy, scan_xstep, scan_ystep, pixel_size=None,
     focus_to_det=None, negate=True, scale=True, padding=0, weighting=0.5):
     """Using the partial results from dpc_runner, reconstruct the phase image
 
@@ -441,7 +448,7 @@ def reconstruct_phase_from_partial_info(
     """
     if weighting < 0 or weighting > 1:
         raise ValueError('weighting should be within the range of [0, 1]!')
-    gx = dpc_state.gx
+    gx = None
     gy = dpc_state.gy
     if pixel_size and focus_to_det:
         # Convert to wavelength
@@ -451,7 +458,10 @@ def reconstruct_phase_from_partial_info(
         gx = dpc_state.gx * len(dpc_state.ref_fx) * scale
         gy = dpc_state.gy * len(dpc_state.ref_fy) * scale
     if negate:
-        gx = dpc_state * -1
+        if gx is not None:
+            gx *= -1
+        else:
+            gx = dpc_state.gx * -1
     # Reconstruct the final phase image
     phase = recon(gx, gy, scan_xstep, scan_ystep, padding, weighting)
 

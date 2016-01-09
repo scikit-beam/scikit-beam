@@ -94,7 +94,7 @@ def test_image_reduction():
     # call image reduction
     xline, yline = dpc.image_reduction(img, roi_0, bad_pixels_0)
     xline_bp, yline_bp = dpc.image_reduction(img, bad_pixels=bad_pixels_1)
-    xline_roi, yline_roi = dpc.image_reduction(img, roi=roi_1)    
+    xline_roi, yline_roi = dpc.image_reduction(img, roi=roi_1)
 
     assert_array_equal(xline, xsum)
     assert_array_equal(yline, ysum)
@@ -102,7 +102,7 @@ def test_image_reduction():
     assert_array_equal(yline_bp, ysum_bp)
     assert_array_equal(xline_roi, xsum_roi)
     assert_array_equal(yline_roi, ysum_roi)
-    
+
 
 def test_rss_factory():
     """
@@ -120,52 +120,52 @@ def test_rss_factory():
     residue = rss(v, xdata, ydata)
 
     assert_almost_equal(residue, 0)
-    
-    
+
+
 def test_dpc_fit():
     """
     Test dpc_fit.
-    
+
     """
-    
+
     start_point = [1, 0]
     length = 100
     solver = 'Nelder-Mead'
     xdata = np.arange(length)
     beta = 1j * (np.arange(length) - length//2)
     rss = dpc._rss_factory(length)
-    
+
     # Test 1
     v = [1.02, -0.00023]
     ydata = xdata * v[0] * np.exp(v[1] * beta)
     res = dpc.dpc_fit(rss, xdata, ydata, start_point, solver)
     assert_array_almost_equal(res, v)
-    
+
     # Test 2
     v = [0.88, -0.0048]
     ydata = xdata * v[0] * np.exp(v[1] * beta)
     res = dpc.dpc_fit(rss, xdata, ydata, start_point, solver)
     assert_array_almost_equal(res, v)
-    
+
     # Test 3
     v = [0.98, 0.0068]
     ydata = xdata * v[0] * np.exp(v[1] * beta)
     res = dpc.dpc_fit(rss, xdata, ydata, start_point, solver)
     assert_array_almost_equal(res, v)
-    
+
     # Test 4
     v = [0.95, 0.0032]
     ydata = xdata * v[0] * np.exp(v[1] * beta)
     res = dpc.dpc_fit(rss, xdata, ydata, start_point, solver)
     assert_array_almost_equal(res, v)
-    
-    
+
+
 def test_dpc_end_to_end():
     """
     Integrated test for DPC based on dpc_runner.
-    
+
     """
-    
+
     start_point = [1, 0]
     pixel_size = (55, 55)
     focus_to_det = 1.46e6
@@ -182,17 +182,43 @@ def test_dpc_end_to_end():
     img_size = (40, 40)
     scale = True
     negate = True
+    num_imgs = scan_rows * scan_cols
 
     ref_image = np.ones(img_size)
-    image_sequence = np.ones((scan_rows * scan_cols, img_size[0], img_size[1]))
+    image_sequence = np.ones((num_imgs, img_size[0], img_size[1]))
 
-    phi, a = dpc.dpc_runner(ref_image, image_sequence, start_point, pixel_size, 
-                            focus_to_det, scan_rows, scan_cols, scan_xstep, 
-                            scan_ystep, energy, padding, weighting, solver, 
-                            roi, bad_pixels, negate, scale)
-
+    # get the generator
+    gen = dpc.dpc_runner(ref_image, image_sequence, start_point, scan_rows,
+                         scan_cols, solver, roi, bad_pixels)
+    for partial_results in gen:
+        pass
+    phi, a = dpc.reconstruct_phase_from_partial_info(
+        partial_results, energy, scan_xstep, scan_ystep, pixel_size[0],
+        focus_to_det, negate, scale, padding, weighting
+    )
     assert_array_almost_equal(phi, np.zeros((scan_rows, scan_cols)))
     assert_array_almost_equal(a, np.ones((scan_rows, scan_cols)))
+
+    # test to make sure I can do half of the image sequence
+    first_half_gen = dpc.dpc_runner(ref_image, image_sequence[:num_imgs//2],
+                                    start_point, scan_rows, scan_cols, solver,
+                                    roi, bad_pixels)
+    for first_half_partial_results in first_half_gen:
+        pass
+    second_half_gen = dpc.dpc_runner(ref_image, image_sequence[num_imgs//2:],
+                                     start_point, scan_rows, scan_cols, solver,
+                                     roi, bad_pixels,
+                                     dpc_state=first_half_partial_results)
+    for second_half_partial_results in second_half_gen:
+        pass
+
+    phi_partial, a_partial = dpc.reconstruct_phase_from_partial_info(
+        second_half_partial_results, energy, scan_xstep, scan_ystep,
+        pixel_size[0], focus_to_det, negate, scale, padding, weighting
+    )
+
+    assert_array_almost_equal(phi_partial, phi)
+    assert_array_almost_equal(a_partial, a)
 
 
 if __name__ == "__main__":
