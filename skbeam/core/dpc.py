@@ -197,15 +197,8 @@ def dpc_fit(rss, ref_reduction, diff_reduction, start_point,
                     method=solver, tol=tol, options=dict(maxiter=max_iters)).x
 
 # attributes
-dpc_fit.solver = ['Nelder-Mead',
-                  'Powell',
-                  'CG',
-                  'BFGS',
-                  'Anneal',
-                  'L-BFGS-B',
-                  'TNC',
-                  'COBYLA',
-                  'SLSQP']
+dpc_fit.solver = ['Nelder-Mead', 'Powell', 'CG', 'BFGS', 'Anneal', 'L-BFGS-B',
+                  'TNC', 'COBYLA', 'SLSQP']
 
 
 def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
@@ -449,12 +442,5 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
     return phase, (ax + ay) / 2
 
 # attributes
-dpc_runner.solver = ['Nelder-Mead',
-                     'Powell',
-                     'CG',
-                     'BFGS',
-                     'Anneal',
-                     'L-BFGS-B',
-                     'TNC',
-                     'COBYLA',
-                     'SLSQP']
+dpc_runner.solver = ['Nelder-Mead', 'Powell', 'CG', 'BFGS', 'Anneal',
+                     'L-BFGS-B', 'TNC', 'COBYLA', 'SLSQP']
