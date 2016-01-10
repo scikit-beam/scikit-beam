@@ -423,7 +423,7 @@ def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1):
 def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
                   two_time_internal_state=None):
     """ Generator implementation of two-time multi-tau correlation
-    
+
     If you do not want multi-tau correlation, set num_levels to 1 and
     num_bufs to the number of images you wish to correlate
 
