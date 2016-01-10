@@ -77,8 +77,8 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
     num_bufs : int, even
         number of buffers(channels)
     num_pixels : array
-        number of pixels in certain roi's
-        roi's, dimensions are : [number of roi's]X1
+        number of pixels in certain ROI's
+        ROI's, dimensions are : [number of ROI's]X1
     img_per_level : array
         to track how many images processed in each level
     level : int
@@ -110,7 +110,7 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
         future_img = buf[level, buf_no]
         for w, arr in zip([past_img*future_img, past_img, future_img],
                           [G, past_intensity_norm, future_intensity_norm]):
-            binned = np.bincount(label_array, weights=w)
+            binned = np.bincount(label_array, weights=w)[1:]
             # pdb.set_trace()
             arr[t_index] += ((binned / num_pixels - arr[t_index]) /
                              (img_per_level[level] - i))
@@ -340,10 +340,10 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
 def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     """Wraps generator implementation of multi-tau
 
-    See docstring for lazy_one_time
-
     Original code(in Yorick) for multi tau auto correlation
     @author: Mark Sutton
+
+    See docstring for lazy_one_time
     """
     gen = lazy_one_time(images, num_levels, num_bufs, labels)
     for result in gen:
@@ -406,12 +406,24 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
     return beta * np.exp(-2 * relaxation_rate * lags) + baseline
 
 
-def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1,
-                  two_time_internal_state=None):
-    """
+def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1):
+    """Wraps generator implementation of multi-tau two time correlation
+
     This function computes two-time correlations.
     Original code : @author: Yugang Zhang
 
+    See docstring for lazy_two_time
+    """
+    gen = lazy_two_time(labels, images, num_frames, num_bufs, num_levels)
+    for result in gen:
+        pass
+    return result.correlation_results, result.lag_steps
+
+
+def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
+                  two_time_internal_state=None):
+    """ Generator implementation of two-time multi-tau correlation
+    
     If you do not want multi-tau correlation, set num_levels to 1 and
     num_bufs to the number of images you wish to correlate
 
@@ -440,6 +452,17 @@ def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1,
         how many generations of downsampling to perform, i.e.,
         the depth of the binomial tree of averaged frames
         default is one
+
+    Yields
+    ------
+    namedtuple
+        A `results` object is yielded after every image has been processed. This
+        `reults` object contains:
+        - the normalized correlation, `two_time`
+        - the times at which the correlation was computed, `lag_steps`
+        - and all of the internal state, `final_state`, which is a
+          `correlation_state` namedtuple
+
 
     Returns
     -------
@@ -541,14 +564,11 @@ def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1,
                 # Checking whether there is next level for processing
                 processing = level < num_levels
 
-    print (s.two_time.shape)
-    print (np.max(labels))
     for q in range(np.max(labels)):
         x0 = (s.two_time)[:, :, q]
         (s.two_time)[:, :, q] = (np.tril(x0) + np.tril(x0).T -
                                np.diag(np.diag(x0)))
-
-    return results(s.two_time, s.lag_steps, s)
+    yield results(s.two_time, s.lag_steps, s)
 
 
 def _two_time_process(buf, two_time, label_array, num_bufs, num_pixels,
@@ -568,8 +588,8 @@ def _two_time_process(buf, two_time, label_array, num_bufs, num_pixels,
     num_bufs: int, even
         number of buffers(channels)
     num_pixels : array
-        number of pixels in certain roi's
-        roi's, dimensions are : [number of roi's]
+        number of pixels in certain ROI's
+        ROI's, dimensions are : [number of ROI's]
     img_per_level: array
         to track how many images processed in each level
     lag_steps : array
@@ -712,9 +732,9 @@ def _inputs(num_bufs, num_levels, labels):
     label_array, pixel_list = extract_label_indices(labels)
 
     # map the indices onto a sequential list of integers starting at 1
-    label_mapping = {label: n for n, label in enumerate(
-            np.unique(label_array))}
-    # remap the label mask to go from 0 -> max(_labels)
+    label_mapping = {label: n+1 for n,
+                                    label in enumerate(np.unique(label_array))}
+    # remap the label array to go from 1 -> max(_labels)
     for label, n in label_mapping.items():
         label_array[label_array == label] = n
 
@@ -722,7 +742,7 @@ def _inputs(num_bufs, num_levels, labels):
     num_rois = len(label_mapping)
 
     # stash the number of pixels in the mask
-    num_pixels = np.bincount(label_array)
+    num_pixels = np.bincount(label_array)[1:]
 
      # Convert from num_levels, num_bufs to lag frames.
     tot_channels, lag_steps = multi_tau_lags(num_levels, num_bufs)
