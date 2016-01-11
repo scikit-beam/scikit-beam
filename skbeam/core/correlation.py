@@ -151,6 +151,7 @@ _two_time_internal_state = namedtuple(
      'lag_steps',
      'two_time',
      'count_level',
+     #'current_img_time',
      ]
 )
 
@@ -341,7 +342,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     """Wraps generator implementation of multi-tau
 
     Original code(in Yorick) for multi tau auto correlation
-    @author: Mark Sutton
+    author: Mark Sutton
 
     See docstring for lazy_one_time
     """
@@ -410,7 +411,7 @@ def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1):
     """Wraps generator implementation of multi-tau two time correlation
 
     This function computes two-time correlations.
-    Original code : @author: Yugang Zhang
+    Original code : author: Yugang Zhang
 
     See docstring for lazy_two_time
     """
@@ -422,7 +423,7 @@ def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1):
 
 def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
                   two_time_internal_state=None):
-    """ Generator implementation of two-time multi-tau correlation
+    """ Generator implementation of two-time correlation
 
     If you do not want multi-tau correlation, set num_levels to 1 and
     num_bufs to the number of images you wish to correlate
@@ -462,7 +463,6 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
         - the times at which the correlation was computed, `lag_steps`
         - and all of the internal state, `final_state`, which is a
           `correlation_state` namedtuple
-
 
     Returns
     -------
@@ -514,9 +514,9 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
 
         # Compute the two time correlations between the first level
         # (undownsampled) frames. two_time and img_per_level in place!
-        _two_time_process(s.buf, s.two_time, s.label_array, num_bufs, s.num_pixels,
-                          s.img_per_level, s.lag_steps, current_img_time, level=0,
-                          buf_no=s.cur[0] - 1)
+        _two_time_process(s.buf, s.two_time, s.label_array, num_bufs,
+                          s.num_pixels, s.img_per_level, s.lag_steps,
+                          current_img_time, level=0, buf_no=s.cur[0] - 1)
 
         # time frame for each level
         time_ind[0].append(current_img_time)
@@ -564,10 +564,10 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
                 # Checking whether there is next level for processing
                 processing = level < num_levels
 
-    for q in range(np.max(labels)):
+    for q in range(np.max(s.label_array)):
         x0 = (s.two_time)[:, :, q]
         (s.two_time)[:, :, q] = (np.tril(x0) + np.tril(x0).T -
-                               np.diag(np.diag(x0)))
+                                 np.diag(np.diag(x0)))
     yield results(s.two_time, s.lag_steps, s)
 
 
@@ -646,8 +646,7 @@ def _two_time_process(buf, two_time, label_array, num_bufs, num_pixels,
 
 
 def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
-    """Initialize a stateful namedtuple for the multi-tau
-     for two time correlation
+    """Initialize a stateful namedtuple for two time correlation
 
     Parameters
     ----------

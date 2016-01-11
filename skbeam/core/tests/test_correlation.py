@@ -41,7 +41,8 @@ from numpy.testing import assert_array_almost_equal
 import skbeam.core.utils as utils
 from skbeam.core.correlation import (multi_tau_auto_corr,
                                      auto_corr_scat_factor,
-                                     lazy_one_time)
+                                     lazy_one_time,
+                                     lazy_two_time, two_time_corr)
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +56,8 @@ def setup():
     stack_size = 100
     img_stack = np.random.randint(1, 3, (stack_size, xdim, ydim))
     rois = np.zeros_like(img_stack[0])
-    # make sure that the ROIs can be any integers greater than 1. They do not
-    # have to start at 1 and be continuous
+    # make sure that the ROIs can be any integers greater than 1.
+    # They do not have to start at 1 and be continuous
     rois[0:xdim//10, 0:ydim//10] = 5
     rois[xdim//10:xdim//5, ydim//10:ydim//5] = 3
 
@@ -64,15 +65,27 @@ def setup():
 def test_lazy_vs_original():
     setup()
     # run the correlation on the full stack
-    full_gen = lazy_one_time(
+    full_gen_one = lazy_one_time(
         img_stack, num_levels, num_bufs, rois)
-    for gen_result in full_gen:
+    for gen_result_one in full_gen_one:
         pass
 
-    g2, lag_steps = multi_tau_auto_corr(num_levels, num_bufs, rois, img_stack)
+    g2, lag_steps = multi_tau_auto_corr(num_levels, num_bufs,
+                                        rois, img_stack)
 
-    assert np.all(g2 == gen_result.correlation_results)
-    assert np.all(lag_steps == gen_result.lag_steps)
+    assert np.all(g2 == gen_result_one.correlation_results)
+    assert np.all(lag_steps == gen_result_one.lag_steps)
+
+    full_gen_two = lazy_two_time(rois, img_stack, stack_size,
+                                 num_bufs=stack_size, num_levels=1)
+    for gen_result_two in full_gen_two:
+        pass
+
+    two_time, lag_steps2 = two_time_corr(rois, img_stack, stack_size,
+                                         num_bufs=stack_size, num_levels=1)
+
+    assert np.all(two_time == gen_result_two.correlation_results)
+    assert np.all(lag_steps2 == gen_result_two.lag_steps)
 
 
 def test_lazy_one_time():
@@ -104,6 +117,18 @@ def test_lazy_one_time():
 
     assert np.all(full_result.correlation_results ==
                   second_half_result.correlation_results)
+
+
+def test_two_time_corr():
+    y = []
+    for i in range(50):
+        y.append(img_stack[0])
+    two_time, lag_steps = two_time_corr(rois, np.asarray(y),
+                                             50, num_bufs=50,
+                                             num_levels=1)
+
+    assert (np.all(two_time)==True)
+
 
 
 def test_auto_corr_scat_factor():
