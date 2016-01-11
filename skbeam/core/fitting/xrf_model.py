@@ -446,6 +446,8 @@ class ParamController(object):
         elif element in M_LINE:
             element = element.split('_')[0]
             param_name = str(element)+"_ma1_area"
+        elif 'user' in element.lower():  #user peak
+            param_name = str(element) + '_area'
         elif '-' in element:  #pileup peaks
             param_name = 'pileup_'+element.replace('-', '_')
             param_name += '_area'
@@ -581,6 +583,7 @@ class ModelSpectrum(object):
         parameter = self.params
 
         all_element_mod = None
+        # global parameters
         param_hints_to_copy = ['e_offset', 'e_linear', 'e_quadratic',
                                'fwhm_offset', 'fwhm_fanoprime']
 
@@ -810,6 +813,57 @@ class ModelSpectrum(object):
                     all_element_mod += element_mod
                 else:
                     all_element_mod = element_mod
+
+        elif 'user' in elemental_line.lower(): #user peak
+            logger.debug('Started setting up user peak: {}'.format(
+                elemental_line))
+
+            e_cen = 5  # user peak is set 5 keV every time, this value is not important
+
+            pre_name = elemental_line + '_'
+            element_mod = ElementModel(prefix=pre_name)
+
+            # copy the fixed parameters from the Compton model
+            _copy_model_param_hints(element_mod, self.compton_param,
+                                    param_hints_to_copy)
+
+            element_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
+
+            area_name = pre_name + 'area'
+            if area_name in self.params:
+                default_area = self.params[area_name]['value']
+
+            element_mod.set_param_hint('area', value=default_area, vary=True, min=0)
+            element_mod.set_param_hint('delta_center', value=0, vary=False)
+            element_mod.set_param_hint('delta_sigma', value=0, vary=False)
+
+            # area needs to be adjusted
+            if area_name in self.params:
+                _set_parameter_hint(area_name, self.params[area_name], element_mod)
+
+            element_mod.set_param_hint('center', value=e_cen, vary=False)
+            element_mod.set_param_hint('ratio', value=1.0, vary=False)
+            element_mod.set_param_hint('ratio_adjust', value=1, vary=False)
+
+            # position needs to be adjusted
+            pos_name = pre_name + 'delta_center'
+            if pos_name in self.params:
+                _set_parameter_hint('delta_center', self.params[pos_name],
+                                    element_mod)
+
+            # width needs to be adjusted
+            width_name = pre_name + 'delta_sigma'
+            if width_name in self.params:
+                _set_parameter_hint('delta_sigma', self.params[width_name],
+                                    element_mod)
+
+            # branching ratio needs to be adjusted
+            ratio_name = pre_name + 'ratio_adjust'
+            if ratio_name in self.params:
+                _set_parameter_hint('ratio_adjust', self.params[ratio_name],
+                                    element_mod)
+
+            all_element_mod = element_mod
 
         else:
             logger.debug('Started setting up pileup peaks for {}'.format(
