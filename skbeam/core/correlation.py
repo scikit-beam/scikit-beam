@@ -52,8 +52,8 @@ logger = logging.getLogger(__name__)
 
 
 def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
-                      label_array, num_bufs, num_pixels, img_per_level, level,
-                      buf_no):
+                      label_array, num_bufs, num_pixels, img_per_level,
+                      level, buf_no):
     """Reference implementation of the inner loop of multi-tau one time
     correlation
 
@@ -151,7 +151,7 @@ _two_time_internal_state = namedtuple(
      'lag_steps',
      'two_time',
      'count_level',
-     #'current_img_time',
+     'current_img_time',
      ]
 )
 
@@ -171,11 +171,12 @@ def _init_state_one_time(num_levels, num_bufs, labels):
     -------
     internal_state : namedtuple
         The namedtuple that contains all the state information that
-        `lazy_one_time` requires so that it can be used to pick up processing
-        after it was interrupted
+        `lazy_one_time` requires so that it can be used to pick up
+         processing after it was interrupted
     """
-    (label_array, pixel_list, num_rois, num_pixels, lag_steps, buf,
-     img_per_level, track_level, cur) = _inputs(num_bufs, num_levels, labels)
+    (label_array, pixel_list, num_rois,
+     num_pixels, lag_steps, buf, img_per_level, track_level,
+     cur) = _validate_and_transform_inputs(num_bufs, num_levels, labels)
 
     # G holds the un normalized auto- correlation result. We
     # accumulate computations into G as the algorithm proceeds.
@@ -234,8 +235,8 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
     Yields
     ------
     namedtuple
-        A `results` object is yielded after every image has been processed. This
-        `reults` object contains:
+        A `results` object is yielded after every image has been processed.
+         This `reults` object contains:
         - the normalized correlation, `g2`
         - the times at which the correlation was computed, `lag_steps`
         - and all of the internal state, `final_state`, which is a
@@ -287,8 +288,8 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
         # past_intensity, future_intensity,
         # and img_per_level in place!
         _one_time_process(s.buf, s.G, s.past_intensity, s.future_intensity,
-                          s.label_array, num_bufs, s.num_pixels, s.img_per_level,
-                          level, buf_no)
+                          s.label_array, num_bufs, s.num_pixels,
+                          s.img_per_level, level, buf_no)
 
         # check whether the number of levels is one, otherwise
         # continue processing the next level
@@ -410,7 +411,7 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
 def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1):
     """Wraps generator implementation of multi-tau two time correlation
 
-    This function computes two-time correlations.
+    This function computes two-time correlation
     Original code : author: Yugang Zhang
 
     See docstring for lazy_two_time
@@ -501,13 +502,14 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
 
     # generate a time frame for each level
     time_ind = {key: [] for key in range(num_levels)}
-    current_img_time = 0
+
     for img in images:
         s.cur[0] = (1 + s.cur[0]) % num_bufs  # increment buffer
 
         s.count_level[0] = 1 + s.count_level[0]
-        # current image time
-        current_img_time += 1
+
+        # get the current image time
+        s = s._replace(current_img_time=(s.current_img_time + 1))
 
         # Put the image into the ring buffer.
         s.buf[0, s.cur[0] - 1] = (np.ravel(img))[s.pixel_list]
@@ -516,10 +518,10 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
         # (undownsampled) frames. two_time and img_per_level in place!
         _two_time_process(s.buf, s.two_time, s.label_array, num_bufs,
                           s.num_pixels, s.img_per_level, s.lag_steps,
-                          current_img_time, level=0, buf_no=s.cur[0] - 1)
+                          s.current_img_time, level=0, buf_no=s.cur[0] - 1)
 
         # time frame for each level
-        time_ind[0].append(current_img_time)
+        time_ind[0].append(s.current_img_time)
 
         # check whether the number of levels is one, otherwise
         # continue processing the next level
@@ -542,11 +544,12 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
 
                 t1_idx = (s.count_level[level] - 1) * 2
 
-                current_img_time = ((time_ind[level - 1])[t1_idx]
-                                    + (time_ind[level - 1])[t1_idx + 1])/2.
+                s = s._replace(current_img_time=
+                               ((time_ind[level - 1])[t1_idx]
+                                + (time_ind[level - 1])[t1_idx + 1])/2.)
 
                 # time frame for each level
-                time_ind[level].append(current_img_time)
+                time_ind[level].append(s.current_img_time)
 
                 # make the track_level zero once that level is processed
                 s.track_level[level] = 0
@@ -557,7 +560,7 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
                 # on previous call above.
                 _two_time_process(s.buf, s.two_time, s.label_array, num_bufs,
                                   s.num_pixels, s.img_per_level, s.lag_steps,
-                                  current_img_time, level=level,
+                                  s.current_img_time, level=level,
                                   buf_no=s.cur[level]-1)
                 level += 1
 
@@ -659,16 +662,18 @@ def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
     -------
     internal_state : namedtuple
         The namedtuple that contains all the state information that
-        `lazy_one_time` requires so that it can be used to pick up processing
+        `lazy_two_time` requires so that it can be used to pick up processing
         after it was interrupted
     """
-    (label_array, pixel_list, num_rois, num_pixels, lag_steps, buf,
-     img_per_level, track_level, cur) = _inputs(num_bufs, num_levels, labels)
+    (label_array, pixel_list, num_rois, num_pixels, lag_steps,
+     buf, img_per_level, track_level,
+     cur) = _validate_and_transform_inputs(num_bufs, num_levels, labels)
 
     # to count images in each level
     count_level = np.zeros(num_levels, dtype=np.int64)
+
     # current image time
-    #current_img_time = 0
+    current_img_time = 0
 
     # two time correlation results (array)
     two_time = np.zeros((num_frames, num_frames,
@@ -685,11 +690,11 @@ def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
         lag_steps,
         two_time,
         count_level,
-        #current_img_time,
+        current_img_time,
     )
 
 
-def _inputs(num_bufs, num_levels, labels):
+def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     """
     This is a helper function to validate inputs and create initial state
     inputs for both one time and two time correlation
