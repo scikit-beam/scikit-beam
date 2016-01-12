@@ -284,11 +284,33 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
 dpc_internal_state = namedtuple('dpc_internal_state',
                                 ['ax', 'ay', 'gx', 'gy', 'ref_fx', 'ref_fy',
                                  'index'])
+def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
+               scan_rows, scan_cols, scan_xstep, scan_ystep, energy, padding=0,
+               weighting=0.5, solver='Nelder-Mead', roi=None, bad_pixels=None,
+               negate=True, scale=True):
+    if len(pixel_size) == 2:
+       # make sure the pixels are the same size
+       if pixel_size[0] != pixel_size[1]:
+           raise ValueError("In DPC, pixels must be square. You provided"
+           "pixel values of {}".format(pixel_size))
+    dpc_gen = lazy_dpc(ref, image_sequence, start_point, scan_rows, scan_cols,
+                       solver, roi, bad_pixels)
+    # exhaust the generator, keeping only the last result
+    for dpc_state in dpc_gen:
+        pass
 
-def dpc_runner(ref, image_sequence, start_point,
-               scan_rows, scan_cols,
-               solver='Nelder-Mead', roi=None, bad_pixels=None,
-               dpc_state=None):
+    # compute the final results
+    phase, amplitude = reconstruct_phase_from_partial_info(
+        dpc_state, energy, scan_xstep, scan_ystep, pixel_size[0],
+        focus_to_det, negate, scale, padding, weighting)
+
+    return phase, amplitude
+
+
+def lazy_dpc(ref, image_sequence, start_point,
+             scan_rows, scan_cols,
+             solver='Nelder-Mead', roi=None, bad_pixels=None,
+             dpc_state=None):
     """
     Controller function to run the whole Differential Phase Contrast (DPC)
     imaging calculation.

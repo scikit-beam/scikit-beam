@@ -187,9 +187,15 @@ def test_dpc_end_to_end():
     ref_image = np.ones(img_size)
     image_sequence = np.ones((num_imgs, img_size[0], img_size[1]))
 
+    # test the one-shot API
+    phase, amplitude = dpc.dpc_runner(
+        ref_image, image_sequence, start_point, pixel_size, focus_to_det,
+        scan_rows, scan_cols, scan_xstep, scan_ystep, energy, padding,
+        weighting, solver, roi, bad_pixels, negate, scale)
+
     # get the generator
-    gen = dpc.dpc_runner(ref_image, image_sequence, start_point, scan_rows,
-                         scan_cols, solver, roi, bad_pixels)
+    gen = dpc.lazy_dpc(ref_image, image_sequence, start_point, scan_rows,
+                       scan_cols, solver, roi, bad_pixels)
     for partial_results in gen:
         pass
     phi, a = dpc.reconstruct_phase_from_partial_info(
@@ -199,16 +205,21 @@ def test_dpc_end_to_end():
     assert_array_almost_equal(phi, np.zeros((scan_rows, scan_cols)))
     assert_array_almost_equal(a, np.ones((scan_rows, scan_cols)))
 
+    # make sure we are getting the same results from the generator and the
+    # one-shot API.  We better, since the one-shot API wraps the generator!
+    assert_array_almost_equal(phase, phi)
+    assert_array_almost_equal(amplitude, a)
+
     # test to make sure I can do half of the image sequence
-    first_half_gen = dpc.dpc_runner(ref_image, image_sequence[:num_imgs//2],
-                                    start_point, scan_rows, scan_cols, solver,
-                                    roi, bad_pixels)
+    first_half_gen = dpc.lazy_dpc(ref_image, image_sequence[:num_imgs//2],
+                                  start_point, scan_rows, scan_cols, solver,
+                                  roi, bad_pixels)
     for first_half_partial_results in first_half_gen:
         pass
-    second_half_gen = dpc.dpc_runner(ref_image, image_sequence[num_imgs//2:],
-                                     start_point, scan_rows, scan_cols, solver,
-                                     roi, bad_pixels,
-                                     dpc_state=first_half_partial_results)
+    second_half_gen = dpc.lazy_dpc(ref_image, image_sequence[num_imgs//2:],
+                                   start_point, scan_rows, scan_cols, solver,
+                                   roi, bad_pixels,
+                                   dpc_state=first_half_partial_results)
     for second_half_partial_results in second_half_gen:
         pass
 
