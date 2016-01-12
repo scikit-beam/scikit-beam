@@ -120,14 +120,14 @@ def test_lazy_one_time():
 
 
 def test_two_time_corr():
+    setup()
     y = []
     for i in range(50):
         y.append(img_stack[0])
-    two_time, lag_steps = two_time_corr(rois, np.asarray(y),
-                                             50, num_bufs=50,
-                                             num_levels=1)
-
-    assert (np.all(two_time)==True)
+    two_time, lag_steps = two_time_corr(rois,
+                                        np.asarray(y), 50,
+                                        num_bufs=50, num_levels=1)
+    assert np.all(two_time)
 
 
 
