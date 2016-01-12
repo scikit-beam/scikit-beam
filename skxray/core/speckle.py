@@ -1,46 +1,7 @@
-# ######################################################################
-# Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
-# National Laboratory. All rights reserved.                            #
-#                                                                      #
-# Developed at the NSLS-II, Brookhaven National Laboratory             #
-# Developed by Sameera K. Abeykoon and Yugang Zhang, June 2015         #
-#                                                                      #
-# Redistribution and use in source and binary forms, with or without   #
-# modification, are permitted provided that the following conditions   #
-# are met:                                                             #
-#                                                                      #
-# * Redistributions of source code must retain the above copyright     #
-#   notice, this list of conditions and the following disclaimer.      #
-#                                                                      #
-# * Redistributions in binary form must reproduce the above copyright  #
-#   notice this list of conditions and the following disclaimer in     #
-#   the documentation and/or other materials provided with the         #
-#   distribution.                                                      #
-#                                                                      #
-# * Neither the name of the Brookhaven Science Associates, Brookhaven  #
-#   National Laboratory nor the names of its contributors may be used  #
-#   to endorse or promote products derived from this software without  #
-#   specific prior written permission.                                 #
-#                                                                      #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS  #
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT    #
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS    #
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE       #
-# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,           #
-# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES   #
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR   #
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)   #
-# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,  #
-# STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OTHERWISE) ARISING   #
-# IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
-# POSSIBILITY OF SUCH DAMAGE.                                          #
-########################################################################
-
 """
 X-ray speckle visibility spectroscopy(XSVS) - Dynamic information of
 the speckle patterns are obtained by analyzing the speckle statistics
 and calculating the speckle contrast in single scattering patterns.
-
 This module will provide XSVS analysis tools
 """
 
@@ -49,24 +10,23 @@ import six
 import numpy as np
 import time
 
-from . import roi
-from .utils import bin_edges_to_centers, geometric_series
+from skxray.core import roi
+from skxray.core.utils import bin_edges_to_centers, geometric_series
 
 import logging
 logger = logging.getLogger(__name__)
 
+import sys
 
 def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
-         max_cts=None):
+         max_cts=None, bad_images = None, threshold=None):   
     """
     This function will provide the probability density of detecting photons
     for different integration times.
-
     The experimental probability density P(K) of detecting photons K is
     obtained by histogramming the speckle counts over an ensemble of
     equivalent pixels and over a number of speckle patterns recorded
     with the same integration time T under the same condition.
-
     Parameters
     ----------
     image_sets : array
@@ -83,32 +43,34 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
        the brightest pixel in any ROI in any image in the image set.
        defaults to using skxray.core.roi.roi_max_counts to determine
        the brightest pixel in any of the ROIs
-
+       
+       
+    bad_images: array, optional
+        the bad images number list, the XSVS will not analyze the binning image groups which involve any bad images
+    threshold: float, optional
+        If one image involves a pixel with intensity above threshold, such image will be considered as a bad image.
+    
+    
     Returns
     -------
     prob_k_all : array
         probability density of detecting photons
     prob_k_std_dev : array
         standard deviation of probability density of detecting photons
-
     Notes
     -----
     These implementation is based on following references
     References: text [1]_, text [2]_
-
     .. [1] L. Li, P. Kwasniewski, D. Oris, L Wiegart, L. Cristofolini,
        C. Carona and A. Fluerasu , "Photon statistics and speckle visibility
        spectroscopy with partially coherent x-rays" J. Synchrotron Rad.,
        vol 21, p 1288-1295, 2014.
-
     .. [2] R. Bandyopadhyay, A. S. Gittings, S. S. Suh, P.K. Dixon and
        D.J. Durian "Speckle-visibilty Spectroscopy: A tool to study
        time-varying dynamics" Rev. Sci. Instrum. vol 76, p  093110, 2005.
-
     There is an example in https://github.com/scikit-xray/scikit-xray-examples
     It will demonstrate the use of these functions in this module for
     experimental data.
-
     """
     if max_cts is None:
         max_cts = roi.roi_max_counts(image_sets, label_array)
@@ -152,7 +114,7 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
                        dtype=np.object)  # matrix of buffers
 
         # to track processing each time level
-        track_level = np.zeros(num_times)
+        track_level = np.zeros( num_times )
 
         # to increment buffer
         cur = np.full(num_times, timebin_num)
@@ -162,24 +124,40 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
 
         prob_k = np.zeros_like(prob_k_all)
         prob_k_pow = np.zeros_like(prob_k_all)
-
+ 
+        try:
+            noframes= len(images)
+        except:
+            noframes= images.length
+            
+        
+        #Num= { key: [0]* len(  dict_dly[key] ) for key in list(dict_dly.keys())  }
+        
         for n, img in enumerate(images):
-            cur[0] = (1 + cur[0]) % timebin_num
+            cur[0] = 1 + cur[0]% timebin_num
             # read each frame
             # Put the image into the ring buffer.
             buf[0, cur[0] - 1] = (np.ravel(img))[indices]
+            
+            #print (n, cur[0]-1)
+            #print (buf.shape)
+            
 
             _process(num_roi, 0, cur[0] - 1, buf, img_per_level, labels,
                      max_cts, bin_edges[0], prob_k, prob_k_pow)
+            
+            #print (0, img_per_level)
 
             # check whether the number of levels is one, otherwise
             # continue processing the next level
             level = 1
-
-            while level < num_times:
-                if not track_level[level]:
-                    track_level[level] = 1
-                else:
+            processing=1   
+            #print ('track_level: %s'%track_level)
+            #while level < num_times:
+                #if not track_level[level]:
+                    #track_level[level] = 1
+            while processing:
+                if track_level[level]:
                     prev = 1 + (cur[level - 1] - 2) % timebin_num
                     cur[level] = 1 + cur[level] % timebin_num
 
@@ -187,12 +165,28 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
                                                     prev-1] +
                                                 buf[level-1,
                                                     cur[level - 1] - 1])
+                    
+                    #print (level, cur[level]-1)
+                    
+                    
                     track_level[level] = 0
 
                     _process(num_roi, level, cur[level]-1, buf, img_per_level,
                              labels, max_cts, bin_edges[level], prob_k,
                              prob_k_pow)
                     level += 1
+                    if level < num_times:processing = 1
+                    else:processing = 0
+                    
+                else:
+                    track_level[level] = 1
+                    processing = 0
+                #print ('track_level: %s'%track_level)
+            
+            if  n %( int(noframes/10) ) ==0:
+                sys.stdout.write("#")
+                sys.stdout.flush() 
+            
 
             prob_k_all += (prob_k - prob_k_all)/(i + 1)
             prob_k_pow_all += (prob_k_pow - prob_k_pow_all)/(i + 1)
@@ -202,6 +196,13 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
 
     logger.info("Processing time for XSVS took %s seconds."
                 "", (time.time() - start_time))
+    elapsed_time = time.time() - start_time
+    #print (Num)
+    print ('Total time: %.2f min' %(elapsed_time/60.)) 
+    
+    print (img_per_level)
+    #print (buf)
+    
     return prob_k_all, prob_k_std_dev
 
 
@@ -209,12 +210,9 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels,
              max_cts, bin_edges, prob_k, prob_k_pow):
     """
     Internal helper function. This modifies inputs in place.
-
     This helper function calculate probability of detecting photons for
     each integration time.
-
     .. warning :: This function mutates the input values.
-
     Parameters
     ----------
     num_roi : int
@@ -239,6 +237,9 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels,
         squares of probability density of detecting photons
     """
     img_per_level[level] += 1
+    
+    #print (img_per_level)
+    
     u_labels = list(np.unique(labels))
 
     for j, label in enumerate(u_labels):
@@ -257,7 +258,6 @@ def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts):
     """
     This will provide the normalized bin edges and bin centers for each
     integration time.
-
     Parameters
     ----------
     num_times : int
@@ -269,7 +269,6 @@ def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts):
         shape (number of ROI's)
     max_cts : int
         maximum pixel counts
-
     Returns
     -------
     norm_bin_edges : array
