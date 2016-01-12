@@ -284,10 +284,17 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
 dpc_internal_state = namedtuple('dpc_internal_state',
                                 ['ax', 'ay', 'gx', 'gy', 'ref_fx', 'ref_fy',
                                  'index'])
+
+
 def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
                scan_rows, scan_cols, scan_xstep, scan_ystep, energy, padding=0,
                weighting=0.5, solver='Nelder-Mead', roi=None, bad_pixels=None,
                negate=True, scale=True):
+    """Wraps `lazy_dpc`
+
+    See docstring for `lazy_dpc` and `reconstruct_phase_from_partial_info`
+    for the input parameters for this function and what it returns
+    """
     if len(pixel_size) == 2:
        # make sure the pixels are the same size
        if pixel_size[0] != pixel_size[1]:
