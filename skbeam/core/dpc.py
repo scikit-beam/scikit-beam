@@ -314,10 +314,8 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
     return phase, amplitude
 
 
-def lazy_dpc(ref, image_sequence, start_point,
-             scan_rows, scan_cols,
-             solver='Nelder-Mead', roi=None, bad_pixels=None,
-             dpc_state=None):
+def lazy_dpc(ref, image_sequence, start_point, scan_rows, scan_cols,
+             solver='Nelder-Mead', roi=None, bad_pixels=None, dpc_state=None):
     """
     Controller function to run the whole Differential Phase Contrast (DPC)
     imaging calculation.
