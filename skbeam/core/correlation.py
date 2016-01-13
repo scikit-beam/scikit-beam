@@ -152,6 +152,7 @@ _two_time_internal_state = namedtuple(
      'two_time',
      'count_level',
      'current_img_time',
+     'time_ind',
      ]
 )
 
@@ -501,7 +502,7 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
     s = two_time_internal_state
 
     # generate a time frame for each level
-    time_ind = {key: [] for key in range(num_levels)}
+    #time_ind = {key: [] for key in range(num_levels)}
 
     for img in images:
         s.cur[0] = (1 + s.cur[0]) % num_bufs  # increment buffer
@@ -521,7 +522,7 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
                           s.current_img_time, level=0, buf_no=s.cur[0] - 1)
 
         # time frame for each level
-        time_ind[0].append(s.current_img_time)
+        s.time_ind[0].append(s.current_img_time)
 
         # check whether the number of levels is one, otherwise
         # continue processing the next level
@@ -544,11 +545,11 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
 
                 t1_idx = (s.count_level[level] - 1) * 2
 
-                current_img_time = ((time_ind[level - 1])[t1_idx]
-                                    + (time_ind[level - 1])[t1_idx + 1])/2.
+                current_img_time = ((s.time_ind[level - 1])[t1_idx]
+                                    + (s.time_ind[level - 1])[t1_idx + 1])/2.
 
                 # time frame for each level
-                time_ind[level].append(s.current_img_time)
+                s.time_ind[level].append(current_img_time)
 
                 # make the track_level zero once that level is processed
                 s.track_level[level] = 0
@@ -676,6 +677,9 @@ def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
     # current image time
     current_img_time = 0
 
+    # generate a time frame for each level
+    time_ind = {key: [] for key in range(num_levels)}
+
     # two time correlation results (array)
     two_time = np.zeros((num_frames, num_frames,
                          num_rois), dtype=np.float64)
@@ -692,6 +696,7 @@ def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
         two_time,
         count_level,
         current_img_time,
+        time_ind,
     )
 
 
