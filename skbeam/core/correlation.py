@@ -501,9 +501,6 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
     # create a shorthand reference to the results and state named tuple
     s = two_time_internal_state
 
-    # generate a time frame for each level
-    #time_ind = {key: [] for key in range(num_levels)}
-
     for img in images:
         s.cur[0] = (1 + s.cur[0]) % num_bufs  # increment buffer
 

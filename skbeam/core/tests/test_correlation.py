@@ -77,12 +77,12 @@ def test_lazy_vs_original():
     assert np.all(lag_steps == gen_result_one.lag_steps)
 
     full_gen_two = lazy_two_time(rois, img_stack, stack_size,
-                                 num_bufs=stack_size, num_levels=1)
+                                 num_bufs, num_levels)
     for gen_result_two in full_gen_two:
         pass
 
     two_time, lag_steps2 = two_time_corr(rois, img_stack, stack_size,
-                                         num_bufs=stack_size, num_levels=1)
+                                         num_bufs, num_levels)
 
     assert np.all(two_time == gen_result_two.g2)
     assert np.all(lag_steps2 == gen_result_two.lag_steps)
