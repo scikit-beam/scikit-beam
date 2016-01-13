@@ -203,8 +203,8 @@ def _init_state_one_time(num_levels, num_bufs, labels):
     )
 
 
-def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
-                  internal_state=None):
+def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
+                   bad_list=None, internal_state=None):
     """Generator implementation of 1-time multi-tau correlation
 
     If you do not want multi-tau correlation, set num_levels to 1 and
@@ -228,6 +228,8 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
         Each ROI is represented by sequential integers starting at one.  For
         example, if you have four ROIs, they must be labeled 1, 2, 3,
         4. Background is labeled as 0
+    bad_list : list
+        list of bad images
     internal_state : namedtuple, optional
         internal_state is a bucket for all of the internal state of the
         generator. It is part of the `results` object that is yielded from
@@ -274,9 +276,14 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
     s = internal_state
 
     # iterate over the images to compute multi-tau correlation
+    img_num = 0
     for image in image_iterable:
         # Compute the correlations for all higher levels.
         level = 0
+        img_num += 1
+        if bad_list is not None:
+            if img_num in bad_list:
+                image = mask_gen(image)
 
         # increment buffer
         s.cur[0] = (1 + s.cur[0]) % num_bufs
@@ -769,3 +776,30 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
 
     return (label_array, pixel_list, num_rois, num_pixels,
             lag_steps, buf, img_per_level, track_level, cur)
+
+
+def mask_gen(image_gen, bad_list):
+    """
+    Parameters
+    ----------
+    image_gen : array
+        image_iterable : iterable of 2D arrays
+    bad_list : list
+        bad images list
+
+    Yields
+    ------
+    img : array
+
+    """
+    for (im, bad) in zip(image_gen, bad_list):
+        if bad:
+            yield np.nan*np.ones_like(im)
+        else:
+            yield img
+
+
+def mask_gen(image):
+
+    yield np.nan*np.ones_like(image)
+
