@@ -544,9 +544,8 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
 
                 t1_idx = (s.count_level[level] - 1) * 2
 
-                s = s._replace(current_img_time=
-                               ((time_ind[level - 1])[t1_idx]
-                                + (time_ind[level - 1])[t1_idx + 1])/2.)
+                current_img_time = ((time_ind[level - 1])[t1_idx]
+                                    + (time_ind[level - 1])[t1_idx + 1])/2.
 
                 # time frame for each level
                 time_ind[level].append(s.current_img_time)
@@ -560,7 +559,7 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
                 # on previous call above.
                 _two_time_process(s.buf, s.two_time, s.label_array, num_bufs,
                                   s.num_pixels, s.img_per_level, s.lag_steps,
-                                  s.current_img_time, level=level,
+                                  current_img_time, level=level,
                                   buf_no=s.cur[level]-1)
                 level += 1
 
