@@ -119,7 +119,7 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
 
 results = namedtuple(
     'correlation_results',
-    ['correlation_results', 'lag_steps', 'internal_state']
+    ['g2', 'lag_steps', 'internal_state']
 )
 
 _internal_state = namedtuple(
@@ -350,7 +350,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     gen = lazy_one_time(images, num_levels, num_bufs, labels)
     for result in gen:
         pass
-    return result.correlation_results, result.lag_steps
+    return result.g2, result.lag_steps
 
 
 def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
@@ -419,7 +419,7 @@ def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1):
     gen = lazy_two_time(labels, images, num_frames, num_bufs, num_levels)
     for result in gen:
         pass
-    return result.correlation_results, result.lag_steps
+    return result.g2, result.lag_steps
 
 
 def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
