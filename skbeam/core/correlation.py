@@ -570,7 +570,9 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
         x0 = (s.two_time)[:, :, q]
         (s.two_time)[:, :, q] = (np.tril(x0) + np.tril(x0).T -
                                  np.diag(np.diag(x0)))
-    yield results(s.two_time, s.lag_steps, s)
+
+    g2 = s.two_time
+    yield results(g2, s.lag_steps, s)
 
 
 def _two_time_process(buf, two_time, label_array, num_bufs, num_pixels,
