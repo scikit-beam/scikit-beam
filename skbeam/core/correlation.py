@@ -461,16 +461,11 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
     namedtuple
         A `results` object is yielded after every image has been processed. This
         `reults` object contains:
-        - the normalized correlation, `two_time`
+        - the normalized correlation, `two_time`,
+          shape (number of images, number of images, number of labels(ROI))
         - the times at which the correlation was computed, `lag_steps`
         - and all of the internal state, `final_state`, which is a
           `correlation_state` namedtuple
-
-    Returns
-    -------
-    two_time : array
-        matrix of two time correlation
-        shape (number of images, number of images, number of labels(ROI))
 
     Notes
     -----
