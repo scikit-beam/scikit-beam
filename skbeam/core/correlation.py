@@ -420,8 +420,7 @@ def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1):
     gen = lazy_two_time(labels, images, num_frames, num_bufs, num_levels)
     for result in gen:
         pass
-    final_result = two_time_state_to_results(result)
-    return final_result.g2, final_result.lag_steps
+    return two_time_state_to_results(result)
 
 
 def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
@@ -458,7 +457,7 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
 
     Yields
     ------
-    internal_state - tuple
+    internal_state : tuple
       all of the internal state, `final_state`, which is a
       `correlation_state` namedtuple
 
@@ -658,7 +657,7 @@ def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
     num_levels : int
     num_bufs : int
     labels : array
-        Two dimensional labeled array that contains ROI information\
+        Two dimensional labeled array that contains ROI information
     num_frames : int
         number of images to use
         default is number of images
