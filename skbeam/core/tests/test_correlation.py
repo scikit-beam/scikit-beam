@@ -163,9 +163,8 @@ def test_two_time_corr():
     assert np.all(two_time[0])
 
     # check the number of buffers are even
-    assert_raises(ValueError,
-                  lambda: two_time_corr(rois, np.asarray(y), 50,
-                                        num_bufs=25, num_levels=1))
+    assert_raises(ValueError, two_time_corr, rois, np.asarray(y), 50,
+                  num_bufs=25, num_levels=1)
 
 
 def test_auto_corr_scat_factor():
