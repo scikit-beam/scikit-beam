@@ -44,8 +44,11 @@ from skbeam.core.correlation import (multi_tau_auto_corr,
                                      auto_corr_scat_factor,
                                      lazy_one_time,
                                      lazy_two_time, two_time_corr,
-                                     two_time_state_to_results)
+                                     two_time_state_to_results,
+                                     two_time_state_to_results,
+                                     one_time_from_two_time)
 from skbeam.core.mask import bad_to_nan_gen
+
 
 logger = logging.getLogger(__name__)
 
@@ -180,7 +183,6 @@ def test_auto_corr_scat_factor():
     assert_array_almost_equal(g2, np.array([1.5, 1.0, 1.0, 1.0, 1.0,
                                             1.0, 1.0, 1.0]), decimal=8)
 
-
 def test_bad_images():
     setup()
     g2, lag_steps = multi_tau_auto_corr(4, num_bufs,
@@ -197,6 +199,27 @@ def test_bad_images():
     assert_array_almost_equal(g2[:, 0], g2_n[:, 0], decimal=3)
     assert_array_almost_equal(g2[:, 1], g2_n[:, 1], decimal=3)
 
+
+def test_one_time_from_two_time():
+    num_levels = 1
+    num_bufs = 10  # must be even
+    xdim = 10
+    ydim = 10
+    stack_size = 10
+    img_stack = np.random.randint(1, 3, (stack_size, xdim, ydim))
+    rois = np.zeros_like(img_stack[0])
+    # make sure that the ROIs can be any integers greater than 1.
+    # They do not have to start at 1 and be continuous
+    rois[0:xdim//10, 0:ydim//10] = 5
+    rois[xdim//10:xdim//5, ydim//10:ydim//5] = 3
+
+    two_time = two_time_corr(rois, img_stack, stack_size,
+                                              num_bufs, num_levels)
+
+    one_time = one_time_from_two_time(two_time[0])
+    assert_array_almost_equal(one_time[:, 0], np.array([1.0, 0.9, 0.8, 0.7,
+                                                        0.6, 0.5, 0.4, 0.3,
+                                                        0.2, 0.1]))
 
 if __name__ == '__main__':
     import nose
