@@ -1,7 +1,7 @@
 # ######################################################################
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
-#                                                                      #
+#                                                                              #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -42,7 +42,8 @@ import skbeam.core.utils as utils
 from skbeam.core.correlation import (multi_tau_auto_corr,
                                      auto_corr_scat_factor,
                                      lazy_one_time,
-                                     lazy_two_time, two_time_corr)
+                                     lazy_two_time, two_time_corr,
+                                     two_time_state_to_results)
 
 logger = logging.getLogger(__name__)
 
@@ -80,12 +81,13 @@ def test_lazy_vs_original():
                                  num_bufs, num_levels)
     for gen_result_two in full_gen_two:
         pass
+    final_gen_result_two = two_time_state_to_results(gen_result_two)
 
     two_time, lag_steps2 = two_time_corr(rois, img_stack, stack_size,
                                          num_bufs, num_levels)
 
-    assert np.all(two_time == gen_result_two.g2)
-    assert np.all(lag_steps2 == gen_result_two.lag_steps)
+    assert np.all(two_time == final_gen_result_two.g2)
+    assert np.all(lag_steps2 == final_gen_result_two.lag_steps)
 
 
 def test_lazy_two_time():
@@ -95,10 +97,11 @@ def test_lazy_two_time():
                              ,stack_size, 1)
     for full_result in full_gen:
         pass
+    final_result = two_time_state_to_results(full_result)
 
     # make sure we have essentially zero correlation in the images,
     # since they are random integers
-    assert np.average(full_result.g2-1) < 0.01
+    assert np.average(final_result.g2-1) < 0.01
 
     # run the correlation on the first half
     gen_first_half = lazy_two_time(rois, img_stack[:stack_size//2], stack_size,
@@ -110,13 +113,13 @@ def test_lazy_two_time():
     gen_second_half = lazy_two_time(rois, img_stack[stack_size//2:], stack_size,
                                    num_bufs=stack_size, num_levels=1,
                                    two_time_internal_state=
-                                   first_half_result.internal_state)
+                                   first_half_result)
 
     for second_half_result in gen_second_half:
         pass
+    result = two_time_state_to_results(second_half_result)
 
-    assert np.all(full_result.g2 ==
-                  second_half_result.g2)
+    assert np.all(full_result.g2 == result.g2)
 
 
 def test_lazy_one_time():
