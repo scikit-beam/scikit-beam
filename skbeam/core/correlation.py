@@ -553,7 +553,7 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
 
                 # Checking whether there is next level for processing
                 processing = level < num_levels
-    yield s
+        yield s
 
 
 def two_time_state_to_results(state):
