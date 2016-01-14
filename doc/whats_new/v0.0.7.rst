@@ -1,0 +1,9 @@
+v0.0.7 (unreleased)
+-------------------
+- Added multi-tau scheme two-time correlation. `PR #391 <https://github.com/scikit-beam/scikit-beam/pull/391>`_
+  This two-time correlator can be found at `skbeam.core.correlation:two_time_corr`.
+  There is a generator version that returns its internal state after consuming
+  each image, `skbeam.core.correlation:lazy_two_time`. The value that the
+  generator yields should be passed to `skbeam.core.correlation:two_time_state_to_results`
+  to produce the correlation results and the lag steps that the correlation results
+  correspond to.
