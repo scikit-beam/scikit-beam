@@ -1,7 +1,7 @@
 # ######################################################################
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
 # National Laboratory. All rights reserved.                            #
-#                                                                              #
+#                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
 # are met:                                                             #
@@ -93,8 +93,8 @@ def test_lazy_vs_original():
 def test_lazy_two_time():
     setup()
     # run the correlation on the full stack
-    full_gen = lazy_two_time(rois, img_stack, stack_size
-                             ,stack_size, 1)
+    full_gen = lazy_two_time(rois, img_stack, stack_size,
+                             stack_size, 1)
     for full_result in full_gen:
         pass
     final_result = two_time_state_to_results(full_result)
@@ -110,10 +110,10 @@ def test_lazy_two_time():
         pass
     # run the correlation on the second half by passing in the state from the
     # first half
-    gen_second_half = lazy_two_time(rois, img_stack[stack_size//2:], stack_size,
-                                   num_bufs=stack_size, num_levels=1,
-                                   two_time_internal_state=
-                                   first_half_result)
+    gen_second_half = lazy_two_time(rois, img_stack[stack_size//2:],
+                                    stack_size, num_bufs=stack_size,
+                                    num_levels=1,
+                                    two_time_internal_state=first_half_result)
 
     for second_half_result in gen_second_half:
         pass
@@ -161,7 +161,6 @@ def test_two_time_corr():
                                         np.asarray(y), 50,
                                         num_bufs=50, num_levels=1)
     assert np.all(two_time)
-
 
 
 def test_auto_corr_scat_factor():

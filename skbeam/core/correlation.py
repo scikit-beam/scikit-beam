@@ -1,4 +1,4 @@
-# ######################################################################                                                                     #
+# ######################################################################
 # Developed at the NSLS-II, Brookhaven National Laboratory             #
 # Developed by Sameera K. Abeykoon, February 2014                      #
 #                                                                      #
@@ -532,8 +532,8 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
 
                 t1_idx = (s.count_level[level] - 1) * 2
 
-                current_img_time = ((s.time_ind[level - 1])[t1_idx]
-                                    + (s.time_ind[level - 1])[t1_idx + 1])/2.
+                current_img_time = ((s.time_ind[level - 1])[t1_idx] +
+                                    (s.time_ind[level - 1])[t1_idx + 1])/2.
 
                 # time frame for each level
                 s.time_ind[level].append(current_img_time)
@@ -573,10 +573,8 @@ def two_time_state_to_results(state):
     for q in range(np.max(state.label_array)):
         x0 = (state.g2)[:, :, q]
         (state.g2)[:, :, q] = (np.tril(x0) + np.tril(x0).T -
-                                     np.diag(np.diag(x0)))
+                               np.diag(np.diag(x0)))
     return results(state.g2, state.lag_steps, state)
-    #g2 = s.two_time
-    #yield results(g2, s.lag_steps, s)
 
 
 def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
@@ -646,11 +644,10 @@ def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
             nshift = 2**(level-1)
             for i in range(-nshift+1, nshift+1):
                 g2[int(tind1+i),
-                        int(tind2+i)] = (tmp_binned/(pi_binned *
-                                                 fi_binned))*num_pixels
+                   int(tind2+i)] = (tmp_binned/(pi_binned *
+                                                fi_binned))*num_pixels
         else:
-            g2[tind1, tind2] = tmp_binned/(pi_binned *
-                                                   fi_binned)*num_pixels
+            g2[tind1, tind2] = tmp_binned/(pi_binned * fi_binned)*num_pixels
 
 
 def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
@@ -686,8 +683,7 @@ def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
     time_ind = {key: [] for key in range(num_levels)}
 
     # two time correlation results (array)
-    g2 = np.zeros((num_frames, num_frames,
-                         num_rois), dtype=np.float64)
+    g2 = np.zeros((num_frames, num_frames, num_rois), dtype=np.float64)
 
     return _two_time_internal_state(
         buf,
@@ -747,8 +743,7 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     label_array, pixel_list = extract_label_indices(labels)
 
     # map the indices onto a sequential list of integers starting at 1
-    label_mapping = {label: n+1 for n,
-                                    label in enumerate(np.unique(label_array))}
+    label_mapping = {label: n+1 for n, label in enumerate(np.unique(label_array))}
     # remap the label array to go from 1 -> max(_labels)
     for label, n in label_mapping.items():
         label_array[label_array == label] = n
@@ -759,7 +754,7 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     # stash the number of pixels in the mask
     num_pixels = np.bincount(label_array)[1:]
 
-     # Convert from num_levels, num_bufs to lag frames.
+    # Convert from num_levels, num_bufs to lag frames.
     tot_channels, lag_steps = multi_tau_lags(num_levels, num_bufs)
 
     # Ring buffer, a buffer with periodic boundary conditions.
