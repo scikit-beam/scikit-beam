@@ -108,6 +108,7 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
         # get the images for correlating
         past_img = buf[level, delay_no]
         future_img = buf[level, buf_no]
+        
         for w, arr in zip([past_img*future_img, past_img, future_img],
                           [G, past_intensity_norm, future_intensity_norm]):
             binned = np.bincount(label_array, weights=w)[1:]
@@ -203,7 +204,7 @@ def _init_state_one_time(num_levels, num_bufs, labels):
     )
 
 
-def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
+def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
                    bad_list=None, internal_state=None):
     """Generator implementation of 1-time multi-tau correlation
 
@@ -281,9 +282,6 @@ def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
         # Compute the correlations for all higher levels.
         level = 0
         img_num += 1
-        if bad_list is not None:
-            if img_num in bad_list:
-                image = mask_gen(image)
 
         # increment buffer
         s.cur[0] = (1 + s.cur[0]) % num_bufs
@@ -315,9 +313,7 @@ def lazy_multi_tau(image_iterable, num_levels, num_bufs, labels,
 
                 s.buf[level, s.cur[level] - 1] = ((
                         s.buf[level - 1, prev - 1] +
-                        s.buf[level - 1, s.cur[level - 1] - 1]
-                    ) / 2
-                )
+                        s.buf[level - 1, s.cur[level - 1] - 1]) / 2)
 
                 # make the track_level zero once that level is processed
                 s.track_level[level] = False
@@ -370,14 +366,11 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
     ----------
     lags : array
         delay time
-
     beta : float
         optical contrast (speckle contrast), a sample-independent
         beamline parameter
-
     relaxation_rate : float
         relaxation time associated with the samples dynamics.
-
     baseline : float, optional
         baseline of one time correlation
         equal to one for ergodic samples
@@ -396,10 +389,8 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
         g_2(q, \tau) = \beta_1[g_1(q, \tau)]^{2} + g_\infty
 
     For a system undergoing  diffusive dynamics,
-
     :math ::
         g_1(q, \tau) = e^{-\gamma(q) \tau}
-
     :math ::
        g_2(q, \tau) = \beta_1 e^{-2\gamma(q) \tau} + g_\infty
 
@@ -780,16 +771,21 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
 
 def mask_gen(image_gen, bad_list):
     """
+    This function will convert the bad image array in the images into
+    NAN(Not-A-Number) array
+
     Parameters
     ----------
     image_gen : array
         image_iterable : iterable of 2D arrays
-    bad_list : list
+     : list
         bad images list
 
     Yields
     ------
     img : array
+        if image is bad it will convert to np.nan array otherwise no
+        change to the array
 
     """
     for (im, bad) in zip(image_gen, bad_list):
@@ -797,9 +793,3 @@ def mask_gen(image_gen, bad_list):
             yield np.nan*np.ones_like(im)
         else:
             yield img
-
-
-def mask_gen(image):
-
-    yield np.nan*np.ones_like(image)
-
