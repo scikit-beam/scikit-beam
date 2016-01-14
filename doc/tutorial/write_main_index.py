@@ -22,16 +22,15 @@ files_to_convert = {'../index.rst.tmpl': '../index.rst',
 for template_file, output_file in files_to_convert.items():
     with open(template_file, 'r') as f:
         new_file = []
-        for line in f.readlines():
-            if line.endswith('\n'):
-                line = line[:-1]
+        for single_line in f.readlines():
+            single_line = single_line[:-1]
             # find the line where I want to write the list of examples
             if 'REPLACE_WITH_LIST_OF_EXAMPLES' in line:
-                line = ['   tutorial/%s' % os.path.splitext(notebook_path)[0]
+                tutorial_lines = ['   tutorial/%s' % os.path.splitext(notebook_path)[0]
                         for notebook_path in notebooks]
-                new_file.extend(line)
+                new_file.extend(tutorial_lines)
             else:
-                new_file.append(line)
+                new_file.append(single_line)
 
     with open(output_file, 'w') as f:
         output = '\n'.join(new_file)
