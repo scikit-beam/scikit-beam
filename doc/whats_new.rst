@@ -19,6 +19,16 @@ v0.0.7 (unreleased)
   correspond to.
 
 
+v0.0.6
+------
+- Partial data, generator implementation of one-time-correlation
+- Rename from scikit-xray to scikit-beam and skxray->skbeam
+- Add cython implementation of accumulating histograms
+- Clean up the ctrans code
+- Add multiprocessing single pixel fitting
+- Automatically build the docs on traivs
+
+
 v0.0.5
 ------
 
