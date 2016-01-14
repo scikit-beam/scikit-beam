@@ -37,6 +37,7 @@ import logging
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal
+from nose.tools import assert_raises
 
 import skbeam.core.utils as utils
 from skbeam.core.correlation import (multi_tau_auto_corr,
@@ -160,6 +161,11 @@ def test_two_time_corr():
     two_time = two_time_corr(rois, np.asarray(y), 50,
                              num_bufs=50, num_levels=1)
     assert np.all(two_time[0])
+
+    # check the number of buffers are even
+    assert_raises(ValueError,
+                  lambda: two_time_corr(rois, np.asarray(y), 50,
+                                        num_bufs=25, num_levels=1))
 
 
 def test_auto_corr_scat_factor():
