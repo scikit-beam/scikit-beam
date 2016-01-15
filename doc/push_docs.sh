@@ -1,10 +1,6 @@
 #!/bin/bash
 set -e # exit with nonzero exit code if anything fails
 
-make clean
-make notebooks
-make html
-
 # go to the out directory and create a *new* Git repo
 cd _build/html
 git init
