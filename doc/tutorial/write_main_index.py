@@ -25,9 +25,10 @@ for template_file, output_file in files_to_convert.items():
         for single_line in f.readlines():
             single_line = single_line[:-1]
             # find the line where I want to write the list of examples
-            if 'REPLACE_WITH_LIST_OF_EXAMPLES' in line:
-                tutorial_lines = ['   tutorial/%s' % os.path.splitext(notebook_path)[0]
-                        for notebook_path in notebooks]
+            if 'REPLACE_WITH_LIST_OF_EXAMPLES' in single_line:
+                tutorial_lines = [
+                    '   tutorial/%s' % os.path.splitext(notebook_path)[0]
+                    for notebook_path in notebooks]
                 new_file.extend(tutorial_lines)
             else:
                 new_file.append(single_line)
