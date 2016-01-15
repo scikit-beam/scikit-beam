@@ -767,29 +767,3 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
 
     return (label_array, pixel_list, num_rois, num_pixels,
             lag_steps, buf, img_per_level, track_level, cur)
-
-
-def mask_gen(image_gen, bad_list):
-    """
-    This function will convert the bad image array in the images into
-    NAN(Not-A-Number) array
-
-    Parameters
-    ----------
-    image_gen : array
-        image_iterable : iterable of 2D arrays
-     : list
-        bad images list
-
-    Yields
-    ------
-    img : array
-        if image is bad it will convert to np.nan array otherwise no
-        change to the array
-
-    """
-    for (im, bad) in zip(image_gen, bad_list):
-        if bad:
-            yield np.nan*np.ones_like(im)
-        else:
-            yield img
