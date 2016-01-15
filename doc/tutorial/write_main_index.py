@@ -9,7 +9,9 @@ examples_dir = os.path.join(tempfile.gettempdir(), 'scikit-beam-examples')
 output_dir = os.path.join(tempfile.gettempdir(), 'notebooks')
 if os.path.exists(output_dir):
     shutil.rmtree(output_dir)
-    os.mkdir(output_dir)
+
+os.mkdir(output_dir)
+
 # copy all notebooks from the git repo to /tmp/notebooks
 nbs = glob.glob('/tmp/scikit-beam-examples/**/*.ipynb', recursive=True)
 
