@@ -44,6 +44,7 @@ This module is for functions specific to time correlation
 from __future__ import absolute_import, division, print_function
 from .utils import multi_tau_lags
 from .roi import extract_label_indices
+from .mask import bad_to_nan_gen, threshold_mask
 from collections import namedtuple
 import numpy as np
 
@@ -108,7 +109,6 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
         # get the images for correlating
         past_img = buf[level, delay_no]
         future_img = buf[level, buf_no]
-        
         for w, arr in zip([past_img*future_img, past_img, future_img],
                           [G, past_intensity_norm, future_intensity_norm]):
             binned = np.bincount(label_array, weights=w)[1:]
@@ -205,7 +205,7 @@ def _init_state_one_time(num_levels, num_bufs, labels):
 
 
 def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
-                   bad_list=None, internal_state=None):
+                  internal_state=None):
     """Generator implementation of 1-time multi-tau correlation
 
     If you do not want multi-tau correlation, set num_levels to 1 and
@@ -229,8 +229,6 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
         Each ROI is represented by sequential integers starting at one.  For
         example, if you have four ROIs, they must be labeled 1, 2, 3,
         4. Background is labeled as 0
-    bad_list : list
-        list of bad images
     internal_state : namedtuple, optional
         internal_state is a bucket for all of the internal state of the
         generator. It is part of the `results` object that is yielded from
@@ -277,11 +275,9 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
     s = internal_state
 
     # iterate over the images to compute multi-tau correlation
-    img_num = 0
     for image in image_iterable:
         # Compute the correlations for all higher levels.
         level = 0
-        img_num += 1
 
         # increment buffer
         s.cur[0] = (1 + s.cur[0]) % num_bufs
