@@ -72,7 +72,7 @@ def test_threshold_mask():
 def test_bad_to_nan_gen():
     xdim = 2
     ydim = 2
-    stack_size = 6
+    stack_size = 5
     img_stack = np.random.randint(1, 3, (stack_size, xdim, ydim))
 
     bad_list = [1, 3]

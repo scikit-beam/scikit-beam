@@ -104,17 +104,23 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
     for i in range(i_min, min(img_per_level[level], num_bufs)):
         # compute the index into the autocorrelation matrix
         t_index = level * num_bufs / 2 + i
-
         delay_no = (buf_no - i) % num_bufs
+
         # get the images for correlating
         past_img = buf[level, delay_no]
         future_img = buf[level, buf_no]
-        for w, arr in zip([past_img*future_img, past_img, future_img],
-                          [G, past_intensity_norm, future_intensity_norm]):
-            binned = np.bincount(label_array, weights=w)[1:]
-            # pdb.set_trace()
-            arr[t_index] += ((binned / num_pixels - arr[t_index]) /
-                             (img_per_level[level] - i))
+
+        # To check the bad images,
+        # bad images are converted to np.nan array
+        if np.isnan(past_img).any() or np.isnan(future_img).any():
+            img_per_level -= 1
+        else:
+            for w, arr in zip([past_img*future_img, past_img, future_img],
+                              [G, past_intensity_norm, future_intensity_norm]):
+                binned = np.bincount(label_array, weights=w)[1:]
+                # pdb.set_trace()
+                arr[t_index] += ((binned / num_pixels - arr[t_index]) /
+                                 (img_per_level[level] - i))
     return None  # modifies arguments in place!
 
 
