@@ -3,7 +3,7 @@
 # National Laboratory. All rights reserved.                            #
 #                                                                      #
 # Developed at the NSLS-II, Brookhaven National Laboratory             #
-# Developed by Sameera K. Abeykoon, January 2105                       #
+# Developed by Sameera K. Abeykoon, January 2016                       #
 #                                                                      #
 # Redistribution and use in source and binary forms, with or without   #
 # modification, are permitted provided that the following conditions   #
