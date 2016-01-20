@@ -420,13 +420,19 @@ class ParamController(object):
                 if constraint is not None:
                     self._element_strategy[param_name] = constraint
                 self.params.update({param_name: new_pos})
-        else:
+        elif 'user' in element.lower():  # for user peak
+            param_name = '_'.join((element, param_suffix))
+            new_pos = PARAM_DEFAULTS[kind].copy()
+            if constraint is not None:
+                self._element_strategy[param_name] = constraint
+            # update parameter in place
+            self.params.update({param_name: new_pos})
+        else:   # for pileup peak
             linename = 'pileup_'+element.replace('-', '_')
             param_name = linename + param_suffix  # as in lmfit Model
             new_pos = PARAM_DEFAULTS[kind].copy()
             if constraint is not None:
                 self._element_strategy[param_name] = constraint
-
             # update parameter in place
             self.params.update({param_name: new_pos})
 
@@ -830,37 +836,36 @@ class ModelSpectrum(object):
             element_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
 
             area_name = pre_name + 'area'
-            if area_name in self.params:
-                default_area = self.params[area_name]['value']
+            if area_name in parameter:
+                default_area = parameter[area_name]['value']
 
             element_mod.set_param_hint('area', value=default_area, vary=True, min=0)
             element_mod.set_param_hint('delta_center', value=0, vary=False)
             element_mod.set_param_hint('delta_sigma', value=0, vary=False)
-
-            # area needs to be adjusted
-            if area_name in self.params:
-                _set_parameter_hint(area_name, self.params[area_name], element_mod)
-
             element_mod.set_param_hint('center', value=e_cen, vary=False)
             element_mod.set_param_hint('ratio', value=1.0, vary=False)
             element_mod.set_param_hint('ratio_adjust', value=1, vary=False)
 
+            # area needs to be adjusted
+            if area_name in parameter:
+                _set_parameter_hint(area_name, parameter[area_name], element_mod)
+
             # position needs to be adjusted
             pos_name = pre_name + 'delta_center'
-            if pos_name in self.params:
-                _set_parameter_hint('delta_center', self.params[pos_name],
+            if pos_name in parameter:
+                _set_parameter_hint('delta_center', parameter[pos_name],
                                     element_mod)
 
             # width needs to be adjusted
             width_name = pre_name + 'delta_sigma'
-            if width_name in self.params:
-                _set_parameter_hint('delta_sigma', self.params[width_name],
+            if width_name in parameter:
+                _set_parameter_hint('delta_sigma', parameter[width_name],
                                     element_mod)
 
             # branching ratio needs to be adjusted
             ratio_name = pre_name + 'ratio_adjust'
-            if ratio_name in self.params:
-                _set_parameter_hint('ratio_adjust', self.params[ratio_name],
+            if ratio_name in parameter:
+                _set_parameter_hint('ratio_adjust', parameter[ratio_name],
                                     element_mod)
 
             all_element_mod = element_mod
