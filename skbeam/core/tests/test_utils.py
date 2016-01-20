@@ -355,16 +355,20 @@ def test_radius_to_twotheta():
 
 
 def test_multi_tau_lags():
-    multi_tau_levels = 3
-    multi_tau_channels = 8
+    levels = 3
+    channels = 8
 
     delay_steps = [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 28]
-
-    tot_channels, lag_steps = core.multi_tau_lags(multi_tau_levels,
-                                                  multi_tau_channels)
+    dict_dly = {}
+    dict_dly[1] = (0, 1, 2, 3, 4, 5, 6, 7)
+    dict_dly[3] = (16, 20, 24, 28)
+    dict_dly[2] = (8, 10, 12, 14)
+    tot_channels, lag_steps, dict_lags = core.multi_tau_lags(levels, channels)
 
     assert_array_equal(16, tot_channels)
     assert_array_equal(delay_steps, lag_steps)
+    assert_array_almost_equal(dict_dly[1], dict_lags[1])
+    assert_array_almost_equal(dict_dly[3], dict_lags[3])
 
 
 @raises(NotImplementedError)
@@ -442,6 +446,7 @@ def test_subtract_reference_images():
 @raises(ValueError)
 def _fail_img_to_relative_xyi_helper(input_dict):
     core.img_to_relative_xyi(**input_dict)
+
 
 def test_img_to_relative_fails():
     fail_dicts = [

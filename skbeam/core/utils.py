@@ -1146,7 +1146,6 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     ----------
     multitau_levels : int
         number of levels of multiple-taus
-
     multitau_channels : int
         number of channels or number of buffers in auto-correlators
         normalizations (must be even)
@@ -1155,9 +1154,10 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     -------
     total_channels : int
         total number of channels ( or total number of delay times)
-
     lag_steps : ndarray
         delay or lag steps for the multiple tau analysis
+    dict_lags : dict
+        dictionary of delays for each multitau_levels
 
     Notes
     -----
@@ -1180,14 +1180,19 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     tot_channels = (multitau_levels + 1)*multitau_channels//2
 
     lag = []
+    dict_lags = {}
     lag_steps = np.arange(0, multitau_channels)
+    dict_lags[1] = lag_steps
     for i in range(2, multitau_levels + 1):
+        y = []
         for j in range(0, multitau_channels//2):
-            lag.append((multitau_channels//2 + j)*(2**(i - 1)))
+            value = (multitau_channels//2 + j)*(2**(i - 1))
+            lag.append(value)
+            y.append(value)
+        dict_lags[i] = y
 
     lag_steps = np.append(lag_steps, np.array(lag))
-
-    return tot_channels, lag_steps
+    return tot_channels, lag_steps, dict_lags
 
 
 def geometric_series(common_ratio, number_of_images, first_term=1):

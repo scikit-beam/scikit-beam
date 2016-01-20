@@ -100,7 +100,8 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
     # in multi-tau correlation, the subsequent levels have half as many
     # buffers as the first
     i_min = num_bufs // 2 if level else 0
-
+    normalize = img_per_level[level]
+    print ("normalize", normalize)
     for i in range(i_min, min(img_per_level[level], num_bufs)):
         # compute the index into the autocorrelation matrix
         t_index = level * num_bufs / 2 + i
@@ -112,15 +113,16 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
 
         # To check the bad images,
         # bad images are converted to np.nan array
-        if np.isnan(past_img).any() or np.isnan(future_img).any():
-            img_per_level -= 1
-        else:
+        if ~np.isnan(past_img).any() or ~np.isnan(future_img).any():
             for w, arr in zip([past_img*future_img, past_img, future_img],
                               [G, past_intensity_norm, future_intensity_norm]):
                 binned = np.bincount(label_array, weights=w)[1:]
                 # pdb.set_trace()
                 arr[t_index] += ((binned / num_pixels - arr[t_index]) /
-                                 (img_per_level[level] - i))
+                                 (normalize - i))
+        else:
+            normalize -= 1
+
     return None  # modifies arguments in place!
 
 
@@ -754,7 +756,7 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     num_pixels = np.bincount(label_array)[1:]
 
     # Convert from num_levels, num_bufs to lag frames.
-    tot_channels, lag_steps = multi_tau_lags(num_levels, num_bufs)
+    tot_channels, lag_steps, dict_lag = multi_tau_lags(num_levels, num_bufs)
 
     # Ring buffer, a buffer with periodic boundary conditions.
     # Images must be keep for up to maximum delay in buf.

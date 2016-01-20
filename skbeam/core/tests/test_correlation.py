@@ -169,7 +169,7 @@ def test_two_time_corr():
 
 def test_auto_corr_scat_factor():
     num_levels, num_bufs = 3, 4
-    tot_channels, lags = utils.multi_tau_lags(num_levels, num_bufs)
+    tot_channels, lags, dict_lags = utils.multi_tau_lags(num_levels, num_bufs)
     beta = 0.5
     relaxation_rate = 10.0
     baseline = 1.0
