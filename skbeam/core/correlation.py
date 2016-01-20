@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 
 def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
                       label_array, num_bufs, num_pixels, img_per_level,
-                      level, buf_no):
+                      level, buf_no, norm, lev_len):
     """Reference implementation of the inner loop of multi-tau one time
     correlation
 
@@ -100,29 +100,31 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
     # in multi-tau correlation, the subsequent levels have half as many
     # buffers as the first
     i_min = num_bufs // 2 if level else 0
-    normalize = img_per_level[level]
-    print ("normalize", normalize)
     for i in range(i_min, min(img_per_level[level], num_bufs)):
         # compute the index into the autocorrelation matrix
-        t_index = level * num_bufs / 2 + i
+        t_index = level * num_bufs/ 2 + i
         delay_no = (buf_no - i) % num_bufs
 
         # get the images for correlating
         past_img = buf[level, delay_no]
         future_img = buf[level, buf_no]
 
+        # find the normalization that can work both for bad_images
+        #  and good_images
+        ind = int(t_index - lev_len[:level].sum())
+        normalize = img_per_level[level] - i - norm[level+1][ind]
+
         # To check the bad images,
         # bad images are converted to np.nan array
-        if ~np.isnan(past_img).any() or ~np.isnan(future_img).any():
+        if np.isnan(past_img).any() or np.isnan(future_img).any():
+            norm[level + 1][ind] += 1
+            normalize = img_per_level[level] - i - norm[level+1][ind]
+        else:
             for w, arr in zip([past_img*future_img, past_img, future_img],
                               [G, past_intensity_norm, future_intensity_norm]):
                 binned = np.bincount(label_array, weights=w)[1:]
                 # pdb.set_trace()
-                arr[t_index] += ((binned / num_pixels - arr[t_index]) /
-                                 (normalize - i))
-        else:
-            normalize -= 1
-
+                arr[t_index] += ((binned / num_pixels - arr[t_index]) / normalize)
     return None  # modifies arguments in place!
 
 
@@ -144,25 +146,29 @@ _internal_state = namedtuple(
      'pixel_list',
      'num_pixels',
      'lag_steps',
+     'norm',
+     'lev_len',
      ]
 )
 
 _two_time_internal_state = namedtuple(
     'two_time_correlation_state',
     [
-     'buf',
-     'img_per_level',
-     'label_array',
-     'track_level',
-     'cur',
-     'pixel_list',
-     'num_pixels',
-     'lag_steps',
-     'g2',
-     'count_level',
-     'current_img_time',
-     'time_ind',
-     ]
+    'buf',
+    'img_per_level',
+    'label_array',
+    'track_level',
+    'cur',
+    'pixel_list',
+    'num_pixels',
+    'lag_steps',
+    'g2',
+    'count_level',
+    'current_img_time',
+    'time_ind',
+    'norm',
+    'lev_len',
+    ]
 )
 
 
@@ -184,9 +190,9 @@ def _init_state_one_time(num_levels, num_bufs, labels):
         `lazy_one_time` requires so that it can be used to pick up
          processing after it was interrupted
     """
-    (label_array, pixel_list, num_rois,
-     num_pixels, lag_steps, buf, img_per_level, track_level,
-     cur) = _validate_and_transform_inputs(num_bufs, num_levels, labels)
+    (label_array, pixel_list, num_rois, num_pixels, lag_steps, buf,
+     img_per_level, track_level, cur, norm,
+     lev_len) = _validate_and_transform_inputs(num_bufs, num_levels, labels)
 
     # G holds the un normalized auto- correlation result. We
     # accumulate computations into G as the algorithm proceeds.
@@ -209,6 +215,8 @@ def _init_state_one_time(num_levels, num_bufs, labels):
         pixel_list,
         num_pixels,
         lag_steps,
+        norm,
+        lev_len,
     )
 
 
@@ -299,7 +307,7 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
         # and img_per_level in place!
         _one_time_process(s.buf, s.G, s.past_intensity, s.future_intensity,
                           s.label_array, num_bufs, s.num_pixels,
-                          s.img_per_level, level, buf_no)
+                          s.img_per_level, level, buf_no, s.norm, s.lev_len)
 
         # check whether the number of levels is one, otherwise
         # continue processing the next level
@@ -328,7 +336,8 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
                 buf_no = s.cur[level] - 1
                 _one_time_process(s.buf, s.G, s.past_intensity,
                                   s.future_intensity, s.label_array, num_bufs,
-                                  s.num_pixels, s.img_per_level, level, buf_no)
+                                  s.num_pixels, s.img_per_level, level, buf_no,
+                                  s.norm, s.lev_len)
                 level += 1
 
                 # Checking whether there is next level for processing
@@ -507,7 +516,8 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
         # (undownsampled) frames. two_time and img_per_level in place!
         _two_time_process(s.buf, s.g2, s.label_array, num_bufs,
                           s.num_pixels, s.img_per_level, s.lag_steps,
-                          s.current_img_time, level=0, buf_no=s.cur[0] - 1)
+                          s.current_img_time, s.norm, s.lev_len,
+                          level=0, buf_no=s.cur[0] - 1)
 
         # time frame for each level
         s.time_ind[0].append(s.current_img_time)
@@ -548,8 +558,8 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
                 # on previous call above.
                 _two_time_process(s.buf, s.g2, s.label_array, num_bufs,
                                   s.num_pixels, s.img_per_level, s.lag_steps,
-                                  current_img_time, level=level,
-                                  buf_no=s.cur[level]-1)
+                                  current_img_time, s.norm, s.lev_len,
+                                  level=level, buf_no=s.cur[level]-1)
                 level += 1
 
                 # Checking whether there is next level for processing
@@ -579,8 +589,8 @@ def two_time_state_to_results(state):
 
 
 def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
-                      img_per_level, lag_steps, current_img_time, level,
-                      buf_no):
+                      img_per_level, lag_steps, current_img_time, norm,
+                      lev_len, level, buf_no):
     """
     Parameters
     ----------
@@ -671,8 +681,8 @@ def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
         after it was interrupted
     """
     (label_array, pixel_list, num_rois, num_pixels, lag_steps,
-     buf, img_per_level, track_level,
-     cur) = _validate_and_transform_inputs(num_bufs, num_levels, labels)
+     buf, img_per_level, track_level, cur, norm,
+     lev_len) = _validate_and_transform_inputs(num_bufs, num_levels, labels)
 
     # to count images in each level
     count_level = np.zeros(num_levels, dtype=np.int64)
@@ -699,6 +709,8 @@ def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
         count_level,
         current_img_time,
         time_ind,
+        norm,
+        lev_len,
     )
 
 
@@ -758,6 +770,9 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     # Convert from num_levels, num_bufs to lag frames.
     tot_channels, lag_steps, dict_lag = multi_tau_lags(num_levels, num_bufs)
 
+    norm = {key: [0] * len(dict_lag[key]) for key in list(dict_lag.keys())}
+    lev_len = np.array([len(dict_lag[i]) for i in list(dict_lag.keys())])
+
     # Ring buffer, a buffer with periodic boundary conditions.
     # Images must be keep for up to maximum delay in buf.
     buf = np.zeros((num_levels, num_bufs, len(pixel_list)),
@@ -770,4 +785,5 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     cur = np.ones(num_levels, dtype=np.int64)
 
     return (label_array, pixel_list, num_rois, num_pixels,
-            lag_steps, buf, img_per_level, track_level, cur)
+            lag_steps, buf, img_per_level, track_level, cur,
+            norm, lev_len)
