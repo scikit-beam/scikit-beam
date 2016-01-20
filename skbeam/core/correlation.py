@@ -44,7 +44,6 @@ This module is for functions specific to time correlation
 from __future__ import absolute_import, division, print_function
 from .utils import multi_tau_lags
 from .roi import extract_label_indices
-from .mask import bad_to_nan_gen, threshold_mask
 from collections import namedtuple
 import numpy as np
 
