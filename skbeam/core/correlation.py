@@ -113,11 +113,10 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
         ind = int(t_index - lev_len[:level].sum())
         normalize = img_per_level[level] - i - norm[level+1][ind]
 
-        # To check the bad images,
-        # bad images are converted to np.nan array
+        # take out the pat_ing and future_img created using bad images
+        # (bad images are converted to np.nan array)
         if np.isnan(past_img).any() or np.isnan(future_img).any():
             norm[level + 1][ind] += 1
-            normalize = img_per_level[level] - i - norm[level+1][ind]
         else:
             for w, arr in zip([past_img*future_img, past_img, future_img],
                               [G, past_intensity_norm, future_intensity_norm]):

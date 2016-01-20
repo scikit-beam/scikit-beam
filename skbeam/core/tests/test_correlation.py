@@ -183,7 +183,7 @@ def test_auto_corr_scat_factor():
 
 def test_bad_images():
     setup()
-    g2, lag_steps = multi_tau_auto_corr(num_levels, num_bufs,
+    g2, lag_steps = multi_tau_auto_corr(4, num_bufs,
                                         rois, img_stack)
     # introduce bad images
     bad_img_list = [3, 21, 35, 48]
@@ -191,7 +191,7 @@ def test_bad_images():
     images = bad_to_nan_gen(img_stack, bad_img_list)
 
     # then use new images (including bad images)
-    g2_n, lag_steps_n = multi_tau_auto_corr(num_levels, num_bufs,
+    g2_n, lag_steps_n = multi_tau_auto_corr(4, num_bufs,
                                             rois, images)
 
     assert_array_almost_equal(g2[:, 0], g2_n[:, 0], decimal=3)
