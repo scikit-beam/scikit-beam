@@ -514,7 +514,7 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
         # (undownsampled) frames. two_time and img_per_level in place!
         _two_time_process(s.buf, s.g2, s.label_array, num_bufs,
                           s.num_pixels, s.img_per_level, s.lag_steps,
-                          s.current_img_time, s.norm, s.lev_len,
+                          s.current_img_time,
                           level=0, buf_no=s.cur[0] - 1)
 
         # time frame for each level
@@ -556,7 +556,7 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
                 # on previous call above.
                 _two_time_process(s.buf, s.g2, s.label_array, num_bufs,
                                   s.num_pixels, s.img_per_level, s.lag_steps,
-                                  current_img_time, s.norm, s.lev_len,
+                                  current_img_time,
                                   level=level, buf_no=s.cur[level]-1)
                 level += 1
 
@@ -587,8 +587,8 @@ def two_time_state_to_results(state):
 
 
 def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
-                      img_per_level, lag_steps, current_img_time, norm,
-                      lev_len, level, buf_no):
+                      img_per_level, lag_steps, current_img_time,
+                      level, buf_no):
     """
     Parameters
     ----------
