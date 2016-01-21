@@ -768,6 +768,8 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     # Convert from num_levels, num_bufs to lag frames.
     tot_channels, lag_steps, dict_lag = multi_tau_lags(num_levels, num_bufs)
 
+    # these norm and lev_len will help to find the one time correlation
+    # normalization norm will updated when there is a bad image
     norm = {key: [0] * len(dict_lag[key]) for key in list(dict_lag.keys())}
     lev_len = np.array([len(dict_lag[i]) for i in list(dict_lag.keys())])
 
