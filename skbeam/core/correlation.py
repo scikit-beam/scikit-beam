@@ -1264,3 +1264,69 @@ def _cross_corr(img1, img2=None):
     imgc = fftconvolve(img1, img2[tuple(reverse_index)], mode="full")
 
     return imgc
+
+
+def get_four_time_from_two_time(  g12,g2=None, rois=None  ):
+    ''' 
+    Dec 16, 2015, Y.G.@CHX
+    Get four-time correlation function from two correlation function
+    namely, calculate the deviation of each diag line of g12 to get four-time correlation fucntion
+    TOBEDONE: deal with bad frames
+    
+    Parameters:
+        g12: a 3-D array, two correlation function, shape as ( imgs_length, imgs_length, q)  
+    
+    Options:
+        g2: if not None, a 2-D array, shape as ( imgs_length,  q), or (tau, q)
+            one-time correlation fucntion, for normalization of the four-time
+        rois: if not None, a list, [x-slice-start, x-slice-end, y-slice-start, y-slice-end]
+   
+    Return:
+        g4f12: a 2-D array, shape as ( imgs_length,  q), 
+                   a four-time correlation function  
+     
+    One example:        
+        s1,s2 = 0,2000
+        g4 = get_four_time_from_two_time( g12bm, g2b, roi=[s1,s2,s1,s2] )
+         
+    '''      
+    
+    
+    m,n,noqs = g12.shape
+    g4f12 = []       
+    for q in  range(noqs):   
+        temp=[]    
+        if rois is None:
+            y=g12[:,:,q]  
+        else:
+            x1,x2,y1,y2 = rois
+            y=g12[x1:x2,y1:y2, q]
+            m,n = y.shape
+        norm =  ( g2[:,q][0] -1)**2  
+        for tau in range(m): 
+            d_ = np.diag(y,k=int(tau))
+            d = d_[   np.where( d_ !=1)            ]
+            g4 = ( d.std() )**2 /norm
+            temp.append( g4 )                
+                
+        temp = np.array( temp).reshape( len(temp),1)
+        if q==0:
+            g4f12 =  temp
+        else:
+            g4f12=np.hstack( [g4f12,  temp] ) 
+            
+    return g4f12
+
+
+
+
+
+
+
+
+
+
+
+
+
+
