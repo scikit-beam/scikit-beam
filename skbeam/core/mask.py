@@ -88,6 +88,7 @@ def threshold_mask(images, threshold, ther_mask=None):
     -------
     thre_mask : array
         image mask to remove the hot spots
+        shape is (num_columns, num_rows) of the image
     """
     if ther_mask is None:
         thre_mask = np.ones_like(images[0])
