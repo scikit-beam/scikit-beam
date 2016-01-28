@@ -17,6 +17,14 @@ v0.0.7 (unreleased)
   generator yields should be passed to `skbeam.core.correlation:two_time_state_to_results`
   to produce the correlation results and the lag steps that the correlation results
   correspond to.
+- Added removing bad images from multi-tau one time correlation.`PR #400 <https://github.com/scikit-beam/scikit-beam/pull/400>`_
+  This multi-tau one time correlator can be found at `skbeam.core.correlation:multi_tau_auto_corr`.
+- Added new module `skbeam.core.mask`. `PR #400 <https://github.com/scikit-beam/scikit-beam/pull/400>`_
+  It contains functions specific to mask or threshold an image
+  basically to clean images. Added following two functions to this module
+  1. Added a generator `skbeam.core.mask.bad_to_nan_gen`. This generator will convert the bad image array in the images into
+     NAN(Not-A-Number) array
+  1. Added a generator `skbeam.core.mask.threshold_mask`.This generator will create a threshold mask for images.
 
 
 v0.0.6
