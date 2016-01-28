@@ -36,16 +36,21 @@ install:
 
 script:
   - python run_tests.py
-
-after_success:
-  - coveralls
-  - codecov
-  - if [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PYTHON_VERSION == 3.5 ] && [ $TRAVIS_PULL_REQUEST == 'false' ]; then
+  - if [ $TRAVIS_PYTHON_VERSION == 3.5 ]; then
       conda install sphinx numpydoc ipython jupyter pip matplotlib;
       pip install sphinx_bootstrap_theme;
       cd ..;
       git clone https://github.com/scikit-beam/scikit-beam-examples.git;
       cd scikit-beam/doc;
-      chmod +x deploy.sh;
-      ./deploy.sh;
+      chmod +x build_docs.sh;
+      ./build_docs.sh;
+    fi;
+
+after_success:
+  - coveralls
+  - codecov
+  - if [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PULL_REQUEST == 'false' ]; then
+      cd doc;
+      chmod +x push_docs.sh;
+      ./push_docs.sh;
     fi;
