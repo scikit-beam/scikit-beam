@@ -511,3 +511,34 @@ def extract_label_indices(labels):
     label_mask = labels[labels > 0]
 
     return label_mask, pixel_list
+
+
+def get_qedge(qstart, qend, qwidth, noqs,  ):
+    ''' DOCUMENT make_qlist( )
+    give qstart,qend,qwidth,noqs
+    return a qedge by giving the noqs, qstart,qend,qwidth.
+           a qcenter, which is center of each qedge
+    KEYWORD:  None    '''
+    import numpy as np
+    qcenter = np.linspace(qstart, qend, noqs)
+    #print ('the qcenter is:  %s'%qcenter )
+    qedge=np.zeros(2*noqs)
+    qedge[::2]= (  qcenter- (qwidth/2)  ) #+1  #render  even value
+    qedge[1::2]= ( qcenter+ qwidth/2) #render odd value
+    return qedge, qcenter
+
+
+def make_gisaxs_grid(qr_w, qz_w, dim_r, dim_z):
+    y, x = np.indices([dim_z, dim_r])
+    Nr = int(dim_r/qp_w)
+    Nz = int(dim_z/qz_w)
+    noqs = Nr*Nz
+
+    ind = 1
+    for i in range(0,Nr):
+        for j in range(0,Nz):
+            y[ qr_w*i: qr_w*(i+1), qz_w*j:qz_w*(j+1)]=  ind
+            ind += 1
+    return y
+
+
