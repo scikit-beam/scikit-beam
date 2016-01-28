@@ -303,7 +303,7 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
     theta_f = np.arctan2((x - inc_x) * pixel_size[0] * 10**(-6),
                          dist_sample)/2 - theta_i
     # wave number
-    wave_number = 2*np.pi/lamda
+    wave_number = 2*np.pi/wavelength
 
     # x component
     qx = (np.cos(alpha_f) * np.cos(2*theta_f) -
