@@ -136,6 +136,16 @@ def test_hkl_to_q():
     npt.assert_array_almost_equal(b_norm, recip.hkl_to_q(b))
 
 
+def test_gisaxs():
+    incident_beam = (2.0, 2.0)
+    reflected_beam = (8.0, 8.0)
+    pixel_size = (1.0, 1.0)
+    detector_size = (10, 10)
+    dist_sample = 8.0
+    wavelength = 10.0
+    theta_i = 0.0
+
+
 if __name__ == '__main__':
     import nose
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

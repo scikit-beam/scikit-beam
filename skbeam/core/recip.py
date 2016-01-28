@@ -232,11 +232,12 @@ def calibrated_pixels_to_q(detector_size, pyfai_kwargs):
     return a.qArray(detector_size)
 
 
-def gisaxs_geometry(incident_beam, reflected_beam, pixel_size,
-                    detector_size, dist_sample, theta_i):
+def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
+           dist_sample, wavelength, theta_i=0.0):
     """
-    This function will provide incident and reflected angles for gisaxs
-    geometry
+    This function will provide scattering wave vector(q) components(x, y, z),
+    q parallel and incident and reflected angles for grazing-incidence small
+    angle X-ray scattering (GISAXS) geometry.
 
     Parameters
     ----------
@@ -251,16 +252,17 @@ def gisaxs_geometry(incident_beam, reflected_beam, pixel_size,
         detector X and Y direction
     dist_sample : float
        sample to detector distance, in meters
+    wavelength : float
+        wavelength of the x-ray beam in Angstroms
     theta_i : float
-
 
     Returns
     -------
     alpha_i : float
         incident angle
-    theta_f : float
+    theta_f : array
         out of plane angle
-    alpha_f : float
+    alpha_f : array
         exit angle
     tilt_angle : float
         tilt angle
@@ -273,36 +275,50 @@ def gisaxs_geometry(incident_beam, reflected_beam, pixel_size,
     qr : array
         q parallel component
 
+    Notes
+    -----
+    This implementation is based on published work. [1]_
 
+    References
+    ----------
+    .. [1] R. Lazzari, "IsGISAXS: a program for grazing-incidence small-
+        angle X-ray scattering analysis of supported islands," J. Appl.
+        Cryst., vol 35, p 406-421, 2002.
     """
     inc_x, inc_y = incident_beam
     refl_x, refl_y = reflected_beam
+
+    # tilt angle
     tilt_angle = np.arctan2((refl_x - inc_x) * pixel_size[0] * 10 ** (-6),
                             (refl_y - inc_y) * pixel_size[1] * 10 ** (-6))
+    # incident angle
     alpha_i = np.arctan2((refl_y - inc_y) * pixel_size[1] * 10 ** (-6),
                          dist_sample) / 2.
-    y, x = np.indices(detector_size)
 
+    y, x = np.indices(detector_size)
+    # exit angle
     alpha_f = np.arctan2((y - inc_y) * pixel_size[1] * 10**(-6),
                          dist_sample) - alpha_i
+    # out of plane angle
     theta_f = np.arctan2((x - inc_x) * pixel_size[0] * 10**(-6),
                          dist_sample)/2 - theta_i
-
+    # wave number
     wave_number = 2*np.pi/lamda
 
+    # x component
     qx = (np.cos(alpha_f) * np.cos(2*theta_f) -
           np.cos(alpha_i) * np.cos(2*theta_i)) * wave_number
 
     # y component
     qy_ = (np.cos(alpha_f) * np.sin(2*theta_f) -
            np.cos(alpha_i) * np.sin(2*theta_i))
-    qy = qz_ * np.sin(tilt_angle) + qy_ * np.cos(tilt_angle) * wave_number
-
-    #  z component
     qz_ = np.sin(alpha_f) + np.sin(alpha_i)
-    qz = qz_ * np.cos(tilt_angle) - qy_ * np.sin(tilt_angle) * wave_number
+    qy = (qz_ * np.sin(tilt_angle) + qy_ * np.cos(tilt_angle)) * wave_number
+
+    # z component
+    qz = (qz_ * np.cos(tilt_angle) - qy_ * np.sin(tilt_angle)) * wave_number
 
     # q parallel
-    qr = np.sqrt(qx**2 + qy**2) * wave_number
+    qr = np.sqrt(qx**2 + qy**2)
 
     return alpha_i, theta_f, alpha_f, tilt_angle, qx, qy, qz, qr
