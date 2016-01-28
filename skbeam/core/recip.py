@@ -230,3 +230,79 @@ def calibrated_pixels_to_q(detector_size, pyfai_kwargs):
                            "function.")
     a = geo.Geometry(**pyfai_kwargs)
     return a.qArray(detector_size)
+
+
+def gisaxs_geometry(incident_beam, reflected_beam, pixel_size,
+                    detector_size, dist_sample, theta_i):
+    """
+    This function will provide incident and reflected angles for gisaxs
+    geometry
+
+    Parameters
+    ----------
+    incident_beam : tuple
+        x and y co-ordinates of the incident beam
+    reflected_beam : tuple
+        x an dy co-ordinates of the reflected beam
+    pixel_size : tuple
+        pixel_size in um
+    detector_size: tuple
+        2 element tuple defining no. of pixels(size) in the
+        detector X and Y direction
+    dist_sample : float
+       sample to detector distance, in meters
+    theta_i : float
+
+
+    Returns
+    -------
+    alpha_i : float
+        incident angle
+    theta_f : float
+        out of plane angle
+    alpha_f : float
+        exit angle
+    tilt_angle : float
+        tilt angle
+    qx : array
+        x component of the scattering wave vector
+    qy : array
+        y component of the scattering wave vector
+    qz : array
+        z component of the scattering wave vector
+    qr : array
+        q parallel component
+
+
+    """
+    inc_x, inc_y = incident_beam
+    refl_x, refl_y = reflected_beam
+    tilt_angle = np.arctan2((refl_x - inc_x) * pixel_size[0] * 10 ** (-6),
+                            (refl_y - inc_y) * pixel_size[1] * 10 ** (-6))
+    alpha_i = np.arctan2((refl_y - inc_y) * pixel_size[1] * 10 ** (-6),
+                         dist_sample) / 2.
+    y, x = np.indices(detector_size)
+
+    alpha_f = np.arctan2((y - inc_y) * pixel_size[1] * 10**(-6),
+                         dist_sample) - alpha_i
+    theta_f = np.arctan2((x - inc_x) * pixel_size[0] * 10**(-6),
+                         dist_sample)/2 - theta_i
+
+    wave_number = 2*np.pi/lamda
+
+    qx = (np.cos(alpha_f) * np.cos(2*theta_f) -
+          np.cos(alpha_i) * np.cos(2*theta_i)) * wave_number
+
+    # y component
+    qy_ = (np.cos(alpha_f) * np.sin(2*theta_f) -
+           np.cos(alpha_i) * np.sin(2*theta_i))
+    qy = qz_ * np.sin(tilt_angle) + qy_ * np.cos(tilt_angle) * wave_number
+
+    #  z component
+    qz_ = np.sin(alpha_f) + np.sin(alpha_i)
+    qz = qz_ * np.cos(tilt_angle) - qy_ * np.sin(tilt_angle) * wave_number
+
+    # q parallel
+    qr = np.sqrt(qx**2 + qy**2) * wave_number
+
+    return alpha_i, theta_f, alpha_f, tilt_angle, qx, qy, qz, qr
