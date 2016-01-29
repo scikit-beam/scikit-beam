@@ -7,9 +7,18 @@ A catalog of new features, improvements, and bug-fixes in each release.
 Follow links to the relevant GitHub issue or pull request for specific
 code changes and any related discussion.
 
+v0.0.8
+------
+In-progress
+===========
+- `PR #395 <https://github.com/scikit-beam/scikit-beam/pull/395>`_: One-time from two-time
+- `PR #401 <https://github.com/scikit-beam/scikit-beam/pull/401>`_: Removing bad images from xsvs
+- `PR #403 <https://github.com/scikit-beam/scikit-beam/pull/401>`_: Adding four time correlation
+- `PR #405 <https://github.com/scikit-beam/scikit-beam/pull/405>`_: Implement user peak, so users have more flexible control of escape peak or pileup peaks.
+- `PR #373 <https://github.com/scikit-beam/scikit-beam/pull/373>`_: Major overhaul of the docs
 
-v0.0.7 (unreleased)
--------------------
+v0.0.7
+------
 - Added multi-tau scheme two-time correlation. `PR #391 <https://github.com/scikit-beam/scikit-beam/pull/391>`_
   This two-time correlator can be found at `skbeam.core.correlation:two_time_corr`.
   There is a generator version that returns its internal state after consuming
@@ -17,16 +26,17 @@ v0.0.7 (unreleased)
   generator yields should be passed to `skbeam.core.correlation:two_time_state_to_results`
   to produce the correlation results and the lag steps that the correlation results
   correspond to.
-- Added removing bad images from multi-tau one time correlation.
-  `PR #400 <https://github.com/scikit-beam/scikit-beam/pull/400>`_
-  This multi-tau one time correlator can be found at `skbeam.core.correlation:multi_tau_auto_corr`.
-- Added new module `skbeam.core.mask`. `PR #400 <https://github.com/scikit-beam/scikit-beam/pull/400>`_
-  It contains functions specific to mask or threshold an image
-  basically to clean images. Added following two functions to this module.
-- 1. Added a generator `skbeam.core.mask.bad_to_nan' to convert the images marked as "bad" in bad
-    list by their index in images into a np.nan array
-- 2. Added a generator `skbeam.core.mask.threshold_mask` to set all pixels whose value is greater
-    than `threshold` to 0 and yields the thresholded images out.
+- `PR #400 <https://github.com/scikit-beam/scikit-beam/pull/400>`_ Added
+  removing bad images from multi-tau one time correlation.
+
+  - Added new module `skbeam.core.mask`.
+    It contains functions specific to mask or threshold an image
+    basically to clean images. This module contains:
+
+    - Convert the images marked as "bad" in bad list by their index in images into
+      a np.nan array.
+    - Set all pixels whose value is greater than `threshold` to 0 and yields the
+      thresholded images out.
 
 
 v0.0.6
