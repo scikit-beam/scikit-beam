@@ -50,7 +50,7 @@ logger = logging.getLogger(__name__)
 
 def bad_to_nan_gen(images, bad):
     """
-    Convert the images marked as "bad" in `bad_list` by their index into
+    Convert the images marked as "bad" in `bad` by their index into
     `image_gen` into a np.nan array
 
     Parameters
@@ -67,9 +67,13 @@ def bad_to_nan_gen(images, bad):
         if image is bad it will convert to np.nan array otherwise no
         change to the array
     """
+    ret_val = None
     for n, im in enumerate(images):
         if n in bad:
-            yield np.nan*np.ones_like(im)
+            if ret_val is None:
+                ret_val = np.empty(im.shape)
+                ret_val[:] = np.nan
+            yield ret_val
         else:
             yield im
 

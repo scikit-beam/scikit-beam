@@ -105,7 +105,7 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
     i_min = num_bufs // 2 if level else 0
     for i in range(i_min, min(img_per_level[level], num_bufs)):
         # compute the index into the autocorrelation matrix
-        t_index = level * num_bufs/ 2 + i
+        t_index = level * num_bufs / 2 + i
         delay_no = (buf_no - i) % num_bufs
 
         # get the images for correlating
