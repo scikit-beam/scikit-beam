@@ -85,6 +85,10 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
         the current multi-tau level
     buf_no : int
         the current buffer number
+    norm : dict
+        to track bad images
+    lev_len : array
+        length of each levels
 
     Notes
     -----
@@ -746,7 +750,11 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     track_level : array
         to track processing each level
     cur : array
-
+        to increment the buffer
+    norm : dict
+        to track bad images
+    lev_len : array
+        length of each levels
     """
     if num_bufs % 2 != 0:
         raise ValueError("There must be an even number of `num_bufs`. You "
