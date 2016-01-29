@@ -50,8 +50,8 @@ logger = logging.getLogger(__name__)
 
 def bad_to_nan_gen(images, bad):
     """
-    Convert the images marked as "bad" in `bad` by their index into
-    `image_gen` into a np.nan array
+    Convert the images marked as "bad" in `bad` by their index in
+    images into a np.nan array
 
     Parameters
     ----------

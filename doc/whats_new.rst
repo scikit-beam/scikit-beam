@@ -22,10 +22,10 @@ v0.0.7 (unreleased)
   This multi-tau one time correlator can be found at `skbeam.core.correlation:multi_tau_auto_corr`.
 - Added new module `skbeam.core.mask`. `PR #400 <https://github.com/scikit-beam/scikit-beam/pull/400>`_
   It contains functions specific to mask or threshold an image
-  basically to clean images. Added following two functions to this module
-  - Convert the images marked as `bad` in bad list by their index into
-     image_gen` into a np.nan array
-  - Added a generator `skbeam.core.mask.threshold_mask` to set all pixels whose value is greater
+  basically to clean images. Added following two functions to this module.
+  * Added a generator `skbeam.core.mask.bad_to_nan' to convert the images marked as "bad" in bad
+    list by their index in images into a np.nan array
+  * Added a generator `skbeam.core.mask.threshold_mask` to set all pixels whose value is greater
     than `threshold` to 0 and yields the thresholded images out.
 
 
