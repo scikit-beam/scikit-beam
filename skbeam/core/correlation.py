@@ -794,3 +794,29 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     return (label_array, pixel_list, num_rois, num_pixels,
             lag_steps, buf, img_per_level, track_level, cur,
             norm, lev_len)
+
+
+def one_time_from_two_time(two_time_corr):
+    """
+    This will provide the one-time correlation data from two-time correlation
+    data. 
+
+    Parameters
+    ----------
+    two_time_corr : array
+        matrix of two time correlation
+        shape (number of images, number of images, number of labels(ROI))
+
+    Returns
+    -------
+    one_time_corr : array
+        matrix of one time correlation
+        shape (number of images, number of labels(ROI))
+
+    """
+    one_time_corr = np.zeros((two_time_corr.shape[0], two_time_corr.shape[2]))
+    for i in range(two_time_corr.shape[2]):
+        for j in range(two_time_corr.shape[0]):
+            one_time_corr[j, i] = np.trace(two_time_corr[:, :, i],
+                                           offset=j)/two_time_corr.shape[0]
+    return one_time_corr
