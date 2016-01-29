@@ -367,8 +367,8 @@ def test_multi_tau_lags():
 
     assert_array_equal(16, tot_channels)
     assert_array_equal(delay_steps, lag_steps)
-    assert_array_almost_equal(dict_dly[1], dict_lags[1])
-    assert_array_almost_equal(dict_dly[3], dict_lags[3])
+    assert_array_equal(dict_dly[1], dict_lags[1])
+    assert_array_equal(dict_dly[3], dict_lags[3])
 
 
 @raises(NotImplementedError)

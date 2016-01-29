@@ -36,7 +36,7 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 import numpy as np
-from numpy.testing import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal, assert_array_equal
 from nose.tools import assert_raises
 
 import skbeam.core.mask as mask
@@ -66,7 +66,7 @@ def test_threshold_mask():
     y[8, 8] = 0
     y[6, 6] = 0
 
-    assert_array_almost_equal(final, y)
+    assert_array_equal(final, y)
 
 
 def test_bad_to_nan_gen():
@@ -82,6 +82,7 @@ def test_bad_to_nan_gen():
     for im in img:
         y.append(im)
 
-    assert (np.isnan(np.asarray(y)[1]).all() == True)
-    assert (np.isnan(np.asarray(y)[3]).all() == True)
-    assert (np.isnan(np.asarray(y)[4]).all() == False)
+    assert np.isnan(np.asarray(y)[1]).all()
+    assert np.isnan(np.asarray(y)[3]).all()
+    assert not np.isnan(np.asarray(y)[4]).all()
+

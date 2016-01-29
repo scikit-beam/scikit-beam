@@ -48,17 +48,18 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def bad_to_nan_gen(image_gen, bad_list):
+def bad_to_nan_gen(images, bad):
     """
-    This generator will convert the bad image array in the images into
-    NAN(Not-A-Number) array
+    Convert the images marked as "bad" in `bad_list` by their index into
+    `image_gen` into a np.nan array
 
     Parameters
     ----------
-    image_gen : array
-        image_iterable : iterable of 2D arrays
-    bad_list: list
-        bad images list
+    images : iterable
+        Iterable of 2-D arrays
+    bad : list
+        List of integer indices into the `images` parameter that mark those
+        images as "bad".
 
     Yields
     ------
@@ -66,37 +67,40 @@ def bad_to_nan_gen(image_gen, bad_list):
         if image is bad it will convert to np.nan array otherwise no
         change to the array
     """
-    for n, im in enumerate(image_gen):
-        if n in bad_list:
+    for n, im in enumerate(images):
+        if n in bad:
             yield np.nan*np.ones_like(im)
         else:
             yield im
 
 
-def threshold_mask(images, threshold, ther_mask=None):
+def threshold_mask(images, threshold, mask=None):
     """
-    This generator will create a threshold mask for images
+    This generator sets all pixels whose value is greater than `threshold`
+    to 0 and yields the thresholded images out
 
     Parameters
     ----------
-    images : array
-        image_iterable : iterable of 2D arrays
-    threshold: float
+    images : iterable
+        Iterable of 2-D arrays
+    threshold : float
         threshold value to remove the hot spots in the image
-    ther_mask : array
-        image mask to remove the hot spots
+    mask : array
+        array with values above the threshold marked as 0 and values
+        below marked as 1.
         shape is (num_columns, num_rows) of the image, optional None
 
     Yields
     -------
-    thre_mask : array
-        image mask to remove the hot spots
+    mask : array
+        array with values above the threshold marked as 0 and values
+        below marked as 1.
         shape is (num_columns, num_rows) of the image
     """
-    if ther_mask is None:
-        thre_mask = np.ones_like(images[0])
+    if mask is None:
+        mask = np.ones_like(images[0])
     for im in images:
         bad_pixels = np.where(im >= threshold)
-        if len(bad_pixels[0])!=0:
-            thre_mask[bad_pixels] = 0
-        yield thre_mask
+        if len(bad_pixels[0]) != 0:
+            mask[bad_pixels] = 0
+        yield mask

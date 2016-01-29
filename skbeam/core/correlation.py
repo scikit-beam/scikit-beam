@@ -88,7 +88,7 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
     norm : dict
         to track bad images
     lev_len : array
-        length of each levels
+        length of each level
 
     Notes
     -----
@@ -125,7 +125,6 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
             for w, arr in zip([past_img*future_img, past_img, future_img],
                               [G, past_intensity_norm, future_intensity_norm]):
                 binned = np.bincount(label_array, weights=w)[1:]
-                # pdb.set_trace()
                 arr[t_index] += ((binned / num_pixels - arr[t_index]) / normalize)
     return None  # modifies arguments in place!
 
@@ -778,8 +777,8 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
 
     # these norm and lev_len will help to find the one time correlation
     # normalization norm will updated when there is a bad image
-    norm = {key: [0] * len(dict_lag[key]) for key in list(dict_lag.keys())}
-    lev_len = np.array([len(dict_lag[i]) for i in list(dict_lag.keys())])
+    norm = {key: [0] * len(dict_lag[key]) for key in (dict_lag.keys())}
+    lev_len = np.array([len(dict_lag[i]) for i in (dict_lag.keys())])
 
     # Ring buffer, a buffer with periodic boundary conditions.
     # Images must be keep for up to maximum delay in buf.
