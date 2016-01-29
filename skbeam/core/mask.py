@@ -57,7 +57,7 @@ def bad_to_nan_gen(image_gen, bad_list):
     ----------
     image_gen : array
         image_iterable : iterable of 2D arrays
-     : list
+    bad_list: list
         bad images list
 
     Yields
@@ -83,6 +83,9 @@ def threshold_mask(images, threshold, ther_mask=None):
         image_iterable : iterable of 2D arrays
     threshold: float
         threshold value to remove the hot spots in the image
+    ther_mask : array
+        image mask to remove the hot spots
+        shape is (num_columns, num_rows) of the image, optional None
 
     Yields
     -------
