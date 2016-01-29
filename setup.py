@@ -18,8 +18,11 @@ def read(fname):
 
 
 def c_ext():
+    define_macros = []
+    if os.name == 'posix':
+        define_macros.append(('USE_THREADS', None))
     return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'],
-                      define_macros=[('USE_THREADS', None)])]
+                      define_macros=define_macros)]
 
 
 def cython_ext():
