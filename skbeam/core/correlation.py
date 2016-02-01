@@ -583,8 +583,8 @@ def two_time_state_to_results(state):
         and the lag steps
     """
     for q in range(np.max(state.label_array)):
-        x0 = (state.g2)[:, :, q]
-        (state.g2)[:, :, q] = (np.tril(x0) + np.tril(x0).T -
+        x0 = (state.g2)[q, :, :]
+        (state.g2)[q, :, :] = (np.tril(x0) + np.tril(x0).T -
                                np.diag(np.diag(x0)))
     return results(state.g2, state.lag_steps, state)
 
@@ -695,7 +695,7 @@ def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
     time_ind = {key: [] for key in range(num_levels)}
 
     # two time correlation results (array)
-    g2 = np.zeros((num_frames, num_frames, num_rois), dtype=np.float64)
+    g2 = np.zeros((num_rois, num_frames, num_frames), dtype=np.float64)
 
     return _two_time_internal_state(
         buf,
@@ -814,9 +814,9 @@ def one_time_from_two_time(two_time_corr):
         shape (number of images, number of labels(ROI))
 
     """
-    one_time_corr = np.zeros((two_time_corr.shape[0], two_time_corr.shape[2]))
-    for i in range(two_time_corr.shape[2]):
-        for j in range(two_time_corr.shape[0]):
-            one_time_corr[j, i] = np.trace(two_time_corr[:, :, i],
-                                           offset=j)/two_time_corr.shape[0]
+    one_time_corr = np.zeros((two_time_corr.shape[2], two_time_corr.shape[0]))
+    for i in range(two_time_corr.shape[0]):
+        for j in range(two_time_corr.shape[2]):
+            one_time_corr[j, i] = np.trace(two_time_corr[i, :, :],
+                                           offset=j)/two_time_corr.shape[2]
     return one_time_corr
