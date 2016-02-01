@@ -655,11 +655,11 @@ def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
         if not isinstance(current_img_time, int):
             nshift = 2**(level-1)
             for i in range(-nshift+1, nshift+1):
-                g2[int(tind1+i),
+                g2[:, int(tind1+i),
                    int(tind2+i)] = (tmp_binned/(pi_binned *
                                                 fi_binned))*num_pixels
         else:
-            g2[tind1, tind2] = tmp_binned/(pi_binned * fi_binned)*num_pixels
+            g2[:, tind1, tind2] = tmp_binned/(pi_binned * fi_binned)*num_pixels
 
 
 def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
