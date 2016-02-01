@@ -218,7 +218,7 @@ def test_one_time_from_two_time():
                              num_buf, num_lev)
 
     one_time = one_time_from_two_time(two_time[0])
-    assert_array_almost_equal(one_time[:, 0], np.array([1.0, 0.9, 0.8, 0.7,
+    assert_array_almost_equal(one_time[0, :], np.array([1.0, 0.9, 0.8, 0.7,
                                                         0.6, 0.5, 0.4, 0.3,
                                                         0.2, 0.1]))
 

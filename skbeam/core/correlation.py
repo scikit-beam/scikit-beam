@@ -599,6 +599,7 @@ def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
         image data array to use for two time correlation
     g2: array
         two time correlation matrix
+        shape (number of labels(ROI), number of images, number of images)
     label_array: array
         Elements not inside any ROI are zero; elements inside each
         ROI are 1, 2, 3, etc. corresponding to the order they are specified
@@ -798,25 +799,24 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
 
 def one_time_from_two_time(two_time_corr):
     """
-    This will provide the one-time correlation data from two-time correlation
-    data. 
+    This will provide the one-time correlation data from two-time
+    correlation data.
 
     Parameters
     ----------
     two_time_corr : array
         matrix of two time correlation
-        shape (number of images, number of images, number of labels(ROI))
+        shape (number of labels(ROI's), number of images, number of images)
 
     Returns
     -------
     one_time_corr : array
         matrix of one time correlation
-        shape (number of images, number of labels(ROI))
-
+        shape (number of labels(ROI), number of labels(ROI's))
     """
-    one_time_corr = np.zeros((two_time_corr.shape[2], two_time_corr.shape[0]))
-    for i in range(two_time_corr.shape[0]):
+
+    one_time_corr = np.zeros((two_time_corr.shape[0], two_time_corr.shape[2]))
+    for g in two_time_corr:
         for j in range(two_time_corr.shape[2]):
-            one_time_corr[j, i] = np.trace(two_time_corr[i, :, :],
-                                           offset=j)/two_time_corr.shape[2]
+            one_time_corr[:, j] = np.trace(g, offset=j)/two_time_corr.shape[2]
     return one_time_corr
