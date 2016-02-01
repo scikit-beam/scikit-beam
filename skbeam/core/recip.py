@@ -242,9 +242,9 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
     Parameters
     ----------
     incident_beam : tuple
-        x and y co-ordinates of the incident beam
+        x and y co-ordinates of the incident beam in pixels
     reflected_beam : tuple
-        x an dy co-ordinates of the reflected beam
+        x and y co-ordinates of the reflected beam in pixels
     pixel_size : tuple
         pixel_size in um
     detector_size: tuple
@@ -254,7 +254,8 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
        sample to detector distance, in meters
     wavelength : float
         wavelength of the x-ray beam in Angstroms
-    theta_i : float
+    theta_i : float, optional
+        out of plane angle, default 0.0
 
     Returns
     -------
@@ -288,19 +289,22 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
     inc_x, inc_y = incident_beam
     refl_x, refl_y = reflected_beam
 
+    # convert pixel_size to meters
+    pixel_size = np.asarray(pixel_size) * 10 ** (-6)
+
     # tilt angle
-    tilt_angle = np.arctan2((refl_x - inc_x) * pixel_size[0] * 10 ** (-6),
-                            (refl_y - inc_y) * pixel_size[1] * 10 ** (-6))
+    tilt_angle = np.arctan2((refl_x - inc_x) * pixel_size[0],
+                            (refl_y - inc_y) * pixel_size[1])
     # incident angle
-    alpha_i = np.arctan2((refl_y - inc_y) * pixel_size[1] * 10 ** (-6),
+    alpha_i = np.arctan2((refl_y - inc_y) * pixel_size[1],
                          dist_sample) / 2.
 
     y, x = np.indices(detector_size)
     # exit angle
-    alpha_f = np.arctan2((y - inc_y) * pixel_size[1] * 10**(-6),
+    alpha_f = np.arctan2((y - inc_y) * pixel_size[1],
                          dist_sample) - alpha_i
     # out of plane angle
-    theta_f = np.arctan2((x - inc_x) * pixel_size[0] * 10**(-6),
+    theta_f = np.arctan2((x - inc_x) * pixel_size[0],
                          dist_sample)/2 - theta_i
     # wave number
     wave_number = 2*np.pi/wavelength
