@@ -484,7 +484,7 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
         A `results` object is yielded after every image has been processed.
         This `reults` object contains, in this order:
         - `g2`: the normalized correlation
-          shape is (len(lag_steps), len(lag_steps), num_rois)
+          shape is (num_rois, len(lag_steps), len(lag_steps))
         - `lag_steps`: the times at which the correlation was computed
         - `_internal_state`: all of the internal state. Can be passed back in
           to `lazy_one_time` as the `internal_state` parameter
