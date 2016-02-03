@@ -255,11 +255,12 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
     ------
     namedtuple
         A `results` object is yielded after every image has been processed.
-         This `reults` object contains:
-        - the normalized correlation, `g2`
-        - the times at which the correlation was computed, `lag_steps`
-        - and all of the internal state, `final_state`, which is a
-          `correlation_state` namedtuple
+        This `reults` object contains, in this order:
+        - `g2`: the normalized correlation
+          shape is (len(lag_steps), num_rois)
+        - `lag_steps`: the times at which the correlation was computed
+        - `_internal_state`: all of the internal state. Can be passed back in
+          to `lazy_one_time` as the `internal_state` parameter
 
     Notes
     -----
@@ -363,7 +364,12 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     Original code(in Yorick) for multi tau auto correlation
     author: Mark Sutton
 
-    See docstring for lazy_one_time
+    For parameter description, please reference the docstring for
+    lazy_one_time. Note that there is an API difference between this function
+    and `lazy_one_time`. The `images` arugment is at the end of this function
+    signature here for backwards compatibility, but is the first argument in
+    the `lazy_one_time()` function. The semantics of the variables remain
+    unchanged.
     """
     gen = lazy_one_time(images, num_levels, num_bufs, labels)
     for result in gen:
@@ -427,7 +433,12 @@ def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1):
     This function computes two-time correlation
     Original code : author: Yugang Zhang
 
-    See docstring for lazy_two_time
+    Returns
+    -------
+    results : namedtuple
+
+    For parameter definition, see the docstring for the `lazy_two_time()`
+    function in this module
     """
     gen = lazy_two_time(labels, images, num_frames, num_bufs, num_levels)
     for result in gen:
@@ -469,9 +480,14 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
 
     Yields
     ------
-    internal_state : tuple
-      all of the internal state, `final_state`, which is a
-      `correlation_state` namedtuple
+    namedtuple
+        A `results` object is yielded after every image has been processed.
+        This `reults` object contains, in this order:
+        - `g2`: the normalized correlation
+          shape is (num_rois, len(lag_steps), len(lag_steps))
+        - `lag_steps`: the times at which the correlation was computed
+        - `_internal_state`: all of the internal state. Can be passed back in
+          to `lazy_one_time` as the `internal_state` parameter
 
     Notes
     -----
@@ -608,7 +624,7 @@ def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
         number of buffers(channels)
     num_pixels : array
         number of pixels in certain ROI's
-        ROI's, dimensions are : [number of ROI's]
+        ROI's, dimensions are len(np.unique(label_array))
     img_per_level: array
         to track how many images processed in each level
     lag_steps : array
