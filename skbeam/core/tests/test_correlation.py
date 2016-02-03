@@ -214,7 +214,7 @@ def test_one_time_from_two_time():
     roi[x_dim//10:x_dim//5, y_dim//10:y_dim//5] = 3
 
     g2, lag_steps, _state = two_time_corr(roi, imgs, stack,
-                             num_buf, num_lev)
+                                          num_buf, num_lev)
 
     one_time = one_time_from_two_time(g2)
     assert_array_almost_equal(one_time[0, :], np.array([1.0, 0.9, 0.8, 0.7,

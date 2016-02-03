@@ -125,7 +125,8 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
             for w, arr in zip([past_img*future_img, past_img, future_img],
                               [G, past_intensity_norm, future_intensity_norm]):
                 binned = np.bincount(label_array, weights=w)[1:]
-                arr[t_index] += ((binned / num_pixels - arr[t_index]) / normalize)
+                arr[t_index] += ((binned / num_pixels -
+                                  arr[t_index]) / normalize)
     return None  # modifies arguments in place!
 
 
@@ -154,21 +155,20 @@ _internal_state = namedtuple(
 
 _two_time_internal_state = namedtuple(
     'two_time_correlation_state',
-    [
-    'buf',
-    'img_per_level',
-    'label_array',
-    'track_level',
-    'cur',
-    'pixel_list',
-    'num_pixels',
-    'lag_steps',
-    'g2',
-    'count_level',
-    'current_img_time',
-    'time_ind',
-    'norm',
-    'lev_len',
+    ['buf',
+     'img_per_level',
+     'label_array',
+     'track_level',
+     'cur',
+     'pixel_list',
+     'num_pixels',
+     'lag_steps',
+     'g2',
+     'count_level',
+     'current_img_time',
+     'time_ind',
+     'norm',
+     'lev_len',
     ]
 )
 
@@ -762,7 +762,8 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     label_array, pixel_list = extract_label_indices(labels)
 
     # map the indices onto a sequential list of integers starting at 1
-    label_mapping = {label: n+1 for n, label in enumerate(np.unique(label_array))}
+    label_mapping = {label: n+1
+                     for n, label in enumerate(np.unique(label_array))}
     # remap the label array to go from 1 -> max(_labels)
     for label, n in label_mapping.items():
         label_array[label_array == label] = n
