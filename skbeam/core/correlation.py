@@ -125,7 +125,8 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
             for w, arr in zip([past_img*future_img, past_img, future_img],
                               [G, past_intensity_norm, future_intensity_norm]):
                 binned = np.bincount(label_array, weights=w)[1:]
-                arr[t_index] += ((binned / num_pixels - arr[t_index]) / normalize)
+                arr[t_index] += ((binned / num_pixels -
+                                  arr[t_index]) / normalize)
     return None  # modifies arguments in place!
 
 
@@ -154,21 +155,20 @@ _internal_state = namedtuple(
 
 _two_time_internal_state = namedtuple(
     'two_time_correlation_state',
-    [
-    'buf',
-    'img_per_level',
-    'label_array',
-    'track_level',
-    'cur',
-    'pixel_list',
-    'num_pixels',
-    'lag_steps',
-    'g2',
-    'count_level',
-    'current_img_time',
-    'time_ind',
-    'norm',
-    'lev_len',
+    ['buf',
+     'img_per_level',
+     'label_array',
+     'track_level',
+     'cur',
+     'pixel_list',
+     'num_pixels',
+     'lag_steps',
+     'g2',
+     'count_level',
+     'current_img_time',
+     'time_ind',
+     'norm',
+     'lev_len',
     ]
 )
 
@@ -583,8 +583,8 @@ def two_time_state_to_results(state):
         and the lag steps
     """
     for q in range(np.max(state.label_array)):
-        x0 = (state.g2)[:, :, q]
-        (state.g2)[:, :, q] = (np.tril(x0) + np.tril(x0).T -
+        x0 = (state.g2)[q, :, :]
+        (state.g2)[q, :, :] = (np.tril(x0) + np.tril(x0).T -
                                np.diag(np.diag(x0)))
     return results(state.g2, state.lag_steps, state)
 
@@ -599,6 +599,7 @@ def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
         image data array to use for two time correlation
     g2: array
         two time correlation matrix
+        shape (number of labels(ROI), number of frames, number of frames)
     label_array: array
         Elements not inside any ROI are zero; elements inside each
         ROI are 1, 2, 3, etc. corresponding to the order they are specified
@@ -655,11 +656,11 @@ def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
         if not isinstance(current_img_time, int):
             nshift = 2**(level-1)
             for i in range(-nshift+1, nshift+1):
-                g2[int(tind1+i),
+                g2[:, int(tind1+i),
                    int(tind2+i)] = (tmp_binned/(pi_binned *
                                                 fi_binned))*num_pixels
         else:
-            g2[tind1, tind2] = tmp_binned/(pi_binned * fi_binned)*num_pixels
+            g2[:, tind1, tind2] = tmp_binned/(pi_binned * fi_binned)*num_pixels
 
 
 def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
@@ -695,7 +696,7 @@ def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
     time_ind = {key: [] for key in range(num_levels)}
 
     # two time correlation results (array)
-    g2 = np.zeros((num_frames, num_frames, num_rois), dtype=np.float64)
+    g2 = np.zeros((num_rois, num_frames, num_frames), dtype=np.float64)
 
     return _two_time_internal_state(
         buf,
@@ -761,7 +762,8 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     label_array, pixel_list = extract_label_indices(labels)
 
     # map the indices onto a sequential list of integers starting at 1
-    label_mapping = {label: n+1 for n, label in enumerate(np.unique(label_array))}
+    label_mapping = {label: n+1
+                     for n, label in enumerate(np.unique(label_array))}
     # remap the label array to go from 1 -> max(_labels)
     for label, n in label_mapping.items():
         label_array[label_array == label] = n
@@ -794,3 +796,28 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     return (label_array, pixel_list, num_rois, num_pixels,
             lag_steps, buf, img_per_level, track_level, cur,
             norm, lev_len)
+
+
+def one_time_from_two_time(two_time_corr):
+    """
+    This will provide the one-time correlation data from two-time
+    correlation data.
+
+    Parameters
+    ----------
+    two_time_corr : array
+        matrix of two time correlation
+        shape (number of labels(ROI's), number of frames, number of frames)
+
+    Returns
+    -------
+    one_time_corr : array
+        matrix of one time correlation
+        shape (number of labels(ROI's), number of frames)
+    """
+
+    one_time_corr = np.zeros((two_time_corr.shape[0], two_time_corr.shape[2]))
+    for g in two_time_corr:
+        for j in range(two_time_corr.shape[2]):
+            one_time_corr[:, j] = np.trace(g, offset=j)/two_time_corr.shape[2]
+    return one_time_corr

@@ -44,8 +44,10 @@ from skbeam.core.correlation import (multi_tau_auto_corr,
                                      auto_corr_scat_factor,
                                      lazy_one_time,
                                      lazy_two_time, two_time_corr,
-                                     two_time_state_to_results)
+                                     two_time_state_to_results,
+                                     one_time_from_two_time)
 from skbeam.core.mask import bad_to_nan_gen
+
 
 logger = logging.getLogger(__name__)
 
@@ -196,6 +198,28 @@ def test_bad_images():
 
     assert_array_almost_equal(g2[:, 0], g2_n[:, 0], decimal=3)
     assert_array_almost_equal(g2[:, 1], g2_n[:, 1], decimal=3)
+
+
+def test_one_time_from_two_time():
+    num_lev = 1
+    num_buf = 10  # must be even
+    x_dim = 10
+    y_dim = 10
+    stack = 10
+    imgs = np.random.randint(1, 3, (stack, x_dim, y_dim))
+    roi = np.zeros_like(imgs[0])
+    # make sure that the ROIs can be any integers greater than 1.
+    # They do not have to start at 1 and be continuous
+    roi[0:x_dim//10, 0:y_dim//10] = 5
+    roi[x_dim//10:x_dim//5, y_dim//10:y_dim//5] = 3
+
+    g2, lag_steps, _state = two_time_corr(roi, imgs, stack,
+                                          num_buf, num_lev)
+
+    one_time = one_time_from_two_time(g2)
+    assert_array_almost_equal(one_time[0, :], np.array([1.0, 0.9, 0.8, 0.7,
+                                                        0.6, 0.5, 0.4, 0.3,
+                                                        0.2, 0.1]))
 
 
 if __name__ == '__main__':
