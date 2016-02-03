@@ -60,6 +60,10 @@ Under active development
     * Absorption
     * Fluorescence
 
+* X-ray Fluorescence
+
+    * `Fitting GUI <https://github.com/NSLS-II/pyxrf>`_
+
 * Correlation
 
     * 4-time
