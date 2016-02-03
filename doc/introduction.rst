@@ -21,9 +21,11 @@ they play nicely with other packages from the scientific Python community.
 Further, the modular design of scikit-beam allows its components to be easily
 reused in way not envisioned by the authors.
 
-Scikit-beam is being developed at the National Synchrotron Light Source at
+Scikit-beam is being developed at the National Synchrotron Light Source II at
 Brookhaven National Lab and also in collaboration with scientists at the LCLS,
-APS and the SwissFEL
+APS and the SwissFEL (If I leave you out here, please understand that it is
+not intentional.  Help fix the oversight by submitting a PR to add your
+organization or post an `issue <https://github.com/scikit-beam/scikit-beam/issues>`_).
 
 Targeted Techniques
 ^^^^^^^^^^^^^^^^^^^
