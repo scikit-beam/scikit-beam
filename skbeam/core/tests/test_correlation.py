@@ -45,7 +45,6 @@ from skbeam.core.correlation import (multi_tau_auto_corr,
                                      lazy_one_time,
                                      lazy_two_time, two_time_corr,
                                      two_time_state_to_results,
-                                     two_time_state_to_results,
                                      one_time_from_two_time)
 from skbeam.core.mask import bad_to_nan_gen
 

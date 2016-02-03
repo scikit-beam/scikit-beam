@@ -599,7 +599,7 @@ def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
         image data array to use for two time correlation
     g2: array
         two time correlation matrix
-        shape (number of labels(ROI), number of images, number of images)
+        shape (number of labels(ROI), number of frames, number of frames)
     label_array: array
         Elements not inside any ROI are zero; elements inside each
         ROI are 1, 2, 3, etc. corresponding to the order they are specified
@@ -806,13 +806,13 @@ def one_time_from_two_time(two_time_corr):
     ----------
     two_time_corr : array
         matrix of two time correlation
-        shape (number of labels(ROI's), number of images, number of images)
+        shape (number of labels(ROI's), number of frames, number of frames)
 
     Returns
     -------
     one_time_corr : array
         matrix of one time correlation
-        shape (number of labels(ROI), number of labels(ROI's))
+        shape (number of labels(ROI's), number of frames)
     """
 
     one_time_corr = np.zeros((two_time_corr.shape[0], two_time_corr.shape[2]))
