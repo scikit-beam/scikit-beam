@@ -49,6 +49,7 @@ Currently implemented
 
 * Fast 2-D image conversion to Q
 * Fast gridding of 3-D point cloud into 2-D plane
+* X-Ray Speckle Visibility Spectroscopy (XSVS)
 
 Under active development
 ========================
