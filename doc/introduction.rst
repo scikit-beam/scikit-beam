@@ -3,14 +3,16 @@
 Introduction to scikit-beam
 ---------------------------
 
-scikit-beam provides simple functions useful for X-ray science, conveniently
-grouped by technique. It includes domain-specific functionality written for
-this package and also relevant functions from other scientific packages such as
-scikit-image. Thus, it is a complete solution, curating useful tools from the
-scientific Python community and presenting them in a context for X-ray science.
+scikit-beam provides simple functions useful for the X-ray, Neutron and
+Electron communities.  The primary goal of the scikit-beam project is to
+provide a centralized repository for algorithms that are used in these three
+scientific domains.  The algorithms that we provide within scikit-beam are
+fully tested and are usually validated by the scientist who developed the
+original technique, so users can have confidence that these algorithms are
+accurate and will continue to be accurate.
 
 There are several ways to use scikit-beam. Users comfortable with Python,
-IPython, or the IPython notebook can use it like any other package. Users
+IPython, or the Jupyter notebook can use it like any other package. Users
 who prefer drag-and-drop software can access all the tools in scikit-beam
 through `vistrails <http://www.vistrails.org/index.php/Main_Page>`__.
 
@@ -19,31 +21,53 @@ they play nicely with other packages from the scientific Python community.
 Further, the modular design of scikit-beam allows its components to be easily
 reused in way not envisioned by the authors.
 
+Scikit-beam is being developed at the National Synchrotron Light Source II at
+Brookhaven National Lab and also in collaboration with scientists at the LCLS,
+APS and the SwissFEL (If I leave you out here, please understand that it is
+not intentional.  Help fix the oversight by submitting a PR to add your
+organization or post an `issue <https://github.com/scikit-beam/scikit-beam/issues>`_).
+
 Targeted Techniques
 ^^^^^^^^^^^^^^^^^^^
-scikit-beam is being developed to support X-ray techniques at the beamlines
-listed in the Supported Beamlines section.
+The following is a list of algorithms that are currently available in
+scikit-beam along with some planned work for the future.  If any of the planned
+work looks interesting to you, please jump in and contribute on `github
+<https://github.com/scikit-beam/scikit-beam>`_!
+
+See our :doc:`/example` section for curated Jupyter notebooks that walk through
+using these algorithms.
 
 Currently implemented
 =====================
 
-* `Differential Phase Contrast <https://github.com/scikit-beam/scikit-beam-examples/tree/master/demos/dpc>`_
-* `1-time correlation <https://github.com/scikit-beam/scikit-beam-examples/tree/master/demos/1_time_correlation>`_
-* `Fast 2-D image conversion to Q and gridding <https://github.com/scikit-beam/scikit-beam-examples/tree/master/demos/reciprocal_space>`_
+* Differential Phase Contrast
+* MultiTau correlation
+
+    * 1-time
+    * 2-time
+    * 1-time from 2-time
+
+* Fast 2-D image conversion to Q
+* Fast gridding of 3-D point cloud into 2-D plane
+* X-Ray Speckle Visibility Spectroscopy (XSVS)
 
 Under active development
 ========================
 
 * Powder Diffraction
-* X-ray Fluorescence
-
-    * `Fitting GUI <https://github.com/NSLS-II-HXN/pyxrf>`_
-    
 * Image Segmentation
 * Tomography
 
     * Absorption
     * Fluorescence
+
+* X-ray Fluorescence
+
+    * `Fitting GUI <https://github.com/NSLS-II/pyxrf>`_
+
+* Correlation
+
+    * 4-time
 
 Planned
 =======
@@ -51,28 +75,11 @@ Planned
 * Ptychography
 * Inelastic Scattering
 * Coherent Diffractive Imaging
-* 2-time correlation
-
-    * GPU Implementation
-    
+* GPU implementation of Multi-tau correlation
 * XANES (1-D, 2-D)
-
-Supported Beamlines
-^^^^^^^^^^^^^^^^^^^
-Scikit-image is developed in collaboration with beamline scientists at
-the following beamlines.
-
-**NSLS-II**
-
-* Inelastic X-ray Scattering (IXS)
-* X-ray Powder Diffraction (XPD)
-* Coherent Hard X-ray Scattering (CHX)
-* Coherent Soft X-ray Scattering (CSX1)
-* Submicron Resolution X-ray Spectroscopy (SRX)
-* Hard X-ray Nanoprobe (HXN)
 
 Credit
 ^^^^^^
 
-scikit-beam is part of the `scikit-beam <https://github.com/scikit-beam>`__ software
-organization supported by `Brookhaven National Lab <http://www.bnl.gov>`__.
+scikit-beam is part of the `scikit-beam <https://github.com/scikit-beam>`__
+software collaboration supported by `Brookhaven National Lab <http://www.bnl.gov>`__.
