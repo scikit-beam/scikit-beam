@@ -390,6 +390,10 @@ class ParamController(object):
             element name
         constraint : {'lo', 'hi', 'lohi', 'fixed', 'none'}, optional
             default "bound strategy" (fitting constraints)
+
+        .. note:: Element that can be add include elemental peak, pileup peak and user peak.
+        User peak is a fake peak, but can be used as a quick replacement for pileup peaks,
+        escape peaks or other unknown peaks due to detector defects or scattering process.
         """
         if element not in self.element_list:
             self.element_list.append(element)
@@ -574,12 +578,17 @@ class ModelSpectrum(object):
 
     def setup_element_model(self, elemental_line, default_area=1e5):
         """
-        Construct element model.
+        Construct element model. Elemental line that can be add include elemental
+        peak, pileup peak and user peak. User peak is a fake peak, but can be used
+        as a quick replacement for pileup peaks, escape peaks or other unknown peaks
+        due to detector defects or scattering process.
 
         Parameters
         ----------
         elemental_line : str
             elemental line, such as 'Fe_K'
+            pileup peak, such as 'Si_Ka1-Si_Ka1'
+            user peak, such as 'user_peak1', 'user_peak2'
         default_area : float, optional
             value for the initial area of a given element
             default is 1e5, found to be a good value
@@ -1135,9 +1144,7 @@ def nnls_fit(spectrum, expected_matrix, weights=None):
     residue : float
         error
 
-    Note
-    ----
-    nnls is chosen as amplitude of each element should not be negative.
+    .. note:: nnls is chosen as amplitude of each element should not be negative.
     """
     if weights is not None:
         expected_matrix = np.transpose(np.multiply(np.transpose(expected_matrix), np.sqrt(weights)))
