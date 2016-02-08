@@ -67,6 +67,10 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
     equivalent pixels and over a number of speckle patterns recorded
     with the same integration time T under the same condition.
 
+    Bad images need to be represented as an array filled with np.nan.
+    Using bad_to_nan function in mask.py the bad images can be converted
+    into np.nan arrays.
+
     Parameters
     ----------
     image_sets : array
