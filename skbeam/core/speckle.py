@@ -156,6 +156,9 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
 
         # to track bad images in each time level
         track_bad = np.zeros(num_times)
+        #  bad images, represented as an array filled with np.nan
+        # (using bad_to_nan function in mask.py all the bad
+        # images are converted into np.nan arrays)
 
         # to increment buffer
         cur = np.full(num_times, timebin_num)
@@ -246,10 +249,9 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels,
     img_per_level[level] += 1
     u_labels = list(np.unique(labels))
 
-    # Check if there are any bad images, represented as an array filled
+    #  Check if there are any bad images, represented as an array filled
     #  with np.nan (using bad_to_nan function in mask.py all the bad
     # images are converted into np.nan arrays)
-
     if np.isnan(buf[level, buf_no]).any():
         track_bad[level] += 1
         return
