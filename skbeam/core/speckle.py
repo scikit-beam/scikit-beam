@@ -67,6 +67,10 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
     equivalent pixels and over a number of speckle patterns recorded
     with the same integration time T under the same condition.
 
+    Bad images need to be represented as an array filled with np.nan.
+    Using bad_to_nan function in mask.py the bad images can be converted
+    into np.nan arrays.
+
     Parameters
     ----------
     image_sets : array
@@ -154,6 +158,12 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
         # to track processing each time level
         track_level = np.zeros(num_times)
 
+        # to track bad images in each time level
+        track_bad = np.zeros(num_times)
+        #  bad images, represented as an array filled with np.nan
+        # (using bad_to_nan function in mask.py all the bad
+        # images are converted into np.nan arrays)
+
         # to increment buffer
         cur = np.full(num_times, timebin_num)
 
@@ -170,7 +180,7 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
             buf[0, cur[0] - 1] = (np.ravel(img))[indices]
 
             _process(num_roi, 0, cur[0] - 1, buf, img_per_level, labels,
-                     max_cts, bin_edges[0], prob_k, prob_k_pow)
+                     max_cts, bin_edges[0], prob_k, prob_k_pow, track_bad)
 
             # check whether the number of levels is one, otherwise
             # continue processing the next level
@@ -191,7 +201,7 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
 
                     _process(num_roi, level, cur[level]-1, buf, img_per_level,
                              labels, max_cts, bin_edges[level], prob_k,
-                             prob_k_pow)
+                             prob_k_pow, track_bad)
                     level += 1
 
             prob_k_all += (prob_k - prob_k_all)/(i + 1)
@@ -206,7 +216,7 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
 
 
 def _process(num_roi, level, buf_no, buf, img_per_level, labels,
-             max_cts, bin_edges, prob_k, prob_k_pow):
+             max_cts, bin_edges, prob_k, prob_k_pow, track_bad):
     """
     Internal helper function. This modifies inputs in place.
 
@@ -237,9 +247,18 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels,
         probability density of detecting photons
     prob_k_pow : array
         squares of probability density of detecting photons
+    track_bad : array
+        to track bad images in each level
     """
     img_per_level[level] += 1
     u_labels = list(np.unique(labels))
+
+    #  Check if there are any bad images, represented as an array filled
+    #  with np.nan (using bad_to_nan function in mask.py all the bad
+    # images are converted into np.nan arrays)
+    if np.isnan(buf[level, buf_no]).any():
+        track_bad[level] += 1
+        return
 
     for j, label in enumerate(u_labels):
         roi_data = buf[level, buf_no][labels == label]
@@ -247,10 +266,11 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels,
                                            density=True)
         spe_hist = np.nan_to_num(spe_hist)
         prob_k[level, j] += (spe_hist -
-                             prob_k[level, j])/(img_per_level[level])
-
+                             prob_k[level, j])/(img_per_level[level] -
+                                                track_bad[level])
         prob_k_pow[level, j] += (np.power(spe_hist, 2) -
-                                 prob_k_pow[level, j])/(img_per_level[level])
+                                 prob_k_pow[level, j])/(img_per_level[level]
+                                                        - track_bad[level])
 
 
 def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts):
