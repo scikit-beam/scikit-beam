@@ -246,23 +246,25 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels,
     img_per_level[level] += 1
     u_labels = list(np.unique(labels))
 
-    # check if there are any bad images, using bad_to_nan function
-    # in mask.py all the bad images are converted into np.nan arrays,
-    # therefore check for np.nan arrays
+    # Check if there are any bad images, represented as an array filled
+    #  with np.nan (using bad_to_nan function in mask.py all the bad
+    # images are converted into np.nan arrays)
+
     if np.isnan(buf[level, buf_no]).any():
         track_bad[level] += 1
-    else:
-        for j, label in enumerate(u_labels):
-            roi_data = buf[level, buf_no][labels == label]
-            spe_hist, bin_edges = np.histogram(roi_data, bins=bin_edges,
-                                               density=True)
-            spe_hist = np.nan_to_num(spe_hist)
-            prob_k[level, j] += (spe_hist -
-                                 prob_k[level, j])/(img_per_level[level] -
-                                                    track_bad[level])
-            prob_k_pow[level, j] += (np.power(spe_hist, 2) -
-                                     prob_k_pow[level, j])/(img_per_level[level]
-                                                            - track_bad[level])
+        return
+
+    for j, label in enumerate(u_labels):
+        roi_data = buf[level, buf_no][labels == label]
+        spe_hist, bin_edges = np.histogram(roi_data, bins=bin_edges,
+                                           density=True)
+        spe_hist = np.nan_to_num(spe_hist)
+        prob_k[level, j] += (spe_hist -
+                             prob_k[level, j])/(img_per_level[level] -
+                                                track_bad[level])
+        prob_k_pow[level, j] += (np.power(spe_hist, 2) -
+                                 prob_k_pow[level, j])/(img_per_level[level]
+                                                        - track_bad[level])
 
 
 def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts):
