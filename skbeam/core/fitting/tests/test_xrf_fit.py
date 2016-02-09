@@ -24,7 +24,8 @@ def synthetic_spectrum():
     param = get_para()
     x = np.arange(2000)
     pileup_peak = ['Si_Ka1-Si_Ka1', 'Si_Ka1-Ce_La1']
-    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak
+    user_peak = ['user_peak1']
+    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak + user_peak
     elist, matv, area_v = construct_linear_model(x, param, elemental_lines, default_area=1e5)
     return np.sum(matv, 1)  #In case that y0 might be zero at certain points.
 
@@ -67,10 +68,10 @@ def test_parameter_controller():
 
 
 def test_fit():
-
     param = get_para()
     pileup_peak = ['Si_Ka1-Si_Ka1', 'Si_Ka1-Ce_La1']
-    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak
+    user_peak = ['user_peak1']
+    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak + user_peak
     x0 = np.arange(2000)
     y0 = synthetic_spectrum()
     default_area = 1e5
@@ -83,7 +84,6 @@ def test_fit():
     # check area of each element
     for k, v in six.iteritems(result.values):
         if 'area' in k:
-            print(k,v)
             # error smaller than 1e-6
             assert_true(abs(v - default_area)/default_area < 1e-6)
 
@@ -205,7 +205,8 @@ def test_pixel_fit_multiprocess():
     y0 = synthetic_spectrum()
     x = np.arange(len(y0))
     pileup_peak = ['Si_Ka1-Si_Ka1', 'Si_Ka1-Ce_La1']
-    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak
+    user_peak = ['user_peak1']
+    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak + user_peak
 
     default_area = 1e5
     elist, matv, area_v = construct_linear_model(x, param, elemental_lines, default_area=default_area)
