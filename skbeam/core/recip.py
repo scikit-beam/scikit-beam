@@ -45,6 +45,7 @@ import logging
 import numpy as np
 
 from .utils import verbosedict
+from collections import namedtuple
 
 logger = logging.getLogger(__name__)
 import time
@@ -232,6 +233,14 @@ def calibrated_pixels_to_q(detector_size, pyfai_kwargs):
     return a.qArray(detector_size)
 
 
+gisaxs_output = namedtuple(
+    'gisaxs_output',
+    ['alpha_i', 'theta_f',
+     'alpha_f', 'tilt_angle',
+     'qx', 'qy', 'qz', 'qr']
+)
+
+
 def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
            dist_sample, wavelength, theta_i=0.0):
     """
@@ -269,12 +278,16 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
         tilt angle
     qx : array
         x component of the scattering wave vector
+        shape (detector_size[0], detector_size[1])
     qy : array
         y component of the scattering wave vector
+        shape (detector_size[0], detector_size[1])
     qz : array
         z component of the scattering wave vector
+        shape (detector_size[0], detector_size[1])
     qr : array
         q parallel component
+        shape (detector_size[0], detector_size[1])
 
     Notes
     -----
@@ -325,4 +338,4 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
     # q parallel
     qr = np.sqrt(qx**2 + qy**2)
 
-    return alpha_i, theta_f, alpha_f, tilt_angle, qx, qy, qz, qr
+    return gisaxs_output(alpha_i, theta_f, alpha_f, tilt_angle, qx, qy, qz, qr)

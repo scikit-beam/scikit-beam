@@ -147,19 +147,17 @@ def test_gisaxs():
     wavelength = 2*np.pi*0.01
     theta_i = 0.0
 
-    (alpha_i, theta_f, alpha_f, tilt_angle,
-     qx, qy, qz, qr) = recip.gisaxs(incident_beam, reflected_beam, pixel_size,
-                                    detector_size, dist_sample, wavelength,
-                                    theta_i=0.0)
-    assert_array_almost_equal(0.78539816339744828, tilt_angle, decimal=8)
-    assert_array_almost_equal(2*10**(-7), alpha_i, decimal=8)
-    assert_array_almost_equal(np.array([-1.00000000e-07, 0.00000000e+00,
-                                        1.00000000e-07, 2.00000000e-07,
-                                        3.00000000e-07]), theta_f[1, :],
-                              decimal=8)
-    assert_array_almost_equal(np.array([-4.00000000e-07, -2.00000000e-07,
-                                        7.99387344e-21, 2.00000000e-07,
-                                        4.00000000e-07]), alpha_f[:, 1])
+    g_output = recip.gisaxs(incident_beam, reflected_beam, pixel_size,
+                            detector_size, dist_sample, wavelength,
+                            theta_i=0.0)
+
+    theta_f_target = 10**(-7)*np.array([-1.0, 0.0, 1.0, 2.0, 3.0])
+    alpha_f_target = 10**(-7)*np.array([-4.0, -2.0, 7.99387344e-14, 2.0, 4.0])
+
+    assert_array_almost_equal(0.78539816, g_output.tilt_angle, decimal=8)
+    assert_array_almost_equal(2*10**(-7), g_output.alpha_i, decimal=8)
+    assert_array_almost_equal(theta_f_target, g_output.theta_f[1, :], decimal=8)
+    assert_array_almost_equal(alpha_f_target, g_output.alpha_f[:, 1])
 
 
 if __name__ == '__main__':
