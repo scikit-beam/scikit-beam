@@ -125,7 +125,8 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
             for w, arr in zip([past_img*future_img, past_img, future_img],
                               [G, past_intensity_norm, future_intensity_norm]):
                 binned = np.bincount(label_array, weights=w)[1:]
-                arr[t_index] += ((binned / num_pixels - arr[t_index]) / normalize)
+                arr[t_index] += ((binned / num_pixels -
+                                  arr[t_index]) / normalize)
     return None  # modifies arguments in place!
 
 
@@ -154,21 +155,20 @@ _internal_state = namedtuple(
 
 _two_time_internal_state = namedtuple(
     'two_time_correlation_state',
-    [
-    'buf',
-    'img_per_level',
-    'label_array',
-    'track_level',
-    'cur',
-    'pixel_list',
-    'num_pixels',
-    'lag_steps',
-    'g2',
-    'count_level',
-    'current_img_time',
-    'time_ind',
-    'norm',
-    'lev_len',
+    ['buf',
+     'img_per_level',
+     'label_array',
+     'track_level',
+     'cur',
+     'pixel_list',
+     'num_pixels',
+     'lag_steps',
+     'g2',
+     'count_level',
+     'current_img_time',
+     'time_ind',
+     'norm',
+     'lev_len',
     ]
 )
 
@@ -255,11 +255,12 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
     ------
     namedtuple
         A `results` object is yielded after every image has been processed.
-         This `reults` object contains:
-        - the normalized correlation, `g2`
-        - the times at which the correlation was computed, `lag_steps`
-        - and all of the internal state, `final_state`, which is a
-          `correlation_state` namedtuple
+        This `reults` object contains, in this order:
+        - `g2`: the normalized correlation
+          shape is (len(lag_steps), num_rois)
+        - `lag_steps`: the times at which the correlation was computed
+        - `_internal_state`: all of the internal state. Can be passed back in
+          to `lazy_one_time` as the `internal_state` parameter
 
     Notes
     -----
@@ -363,7 +364,12 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     Original code(in Yorick) for multi tau auto correlation
     author: Mark Sutton
 
-    See docstring for lazy_one_time
+    For parameter description, please reference the docstring for
+    lazy_one_time. Note that there is an API difference between this function
+    and `lazy_one_time`. The `images` arugment is at the end of this function
+    signature here for backwards compatibility, but is the first argument in
+    the `lazy_one_time()` function. The semantics of the variables remain
+    unchanged.
     """
     gen = lazy_one_time(images, num_levels, num_bufs, labels)
     for result in gen:
@@ -427,7 +433,12 @@ def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1):
     This function computes two-time correlation
     Original code : author: Yugang Zhang
 
-    See docstring for lazy_two_time
+    Returns
+    -------
+    results : namedtuple
+
+    For parameter definition, see the docstring for the `lazy_two_time()`
+    function in this module
     """
     gen = lazy_two_time(labels, images, num_frames, num_bufs, num_levels)
     for result in gen:
@@ -469,9 +480,14 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
 
     Yields
     ------
-    internal_state : tuple
-      all of the internal state, `final_state`, which is a
-      `correlation_state` namedtuple
+    namedtuple
+        A `results` object is yielded after every image has been processed.
+        This `reults` object contains, in this order:
+        - `g2`: the normalized correlation
+          shape is (num_rois, len(lag_steps), len(lag_steps))
+        - `lag_steps`: the times at which the correlation was computed
+        - `_internal_state`: all of the internal state. Can be passed back in
+          to `lazy_one_time` as the `internal_state` parameter
 
     Notes
     -----
@@ -583,8 +599,8 @@ def two_time_state_to_results(state):
         and the lag steps
     """
     for q in range(np.max(state.label_array)):
-        x0 = (state.g2)[:, :, q]
-        (state.g2)[:, :, q] = (np.tril(x0) + np.tril(x0).T -
+        x0 = (state.g2)[q, :, :]
+        (state.g2)[q, :, :] = (np.tril(x0) + np.tril(x0).T -
                                np.diag(np.diag(x0)))
     return results(state.g2, state.lag_steps, state)
 
@@ -599,6 +615,7 @@ def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
         image data array to use for two time correlation
     g2: array
         two time correlation matrix
+        shape (number of labels(ROI), number of frames, number of frames)
     label_array: array
         Elements not inside any ROI are zero; elements inside each
         ROI are 1, 2, 3, etc. corresponding to the order they are specified
@@ -607,7 +624,7 @@ def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
         number of buffers(channels)
     num_pixels : array
         number of pixels in certain ROI's
-        ROI's, dimensions are : [number of ROI's]
+        ROI's, dimensions are len(np.unique(label_array))
     img_per_level: array
         to track how many images processed in each level
     lag_steps : array
@@ -655,11 +672,11 @@ def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
         if not isinstance(current_img_time, int):
             nshift = 2**(level-1)
             for i in range(-nshift+1, nshift+1):
-                g2[int(tind1+i),
+                g2[:, int(tind1+i),
                    int(tind2+i)] = (tmp_binned/(pi_binned *
                                                 fi_binned))*num_pixels
         else:
-            g2[tind1, tind2] = tmp_binned/(pi_binned * fi_binned)*num_pixels
+            g2[:, tind1, tind2] = tmp_binned/(pi_binned * fi_binned)*num_pixels
 
 
 def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
@@ -695,7 +712,7 @@ def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
     time_ind = {key: [] for key in range(num_levels)}
 
     # two time correlation results (array)
-    g2 = np.zeros((num_frames, num_frames, num_rois), dtype=np.float64)
+    g2 = np.zeros((num_rois, num_frames, num_frames), dtype=np.float64)
 
     return _two_time_internal_state(
         buf,
@@ -761,7 +778,8 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     label_array, pixel_list = extract_label_indices(labels)
 
     # map the indices onto a sequential list of integers starting at 1
-    label_mapping = {label: n+1 for n, label in enumerate(np.unique(label_array))}
+    label_mapping = {label: n+1
+                     for n, label in enumerate(np.unique(label_array))}
     # remap the label array to go from 1 -> max(_labels)
     for label, n in label_mapping.items():
         label_array[label_array == label] = n
@@ -794,3 +812,28 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     return (label_array, pixel_list, num_rois, num_pixels,
             lag_steps, buf, img_per_level, track_level, cur,
             norm, lev_len)
+
+
+def one_time_from_two_time(two_time_corr):
+    """
+    This will provide the one-time correlation data from two-time
+    correlation data.
+
+    Parameters
+    ----------
+    two_time_corr : array
+        matrix of two time correlation
+        shape (number of labels(ROI's), number of frames, number of frames)
+
+    Returns
+    -------
+    one_time_corr : array
+        matrix of one time correlation
+        shape (number of labels(ROI's), number of frames)
+    """
+
+    one_time_corr = np.zeros((two_time_corr.shape[0], two_time_corr.shape[2]))
+    for g in two_time_corr:
+        for j in range(two_time_corr.shape[2]):
+            one_time_corr[:, j] = np.trace(g, offset=j)/two_time_corr.shape[2]
+    return one_time_corr

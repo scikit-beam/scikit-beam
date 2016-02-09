@@ -390,6 +390,10 @@ class ParamController(object):
             element name
         constraint : {'lo', 'hi', 'lohi', 'fixed', 'none'}, optional
             default "bound strategy" (fitting constraints)
+
+        .. note:: Element that can be add include elemental peak, pileup peak and user peak.
+        User peak is a fake peak, but can be used as a quick replacement for pileup peaks,
+        escape peaks or other unknown peaks due to detector defects or scattering process.
         """
         if element not in self.element_list:
             self.element_list.append(element)
@@ -420,13 +424,19 @@ class ParamController(object):
                 if constraint is not None:
                     self._element_strategy[param_name] = constraint
                 self.params.update({param_name: new_pos})
-        else:
+        elif 'user' in element.lower():  # for user peak
+            param_name = '_'.join((element, param_suffix))
+            new_pos = PARAM_DEFAULTS[kind].copy()
+            if constraint is not None:
+                self._element_strategy[param_name] = constraint
+            # update parameter in place
+            self.params.update({param_name: new_pos})
+        else:   # for pileup peak
             linename = 'pileup_'+element.replace('-', '_')
             param_name = linename + param_suffix  # as in lmfit Model
             new_pos = PARAM_DEFAULTS[kind].copy()
             if constraint is not None:
                 self._element_strategy[param_name] = constraint
-
             # update parameter in place
             self.params.update({param_name: new_pos})
 
@@ -446,6 +456,8 @@ class ParamController(object):
         elif element in M_LINE:
             element = element.split('_')[0]
             param_name = str(element)+"_ma1_area"
+        elif 'user' in element.lower():  #user peak
+            param_name = str(element) + '_area'
         elif '-' in element:  #pileup peaks
             param_name = 'pileup_'+element.replace('-', '_')
             param_name += '_area'
@@ -566,12 +578,17 @@ class ModelSpectrum(object):
 
     def setup_element_model(self, elemental_line, default_area=1e5):
         """
-        Construct element model.
+        Construct element model. Elemental line that can be add include elemental
+        peak, pileup peak and user peak. User peak is a fake peak, but can be used
+        as a quick replacement for pileup peaks, escape peaks or other unknown peaks
+        due to detector defects or scattering process.
 
         Parameters
         ----------
         elemental_line : str
             elemental line, such as 'Fe_K'
+            pileup peak, such as 'Si_Ka1-Si_Ka1'
+            user peak, such as 'user_peak1', 'user_peak2'
         default_area : float, optional
             value for the initial area of a given element
             default is 1e5, found to be a good value
@@ -581,6 +598,7 @@ class ModelSpectrum(object):
         parameter = self.params
 
         all_element_mod = None
+        # global parameters
         param_hints_to_copy = ['e_offset', 'e_linear', 'e_quadratic',
                                'fwhm_offset', 'fwhm_fanoprime']
 
@@ -810,6 +828,56 @@ class ModelSpectrum(object):
                     all_element_mod += element_mod
                 else:
                     all_element_mod = element_mod
+
+        elif 'user' in elemental_line.lower(): #user peak
+            logger.debug('Started setting up user peak: {}'.format(
+                elemental_line))
+
+            e_cen = 5  # user peak is set 5 keV every time, this value is not important
+
+            pre_name = elemental_line + '_'
+            element_mod = ElementModel(prefix=pre_name)
+
+            # copy the fixed parameters from the Compton model
+            _copy_model_param_hints(element_mod, self.compton_param,
+                                    param_hints_to_copy)
+
+            element_mod.set_param_hint('epsilon', value=self.epsilon, vary=False)
+
+            area_name = pre_name + 'area'
+            if area_name in parameter:
+                default_area = parameter[area_name]['value']
+
+            element_mod.set_param_hint('area', value=default_area, vary=True, min=0)
+            element_mod.set_param_hint('delta_center', value=0, vary=False)
+            element_mod.set_param_hint('delta_sigma', value=0, vary=False)
+            element_mod.set_param_hint('center', value=e_cen, vary=False)
+            element_mod.set_param_hint('ratio', value=1.0, vary=False)
+            element_mod.set_param_hint('ratio_adjust', value=1, vary=False)
+
+            # area needs to be adjusted
+            if area_name in parameter:
+                _set_parameter_hint(area_name, parameter[area_name], element_mod)
+
+            # position needs to be adjusted
+            pos_name = pre_name + 'delta_center'
+            if pos_name in parameter:
+                _set_parameter_hint('delta_center', parameter[pos_name],
+                                    element_mod)
+
+            # width needs to be adjusted
+            width_name = pre_name + 'delta_sigma'
+            if width_name in parameter:
+                _set_parameter_hint('delta_sigma', parameter[width_name],
+                                    element_mod)
+
+            # branching ratio needs to be adjusted
+            ratio_name = pre_name + 'ratio_adjust'
+            if ratio_name in parameter:
+                _set_parameter_hint('ratio_adjust', parameter[ratio_name],
+                                    element_mod)
+
+            all_element_mod = element_mod
 
         else:
             logger.debug('Started setting up pileup peaks for {}'.format(
@@ -1076,9 +1144,7 @@ def nnls_fit(spectrum, expected_matrix, weights=None):
     residue : float
         error
 
-    Note
-    ----
-    nnls is chosen as amplitude of each element should not be negative.
+    .. note:: nnls is chosen as amplitude of each element should not be negative.
     """
     if weights is not None:
         expected_matrix = np.transpose(np.multiply(np.transpose(expected_matrix), np.sqrt(weights)))

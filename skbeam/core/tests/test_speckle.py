@@ -42,6 +42,7 @@ from numpy.testing import (assert_array_almost_equal,
 from skimage.morphology import convex_hull_image
 
 import skbeam.core.speckle as xsvs
+import skbeam.core.mask as mask
 from skbeam.core import roi
 from skbeam.testing.decorators import skip_if
 
@@ -60,11 +61,31 @@ def test_xsvs():
     label_array = roi.rectangles(roi_data, shape=images[0].shape)
 
     prob_k_all, std = xsvs.xsvs(images_sets, label_array, timebin_num=2,
-                                number_of_img=5, max_cts=None)
+                                number_of_img=5, max_cts=6)
 
     assert_array_almost_equal(prob_k_all[0, 0],
                               np.array([0., 0., 0.2, 0.2, 0.4]))
     assert_array_almost_equal(prob_k_all[0, 1],
+                              np.array([0., 0.2, 0.2, 0.2, 0.4]))
+
+    imgs = []
+    for i in range(6):
+        int_array = np.tril((i + 2) * np.ones(10))
+        int_array[int_array == 0] = (i + 1)
+        imgs.append(int_array)
+
+    # testing for bad images
+    bad_list = [5]
+    # convert each bad image to np.nan array
+    images1 = mask.bad_to_nan_gen(imgs, bad_list)
+
+    new_prob_k, new_std = xsvs.xsvs((images1, ), label_array,
+                                    timebin_num=2, number_of_img=5,
+                                    max_cts=6)
+
+    assert_array_almost_equal(new_prob_k[0, 0],
+                              np.array([0., 0., 0.2, 0.2, 0.4]))
+    assert_array_almost_equal(new_prob_k[0, 1],
                               np.array([0., 0.2, 0.2, 0.2, 0.4]))
 
 
