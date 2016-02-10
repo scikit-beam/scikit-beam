@@ -3,6 +3,8 @@
 
 """:py:class:`AngularIntegrationM` - holds and access hierarchical geometry for generic pixel detector
 
+Some change from cpo
+
 Usage::
 
     # IMPORT
@@ -38,7 +40,7 @@ Revision: $Revision: 10664 $
 
 @version $Id: AngularIntegratorM.py 10664 2015-09-11 23:27:03Z dubrovin@SLAC.STANFORD.EDU $
 
-@author Mikhail S. Dubrovin
+@author Mikhail Dubrovin
 """
 
 #------------------------------
