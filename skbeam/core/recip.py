@@ -272,8 +272,10 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
         incident angle
     theta_f : array
         out of plane angle
+        shape (detector_size[0], detector_size[1])
     alpha_f : array
         exit angle
+        shape (detector_size[0], detector_size[1])
     tilt_angle : float
         tilt angle
     qx : array
