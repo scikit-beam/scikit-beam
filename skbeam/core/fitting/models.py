@@ -63,7 +63,6 @@ def set_default(model_name, func_name):
         function name of physics peak
     """
     paras = inspect.getargspec(func_name)
-    default_len = len(paras.defaults)
 
     # the first argument is independent variable, also ignored
     # default values are not considered for fitting in this function
@@ -90,7 +89,8 @@ def set_default(model_name, func_name):
             model_name.set_param_hint(name, value=my_dict['value'], vary=True,
                                       min=my_dict['min'], max=my_dict['max'])
         else:
-            raise TypeError("Boundary type {0} can't be used".format(my_dict['bound_type']))
+            raise TypeError("Boundary type {0} can't be "
+                            "used".format(my_dict['bound_type']))
 
 
 def _gen_class_docs(func):
@@ -105,8 +105,8 @@ def _gen_class_docs(func):
     str :
         documentation of the function
     """
-    return ("Wrap the {} function for fitting within lmfit framework\n".format(func.__name__) +
-            func.__doc__)
+    return ("Wrap the {} function for fitting within lmfit "
+            "framework\n".format(func.__name__) + func.__doc__)
 
 
 # DEFINE NEW MODELS
