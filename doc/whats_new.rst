@@ -9,12 +9,17 @@ code changes and any related discussion.
 
 v0.0.8
 ------
+- Added removing bad images from X-ray speckle visibility  spectroscopy
+  `PR #401 <https://github.com/scikit-beam/scikit-beam/pull/401>`_
+- Added new function to get one time correlation results from two time correlation data
+  `PR #395 <https://github.com/scikit-beam/scikit-beam/pull/395>`_
+- Implemented user peak, so users have more flexible control of escape peak or pileup peaks
+  `PR #405 <https://github.com/scikit-beam/scikit-beam/pull/405>`_
+-  Added new function to provide scattering wave vector for GISAXS (grazing-incidence small angle X-ray scattering) `PR #404 <https://github.com/scikit-beam/scikit-beam/pull/404>`_
+
 In-progress
 ===========
-- `PR #395 <https://github.com/scikit-beam/scikit-beam/pull/395>`_: One-time from two-time
-- `PR #401 <https://github.com/scikit-beam/scikit-beam/pull/401>`_: Removing bad images from xsvs
 - `PR #403 <https://github.com/scikit-beam/scikit-beam/pull/401>`_: Adding four time correlation
-- `PR #405 <https://github.com/scikit-beam/scikit-beam/pull/405>`_: Implement user peak, so users have more flexible control of escape peak or pileup peaks.
 - `PR #373 <https://github.com/scikit-beam/scikit-beam/pull/373>`_: Major overhaul of the docs
 
 v0.0.7
