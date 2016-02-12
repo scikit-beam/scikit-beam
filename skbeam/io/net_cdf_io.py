@@ -81,14 +81,8 @@ def load_netCDF(file_name):
     with Dataset(os.path.normpath(file_name), 'r') as src_file:
         data = src_file.variables['VOLUME']
         md_dict = src_file.__dict__
-        if data.scale_factor != 1.0:
-            #Check for voxel intensity scale factor and apply if value is present
-            scale_value = data.scale_factor
-        else:
-            # Value is set to 1.0 otherwise so values are not altered, other than
-            # to ensure values are of type float
-            scale_value = 1.0
-        data = data / scale_value
+        # Check for voxel intensity scale factor and apply if value is present
+        data /= data.scale_factor if data.scale_factor != 1.0 else 1.0
 
     # Accounts for specific case where z_pixel_size doesn't get assigned
     # even though dimensions are actuall isotropic. This occurs when
