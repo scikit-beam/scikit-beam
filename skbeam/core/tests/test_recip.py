@@ -142,7 +142,7 @@ def test_gisaxs():
     incident_beam = (1.0, 1.0)
     reflected_beam = (3.0, 3.0)
     pixel_size = (1.0, 1.0)
-    detector_size = (5, 5)
+    detector_size = (5, 4)
     dist_sample = 5.0
     wavelength = 2*np.pi*0.01
     theta_i = 0.0
@@ -151,7 +151,7 @@ def test_gisaxs():
                             detector_size, dist_sample, wavelength,
                             theta_i=0.0)
 
-    theta_f_target = 10**(-7)*np.array([-1.0, 0.0, 1.0, 2.0, 3.0])
+    theta_f_target = 10**(-7)*np.array([-1.0, 0.0, 1.0, 2.0])
     alpha_f_target = 10**(-7)*np.array([-4.0, -2.0, 7.99387344e-14, 2.0, 4.0])
 
     assert_array_almost_equal(0.78539816, g_output.tilt_angle, decimal=8)

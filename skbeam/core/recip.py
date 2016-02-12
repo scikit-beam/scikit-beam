@@ -268,28 +268,31 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
 
     Returns
     -------
-    alpha_i : float
-        incident angle
-    theta_f : array
-        out of plane angle
-        shape (detector_size[0], detector_size[1])
-    alpha_f : array
-        exit angle
-        shape (detector_size[0], detector_size[1])
-    tilt_angle : float
-        tilt angle
-    qx : array
-        x component of the scattering wave vector
-        shape (detector_size[0], detector_size[1])
-    qy : array
-        y component of the scattering wave vector
-        shape (detector_size[0], detector_size[1])
-    qz : array
-        z component of the scattering wave vector
-        shape (detector_size[0], detector_size[1])
-    qr : array
-        q parallel component
-        shape (detector_size[0], detector_size[1])
+    namedtuple
+        `gisaxs_output` object is returned
+        This `gisaxs_output` object contains, in this order:
+        - alpha_i : float
+            incident angle
+        - theta_f : array
+            out of plane angle
+            shape (detector_size[0], detector_size[1])
+        - alpha_f : array
+            exit angle
+            shape (detector_size[0], detector_size[1])
+        - tilt_angle : float
+            tilt angle
+        - qx : array
+            x component of the scattering wave vector
+            shape (detector_size[0], detector_size[1])
+        - qy : array
+            y component of the scattering wave vector
+            shape (detector_size[0], detector_size[1])
+        - qz : array
+            z component of the scattering wave vector
+            shape (detector_size[0], detector_size[1])
+        - qr : array
+            q parallel component
+            shape (detector_size[0], detector_size[1])
 
     Notes
     -----
@@ -319,8 +322,9 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
     alpha_f = np.arctan2((y - inc_y) * pixel_size[1],
                          dist_sample) - alpha_i
     # out of plane angle
-    theta_f = np.arctan2((x - inc_x) * pixel_size[0],
-                         dist_sample)/2 - theta_i
+    two_theta = np.arctan2((x - inc_x) * pixel_size[0],
+                           dist_sample)
+    theta_f = two_theta / 2 - theta_i
     # wave number
     wave_number = 2*np.pi/wavelength
 
@@ -329,6 +333,7 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
           np.cos(alpha_i) * np.cos(2*theta_i)) * wave_number
 
     # y component
+    # the variables post-fixed with an underscore are intermediate steps
     qy_ = (np.cos(alpha_f) * np.sin(2*theta_f) -
            np.cos(alpha_i) * np.sin(2*theta_i))
     qz_ = np.sin(alpha_f) + np.sin(alpha_i)
