@@ -37,7 +37,6 @@
 This module is for statistics.
 """
 from __future__ import absolute_import, division, print_function
-import six
 import numpy as np
 import scipy.stats
 from skbeam.core.utils import _defaults  # Dan is dubious about this.
