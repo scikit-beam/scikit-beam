@@ -25,7 +25,7 @@ install:
   - conda config --set always_yes true
   - conda update conda
   - conda config --add channels scikit-xray
-  - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4
+  - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4 flake8
   - source activate testenv
   # # need to build_ext -i for the tests so that the .so is local to the source
   # # code.  We could also setup.py develop, but I'm not sure if that is any
@@ -45,6 +45,7 @@ script:
       chmod +x build_docs.sh;
       ./build_docs.sh;
     fi;
+  - flake8 $TRAVIS_BUILD_DIR/skbeam
 
 after_success:
   - coveralls
