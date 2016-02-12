@@ -37,11 +37,11 @@ This module is for Differential Phase Contrast (DPC) imaging based on
 Fourier shift fitting
 """
 from __future__ import absolute_import, division, print_function
-import logging
-logger = logging.getLogger(__name__)
 import numpy as np
 from scipy.optimize import minimize
 from collections import namedtuple
+import logging
+logger = logging.getLogger(__name__)
 
 
 def image_reduction(im, roi=None, bad_pixels=None):
@@ -296,10 +296,10 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
     for the input parameters for this function and what it returns
     """
     if len(pixel_size) == 2:
-       # make sure the pixels are the same size
-       if pixel_size[0] != pixel_size[1]:
-           raise ValueError("In DPC, pixels must be square. You provided"
-           "pixel values of {}".format(pixel_size))
+        # make sure the pixels are the same size
+        if pixel_size[0] != pixel_size[1]:
+            raise ValueError("In DPC, pixels must be square. You provided"
+                             "pixel values of {}".format(pixel_size))
     dpc_gen = lazy_dpc(ref, image_sequence, start_point, scan_rows, scan_cols,
                        solver, roi, bad_pixels)
     # exhaust the generator, keeping only the last result
@@ -395,9 +395,6 @@ def lazy_dpc(ref, image_sequence, start_point, scan_rows, scan_cols,
     ffx = _rss_factory(len(dpc_state.ref_fx))
     ffy = _rss_factory(len(dpc_state.ref_fy))
 
-
-    num_images = len(image_sequence)
-    steps = np.max((num_images // 100, 1))
     # Same calculation on each diffraction pattern
     for im in image_sequence:
         i, j = np.unravel_index(dpc_state.index[0], (scan_rows, scan_cols))
@@ -422,9 +419,10 @@ def lazy_dpc(ref, image_sequence, start_point, scan_rows, scan_cols,
         yield dpc_state
 
 
-def reconstruct_phase_from_partial_info(
-    dpc_state, energy, scan_xstep, scan_ystep, pixel_size=None,
-    focus_to_det=None, negate=True, scale=True, padding=0, weighting=0.5):
+def reconstruct_phase_from_partial_info(dpc_state, energy, scan_xstep,
+                                        scan_ystep, pixel_size=None,
+                                        focus_to_det=None, negate=True,
+                                        scale=True, padding=0, weighting=0.5):
     """Using the partial results from dpc_runner, reconstruct the phase image
 
     Parameters
