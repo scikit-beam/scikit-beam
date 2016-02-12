@@ -13,7 +13,7 @@ def test_find_ring_center_acorr_1D():
         for y in [110, 150, 190]:
             yield (_helper_find_rings,
                    nimage.find_ring_center_acorr_1D,
-                  (x, y), [10, 25, 50])
+                   (x, y), [10, 25, 50])
 
 
 def _helper_find_rings(proc_method, center, radii_list):

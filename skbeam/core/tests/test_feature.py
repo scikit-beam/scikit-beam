@@ -39,7 +39,7 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 from nose.tools import assert_raises
-
+from .utils import gauss_gen, parabola_gen
 import skbeam.core.feature as feature
 
 
@@ -56,10 +56,7 @@ def _test_refine_helper(x_data, y_data, center, height,
 def test_refine_methods():
     refine_methods = [feature.refine_quadratic,
                       feature.refine_log_quadratic]
-    test_data_gens = [lambda x, center, height, width: (
-                          width * (x-center)**2 + height),
-                      lambda x, center, height, width: (
-                          height * np.exp(-((x-center) / width)**2))]
+    test_data_gens = [parabola_gen, gauss_gen]
 
     x = np.arange(128)
     for center in (15, 75, 110):
@@ -70,9 +67,6 @@ def test_refine_methods():
 
 
 def test_filter_n_largest():
-    gauss_gen = lambda x, center, height, width: (
-                          height * np.exp(-((x-center) / width)**2))
-
     cands = np.array((10, 25, 50, 75, 100))
     x = np.arange(128, dtype=float)
     y = np.zeros_like(x)
@@ -89,9 +83,6 @@ def test_filter_n_largest():
 
 
 def test_filter_peak_height():
-    gauss_gen = lambda x, center, height, width: (
-                          height * np.exp(-((x-center) / width)**2))
-
     cands = np.array((10, 25, 50, 75, 100))
     heights = (10, 20, 30, 40, 50)
     x = np.arange(128, dtype=float)
@@ -108,8 +99,6 @@ def test_filter_peak_height():
 
 
 def test_peak_refinement():
-    gauss_gen = lambda x, center, height, width: (
-                          height * np.exp(-((x-center) / width)**2))
 
     cands = np.array((10, 25, 50, 75, 100))
     heights = (10, 20, 30, 40, 50)
