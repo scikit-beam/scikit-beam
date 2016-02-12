@@ -49,10 +49,11 @@ from collections import namedtuple, MutableMapping, defaultdict, deque
 import numpy as np
 from itertools import tee
 
+from ..ext import ctrans
+
 import logging
 logger = logging.getLogger(__name__)
 
-from ..ext import ctrans
 
 md_value = namedtuple("md_value", ['value', 'units'])
 
@@ -341,8 +342,8 @@ keys_core = {
         "units": "um",
     },
     "voxel_size": {
-        "description": ("3 element tuple defining the (x y z) dimensions of the "
-                         "voxel"),
+        "description": ("3 element tuple defining the (x y z) dimensions "
+                        "of the voxel"),
         "type": tuple,
         "units": "um"
     },
@@ -401,9 +402,9 @@ keys_core = {
         }
     },
     "bounding_box": {
-        "description": ("physical extents of the array: useful for " +
-                        "volume alignment, transformation, merge and " +
-                         "spatial comparison of multiple volumes"),
+        "description": ("physical extents of the array: useful for ",
+                        "volume alignment, transformation, merge and ",
+                        "spatial comparison of multiple volumes"),
         "x_min": {
             "description": "minimum spatial coordinate along the x-axis",
             "type": float,
@@ -475,8 +476,6 @@ def subtract_reference_images(imgs, is_reference):
         raise ValueError("The first image is not a reference image")
     # grab the first image
     ref_imge = imgs[0]
-    # just sum the bool array to get count
-    ref_count = np.sum(is_reference)
     # make an array of zeros of the correct type
     corrected_image = deque()
     # zip together (lazy like this is really izip), images and flags
@@ -1065,8 +1064,7 @@ def d_to_q(d):
 
 def q_to_twotheta(q, wavelength):
     """
-    Helper function to convert :math:`q` + :math:`\\lambda` to :math:`2\\theta`.
-    The point of this function is to prevent fat-fingered typos.
+    Helper function to convert q to two-theta.
 
     By definition the relationship is:
 
@@ -1103,8 +1101,7 @@ def q_to_twotheta(q, wavelength):
 
 def twotheta_to_q(two_theta, wavelength):
     """
-    Helper function to convert :math:`2\\theta` + :math:`\\lambda` to :math:`q`.
-    The point of this function is to prevent fat-fingered typos.
+    Helper function to convert two-theta to q
 
     By definition the relationship is:
 
