@@ -15,8 +15,7 @@ v0.0.8
   `PR #395 <https://github.com/scikit-beam/scikit-beam/pull/395>`_
 - Implemented user peak, so users have more flexible control of escape peak or pileup peaks
   `PR #405 <https://github.com/scikit-beam/scikit-beam/pull/405>`_
--  Added new function to provide scattering wave vector for GISAXS (grazing-incidence small
-  angle X-ray scattering) `PR #404 <https://github.com/scikit-beam/scikit-beam/pull/404>`_
+-  Added new function to provide scattering wave vector for GISAXS (grazing-incidence small angle X-ray scattering) `PR #404 <https://github.com/scikit-beam/scikit-beam/pull/404>`_
 
 In-progress
 ===========
