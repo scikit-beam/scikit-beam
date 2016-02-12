@@ -149,8 +149,7 @@ _internal_state = namedtuple(
      'num_pixels',
      'lag_steps',
      'norm',
-     'lev_len',
-     ]
+     'lev_len']
 )
 
 _two_time_internal_state = namedtuple(
@@ -168,8 +167,7 @@ _two_time_internal_state = namedtuple(
      'current_img_time',
      'time_ind',
      'norm',
-     'lev_len',
-    ]
+     'lev_len']
 )
 
 
