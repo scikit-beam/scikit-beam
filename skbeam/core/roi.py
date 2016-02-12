@@ -130,7 +130,10 @@ def rings(edges, center, shape):
         raise ValueError("edges are expected to be monotonically increasing, "
                          "giving inner and outer radii of each ring from "
                          "r=0 outward")
-    r_coord = utils.radial_grid(center, shape).ravel()
+    if isinstance(values, tuple):
+        r_coord = utils.radial_grid(values, shape).ravel()  # for ring roi's
+    else:
+        r_coord = values.reval()   # for bar roi's
     label_array = np.digitize(r_coord, edges, right=False)
     # Even elements of label_array are in the space between rings.
     label_array = (np.where(label_array % 2 != 0, label_array, 0) + 1) // 2
@@ -511,3 +514,29 @@ def extract_label_indices(labels):
     label_mask = labels[labels > 0]
 
     return label_mask, pixel_list
+
+
+def bar_rois(edges, values):
+    """
+    Draw bar shaped roi's when the edges are provided
+    Parameters
+    ----------
+    edges : list
+        giving the inner and outer edges of each box
+        e.g., [(1, 2), (11, 12), (21, 22)]
+    values : array
+        Position details to create bar rois.
+        This bars can be horizontal or vertical depend on the edges
+
+    Returns
+    -------
+     label_array : array
+        Elements not inside any ROI are zero; elements inside each
+        ROI are 1, 2, 3, corresponding to the order they are specified
+        in edges.
+
+    Note
+    ----
+    These roi's can be created using the rings function
+    """
+    return rings(edges, values, values.shape)
