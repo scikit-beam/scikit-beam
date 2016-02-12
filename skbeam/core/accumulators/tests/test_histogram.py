@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.testing import assert_array_equal
 from numpy.testing import assert_array_almost_equal
 from numpy.testing import assert_almost_equal
 from skbeam.core.accumulators.histogram import Histogram
@@ -38,7 +37,6 @@ def test_1d_histogram():
         yield _1d_histogram_tester, binlowhigh, x, w
 
 
-
 def _2d_histogram_tester(binlowhighs, x, y, weights=1):
     h = Histogram(*binlowhighs)
     h.fill(x, y, weights=weights)
@@ -74,8 +72,8 @@ def test_2d_histogram():
     for binlowhigh, x, y, w in vals:
         yield _2d_histogram_tester, binlowhigh, x, y, w
 
-import itertools
 if __name__ == '__main__':
+    import itertools
     x = [1000, 0, 10.01]
     y = [1000, 0, 9.01]
     xf = np.random.random(1000000)*10*4
@@ -86,7 +84,8 @@ if __name__ == '__main__':
     wi = wf.copy()
     times = []
     print("Testing 2D histogram timings")
-    for xvals, yvals, weights in itertools.product([xf, xi], [yf, yi], [wf, wi]):
+    for xvals, yvals, weights in itertools.product([xf, xi], [yf, yi],
+                                                   [wf, wi]):
         t0 = time()
         h = Histogram(x, y)
         h.fill(xvals, yvals, weights=weights)
@@ -98,9 +97,9 @@ if __name__ == '__main__':
         numpy_time = time() - t0
         times.append(numpy_time / skbeam_time)
         assert_almost_equal(np.sum(h.values), np.sum(ynp))
-    print('skbeam is %s times faster than numpy, on average' % np.average(times))
-    #
+    print('skbeam is %s times faster than numpy, on average' %
+          np.average(times))
     # test_1d_histogram()
     # test_2d_histogram()
 
-#TODO do a better job sampling the variable space
+# TODO do a better job sampling the variable space
