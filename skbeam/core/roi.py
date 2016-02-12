@@ -96,21 +96,23 @@ def rectangles(coords, shape):
 
 def rings(edges, center, shape):
     """
-    Draw annual (ring-shaped) regions of interest.
+    Draw annual (ring-shaped) or bar shaped regions of interest.
 
-    Each ring will be labeled with an integer. Regions outside any ring will
+    Each roi will be labeled with an integer. Regions outside any roi will
     be filled with zeros.
 
     Parameters
     ----------
     edges: list
-        giving the inner and outer radius of each ring
+        giving the inner and outer radius of each roi (ring or bar)
         e.g., [(1, 2), (11, 12), (21, 22)]
-
-    center : tuple
-        point in image where r=0; may be a float giving subpixel precision.
-        Order is (rr, cc).
-
+    center : tuple or array
+        1. tuple
+           point in image where r=0; may be a float giving subpixel precision.
+           Order is (rr, cc).
+        2. array
+           image pixels co-ordinates
+           shape image shape
     shape: tuple
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. Order is (rr, cc).
@@ -125,15 +127,18 @@ def rings(edges, center, shape):
     edges = np.atleast_2d(np.asarray(edges)).ravel()
     if not 0 == len(edges) % 2:
         raise ValueError("edges should have an even number of elements, "
-                         "giving inner, outer radii for each ring")
-    if not np.all(np.diff(edges) >= 0):
-        raise ValueError("edges are expected to be monotonically increasing, "
-                         "giving inner and outer radii of each ring from "
-                         "r=0 outward")
+                         "giving inner, outer radii for each roi")
+
     if isinstance(values, tuple):
+        if not np.all(np.diff(edges) >= 0):
+            raise ValueError("edges are expected to be monotonically"
+                             " increasing, "
+                             "giving inner and outer radii of each ring from "
+                             "r=0 outward")
         r_coord = utils.radial_grid(values, shape).ravel()  # for ring roi's
     else:
         r_coord = values.reval()   # for bar roi's
+
     label_array = np.digitize(r_coord, edges, right=False)
     # Even elements of label_array are in the space between rings.
     label_array = (np.where(label_array % 2 != 0, label_array, 0) + 1) // 2
@@ -522,15 +527,15 @@ def bar_rois(edges, values):
     Parameters
     ----------
     edges : list
-        giving the inner and outer edges of each box
+        giving the inner and outer edges of each bar
         e.g., [(1, 2), (11, 12), (21, 22)]
     values : array
-        Position details to create bar rois.
+        image pixels co-ordinates to create bar rois.
         This bars can be horizontal or vertical depend on the edges
 
     Returns
     -------
-     label_array : array
+    label_array : array
         Elements not inside any ROI are zero; elements inside each
         ROI are 1, 2, 3, corresponding to the order they are specified
         in edges.
@@ -540,3 +545,47 @@ def bar_rois(edges, values):
     These roi's can be created using the rings function
     """
     return rings(edges, values, values.shape)
+
+
+def box_rois(v_edges, h_edges, v_values, h_values=None):
+    """
+    Parameters
+    ----------
+    v_edegs : list
+        list
+        giving the inner and outer edges of each vertical bar
+        e.g., [(1, 2), (11, 12), (21, 22)]
+    h_edges : list
+        giving the inner and outer edges of each horizontal bar
+        e.g., [(1, 2), (11, 12), (21, 22)]
+    v_values : array
+        image pixels co-ordinates to create vertical bar rois.
+        This bars can be horizontal or vertical depend on the edges
+    h_values : array
+        image pixels co-ordinates to create horizontal bar rois.
+        This bars can be horizontal or vertical depend on the edges
+    Returns
+    -------
+    label_array : array
+        Elements not inside any ROI are zero; elements inside each
+        ROI are 1, 2, 3, corresponding to the order they are specified
+        in edges.
+    """
+
+    if h_values is None:
+        h_values = v_values
+
+    v_bars = bar_rois(v_edges, v_values)
+    h_bars = bar_rois(h_edges, h_values)
+
+    num_vb = np.len(v_bars)
+    label_array = v_bars * (h_bars + num_vb)
+
+    # map the indices onto a sequential list of integers starting at 1
+    label_mapping = {label: n+1
+                     for n, label in enumerate(np.unique(label_array))}
+    # remap the label array to go from 1 -> max(labels)
+    for label, n in label_mapping.items():
+        label_array[label_array == label] = n
+
+    return label_array
