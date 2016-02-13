@@ -43,8 +43,6 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 from .utils import verbosedict
 from collections import namedtuple
-
-logger = logging.getLogger(__name__)
 import time
 
 try:
