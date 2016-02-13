@@ -1,28 +1,12 @@
-# Module for the BNL image processing project
-# Developed at the NSLS-II, Brookhaven National Laboratory
-# Developed by Gabriel Iltis, Sept. 2014
 """
-This module contains fileIO operations and file conversion for the image 
-processing tool kit in the NSLS-II data analysis software package. 
+This module contains fileIO operations and file conversion for the image
+processing tool kit in the NSLS-II data analysis software package.
 The functions included in this module focus on reading and writing
-netCDF files. This is the file format used by Mark Rivers for 
+netCDF files. This is the file format used by Mark Rivers for
 x-ray computed microtomography data collected at Argonne National Laboratory,
 Sector 13BMD, GSECars.
 """
-"""
-REVISION LOG: (FORMAT: "PROGRAMMER INITIALS: DATE -- RECORD")
--------------------------------------------------------------
-GCI: 5/13/14 -- Added load function for netCDF files. Specifically for loading 
-    data sets acquired at the APS Sector 13 beamline.
-GCI: 8/1/14 -- Updating documentation to detail required dependencies for 
-    netCDF file IO. Without these required dependencies these functions
-    will not work.
-GCI: 9/11/14 -- Finished initial requirements for pull request. Load function
-    tested using sample netCDF file in test_data folder and successfully
-    loads and returns the metadata dictionary and the array data.
-"""
-
-import numpy as np
+from __future__ import division, absolute_import, print_function
 import os
 from netCDF4 import Dataset
 
