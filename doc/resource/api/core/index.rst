@@ -5,7 +5,7 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-   
+
    arithmetic
    calibration
    cdi
@@ -13,11 +13,10 @@ Contents:
    correlation
    dpc
    feature
-   fitting
-   fitting/model
+   fitting/index
    image
    recip
    roi
    spectroscopy
    utils
-   
+
