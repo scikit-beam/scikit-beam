@@ -35,7 +35,6 @@ install:
   # # code.  We could also setup.py develop, but I'm not sure if that is any
   # # better
   - python setup.py install build_ext -i
-  - pip install coveralls
   - pip install codecov
 
 script:
@@ -52,7 +51,6 @@ script:
     fi;
 
 after_success:
-  - if [ $RUN_TESTS == 'true' ]; then coveralls; fi;
   - if [ $RUN_TESTS == 'true' ]; then codecov; fi;
   - if [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PULL_REQUEST == 'false' ] && [ $BUILD_DOCS ]; then
       cd doc;
