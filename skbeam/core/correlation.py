@@ -92,11 +92,11 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
 
     Notes
     -----
-    :math ::
-        G   = <I(\tau)I(\tau + delay)>
-    :math ::
+    .. math::
+        G = <I(\tau)I(\tau + delay)>
+    .. math::
         past_intensity_norm = <I(\tau)>
-    :math ::
+    .. math::
         future_intensity_norm = <I(\tau + delay)>
     """
     img_per_level[level] += 1
@@ -149,8 +149,7 @@ _internal_state = namedtuple(
      'num_pixels',
      'lag_steps',
      'norm',
-     'lev_len',
-     ]
+     'lev_len']
 )
 
 _two_time_internal_state = namedtuple(
@@ -168,8 +167,7 @@ _two_time_internal_state = namedtuple(
      'current_img_time',
      'time_ind',
      'norm',
-     'lev_len',
-    ]
+     'lev_len']
 )
 
 
@@ -267,15 +265,15 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
     The normalized intensity-intensity time-autocorrelation function
     is defined as
 
-    :math ::
-        g_2(q, t') = \frac{<I(q, t)I(q, t + t')> }{<I(q, t)>^2}
+    .. math::
+        g_2(q, t') = \\frac{<I(q, t)I(q, t + t')> }{<I(q, t)>^2}
 
-    ; t' > 0
+        t' > 0
 
-    Here, I(q, t) refers to the scattering strength at the momentum
-    transfer vector q in reciprocal space at time t, and the brackets
-    <...> refer to averages over time t. The quantity t' denotes the
-    delay time
+    Here, ``I(q, t)`` refers to the scattering strength at the momentum
+    transfer vector ``q`` in reciprocal space at time ``t``, and the brackets
+    ``<...>`` refer to averages over time ``t``. The quantity ``t'`` denotes
+    the delay time
 
     This implementation is based on published work. [1]_
 
@@ -405,14 +403,14 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
     The intensity-intensity autocorrelation g2 is connected to the intermediate
     scattering factor(ISF) g1
 
-    :math ::
-        g_2(q, \tau) = \beta_1[g_1(q, \tau)]^{2} + g_\infty
+    .. math::
+        g_2(q, \\tau) = \\beta_1[g_1(q, \\tau)]^{2} + g_\infty
 
     For a system undergoing  diffusive dynamics,
-    :math ::
-        g_1(q, \tau) = e^{-\gamma(q) \tau}
-    :math ::
-       g_2(q, \tau) = \beta_1 e^{-2\gamma(q) \tau} + g_\infty
+    .. math::
+        g_1(q, \\tau) = e^{-\gamma(q) \\tau}
+    .. math::
+       g_2(q, \\tau) = \\beta_1 e^{-2\gamma(q) \\tau} + g_\infty
 
     These implementation are based on published work. [1]_
 
@@ -481,36 +479,37 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
     Yields
     ------
     namedtuple
-        A `results` object is yielded after every image has been processed.
+        A ``results`` object is yielded after every image has been processed.
         This `reults` object contains, in this order:
-        - `g2`: the normalized correlation
+        - ``g2``: the normalized correlation
           shape is (num_rois, len(lag_steps), len(lag_steps))
-        - `lag_steps`: the times at which the correlation was computed
-        - `_internal_state`: all of the internal state. Can be passed back in
-          to `lazy_one_time` as the `internal_state` parameter
+        - ``lag_steps``: the times at which the correlation was computed
+        - ``_internal_state``: all of the internal state. Can be passed back in
+          to ``lazy_one_time`` as the ``internal_state`` parameter
 
     Notes
     -----
     The two-time correlation function is defined as
 
-    :math ::
-        C(q, t_1, t_2) = \frac{<I(q, t_1)I(q, t_2)>_pix }{<I(q, t_1)>_pix <I(q, t_2)>_pix}
+    .. math::
+        C(q,t_1,t_2) = \\frac{<I(q,t_1)I(q,t_2)>}{<I(q, t_1)><I(q,t_2)>}
 
     Here, the ensemble averages are performed over many pixels of detector,
-    all having the same q value. The average time or age is equal to (t1+t2)/2,
-    measured by the distance along the t1 = t2 diagonal.
-    The time difference t = |t1 - t2|, with is distance from the t1 = t2
-    diagonal in the perpendicular direction.
+    all having the same ``q`` value. The average time or age is equal to
+    ``(t1+t2)/2``, measured by the distance along the ``t1 = t2`` diagonal.
+    The time difference ``t = |t1 - t2|``, with is distance from the
+    ``t1 = t2`` diagonal in the perpendicular direction.
     In the equilibrium system, the two-time correlation functions depend only
-    on the time difference t, and hence the two-time correlation contour lines
-    are parallel.
+    on the time difference ``t``, and hence the two-time correlation contour
+    lines are parallel.
 
     References
     ----------
 
-    .. [1] A. Fluerasu, A. Moussaid, A. Mandsen and A. Schofield,
-        "Slow dynamics and aging in collodial gels studied by x-ray photon
-         correlation spectroscopy," Phys. Rev. E., vol 76, p 010401(1-4), 2007.
+    .. [1]
+        A. Fluerasu, A. Moussaid, A. Mandsen and A. Schofield, "Slow dynamics
+        and aging in collodial gels studied by x-ray photon correlation
+        spectroscopy," Phys. Rev. E., vol 76, p 010401(1-4), 2007.
     """
     if two_time_internal_state is None:
         two_time_internal_state = _init_state_two_time(num_levels, num_bufs,

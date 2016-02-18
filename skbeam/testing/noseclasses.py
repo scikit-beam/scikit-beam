@@ -44,7 +44,6 @@ Much of this code is inspired by the code in matplotlib.  Exact copies
 are noted.
 """
 from __future__ import absolute_import, division, print_function
-import six
 
 import os
 from nose.plugins.errorclass import ErrorClass, ErrorClassPlugin
@@ -60,6 +59,7 @@ class KnownFailureDidNotFailTest(Exception):
 class KnownFailureTest(Exception):
     '''Raise this exception to mark a test as a known failing test.'''
     pass
+
 
 # This code is copied from numpy
 class KnownFailure(ErrorClassPlugin):

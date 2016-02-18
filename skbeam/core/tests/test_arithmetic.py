@@ -27,7 +27,8 @@ def test_prealloc_passthrough():
     x1 = np.arange(10)
     x2 = np.arange(10)
     scratch_space = np.zeros(x1.shape)
-    for op in [arithmetic.logical_nand, arithmetic.logical_sub, arithmetic.logical_nor]:
+    for op in [arithmetic.logical_nand, arithmetic.logical_sub,
+               arithmetic.logical_nor]:
         yield _helper_prealloc_passthrough, op, x1, x2, scratch_space
 
 

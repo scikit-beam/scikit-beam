@@ -48,7 +48,6 @@ def test_snip_method():
     """
 
     xmin = 0
-    xmax = 3000
 
     # three gaussian peak
     xval = np.arange(-20, 20, 0.1)
@@ -70,20 +69,12 @@ def test_snip_method():
                      xmin=xmin, xmax=3000,
                      spectral_binning=None, width=0.1)
 
-    #plt.semilogy(xval, bg_true, xval, bg)
-    #plt.plot(xval, bg_true, xval, bg)
-    #plt.show()
-
     # ignore the boundary part
     cutval = 15
-    bg_true_part = bg_true[cutval : -cutval]
-    bg_cal_part = bg[cutval : -cutval]
+    bg_true_part = bg_true[cutval:-cutval]
+    bg_cal_part = bg[cutval:-cutval]
 
-
-    #assert_array_almost_equal(bg_true_part, bg_cal_part, decimal=2)
     assert_allclose(bg_true_part, bg_cal_part, rtol=1e-3, atol=1e-1)
-
-    return
 
 
 if __name__ == '__main__':

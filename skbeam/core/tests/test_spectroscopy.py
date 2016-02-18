@@ -38,7 +38,7 @@ from nose.tools import assert_raises
 from numpy.testing import assert_array_almost_equal
 
 from skbeam.core.spectroscopy import (align_and_scale, integrate_ROI,
-                                integrate_ROI_spectrum)
+                                      integrate_ROI_spectrum)
 
 
 def synthetic_data(E, E0, sigma, alpha, k, beta):
@@ -109,6 +109,7 @@ def test_integrate_ROI_errors():
     E[50] = 2
     assert_raises(ValueError, integrate_ROI, E, C, 2, 60)
 
+
 def test_integrate_ROI_compute():
     E = np.arange(100)
     C = np.ones_like(E)
@@ -119,6 +120,7 @@ def test_integrate_ROI_compute():
     assert_array_almost_equal(integrate_ROI(E, C, [5.5, 17], [11.5, 23]),
                               12)
 
+
 def test_integrate_ROI_spectrum_compute():
     C = np.ones(100)
     E = np.arange(101)
@@ -128,6 +130,7 @@ def test_integrate_ROI_spectrum_compute():
                               6)
     assert_array_almost_equal(integrate_ROI_spectrum(E, C, [5, 17], [11, 23]),
                               12)
+
 
 def test_integrate_ROI_reverse_input():
     E = np.arange(100)

@@ -38,7 +38,6 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-import six
 import numpy as np
 import time
 from scipy.ndimage.filters import gaussian_filter
@@ -184,8 +183,8 @@ def generate_random_phase_field(diffracted_pattern):
         sample information with phase
     """
     pha_tmp = np.random.uniform(0, 2*np.pi, diffracted_pattern.shape)
-    sample_obj = (np.fft.ifftn(diffracted_pattern * np.exp(1j*pha_tmp))
-                  * np.sqrt(np.size(diffracted_pattern)))
+    sample_obj = (np.fft.ifftn(diffracted_pattern * np.exp(1j*pha_tmp)) *
+                  np.sqrt(np.size(diffracted_pattern)))
     return sample_obj
 
 
@@ -256,7 +255,8 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
         define the point to start doing average.
         default is 0.8.
     pi_modulus_flag : str, optional
-        'Complex' or 'Real', defining the way to perform pi_modulus calculation.
+        'Complex' or 'Real', defining the way to perform pi_modulus
+        calculation.
         default is 'Complex'.
     sw_flag : Bool, optional
         flag to use shrinkwrap algorithm or not.
@@ -357,10 +357,11 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
 
         if sw_flag:
             if((n >= (sw_start * n_iterations)) and
-                   (n <= (sw_end * n_iterations))):
+               (n <= (sw_end * n_iterations))):
                 if np.mod(n, sw_step) == 0:
                     logger.info('Refine support with shrinkwrap')
-                    sup_index = find_support(sample_obj, sw_sigma, sw_threshold)
+                    sup_index = find_support(sample_obj, sw_sigma,
+                                             sw_threshold)
                     sup = np.zeros_like(diffracted_pattern)
                     sup[sup_index] = 1
                     outside_sup_index = sup != 1

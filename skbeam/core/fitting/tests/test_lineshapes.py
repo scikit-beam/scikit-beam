@@ -138,9 +138,9 @@ def test_compton_peak():
     test of compton peak from xrf fit
     """
     y_true = [0.01332237,  0.01536984,  0.01870113,  0.02401014,  0.03223281,
-              0.04455143,  0.0623487 ,  0.08709168,  0.12013435,  0.16244524,
-              0.2142911 ,  0.27493377,  0.34241693,  0.41352197,  0.48395163,
-              0.5487556 ,  0.6029529 ,  0.64224726,  0.66369326,  0.65792554,
+              0.04455143,  0.0623487,   0.08709168,  0.12013435,  0.16244524,
+              0.2142911,   0.27493377,  0.34241693,  0.41352197,  0.48395163,
+              0.5487556,   0.6029529,   0.64224726,  0.66369326,  0.65792554,
               0.63050209,  0.58478146,  0.52510892,  0.45674079,  0.38508357,
               0.31500557,  0.25033778,  0.19362201,  0.14610264,  0.10790876,
               0.07834781,  0.05623019,  0.04016135,  0.02876383,  0.02081757,
@@ -174,10 +174,10 @@ def test_compton_peak():
 
 def test_lorentzian_peak():
 
-    y_true = [ 0.03151583,  0.03881828,  0.04897075,  0.06366198,  0.0860297 ,
-               0.12242688,  0.18724111,  0.31830989,  0.63661977,  1.59154943,
-               3.18309886,  1.59154943,  0.63661977,  0.31830989,  0.18724111,
-               0.12242688,  0.0860297 ,  0.06366198,  0.04897075,  0.03881828]
+    y_true = [0.03151583,  0.03881828,  0.04897075,  0.06366198,  0.0860297,
+              0.12242688,  0.18724111,  0.31830989,  0.63661977,  1.59154943,
+              3.18309886,  1.59154943,  0.63661977,  0.31830989,  0.18724111,
+              0.12242688,  0.0860297,   0.06366198,  0.04897075,  0.03881828]
 
     x = np.arange(-1, 1, 0.1)
     a = 1
@@ -266,13 +266,15 @@ def test_elastic_model():
     elastic_model.set_param_hint(name='e_offset', value=0, vary=False)
     elastic_model.set_param_hint(name='e_linear', value=0.01, vary=False)
     elastic_model.set_param_hint(name='e_quadratic', value=0, vary=False)
-    elastic_model.set_param_hint(name='coherent_sct_energy', value=10, vary=False)
+    elastic_model.set_param_hint(name='coherent_sct_energy', value=10,
+                                 vary=False)
     elastic_model.set_param_hint(name='fwhm_offset', value=0.02, vary=False)
     elastic_model.set_param_hint(name='fwhm_fanoprime', value=0.03, vary=False)
 
     result = elastic_model.fit(out, x=x, coherent_sct_amplitude=10)
 
-    fitted_val = [result.values['fwhm_fanoprime'], result.values['coherent_sct_amplitude'],
+    fitted_val = [result.values['fwhm_fanoprime'],
+                  result.values['coherent_sct_amplitude'],
                   result.values['coherent_sct_energy']]
 
     assert_array_almost_equal(true_param, fitted_val, decimal=2)
@@ -314,9 +316,8 @@ def test_compton_model():
     cm.set_param_hint(name='fwhm_fanoprime', value=fano, vary=False)
     cm.set_param_hint(name='compton_hi_f_tail', value=hi_f_tail, vary=False)
     cm.set_param_hint(name='compton_f_step', value=f_step, vary=False)
-    #cm.set_param_hint(name='coherent_sct_energy', value=10, vary=False)
     cm.set_param_hint(name='compton_f_tail', value=f_tail, vary=False)
-    cm.set_param_hint(name='compton_gamma', value=gamma, vary=False)#min=1, max=3.5)
+    cm.set_param_hint(name='compton_gamma', value=gamma, vary=False)
     cm.set_param_hint(name='compton_amplitude', value=20, vary=False)
     cm.set_param_hint(name='compton_fwhm_corr', value=fwhm_corr, vary=False)
 
@@ -324,7 +325,8 @@ def test_compton_model():
     result = cm.fit(out, x=x, params=p, compton_amplitude=20,
                     coherent_sct_energy=10)
 
-    fit_val = [result.values['coherent_sct_energy'], result.values['compton_amplitude']]
+    fit_val = [result.values['coherent_sct_energy'],
+               result.values['compton_amplitude']]
 
     assert_array_almost_equal(true_param, fit_val, decimal=2)
 
@@ -350,7 +352,7 @@ def test_dist():
     assert_array_almost_equal(pk_p,
                               np.array([0.04285213, 0.07642648,
                                         0.11521053, 0.15411372,
-                                         0.18795214, 0.21260011]))
+                                        0.18795214, 0.21260011]))
 
 
 if __name__ == '__main__':

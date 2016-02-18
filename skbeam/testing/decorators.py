@@ -39,7 +39,7 @@ Much of this code is inspired by the code in matplotlib.  Exact copies
 are noted.
 """
 from skbeam.testing.noseclasses import (KnownFailureTest,
-                                       KnownFailureDidNotFailTest)
+                                        KnownFailureDidNotFailTest)
 
 import nose
 from nose.tools import make_decorator

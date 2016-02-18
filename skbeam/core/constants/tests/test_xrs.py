@@ -38,11 +38,10 @@
 from __future__ import absolute_import, division, print_function
 
 import numpy as np
-from numpy.testing import (assert_array_equal, assert_array_almost_equal)
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 from nose.tools import assert_equal
 
-from skbeam.core.constants.xrs import (HKL,
-                                  calibration_standards)
+from skbeam.core.constants.xrs import HKL, calibration_standards
 from skbeam.core.utils import q_to_d, d_to_q
 
 
