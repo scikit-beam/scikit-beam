@@ -35,7 +35,7 @@ install:
   - pip install codecov
 
 script:
-  - python run_tests.py
+  - coverage run run_tests.py
   - if [ $TRAVIS_PYTHON_VERSION == 3.5 ]; then
       conda install sphinx numpydoc ipython jupyter pip matplotlib;
       pip install sphinx_bootstrap_theme sphinxcontrib-napoleon;
