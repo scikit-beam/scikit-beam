@@ -6,9 +6,13 @@ addons:
       - pandoc
 env:
   global:
+    - RUN_TESTS: true
     - GH_REF: github.com/scikit-beam/scikit-beam.git
     - secure: "KzntGlmLDUZlAB8ZiSRBtONJypv4atrnFxl+THCW8kg6YbiODcCxG9cez7mfmh63wpJ54+zeGvgGljeVvjb7bjB2p+4hZy+mLoP9xoE1w5qF4XaQ5YTOYaSQqCeWa5cEIi+854gFX7gOfW5qL+EJf7h3HtmndI15zaU5gOPjSDU="
-
+matrix:
+  include:
+    - python: 3.5
+      env: BUILD_DOCS=true RUN_TESTS=false
 python:
   - 2.7
   - 3.4
@@ -35,8 +39,9 @@ install:
   - pip install codecov
 
 script:
-  - coverage run run_tests.py
-  - if [ $TRAVIS_PYTHON_VERSION == 3.5 ]; then
+  - if [ $RUN_TESTS == 'true' ]; then coverage run run_tests.py; fi;
+  - if [ $RUN_TESTS == 'true' ]; then flake8 $TRAVIS_BUILD_DIR/skbeam; fi;
+  - if [ $BUILD_DOCS == 'true' ]; then
       conda install sphinx numpydoc ipython jupyter pip matplotlib;
       pip install sphinx_bootstrap_theme sphinxcontrib-napoleon;
       cd ..;
@@ -50,7 +55,7 @@ script:
 after_success:
   - coveralls
   - codecov
-  - if [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PULL_REQUEST == 'false' ]; then
+  - if [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PULL_REQUEST == 'false' ] && [ $BUILD_DOCS ]; then
       cd doc;
       chmod +x push_docs.sh;
       ./push_docs.sh;
