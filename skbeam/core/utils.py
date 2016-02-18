@@ -1217,13 +1217,14 @@ def geometric_series(common_ratio, number_of_images, first_term=1):
     geometric_series : list
         time series
 
-    Note
-    ----
-    :math ::
-     a + ar + ar^2 + ar^3 + ar^4 + ...
+    Notes
+    -----
+    .. math::
+        a + ar + ar^2 + ar^3 + ar^4 + ...
 
-     a - first term in the series
-     r - is the common ratio
+    a - first term in the series
+
+    r - is the common ratio
     """
 
     geometric_series = [first_term]

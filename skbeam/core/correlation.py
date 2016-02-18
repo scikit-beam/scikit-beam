@@ -92,11 +92,11 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
 
     Notes
     -----
-    :math ::
+    .. math::
         G = <I(\tau)I(\tau + delay)>
-    :math ::
+    .. math::
         past_intensity_norm = <I(\tau)>
-    :math ::
+    .. math::
         future_intensity_norm = <I(\tau + delay)>
     """
     img_per_level[level] += 1
