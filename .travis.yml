@@ -53,8 +53,8 @@ script:
   - flake8 $TRAVIS_BUILD_DIR/skbeam
 
 after_success:
-  - coveralls
-  - codecov
+  - if [ $RUN_TESTS == 'true' ]; then coveralls; fi;
+  - if [ $RUN_TESTS == 'true' ]; then codecov; fi;
   - if [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PULL_REQUEST == 'false' ] && [ $BUILD_DOCS ]; then
       cd doc;
       chmod +x push_docs.sh;
