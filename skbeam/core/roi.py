@@ -129,15 +129,15 @@ def rings(edges, center, shape):
         raise ValueError("edges should have an even number of elements, "
                          "giving inner, outer radii for each roi")
 
-    if isinstance(values, tuple):
+    if isinstance(center, tuple):
         if not np.all(np.diff(edges) >= 0):
             raise ValueError("edges are expected to be monotonically"
                              " increasing, "
                              "giving inner and outer radii of each ring from "
                              "r=0 outward")
-        r_coord = utils.radial_grid(values, shape).ravel()  # for ring roi's
+        r_coord = utils.radial_grid(center, shape).ravel()  # for ring roi's
     else:
-        r_coord = values.reval()   # for bar roi's
+        r_coord = center.ravel()   # for bar roi's
 
     label_array = np.digitize(r_coord, edges, right=False)
     # Even elements of label_array are in the space between rings.
@@ -547,23 +547,22 @@ def bar_rois(edges, values):
     return rings(edges, values, values.shape)
 
 
-def box_rois(v_edges, h_edges, v_values, h_values=None):
+def box_rois(h_values, v_values, v_edges, h_edges=None):
     """
     Parameters
     ----------
-    v_edegs : list
-        list
+    h_values : array
+        image pixels co-ordinates to create vertical bar rois.
+        This bars can be horizontal or vertical depend on the edges
+    v_values : array
+        image pixels co-ordinates to create horizontal bar rois.
+        This bars can be horizontal or vertical depend on the edges
+    v_edges : list
         giving the inner and outer edges of each vertical bar
         e.g., [(1, 2), (11, 12), (21, 22)]
     h_edges : list
         giving the inner and outer edges of each horizontal bar
-        e.g., [(1, 2), (11, 12), (21, 22)]
-    v_values : array
-        image pixels co-ordinates to create vertical bar rois.
-        This bars can be horizontal or vertical depend on the edges
-    h_values : array
-        image pixels co-ordinates to create horizontal bar rois.
-        This bars can be horizontal or vertical depend on the edges
+        e.g., [(1, 2), (11, 12), (21, 22)], optional
     Returns
     -------
     label_array : array
@@ -572,13 +571,13 @@ def box_rois(v_edges, h_edges, v_values, h_values=None):
         in edges.
     """
 
-    if h_values is None:
-        h_values = v_values
+    if h_edges is None:
+        h_edges = v_edges
 
     v_bars = bar_rois(v_edges, v_values)
     h_bars = bar_rois(h_edges, h_values)
 
-    num_vb = np.len(v_bars)
+    num_vb = len(v_bars)
     label_array = v_bars * (h_bars + num_vb)
 
     # map the indices onto a sequential list of integers starting at 1
