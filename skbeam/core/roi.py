@@ -146,8 +146,7 @@ def rings(edges, center, shape):
 
 
 def ring_edges(inner_radius, width, spacing=0, num_rings=None):
-    """
-    Calculate the inner and outer radius of a set of rings.
+    """ Calculate the inner and outer radius of a set of rings.
 
     The number of rings, their widths, and any spacing between rings can be
     specified. They can be uniform or varied.
@@ -522,8 +521,7 @@ def extract_label_indices(labels):
 
 
 def bar_rois(edges, values):
-    """
-    Draw bar shaped roi's when the edges are provided
+    """Draw bar shaped roi's when the edges are provided
 
     Parameters
     ----------
@@ -538,8 +536,8 @@ def bar_rois(edges, values):
     -------
     label_array : array
         Elements not inside any ROI are zero; elements inside each
-        ROI are 1, 2, 3, corresponding to the order they are specified
-        in edges.
+        ROI are 1, 2, 3, corresponding to the order they are
+        specified in edges.
 
     Note
     ----
@@ -549,8 +547,8 @@ def bar_rois(edges, values):
 
 
 def box_rois(v_values, v_edges, h_values=None, h_edges=None):
-    """
-    Draw box shaped roi's when the horizontal and vertical edges are provided.
+    """Draw box shaped roi's when the horizontal and vertical edges
+     are provided.
 
     Parameters
     ----------
@@ -579,16 +577,14 @@ def box_rois(v_values, v_edges, h_values=None, h_edges=None):
 
     if h_values is None:
         h_values = v_values
-    elif h_values.shape == v_edges.shape:
+    elif h_values.shape != v_values.shape:
         raise ValueError("Shape of the h_values array should be equal to"
                          " shape of the v_values array")
-
     for edges in (h_edges, v_edges):
         edges = np.atleast_2d(np.asarray(edges)).ravel()
         if not 0 == len(edges) % 2:
             raise ValueError("edges should have an even number of elements, "
                              "giving inner, outer edges for each roi")
-
     coords = []
     for h in h_edges:
         for v in v_edges:

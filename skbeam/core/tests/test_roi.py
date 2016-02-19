@@ -344,3 +344,13 @@ def test_kymograph():
     # number
     for row in kymograph_data:
         assert np.all(row == row[0])
+
+
+def test_bars_boxes():
+    h_values, v_values = np.mgrid[0:10, 0:10]
+    edges = [[3, 4], [5, 7]]
+
+    h_label_array = roi.bar_rois(edges, h_values)
+    v_label_array = roi.bar_rois(edges, v_values)
+
+    box_array = roi.box_rois(v_values, v_edges, h_values)
