@@ -195,9 +195,8 @@ def gsas_writer(tth, intensity, output_name, mode=None,
         l_bank = ("BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f ESD"
                   % (i_bank, n_chan, n_rec, tth0_cdg, dtth_cdg, 0, 0))
         lines.append("%-80s" % l_bank)
-        l_recs = ["%8.0f%8.0f" % (ii, ee * scale) for ii,
-                                                      ee in zip(intensity,
-                                                                err)]
+        l_recs = ["%8.0f%8.0f" % (ii, ee * scale)
+                  for ii, ee in zip(intensity, err)]
         for i in range(0, len(l_recs), 5):
                 lines.append("".join(l_recs[i:i + 5]))
     elif mode == 'FXYE':
@@ -205,13 +204,9 @@ def gsas_writer(tth, intensity, output_name, mode=None,
         l_bank = ("BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f FXYE" %
                   (i_bank, n_chan, n_rec, tth0_cdg, dtth_cdg, 0, 0))
         lines.append("%-80s" % l_bank)
-        l_recs = ["%22.10f%22.10f%24.10f" % (xx * scale,
-                                             yy * scale,
-                                             ee * scale) for xx,
-                                                             yy,
-                                                             ee in zip(tth,
-                                                                       intensity,
-                                                                       err)]
+        l_recs = [
+            "%22.10f%22.10f%24.10f" % (xx * scale, yy * scale, ee * scale)
+            for xx, yy, ee in zip(tth, intensity, err)]
         for i in range(len(l_recs)):
             lines.append("%-80s" % l_recs[i])
     else:

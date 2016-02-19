@@ -4,7 +4,8 @@ import logging
 
 import six
 import numpy as np
-from numpy.testing import (assert_equal, assert_array_almost_equal, assert_array_equal)
+from numpy.testing import (assert_equal, assert_array_almost_equal,
+                           assert_array_equal)
 from nose.tools import assert_true, raises, assert_raises
 
 from skbeam.core.fitting.base.parameter_data import get_para, e_calibration
@@ -25,9 +26,12 @@ def synthetic_spectrum():
     x = np.arange(2000)
     pileup_peak = ['Si_Ka1-Si_Ka1', 'Si_Ka1-Ce_La1']
     user_peak = ['user_peak1']
-    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak + user_peak
-    elist, matv, area_v = construct_linear_model(x, param, elemental_lines, default_area=1e5)
-    return np.sum(matv, 1)  #In case that y0 might be zero at certain points.
+    elemental_lines = (['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak +
+                       user_peak)
+    elist, matv, area_v = construct_linear_model(x, param, elemental_lines,
+                                                 default_area=1e5)
+    # In case that y0 might be zero at certain points.
+    return np.sum(matv, 1)
 
 
 def test_param_controller_fail():
@@ -71,7 +75,8 @@ def test_fit():
     param = get_para()
     pileup_peak = ['Si_Ka1-Si_Ka1', 'Si_Ka1-Ce_La1']
     user_peak = ['user_peak1']
-    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak + user_peak
+    elemental_lines = (['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak +
+                       user_peak)
     x0 = np.arange(2000)
     y0 = synthetic_spectrum()
     default_area = 1e5
@@ -126,7 +131,8 @@ def test_register_error():
 
 
 def test_pre_fit():
-    # No pre-defined elements. Use all possible elements activated at given energy
+    # No pre-defined elements. Use all possible elements activated at
+    # given energy
     y0 = synthetic_spectrum()
     x0 = np.arange(len(y0))
     # the following items should appear
@@ -196,7 +202,8 @@ def test_set_param():
     # get compton model
     compton = MS.mod.components[0]
 
-    input_param = {'bound_type': 'other', 'max': 13.0, 'min': 9.0, 'value': 11.0}
+    input_param = {'bound_type': 'other', 'max': 13.0, 'min': 9.0,
+                   'value': 11.0}
     _set_parameter_hint('coherent_sct_energy', input_param, compton)
 
 
@@ -206,13 +213,15 @@ def test_pixel_fit_multiprocess():
     x = np.arange(len(y0))
     pileup_peak = ['Si_Ka1-Si_Ka1', 'Si_Ka1-Ce_La1']
     user_peak = ['user_peak1']
-    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak + user_peak
+    elemental_lines = (['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak +
+                       user_peak)
 
     default_area = 1e5
-    elist, matv, area_v = construct_linear_model(x, param, elemental_lines, default_area=default_area)
+    elist, matv, area_v = construct_linear_model(x, param, elemental_lines,
+                                                 default_area=default_area)
     exp_data = np.zeros([2, 1, len(y0)])
     for i in range(exp_data.shape[0]):
-        exp_data[i,0,:] = y0
+        exp_data[i, 0, :] = y0
     results = fit_pixel_multiprocess_nnls(exp_data, matv, param,
                                           use_snip=True)
     # output area of dict
@@ -228,13 +237,14 @@ def test_pixel_fit_multiprocess():
     assert_array_equal(results.shape, [2, 1, total_len])
 
     # same exp data should output same results
-    assert_array_equal(results[0,:,:], results[1,:,:])
+    assert_array_equal(results[0, :, :], results[1, :, :])
 
     for k, v in six.iteritems(result_map):
         assert_equal(v[0, 0], v[1, 0])
         if k in ['snip_bkg', 'r_squared']:
-            # bkg is not a fitting parameter, and r_squared is just a statistical output.
+            # bkg is not a fitting parameter, and r_squared is just a
+            # statistical output.
             # Only compare the fitting parameters, such as area of each peak.
             continue
         # compare with default value 1e5, and get difference < 1%
-        assert_true(abs(v[0,0]*0.01-default_area)/default_area < 1e-2)  # difference < 1%
+        assert_true(abs(v[0, 0] * 0.01 - default_area) / default_area < 1e-2)

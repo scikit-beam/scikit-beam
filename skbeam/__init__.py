@@ -32,16 +32,13 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-
 from __future__ import absolute_import, division, print_function
-
-import six
 import logging
-logger = logging.getLogger(__name__)
-
 from logging import NullHandler
+from ._version import get_versions
+
+logger = logging.getLogger(__name__)
 logger.addHandler(NullHandler())
 
-from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions

@@ -39,7 +39,6 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 logger = logging.getLogger(__name__)
-import numpy as np
 from .background import snip_method
 from .models import (Lorentzian2Model, ComptonModel, ElasticModel)
 

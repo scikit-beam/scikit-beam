@@ -38,10 +38,9 @@ processing tools.  These should be interesting compositions of existing
 tools, not just straight wrapping of np/scipy/scikit images.
 """
 from __future__ import absolute_import, division, print_function
-import six
+import numpy as np
 import logging
 logger = logging.getLogger(__name__)
-import numpy as np
 
 
 def find_ring_center_acorr_1D(input_image):
@@ -66,7 +65,7 @@ def find_ring_center_acorr_1D(input_image):
         are centered on.  Accurate to pixel resolution.
     """
     return tuple(bins[np.argmax(vals)] for vals, bins in
-                  (_corr_ax1(_im) for _im in (input_image.T, input_image)))
+                 (_corr_ax1(_im) for _im in (input_image.T, input_image)))
 
 
 def _corr_ax1(input_image):
@@ -93,7 +92,7 @@ def _corr_ax1(input_image):
     m_ones = np.ones(dim)
     norm_mask = np.correlate(m_ones, m_ones, mode='full')
     # not sure that the /2 is the correct correction
-    est_by_row = [np.argmax(np.correlate(v, v[::-1],
-                                         mode='full')/norm_mask) / 2
-             for v in input_image]
+    est_by_row = [
+        np.argmax(np.correlate(v, v[::-1], mode='full')/norm_mask) / 2
+        for v in input_image]
     return np.histogram(est_by_row, bins=np.arange(0, dim + 1))

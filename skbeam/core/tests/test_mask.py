@@ -36,8 +36,7 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 import numpy as np
-from numpy.testing import assert_array_almost_equal, assert_array_equal
-from nose.tools import assert_raises
+from numpy.testing import assert_array_equal
 
 import skbeam.core.mask as mask
 
@@ -85,4 +84,3 @@ def test_bad_to_nan_gen():
     assert np.isnan(np.asarray(y)[1]).all()
     assert np.isnan(np.asarray(y)[3]).all()
     assert not np.isnan(np.asarray(y)[4]).all()
-

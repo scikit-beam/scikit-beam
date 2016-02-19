@@ -46,7 +46,6 @@ from __future__ import absolute_import, division, print_function
 
 import numpy as np
 import scipy.special
-import six
 
 from scipy import stats
 from scipy.special import gamma, gammaln
@@ -57,13 +56,12 @@ logger = logging.getLogger(__name__)
 
 log2 = np.log(2)
 s2pi = np.sqrt(2*np.pi)
-spi  = np.sqrt(np.pi)
-s2   = np.sqrt(2.0)
+spi = np.sqrt(np.pi)
+s2 = np.sqrt(2.0)
 
 
 def gaussian(x, area, center, sigma):
-    """1 dimensional gaussian:
-    gaussian(x, amplitude, center, sigma)
+    """1 dimensional gaussian
 
     Parameters
     ----------
@@ -76,12 +74,12 @@ def gaussian(x, area, center, sigma):
     sigma : float
         standard deviation
     """
-    return (area/(s2pi*sigma)) * np.exp(-(1.0*x-center)**2 /(2*sigma**2))
+    return ((area / (s2pi * sigma)) *
+            np.exp(-1 * (1.0 * x - center) ** 2 / (2 * sigma ** 2)))
 
 
 def lorentzian(x, area, center, sigma):
     """1 dimensional lorentzian
-    lorentzian(x, amplitude, center, sigma)
 
     Parameters
     ----------
@@ -95,12 +93,11 @@ def lorentzian(x, area, center, sigma):
     sigma : float
         standard deviation
     """
-    return (area/(1 + ((1.0*x-center)/sigma)**2) ) / (np.pi*sigma)
+    return (area / (1 + ((1.0 * x - center) / sigma) ** 2)) / (np.pi * sigma)
 
 
 def lorentzian2(x, area, center, sigma):
-    """
-    1-d lorentzian squared profile
+    """1-d lorentzian squared profile
 
     Parameters
     ----------
@@ -119,10 +116,9 @@ def lorentzian2(x, area, center, sigma):
 
 
 def voigt(x, area, center, sigma, gamma=None):
-    """1 dimensional voigt function.
+    """Convolution of gaussian and lorentzian curve.
+
     see http://en.wikipedia.org/wiki/Voigt_profile
-    1 dimensional voigt function, the convolution between gaussian and
-    lorentzian curve.
 
     Parameters
     ----------
@@ -145,13 +141,7 @@ def voigt(x, area, center, sigma, gamma=None):
 
 
 def pvoigt(x, area, center, sigma, fraction):
-    """1 dimensional pseudo-voigt:
-    pvoigt(x, area, center, sigma, fraction)
-       = amplitude*(1-fraction)*gaussion(x, center,sigma) +
-         amplitude*fraction*lorentzian(x, center, sigma)
-
-    1 dimensional pseudo-voigt, linear combination of gaussian and lorentzian
-    curve.
+    """Linear combination  of gaussian and lorentzian
 
     Parameters
     ----------
@@ -165,8 +155,7 @@ def pvoigt(x, area, center, sigma, fraction):
         standard deviation
     fraction : float
         weight for lorentzian peak in the linear combination, and (1-fraction)
-        is the weight
-        for gaussian peak.
+        is the weight for gaussian peak.
     """
     return ((1-fraction) * gaussian(x, area, center, sigma) +
             fraction * lorentzian(x, area, center, sigma))
@@ -197,18 +186,19 @@ def gausssian_step(x, area, center, sigma, peak_e):
 
     References
     ----------
-    .. [1] Rene Van Grieken, "Handbook of X-Ray Spectrometry, Second Edition,
-           (Practical Spectroscopy)", CRC Press, 2 edition, pp. 182, 2007.
+    .. [1]
+        Rene Van Grieken, "Handbook of X-Ray Spectrometry, Second Edition,
+        (Practical Spectroscopy)", CRC Press, 2 edition, pp. 182, 2007.
     """
 
-    return (area * scipy.special.erfc((x - center) / (np.sqrt(2) * sigma))
-            / (2. * peak_e))
+    return (area * scipy.special.erfc((x - center) / (np.sqrt(2) * sigma)) /
+            (2. * peak_e))
 
 
 def gaussian_tail(x, area, center, sigma, gamma):
     """
     Use a gaussian tail function to simulate compton peak
-    
+
     Parameters
     ----------
     x : array
@@ -222,7 +212,7 @@ def gaussian_tail(x, area, center, sigma, gamma):
         control peak width
     gamma : float
         normalization factor
-    
+
     Returns
     -------
     counts : array
@@ -230,32 +220,27 @@ def gaussian_tail(x, area, center, sigma, gamma):
 
     References
     ----------
-    .. [1] Rene Van Grieken, "Handbook of X-Ray Spectrometry, Second Edition,
-           (Practical Spectroscopy)", CRC Press, 2 edition, pp. 182, 2007.
+    .. [1]
+        Rene Van Grieken, "Handbook of X-Ray Spectrometry, Second Edition,
+        (Practical Spectroscopy)", CRC Press, 2 edition, pp. 182, 2007.
     """
 
     dx_neg = np.array(x) - center
     dx_neg[dx_neg > 0] = 0
-    
+
     temp_a = np.exp(dx_neg / (gamma * sigma))
-    counts = (area
-              / (2 * gamma * sigma * np.exp(-0.5 / (gamma**2)))
-              * temp_a
-              * scipy.special.erfc((x - center)
-                                   / (np.sqrt(2) * sigma)
-                                   + (1 / (gamma * np.sqrt(2)))))
+    counts = (area /
+              (2 * gamma * sigma * np.exp(-0.5 / (gamma**2))) * temp_a *
+              scipy.special.erfc((x - center) / (np.sqrt(2) * sigma) +
+                                 (1 / (gamma * np.sqrt(2)))))
 
     return counts
 
 
-def elastic(x, coherent_sct_amplitude,
-            coherent_sct_energy,
-            fwhm_offset, fwhm_fanoprime,
-            e_offset, e_linear, e_quadratic,
-            epsilon=2.96):
-    """
-    Use gaussian function to model elastic peak
-    
+def elastic(x, coherent_sct_amplitude, coherent_sct_energy, fwhm_offset,
+            fwhm_fanoprime, e_offset, e_linear, e_quadratic, epsilon=2.96):
+    """Model of elastic peak in X-Ray fluorescence
+
     Parameters
     ----------
     x : array
@@ -278,7 +263,7 @@ def elastic(x, coherent_sct_amplitude,
         energy to create a hole-electron pair
         for Ge 2.96, for Si 3.61 at 300K
         needs to double check this value
-    
+
     Returns
     -------
     value : array
@@ -292,7 +277,7 @@ def elastic(x, coherent_sct_amplitude,
                     coherent_sct_energy * epsilon * fwhm_fanoprime)
 
     return gaussian(x, coherent_sct_amplitude, coherent_sct_energy, sigma)
-    
+
 
 def compton(x, compton_amplitude, coherent_sct_energy,
             fwhm_offset, fwhm_fanoprime,
@@ -304,7 +289,7 @@ def compton(x, compton_amplitude, coherent_sct_energy,
     """
     Model compton peak, which is generated as an inelastic peak and always
     stays to the left of elastic peak on the spectrum.
-    
+
     Parameters
     ----------
     x : array
@@ -312,7 +297,7 @@ def compton(x, compton_amplitude, coherent_sct_energy,
     compton_amplitude : float
         area for gaussian peak, gaussian step and gaussian tail functions
     coherent_sct_energy : float
-        incident energy                         
+        incident energy
     fwhm_offset : float
         global fitting parameter for peak width
     fwhm_fanoprime : float
@@ -325,7 +310,7 @@ def compton(x, compton_amplitude, coherent_sct_energy,
         quadratic coefficient in energy calibration
     compton_angle : float
         compton angle in degree
-    compton_fwhm_corr : float 
+    compton_fwhm_corr : float
         correction factor on peak width
     compton_f_step : float
         weight factor of the gaussian step function
@@ -341,24 +326,26 @@ def compton(x, compton_amplitude, coherent_sct_energy,
         energy to create a hole-electron pair
         for Ge 2.96, for Si 3.61 at 300K
         needs to double check this value
-    
+
     Returns
     -------
     counts : array
         compton peak
 
-     References
-    -----------
-    .. [1] M. Van Gysel etc, "Description of Compton peaks in
-           energy-dispersive x-ray fluorescence spectra",
-           X-Ray Spectrometry, vol. 32, pp. 139-147, 2003.
+    References
+    ----------
+    .. [1]
+        M. Van Gysel etc, "Description of Compton peaks in energy-dispersive
+        x-ray fluorescence spectra", X-Ray Spectrometry, vol. 32, pp. 139-147,
+        2003.
     """
 
     x = e_offset + x * e_linear + x**2 * e_quadratic
 
     # the rest-mass energy of an electron (511 keV)
     mc2 = 511
-    comp_denom = 1 + coherent_sct_energy / mc2 * (1 - np.cos(np.deg2rad(compton_angle)))
+    comp_denom = (1 + coherent_sct_energy / mc2 *
+                  (1 - np.cos(np.deg2rad(compton_angle))))
     compton_e = coherent_sct_energy / comp_denom
 
     temp_val = 2 * np.sqrt(2 * np.log(2))
@@ -376,12 +363,14 @@ def compton(x, compton_amplitude, coherent_sct_energy,
     # compton peak, step
     if compton_f_step > 0.:
         value = factor * compton_f_step
-        value *= gausssian_step(x, compton_amplitude, compton_e, sigma, compton_e)
+        value *= gausssian_step(x, compton_amplitude, compton_e, sigma,
+                                compton_e)
         counts += value
-    
+
     # compton peak, tail on the low side
     value = factor * compton_f_tail
-    value *= gaussian_tail(x, compton_amplitude, compton_e, sigma, compton_gamma)
+    value *= gaussian_tail(x, compton_amplitude, compton_e, sigma,
+                           compton_gamma)
     counts += value
 
     # compton peak, tail on the high side
@@ -394,8 +383,8 @@ def compton(x, compton_amplitude, coherent_sct_energy,
 
 
 def gamma_dist(bin_values, K, M):
-    """
-    Gamma distribution function
+    """Gamma distribution function
+
     Parameters
     ----------
     bin_values : array
@@ -406,17 +395,20 @@ def gamma_dist(bin_values, K, M):
         mean count of photons
     M : int
         number of coherent modes
+
     Returns
     -------
     gamma_dist : array
         Gamma distribution
+
     Notes
     -----
-    These implementations are based on the references under
-    nbinom_distribution() function Notes
+    These implementations are based on the references under the ``Notes``
+    section of the ``nbinom_dist()`` docstring
 
-    : math ::
-        P(K) = \frac{\Gamma(K + M)} {\Gamma(K + 1)\Gamma(M)}(\frac {M} {M + <K>})^M (\frac {<K>}{M + <K>})^K
+    .. math::
+        P(K) = \\frac{\Gamma(K + M)} {\Gamma(K + 1)\Gamma(M)}
+        (\\frac {M} {M + <K>})^M (\\frac {<K>}{M + <K>})^K
     """
 
     gamma_dist = (stats.gamma(M, 0., K/M)).pdf(bin_values)
@@ -426,6 +418,7 @@ def gamma_dist(bin_values, K, M):
 def nbinom_dist(bin_values, K, M):
     """
     Negative Binomial (Poisson-Gamma) distribution function
+
     Parameters
     ----------
     bin_values : array
@@ -436,23 +429,29 @@ def nbinom_dist(bin_values, K, M):
         mean count of photons
     M : int
         number of coherent modes
+
     Returns
     -------
     nbinom : array
         Negative Binomial (Poisson-Gamma) distribution function
+
     Notes
     -----
     The negative-binomial distribution function
-    :math ::
-       P(K) =(\frac{M}{<K>})^M \frac{K^(M-1)}{\Gamma(M)}\exp(-M\frac{K}{<K>})
 
-    These implementation is based on following references
+    .. math::
+       P(K) =(\\frac{M}{<K>})^M \\frac{K^{M-1}}
+       {\Gamma(M)}\exp(-M\\frac{K}{<K>})
 
-    References: text [1]_
-    .. [1] L. Li, P. Kwasniewski, D. Oris, L Wiegart, L. Cristofolini,
-       C. Carona and A. Fluerasu , "Photon statistics and speckle visibility
-       spectroscopy with partially coherent x-rays" J. Synchrotron Rad.,
-       vol 21, p 1288-1295, 2014.
+    Implementation reference [1]_
+
+    References
+    ----------
+    .. [1]
+        L. Li, P. Kwasniewski, D. Oris, L Wiegart, L. Cristofolini,
+        C. Carona and A. Fluerasu , "Photon statistics and speckle visibility
+        spectroscopy with partially coherent x-rays" J. Synchrotron Rad.,
+        vol 21, p 1288-1295, 2014.
 
     """
     co_eff = np.exp(gammaln(bin_values + M) -
@@ -466,24 +465,28 @@ def nbinom_dist(bin_values, K, M):
 def poisson_dist(bin_values, K):
     """
     Poisson Distribution
+
     Parameters
-    ---------
+    ----------
     K : int
         mean count of photons
     bin_values : array
         bin values for detecting photons
         eg : max photon counts is 8
         bin_values = np.arange(8+2)
+
     Returns
     -------
     poisson_dist : array
        Poisson Distribution
+
     Notes
     -----
     These implementations are based on the references under
-    nbinom_distribution() function Notes
-    :math ::
-        P(K) = \frac{<K>^K}{K!}\exp(-<K>)
+    the ``Notes`` section of the ``nbinom_dist()`` docstring
+
+    .. math::
+        P(K) = \\frac{<K>^K}{K!}\exp(-<K>)
     """
 
     poisson_dist = np.exp(-K) * np.power(K, bin_values)/gamma(bin_values + 1)

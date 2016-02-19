@@ -60,7 +60,6 @@ def test_rectangles():
 
     ty = np.zeros(shape).ravel()
     ty[pixel_list] = roi_inds
-    num_pixels_m = (np.bincount(ty.astype(int)))[1:]
 
     re_mesh = ty.reshape(*shape)
     for i, (col_coor, row_coor, col_val, row_val) in enumerate(roi_data, 0):
@@ -162,8 +161,6 @@ def _helper_check(pixel_list, inds, num_pix, edges, center,
     # recreate the indices using pixel_list and inds values
     ty = np.zeros(img_dim).ravel()
     ty[pixel_list] = inds
-    data = ty.reshape(img_dim[0], img_dim[1])
-
     # get the grid values from the center
     grid_values = utils.radial_grid(img_dim, center)
 

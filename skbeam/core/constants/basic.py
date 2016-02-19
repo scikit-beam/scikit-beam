@@ -53,8 +53,7 @@ element = namedtuple('element',
                       'covalent_radius', 'mass', 'bp', 'mp', 'density',
                       'atomic_volume', 'coherent_scattering_length',
                       'incoherent_crosssection', 'absorption', 'debye_temp',
-                      'thermal_conductivity']
-)
+                      'thermal_conductivity'])
 
 
 def read_atomic_constants():
@@ -70,7 +69,7 @@ def read_atomic_constants():
     """
     basic = {}
     field_desc = []
-    with open(os.path.join(data_dir, 'AtomicConstants.dat'),'r') as infile:
+    with open(os.path.join(data_dir, 'AtomicConstants.dat'), 'r') as infile:
         for line in infile:
             if line.split()[0] == '#S':
                 s = line.split()

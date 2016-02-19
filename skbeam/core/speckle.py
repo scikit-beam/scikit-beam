@@ -45,7 +45,6 @@ This module will provide XSVS analysis tools
 """
 
 from __future__ import (absolute_import, division, print_function)
-import six
 import numpy as np
 import time
 
@@ -129,9 +128,6 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
 
     # number of times in the time bin
     num_times = len(time_bin)
-
-    # number of pixels per ROI
-    num_pixels = np.bincount(labels, minlength=(num_roi+1))[1:]
 
     # probability density of detecting photons
     prob_k_all = np.zeros([num_times, num_roi], dtype=np.object)
@@ -265,12 +261,12 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels,
         spe_hist, bin_edges = np.histogram(roi_data, bins=bin_edges,
                                            density=True)
         spe_hist = np.nan_to_num(spe_hist)
-        prob_k[level, j] += (spe_hist -
-                             prob_k[level, j])/(img_per_level[level] -
-                                                track_bad[level])
-        prob_k_pow[level, j] += (np.power(spe_hist, 2) -
-                                 prob_k_pow[level, j])/(img_per_level[level]
-                                                        - track_bad[level])
+        prob_k[level, j] += ((spe_hist - prob_k[level, j]) /
+                             (img_per_level[level] - track_bad[level]))
+        prob_k_pow[level, j] += ((np.power(spe_hist, 2) -
+                                  prob_k_pow[level, j]) /
+                                 (img_per_level[level] -
+                                  track_bad[level]))
 
 
 def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts):

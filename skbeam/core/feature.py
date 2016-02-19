@@ -36,15 +36,12 @@
 This module contains code for extracting features from data
 """
 from __future__ import absolute_import, division, print_function
-import logging
-logger = logging.getLogger(__name__)
-
 from six.moves import zip
 import numpy as np
-
 from collections import deque
-
 from .fitting import fit_quad_to_peak
+import logging
+logger = logging.getLogger(__name__)
 
 
 class PeakRejection(Exception):

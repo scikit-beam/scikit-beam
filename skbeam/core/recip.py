@@ -40,14 +40,9 @@ calculations.
 
 """
 from __future__ import absolute_import, division, print_function
-import logging
-
 import numpy as np
-
 from .utils import verbosedict
 from collections import namedtuple
-
-logger = logging.getLogger(__name__)
 import time
 
 try:
@@ -56,6 +51,9 @@ except ImportError:
     geo = None
 
 from ..ext import ctrans
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 def process_to_q(setting_angles, detector_size, pixel_size,

@@ -42,7 +42,6 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-import six
 
 
 """
@@ -58,9 +57,9 @@ lo: with low boundary
 hi: with high boundary
 none: no fitting boundary
 
-Different fitting strategies are included to turn on or turn off some parameters.
-Those strategies are default, linear, free_energy, free_all and e_calibration.
-They are empirical experience from authors of the original code.
+Different fitting strategies are included to turn on or turn off some
+parameters. Those strategies are default, linear, free_energy, free_all and
+e_calibration. They are empirical experience from authors of the original code.
 """
 
 
@@ -123,15 +122,24 @@ para_dict = {
     'kb_f_tail_quadratic': {
         'bound_type': 'none', 'min': 0.0, 'max': 0.0, 'value': 0.0},
     'linear': {'bound_type': 'none', 'min': 0.0, 'max': 1.0, 'value': 0.0},
-    'pileup0': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-    'pileup1': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-    'pileup2': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-    'pileup3': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-    'pileup4': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-    'pileup5': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-    'pileup6': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-    'pileup7': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
-    'pileup8': {'bound_type': 'none', 'min': -10.0, 'max': 1.10, 'value': 1e-10},
+    'pileup0': {'bound_type': 'none', 'min': -10.0, 'max': 1.10,
+                'value': 1e-10},
+    'pileup1': {'bound_type': 'none', 'min': -10.0, 'max': 1.10,
+                'value': 1e-10},
+    'pileup2': {'bound_type': 'none', 'min': -10.0, 'max': 1.10,
+                'value': 1e-10},
+    'pileup3': {'bound_type': 'none', 'min': -10.0, 'max': 1.10,
+                'value': 1e-10},
+    'pileup4': {'bound_type': 'none', 'min': -10.0, 'max': 1.10,
+                'value': 1e-10},
+    'pileup5': {'bound_type': 'none', 'min': -10.0, 'max': 1.10,
+                'value': 1e-10},
+    'pileup6': {'bound_type': 'none', 'min': -10.0, 'max': 1.10,
+                'value': 1e-10},
+    'pileup7': {'bound_type': 'none', 'min': -10.0, 'max': 1.10,
+                'value': 1e-10},
+    'pileup8': {'bound_type': 'none', 'min': -10.0, 'max': 1.10,
+                'value': 1e-10},
     'si_escape': {'bound_type': 'none', 'min': 0.0, 'max': 0.5, 'value': 0.0},
     'snip_width': {
         'bound_type': 'none', 'min': 0.1, 'max': 2.82842712475, 'value': 0.15},

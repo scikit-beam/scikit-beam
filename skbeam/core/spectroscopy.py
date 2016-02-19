@@ -36,15 +36,12 @@
 This module is for spectroscopy specific tools (spectrum fitting etc).
 """
 from __future__ import absolute_import, division, print_function
-import logging
-
 import numpy as np
-
 from six.moves import zip
-
-logger = logging.getLogger(__name__)
 from scipy.integrate import simps
 from .fitting import fit_quad_to_peak
+import logging
+logger = logging.getLogger(__name__)
 
 
 def align_and_scale(energy_list, counts_list, pk_find_fun=None):
@@ -216,11 +213,10 @@ def _formatter_array_regions(x, centers, window=1, tab_count=0):
     x = np.asarray(x)
     header = ("\t"*tab_count + 'center\tarray values\n' +
               "\t"*tab_count + '------\t------------\n')
-    return header + '\n'.join(["\t"*tab_count +
-               "{c}: \t {vals}".format(c=c,
-                                    vals=x[np.max([0, c-window]):
-                                           np.min([xl, c + window + 1])])
-                for c in centers])
+    return header + '\n'.join(
+        ["\t"*tab_count + "{c}: \t {vals}".format(
+            c=c, vals=x[np.max([0, c-window]):np.min([xl, c + window + 1])])
+         for c in centers])
 
 
 def integrate_ROI(x, y, x_min, x_max):

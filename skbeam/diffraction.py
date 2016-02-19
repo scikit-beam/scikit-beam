@@ -36,10 +36,6 @@
 """
 This module creates a namespace for X-Ray Diffraction
 """
-
-import logging
-logger = logging.getLogger(__name__)
-
 from skbeam.core.constants import BasicElement
 from skbeam.core.constants import calibration_standards
 
@@ -73,6 +69,8 @@ from skbeam.core.utils import radial_grid
 from skbeam.core.calibration import refine_center
 from skbeam.core.calibration import estimate_d_blind
 
+import logging
+logger = logging.getLogger(__name__)
 
 __all__ = [
     # constants api

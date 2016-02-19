@@ -44,8 +44,7 @@ import numpy as np
 import six
 
 from ..utils import NotInstalledError
-from ..constants.basic import (BasicElement, doc_title, doc_params, doc_attrs,
-                               doc_ex)
+from ..constants.basic import (BasicElement, doc_params, doc_attrs, doc_ex)
 from ..utils import verbosedict
 
 logger = logging.getLogger(__name__)
@@ -68,7 +67,8 @@ class XraylibNotInstalledError(NotInstalledError):
     def __init__(self, caller, *args, **kwargs):
         message = ('The call to {} cannot be completed because {}'
                    ''.format(caller, self.message_post))
-        super(XraylibNotInstalledError, self).__init__(message, *args, **kwargs)
+        super(XraylibNotInstalledError, self).__init__(message, *args,
+                                                       **kwargs)
 
 
 try:
@@ -298,7 +298,7 @@ class XrayLibWrap_Energy(XrayLibWrap):
                           self._map[key.lower()],
                           self._incident_energy)
 
-
+# redefine the doc_title for xrf elements
 doc_title = """
     Object to return all the elemental information related to fluorescence
     """
