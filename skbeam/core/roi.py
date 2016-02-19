@@ -524,6 +524,7 @@ def extract_label_indices(labels):
 def bar_rois(edges, values):
     """
     Draw bar shaped roi's when the edges are provided
+
     Parameters
     ----------
     edges : list
@@ -547,44 +548,50 @@ def bar_rois(edges, values):
     return rings(edges, values, values.shape)
 
 
-def box_rois(h_values, v_values, v_edges, h_edges=None):
+def box_rois(v_values, v_edges, h_values=None, h_edges=None):
     """
+    Draw box shaped roi's when the horizontal and vertical edges are provided.
+
     Parameters
     ----------
-    h_values : array
-        image pixels co-ordinates to create vertical bar rois.
-        This bars can be horizontal or vertical depend on the edges
     v_values : array
-        image pixels co-ordinates to create horizontal bar rois.
+        image pixels co-ordinates to create vertical bar rois.
         This bars can be horizontal or vertical depend on the edges
     v_edges : list
         giving the inner and outer edges of each vertical bar
         e.g., [(1, 2), (11, 12), (21, 22)]
-    h_edges : list
+    h_values : array, optional
+        image pixels co-ordinates to create horizontal bar rois.
+        This bars can be horizontal or vertical depend on the edges
+    h_edges : list, optional
         giving the inner and outer edges of each horizontal bar
-        e.g., [(1, 2), (11, 12), (21, 22)], optional
+        e.g., [(1, 2), (11, 12), (21, 22)]
     Returns
     -------
     label_array : array
         Elements not inside any ROI are zero; elements inside each
         ROI are 1, 2, 3, corresponding to the order they are specified
         in edges.
-    """
 
+    """
     if h_edges is None:
         h_edges = v_edges
 
-    v_bars = bar_rois(v_edges, v_values)
-    h_bars = bar_rois(h_edges, h_values)
+    if h_values is None:
+        h_values = v_values
+    elif h_values.shape == v_edges.shape:
+        raise ValueError("Shape of the h_values array should be equal to"
+                         " shape of the v_values array")
 
-    num_vb = len(v_bars)
-    label_array = v_bars * (h_bars + num_vb)
+    for edges in (h_edges, v_edges):
+        edges = np.atleast_2d(np.asarray(edges)).ravel()
+        if not 0 == len(edges) % 2:
+            raise ValueError("edges should have an even number of elements, "
+                             "giving inner, outer edges for each roi")
 
-    # map the indices onto a sequential list of integers starting at 1
-    label_mapping = {label: n+1
-                     for n, label in enumerate(np.unique(label_array))}
-    # remap the label array to go from 1 -> max(labels)
-    for label, n in label_mapping.items():
-        label_array[label_array == label] = n
+    coords = []
+    for h in h_edges:
+        for v in v_edges:
+            coords.append((h[0], v[0], h[1]-h[0], v[1] - v[0]))
 
-    return label_array
+    return roi.rectangles(coords, v_values.shape)
