@@ -590,4 +590,4 @@ def box_rois(v_values, v_edges, h_values=None, h_edges=None):
         for v in v_edges:
             coords.append((h[0], v[0], h[1]-h[0], v[1] - v[0]))
 
-    return roi.rectangles(coords, v_values.shape)
+    return rectangles(coords, v_values.shape)
