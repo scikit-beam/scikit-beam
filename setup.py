@@ -18,11 +18,14 @@ def read(fname):
 
 
 def c_ext():
-    define_macros = []
-    if os.name == 'posix':
-        define_macros.append(('USE_THREADS', None))
+    if os.name == 'nt':
+        # we are on windows. Do not compile the extension. Tons of errors are
+        # spit out when we compile on AppVeyor.
+        # https://gist.github.com/ericdill/bdc86eb81e338ca4624b
+        return []
+    # compile the extension on OSX and Linux.
     return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'],
-                      define_macros=define_macros)]
+                      define_macros=[('USE_THREADS', None)])]
 
 
 def cython_ext():
