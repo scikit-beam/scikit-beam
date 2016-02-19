@@ -41,7 +41,7 @@ calculations.
 """
 from __future__ import absolute_import, division, print_function
 import numpy as np
-from .utils import verbosedict
+from .utils import verbosedict, ctrans_not_available
 from collections import namedtuple
 import time
 
