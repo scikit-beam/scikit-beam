@@ -7,6 +7,7 @@ addons:
 env:
   global:
     - RUN_TESTS: true
+    - BUILD_DOCS: false
     - GH_REF: github.com/scikit-beam/scikit-beam.git
     - secure: "KzntGlmLDUZlAB8ZiSRBtONJypv4atrnFxl+THCW8kg6YbiODcCxG9cez7mfmh63wpJ54+zeGvgGljeVvjb7bjB2p+4hZy+mLoP9xoE1w5qF4XaQ5YTOYaSQqCeWa5cEIi+854gFX7gOfW5qL+EJf7h3HtmndI15zaU5gOPjSDU="
 matrix:
