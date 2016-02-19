@@ -12,7 +12,6 @@ v0.0.9 (Future)
 In Progress
 ===========
 - `PR #403 <https://github.com/scikit-beam/scikit-beam/pull/401>`_: Adding four time correlation
-- `PR #373 <https://github.com/scikit-beam/scikit-beam/pull/373>`_: Major overhaul of the docs
 
 v0.0.8
 ------
@@ -22,9 +21,10 @@ v0.0.8
 - `PR #405 <https://github.com/scikit-beam/scikit-beam/pull/405>`_: Implement user peak, so users have more flexible control of escape peak or pileup peaks.
 - `PR #407 <https://github.com/scikit-beam/scikit-beam/pull/407>`_: Clarify docstrings for correlation functions in skbeam.core.correlation
 - `PR #408 <https://github.com/scikit-beam/scikit-beam/pull/408>`_: Rework the example notebook conversion in the scikit-beam docs.  The example notebooks are now grouped according to their folder in `scikit-beam-examples <http://github.com/scikit-beam/scikit-beam-examples>`_
-- `PR #414 <https://github.com/scikit-beam/scikit-beam/pull/414>`_: Test for PEP8 compatibility on travis-ci.
+- `PR #414 <https://github.com/scikit-beam/scikit-beam/pull/414>`_: Test for PEP8 compatibility on travis-ci. Enable flake8 coverage on scikit-beam. This will save code review time by allowing us to simply point at the failing flake8 test on travis-ci and say "Fix your code according to those things" instead of manually pointing out all the pep8 violations, like we do now.
 - `PR #415 <https://github.com/scikit-beam/scikit-beam/pull/415>`_: Run the test suite through the `coverage run run_tests.py` command. This does a better job of capturing coverage stats
 - `PR #416 <https://github.com/scikit-beam/scikit-beam/pull/416>`_: Build the docs as an extra matrix element on travis. This helps by reducing the sphinx output on travis-ci which makes it easier to find error messages in the test suite.
+- `PR #417 <https://github.com/scikit-beam/scikit-beam/pull/417>`_: Don't compile the reciprocal space c extensions on windows. There are a multitude of errors in that code on the windows platform.
 - `PR #419 <https://github.com/scikit-beam/scikit-beam/pull/419>`_: Add functions to create box and horizontal/vertical bar regions of interest.
 
 v0.0.7
