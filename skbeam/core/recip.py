@@ -50,7 +50,6 @@ try:
 except ImportError:
     geo = None
 
-from ..ext import ctrans
 
 import logging
 logger = logging.getLogger(__name__)
@@ -130,6 +129,11 @@ def process_to_q(setting_angles, detector_size, pixel_size,
        1998.
 
     """
+    try:
+        from ..ext import ctrans
+    except ImportError:
+        # switch to a not implemented error and raise
+        raise ctrans_not_available()
 
     # Set default threads
     if n_threads is None:
