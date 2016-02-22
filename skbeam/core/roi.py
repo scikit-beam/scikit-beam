@@ -106,9 +106,9 @@ def rings(edges, center, shape):
     edges: list
         giving the inner and outer radius of each ring
         e.g., [(1, 2), (11, 12), (21, 22)]
-    center : tuple
-           point in image where r=0; may be a float giving subpixel precision.
-           Order is (rr, cc).
+    center: tuple
+        point in image where r=0; may be a float giving subpixel precision.
+        Order is (rr, cc).
     shape: tuple
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. Order is (rr, cc).
