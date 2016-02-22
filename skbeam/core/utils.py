@@ -49,8 +49,6 @@ from collections import namedtuple, MutableMapping, defaultdict, deque
 import numpy as np
 from itertools import tee
 
-from ..ext import ctrans
-
 import logging
 logger = logging.getLogger(__name__)
 
@@ -895,6 +893,13 @@ def grid3d(q, img_stack,
     greater than one. The n_threads can be used to set the number of cores used
     to correct this if the standard error is needed to be accurate.
     """
+    try:
+        from ..ext import ctrans
+    except ImportError:
+        raise NotImplementedError(
+            "ctrans is not available on your platform. See"
+            "https://github.com/scikit-beam/scikit-beam/issues/418"
+            "to follow updates to this problem.")
 
     if n_threads is None:
         n_threads = 0

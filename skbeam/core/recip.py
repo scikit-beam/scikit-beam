@@ -50,7 +50,6 @@ try:
 except ImportError:
     geo = None
 
-from ..ext import ctrans
 
 import logging
 logger = logging.getLogger(__name__)
@@ -130,6 +129,13 @@ def process_to_q(setting_angles, detector_size, pixel_size,
        1998.
 
     """
+    try:
+        from ..ext import ctrans
+    except ImportError:
+        raise NotImplementedError(
+            "ctrans is not available on your platform. See"
+            "https://github.com/scikit-beam/scikit-beam/issues/418"
+            "to follow updates to this problem.")
 
     # Set default threads
     if n_threads is None:
