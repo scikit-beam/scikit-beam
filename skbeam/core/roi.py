@@ -96,23 +96,19 @@ def rectangles(coords, shape):
 
 def rings(edges, center, shape):
     """
-    Draw annual (ring-shaped) or bar shaped regions of interest.
+    Draw annual (ring-shaped) shaped regions of interest.
 
-    Each roi will be labeled with an integer. Regions outside any roi will
+    Each ring will be labeled with an integer. Regions outside any ring will
     be filled with zeros.
 
     Parameters
     ----------
     edges: list
-        giving the inner and outer radius of each roi (ring or bar)
+        giving the inner and outer radius of each ring
         e.g., [(1, 2), (11, 12), (21, 22)]
-    center : tuple or array
-        1. tuple
+    center : tuple
            point in image where r=0; may be a float giving subpixel precision.
            Order is (rr, cc).
-        2. array
-           image pixels co-ordinates
-           shape image shape
     shape: tuple
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. Order is (rr, cc).
@@ -512,7 +508,7 @@ def extract_label_indices(labels):
 
 
 def _make_roi(coords, edges, shape):
-    """ Helper function to create ring roi's and bar rois
+    """ Helper function to create ring roi's and bar roi's
 
     Parameter
     ---------
@@ -549,7 +545,8 @@ def bar(edges, shape, horizontal=True, values=None):
         True: Make horizontal bars
         False: Make vertical bars
         Defaults to True
-
+    values : array, optional
+        image pixels co-ordinates
     Returns
     -------
     label_array : array
