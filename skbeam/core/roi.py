@@ -588,10 +588,10 @@ def box(shape, v_edges, h_edges=None, h_values=None, v_values=None):
         giving the inner and outer edges of each horizontal bar
         e.g., [(1, 2), (11, 12), (21, 22)]
     h_values : array, optional
-        image pixels co-ordinates in horizontal
+        image pixels co-ordinates in horizontal direction
         shape has to be image shape
     v_values : array, optional
-        image pixels co-ordinates in vertical
+        image pixels co-ordinates in vertic
         shape has to be image shape
     Returns
     -------
