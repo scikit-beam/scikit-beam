@@ -7,6 +7,13 @@ A catalog of new features, improvements, and bug-fixes in each release.
 Follow links to the relevant GitHub issue or pull request for specific
 code changes and any related discussion.
 
+v0.0.9
+------
+In-progress
+===========
+- `PR #403 <https://github.com/scikit-beam/scikit-beam/pull/401>`_: Adding four time correlation
+- `PR #373 <https://github.com/scikit-beam/scikit-beam/pull/373>`_: Major overhaul of the docs
+
 v0.0.8
 ------
 - Added removing bad images from X-ray speckle visibility  spectroscopy
@@ -16,11 +23,10 @@ v0.0.8
 - Implemented user peak, so users have more flexible control of escape peak or pileup peaks
   `PR #405 <https://github.com/scikit-beam/scikit-beam/pull/405>`_
 -  Added new function to provide scattering wave vector for GISAXS (grazing-incidence small angle X-ray scattering) `PR #404 <https://github.com/scikit-beam/scikit-beam/pull/404>`_
+-  Added new functions to create bar and box rois in roi.py
+   `PR #419 <https://github.com/scikit-beam/scikit-beam/pull/419>`_
 
-In-progress
-===========
-- `PR #403 <https://github.com/scikit-beam/scikit-beam/pull/401>`_: Adding four time correlation
-- `PR #373 <https://github.com/scikit-beam/scikit-beam/pull/373>`_: Major overhaul of the docs
+
 
 v0.0.7
 ------
