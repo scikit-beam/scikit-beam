@@ -344,24 +344,26 @@ def test_kymograph():
 
 
 def test_bars_boxes():
-    h_values, v_values = np.mgrid[0:10, 0:10]
     edges = [[3, 4], [5, 7]]
-
-    h_label_array = roi.bar_rois(edges, h_values)
-    v_label_array = roi.bar_rois(edges, v_values)
+    shape = (10, 10)
+    h_label_array = roi.bar(edges, shape)
+    v_label_array = roi.bar(edges, shape, horizontal=False)
 
     assert_array_equal(h_label_array[3, :], np.ones((10,), dtype=np.int))
     assert_array_equal(v_label_array[:, 3], np.ones((10,), dtype=np.int))
     assert_array_equal(np.unique(h_label_array)[1:], np.array([1, 2]))
     assert_array_equal(np.unique(v_label_array)[1:], np.array([1, 2]))
 
-    box_array = roi.box_rois(v_values, edges, h_values)
+    box_array = roi.box(shape, edges)
 
     assert_array_equal(box_array[3, 3], 1)
     assert_array_equal(box_array[5, 5], 4)
     assert_array_equal(np.unique(box_array)[1:], np.array([1, 2, 3, 4]))
 
     n_edges = edges = [[3, 4], [5, 7], [8]]
+    h_values, v_values = np.mgrid[0:10, 0:10]
     h_val, v_val = np.mgrid[0:20, 0:20]
-    assert_raises(ValueError, lambda: roi.box_rois(v_values, n_edges))
-    assert_raises(ValueError, lambda: roi.box_rois(v_values, edges, h_val))
+
+    assert_raises(ValueError, roi.box, shape, n_edges)
+    assert_raises(ValueError, roi.box, shape, edges, h_values=h_val,
+                  v_values=v_values)

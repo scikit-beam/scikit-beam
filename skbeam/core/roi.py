@@ -127,22 +127,13 @@ def rings(edges, center, shape):
     edges = np.atleast_2d(np.asarray(edges)).ravel()
     if not 0 == len(edges) % 2:
         raise ValueError("edges should have an even number of elements, "
-                         "giving inner, outer radii for each roi")
-
-    if isinstance(center, tuple):
-        if not np.all(np.diff(edges) >= 0):
-            raise ValueError("edges are expected to be monotonically"
-                             " increasing, "
-                             "giving inner and outer radii of each ring from "
-                             "r=0 outward")
-        r_coord = utils.radial_grid(center, shape).ravel()  # for ring roi's
-    else:
-        r_coord = center.ravel()   # for bar roi's
-
-    label_array = np.digitize(r_coord, edges, right=False)
-    # Even elements of label_array are in the space between rings.
-    label_array = (np.where(label_array % 2 != 0, label_array, 0) + 1) // 2
-    return label_array.reshape(shape)
+                         "giving inner, outer radii for each ring")
+    if not np.all(np.diff(edges) >= 0):
+        raise ValueError("edges are expected to be monotonically increasing, "
+                         "giving inner and outer radii of each ring from "
+                         "r=0 outward")
+    r_coord = utils.radial_grid(center, shape).ravel()
+    return _make_roi(r_coord, edges, shape)
 
 
 def ring_edges(inner_radius, width, spacing=0, num_rings=None):
@@ -520,50 +511,91 @@ def extract_label_indices(labels):
     return label_mask, pixel_list
 
 
-def bar_rois(edges, values):
-    """Draw bar shaped roi's when the edges are provided
+def _make_roi(coords, edges, shape):
+    """ Helper function to create ring roi's and bar rois
 
+    Parameter
+    ---------
+    coords : array
+        shape is image shape
+    edges : list
+        List of tuples of inner (left or top) and outer (right or bottom)
+        edges of each roi.
+        e.g., edges=[(1, 2), (11, 12), (21, 22)]
+    shape : tuple
+        Shape of the image in which to create the ROIs
+        e.g., shape=(512, 512)
+    """
+    label_array = np.digitize(coords, edges, right=False)
+    # Even elements of label_array are in the space between rings.
+    label_array = (np.where(label_array % 2 != 0, label_array, 0) + 1) // 2
+    return label_array.reshape(shape)
+
+
+def bar(edges, shape, horizontal=True, values=None):
+    """Draw bars defined by `edges` from one edge to the other of `image_shape`
+
+    Bars will be horizontal or vertical depending on the value of `horizontal`
     Parameters
     ----------
     edges : list
-        giving the inner and outer edges of each bar
-        e.g., [(1, 2), (11, 12), (21, 22)]
-    values : array
-        image pixels co-ordinates to create bar rois.
-        This bars can be horizontal or vertical depend on the edges
+        List of tuples of inner (left or top) and outer (right or bottom)
+        edges of each bar.
+        e.g., edges=[(1, 2), (11, 12), (21, 22)]
+    shape : tuple
+        Shape of the image in which to create the ROIs
+        e.g., shape=(512, 512)
+    horizontal : bool, optional
+        True: Make horizontal bars
+        False: Make vertical bars
+        Defaults to True
 
     Returns
     -------
     label_array : array
         Elements not inside any ROI are zero; elements inside each
         ROI are 1, 2, 3, corresponding to the order they are
-        specified in edges.
+        specified in `edges`.
+        Has shape=`image shape`
 
-    Note
-    ----
-    These roi's can be created using the rings function
     """
-    return rings(edges, values, values.shape)
+    edges = np.atleast_2d(np.asarray(edges)).ravel()
+    if not 0 == len(edges) % 2:
+        raise ValueError("edges should have an even number of elements, "
+                         "giving inner, outer edge value for each bar")
+    if not np.all(np.diff(edges) >= 0):
+        raise ValueError("edges are expected to be monotonically increasing, "
+                         "giving inner and outer radii of each bar from "
+                         "r=0 outward")
+    if values is None:
+        values = np.repeat(range(shape[0]), shape[1])
+    if not horizontal:
+        values = values.reshape(shape).T.ravel()
+
+    return _make_roi(values, edges, shape)
 
 
-def box_rois(v_values, v_edges, h_values=None, h_edges=None):
+def box(shape, v_edges, h_edges=None, h_values=None, v_values=None):
     """Draw box shaped roi's when the horizontal and vertical edges
      are provided.
 
     Parameters
     ----------
-    v_values : array
-        image pixels co-ordinates to create vertical bar rois.
-        This bars can be horizontal or vertical depend on the edges
+    shape : tuple
+        Shape of the image in which to create the ROIs
+        e.g., shape=(512, 512)
     v_edges : list
         giving the inner and outer edges of each vertical bar
         e.g., [(1, 2), (11, 12), (21, 22)]
-    h_values : array, optional
-        image pixels co-ordinates to create horizontal bar rois.
-        This bars can be horizontal or vertical depend on the edges
     h_edges : list, optional
         giving the inner and outer edges of each horizontal bar
         e.g., [(1, 2), (11, 12), (21, 22)]
+    h_values : array, optional
+        image pixels co-ordinates in horizontal
+        shape has to be image shape
+    v_values : array, optional
+        image pixels co-ordinates in vertical
+        shape has to be image shape
     Returns
     -------
     label_array : array
@@ -571,12 +603,17 @@ def box_rois(v_values, v_edges, h_values=None, h_edges=None):
         ROI are 1, 2, 3, corresponding to the order they are specified
         in edges.
 
+    Note
+    ----
+    To draw boxes according to the image pixels co-ordinates has to provide
+    both h_values and v_values
+
     """
     if h_edges is None:
         h_edges = v_edges
 
-    if h_values is None:
-        h_values = v_values
+    if h_values is None and v_values is None :
+        v_values, h_values = np.mgrid[:shape[0], :shape[1]]
     elif h_values.shape != v_values.shape:
         raise ValueError("Shape of the h_values array should be equal to"
                          " shape of the v_values array")
