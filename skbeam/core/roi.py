@@ -508,10 +508,10 @@ def extract_label_indices(labels):
 
 
 def _make_roi(coords, edges, shape):
-    """ Helper function to create ring roi's and bar roi's
+    """ Helper function to create ring rois and bar rois
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     coords : array
         shape is image shape
     edges : list
@@ -521,6 +521,14 @@ def _make_roi(coords, edges, shape):
     shape : tuple
         Shape of the image in which to create the ROIs
         e.g., shape=(512, 512)
+
+    Returns
+    -------
+    label_array : array
+        Elements not inside any ROI are zero; elements inside each
+        ROI are 1, 2, 3, corresponding to the order they are
+        specified in `edges`.
+        Has shape=`image shape`
     """
     label_array = np.digitize(coords, edges, right=False)
     # Even elements of label_array are in the space between rings.
@@ -532,6 +540,7 @@ def bar(edges, shape, horizontal=True, values=None):
     """Draw bars defined by `edges` from one edge to the other of `image_shape`
 
     Bars will be horizontal or vertical depending on the value of `horizontal`
+
     Parameters
     ----------
     edges : list
@@ -547,6 +556,7 @@ def bar(edges, shape, horizontal=True, values=None):
         Defaults to True
     values : array, optional
         image pixels co-ordinates
+
     Returns
     -------
     label_array : array
@@ -554,7 +564,6 @@ def bar(edges, shape, horizontal=True, values=None):
         ROI are 1, 2, 3, corresponding to the order they are
         specified in `edges`.
         Has shape=`image shape`
-
     """
     edges = np.atleast_2d(np.asarray(edges)).ravel()
     if not 0 == len(edges) % 2:
@@ -573,7 +582,7 @@ def bar(edges, shape, horizontal=True, values=None):
 
 
 def box(shape, v_edges, h_edges=None, h_values=None, v_values=None):
-    """Draw box shaped roi's when the horizontal and vertical edges
+    """Draw box shaped rois when the horizontal and vertical edges
      are provided.
 
     Parameters
@@ -593,6 +602,7 @@ def box(shape, v_edges, h_edges=None, h_values=None, v_values=None):
     v_values : array, optional
         image pixels co-ordinates in vertical direction
         shape has to be image shape
+
     Returns
     -------
     label_array : array
