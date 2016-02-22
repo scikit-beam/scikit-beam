@@ -564,6 +564,10 @@ def bar(edges, shape, horizontal=True, values=None):
         ROI are 1, 2, 3, corresponding to the order they are
         specified in `edges`.
         Has shape=`image shape`
+
+    Note
+    ----
+    The primary use case is in GISAXS.
     """
     edges = np.atleast_2d(np.asarray(edges)).ravel()
     if not 0 == len(edges) % 2:
@@ -613,7 +617,8 @@ def box(shape, v_edges, h_edges=None, h_values=None, v_values=None):
     Note
     ----
     To draw boxes according to the image pixels co-ordinates has to provide
-    both h_values and v_values
+    both h_values and v_values. The primary use case is in GISAXS.
+    e.g., v_values=gisaxs_qy, h_values=gisaxs_qx
 
     """
     if h_edges is None:
