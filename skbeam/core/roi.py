@@ -591,7 +591,7 @@ def box(shape, v_edges, h_edges=None, h_values=None, v_values=None):
         image pixels co-ordinates in horizontal direction
         shape has to be image shape
     v_values : array, optional
-        image pixels co-ordinates in vertic
+        image pixels co-ordinates in vertical direction
         shape has to be image shape
     Returns
     -------
@@ -609,7 +609,7 @@ def box(shape, v_edges, h_edges=None, h_values=None, v_values=None):
     if h_edges is None:
         h_edges = v_edges
 
-    if h_values is None and v_values is None :
+    if h_values is None and v_values is None:
         v_values, h_values = np.mgrid[:shape[0], :shape[1]]
     elif h_values.shape != v_values.shape:
         raise ValueError("Shape of the h_values array should be equal to"
