@@ -11,12 +11,14 @@ v0.0.9 (Future)
 ---------------
 In Progress
 ===========
+- `PR #373 <https://github.com/scikit-beam/scikit-beam/pull/373>`_: Major overhaul of the docs
 - `PR #403 <https://github.com/scikit-beam/scikit-beam/pull/401>`_: Adding four time correlation
+
 
 v0.0.8
 ------
-- `PR #395 <https://github.com/scikit-beam/scikit-beam/pull/395>`_: One-time from two-time
-- `PR #401 <https://github.com/scikit-beam/scikit-beam/pull/401>`_: Removing bad images from xsvs
+- `PR #395 <https://github.com/scikit-beam/scikit-beam/pull/395>`_: Compute one-time correlation from the results of two-time correlation
+- `PR #401 <https://github.com/scikit-beam/scikit-beam/pull/401>`_: Remove bad images from X-Ray Speckle Visibility Spectroscopy (XSVS)
 - `PR #404 <https://github.com/scikit-beam/scikit-beam/pull/404>`_: Implement gisaxs image conversion
 - `PR #405 <https://github.com/scikit-beam/scikit-beam/pull/405>`_: Implement user peak, so users have more flexible control of escape peak or pileup peaks.
 - `PR #407 <https://github.com/scikit-beam/scikit-beam/pull/407>`_: Clarify docstrings for correlation functions in skbeam.core.correlation
