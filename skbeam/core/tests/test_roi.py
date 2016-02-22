@@ -154,6 +154,9 @@ def test_rings():
     # num_rings conflicts with width, spacing
     assert_raises(ValueError,
                   lambda: roi.ring_edges(1, [1, 2, 3], [1, 2], 5))
+    w_edges = [[5, 7], [1, 2]]
+    assert_raises(ValueError, roi.rings, w_edges, center=(4, 4),
+                  shape=(20, 20))
 
 
 def _helper_check(pixel_list, inds, num_pix, edges, center,
@@ -348,11 +351,13 @@ def test_bars_boxes():
     shape = (10, 10)
     h_label_array = roi.bar(edges, shape)
     v_label_array = roi.bar(edges, shape, horizontal=False)
+    w_edges = [[5, 7], [1, 2]]
 
     assert_array_equal(h_label_array[3, :], np.ones((10,), dtype=np.int))
     assert_array_equal(v_label_array[:, 3], np.ones((10,), dtype=np.int))
     assert_array_equal(np.unique(h_label_array)[1:], np.array([1, 2]))
     assert_array_equal(np.unique(v_label_array)[1:], np.array([1, 2]))
+    assert_raises(ValueError, roi.bar, w_edges, shape)
 
     box_array = roi.box(shape, edges)
 
