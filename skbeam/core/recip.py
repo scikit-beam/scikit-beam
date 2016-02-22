@@ -41,7 +41,7 @@ calculations.
 """
 from __future__ import absolute_import, division, print_function
 import numpy as np
-from .utils import verbosedict, ctrans_not_available
+from .utils import verbosedict
 from collections import namedtuple
 import time
 
@@ -132,8 +132,10 @@ def process_to_q(setting_angles, detector_size, pixel_size,
     try:
         from ..ext import ctrans
     except ImportError:
-        # switch to a not implemented error and raise
-        raise ctrans_not_available()
+        raise NotImplementedError(
+            "ctrans is not available on your platform. See"
+            "https://github.com/scikit-beam/scikit-beam/issues/418"
+            "to follow updates to this problem.")
 
     # Set default threads
     if n_threads is None:

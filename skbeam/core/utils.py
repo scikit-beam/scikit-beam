@@ -53,13 +53,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def ctrans_not_available():
-    raise NotImplementedError(
-        "ctrans is not available on your platform. See"
-        "https://github.com/scikit-beam/scikit-beam/issues/418"
-        "to follow updates to this problem.")
-
-
 md_value = namedtuple("md_value", ['value', 'units'])
 
 
@@ -903,8 +896,10 @@ def grid3d(q, img_stack,
     try:
         from ..ext import ctrans
     except ImportError:
-        # switch to a not implemented error and raise
-        raise ctrans_not_available()
+        raise NotImplementedError(
+            "ctrans is not available on your platform. See"
+            "https://github.com/scikit-beam/scikit-beam/issues/418"
+            "to follow updates to this problem.")
 
     if n_threads is None:
         n_threads = 0
