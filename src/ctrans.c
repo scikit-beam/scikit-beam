@@ -530,6 +530,15 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
         threadData[0].Mk[j] = threadData[0].dout[j] / threadData[0].nout[j];
       }
     }
+
+  }
+
+  // Now copy the outputs to the arrays
+  //
+  for(j=0;j<grid_size;j++){
+    dout[j] = threadData[0].dout[j];
+    nout[j] = threadData[0].nout[j];
+    mout[j] = threadData[0].Mk[j];
   }
 
   // Store the number of elements outside the grid
