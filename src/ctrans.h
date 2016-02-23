@@ -56,38 +56,12 @@ typedef struct {
 } CCD;
 
 typedef struct {
-  CCD *ccd;
-  double *anglesp;
-  double *qOutp;
-  double *delgam;
-  double lambda;
-  int mode;
-  unsigned long imstart;
-  unsigned long imend;
-  double UBI[3][3];
-  int retval;
-} imageThreadData;
-
-typedef struct {
   double *Qk;
   double *Mk;
   double *dout;
   unsigned long *nout;
-  unsigned long n_outside;
-  double *grid_start;
-  double *grid_len;
-  unsigned long *n_grid;
-  //int data_len;
-  unsigned long end;
-  unsigned long start;
-  double *data;
-  int retval;
 } gridderThreadData;
 
-long nproc(void);
-
-void *processImageThread(void* ptr);
-void *grid3DThread(void *ptr);
 int calcQTheta(double* diffAngles, double theta, double mu, 
                double *qTheta, int n, double lambda);
 int calcQPhiFromQTheta(double *qTheta, int n, double chi, double phi);
@@ -96,18 +70,15 @@ int matmulti(double *val, int n, double mat[][3]);
 int calcHKLFromQPhi(double *qPhi, int n, double mat[][3]);
 
 int processImages(double *delgam, double *anglesp, double *qOutp, double lambda, 
-                  int mode, unsigned long nimages, unsigned int n_threads, double *ubinvp,
-                  CCD *ccd);
+                  int mode, unsigned long nimages, double *ubinvp, CCD *ccd);
 
 int c_grid3d(double *dout, unsigned long *nout, double *mout, 
              double *sterr, double *data, unsigned long *n_outside,
              double *grid_start, double *grid_stop, unsigned long max_data, 
-             unsigned long *n_grid, int norm, unsigned int n_threads);
+             unsigned long *n_grid, int norm);
 
 static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs);
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs);
-static PyObject* get_threads(PyObject *self, PyObject *args);
-static PyObject* set_threads(PyObject *self, PyObject *args);
 
 #if PY_MAJOR_VERSION < 3
 static char *_ctransDoc = \

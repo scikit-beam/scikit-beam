@@ -25,7 +25,8 @@ def c_ext():
         return []
     # compile the extension on OSX and Linux.
     return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'],
-                      define_macros=[('USE_THREADS', None)])]
+                      extra_compile_args=['-fopenmp'],
+                      extra_link_args=['-lgomp'])]
 
 
 def cython_ext():
