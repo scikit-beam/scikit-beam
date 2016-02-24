@@ -62,7 +62,7 @@
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   static char *kwlist[] = { "angles", "mode", "ccd_size", "ccd_pixsize",
 			                      "ccd_cen", "dist", "wavelength",
-			                      "UBinv", "n_threads", NULL };
+			                      "UBinv", NULL };
   PyArrayObject *angles = NULL;
   PyObject *_angles = NULL;
   PyArrayObject *ubinv = NULL;
