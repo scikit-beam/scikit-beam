@@ -50,19 +50,10 @@
 #define NPY_NO_DEPRECATED_API NPY_1_9_API_VERSION
 #include <numpy/arrayobject.h>
 
-/* If useing threading then import pthreads */
-#ifdef USE_THREADS
-#include <pthread.h>
-#include <unistd.h>
-#endif
-
 #include "ctrans.h"
 
 /* Computation functions */
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
-  static char *kwlist[] = { "angles", "mode", "ccd_size", "ccd_pixsize",
-			                      "ccd_cen", "dist", "wavelength",
-			                      "UBinv", NULL };
   PyArrayObject *angles = NULL;
   PyObject *_angles = NULL;
   PyArrayObject *ubinv = NULL;
@@ -81,15 +72,19 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   double *ubinvp = NULL;
   double *delgam = NULL;
 
+  static char *kwlist[] = { "angles", "mode", "ccd_size", "ccd_pixsize",
+			                      "ccd_cen", "dist", "wavelength",
+			                      "UBinv", NULL };
+
   if(!PyArg_ParseTupleAndKeywords(args, kwargs, "Oi(ii)(dd)(dd)ddO", kwlist,
-				  &_angles,
-				  &mode,
-				  &ccd.xSize, &ccd.ySize,
-				  &ccd.xPixSize, &ccd.yPixSize,
-				  &ccd.xCen, &ccd.yCen,
-				  &ccd.dist,
-				  &lambda,
-				  &_ubinv)){
+				                          &_angles,
+				                          &mode,
+				                          &ccd.xSize, &ccd.ySize,
+				                          &ccd.xPixSize, &ccd.yPixSize,
+				                          &ccd.xCen, &ccd.yCen,
+				                          &ccd.dist,
+				                          &lambda,
+				                          &_ubinv)){
 
     return NULL;
   }
@@ -98,13 +93,11 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 
   angles = (PyArrayObject*)PyArray_FROMANY(_angles, NPY_DOUBLE, 2, 2, NPY_ARRAY_IN_ARRAY);
   if(!angles){
-    PyErr_SetString(PyExc_ValueError, "angles must be a 2-D array of floats");
     goto cleanup;
   }
   
   ubinv = (PyArrayObject*)PyArray_FROMANY(_ubinv, NPY_DOUBLE, 2, 2, NPY_ARRAY_IN_ARRAY);
   if(!ubinv){
-    PyErr_SetString(PyExc_ValueError, "ubinv must be a 2-D array of floats");
     goto cleanup;
   }
 
@@ -117,10 +110,8 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 
   qOut = (PyArrayObject*)PyArray_SimpleNew(2, dims, NPY_DOUBLE);
   if(!qOut){
-    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (qOut)");
     goto cleanup;
   }
-
   
   anglesp = (double *)PyArray_DATA(angles);
   qOutp = (double *)PyArray_DATA(qOut);
@@ -128,10 +119,8 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   // Now create the arrays for delta-gamma pairs
   delgam = (double*)malloc(nimages * ccd.size * sizeof(double) * 2);
   if(!delgam){
-    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (delgam)");
     goto cleanup;
   }
-
 
   // Ok now we don't touch Python Object ... Release the GIL
   Py_BEGIN_ALLOW_THREADS
@@ -322,7 +311,6 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
 
   gridI = (PyArrayObject*)PyArray_FROMANY(_I, NPY_DOUBLE, 0, 0, NPY_ARRAY_IN_ARRAY);
   if(!gridI){
-    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (gridI)");
     goto error;
   }
   
@@ -338,19 +326,16 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
 
   gridout = (PyArrayObject*)PyArray_SimpleNew(3, dims, NPY_DOUBLE);
   if(!gridout){
-    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (gridout)");
     goto error;
   }
 
   Nout = (PyArrayObject*)PyArray_SimpleNew(3, dims, NPY_ULONG);
   if(!Nout){
-    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (Nout)");
     goto error;
   }
 
   stderror = (PyArrayObject*)PyArray_SimpleNew(3, dims, NPY_DOUBLE);
   if(!stderror){
-    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory (stderror)");
     goto error;
   }
 
