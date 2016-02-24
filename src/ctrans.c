@@ -485,6 +485,11 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
 
           _Qk[pos] = _Qk[pos] + ((_nout[pos] - 1) * pow(data_ptr[3] - _Mk[pos],2) / _nout[pos]);
           _Mk[pos] = _Mk[pos] + ((data_ptr[3] - _Mk[pos]) / _nout[pos]);
+          if((pos == 0)){
+            fprintf(stderr, "n = %d, data = %lf, nout = %ld, Mk = %lf, Qk = %lf\n", 
+                thread_num, data_ptr[3], _nout[pos], _Mk[pos], _Qk[pos]);
+          }
+
         } 
       }
 
@@ -507,8 +512,9 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
     for(j=0;j<grid_size;j++){
       threadData[0].Qk[j] = (threadData[0].Qk[j] * threadData[0].nout[j]);
       threadData[0].Mk[j] = (threadData[0].Mk[j] * threadData[0].nout[j]);
+      fprintf(stderr, "0 : Qk = %f, Mk = %f, N = %ld\n", 
+          threadData[0].Qk[j], threadData[0].Mk[j], threadData[0].nout[j]);
     }
-      //fprintf(stderr, "0 : Qk = %f, N = %ld\n", threadData[0].Qk[j], threadData[0].nout[j]);
   }
 
   for(n=1;n<num_threads;n++){
@@ -517,7 +523,8 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
       threadData[0].dout[j] += threadData[n].dout[j];
       threadData[0].Qk[j] += (threadData[n].Qk[j] * threadData[n].nout[j]);
       threadData[0].Mk[j] += (threadData[n].Mk[j] * threadData[n].nout[j]);
-      //fprintf(stderr, "%ld : Qk = %f, N = %ld\n", i,threadData[i].Qk[j], threadData[i].nout[j]);
+      fprintf(stderr, "%d : Qk = %f, Mk = %f, N = %ld\n", 
+          n, threadData[n].Qk[j], threadData[n].Mk[j], threadData[n].nout[j]);
     }
   }
 
@@ -531,6 +538,8 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
         threadData[0].Mk[j] = threadData[0].Mk[j] / threadData[0].nout[j];
         threadData[0].Qk[j] = threadData[0].Qk[j] / threadData[0].nout[j];
       }
+      fprintf(stderr, "F : Qk = %f, Mk = %f, N = %ld\n", 
+          threadData[0].Qk[j], threadData[0].Mk[j], threadData[0].nout[j]);
       if(threadData[0].nout[j] > 1){
         stderror[j] = pow(threadData[0].Qk[j] / 
             (threadData[0].nout[j] - 1), 0.5) / pow(threadData[0].nout[j], 0.5);

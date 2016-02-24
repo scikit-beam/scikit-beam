@@ -236,6 +236,7 @@ def test_process_grid_std_err():
                       for _ in (np.ravel(X), np.ravel(Y), np.ravel(Z))]).T
     (mean, occupancy,
      std_err, bounds) = core.grid3d(data, I, **param_dict)
+    print(occupancy)
 
     # check the values are as expected
     npt.assert_array_equal(mean,
