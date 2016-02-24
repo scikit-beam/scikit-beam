@@ -826,7 +826,7 @@ def grid3d(q, img_stack,
            nx=None, ny=None, nz=None,
            xmin=None, xmax=None, ymin=None,
            ymax=None, zmin=None, zmax=None,
-           binary_mask=None, n_threads=None):
+           binary_mask=None):
     """Grid irregularly spaced data points onto a regular grid via histogramming
 
     This function will process the set of reciprocal space values (q), the
@@ -864,10 +864,6 @@ def grid3d(q, img_stack,
         Binary mask can be two different shapes.
         - 1: 2-D with binary_mask.shape == np.asarray(img_stack[0]).shape
         - 2: 3-D with binary_mask.shape == np.asarray(img_stack).shape
-    n_threads : int, optional
-        Specify the number of threads for the c-module to use in its
-        calculations. A value of None indicates to use the number of
-        configured cores on the system.
 
     Returns
     -------
@@ -879,9 +875,6 @@ def grid3d(q, img_stack,
     std_err : ndarray
         This is the standard error of the value in the
         grid box.
-    oob : int
-        Out Of Bounds. Number of data points that are outside of
-        the gridded region.
     bounds : list
         tuple of (min, max, step) for x, y, z in order: [x_bounds,
         y_bounds, z_bounds]
@@ -892,12 +885,8 @@ def grid3d(q, img_stack,
     Therefore, the standard error is not correctly calculated if there is only
     one value per voxel per thread. The standard error calculation is
     therefore only valid when the number of values per voxel per thread is
-    greater than one. The n_threads can be used to set the number of cores used
-    to correct this if the standard error is needed to be accurate.
+    greater than one.
     """
-
-    if n_threads is None:
-        n_threads = 0
 
     # validate input
     img_stack = np.asarray(img_stack)
@@ -963,8 +952,8 @@ def grid3d(q, img_stack,
 
     # call the c library
 
-    total, mean, occupancy, std_err, oob = ctrans.grid3d(q, qmin, qmax, dqn,
-                                                         n_threads)
+    total, mean, occupancy, std_err = ctrans.grid3d(q, qmin, qmax, dqn)
+
     # ending time for the gridding
     t2 = time.time()
     logger.info("Done processed in {0} seconds".format(t2-t1))
@@ -973,13 +962,11 @@ def grid3d(q, img_stack,
     empt_nb = (occupancy == 0).sum()
 
     # log some information about the grid at the debug level
-    if oob:
-        logger.debug("There are %.2e points outside the grid", oob)
     logger.debug("There are %2e bins in the grid", mean.size)
     if empt_nb:
         logger.debug("There are %.2e values zero in the grid", empt_nb)
 
-    return mean, occupancy, std_err, oob, bounds
+    return mean, occupancy, std_err, bounds
 
 
 def bin_edges_to_centers(input_edges):

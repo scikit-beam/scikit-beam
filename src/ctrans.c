@@ -307,7 +307,6 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   double grid_start[3];
   double grid_stop[3];
   unsigned long grid_nsteps[3];
-  unsigned long n_outside;
 
   int retval;
 
@@ -366,7 +365,7 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
 
   retval = c_grid3d((double*)PyArray_DATA(gridout), (unsigned long*)PyArray_DATA(Nout),
                     (double*)PyArray_DATA(meanout), (double*)PyArray_DATA(stderror), 
-                    (double*)PyArray_DATA(gridI), &n_outside,
+                    (double*)PyArray_DATA(gridI),
 		                grid_start, grid_stop, (unsigned long)data_size, grid_nsteps, 1);
 
   // Ok now get the GIL back
@@ -379,7 +378,7 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   }
 
   Py_XDECREF(gridI);
-  return Py_BuildValue("NNNNl", gridout, meanout, Nout, stderror, n_outside);
+  return Py_BuildValue("NNNN", gridout, meanout, Nout, stderror);
 
 error:
   Py_XDECREF(gridI);
@@ -391,11 +390,12 @@ error:
 }
 
 int c_grid3d(double *dout, unsigned long *nout, double *mout,
-             double *stderror, double *data, unsigned long *n_outside,
+             double *stderror, double *data, 
              double *grid_start, double *grid_stop, unsigned long max_data,
              unsigned long *n_grid, int norm){
 
   unsigned long i, j;
+  int n;
   unsigned long grid_size = 0;
   double grid_len[3];
 	
@@ -410,24 +410,22 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
   int max_threads = omp_get_max_threads();
   int num_threads;
 
-  gridderThreadData *threadData = malloc(sizeof(pthread_t) * max_threads);
+  gridderThreadData *threadData = malloc(sizeof(gridderThreadData) * max_threads);
   if(!threadData){
     return 1;
   }
 
-  // Allocate arrays for standard error calculation
-  
-#pragma omp parallel shared(num_threads)
+#pragma omp parallel shared(data, num_threads, threadData, grid_start, grid_len)
   {
     int thread_num = omp_get_thread_num();
 
 #pragma omp single
     num_threads = omp_get_num_threads();
  
-    double *_Mk = NULL;
-    double *_Qk = NULL;
-    double *_dout = NULL;
-    unsigned long *_nout = NULL;
+    double *_Mk;
+    double *_Qk;
+    double *_dout;
+    unsigned long *_nout;
 
     _Qk = (double*)malloc(sizeof(double) * grid_size);
     _Mk = (double*)malloc(sizeof(double) * grid_size);
@@ -442,9 +440,7 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
       _nout[j] = 0;
     }
 
-    // Setup entry points for threads
-
-#pragma omp for
+#pragma omp for 
     for(i=0;i<max_data;i++){
       double pos_double[3];
       unsigned long grid_pos[3];
@@ -471,16 +467,13 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
 
         // Store the answer
         _dout[pos] = _dout[pos] + data_ptr[3];
-        _nout[pos] = _nout[pos] + 1;
+        _nout[pos]++;
 
         // Calculate the standard deviation quantities
 
         _Qk[pos] = _Qk[pos] + ((_nout[pos] - 1) * pow(data_ptr[3] - _Mk[pos],2) / _nout[pos]);
         _Mk[pos] = _Mk[pos] + ((data_ptr[3] - _Mk[pos]) / _nout[pos]);
-
-      } else {
-        n_outside++;
-      }
+      } 
     }
 
     threadData[thread_num].Mk = _Mk;
@@ -499,15 +492,14 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
       //fprintf(stderr, "0 : Qk = %f, N = %ld\n", threadData[0].Qk[j], threadData[0].nout[j]);
   }
 
-  for(i=1;i<num_threads;i++){
+  for(n=1;n<num_threads;n++){
     for(j=0;j<grid_size;j++){
-      threadData[0].nout[j] += threadData[i].nout[j];
-      threadData[0].dout[j] += threadData[i].dout[j];
-      threadData[0].Qk[j] += (threadData[i].Qk[j] * threadData[i].nout[j]);
-      threadData[0].Mk[j] += (threadData[i].Mk[j] * threadData[i].nout[j]);
+      threadData[0].nout[j] += threadData[n].nout[j];
+      threadData[0].dout[j] += threadData[n].dout[j];
+      threadData[0].Qk[j] += (threadData[n].Qk[j] * threadData[n].nout[j]);
+      threadData[0].Mk[j] += (threadData[n].Mk[j] * threadData[n].nout[j]);
       //fprintf(stderr, "%ld : Qk = %f, N = %ld\n", i,threadData[i].Qk[j], threadData[i].nout[j]);
     }
-    //threadData[0].n_outside += threadData[i].n_outside;
   }
 
   // Calculate the stderror
@@ -534,24 +526,20 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
   }
 
   // Now copy the outputs to the arrays
-  //
+  
   for(j=0;j<grid_size;j++){
     dout[j] = threadData[0].dout[j];
     nout[j] = threadData[0].nout[j];
     mout[j] = threadData[0].Mk[j];
   }
 
-  // Store the number of elements outside the grid
-  
-  //*n_outside = threadData[0].n_outside;
-
   // Now free the memory.
 
-  for(i=0;i<num_threads;i++){
-    free(threadData[i].Qk);
-    free(threadData[i].Mk);
-    free(threadData[i].dout);
-    free(threadData[i].nout);
+  for(n=0;n<num_threads;n++){
+    free(threadData[n].Qk);
+    free(threadData[n].Mk);
+    free(threadData[n].dout);
+    free(threadData[n].nout);
   }
   return 0;
 }
