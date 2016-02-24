@@ -229,24 +229,24 @@ def test_process_grid_std_err():
     X, Y, Z = np.mgrid[slc]
 
     # make and ravel the image data (which is all ones)
-    I = np.hstack([j * np.ones_like(X).ravel() for j in range(1, 6)])
+    I = np.hstack([j * np.ones_like(X).ravel() for j in range(1, 101)])
 
     # make input data (N*5x3)
-    data = np.vstack([np.tile(_, 5)
+    data = np.vstack([np.tile(_, 100)
                       for _ in (np.ravel(X), np.ravel(Y), np.ravel(Z))]).T
     (mean, occupancy,
      std_err, bounds) = core.grid3d(data, I, **param_dict)
 
     # check the values are as expected
     npt.assert_array_equal(mean,
-                           np.ones_like(X) * np.mean(np.arange(1, 6)))
-    npt.assert_array_equal(occupancy, np.ones_like(occupancy)*5)
+                           np.ones_like(X) * np.mean(np.arange(1, 101)))
+    npt.assert_array_equal(occupancy, np.ones_like(occupancy)*100)
     # need to convert std -> ste (standard error)
     # according to wikipedia ste = std/sqrt(n), but experimentally, this is
     # implemented as ste = std / srt(n - 1)
-    npt.assert_array_equal(std_err,
-                           (np.ones_like(occupancy) *
-                            np.std(np.arange(1, 6))/np.sqrt(5 - 1)))
+    npt.assert_array_almost_equal(std_err,
+                                  (np.ones_like(occupancy) *
+                                   np.std(np.arange(1, 101))/np.sqrt(100 - 1)))
 
 
 def test_bin_edge2center():
