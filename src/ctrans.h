@@ -56,9 +56,8 @@ typedef struct {
 } CCD;
 
 typedef struct {
-  double *Qk;
-  double *Mk;
   double *dout;
+  double *d2out;
   unsigned long *nout;
 } gridderThreadData;
 
@@ -72,10 +71,9 @@ int calcHKLFromQPhi(double *qPhi, int n, double mat[][3]);
 int processImages(double *delgam, double *anglesp, double *qOutp, double lambda, 
                   int mode, unsigned long nimages, double *ubinvp, CCD *ccd);
 
-int c_grid3d(double *dout, unsigned long *nout, double *mout, 
-             double *sterr, double *data,
+int c_grid3d(double *dout, unsigned long *nout, double *sterr, double *data,
              double *grid_start, double *grid_stop, unsigned long max_data, 
-             unsigned long *n_grid, int norm);
+             unsigned long *n_grid);
 
 static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs);
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs);

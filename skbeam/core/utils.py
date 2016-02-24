@@ -877,13 +877,6 @@ def grid3d(q, img_stack,
         tuple of (min, max, step) for x, y, z in order: [x_bounds,
         y_bounds, z_bounds]
 
-    Notes
-    -----
-    The standard error is calculated "on the fly" on a per thread basis.
-    Therefore, the standard error is not correctly calculated if there is only
-    one value per voxel per thread. The standard error calculation is
-    therefore only valid when the number of values per voxel per thread is
-    greater than one.
     """
     try:
         from ..ext import ctrans
@@ -957,7 +950,8 @@ def grid3d(q, img_stack,
 
     # call the c library
 
-    total, mean, occupancy, std_err = ctrans.grid3d(q, qmin, qmax, dqn)
+    total, occupancy, std_err = ctrans.grid3d(q, qmin, qmax, dqn)
+    mean = total / occupancy
 
     # ending time for the gridding
     t2 = time.time()

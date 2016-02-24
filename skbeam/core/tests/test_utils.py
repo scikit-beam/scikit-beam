@@ -236,18 +236,16 @@ def test_process_grid_std_err():
                       for _ in (np.ravel(X), np.ravel(Y), np.ravel(Z))]).T
     (mean, occupancy,
      std_err, bounds) = core.grid3d(data, I, **param_dict)
-    print(occupancy)
 
     # check the values are as expected
     npt.assert_array_equal(mean,
                            np.ones_like(X) * np.mean(np.arange(1, 101)))
     npt.assert_array_equal(occupancy, np.ones_like(occupancy)*100)
     # need to convert std -> ste (standard error)
-    # according to wikipedia ste = std/sqrt(n), but experimentally, this is
-    # implemented as ste = std / srt(n - 1)
+    # according to wikipedia ste = std/sqrt(n)
     npt.assert_array_almost_equal(std_err,
                                   (np.ones_like(occupancy) *
-                                   np.std(np.arange(1, 101))/np.sqrt(100 - 1)))
+                                   np.std(np.arange(1, 101))/np.sqrt(100)))
 
 
 def test_bin_edge2center():
