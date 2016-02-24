@@ -138,7 +138,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
 
   if(processImages(delgam, anglesp, qOutp, lambda, mode, (unsigned long)nimages, 
                    ubinvp, &ccd)){
-    PyErr_SetString(PyExc_RuntimeError, "Processing data failed");
+    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory for processImages");
     goto cleanup;
   }
 
@@ -373,7 +373,7 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
 
   if(retval){
     // We had a runtime error
-    PyErr_SetString(PyExc_RuntimeError, "Gridding process failed to run");
+    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory in c_grid3d");
     goto error;
   }
 
@@ -396,6 +396,7 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
 
   unsigned long i, j;
   int n;
+  int retval = 0;
   unsigned long grid_size = 0;
   double grid_len[3];
 	
@@ -415,12 +416,21 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
     return 1;
   }
 
+  for(n=0;n<max_threads;n++){
+    threadData[n].Qk = NULL;
+    threadData[n].Mk = NULL;
+    threadData[n].nout = NULL;
+    threadData[n].dout = NULL;
+  }
+
 #pragma omp parallel shared(data, num_threads, threadData, grid_start, grid_len)
   {
     int thread_num = omp_get_thread_num();
 
 #pragma omp single
-    num_threads = omp_get_num_threads();
+    {
+      num_threads = omp_get_num_threads();
+    }
  
     double *_Mk;
     double *_Qk;
@@ -432,56 +442,65 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
     _dout = (double *)malloc(sizeof(double) * grid_size);
     _nout = (unsigned long *)malloc(sizeof(unsigned long) * grid_size);
 
-    // Clear the arrays ....
-    for(j=0;j<grid_size;j++){
-      _Mk[j] = 0.0;
-      _Qk[j] = 0.0;
-      _dout[j] = 0.0;
-      _nout[j] = 0;
-    }
+    if((_Qk != NULL)&& (_Mk != NULL) && (_dout != NULL) && (_nout != NULL)){
+
+      // Clear the arrays ....
+      for(j=0;j<grid_size;j++){
+        _Mk[j] = 0.0;
+        _Qk[j] = 0.0;
+        _dout[j] = 0.0;
+        _nout[j] = 0;
+      }
 
 #pragma omp for 
-    for(i=0;i<max_data;i++){
-      double pos_double[3];
-      unsigned long grid_pos[3];
-      double *data_ptr = data + (i * 4);
+      for(i=0;i<max_data;i++){
+        double pos_double[3];
+        unsigned long grid_pos[3];
+        double *data_ptr = data + (i * 4);
 
-      // Calculate the relative position in the grid.
-      
-      pos_double[0] = (data_ptr[0] - grid_start[0]) / grid_len[0];
-      pos_double[1] = (data_ptr[1] - grid_start[1]) / grid_len[1];
-      pos_double[2] = (data_ptr[2] - grid_start[2]) / grid_len[2];
-
-      if((pos_double[0] >= 0) && (pos_double[0] < 1) &&
-         (pos_double[1] >= 0) && (pos_double[1] < 1) &&
-         (pos_double[2] >= 0) && (pos_double[2] < 1)){
+        // Calculate the relative position in the grid.
         
-        // Calculate the position in the grid
-        grid_pos[0] = (int)(pos_double[0] * n_grid[0]);
-        grid_pos[1] = (int)(pos_double[1] * n_grid[1]);
-        grid_pos[2] = (int)(pos_double[2] * n_grid[2]);
-        
-        unsigned long pos =  grid_pos[0] * (n_grid[1] * n_grid[2]);
-        pos += grid_pos[1] * n_grid[2];
-        pos += grid_pos[2];
+        pos_double[0] = (data_ptr[0] - grid_start[0]) / grid_len[0];
+        pos_double[1] = (data_ptr[1] - grid_start[1]) / grid_len[1];
+        pos_double[2] = (data_ptr[2] - grid_start[2]) / grid_len[2];
 
-        // Store the answer
-        _dout[pos] = _dout[pos] + data_ptr[3];
-        _nout[pos]++;
+        if((pos_double[0] >= 0) && (pos_double[0] < 1) &&
+          (pos_double[1] >= 0) && (pos_double[1] < 1) &&
+          (pos_double[2] >= 0) && (pos_double[2] < 1)){
+          
+          // Calculate the position in the grid
+          grid_pos[0] = (int)(pos_double[0] * n_grid[0]);
+          grid_pos[1] = (int)(pos_double[1] * n_grid[1]);
+          grid_pos[2] = (int)(pos_double[2] * n_grid[2]);
+          
+          unsigned long pos =  grid_pos[0] * (n_grid[1] * n_grid[2]);
+          pos += grid_pos[1] * n_grid[2];
+          pos += grid_pos[2];
 
-        // Calculate the standard deviation quantities
+          // Store the answer
+          _dout[pos] = _dout[pos] + data_ptr[3];
+          _nout[pos]++;
 
-        _Qk[pos] = _Qk[pos] + ((_nout[pos] - 1) * pow(data_ptr[3] - _Mk[pos],2) / _nout[pos]);
-        _Mk[pos] = _Mk[pos] + ((data_ptr[3] - _Mk[pos]) / _nout[pos]);
-      } 
+          // Calculate the standard deviation quantities
+
+          _Qk[pos] = _Qk[pos] + ((_nout[pos] - 1) * pow(data_ptr[3] - _Mk[pos],2) / _nout[pos]);
+          _Mk[pos] = _Mk[pos] + ((data_ptr[3] - _Mk[pos]) / _nout[pos]);
+        } 
+      }
+
+      threadData[thread_num].Mk = _Mk;
+      threadData[thread_num].Qk = _Qk;
+      threadData[thread_num].dout = _dout;
+      threadData[thread_num].nout = _nout;
+    } else {
+      retval = 1;
     }
 
-    threadData[thread_num].Mk = _Mk;
-    threadData[thread_num].Qk = _Qk;
-    threadData[thread_num].dout = _dout;
-    threadData[thread_num].nout = _nout;
-
   } // pragma parallel
+
+  if(retval){
+    goto error;
+  }
 
   // Combine results
   if(num_threads > 1){
@@ -534,14 +553,18 @@ int c_grid3d(double *dout, unsigned long *nout, double *mout,
   }
 
   // Now free the memory.
+  
+error:
 
   for(n=0;n<num_threads;n++){
-    free(threadData[n].Qk);
-    free(threadData[n].Mk);
-    free(threadData[n].dout);
-    free(threadData[n].nout);
+    if(threadData[n].Qk) free(threadData[n].Qk);
+    if(threadData[n].Mk) free(threadData[n].Mk);
+    if(threadData[n].dout) free(threadData[n].dout);
+    if(threadData[n].nout) free(threadData[n].nout);
   }
-  return 0;
+
+  free(threadData);
+  return retval;
 }
 
 
