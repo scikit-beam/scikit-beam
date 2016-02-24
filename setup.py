@@ -23,6 +23,9 @@ def c_ext():
         # spit out when we compile on AppVeyor.
         # https://gist.github.com/ericdill/bdc86eb81e338ca4624b
         return []
+
+    if os.name == 'posix':
+        return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'])]
     # compile the extension on OSX and Linux.
     return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'],
                       extra_compile_args=['-fopenmp'],
