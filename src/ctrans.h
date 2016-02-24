@@ -73,7 +73,7 @@ int processImages(double *delgam, double *anglesp, double *qOutp, double lambda,
                   int mode, unsigned long nimages, double *ubinvp, CCD *ccd);
 
 int c_grid3d(double *dout, unsigned long *nout, double *mout, 
-             double *sterr, double *data, unsigned long *n_outside,
+             double *sterr, double *data,
              double *grid_start, double *grid_stop, unsigned long max_data, 
              unsigned long *n_grid, int norm);
 

@@ -195,11 +195,10 @@ def test_grid3d():
                      np.ravel(Z)]).T
 
     (mean, occupancy,
-     std_err, oob, bounds) = core.grid3d(data, I, **param_dict)
+     std_err, bounds) = core.grid3d(data, I, **param_dict)
 
     # check the values are as expected
     npt.assert_array_equal(mean.ravel(), I)
-    npt.assert_equal(oob, 0)
     npt.assert_array_equal(occupancy, np.ones_like(occupancy))
     npt.assert_array_equal(std_err, 0)
 
