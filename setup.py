@@ -5,6 +5,7 @@ from distutils.core import setup, Extension
 import versioneer
 import numpy as np
 import os
+import sys
 from Cython.Build import cythonize
 
 # Utility function to read the README file.
@@ -24,7 +25,7 @@ def c_ext():
         # https://gist.github.com/ericdill/bdc86eb81e338ca4624b
         return []
 
-    if os.name == 'posix':
+    if sys.platform == 'darwin':
         return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'])]
     # compile the extension on OSX and Linux.
     return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'],

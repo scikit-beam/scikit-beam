@@ -387,7 +387,7 @@ int c_grid3d(double *dout, unsigned long *nout,
     grid_len[i] = grid_stop[i] - grid_start[i];
   }
 
-  int max_threads = max_data;
+  int max_threads = 1;
 #ifdef _OPENMP
   // Lets see hown many threads we can do.
   max_threads = omp_get_max_threads();
@@ -414,7 +414,6 @@ int c_grid3d(double *dout, unsigned long *nout,
     int thread_num = 0;
 #endif
 
-    num_threads = max_data;
 #ifdef _OPENMP
     num_threads = omp_get_num_threads();
 #endif
@@ -468,9 +467,6 @@ int c_grid3d(double *dout, unsigned long *nout,
           _nout[pos]++;
         }
       }
-#ifndef _OPENMP
-  thread_num = i;
-#endif
 
       threadData[thread_num].dout = _dout;
       threadData[thread_num].d2out = _d2out;
@@ -489,14 +485,6 @@ int c_grid3d(double *dout, unsigned long *nout,
 
 #ifdef _OPENMP
   for(n=1;n<num_threads;n++){
-    for(j=0;j<grid_size;j++){
-      threadData[0].nout[j] += threadData[n].nout[j];
-      threadData[0].dout[j] += threadData[n].dout[j];
-      threadData[0].d2out[j] += threadData[n].d2out[j];
-    }
-  }
-#else
-  for(n=1;n<max_data;n++){
     for(j=0;j<grid_size;j++){
       threadData[0].nout[j] += threadData[n].nout[j];
       threadData[0].dout[j] += threadData[n].dout[j];
