@@ -1,46 +1,49 @@
 /*
- * Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        
- * National Laboratory. All rights reserved.                            
- *                                                                      
- * Redistribution and use in source and binary forms, with or without   
- * modification, are permitted provided that the following conditions   
- * are met:                                                             
- *                                                                      
- * * Redistributions of source code must retain the above copyright     
- *   notice, this list of conditions and the following disclaimer.      
- *                                                                      
- * * Redistributions in binary form must reproduce the above copyright  
- *   notice this list of conditions and the following disclaimer in     
- *   the documentation and/or other materials provided with the         
- *   distribution.                                                      
- *                                                                      
- * * Neither the name of the Brookhaven Science Associates, Brookhaven  
- *   National Laboratory nor the names of its contributors may be used  
- *   to endorse or promote products derived from this software without  
- *   specific prior written permission.                                 
- *                                                                      
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS  
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT    
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS    
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE       
- * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,           
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES   
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR   
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)   
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,  
- * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OTHERWISE) ARISING   
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   
- * POSSIBILITY OF SUCH DAMAGE.                                          
+ * Copyright (c) 2014, Brookhaven Science Associates, Brookhaven
+ * National Laboratory. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ *
+ * * Neither the name of the Brookhaven Science Associates, Brookhaven
+ *   National Laboratory nor the names of its contributors may be used
+ *   to endorse or promote products derived from this software without
+ *   specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  *
  *
  * This is ctranc.c routine. process_to_q and process_grid
  * functions in the nsls2/recip.py call  ctranc.c routine for
  * fast data analysis.
- 
+
  */
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
+
 #include <stdlib.h>
 #include <math.h>
 
@@ -95,14 +98,14 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   if(!angles){
     goto cleanup;
   }
-  
+
   ubinv = (PyArrayObject*)PyArray_FROMANY(_ubinv, NPY_DOUBLE, 2, 2, NPY_ARRAY_IN_ARRAY);
   if(!ubinv){
     goto cleanup;
   }
 
   ubinvp = (double *)PyArray_DATA(ubinv);
-  
+
   nimages = PyArray_DIM(angles, 0);
 
   dims[0] = nimages * ccd.size;
@@ -112,7 +115,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   if(!qOut){
     goto cleanup;
   }
-  
+
   anglesp = (double *)PyArray_DATA(angles);
   qOutp = (double *)PyArray_DATA(qOut);
 
@@ -125,7 +128,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   // Ok now we don't touch Python Object ... Release the GIL
   Py_BEGIN_ALLOW_THREADS
 
-  if(processImages(delgam, anglesp, qOutp, lambda, mode, (unsigned long)nimages, 
+  if(processImages(delgam, anglesp, qOutp, lambda, mode, (unsigned long)nimages,
                    ubinvp, &ccd)){
     PyErr_SetString(PyExc_MemoryError, "Could not allocate memory for processImages");
     goto cleanup;
@@ -147,14 +150,14 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   return NULL;
 }
 
-int processImages(double *delgam, double *anglesp, double *qOutp, double lambda, 
+int processImages(double *delgam, double *anglesp, double *qOutp, double lambda,
                   int mode, unsigned long nimages, double *ubinvp, CCD *ccd){
 
   int retval = 0;
   unsigned long i;
   double UBI[3][3];
 
-  // Permute the UB matrix into the orientation 
+  // Permute the UB matrix into the orientation
   // for the calculations
 
   for(i=0;i<3;i++){
@@ -225,16 +228,16 @@ int calcQTheta(double* diffAngles, double theta, double mu, double *qTheta, int 
     del = *(angles++);
     gam = *(angles++);
     *qt = (-1.0 * sin(gam) * kl) - (sin(mu) * kl);
- 
+
     qt++;
     *qt = (cos(del - theta) * cos(gam) * kl) - (cos(theta) * cos(mu) * kl);
- 
+
     qt++;
     *qt = (sin(del - theta) * cos(gam) * kl) + (sin(theta) * cos(mu) * kl);
- 
+
     qt++;
   }
-  
+
   return true;
 }
 
@@ -252,7 +255,7 @@ int calcQPhiFromQTheta(double *qTheta, int n, double chi, double phi){
   r[2][2] = cos(phi) * cos(chi);
 
   matmulti(qTheta, n, r);
-  
+
   return true;
 }
 
@@ -289,19 +292,19 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   PyArrayObject *gridout = NULL, *Nout = NULL, *stderror = NULL;
   PyArrayObject *gridI = NULL;
   PyObject *_I;
-  
+
   npy_intp data_size;
   npy_intp dims[3];
-  
+
   double grid_start[3];
   double grid_stop[3];
   unsigned long grid_nsteps[3];
 
   int retval;
 
-  static char *kwlist[] = { "data", "xrange", "yrange", "zrange", NULL }; 
+  static char *kwlist[] = { "data", "xrange", "yrange", "zrange", NULL };
 
-  if(!PyArg_ParseTupleAndKeywords(args, kwargs, "O(ddd)(ddd)(lll)", kwlist, 
+  if(!PyArg_ParseTupleAndKeywords(args, kwargs, "O(ddd)(ddd)(lll)", kwlist,
 				  &_I,
 				  &grid_start[0], &grid_start[1], &grid_start[2],
 				  &grid_stop[0], &grid_stop[1], &grid_stop[2],
@@ -313,7 +316,7 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   if(!gridI){
     goto error;
   }
-  
+
   data_size = PyArray_DIM(gridI, 0);
   if(PyArray_DIM(gridI, 1) != 4){
     PyErr_SetString(PyExc_ValueError, "Dimension 1 of array must be 4");
@@ -366,8 +369,8 @@ error:
   return NULL;
 }
 
-int c_grid3d(double *dout, unsigned long *nout, 
-             double *stderror, double *data, 
+int c_grid3d(double *dout, unsigned long *nout,
+             double *stderror, double *data,
              double *grid_start, double *grid_stop, unsigned long max_data,
              unsigned long *n_grid){
 
@@ -376,7 +379,7 @@ int c_grid3d(double *dout, unsigned long *nout,
   int retval = 0;
   unsigned long grid_size = 0;
   double grid_len[3];
-	
+
   // Some useful quantities
 
   grid_size = n_grid[0] * n_grid[1] * n_grid[2];
@@ -384,8 +387,12 @@ int c_grid3d(double *dout, unsigned long *nout,
     grid_len[i] = grid_stop[i] - grid_start[i];
   }
 
-  // Lets see hown many threads we can do. 
-  int max_threads = omp_get_max_threads();
+  int max_threads = 1;
+#ifdef _OPENMP
+  // Lets see hown many threads we can do.
+  max_threads = omp_get_max_threads();
+#endif
+
   int num_threads;
 
   gridderThreadData *threadData = malloc(sizeof(gridderThreadData) * max_threads);
@@ -401,13 +408,16 @@ int c_grid3d(double *dout, unsigned long *nout,
 
 #pragma omp parallel shared(data, num_threads, threadData, grid_start, grid_len)
   {
+#ifdef _OPENMP
     int thread_num = omp_get_thread_num();
+#else
+    int thread_num = 0;
+#endif
 
-#pragma omp single
-    {
-      num_threads = omp_get_num_threads();
-    }
- 
+#ifdef _OPENMP
+    num_threads = omp_get_num_threads();
+#endif
+
     double *_d2out;
     double *_dout;
     unsigned long *_nout;
@@ -425,14 +435,15 @@ int c_grid3d(double *dout, unsigned long *nout,
         _nout[j] = 0;
       }
 
-#pragma omp for 
+#pragma omp for
       for(i=0;i<max_data;i++){
+
         double pos_double[3];
         unsigned long grid_pos[3];
         double *data_ptr = data + (i * 4);
 
         // Calculate the relative position in the grid.
-        
+
         pos_double[0] = (data_ptr[0] - grid_start[0]) / grid_len[0];
         pos_double[1] = (data_ptr[1] - grid_start[1]) / grid_len[1];
         pos_double[2] = (data_ptr[2] - grid_start[2]) / grid_len[2];
@@ -440,12 +451,12 @@ int c_grid3d(double *dout, unsigned long *nout,
         if((pos_double[0] >= 0) && (pos_double[0] < 1) &&
           (pos_double[1] >= 0) && (pos_double[1] < 1) &&
           (pos_double[2] >= 0) && (pos_double[2] < 1)){
-          
+
           // Calculate the position in the grid
           grid_pos[0] = (int)(pos_double[0] * n_grid[0]);
           grid_pos[1] = (int)(pos_double[1] * n_grid[1]);
           grid_pos[2] = (int)(pos_double[2] * n_grid[2]);
-          
+
           unsigned long pos =  grid_pos[0] * (n_grid[1] * n_grid[2]);
           pos += grid_pos[1] * n_grid[2];
           pos += grid_pos[2];
@@ -454,7 +465,7 @@ int c_grid3d(double *dout, unsigned long *nout,
           _dout[pos] += data_ptr[3];
           _d2out[pos] += (data_ptr[3] * data_ptr[3]);
           _nout[pos]++;
-        } 
+        }
       }
 
       threadData[thread_num].dout = _dout;
@@ -471,7 +482,8 @@ int c_grid3d(double *dout, unsigned long *nout,
   }
 
   // Now gather the results
-  
+
+#ifdef _OPENMP
   for(n=1;n<num_threads;n++){
     for(j=0;j<grid_size;j++){
       threadData[0].nout[j] += threadData[n].nout[j];
@@ -479,6 +491,7 @@ int c_grid3d(double *dout, unsigned long *nout,
       threadData[0].d2out[j] += threadData[n].d2out[j];
     }
   }
+#endif
 
   // Calculate the stderror
 
@@ -486,25 +499,25 @@ int c_grid3d(double *dout, unsigned long *nout,
     if(threadData[0].nout[j] == 0){
       stderror[j] = 0.0;
     } else {
-      double var = (threadData[0].d2out[j] - 
-                    pow(threadData[0].dout[j], 2) / threadData[0].nout[j]) / 
+      double var = (threadData[0].d2out[j] -
+                    pow(threadData[0].dout[j], 2) / threadData[0].nout[j]) /
                     threadData[0].nout[j];
       stderror[j] = pow(var, 0.5) / pow(threadData[0].nout[j], 0.5);
     }
   }
 
   // Now copy the outputs to the arrays
-  
+
   for(j=0;j<grid_size;j++){
     dout[j] = threadData[0].dout[j];
     nout[j] = threadData[0].nout[j];
   }
 
   // Now free the memory.
-  
+
 error:
 
-  for(n=0;n<num_threads;n++){
+  for(n=0;n<max_threads;n++){
     if(threadData[n].d2out) free(threadData[n].d2out);
     if(threadData[n].dout) free(threadData[n].dout);
     if(threadData[n].nout) free(threadData[n].nout);
@@ -544,7 +557,7 @@ PyObject* PyInit_ctrans(void) {
   return module;
 }
 
-#else // We have Python 2 ... 
+#else // We have Python 2 ...
 
 PyMODINIT_FUNC initctrans(void){
   PyObject *module = Py_InitModule3("ctrans", ctrans_methods, _ctransDoc);
