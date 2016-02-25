@@ -41,8 +41,17 @@
  */
 
 #ifdef _OPENMP
+
 #include <omp.h>
+
+#else
+
+#define omp_get_thread_num() 0
+#define omp_get_max_threads() 0
+#define omp_get_num_threads() 1
+
 #endif
+
 
 #include <stdlib.h>
 #include <math.h>
@@ -390,12 +399,7 @@ int c_grid3d(double *dout, unsigned long *nout, double *stderror, double *data,
     grid_len[i] = grid_stop[i] - grid_start[i];
   }
 
-  int max_threads = 1;
-#ifdef _OPENMP
-  // Lets see hown many threads we can do.
-  max_threads = omp_get_max_threads();
-#endif
-
+  int max_threads = omp_get_max_threads();
   int num_threads;
 
   gridderThreadData *threadData = malloc(sizeof(gridderThreadData) * max_threads);
@@ -411,15 +415,8 @@ int c_grid3d(double *dout, unsigned long *nout, double *stderror, double *data,
 
 #pragma omp parallel shared(data, num_threads, threadData, grid_start, grid_len)
   {
-#ifdef _OPENMP
     int thread_num = omp_get_thread_num();
-#else
-    int thread_num = 0;
-#endif
-
-#ifdef _OPENMP
     num_threads = omp_get_num_threads();
-#endif
 
     double *_d2out;
     double *_dout;
