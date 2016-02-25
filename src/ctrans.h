@@ -73,7 +73,7 @@ int processImages(double *delgam, double *anglesp, double *qOutp, double lambda,
 
 int c_grid3d(double *dout, unsigned long *nout, double *sterr, double *data,
              double *grid_start, double *grid_stop, unsigned long max_data, 
-             unsigned long *n_grid);
+             unsigned long *n_grid, int ignore_nan);
 
 static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs);
 static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs);
