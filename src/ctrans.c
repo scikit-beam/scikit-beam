@@ -32,8 +32,6 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *
- *
  * This is ctranc.c routine. process_to_q and process_grid
  * functions in the nsls2/recip.py call  ctranc.c routine for
  * fast data analysis.
@@ -74,6 +72,7 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   CCD ccd;
   npy_intp dims[2];
   npy_intp nimages;
+  int retval;
 
   int mode;
 
@@ -137,14 +136,16 @@ static PyObject* ccdToQ(PyObject *self, PyObject *args, PyObject *kwargs){
   // Ok now we don't touch Python Object ... Release the GIL
   Py_BEGIN_ALLOW_THREADS
 
-  if(processImages(delgam, anglesp, qOutp, lambda, mode, (unsigned long)nimages,
-                   ubinvp, &ccd)){
-    PyErr_SetString(PyExc_MemoryError, "Could not allocate memory for processImages");
-    goto cleanup;
-  }
+  retval = processImages(delgam, anglesp, qOutp, lambda, mode, (unsigned long)nimages,
+                         ubinvp, &ccd);
 
   // Now we have finished with the magic ... Obtain the GIL
   Py_END_ALLOW_THREADS
+
+  if(retval){
+    PyErr_SetString(PyExc_RuntimeError, "Error processing images");
+    goto cleanup;
+  }
 
   Py_XDECREF(ubinv);
   Py_XDECREF(angles);
@@ -176,6 +177,7 @@ int processImages(double *delgam, double *anglesp, double *qOutp, double lambda,
     ubinvp+=3;
   }
 
+#pragma omp parallel for shared(anglesp, qOutp, delgam, mode)
   for(i=0;i<nimages;i++){
     // Calculate pointer offsets
 
