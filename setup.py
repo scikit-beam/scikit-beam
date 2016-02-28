@@ -5,6 +5,7 @@ from distutils.core import setup, Extension
 import versioneer
 import numpy as np
 import os
+import sys
 from Cython.Build import cythonize
 
 # Utility function to read the README file.
@@ -23,9 +24,14 @@ def c_ext():
         # spit out when we compile on AppVeyor.
         # https://gist.github.com/ericdill/bdc86eb81e338ca4624b
         return []
-    # compile the extension on OSX and Linux.
+
+    # compile for MacOS without openmp
+    if sys.platform == 'darwin':
+        return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'])]
+    # compile the extension on Linux.
     return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'],
-                      define_macros=[('USE_THREADS', None)])]
+                      extra_compile_args=['-fopenmp'],
+                      extra_link_args=['-lgomp'])]
 
 
 def cython_ext():
