@@ -216,9 +216,9 @@ void raw_dropletfind(long int *img_out,long int *img_in, int ncol, int nrow, lon
 	    }
 }
 
-extern void photonize(int *img_out, int *img_in, int *bimg, int *npix, int *adus, long int *idlist, int npeak,int ncol, int nrow,int MINADU, int ADUPPHOT);
+extern void raw_photonize(long int *img_out, long int *img_in, long int *bimg, long int *npix, long int *adus, long int *idlist, int npeak, int MINADU, int ADUPPHOT);
 
-void photonize(int *img_out, int *img_in, int *bimg, int *npix, int *adus,long int *idlist, int npeak,int ncol, int nrow,int MINADU, int ADUPPHOT) {
+void raw_photonize(long int *img_out, long int *img_in, long int *bimg, long int *npix, long int *adus, long int *idlist, int npeak, int MINADU, int ADUPPHOT) {
 /* Convert droplets to photons. Uses simple rule to place photon at
  * largest pixel in droplet, reduces it and repeats for number of photons
  * in droplet.

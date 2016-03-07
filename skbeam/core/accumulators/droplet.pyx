@@ -73,6 +73,9 @@ cdef extern from "../../../src/droplet.c":
     void raw_dropletanal(np.int_t *img, np.int_t* dimg, np.int_t *npix, \
             np.float_t *xcen, np.float_t *ycen, np.int_t * adus, np.int_t * idlist,\
             int npeak,int ncol, int nrow);
+    void raw_photonize(np.int_t *img_out, np.int_t *img_in, np.int_t *bimg, \
+            np.int_t *npix, np.int_t *adus, np.int_t *idlist, \
+            int npeak, int MINADU, int ADUPPHOT);
 
 def dropletfind(np.ndarray[np.int_t, ndim=2, mode="c"] img):
     '''
@@ -215,3 +218,68 @@ def dropletanal(np.ndarray[np.int_t, ndim=2, mode="c"] img, \
 
 #TODO : Make a version that allows a floating point image
     # adus would also have to be float
+
+
+def photonize(np.ndarray[np.int_t, ndim=2, mode="c"] img,    \
+              np.ndarray[np.int_t, ndim=2, mode="c"] dimg,   \
+              np.ndarray[np.int_t, ndim=1, mode="c"] npix,   \
+              np.ndarray[np.int_t, ndim=1, mode="c"] adus,   \
+              np.ndarray[np.int_t, ndim=1, mode="c"] idlist, \
+              int npeaks, int MINADU, int ADUPPHOT):
+    '''
+    img_out = photonize(img, dimg, npix, adus, idlist, npeaks, MINADU, ADUPHOT)
+
+    Convert droplets to photons. Uses simple rule to place photon at
+    largest pixel in droplet, reduces it and repeats for number of
+    photons in droplet.
+
+    Parameters
+    ----------
+    img : 2-D int array
+        The data you want to collect statistics from (must be floating point array)
+
+    dimg : 2-D int array
+        The image with droplet id's assigned per pixel (as returned by dropletfind)
+
+    npix : 1-D int array
+        Number of pixels in each droplet
+
+    adus : 1-D int array
+        The summed intensity in each droplet
+
+    idlist : 1-D int array
+        The unique id of each droplet. nopeaks is the number of droplets
+        in the image. As a side effect it modifies the dropletmap into cycles so
+        further processing will become easier. The cycles link pixels of same
+        droplet. So the code:
+     	pos=dropletmap(id);
+	do { //do stuff with pixel img(pos)
+	   pos=dropletmap(pos)}
+	   }
+	while(pos!=id);
+        will loop through pixels of droplet id. Save a copy of dropletmap
+        if you want to use it later. (Really is only easier to process this
+        way in C code.)
+
+    npeaks : int
+        The number of droplets (as returned by dropletfind)
+
+    MINADU : int
+        The minimum threshold for ADU counts
+
+    ADUPPHOT: int
+        ADUs per photon
+
+    Returns
+    -------
+    img_out : 2-D int array
+        Output image with photons
+
+    '''
+
+    cdef np.ndarray[np.int_t, ndim=2, mode="c"] img_out = np.zeros_like(dimg)
+
+    raw_photonize(&img_out[0,0], &img[0,0], &dimg[0,0], &npix[0],
+            &adus[0], &idlist[0], npeaks, MINADU, ADUPPHOT)
+
+    return img_out
