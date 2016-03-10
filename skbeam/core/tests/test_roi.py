@@ -372,3 +372,13 @@ def test_bars_boxes():
     assert_raises(ValueError, roi.box, shape, n_edges)
     assert_raises(ValueError, roi.box, shape, edges, h_values=h_val,
                   v_values=v_values)
+
+
+def test_lines():
+    points = ([30, 45, 50, 256], [56, 60, 80, 150])
+    shape = (256, 150)
+    label_array = roi.lines(points, shape)
+    assert_array_equal(np.array([1, 2]), np.unique(label_array)[1:])
+
+    assert_raises(ValueError, roi.lines,
+                  ([10, 12, 30], [30, 45, 50, 256]), shape)
