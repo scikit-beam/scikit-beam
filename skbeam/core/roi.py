@@ -669,7 +669,8 @@ def lines(end_points, shape):
             raise ValueError("end points should have four number of"
                              " elements, giving starting co-ordinates,"
                              " ending co-ordinates for each line")
-        rr, cc = line(points[0], points[1], np.min([points[2], shape[0]-1]),
+        rr, cc = line(np.max([points[0], 0]), np.max([points[1], 0]),
+                      np.min([points[2], shape[0]-1]),
                       np.min([points[3], shape[1]-1]))
         l += 1
         label_array[rr, cc] = l
