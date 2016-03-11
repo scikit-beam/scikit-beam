@@ -51,6 +51,14 @@ script:
       ./build_docs.sh;
     fi;
 
+ # Check repo size does not expand too much
+    - if [ "${TEST}" == "extra" ]; then
+        start_test "repo size check";
+        echo -e "Estimated content size difference = ${SIZE_DIFF} kB" &&
+        test ${SIZE_DIFF} -lt 100;
+        check_output "repo size check";
+      fi;
+
 after_success:
   - if [ $RUN_TESTS == 'true' ]; then codecov; fi;
   - if [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PULL_REQUEST == 'false' ] && [ $BUILD_DOCS ]; then
