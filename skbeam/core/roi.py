@@ -581,7 +581,7 @@ def bar(edges, shape, horizontal=True, values=None):
     if values is None:
         values = np.repeat(range(shape[0]), shape[1])
     if not horizontal:
-        values = values.reshape(shape).T.ravel()
+        values = np.tile(range(shape[1]), shape[0])
 
     return _make_roi(values, edges, shape)
 
