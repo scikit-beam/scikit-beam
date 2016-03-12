@@ -663,7 +663,7 @@ def lines(end_points, shape):
 
     """
     label_array = np.zeros(shape, dtype=np.int64)
-    l = 0
+    label = 0
     for points in end_points:
         if len(points) != 4:
             raise ValueError("end points should have four number of"
@@ -672,6 +672,6 @@ def lines(end_points, shape):
         rr, cc = line(np.max([points[0], 0]), np.max([points[1], 0]),
                       np.min([points[2], shape[0]-1]),
                       np.min([points[3], shape[1]-1]))
-        l += 1
-        label_array[rr, cc] = l
+        label += 1
+        label_array[rr, cc] = label
     return label_array
