@@ -42,6 +42,7 @@ from __future__ import absolute_import, division, print_function
 
 import collections
 import scipy.ndimage.measurements as ndim
+from skimage.draw import line
 import numpy as np
 from . import utils
 import logging
@@ -580,7 +581,7 @@ def bar(edges, shape, horizontal=True, values=None):
     if values is None:
         values = np.repeat(range(shape[0]), shape[1])
     if not horizontal:
-        values = values.reshape(shape).T.ravel()
+        values = np.tile(range(shape[1]), shape[0])
 
     return _make_roi(values, edges, shape)
 
@@ -640,3 +641,37 @@ def box(shape, v_edges, h_edges=None, h_values=None, v_values=None):
             coords.append((h[0], v[0], h[1]-h[0], v[1] - v[0]))
 
     return rectangles(coords, v_values.shape)
+
+
+def lines(end_points, shape):
+    """
+    Parameters
+    ----------
+    end_points : iterable
+        coordinates of the starting point and the ending point of each
+        line: e.g., [(start_x, start_y, end_x, end_y), (x1, y1, x2, y2)]
+    shape : tuple
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates. Order is (rr, cc).
+
+    Returns
+    -------
+    label_array : array
+        Elements not inside any ROI are zero; elements inside each
+        ROI are 1, 2, 3, corresponding to the order they are specified
+        in coords. Order is (rr, cc).
+
+    """
+    label_array = np.zeros(shape, dtype=np.int64)
+    label = 0
+    for points in end_points:
+        if len(points) != 4:
+            raise ValueError("end points should have four number of"
+                             " elements, giving starting co-ordinates,"
+                             " ending co-ordinates for each line")
+        rr, cc = line(np.max([points[0], 0]), np.max([points[1], 0]),
+                      np.min([points[2], shape[0]-1]),
+                      np.min([points[3], shape[1]-1]))
+        label += 1
+        label_array[rr, cc] = label
+    return label_array
