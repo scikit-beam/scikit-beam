@@ -239,11 +239,6 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
         Each ROI is represented by sequential integers starting at one.  For
         example, if you have four ROIs, they must be labeled 1, 2, 3,
         4. Background is labeled as 0
-    labels : array
-        Labeled array of the same shape as the image stack.
-        Each ROI is represented by sequential integers starting at one.  For
-        example, if you have four ROIs, they must be labeled 1, 2, 3,
-        4. Background is labeled as 0
     internal_state : namedtuple, optional
         internal_state is a bucket for all of the internal state of the
         generator. It is part of the `results` object that is yielded from
