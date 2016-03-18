@@ -38,6 +38,14 @@ install:
   - python setup.py install build_ext -i
   - pip install codecov
 
+before_script:
+    - if [ "$BUILD_DOCS" == "true" ]; then
+        start_test "repo size check";
+        echo -e "Estimated content size difference = ${SIZE_DIFF} kB" &&
+        test ${SIZE_DIFF} -lt 100;
+        check_output "repo size check";
+      fi;
+
 script:
   - if [ $RUN_TESTS == 'true' ]; then coverage run run_tests.py; fi;
   - if [ $RUN_TESTS == 'true' ]; then flake8 $TRAVIS_BUILD_DIR/skbeam; fi;
@@ -51,14 +59,7 @@ script:
       ./build_docs.sh;
     fi;
 
- # Check repo size does not expand too much
-    - if [ "${TEST}" == "extra" ]; then
-        start_test "repo size check";
-        echo -e "Estimated content size difference = ${SIZE_DIFF} kB" &&
-        test ${SIZE_DIFF} -lt 100;
-        check_output "repo size check";
-      fi;
-
+ 
 after_success:
   - if [ $RUN_TESTS == 'true' ]; then codecov; fi;
   - if [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PULL_REQUEST == 'false' ] && [ $BUILD_DOCS ]; then
