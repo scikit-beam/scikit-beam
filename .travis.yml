@@ -39,18 +39,35 @@ install:
   - pip install codecov
 
 before_script:
-    - if [ "$BUILD_DOCS" == "true" ]; then
+- if [ "${TEST}" == "extra" ]; then
         start_test "repo size check";
-        echo -e "Estimated content size difference = ${SIZE_DIFF} kB" &&
-        test ${SIZE_DIFF} -lt 100;
-        check_output "repo size check";
+        mkdir ~/repo-clone && cd ~/repo-clone &&
+        git init && git remote add -t ${TRAVIS_BRANCH} origin git://github.com/${TRAVIS_REPO_SLUG}.git &&
+        git fetch origin ${GIT_TARGET_EXTRA} &&
+        git checkout -qf FETCH_HEAD &&
+        git tag travis-merge-target &&
+        git gc --aggressive &&
+        TARGET_SIZE=`du -s . | sed -e "s/\t.*//"` &&
+        git pull origin ${GIT_SOURCE_EXTRA} &&
+        git gc --aggressive &&
+        MERGE_SIZE=`du -s . | sed -e "s/\t.*//"` &&
+        if [ "${MERGE_SIZE}" != "${TARGET_SIZE}" ]; then
+          SIZE_DIFF=`expr \( ${MERGE_SIZE} - ${TARGET_SIZE} \)`;
+        else
+          SIZE_DIFF=0;
+        fi;
       fi;
-
 script:
   - if [ $RUN_TESTS == 'true' ]; then coverage run run_tests.py; fi;
   - if [ $RUN_TESTS == 'true' ]; then flake8 $TRAVIS_BUILD_DIR/skbeam; fi;
   - if [ $BUILD_DOCS == 'true' ]; then
-      conda install sphinx numpydoc ipython jupyter pip matplotlib;
+      start_test "repo size check";
+      echo -e "Estimated content size difference = ${SIZE_DIFF} kB" &&
+      test ${SIZE_DIFF} -lt 100;
+      check_output "repo size check";
+    fi;
+  - if [ $BUILD_DOCS == 'true' ]; then
+    conda install sphinx numpydoc ipython jupyter pip matplotlib;
       pip install sphinx_bootstrap_theme sphinxcontrib-napoleon;
       cd ..;
       git clone https://github.com/scikit-beam/scikit-beam-examples.git;
