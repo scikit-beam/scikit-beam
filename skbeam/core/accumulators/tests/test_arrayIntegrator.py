@@ -1,4 +1,4 @@
-from skbeam.core.accumulators.angularIntegrator import AngularIntegrator
+from skbeam.core.accumulators.arrayIntegrator import AngularIntegrator
 import numpy as np
 
 def MakeImage(shape=(1024,1024)) :
@@ -35,7 +35,7 @@ def testAngularIntegrator():
     
     angint = AngularIntegrator(xsize, ysize, xc=410, yc=718, rmin=0, rmax=1000, nbins=1000)
 
-    bincent, integral = angint.getRadialHistogramArrays(image,norm=True)
+    bincent, integral = angint.histogram(image,norm=True)
 
     plt.plot(bincent, integral)
     plt.show()    
