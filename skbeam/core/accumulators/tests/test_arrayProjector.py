@@ -2,8 +2,7 @@ from skbeam.core.accumulators.arrayProjector import RadialProjector
 import numpy as np
 
 def MakeImage(shape) :
-    # Create test image - a sinc function, centered in the middle of
-    # the image  
+    # Create test image - a sinc function, centered in the middle of the image
     # Integrating in phi about center, the integral will become sin(x)    
 
     xsize, ysize = shape
@@ -30,7 +29,7 @@ def testRadialProjector():
     
     radproj = RadialProjector(xsize, ysize, xc=410, yc=718, rmin=0, rmax=1000, nbins=1000, norm=True)
 
-    integral = radproj(image)
+    projection = radproj(image)
 
-    plt.plot(radproj.bin_centers, integral)
+    plt.plot(radproj.bin_centers, projection)
     plt.show()    
