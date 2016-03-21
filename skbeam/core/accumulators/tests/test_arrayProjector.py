@@ -1,20 +1,15 @@
-from skbeam.core.accumulators.arrayIntegrator import AngularIntegrator
+from skbeam.core.accumulators.arrayProjector import RadialProjector
 import numpy as np
 
-def MakeImage(shape=(1024,1024)) :
+def MakeImage(shape) :
     # Create test image - a sinc function, centered in the middle of
     # the image  
     # Integrating in phi about center, the integral will become sin(x)    
-    print "Creating test image",
 
     xsize, ysize = shape
     ratio = float(ysize)/float(xsize)
-    print 'ratio = ', ratio
     xmin, xmax = -4, 6 
     ymin, ymax = -7*ratio, 3*ratio
-
-    print '\nxmin, xmax, xsize = ', xmin, xmax, xsize
-    print '\nymin, ymax, ysize = ', ymin, ymax, ysize
 
     xarr = np.linspace(xmin, xmax, xsize)
     yarr = np.linspace(ymin, ymax, ysize)
@@ -25,17 +20,17 @@ def MakeImage(shape=(1024,1024)) :
 
 import matplotlib.pyplot as plt
 
-def testAngularIntegrator():
+def testRadialProjector():
 
-    image = MakeImage()
+    image = MakeImage((1024,1024))
     mask = np.ones_like(image, dtype=np.int)
     normImage = np.ones_like(image, dtype=np.int)
 
     ysize, xsize = image.shape
     
-    angint = AngularIntegrator(xsize, ysize, xc=410, yc=718, rmin=0, rmax=1000, nbins=1000)
+    angint = RadialProjector(xsize, ysize, xc=410, yc=718, rmin=0, rmax=1000, nbins=1000, norm=True)
 
-    bincent, integral = angint.histogram(image,norm=True)
+    integral = angint(image)
 
-    plt.plot(bincent, integral)
+    plt.plot(angint.bin_centers, integral)
     plt.show()    
