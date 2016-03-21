@@ -33,9 +33,9 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-import six
 import numpy as np
 import numpy.testing as npt
+from numpy.testing import assert_array_almost_equal
 from nose.tools import raises
 
 from skbeam.core import recip
@@ -134,6 +134,29 @@ def test_hkl_to_q():
                        14.73091986])
 
     npt.assert_array_almost_equal(b_norm, recip.hkl_to_q(b))
+
+
+def test_gisaxs():
+    incident_beam = (1.0, 1.0)
+    reflected_beam = (3.0, 3.0)
+    pixel_size = (1.0, 1.0)
+    detector_size = (5, 4)
+    dist_sample = 5.0
+    wavelength = 2*np.pi*0.01
+    theta_i = 0.0
+
+    g_output = recip.gisaxs(incident_beam, reflected_beam, pixel_size,
+                            detector_size, dist_sample, wavelength,
+                            theta_i=theta_i)
+
+    theta_f_target = 10**(-7)*np.array([-1.0, 0.0, 1.0, 2.0])
+    alpha_f_target = 10**(-7)*np.array([-4.0, -2.0, 7.99387344e-14, 2.0, 4.0])
+
+    assert_array_almost_equal(0.78539816, g_output.tilt_angle, decimal=8)
+    assert_array_almost_equal(2*10**(-7), g_output.alpha_i, decimal=8)
+    assert_array_almost_equal(theta_f_target, g_output.theta_f[1, :],
+                              decimal=8)
+    assert_array_almost_equal(alpha_f_target, g_output.alpha_f[:, 1])
 
 
 if __name__ == '__main__':

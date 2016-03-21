@@ -125,8 +125,8 @@ def smoke_test_element_creation():
     elements.sort()
     for element in elements:
         Z = element.Z
-        mass = element.mass
-        density = element.density
+        element.mass
+        element.density
         sym = element.sym
         inits = [Z, sym, sym.upper(), sym.lower(), sym.swapcase()]
         element = None

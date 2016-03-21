@@ -40,13 +40,9 @@ calculations.
 
 """
 from __future__ import absolute_import, division, print_function
-import logging
-
 import numpy as np
-
 from .utils import verbosedict
-
-logger = logging.getLogger(__name__)
+from collections import namedtuple
 import time
 
 try:
@@ -54,12 +50,14 @@ try:
 except ImportError:
     geo = None
 
-from ..ext import ctrans
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 def process_to_q(setting_angles, detector_size, pixel_size,
                  calibrated_center, dist_sample, wavelength, ub,
-                 frame_mode=None, n_threads=None):
+                 frame_mode=None):
     """
     This will compute the hkl values for all pixels in a shape specified by
     detector_size.
@@ -104,11 +102,6 @@ def process_to_q(setting_angles, detector_size, pixel_size,
         See the `process_to_q.frame_mode` attribute for an exact list of
         valid options.
 
-    n_threads : int, optional
-        Specify the number of threads for the c-module to use in its
-        calculations. A value of None indicates to use the number of
-        configured cores on the system.
-
     Returns
     -------
     hkl : ndarray
@@ -131,10 +124,15 @@ def process_to_q(setting_angles, detector_size, pixel_size,
        1998.
 
     """
+    try:
+        from ..ext import ctrans
+    except ImportError:
+        raise NotImplementedError(
+            "ctrans is not available on your platform. See"
+            "https://github.com/scikit-beam/scikit-beam/issues/418"
+            "to follow updates to this problem.")
 
     # Set default threads
-    if n_threads is None:
-        n_threads = 0
 
     # set default frame_mode
     if frame_mode is None:
@@ -169,8 +167,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
                         ccd_cen=(calibrated_center),
                         dist=dist_sample,
                         wavelength=wavelength,
-                        UBinv=np.matrix(ub).I,
-                        n_threads=n_threads)
+                        UBinv=np.matrix(ub).I)
 
     # ending time for the process
     t2 = time.time()
@@ -230,3 +227,118 @@ def calibrated_pixels_to_q(detector_size, pyfai_kwargs):
                            "function.")
     a = geo.Geometry(**pyfai_kwargs)
     return a.qArray(detector_size)
+
+
+gisaxs_output = namedtuple(
+    'gisaxs_output',
+    ['alpha_i', 'theta_f',
+     'alpha_f', 'tilt_angle',
+     'qx', 'qy', 'qz', 'qr']
+)
+
+
+def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
+           dist_sample, wavelength, theta_i=0.0):
+    """
+    This function will provide scattering wave vector(q) components(x, y, z),
+    q parallel and incident and reflected angles for grazing-incidence small
+    angle X-ray scattering (GISAXS) geometry.
+
+    Parameters
+    ----------
+    incident_beam : tuple
+        x and y co-ordinates of the incident beam in pixels
+    reflected_beam : tuple
+        x and y co-ordinates of the reflected beam in pixels
+    pixel_size : tuple
+        pixel_size in um
+    detector_size: tuple
+        2 element tuple defining no. of pixels(size) in the
+        detector X and Y direction
+    dist_sample : float
+       sample to detector distance, in meters
+    wavelength : float
+        wavelength of the x-ray beam in Angstroms
+    theta_i : float, optional
+        out of plane angle, default 0.0
+
+    Returns
+    -------
+    namedtuple
+        `gisaxs_output` object is returned
+        This `gisaxs_output` object contains, in this order:
+        - alpha_i : float
+            incident angle
+        - theta_f : array
+            out of plane angle
+            shape (detector_size[0], detector_size[1])
+        - alpha_f : array
+            exit angle
+            shape (detector_size[0], detector_size[1])
+        - tilt_angle : float
+            tilt angle
+        - qx : array
+            x component of the scattering wave vector
+            shape (detector_size[0], detector_size[1])
+        - qy : array
+            y component of the scattering wave vector
+            shape (detector_size[0], detector_size[1])
+        - qz : array
+            z component of the scattering wave vector
+            shape (detector_size[0], detector_size[1])
+        - qr : array
+            q parallel component
+            shape (detector_size[0], detector_size[1])
+
+    Notes
+    -----
+    This implementation is based on published work. [1]_
+
+    References
+    ----------
+    .. [1] R. Lazzari, "IsGISAXS: a program for grazing-incidence small-
+        angle X-ray scattering analysis of supported islands," J. Appl.
+        Cryst., vol 35, p 406-421, 2002.
+    """
+    inc_x, inc_y = incident_beam
+    refl_x, refl_y = reflected_beam
+
+    # convert pixel_size to meters
+    pixel_size = np.asarray(pixel_size) * 10 ** (-6)
+
+    # tilt angle
+    tilt_angle = np.arctan2((refl_x - inc_x) * pixel_size[0],
+                            (refl_y - inc_y) * pixel_size[1])
+    # incident angle
+    alpha_i = np.arctan2((refl_y - inc_y) * pixel_size[1],
+                         dist_sample) / 2.
+
+    y, x = np.indices(detector_size)
+    # exit angle
+    alpha_f = np.arctan2((y - inc_y) * pixel_size[1],
+                         dist_sample) - alpha_i
+    # out of plane angle
+    two_theta = np.arctan2((x - inc_x) * pixel_size[0],
+                           dist_sample)
+    theta_f = two_theta / 2 - theta_i
+    # wave number
+    wave_number = 2*np.pi/wavelength
+
+    # x component
+    qx = (np.cos(alpha_f) * np.cos(2*theta_f) -
+          np.cos(alpha_i) * np.cos(2*theta_i)) * wave_number
+
+    # y component
+    # the variables post-fixed with an underscore are intermediate steps
+    qy_ = (np.cos(alpha_f) * np.sin(2*theta_f) -
+           np.cos(alpha_i) * np.sin(2*theta_i))
+    qz_ = np.sin(alpha_f) + np.sin(alpha_i)
+    qy = (qz_ * np.sin(tilt_angle) + qy_ * np.cos(tilt_angle)) * wave_number
+
+    # z component
+    qz = (qz_ * np.cos(tilt_angle) - qy_ * np.sin(tilt_angle)) * wave_number
+
+    # q parallel
+    qr = np.sqrt(qx**2 + qy**2)
+
+    return gisaxs_output(alpha_i, theta_f, alpha_f, tilt_angle, qx, qy, qz, qr)

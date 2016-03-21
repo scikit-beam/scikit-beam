@@ -37,7 +37,6 @@ The included functions supplement the logical operations currently provided
 in numpy in order to provide a complete set of logical operations.
 """
 from __future__ import absolute_import, division, print_function
-import six
 from numpy import (logical_and, logical_or, logical_not, logical_xor, add,
                    subtract, multiply, divide)
 
@@ -124,13 +123,13 @@ def logical_nor(x1, x2, out=None):
 def logical_sub(x1, x2, out=None):
     """Compute truth value of x1 AND (NOT (x1 AND x2)) element wise.
 
-    This function enables LOGICAL SUBTRACTION of one binary image or volume data
-    set from another. This function can be used to remove phase information,
-    interface boundaries, or noise, present in two data sets, without having to
-    worry about mislabeling of pixels which would result from arithmetic
-    subtraction. This function will evaluate as true for all "true" voxels
-    present ONLY in Source Dataset 1. This function can be used for data
-    cleanup, or boundary/interface analysis.
+    This function enables LOGICAL SUBTRACTION of one binary image or volume
+    data set from another. This function can be used to remove phase
+    information, interface boundaries, or noise, present in two data sets,
+    without having to worry about mislabeling of pixels which would result
+    from arithmetic subtraction. This function will evaluate as true for all
+    "true" voxels present ONLY in Source Dataset 1. This function can be used
+    for data cleanup, or boundary/interface analysis.
 
     Parameters
     ----------

@@ -40,6 +40,7 @@ import numpy as np
 
 import skbeam.core.calibration as calibration
 import skbeam.core.calibration as core
+from .utils import gauss_gen
 
 
 def _draw_gaussian_rings(shape, calibrated_center, r_list, r_width):
@@ -69,8 +70,6 @@ def test_refine_center():
 
 
 def test_blind_d():
-    gaus = lambda x, center, height, width: (
-                          height * np.exp(-((x-center) / width)**2))
     name = 'Si'
     wavelength = .18
     window_size = 5
@@ -85,10 +84,10 @@ def test_blind_d():
     bin_centers = np.linspace(0, 50, 2000)
     I = np.zeros_like(bin_centers)
     for r in expected_r:
-        I += gaus(bin_centers, r, 100, .2)
+        I += gauss_gen(bin_centers, r, 100, .2)
     d, dstd = calibration.estimate_d_blind(name, wavelength, bin_centers,
-                                     I, window_size, len(expected_r),
-                                     threshold)
+                                           I, window_size, len(expected_r),
+                                           threshold)
     assert np.abs(d - D) < 1e-6
 
 
