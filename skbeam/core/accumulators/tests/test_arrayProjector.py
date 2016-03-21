@@ -28,9 +28,9 @@ def testRadialProjector():
 
     ysize, xsize = image.shape
     
-    angint = RadialProjector(xsize, ysize, xc=410, yc=718, rmin=0, rmax=1000, nbins=1000, norm=True)
+    radproj = RadialProjector(xsize, ysize, xc=410, yc=718, rmin=0, rmax=1000, nbins=1000, norm=True)
 
-    integral = angint(image)
+    integral = radproj(image)
 
-    plt.plot(angint.bin_centers, integral)
+    plt.plot(radproj.bin_centers, integral)
     plt.show()    
