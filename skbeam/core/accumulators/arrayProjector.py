@@ -96,10 +96,14 @@ class RadialProjector(ArrayProjector) :
         Parameters:
         -----------
         rows,columns:  shape of image to be projected
-        xc,yc:         location (in pixels) of origin (defaults to center of image)
-        rmin,rmax:     radial range to include in projection, in pixels
-        phimin,phimax: phi range to include in projection, in degrees
-        
+        xc,yc:         location (in pixels) of origin (default: center of image)
+        rmin,rmax:     radial range to include in projection, in pixels (default: no limits)
+        phimin,phimax: phi range to include in projection, in degrees (default: no limits)
+        nbins:         number of bins in projected histogram
+        weights:       np.ndarray.  weight to be applied to each pixel in image.  this can
+                       be used as a mask if the weight is set to zero.
+        norm:          boolean indicating whether bin entries in the projected histogram should be divided
+                       by weights (number of pixels, in the case where the weights are 1).
         """   
         # flip these to make it more intuitive for users who will use
         # this with arrays (matrices).  numpy.meshgrid (version 1.6) uses
