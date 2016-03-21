@@ -52,7 +52,6 @@ from itertools import tee
 import logging
 logger = logging.getLogger(__name__)
 
-from ..ext import ctrans
 
 md_value = namedtuple("md_value", ['value', 'units'])
 
@@ -341,8 +340,8 @@ keys_core = {
         "units": "um",
     },
     "voxel_size": {
-        "description": ("3 element tuple defining the (x y z) dimensions of the "
-                         "voxel"),
+        "description": ("3 element tuple defining the (x y z) dimensions "
+                        "of the voxel"),
         "type": tuple,
         "units": "um"
     },
@@ -401,9 +400,9 @@ keys_core = {
         }
     },
     "bounding_box": {
-        "description": ("physical extents of the array: useful for " +
-                        "volume alignment, transformation, merge and " +
-                         "spatial comparison of multiple volumes"),
+        "description": ("physical extents of the array: useful for ",
+                        "volume alignment, transformation, merge and ",
+                        "spatial comparison of multiple volumes"),
         "x_min": {
             "description": "minimum spatial coordinate along the x-axis",
             "type": float,
@@ -475,8 +474,6 @@ def subtract_reference_images(imgs, is_reference):
         raise ValueError("The first image is not a reference image")
     # grab the first image
     ref_imge = imgs[0]
-    # just sum the bool array to get count
-    ref_count = np.sum(is_reference)
     # make an array of zeros of the correct type
     corrected_image = deque()
     # zip together (lazy like this is really izip), images and flags
@@ -827,7 +824,7 @@ def grid3d(q, img_stack,
            nx=None, ny=None, nz=None,
            xmin=None, xmax=None, ymin=None,
            ymax=None, zmin=None, zmax=None,
-           binary_mask=None, n_threads=None):
+           binary_mask=None):
     """Grid irregularly spaced data points onto a regular grid via histogramming
 
     This function will process the set of reciprocal space values (q), the
@@ -865,10 +862,6 @@ def grid3d(q, img_stack,
         Binary mask can be two different shapes.
         - 1: 2-D with binary_mask.shape == np.asarray(img_stack[0]).shape
         - 2: 3-D with binary_mask.shape == np.asarray(img_stack).shape
-    n_threads : int, optional
-        Specify the number of threads for the c-module to use in its
-        calculations. A value of None indicates to use the number of
-        configured cores on the system.
 
     Returns
     -------
@@ -880,25 +873,18 @@ def grid3d(q, img_stack,
     std_err : ndarray
         This is the standard error of the value in the
         grid box.
-    oob : int
-        Out Of Bounds. Number of data points that are outside of
-        the gridded region.
     bounds : list
         tuple of (min, max, step) for x, y, z in order: [x_bounds,
         y_bounds, z_bounds]
 
-    Notes
-    -----
-    The standard error is calculated "on the fly" on a per thread basis.
-    Therefore, the standard error is not correctly calculated if there is only
-    one value per voxel per thread. The standard error calculation is
-    therefore only valid when the number of values per voxel per thread is
-    greater than one. The n_threads can be used to set the number of cores used
-    to correct this if the standard error is needed to be accurate.
     """
-
-    if n_threads is None:
-        n_threads = 0
+    try:
+        from ..ext import ctrans
+    except ImportError:
+        raise NotImplementedError(
+            "ctrans is not available on your platform. See"
+            "https://github.com/scikit-beam/scikit-beam/issues/418"
+            "to follow updates to this problem.")
 
     # validate input
     img_stack = np.asarray(img_stack)
@@ -964,8 +950,9 @@ def grid3d(q, img_stack,
 
     # call the c library
 
-    total, mean, occupancy, std_err, oob = ctrans.grid3d(q, qmin, qmax, dqn,
-                                                         n_threads)
+    total, occupancy, std_err = ctrans.grid3d(q, qmin, qmax, dqn)
+    mean = total / occupancy
+
     # ending time for the gridding
     t2 = time.time()
     logger.info("Done processed in {0} seconds".format(t2-t1))
@@ -974,13 +961,11 @@ def grid3d(q, img_stack,
     empt_nb = (occupancy == 0).sum()
 
     # log some information about the grid at the debug level
-    if oob:
-        logger.debug("There are %.2e points outside the grid", oob)
     logger.debug("There are %2e bins in the grid", mean.size)
     if empt_nb:
         logger.debug("There are %.2e values zero in the grid", empt_nb)
 
-    return mean, occupancy, std_err, oob, bounds
+    return mean, occupancy, std_err, bounds
 
 
 def bin_edges_to_centers(input_edges):
@@ -1065,8 +1050,7 @@ def d_to_q(d):
 
 def q_to_twotheta(q, wavelength):
     """
-    Helper function to convert :math:`q` + :math:`\\lambda` to :math:`2\\theta`.
-    The point of this function is to prevent fat-fingered typos.
+    Helper function to convert q to two-theta.
 
     By definition the relationship is:
 
@@ -1103,8 +1087,7 @@ def q_to_twotheta(q, wavelength):
 
 def twotheta_to_q(two_theta, wavelength):
     """
-    Helper function to convert :math:`2\\theta` + :math:`\\lambda` to :math:`q`.
-    The point of this function is to prevent fat-fingered typos.
+    Helper function to convert two-theta to q
 
     By definition the relationship is:
 
@@ -1220,13 +1203,14 @@ def geometric_series(common_ratio, number_of_images, first_term=1):
     geometric_series : list
         time series
 
-    Note
-    ----
-    :math ::
-     a + ar + ar^2 + ar^3 + ar^4 + ...
+    Notes
+    -----
+    .. math::
+        a + ar + ar^2 + ar^3 + ar^4 + ...
 
-     a - first term in the series
-     r - is the common ratio
+    a - first term in the series
+
+    r - is the common ratio
     """
 
     geometric_series = [first_term]

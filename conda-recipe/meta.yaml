@@ -30,42 +30,52 @@ requirements:
 test:
   requires:
     - nose
+    - coverage
   imports:
-    # import all sub-packages and modules
     - skbeam
     - skbeam.diffraction
     - skbeam.fluorescence
-    - skbeam._version
     - skbeam.core
     - skbeam.core.utils
-    - skbeam.core.dpc
     - skbeam.core.feature
+    - skbeam.core.stats
     - skbeam.core.calibration
-    - skbeam.core.arithmetic
+    - skbeam.core.speckle
+    - skbeam.core.dpc
+    - skbeam.core.correlation
     - skbeam.core.recip
+    - skbeam.core.spectroscopy
+    - skbeam.core.mask
+    - skbeam.core.roi
+    - skbeam.core.arithmetic
     - skbeam.core.image
     - skbeam.core.cdi
-    - skbeam.core.roi
-    - skbeam.core.correlation
-    - skbeam.core.spectroscopy
-    - skbeam.core.fitting
+    - skbeam.core.accumulators
+    - skbeam.core.accumulators.histogram
+    - skbeam.core.accumulators.histogram
+    - skbeam.core.accumulators.histogram
+    - skbeam.core.fitting [not win]
     - skbeam.core.fitting.xrf_model
-    - skbeam.core.fitting.background
-    - skbeam.core.fitting.lineshapes
     - skbeam.core.fitting.funcs
     - skbeam.core.fitting.models
+    - skbeam.core.fitting.lineshapes
+    - skbeam.core.fitting.background
     - skbeam.core.fitting.base
     - skbeam.core.fitting.base.parameter_data
     - skbeam.core.constants
     - skbeam.core.constants.basic
     - skbeam.core.constants.xrs
-    - skbeam.core.constants.xrf
+    - skbeam.core.constants.xrf [not win]
     - skbeam.io
-    - skbeam.io.avizo_io
     - skbeam.io.save_powder_output
-    - skbeam.io.binary
-    - skbeam.io.net_cdf_io
+    - skbeam.io.avizo_io
+    # disabled because we are no longer shipping netcdf4 with skbeam
+    #- skbeam.io.net_cdf_io
     - skbeam.io.gsas_file_reader
+    - skbeam.io.binary
+    - skbeam.ext
+    # don't try to import ctrans on windows
+    - skbeam.ext.ctrans [not win]
 
 about:
   home: http://scikit-beam.github.io/scikit-beam/

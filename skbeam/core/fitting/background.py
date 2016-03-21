@@ -48,7 +48,7 @@ import numpy as np
 _defaults = {'con_val_no_bin': 3,
              'con_val_bin': 5,
              'iter_num_no_bin': 3,
-             'iter_num_bin': 5,}
+             'iter_num_bin': 5}
 
 
 def snip_method(spectrum,
@@ -145,7 +145,7 @@ def snip_method(spectrum,
     tmp[tmp < 0] = 0
     fwhm = std_fwhm * np.sqrt(tmp)
 
-    #smooth the background
+    # smooth the background
     s = scipy.signal.boxcar(con_val)
 
     # For background remove, we only care about the central parts
@@ -163,7 +163,7 @@ def snip_method(spectrum,
 
     index = np.arange(n_background)
 
-    #FIRST SNIPPING
+    # FIRST SNIPPING
     for j in range(iter_num):
         lo_index = np.clip(index - window_p,
                            np.max([xmin, 0]),

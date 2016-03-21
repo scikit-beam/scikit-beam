@@ -5,9 +5,9 @@ from numpy.testing import (assert_equal, assert_array_equal,
 from nose.tools import raises
 
 from skbeam.core.cdi import (_dist, gauss, find_support,
-                        pi_modulus, cal_diff_error, cdi_recon,
-                        generate_random_phase_field,
-                        generate_box_support, generate_disk_support)
+                             pi_modulus, cal_diff_error, cdi_recon,
+                             generate_random_phase_field,
+                             generate_box_support, generate_disk_support)
 
 
 def dist_temp(dims):
@@ -131,8 +131,6 @@ def _disk_support_area(sup_radius, shape_v):
 def test_support():
     sup_radius = 20
     a, diff_v = make_synthetic_data()
-    sup = generate_box_support(sup_radius, diff_v.shape)
-
     shape_list = [[100, 100], [100, 100, 100]]
     for v in shape_list:
         yield _box_support_area, sup_radius, v
@@ -153,8 +151,9 @@ def test_recon():
                                   n_iterations=total_n, sw_step=2)
     outv1 = np.abs(outv1)
 
-    outv2, error_dict = cdi_recon(diff_v, init_phase, sup, pi_modulus_flag='Real',
-                                  sw_flag=True, n_iterations=total_n, sw_step=2)
+    outv2, error_dict = cdi_recon(diff_v, init_phase, sup,
+                                  pi_modulus_flag='Real', sw_flag=True,
+                                  n_iterations=total_n, sw_step=2)
     outv2 = np.abs(outv2)
     # compare the area of supports
     assert_array_equal(outv1.shape, outv2.shape)

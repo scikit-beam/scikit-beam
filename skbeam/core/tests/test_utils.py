@@ -33,21 +33,20 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-import logging
 
 import six
 import numpy as np
-
-logger = logging.getLogger(__name__)
-from numpy.testing import (assert_array_equal, assert_array_almost_equal,
-                           assert_almost_equal)
 import sys
 
+import numpy.testing as npt
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_almost_equal)
 from nose.tools import assert_equal, assert_true, raises
 
 import skbeam.core.utils as core
 
-import numpy.testing as npt
+import logging
+logger = logging.getLogger(__name__)
 
 
 def test_bin_1D():
@@ -141,35 +140,25 @@ def test_bin_edges():
             tmp_pdict.pop(drop_key)
             yield _bin_edges_helper, tmp_pdict
 
-    fail_dicts = [{},  # no entries
-
-                  {'range_min': 1.234,
-                   'range_max': 5.678,
-                   'nbins': 42,
-                   'step': np.pi / 10},  # 4 entries
-
-                   {'range_min': 1.234,
-                    'step': np.pi / 10},  # 2 entries
-
-                    {'range_min': 1.234, },  # 1 entry
-
-                   {'range_max': 1.234,
-                   'range_min': 5.678,
-                   'step': np.pi / 10},   # max < min
-
-                   {'range_min': 1.234,
-                   'range_max': 5.678,
-                   'step': np.pi * 10},  # step > max - min
-
-                   {'range_min': 1.234,
-                   'range_max': 5.678,
-                   'nbins': 0},  # nbins == 0
-                ]
+    fail_dicts = [
+        # no entries
+        {},
+        # 4 entries
+        {'range_min': 1.234, 'range_max': 5.678, 'nbins': 42,
+         'step': np.pi / 10},
+        # 2 entries
+        {'range_min': 1.234, 'step': np.pi / 10},
+        # 1 entry
+        {'range_min': 1.234, },
+        # max < min
+        {'range_max': 1.234, 'range_min': 5.678, 'step': np.pi / 10},
+        # step > max - min
+        {'range_min': 1.234, 'range_max': 5.678, 'step': np.pi * 10},
+        # nbins == 0
+        {'range_min': 1.234, 'range_max': 5.678, 'nbins': 0}]
 
     for param_dict in fail_dicts:
         yield _bin_edges_exceptions, param_dict
-
-
 
 
 def test_grid3d():
@@ -206,11 +195,10 @@ def test_grid3d():
                      np.ravel(Z)]).T
 
     (mean, occupancy,
-     std_err, oob, bounds) = core.grid3d(data, I, **param_dict)
+     std_err, bounds) = core.grid3d(data, I, **param_dict)
 
     # check the values are as expected
     npt.assert_array_equal(mean.ravel(), I)
-    npt.assert_equal(oob, 0)
     npt.assert_array_equal(occupancy, np.ones_like(occupancy))
     npt.assert_array_equal(std_err, 0)
 
@@ -228,8 +216,7 @@ def test_process_grid_std_err():
                   'zmin': q_min[2],
                   'xmax': q_max[0],
                   'ymax': q_max[1],
-                  'zmax': q_max[2],
-                  'n_threads': 1}
+                  'zmax': q_max[2]}
     # slice tricks
     # this make a list of slices, the imaginary value in the
     # step is interpreted as meaning 'this many values'
@@ -242,25 +229,23 @@ def test_process_grid_std_err():
     X, Y, Z = np.mgrid[slc]
 
     # make and ravel the image data (which is all ones)
-    I = np.hstack([j * np.ones_like(X).ravel() for j in range(1, 6)])
+    I = np.hstack([j * np.ones_like(X).ravel() for j in range(1, 101)])
 
     # make input data (N*5x3)
-    data = np.vstack([np.tile(_, 5)
+    data = np.vstack([np.tile(_, 100)
                       for _ in (np.ravel(X), np.ravel(Y), np.ravel(Z))]).T
     (mean, occupancy,
-     std_err, oob, bounds) = core.grid3d(data, I, **param_dict)
+     std_err, bounds) = core.grid3d(data, I, **param_dict)
 
     # check the values are as expected
     npt.assert_array_equal(mean,
-                           np.ones_like(X) * np.mean(np.arange(1, 6)))
-    npt.assert_equal(oob, 0)
-    npt.assert_array_equal(occupancy, np.ones_like(occupancy)*5)
+                           np.ones_like(X) * np.mean(np.arange(1, 101)))
+    npt.assert_array_equal(occupancy, np.ones_like(occupancy)*100)
     # need to convert std -> ste (standard error)
-    # according to wikipedia ste = std/sqrt(n), but experimentally, this is
-    # implemented as ste = std / srt(n - 1)
-    npt.assert_array_equal(std_err,
-                           (np.ones_like(occupancy) *
-                            np.std(np.arange(1, 6))/np.sqrt(5 - 1)))
+    # according to wikipedia ste = std/sqrt(n)
+    npt.assert_array_almost_equal(std_err,
+                                  (np.ones_like(occupancy) *
+                                   np.std(np.arange(1, 101))/np.sqrt(100)))
 
 
 def test_bin_edge2center():
@@ -272,8 +257,8 @@ def test_bin_edge2center():
 
 def test_small_verbosedict():
     expected_string = ("You tried to access the key 'b' "
-                   "which does not exist.  "
-                   "The extant keys are: ['a']")
+                       "which does not exist.  "
+                       "The extant keys are: ['a']")
     dd = core.verbosedict()
     dd['a'] = 1
     assert_equal(dd['a'], 1)
@@ -338,16 +323,17 @@ def test_radius_to_twotheta():
     dist_sample = 100
     radius = np.linspace(50, 100)
 
-    two_theta = np.array([0.46364761, 0.47177751, 0.47984053, 0.48783644, 0.49576508,
-                          0.5036263, 0.51142, 0.51914611, 0.52680461, 0.53439548,
-                          0.54191875, 0.54937448, 0.55676277, 0.56408372, 0.57133748,
-                          0.57852421, 0.58564412, 0.5926974, 0.59968432, 0.60660511,
-                          0.61346007, 0.62024949, 0.62697369, 0.63363301, 0.6402278,
-                          0.64675843, 0.65322528, 0.65962874, 0.66596924, 0.67224718,
-                          0.67846301, 0.68461716, 0.6907101, 0.69674228, 0.70271418,
-                          0.70862627, 0.71447905, 0.720273, 0.72600863, 0.73168643,
-                          0.73730693, 0.74287063, 0.74837805, 0.75382971, 0.75922613,
-                          0.76456784, 0.76985537, 0.77508925, 0.78027, 0.78539816])
+    two_theta = np.array(
+        [0.46364761, 0.47177751, 0.47984053, 0.48783644, 0.49576508,
+         0.5036263,   0.51142,    0.51914611, 0.52680461, 0.53439548,
+         0.54191875,  0.54937448, 0.55676277, 0.56408372, 0.57133748,
+         0.57852421,  0.58564412, 0.5926974,  0.59968432, 0.60660511,
+         0.61346007,  0.62024949, 0.62697369, 0.63363301, 0.6402278,
+         0.64675843,  0.65322528, 0.65962874, 0.66596924, 0.67224718,
+         0.67846301,  0.68461716, 0.6907101,  0.69674228, 0.70271418,
+         0.70862627,  0.71447905, 0.720273,   0.72600863, 0.73168643,
+         0.73730693,  0.74287063, 0.74837805, 0.75382971, 0.75922613,
+         0.76456784,  0.76985537, 0.77508925, 0.78027,    0.78539816])
 
     assert_array_almost_equal(two_theta,
                               core.radius_to_twotheta(dist_sample,
@@ -417,7 +403,6 @@ def test_subtract_reference_images():
         six.reraise(AssertionError, ae, sys.exc_info()[2])
     # test that the image subtraction values are behaving as expected
     img_sum_lst = [img_dims * img_dims * val for val in range(num_images)]
-    total_val = sum(img_sum_lst)
     expected_return_val = 0
     dark_val = 0
     for idx, (is_dark, img_val) in enumerate(zip(is_dark_lst, img_sum_lst)):
@@ -451,19 +436,22 @@ def _fail_img_to_relative_xyi_helper(input_dict):
 def test_img_to_relative_fails():
     fail_dicts = [
         # invalid values of x and y
-        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_x': -1, 'pixel_size_y': -1},
+        {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_x': -1,
+         'pixel_size_y': -1},
         # valid value of x, no value for y
-        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_x': 1},
+        {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_x': 1},
         # valid value of y, no value for x
-        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_y': 1},
+        {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_y': 1},
         # valid value of y, invalid value for x
-        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_x': -1, 'pixel_size_y': 1},
+        {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_x': -1,
+         'pixel_size_y': 1},
         # valid value of x, invalid value for y
-        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_x': 1, 'pixel_size_y': -1},
+        {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_x': 1,
+         'pixel_size_y': -1},
         # invalid value of x, no value for y
-        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_x': -1,},
+        {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_x': -1},
         # invalid value of y, no value for x
-        {'img': np.ones((100, 100)),'cx': 50, 'cy': 50, 'pixel_size_y': -1,},
+        {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_y': -1}
     ]
     for failer in fail_dicts:
         yield _fail_img_to_relative_xyi_helper, failer

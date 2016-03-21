@@ -41,11 +41,10 @@
 ########################################################################
 
 """
-    This is the module for reading files created in GSAS file formats
-    https://subversion.xor.aps.anl.gov/trac/pyGSAS
+This is the module for reading files created in GSAS file formats
+https://subversion.xor.aps.anl.gov/trac/pyGSAS
 """
 from __future__ import absolute_import, division, print_function
-import six
 import os
 import numpy as np
 
@@ -180,7 +179,6 @@ def _get_esd_data(file):
                 else:
                     err.append(0.0)
                 j += 1
-    N = len(tth)
     return [np.array(tth), np.array(intensity), np.array(err)]
 
 
@@ -237,13 +235,13 @@ def _get_std_data(file):
                         intensity.append(yi)
                         err.append(1.0/vi)
                 j += 1
-    N = len(tth)
     return [np.array(tth), np.array(intensity), np.array(err)]
 
 
 # find the which function to use according to mode of the GSAS file
 # mode could be "STD", "ESD" or "FXYE"
-_func_look_up = {'STD':_get_std_data, 'ESD':_get_esd_data, 'FXYE':_get_fxye_data}
+_func_look_up = {'STD': _get_std_data, 'ESD': _get_esd_data,
+                 'FXYE': _get_fxye_data}
 
 
 def _sfloat(S):

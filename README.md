@@ -50,3 +50,9 @@ pip install nose coverage setuptools
 ```
 python run_tests.py
 ```
+
+**and you can check the code coverage with**
+```
+coverage run run_tests.py
+coverage report -m
+```
