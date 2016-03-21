@@ -95,10 +95,10 @@ class RadialProjector(ArrayProjector) :
         """
         Parameters:
         -----------
-        rows,columns:  shape of image to be integrated
+        rows,columns:  shape of image to be projected
         xc,yc:         location (in pixels) of origin (defaults to center of image)
-        rmin,rmax:     radial range to include in integration, in pixels
-        phimin,phimax: phi range to include in integration, in degrees
+        rmin,rmax:     radial range to include in projection, in pixels
+        phimin,phimax: phi range to include in projection, in degrees
         
         """   
         # flip these to make it more intuitive for users who will use
