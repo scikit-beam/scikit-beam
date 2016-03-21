@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import math
+from __future__ import division
 import numpy as np
 
 """
@@ -9,7 +9,7 @@ authors: Mikhail Dubrovin, TJ Lane, Christopher O'Grady
 
 class ArrayProjector(object):
 
-    def __init__(self, bin_values, weights=None, nbins=101, norm=True):
+    def __init__(self, bin_values, nbins, weights=None, norm=True):
         """
         Parameters
         ----------
@@ -19,7 +19,7 @@ class ArrayProjector(object):
         weights : np.ndarray
             A weight for each pixel with the same shape as bin_values (can be zero to ignore a pixel)
         nbins : int
-            The number of bins to employ. If `None` guesses a good value.
+            The number of bins to employ.
         """
 
         self.bin_values = bin_values
@@ -27,16 +27,21 @@ class ArrayProjector(object):
         self.nbins = nbins
         self.norm = norm
 
-        self.binvalRange = self.bin_values.max() - self.bin_values.min()
-        self.bin_width = self.binvalRange / (float(nbins) - 1)
+        if weights is not None:
+            included_bin_values = bin_values[weights!=0]
+            binvalRange = included_bin_values.max() - included_bin_values.min()
+        else:
+            binvalRange = self.bin_values.max() - self.bin_values.min()
+
+        self.bin_width = binvalRange / (float(nbins) - 1)
 
         self._bin_assignments = np.floor( (self.bin_values - self.bin_values.min()) / self.bin_width ).astype(np.int32)
         if weights is None:
             self._normalization_array = (np.bincount( self._bin_assignments.flatten() ) \
-                                             + 1e-100).astype(np.float)
+                                             + np.finfo(np.float).eps).astype(np.float)
         else:
             self._normalization_array = (np.bincount( self._bin_assignments.flatten(), weights=self.weights.flatten() ) \
-                                             + 1e-100).astype(np.float)
+                                             + np.finfo(np.float).eps).astype(np.float)
 
         assert self.nbins >= self._bin_assignments.max() + 1, 'incorrect bin assignments'
         self._normalization_array = self._normalization_array[:self.nbins]
@@ -67,14 +72,14 @@ class ArrayProjector(object):
             if not (image.shape == self.weights.shape):
                 raise ValueError('`image` and `weights` must have the same shape')
 
-        bin_values = np.bincount(self._bin_assignments.flatten(), weights=weights)
+        histogram = np.bincount(self._bin_assignments.flatten(), weights=weights)
 
         if self.norm:
-            bin_values /= self._normalization_array
+            histogram /= self._normalization_array
 
-        assert bin_values.shape[0] == self.nbins
+        assert histogram.shape[0] == self.nbins
 
-        return bin_values
+        return histogram
 
     @property
     def bin_centers(self):
@@ -91,15 +96,15 @@ class RadialProjector(ArrayProjector) :
     Project a 2D image onto a radial axis
     """
     
-    def __init__(self, rows, columns, xc=None, yc=None, rmin=None, rmax=None, phimin=None, phimax=None, nbins=101, weights=None, norm=True):
+    def __init__(self, rows, columns, nbins, xc=None, yc=None, rmin=None, rmax=None, phimin=None, phimax=None, weights=None, norm=True):
         """
         Parameters:
         -----------
         rows,columns:  shape of image to be projected
+        nbins:         number of bins in projected histogram
         xc,yc:         location (in pixels) of origin (default: center of image)
         rmin,rmax:     radial range to include in projection, in pixels (default: no limits)
         phimin,phimax: phi range to include in projection, in degrees (default: no limits)
-        nbins:         number of bins in projected histogram
         weights:       np.ndarray.  weight to be applied to each pixel in image.  this can
                        be used as a mask if the weight is set to zero.
         norm:          boolean indicating whether bin entries in the projected histogram should be divided
@@ -109,13 +114,11 @@ class RadialProjector(ArrayProjector) :
         # this with arrays (matrices).  numpy.meshgrid (version 1.6) uses
         # cartesian (non-matrix) coordinates, so we need to do the flip
 
-        xsize   = columns
-        ysize   = rows
+        xsize = columns
+        ysize = rows
 
-        xc    = xsize/2                  if xc    is None else xc
-        yc    = ysize/2                  if yc    is None else yc
-        rmin  = 0                        if rmin  is None else rmin
-        rmax  = math.sqrt(xc**2 + yc**2) if rmax  is None else rmax
+        xc = xsize//2 if xc is None else xc
+        yc = ysize//2 if yc is None else yc
 
         # produce all index arrays
         x = np.arange(xsize) - xc
@@ -123,8 +126,10 @@ class RadialProjector(ArrayProjector) :
         xgrid, ygrid = np.meshgrid(x,y)
  
         rpix  = np.sqrt(xgrid**2 + ygrid**2)
-        # flip y here so that the angles correspond well to matplotlib plots.
-        phipix = np.arctan2(-ygrid,xgrid) * 180 / np.pi
+
+        if phimin is not None or phimax is not None:
+            # flip y here so that the angles correspond well to matplotlib plots.
+            phipix = np.arctan2(-ygrid,xgrid) * 180 / np.pi
         
         if weights is None and (None in (phimin,phimax,rmin,rmax)):
             weights = np.ones((rows,columns))
@@ -137,19 +142,4 @@ class RadialProjector(ArrayProjector) :
         if rmax is not None:
             weights[rpix>rmax] = 0
 
-        super(RadialProjector,self).__init__(rpix, weights, nbins=nbins, norm=norm)
-
-    def __call__(self,image):
-        """
-        Bin pixel intensities.
-        
-        Parameters
-        ----------            
-        image : np.ndarray
-            The intensity at each pixel
-        Returns
-        -------
-        bin_values : np.ndarray
-            The average intensity in each bin
-        """
-        return super(RadialProjector,self).__call__(image)
+        super(RadialProjector,self).__init__(rpix, nbins, weights, norm=norm)
