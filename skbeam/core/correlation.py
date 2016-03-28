@@ -282,7 +282,7 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
     .. [1] D. Lumma, L. B. Lurio, S. G. J. Mochrie and M. Sutton,
         "Area detector based photon correlation in the regime of
         short data batches: Data reduction for dynamic x-ray
-        scattering," Rev. Sci. Instrum., vol 70, p 3274-3289, 2000.
+        scattering," Rev. Sci. Instrum., vol 71, p 3274-3289, 2000.
     """
 
     if internal_state is None:
