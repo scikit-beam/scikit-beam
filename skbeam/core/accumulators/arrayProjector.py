@@ -27,23 +27,29 @@ class ArrayProjector(object):
         self.nbins = nbins
         self.norm = norm
 
+        # _ibv = included bin values
         if weights is not None:
-            included_bin_values = bin_values[weights!=0]
-            binvalRange = included_bin_values.max() - included_bin_values.min()
+            self._ibv = ( weights!=0 )
         else:
-            binvalRange = self.bin_values.max() - self.bin_values.min()
+            self._ibv = np.s_[:] # slice that returns arr unchanged
 
-        self.bin_width = binvalRange / (float(nbins) - 1)
+        bv = self.bin_values[self._ibv]
+        wt = self.weights[self._ibv]
 
-        self._bin_assignments = np.floor( (self.bin_values - self.bin_values.min()) / self.bin_width ).astype(np.int32)
+        binvalRange = bv.max() - bv.min()
+        self.bin_width = binvalRange / (float(self.nbins) - 1)
+
+        self._bin_assignments = np.floor( (bv - bv.min()) / self.bin_width ).astype(np.int32)
         if weights is None:
             self._normalization_array = (np.bincount( self._bin_assignments.flatten() ) \
                                              + np.finfo(np.float).eps).astype(np.float)
         else:
-            self._normalization_array = (np.bincount( self._bin_assignments.flatten(), weights=self.weights.flatten() ) \
+            self._normalization_array = (np.bincount( self._bin_assignments.flatten(), weights=wt.flatten() ) \
                                              + np.finfo(np.float).eps).astype(np.float)
 
-        assert self.nbins >= self._bin_assignments.max() + 1, 'incorrect bin assignments'
+        assert self.nbins >= self._bin_assignments.max() + 1, \
+            'incorrect bin assignments (%d %d)'% (self.nbins, 
+                                                  self._bin_assignments.max() + 1)
         self._normalization_array = self._normalization_array[:self.nbins]
 
         return
@@ -58,7 +64,7 @@ class ArrayProjector(object):
             The intensity at each pixel
         Returns
         -------
-        bin_values : np.ndarray
+        histogram : np.ndarray
             The average intensity in the bin
         """
 
@@ -72,12 +78,13 @@ class ArrayProjector(object):
             if not (image.shape == self.weights.shape):
                 raise ValueError('`image` and `weights` must have the same shape')
 
-        histogram = np.bincount(self._bin_assignments.flatten(), weights=weights)
+        histogram = np.bincount(self._bin_assignments.flatten(), 
+                                weights=weights[self._ibv.flatten()])
 
         if self.norm:
             histogram /= self._normalization_array
 
-        assert histogram.shape[0] == self.nbins
+        #assert histogram.shape[0] == self.nbins, '%d %d' % (histogram.shape[0], self.nbins)
 
         return histogram
 
@@ -89,7 +96,7 @@ class ArrayProjector(object):
         bin_centers : ndarray, float
             The center of each bin.
         """
-        return (np.arange(self.nbins) + 0.5) * self.bin_width + self.bin_values.min()
+        return (np.arange(self.nbins) + 0.5) * self.bin_width + self.bin_values[self._ibv].min()
 
 class RadialProjector(ArrayProjector) :
     """ 

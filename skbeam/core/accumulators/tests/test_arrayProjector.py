@@ -1,35 +1,33 @@
 from skbeam.core.accumulators.arrayProjector import RadialProjector
 import numpy as np
 
-def MakeImage(shape) :
-    # Create test image - a sinc function, centered in the middle of the image
-    # Integrating in phi about center, the integral will become sin(x)    
+class TestRadialIntegrator(object):
 
-    xsize, ysize = shape
-    ratio = float(ysize)/float(xsize)
-    xmin, xmax = -4, 6 
-    ymin, ymax = -7*ratio, 3*ratio
+    def setup(self):
 
-    xarr = np.linspace(xmin, xmax, xsize)
-    yarr = np.linspace(ymin, ymax, ysize)
-    xgrid, ygrid = np.meshgrid(xarr, yarr)
-    rgrid = np.sqrt(xgrid**2 + ygrid**2)
-    image = np.abs(np.sinc(rgrid))    
-    return image
+        # Create test image - a sinc function, centered in the middle of the image
+        # Integrating in phi about center, the integral will become sin(x)    
 
-import matplotlib.pyplot as plt
+        xsize, ysize = (1024, 1024)
 
-def testRadialProjector():
+        xarr = np.arange(xsize)
+        yarr = np.arange(ysize)
+        xgrid, ygrid = np.meshgrid(xarr, yarr)
+        self.rgrid = np.sqrt(xgrid**2 + ygrid**2)
+        self.image = np.sinc(self.rgrid / 100.)
 
-    image = MakeImage((1024,1024))
-    mask = np.ones_like(image, dtype=np.int)
-    normImage = np.ones_like(image, dtype=np.int)
+    def testRadialProjector(self):
 
-    ysize, xsize = image.shape
-    
-    radproj = RadialProjector(xsize, ysize, xc=410, yc=718, rmin=0, rmax=1000, nbins=1000, norm=True)
+        ysize, xsize = self.image.shape
+        radproj = RadialProjector(xsize, ysize, xc=0, yc=0, rmin=0.1, rmax=1000, nbins=100, norm=False)
 
-    projection = radproj(image)
+        projection = radproj(self.image)
+        projection /= projection.max()
+        print radproj.bin_centers
+        ref = np.sin(radproj.bin_centers/100.*np.pi)
 
-    plt.plot(radproj.bin_centers, projection)
-    plt.show()    
+        from matplotlib import pyplot as plt
+        plt.figure()
+        plt.plot(projection)
+        plt.plot(ref)
+        plt.show()
