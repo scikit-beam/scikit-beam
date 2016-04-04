@@ -1,19 +1,17 @@
 
-Complete Referece (API)
-=======================
+Complete Reference (API)
+========================
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
-   core
-   image
-   recip
-   dpc
-   rcparams
-   spectroscopy
-   io/index
-   fitting/index
-   constants
-   calibration
+   diffraction
+   fluorescence
+   core/index
+   io/avizo_io
+   io/binary
+   io/gsas_file_reader
+   io/net_cdf_io
+   io/save_powder_output

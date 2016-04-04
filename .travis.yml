@@ -1,27 +1,60 @@
 language: python
 sudo: false
 
+addons:
+  apt_packages:
+      - pandoc
+env:
+  global:
+    - RUN_TESTS: true
+    - BUILD_DOCS: false
+    - GH_REF: github.com/scikit-beam/scikit-beam.git
+    - secure: "KzntGlmLDUZlAB8ZiSRBtONJypv4atrnFxl+THCW8kg6YbiODcCxG9cez7mfmh63wpJ54+zeGvgGljeVvjb7bjB2p+4hZy+mLoP9xoE1w5qF4XaQ5YTOYaSQqCeWa5cEIi+854gFX7gOfW5qL+EJf7h3HtmndI15zaU5gOPjSDU="
+matrix:
+  include:
+    - python: 3.5
+      env: BUILD_DOCS=true RUN_TESTS=false
 python:
   - 2.7
   - 3.4
+  - 3.5
 
 before_install:
   - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-3.5.5-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.5.5-Linux-x86_64.sh -O miniconda.sh; fi
   - chmod +x miniconda.sh
   - ./miniconda.sh -b -p /home/travis/mc
   - export PATH=/home/travis/mc/bin:$PATH
-  - wget https://gist.githubusercontent.com/tacaswell/128bb482f845feb024eb/raw/5cf21dc03a354fc87140d4a75e17cb5c076a0517/.condarc -O /home/travis/.condarc
 
 install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
-  - conda update conda --yes
-  - conda create -n testenv --yes pip nose python=$TRAVIS_PYTHON_VERSION lmfit xraylib numpy scipy scikit-image netcdf4 six
+  - conda config --set always_yes true
+  - conda update conda
+  - conda config --add channels scikit-xray
+  - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4 flake8
   - source activate testenv
-  - python setup.py install
-  - pip install coveralls
+  # # need to build_ext -i for the tests so that the .so is local to the source
+  # # code.  We could also setup.py develop, but I'm not sure if that is any
+  # # better
+  - python setup.py install build_ext -i
+  - pip install codecov
 
 script:
-  - python run_tests.py
+  - if [ $RUN_TESTS == 'true' ]; then coverage run run_tests.py; fi;
+  - if [ $RUN_TESTS == 'true' ]; then flake8 $TRAVIS_BUILD_DIR/skbeam; fi;
+  - if [ $BUILD_DOCS == 'true' ]; then
+      conda install sphinx numpydoc ipython jupyter pip matplotlib;
+      pip install sphinx_bootstrap_theme sphinxcontrib-napoleon;
+      cd ..;
+      git clone https://github.com/scikit-beam/scikit-beam-examples.git;
+      cd scikit-beam/doc;
+      chmod +x build_docs.sh;
+      ./build_docs.sh;
+    fi;
 
 after_success:
-  coveralls
+  - if [ $RUN_TESTS == 'true' ]; then codecov; fi;
+  - if [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PULL_REQUEST == 'false' ] && [ $BUILD_DOCS ]; then
+      cd doc;
+      chmod +x push_docs.sh;
+      ./push_docs.sh;
+    fi;

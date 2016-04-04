@@ -2,27 +2,54 @@
 
 import setuptools
 from distutils.core import setup, Extension
-from setupext import ext_modules
+import versioneer
 import numpy as np
 import os
+import sys
+from Cython.Build import cythonize
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
 # README file and 2) it's easier to type in the README file than to put a raw
 # string in below ...
+
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
+
+def c_ext():
+    if os.name == 'nt':
+        # we are on windows. Do not compile the extension. Tons of errors are
+        # spit out when we compile on AppVeyor.
+        # https://gist.github.com/ericdill/bdc86eb81e338ca4624b
+        return []
+
+    # compile for MacOS without openmp
+    if sys.platform == 'darwin':
+        return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'])]
+    # compile the extension on Linux.
+    return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'],
+                      extra_compile_args=['-fopenmp'],
+                      extra_link_args=['-lgomp'])]
+
+
+def cython_ext():
+    return cythonize("**/*.pyx")
+
+
 setup(
-    name='scikit-xray',
-    version='0.0.3',
+    name='scikit-beam',
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     author='Brookhaven National Lab',
     description="Data analysis tools for X-ray science",
     packages=setuptools.find_packages(exclude=['doc']),
     include_dirs=[np.get_include()],
-    package_data={'skxray.constants': ['data/*.dat']},
-    ext_modules=ext_modules,
-    url='http://github.com/Nikea/scikit-xray',
+    package_data={'skbeam.core.constants': ['data/*.dat']},
+    install_requires=['six', 'numpy'],  # essential deps only
+    ext_modules=c_ext() + cython_ext(),
+    url='http://github.com/scikit-beam/scikit-beam',
     keywords='Xray Analysis',
     license='BSD',
     classifiers=['Development Status :: 3 - Alpha',
@@ -34,5 +61,5 @@ setup(
                  "Topic :: Software Development :: Libraries",
                  "Intended Audience :: Science/Research",
                  "Intended Audience :: Developers",
-                 ], requires=['numpy']
+                 ],
     )

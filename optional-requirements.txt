@@ -1,0 +1,5 @@
+lmfit==0.8.1
+scipy
+scikit-image
+xraylib
+netCDF4

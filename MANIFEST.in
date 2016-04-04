@@ -1,0 +1,4 @@
+include versioneer.py
+include skbeam/_version.py
+include requirements.txt
+include optional-requirements.txt

@@ -7,22 +7,32 @@ Here's the long and short of it:
 
 1. If you are a first-time contributor:
 
-   * Go to `https://github.com/Nikea/scikit-xray
-     <http://github.com/Nikea/scikit-xray>`_ and click the
+   * Go to `https://github.com/scikit-beam/scikit-beam
+     <http://github.com/scikit-beam/scikit-beam>`_ and click the
      "fork" button to create your own copy of the project.
 
    * Clone the project to your local computer::
 
-      git clone git@github.com:your-username/scikit-xray.git
+      git clone git@github.com:your-username/scikit-beam.git
+      or ::
+      git clone https://github.com/your-username/scikit-beam.git
 
    * Add the upstream repository::
 
-      git remote add upstream git@github.com:Nikea/scikit-xray.git
+      git remote add upstream git@github.com:scikit-beam/scikit-beam.git
+      or ::
+      git remote add upstream https://github.com/scikit-beam/scikit-beam.git
+
+   * Fetch the upstream repository::
+
+      git fetch upstream
 
    * Now, you have remote repositories named:
 
-      - ``upstream``, which refers to the ``scikit-xray`` repository
-      - ``origin``, which refers to your personal fork
+      git remote -v
+
+     - ``upstream``, which refers to the ``scikit-beam`` repository
+     - ``origin``, which refers to your personal fork
 
 2. Develop your contribution:
 
@@ -39,13 +49,21 @@ Here's the long and short of it:
 
    * Commit locally as you progress (``git add`` and ``git commit``)
 
-3. To submit your contribution:
+3. Test your contribution
+
+   * at the root of the git repository, execute the following command ::
+      
+      python run_tests.py
+  
+   * Inspect the output to ensure that all tests passed
+  
+4. To submit your contribution:
 
    * Push your changes back to your fork on GitHub::
 
       git push origin transform-speedups
 
-  * **Explain your contribution.** Include a description aimed at someone
+   * **Explain your contribution.** Include a description aimed at someone
      who may not be following the issue closely. If your contribution
      includes new functionality or enhancements, include a link to an
      IPython notebook demonstrating its use. And, as always, include tests.
@@ -53,12 +71,12 @@ Here's the long and short of it:
    * Go to GitHub. The new branch will show up with a green Pull Request
      button - click it.
 
-For a more detailed discussion, See `scikit-xray dev guide
-<https://github.com/Nikea/scikit-xray/tree/master/doc/resource/dev_guide>`_.
+For a more detailed discussion, See `scikit-beam dev guide
+<https://github.com/scikit-beam/scikit-beam/tree/master/doc/resource/dev_guide>`_.
 Also see these scikit-image :doc:`detailed documents
 <gitwash/index>` on how to use Git with ``scikit-image``
 (`<http://scikit-image.org/docs/dev/gitwash/index.html>`_) and appropriately
-translate scikit-image/scikit-image to Nikea/scikit-xray.
+translate scikit-image/scikit-image to scikit-beam/scikit-beam.
 
 4. Review process:
 
@@ -181,31 +199,31 @@ To measure the test coverage, install
 
   $ python run_tests.py
 
-This will print a report with one line for each file in `skxray`,
+This will print a report with one line for each file in `skbeam`,
 detailing the test coverage::
 
   Name                                 Stmts   Miss  Cover   Missing
   ------------------------------------------------------------------
-  skxray.calibration                      48      0   100%
-  skxray.constants                       153      2    99%   783, 836
-  skxray.core                            306    113    63%   63-64, 101-105,
+  skbeam.calibration                      48      0   100%
+  skbeam.constants                       153      2    99%   783, 836
+  skbeam.core                            306    113    63%   63-64, 101-105,
         108, 113-146, 149-162, 167-172, 176, 179, 186-191, 237-240, 245-262,
         266-270, 273-277, 280, 283, 289-294, 298-300, 304-334, 476, 658, 804,
         894-903, 911, 915, 942, 960,
   963, 1158
-  skxray.feature                          58      4    93%   133-136, 177, 216
-  skxray.fitting                          15      1    93%   77
-  skxray.fitting.api                      11      0   100%
-  skxray.fitting.background               51      4    92%   127, 133, 141, 163
-  skxray.fitting.base                      4      0   100%
-  skxray.fitting.base.parameter_data       9      0   100%
-  skxray.fitting.lineshapes               56      1    98%   137
-  skxray.fitting.models                   40      2    95%   126, 156
-  skxray.image                            14      0   100%
-  skxray.io                                2      0   100%
-  skxray.io.net_cdf_io                    15     10    33%   81-105
-  skxray.recip                            35      4    89%   57-58, 142, 147
-  skxray.spectroscopy                     69      2    97%   133, 267
+  skbeam.feature                          58      4    93%   133-136, 177, 216
+  skbeam.fitting                          15      1    93%   77
+  skbeam.fitting.api                      11      0   100%
+  skbeam.fitting.background               51      4    92%   127, 133, 141, 163
+  skbeam.fitting.base                      4      0   100%
+  skbeam.fitting.base.parameter_data       9      0   100%
+  skbeam.fitting.lineshapes               56      1    98%   137
+  skbeam.fitting.models                   40      2    95%   126, 156
+  skbeam.image                            14      0   100%
+  skbeam.io                                2      0   100%
+  skbeam.io.net_cdf_io                    15     10    33%   81-105
+  skbeam.recip                            35      4    89%   57-58, 142, 147
+  skbeam.spectroscopy                     69      2    97%   133, 267
   ------------------------------------------------------------------
   TOTAL                                  886    143    84%
   ----------------------------------------------------------------------
@@ -222,14 +240,14 @@ Travis-CI checks all unittests in the project to prevent breakage.
 Before sending a pull request, you may want to check that Travis-CI
 successfully passes all tests. To do so,
 
-   * Go to `Travis-CI <http://travis-ci.org/>`__ and follow the Sign In link at the top
+    * Go to `Travis-CI <http://travis-ci.org/>`__ and follow the Sign In link at the top
 
-   * Go to your `profile page <https://travis-ci.org/profile>`__ and switch on your
-   scikit-xray fork
+    * Go to your `profile page <https://travis-ci.org/profile>`__ and switch on your
+      scikit-beam fork
 
 It corresponds to steps one and two in
 `Travis-CI documentation <http://about.travis-ci.org/docs/user/getting-started/>`__
-(Step three is already done in scikit-xray).
+(Step three is already done in scikit-beam).
 
 Thus, as soon as you push your code to your fork, it will trigger Travis-CI,
 and you will receive an email notification when the process is done.
@@ -241,4 +259,4 @@ Every time Travis is triggered, it also calls on `Coveralls
 Bugs
 ----
 
-Please `report bugs on GitHub <https://github.com/Nikea/scikit-xray/issues>`_.
+Please `report bugs on GitHub <https://github.com/scikit-beam/scikit-beam/issues>`_.

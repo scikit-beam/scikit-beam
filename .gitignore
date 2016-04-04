@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 
+# NFS crud
+.nfs*
+
 # C extensions
 *.so
 
@@ -75,4 +78,21 @@ docs/_build/
 *.DAT
 
 #generated documntation files
-doc/resource/api/generated/
+generated/
+
+#ipython notebook
+.ipynb_checkpoints/
+
+#vim
+*.swp
+
+#data files
+*.zip
+*.jpg
+
+# ctags
+.tags*
+/tags
+
+# Generated cython files in any subdirectory of /skbeam/
+/skbeam/**/*.c

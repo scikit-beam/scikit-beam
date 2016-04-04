@@ -1,5 +1,5 @@
 package:
-  name: scikit-xray
+  name: scikit-beam
   version: {{ environ['GIT_DESCRIBE_TAG'] }}.post{{ environ['GIT_DESCRIBE_NUMBER'] }}
 
 source:
@@ -16,6 +16,7 @@ requirements:
     - setuptools
     - numpy
     - six
+    - cython
   run:
     - python
     - numpy
@@ -23,29 +24,59 @@ requirements:
     - six
     - xraylib
     - scikit-image
-    - lmfit
-    - netcdf4
+    - lmfit ==0.8.3
+    - netcdf4  # optional, required for skbeam.io
 
 test:
   requires:
     - nose
+    - coverage
   imports:
-     - skxray
-     - skxray.core
-     - skxray.calibration
-     - skxray.constants
-     - skxray.constants.api
-     - skxray.dpc
-     - skxray.feature
-     - skxray.image
-     - skxray.recip
-     - skxray.diff_roi_choice
-     - skxray.spectroscopy
-     - skxray.fitting
-     - skxray.fitting.api
-     - skxray.io
-     - skxray.io.api
+    - skbeam
+    - skbeam.diffraction
+    - skbeam.fluorescence
+    - skbeam.core
+    - skbeam.core.utils
+    - skbeam.core.feature
+    - skbeam.core.stats
+    - skbeam.core.calibration
+    - skbeam.core.speckle
+    - skbeam.core.dpc
+    - skbeam.core.correlation
+    - skbeam.core.recip
+    - skbeam.core.spectroscopy
+    - skbeam.core.mask
+    - skbeam.core.roi
+    - skbeam.core.arithmetic
+    - skbeam.core.image
+    - skbeam.core.cdi
+    - skbeam.core.accumulators
+    - skbeam.core.accumulators.histogram
+    - skbeam.core.accumulators.histogram
+    - skbeam.core.accumulators.histogram
+    - skbeam.core.fitting [not win]
+    - skbeam.core.fitting.xrf_model
+    - skbeam.core.fitting.funcs
+    - skbeam.core.fitting.models
+    - skbeam.core.fitting.lineshapes
+    - skbeam.core.fitting.background
+    - skbeam.core.fitting.base
+    - skbeam.core.fitting.base.parameter_data
+    - skbeam.core.constants
+    - skbeam.core.constants.basic
+    - skbeam.core.constants.xrs
+    - skbeam.core.constants.xrf [not win]
+    - skbeam.io
+    - skbeam.io.save_powder_output
+    - skbeam.io.avizo_io
+    # disabled because we are no longer shipping netcdf4 with skbeam
+    #- skbeam.io.net_cdf_io
+    - skbeam.io.gsas_file_reader
+    - skbeam.io.binary
+    - skbeam.ext
+    # don't try to import ctrans on windows
+    - skbeam.ext.ctrans [not win]
 
 about:
-  home: http://Nikea.github.io/scikit-xray/
+  home: http://scikit-beam.github.io/scikit-beam/
   license: 3-Clause BSD
