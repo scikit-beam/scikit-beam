@@ -40,6 +40,8 @@ install:
 
 before_script:
 - if [ "${TEST}" == "extra" ]; then
+        GIT_TARGET_EXTRA="+refs/heads/${TRAVIS_BRANCH}";
+        GIT_SOURCE_EXTRA="+refs/pull/${TRAVIS_PULL_REQUEST}/merge";
         mkdir ~/repo-clone && cd ~/repo-clone &&
         git init && git remote add -t ${TRAVIS_BRANCH} origin git://github.com/${TRAVIS_REPO_SLUG}.git &&
         git fetch origin ${GIT_TARGET_EXTRA} &&
@@ -62,7 +64,6 @@ script:
   - if [ $BUILD_DOCS == 'true' ]; then
       echo -e "Estimated content size difference = ${SIZE_DIFF} kB" &&
       test ${SIZE_DIFF} -lt 100;
-      check_output "repo size check";
     fi;
   - if [ $BUILD_DOCS == 'true' ]; then
     conda install sphinx numpydoc ipython jupyter pip matplotlib;
