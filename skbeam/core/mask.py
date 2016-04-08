@@ -123,15 +123,12 @@ def mask_edge(img_shape, edge_size):
         Number of pixels to mask from the edge
     Returns
     --------
-    1darray:
-        The raveled mask array, bad pixels are 0
+    2darray:
+        The mask array, bad pixels are 0
     """
-    mask = np.ones(img_shape)
-    mask[:, :edge_size] = 0
-    mask[:, -edge_size:] = 0
-    mask[:edge_size, :] = 0
-    mask[-edge_size:, :] = 0
-    return mask.ravel().astype(bool)
+    mask = np.zeros(img_shape, dtype=bool)
+    mask[edge_size:-edge_size, edge_size:-edge_size] = True
+    return mask
 
 
 def ring_blur_mask(img, r, rsize, alpha, bins=None, mask=None):
@@ -156,8 +153,8 @@ def ring_blur_mask(img, r, rsize, alpha, bins=None, mask=None):
         A starting flattened mask
     Returns
     --------
-    1darray:
-        The flattened mask
+    2darray:
+        The mask
     """
 
     if mask is None:
@@ -186,4 +183,4 @@ def ring_blur_mask(img, r, rsize, alpha, bins=None, mask=None):
     too_hi = img > upper[int_r]
 
     mask = mask * ~too_low * ~too_hi
-    return mask.astype(bool).ravel()
+    return mask.astype(bool)
