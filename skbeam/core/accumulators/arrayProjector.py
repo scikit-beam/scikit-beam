@@ -40,7 +40,7 @@ class ArrayProjector(object):
         binvalRange = bv.max() - bv.min()
         # add a little bit to not have the bv.max() value create an extra bin
         # in the np.floor statement below
-        binvalRange *= 1.0+1e-8 
+        binvalRange *= 1.0+1e-9
         self.bin_width = binvalRange / (float(self.nbins))
 
         self._bin_assignments = np.floor( (bv - bv.min()) / self.bin_width ).astype(np.int32)
@@ -104,7 +104,10 @@ class ArrayProjector(object):
 
 class RadialProjector(ArrayProjector) :
     """ 
-    Project a 2D image onto a radial axis
+    Project a 2D image onto a radial axis.
+    NOTE: This class provides a "cartesian" interface as viewed in a matplotlib plot
+    meaning that the origin lies at the lower left, x increases from left to right,
+    and y increases from bottom to top.
     """
     
     def __init__(self, xsize, ysize, nbins, xc=None, yc=None, rmin=None, rmax=None, phimin=None, phimax=None, weights=None, norm=True):
@@ -112,12 +115,17 @@ class RadialProjector(ArrayProjector) :
         Parameters:
         -----------
         xsize,ysize:   shape of image in pixels (NOTE: this is in "cartesian" form
-                       so xsize/ysize correspond to columns/rows respectively in the "matrix" form
+                       so xsize/ysize correspond to the columns/rows (shape[1]/shape[0]) of the
+                       "matrix" form of an array.
         nbins:         number of bins in projected histogram
         xc,yc:         location (in pixels) of origin (default: center of image).  These are
-                       in "cartesian" form, so lie at the lower-left of a matplotlib plot.
+                       in "cartesian" form, so the origin (0,0) is located at the lower-left
+                       of a matplotlib/pyqtgraph plot of an array.
         rmin,rmax:     radial range to include in projection, in pixels (default: no limits)
-        phimin,phimax: phi range to include in projection, in degrees (default: no limits)
+        phimin,phimax: phi range to include in projection, in degrees (default: no limits).
+                       0 degrees corresponds to the x-axis (left-to-right on a matplotlib
+                       or pyqtgraph plot).  90 degrees corresponds to the y-axis (bottom-to-top
+                       on a matplotlib or pyqtgraph plot).
         weights:       np.ndarray.  weight to be applied to each pixel in image.  this can
                        be used as a mask if the weight is set to zero.
         norm:          boolean indicating whether bin entries in the projected histogram should be divided
@@ -126,11 +134,11 @@ class RadialProjector(ArrayProjector) :
 
         xc = xsize//2 if xc is None else xc
         yc = ysize//2 if yc is None else yc
-        x = np.arange(xsize) - xc
+        x = np.arange(xsize)-xc
         # meshgrid in numpy 1.6 only does "cartesian" ordering: x corresponds
         # to column and y corresponds to row.  flip y to make it cartesian,
         # which I believe is a more natural user-interface.
-        y = yc - np.arange(ysize)
+        y = np.arange(ysize-1,-1,-1)-yc
         xgrid, ygrid = np.meshgrid(x,y)
 
         rpix  = np.sqrt(xgrid**2 + ygrid**2)
@@ -138,7 +146,7 @@ class RadialProjector(ArrayProjector) :
         if phimin is not None or phimax is not None:
             phipix = np.arctan2(ygrid,xgrid) * 180 / np.pi
         
-        if weights is None and (None in (phimin,phimax,rmin,rmax)):
+        if weights is None and (None not in (phimin,phimax,rmin,rmax)):
             weights = np.ones((ysize,xsize))
         if phimin is not None:
             weights[phipix<phimin] = 0
@@ -149,16 +157,4 @@ class RadialProjector(ArrayProjector) :
         if rmax is not None:
             weights[rpix>rmax] = 0
 
-        from matplotlib import pyplot as plt
-        plt.subplot(1,3,1)
-        plt.imshow(xgrid)
-        plt.colorbar()
-        plt.subplot(1,3,2)
-        plt.imshow(ygrid)
-        plt.colorbar()
-        plt.subplot(1,3,3)
-        plt.imshow(weights)
-        plt.colorbar()
-        plt.show()
- 
         super(RadialProjector,self).__init__(rpix, nbins, weights, norm=norm)
