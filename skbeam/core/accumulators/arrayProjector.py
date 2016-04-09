@@ -17,9 +17,9 @@ class ArrayProjector(object):
             For each pixel, this is the value of that determines which bin
             a pixel's intensity will contribute to
         weights : np.ndarray
-            A weight for each pixel with the same shape as bin_values (can be zero to ignore a pixel)
+            A weight for each pixel with the same shape as bin_values (set to zero to ignore a pixel)
         nbins : int
-            The number of bins to employ.
+            The number of bins to employ
         """
 
         self.bin_values = bin_values
@@ -28,6 +28,7 @@ class ArrayProjector(object):
         self.norm = norm
 
         # _ibv = included bin values
+        # this is used to select only unmasked pixels in the analysis (i.e. those with weight!=0)
         if weights is not None:
             self._ibv = ( weights!=0 )
         else:
@@ -37,7 +38,10 @@ class ArrayProjector(object):
         wt = self.weights[self._ibv]
 
         binvalRange = bv.max() - bv.min()
-        self.bin_width = binvalRange / (float(self.nbins) - 1)
+        # add a little bit to not have the bv.max() value create an extra bin
+        # in the np.floor statement below
+        binvalRange *= 1.0+1e-8 
+        self.bin_width = binvalRange / (float(self.nbins))
 
         self._bin_assignments = np.floor( (bv - bv.min()) / self.bin_width ).astype(np.int32)
         if weights is None:
@@ -47,9 +51,9 @@ class ArrayProjector(object):
             self._normalization_array = (np.bincount( self._bin_assignments.flatten(), weights=wt.flatten() ) \
                                              + np.finfo(np.float).eps).astype(np.float)
 
-        assert self.nbins >= self._bin_assignments.max() + 1, \
+        assert self.nbins == self._bin_assignments.max()+1, \
             'incorrect bin assignments (%d %d)'% (self.nbins, 
-                                                  self._bin_assignments.max() + 1)
+                                                  self._bin_assignments.max())
         self._normalization_array = self._normalization_array[:self.nbins]
 
         return
@@ -84,7 +88,7 @@ class ArrayProjector(object):
         if self.norm:
             histogram /= self._normalization_array
 
-        #assert histogram.shape[0] == self.nbins, '%d %d' % (histogram.shape[0], self.nbins)
+        assert histogram.shape[0] == self.nbins, '%d %d' % (histogram.shape[0], self.nbins)
 
         return histogram
 
@@ -103,13 +107,15 @@ class RadialProjector(ArrayProjector) :
     Project a 2D image onto a radial axis
     """
     
-    def __init__(self, rows, columns, nbins, xc=None, yc=None, rmin=None, rmax=None, phimin=None, phimax=None, weights=None, norm=True):
+    def __init__(self, xsize, ysize, nbins, xc=None, yc=None, rmin=None, rmax=None, phimin=None, phimax=None, weights=None, norm=True):
         """
         Parameters:
         -----------
-        rows,columns:  shape of image to be projected
+        xsize,ysize:   shape of image in pixels (NOTE: this is in "cartesian" form
+                       so xsize/ysize correspond to columns/rows respectively in the "matrix" form
         nbins:         number of bins in projected histogram
-        xc,yc:         location (in pixels) of origin (default: center of image)
+        xc,yc:         location (in pixels) of origin (default: center of image).  These are
+                       in "cartesian" form, so lie at the lower-left of a matplotlib plot.
         rmin,rmax:     radial range to include in projection, in pixels (default: no limits)
         phimin,phimax: phi range to include in projection, in degrees (default: no limits)
         weights:       np.ndarray.  weight to be applied to each pixel in image.  this can
@@ -117,29 +123,23 @@ class RadialProjector(ArrayProjector) :
         norm:          boolean indicating whether bin entries in the projected histogram should be divided
                        by weights (number of pixels, in the case where the weights are 1).
         """   
-        # flip these to make it more intuitive for users who will use
-        # this with arrays (matrices).  numpy.meshgrid (version 1.6) uses
-        # cartesian (non-matrix) coordinates, so we need to do the flip
-
-        xsize = columns
-        ysize = rows
 
         xc = xsize//2 if xc is None else xc
         yc = ysize//2 if yc is None else yc
-
-        # produce all index arrays
         x = np.arange(xsize) - xc
-        y = np.arange(ysize) - yc
+        # meshgrid in numpy 1.6 only does "cartesian" ordering: x corresponds
+        # to column and y corresponds to row.  flip y to make it cartesian,
+        # which I believe is a more natural user-interface.
+        y = yc - np.arange(ysize)
         xgrid, ygrid = np.meshgrid(x,y)
- 
+
         rpix  = np.sqrt(xgrid**2 + ygrid**2)
 
         if phimin is not None or phimax is not None:
-            # flip y here so that the angles correspond well to matplotlib plots.
-            phipix = np.arctan2(-ygrid,xgrid) * 180 / np.pi
+            phipix = np.arctan2(ygrid,xgrid) * 180 / np.pi
         
         if weights is None and (None in (phimin,phimax,rmin,rmax)):
-            weights = np.ones((rows,columns))
+            weights = np.ones((ysize,xsize))
         if phimin is not None:
             weights[phipix<phimin] = 0
         if phimax is not None:
@@ -149,4 +149,16 @@ class RadialProjector(ArrayProjector) :
         if rmax is not None:
             weights[rpix>rmax] = 0
 
+        from matplotlib import pyplot as plt
+        plt.subplot(1,3,1)
+        plt.imshow(xgrid)
+        plt.colorbar()
+        plt.subplot(1,3,2)
+        plt.imshow(ygrid)
+        plt.colorbar()
+        plt.subplot(1,3,3)
+        plt.imshow(weights)
+        plt.colorbar()
+        plt.show()
+ 
         super(RadialProjector,self).__init__(rpix, nbins, weights, norm=norm)
