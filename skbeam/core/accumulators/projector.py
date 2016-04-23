@@ -7,7 +7,7 @@ import numpy as np
 authors: Mikhail Dubrovin, TJ Lane, Christopher O'Grady
 """
 
-class ArrayProjector(object):
+class Projector(object):
 
     def __init__(self, bin_values, nbins, weights=None, norm=True):
         """
@@ -19,7 +19,7 @@ class ArrayProjector(object):
         weights : np.ndarray
             A weight for each pixel with the same shape as bin_values (set to zero to ignore a pixel)
         nbins : int
-            The number of bins to employ
+            The number of bins to project into
         """
 
         self.bin_values = bin_values
@@ -73,7 +73,7 @@ class ArrayProjector(object):
         """
 
         if not (image.shape == self.bin_values.shape):
-            raise ValueError('`image` and `bin_values` must have the same shape',image.shape,self.bin_values.shape)
+            raise ValueError('"image" and "bin_values" must have the same shape',image.shape,self.bin_values.shape)
 
         if self.weights is None:
             weights = image.flatten()
@@ -102,52 +102,48 @@ class ArrayProjector(object):
         """
         return (np.arange(self.nbins) + 0.5) * self.bin_width + self.bin_values[self._ibv].min()
 
-class RadialProjector(ArrayProjector) :
+class RadialProjector(Projector) :
     """ 
     Project a 2D image onto a radial axis.
-    NOTE: This class provides a "cartesian" interface as viewed in a matplotlib plot
-    meaning that the origin lies at the lower left, x increases from left to right,
-    and y increases from bottom to top.
     """
     
-    def __init__(self, xsize, ysize, nbins, xc=None, yc=None, rmin=None, rmax=None, phimin=None, phimax=None, weights=None, norm=True):
+    def __init__(self, xsize, ysize, nbins, xc=None, yc=None, rmin=None, rmax=None, phimin=None, phimax=None, weights=None, norm=True, cartesian=True):
         """
         Parameters:
         -----------
-        xsize,ysize:   shape of image in pixels (NOTE: this is in "cartesian" form
-                       so xsize/ysize correspond to the columns/rows (shape[1]/shape[0]) of the
-                       "matrix" form of an array.
+        xsize,ysize:   shape of image in pixels
         nbins:         number of bins in projected histogram
-        xc,yc:         location (in pixels) of origin (default: center of image).  These are
-                       in "cartesian" form, so the origin (0,0) is located at the lower-left
-                       of a matplotlib/pyqtgraph plot of an array.
+        xc,yc:         location (in pixels) of origin (default: center of image)
         rmin,rmax:     radial range to include in projection, in pixels (default: no limits)
-        phimin,phimax: phi range to include in projection, in degrees (default: no limits).
-                       0 degrees corresponds to the x-axis (left-to-right on a matplotlib
-                       or pyqtgraph plot).  90 degrees corresponds to the y-axis (bottom-to-top
-                       on a matplotlib or pyqtgraph plot).
+        phimin,phimax: phi range to include in projection in the range (-180,180) degrees (default: no limits)
         weights:       np.ndarray.  weight to be applied to each pixel in image.  this can
-                       be used as a mask if the weight is set to zero.
+                       be used as a mask if the weight is set to zero
         norm:          boolean indicating whether bin entries in the projected histogram should be divided
-                       by weights (number of pixels, in the case where the weights are 1).
+                       by weights (number of pixels, in the case where the weights are 1)
+        cartesian:     if True, use "cartesian" ordering: with x corresponding to matrix columns and y
+                       corresponding to matrix rows.  Otherwise the opposite ("matrix" ordering).
         """   
 
+        if not cartesian:
+            # switch from matrix to cartesian by swapping axes
+            xc,yc = yc,xc
+            xsize,ysize = ysize,xsize
         xc = xsize//2 if xc is None else xc
         yc = ysize//2 if yc is None else yc
         x = np.arange(xsize)-xc
-        # meshgrid in numpy 1.6 only does "cartesian" ordering: x corresponds
-        # to column and y corresponds to row.  flip y to make it cartesian,
-        # which I believe is a more natural user-interface.
-        y = np.arange(ysize-1,-1,-1)-yc
-        xgrid, ygrid = np.meshgrid(x,y)
+        y = np.arange(ysize)-yc
+        xgrid, ygrid = np.meshgrid(x,y) # "cartesian"
 
         rpix  = np.sqrt(xgrid**2 + ygrid**2)
 
         if phimin is not None or phimax is not None:
-            phipix = np.arctan2(ygrid,xgrid) * 180 / np.pi
-        
+            if cartesian:
+                phipix = np.arctan2(ygrid,xgrid) * 180 / np.pi
+            else:
+                phipix = np.arctan2(xgrid,ygrid) * 180 / np.pi
+
         if weights is None and (None not in (phimin,phimax,rmin,rmax)):
-            weights = np.ones((ysize,xsize))
+            weights = np.ones((ysize,xsize)) # "cartesian"
         if phimin is not None:
             weights[phipix<phimin] = 0
         if phimax is not None:
