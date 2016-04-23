@@ -33,7 +33,7 @@ class Projector(object):
         # this is used to select only unmasked pixels in the analysis
         # (i.e. those with weight!=0)
         if weights is not None:
-            self._ibv = (weights!=0)
+            self._ibv = (weights != 0)
         else:
             self._ibv = np.s_[:]  # slice that returns arr unchanged
 
@@ -46,17 +46,16 @@ class Projector(object):
         binvalRange *= 1.0+1e-9
         self.bin_width = binvalRange / (float(self.nbins))
 
-        self._bin_assignments = np.floor((bv - bv.min()) / 
+        self._bin_assignments = np.floor((bv - bv.min()) /
                                          self.bin_width).astype(np.int32)
+        smallval = np.finfo(np.float).eps).astype(np.float)
         if weights is None:
             self._normalization_array = \
-                (np.bincount(self._bin_assignments.flatten())
-                 + np.finfo(np.float).eps).astype(np.float)
+                (np.bincount(self._bin_assignments.flatten()) + smallval
         else:
             self._normalization_array = \
                 (np.bincount( self._bin_assignments.flatten(), 
-                              weights=wt.flatten() )
-                 + np.finfo(np.float).eps).astype(np.float)
+                              weights=wt.flatten() ) + smallval
 
         assert self.nbins == self._bin_assignments.max()+1, \
             'incorrect bin assignments (%d %d)' % (self.nbins,
@@ -70,7 +69,7 @@ class Projector(object):
         Bin pixel intensities.
 
         Parameters
-        ----------            
+        ----------
         image : np.ndarray
             The intensity at each pixel
         Returns
@@ -127,7 +126,7 @@ class RadialProjector(Projector):
         -----------
         xsize,ysize:   shape of image in pixels
         nbins:         number of bins in projected histogram
-        xc,yc:         location (in pixels) of origin (default: center of image)
+        xc,yc:         location (in pixels) of origin (default: image center)
         rmin,rmax:     radial range to include in projection, in pixels
                        (default: no limits)
         phimin,phimax: phi range to include in projection in the range
@@ -153,7 +152,7 @@ class RadialProjector(Projector):
         y = np.arange(ysize)-yc
         xgrid, ygrid = np.meshgrid(x, y)  # "cartesian"
 
-        rpix  = np.sqrt(xgrid**2 + ygrid**2)
+        rpix = np.sqrt(xgrid**2 + ygrid**2)
 
         if phimin is not None or phimax is not None:
             if cartesian:
@@ -172,4 +171,4 @@ class RadialProjector(Projector):
         if rmax is not None:
             weights[rpix > rmax] = 0
 
-        super(RadialProjector,self).__init__(rpix, nbins, weights, norm=norm)
+        super(RadialProjector, self).__init__(rpix, nbins, weights, norm=norm)
