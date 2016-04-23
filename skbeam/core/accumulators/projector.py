@@ -48,14 +48,16 @@ class Projector(object):
 
         self._bin_assignments = np.floor((bv - bv.min()) /
                                          self.bin_width).astype(np.int32)
-        smallval = np.finfo(np.float).eps).astype(np.float)
+        smallval = np.finfo(np.float).eps
         if weights is None:
             self._normalization_array = \
-                (np.bincount(self._bin_assignments.flatten()) + smallval
+                (np.bincount(self._bin_assignments.flatten()) + smallval) \
+                .astype(np.float)
         else:
             self._normalization_array = \
                 (np.bincount( self._bin_assignments.flatten(), 
-                              weights=wt.flatten() ) + smallval
+                              weights=wt.flatten() ) + smallval) \
+                              .astype(np.float)
 
         assert self.nbins == self._bin_assignments.max()+1, \
             'incorrect bin assignments (%d %d)' % (self.nbins,
