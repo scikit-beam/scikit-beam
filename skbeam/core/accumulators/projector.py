@@ -55,9 +55,9 @@ class Projector(object):
                 .astype(np.float)
         else:
             self._normalization_array = \
-                (np.bincount( self._bin_assignments.flatten(), 
-                              weights=wt.flatten() ) + smallval) \
-                              .astype(np.float)
+                (np.bincount(self._bin_assignments.flatten(), 
+                             weights=wt.flatten()) + smallval) \
+                             .astype(np.float)
 
         assert self.nbins == self._bin_assignments.max()+1, \
             'incorrect bin assignments (%d %d)' % (self.nbins,
