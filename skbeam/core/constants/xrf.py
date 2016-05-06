@@ -49,7 +49,7 @@ from ..utils import verbosedict
 
 logger = logging.getLogger(__name__)
 
-line_name = ['Ka1', 'Ka2', 'Kb1', 'Kb2', 'La1', 'La2', 'Lb1', 'Lb2',
+line_name = ['Ka1', 'Ka2', 'Kb1', 'Kb2', 'Kb3', 'La1', 'La2', 'Lb1', 'Lb2',
              'Lb3', 'Lb4', 'Lb5', 'Lg1', 'Lg2', 'Lg3', 'Lg4', 'Ll',
              'Ln', 'Ma1', 'Ma2', 'Mb', 'Mg']
 
@@ -86,7 +86,7 @@ else:
     xraylib.SetErrorMessages(0)
 
     line_list = [xraylib.KA1_LINE, xraylib.KA2_LINE, xraylib.KB1_LINE,
-                 xraylib.KB2_LINE, xraylib.LA1_LINE, xraylib.LA2_LINE,
+                 xraylib.KB2_LINE, xraylib.KB2_LINE, xraylib.LA1_LINE, xraylib.LA2_LINE,
                  xraylib.LB1_LINE, xraylib.LB2_LINE, xraylib.LB3_LINE,
                  xraylib.LB4_LINE, xraylib.LB5_LINE, xraylib.LG1_LINE,
                  xraylib.LG2_LINE, xraylib.LG3_LINE, xraylib.LG4_LINE,
@@ -109,7 +109,7 @@ else:
                                                             shell_list))
 
     XRAYLIB_MAP = verbosedict({'lines': (line_dict, xraylib.LineEnergy),
-                               'cs': (line_dict, xraylib.CS_FluorLine_Kissel),
+                               'cs': (line_dict, xraylib.CSb_FluorLine_Kissel),
                                'binding_e': (shell_dict, xraylib.EdgeEnergy),
                                'jump': (shell_dict, xraylib.JumpFactor),
                                'yield': (shell_dict, xraylib.FluorYield),
@@ -246,7 +246,7 @@ class XrayLibWrap_Energy(XrayLibWrap):
         incident energy.
         See Class attribute `opts_info_type` for valid options
 
-        :cs: cross section, unit in cm2/g
+        :cs: cross section, unit in barns/atom
 
     incident_energy : float
         incident energy for fluorescence in KeV
