@@ -4,6 +4,9 @@ import numpy as np
 
 
 class Projector(object):
+    """
+    Class to project an arbitray ndarray onto an axis.
+    """
 
     def __init__(self, bin_values, nbins, norm, weights=None):
         """
@@ -23,6 +26,7 @@ class Projector(object):
         weights : np.ndarray, optional
             A weight for each pixel with the same shape as bin_values.
             These can be set to zero to ignore a pixel, similar to a mask.
+            If not provided, each pixel is assigned a weight of 1.
         """
 
         self._bin_values = bin_values
@@ -102,7 +106,7 @@ class Projector(object):
         return histogram
 
     @property
-    def bin_centers(self):
+    def centers(self):
         """
         Returns bin centers of projected histogram.
 
@@ -117,7 +121,7 @@ class Projector(object):
 
 class RadialProjector(Projector):
     """
-    Project a 2D image onto a radial axis.
+    Class to project a 2D image onto a radial axis.
     """
 
     def __init__(self, xsize, ysize, nbins, norm, xc=None, yc=None, rmin=None,
