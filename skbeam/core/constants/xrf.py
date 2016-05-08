@@ -256,8 +256,8 @@ class XrayLibWrap_Energy(XrayLibWrap):
     >>> # Cross section of zinc with an incident X-ray at 12 KeV
     >>> x = XrayLibWrap_Energy(30, 'cs', 12)
     >>> # Compute the cross section of the Kα1 line.
-    >>> x['Ka1'] # cross section for Ka1, unit in cm2/g
-    34.44424057006836
+    >>> x['Ka1'] # cross section for Ka1, unit in barns/atom
+    3765.3415913117224
     """
     opts_info_type = ['cs']
 
@@ -317,7 +317,7 @@ doc_ex += """>>> # Get the emission energy for the Kα1 line.
 
     >>> Cross section for emission line Kα1 with 10 keV incident energy
     >>> e.cs(10)['Ka1']
-    54.756561279296875
+    5987.081587605121
 
     >>> # fluorescence yield for K shell
     >>> e.fluor_yield['K']
@@ -354,23 +354,23 @@ doc_ex += """>>> # Get the emission energy for the Kα1 line.
 
     >>> # List all of the known cross sections
     >>> e.cs(10).all
-    [('ka1', 54.756561279296875),
-     ('ka2', 28.13692855834961),
-     ('kb1', 7.509212970733643),
+    [('ka1', 5987.081587605121),
+     ('ka2', 3076.4914784265347),
+     ('kb1', 821.0572112842519),
      ('kb2', 0.0),
-     ('la1', 0.13898827135562897),
-     ('la2', 0.01567710004746914),
-     ('lb1', 0.0791187509894371),
+     ('la1', 188.06856034970164),
+     ('la2', 21.213083101234524),
+     ('lb1', 94.10717616654374),
      ('lb2', 0.0),
-     ('lb3', 0.004138986114412546),
-     ('lb4', 0.002259803470224142),
+     ('lb3', 6.2207984090565),
+     ('lb4', 3.3964315566384187),
      ('lb5', 0.0),
      ('lg1', 0.0),
      ('lg2', 0.0),
      ('lg3', 0.0),
      ('lg4', 0.0),
-     ('ll', 0.008727769367396832),
-     ('ln', 0.00407258840277791),
+     ('ll', 11.809765990232954),
+     ('ln', 4.8441078404731766),
      ('ma1', 0.0),
      ('ma2', 0.0),
      ('mb', 0.0),
@@ -419,14 +419,14 @@ class XrfElement(BasicElement):
         """Fluorescence cross section function, `function`
 
         Returns a function of energy which returns the
-        elemental cross section in cm2/g
+        elemental cross section in barns/atom
 
         The signature of the function is ::
 
            x_section = func(enery)
 
         where `energy` in in keV and `x_section` is in
-        cm²/g
+        barns/atom
         """
         def myfunc(incident_energy):
             return XrayLibWrap_Energy(self.Z, 'cs',
