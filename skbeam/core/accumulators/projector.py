@@ -5,7 +5,8 @@ import numpy as np
 
 class Projector(object):
     """
-    Class to project an arbitray ndarray onto an axis.
+    Class to project an arbitray ndarray onto an axis using a
+    user-specified bin for each element of the array.
     """
 
     def __init__(self, bin_values, nbins, norm, weights=None):
@@ -151,7 +152,7 @@ class RadialProjector(Projector):
         weights: np.ndarray
             weight to be applied to each pixel in
             image.  this can be used as a mask if the weight is
-            set to zero.
+            set to zero. must be the same shape as the image being projected.
         cartesian: bool
             if True, use "cartesian" ordering: with x corresponding
             to matrix columns and y corresponding to matrix rows.
