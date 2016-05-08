@@ -41,7 +41,7 @@ class TestRadialProjector(object):
                                               **kwargs)
                     projection = radproj(self.image)[slice]
                     projection /= projection.max()
-                    ref = np.sin(radproj.bin_centers/self.oscillation_rate *
+                    ref = np.sin(radproj.centers/self.oscillation_rate *
                                  np.pi)[slice]
                     # the projection won't be precisely equal to the analytic
                     # np.sin formula because the pixel r-values are quantized.
