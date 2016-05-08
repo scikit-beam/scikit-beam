@@ -32,7 +32,6 @@ class TestRadialProjector(object):
         myslice = [np.s_[:], np.s_[:60]]
         nbins = 100
 
-        # import matplotlib.pyplot as plt
         for norm in [True, False]:
             for xsize, ysize, cartesian in params:
                 for kwargs, slice in zip(mykwargs, myslice):
@@ -43,12 +42,10 @@ class TestRadialProjector(object):
                     projection /= projection.max()
                     ref = np.sin(radproj.centers/self.oscillation_rate *
                                  np.pi)[slice]
-                    # the projection won't be precisely equal to the analytic
-                    # np.sin formula because the pixel r-values are quantized.
-                    # plt.plot(ref)
-                    # plt.plot(projection)
-                    # plt.show()
-                    # can't check equality if we use normalization, but at
-                    # least check code runs
+                    # can't check equality if we use normalization with
+                    # current testing strategy, but at least check code runs
                     if not norm:
+                        # the projection won't be precisely equal to the
+                        # analytic np.sin formula because the pixel r-values
+                        # are quantized.
                         assert_array_almost_equal(ref, projection, decimal=1)

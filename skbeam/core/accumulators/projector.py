@@ -33,7 +33,7 @@ class Projector(object):
         self._bin_values = bin_values
         self._weights = weights
         self._nbins = nbins
-        self._norm = norm
+        self._norm = None
 
         if weights is None:
             self._bv = self._bin_values
@@ -58,20 +58,20 @@ class Projector(object):
                                          self.bin_width)
         self._bin_assignments = (self._bin_assignments.astype(np.int32).
                                  flatten())
-        if self._norm:
+        if norm:
             if weights is None:
-                self._normalization_array = (
+                self._norm = (
                     (np.bincount(self._bin_assignments))
                     .astype(np.float))
             else:
                 wt = self._weights[self._ibv]
-                self._normalization_array = (
+                self._norm = (
                     (np.bincount(self._bin_assignments,
                                  weights=wt.flatten()))
                     .astype(np.float))
 
             # to avoid divide-by-zero
-            self._normalization_array[self._normalization_array == 0] = np.nan
+            self._norm[self._norm == 0] = np.nan
 
         return
 
@@ -101,8 +101,8 @@ class Projector(object):
             histogram = np.bincount(self._bin_assignments,
                                     weights=weights[self._ibv].flatten())
 
-        if self._norm:
-            histogram /= self._normalization_array
+        if self._norm is not None:
+            histogram /= self._norm
 
         return histogram
 
