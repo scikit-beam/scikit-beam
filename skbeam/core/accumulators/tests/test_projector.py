@@ -1,4 +1,4 @@
-from skbeam.core.accumulators.projector import RadialProjector
+from skbeam.core.accumulators.projector import RadialProjector, Projector
 from numpy.testing import assert_array_almost_equal
 import numpy as np
 
@@ -49,3 +49,27 @@ class TestRadialProjector(object):
                         # analytic np.sin formula because the pixel r-values
                         # are quantized.
                         assert_array_almost_equal(ref, projection, decimal=1)
+        # test exception when Projector is given array of incorrect shape
+        try:
+            radproj(self.image[:10, :10])
+            raise RuntimeError('Projector failed to raise exception'
+                               ' when given an array of incorrect shape')
+        except ValueError:
+            pass
+        # test exception when weights and bin_values have different shape
+        try:
+            Projector(np.array([1, 2]), 10, True,
+                      weights=np.array([1, 2, 3]))
+            raise RuntimeError('Projector failed to raise exception'
+                               ' when when weights/bin_values have'
+                               ' inconsistent shapes')
+        except ValueError:
+            pass
+        # test exception when RadialProjector is given 1D array
+        try:
+            RadialProjector(xsize, ysize, nbins, norm,
+                            weights=np.array([1, 2, 3, 4]))
+            raise RuntimeError('RadialProjector failed to raise exception'
+                               ' when passed 1D array')
+        except ValueError:
+            pass

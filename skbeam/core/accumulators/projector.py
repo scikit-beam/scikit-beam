@@ -122,7 +122,7 @@ class Projector(object):
 
 class RadialProjector(Projector):
     """
-    Class to project a 2D image onto a radial axis.
+    Class to project a 2-dimensional image onto a radial axis.
     """
 
     def __init__(self, xsize, ysize, nbins, norm, xc=None, yc=None, rmin=None,
@@ -149,7 +149,7 @@ class RadialProjector(Projector):
             (-180,180) degrees (default: no limits).  The location
             of phi=0 depends on the setting of the "cartesian"
             parameter.
-        weights: np.ndarray
+        weights: 2-dimensional np.ndarray
             weight to be applied to each pixel in
             image.  this can be used as a mask if the weight is
             set to zero. must be the same shape as the image being projected.
@@ -158,6 +158,10 @@ class RadialProjector(Projector):
             to matrix columns and y corresponding to matrix rows.
             Otherwise the opposite ("matrix" ordering).
         """
+
+        if weights is not None:
+            if not (len(weights.shape) == 2):
+                raise ValueError('"weights" must be a 2-dimensional array')
 
         if not cartesian:
             # switch from matrix to cartesian by swapping axes
