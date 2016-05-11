@@ -123,8 +123,8 @@ def test_cs_different_units():
     e = XrfElement('Fe')
     # test at different energies
     for eng in range(10, 20):
-        cs1 = np.asarray(e.cs(eng).values())     # unit in cm2/g
-        cs2 = np.asarray(e.csb(eng).values())    # unit in barns/atom
+        cs1 = np.array([v for k,v in e.cs(eng).all])   # unit in cm2/g
+        cs2 = np.array([v for k,v in e.csb(eng).all])  # unit in barns/atom
         cs1 /= cs1[0]
         cs2 /= cs2[0]
         # ratio should be the same no matter which unit is used
