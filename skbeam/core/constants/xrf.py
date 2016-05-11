@@ -108,13 +108,14 @@ else:
     shell_dict = verbosedict((k.lower(), v) for k, v in zip(bindingE,
                                                             shell_list))
 
-    XRAYLIB_MAP = verbosedict({'lines': (line_dict, xraylib.LineEnergy),
-                               'cs': (line_dict, xraylib.CS_FluorLine_Kissel),
-                               'csb': (line_dict, xraylib.CSb_FluorLine_Kissel),
-                               'binding_e': (shell_dict, xraylib.EdgeEnergy),
-                               'jump': (shell_dict, xraylib.JumpFactor),
-                               'yield': (shell_dict, xraylib.FluorYield),
-                               })
+    XRAYLIB_MAP = verbosedict({
+        'lines': (line_dict, xraylib.LineEnergy),
+        'cs': (line_dict, xraylib.CS_FluorLine_Kissel),
+        'csb': (line_dict, xraylib.CSb_FluorLine_Kissel),
+        'binding_e': (shell_dict, xraylib.EdgeEnergy),
+        'jump': (shell_dict, xraylib.JumpFactor),
+        'yield': (shell_dict, xraylib.FluorYield),
+        })
 
 
 class XrayLibWrap(Mapping):
@@ -325,11 +326,11 @@ doc_ex += """
     >>> e.emission_line['Ka1']
     8.638900756835938
 
-    >>> # Cross section [barns/atom] for emission line Kα1 with 10 keV incident energy
+    >>> # Cross section [barns/atom] for Kα1 line at 10 keV incident energy
     >>> e.csb(10)['Ka1']
     5987.081587605121
 
-    >>> # Cross section [cm2/g] for emission line Kα1 with 10 keV incident energy
+    >>> # Cross section [cm2/g] for Kα1 line at 10 keV incident energy
     >>> e.cs(10)['Ka1']
     55.146912259583296
 
