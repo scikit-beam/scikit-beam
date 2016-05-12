@@ -3,13 +3,14 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 
 
-class Projector(object):
+class BinImage(object):
     """
-    Class to project an arbitray ndarray onto an axis using a
+    Class to bin an ndarray onto an axis using a
     user-specified bin for each element of the array.
     """
 
-    def __init__(self, bin_values, nbins, norm, weights=None):
+    def __init__(self, bin_values, norm, nbins, min=None, max=None,
+                 weights=None):
         """
         Parameters
         ----------
@@ -18,12 +19,14 @@ class Projector(object):
             a pixel's intensity will contribute to.  It can be an arbitrary
             array of floats/ints which will be discretized into nbins equally
             sized bins.
-        nbins : int
-            The number of bins to project into.
         norm : bool
-            If set to true, normalize projection by the sum of the weights
-            of all pixels contributing to a bin.  If weights=None, then
-            divide by the number of pixels contributing to a bin.
+            If set to true, normalize histogram by the sum of the weights
+            of all pixels contributing to a bin (see "weights" parameter).
+        nbins : int
+            The number of histogram bins.
+        min/max : int/float, optional
+            Lower/Upper limits of returned histogram.  If not specified
+            one will be computed from bin_values/min/max/weights
         weights : np.ndarray, optional
             A weight for each pixel with the same shape as bin_values.
             These can be set to zero to ignore a pixel, similar to a mask.
@@ -34,32 +37,50 @@ class Projector(object):
         self._weights = weights
         self._nbins = nbins
         self._norm = None
+        self._min = min
+        self._max = max
 
-        if weights is None:
+        # modify weights to mask additional pixels flagged by min/max limits
+        if self._weights is None and (self._min is not None or
+                                      self._max is not None):
+            self._weights = np.ones_like(bin_values)
+        if self._min is not None:
+            self._weights[bin_values < self._min] = 0
+        if self._max is not None:
+            # exclude max values, consistent with histogram pattern
+            self._weights[bin_values >= self._max] = 0
+
+        # compute the bin_values, perhaps using the weights
+        if self._weights is None:
             self._bv = self._bin_values
         else:
-            if not (weights.shape == bin_values.shape):
+            if not (self._weights.shape == bin_values.shape):
                 raise ValueError('"weights" and "bin_values" must have the '
-                                 'same shape', weights.shape,
+                                 'same shape', self._weights.shape,
                                  self._bin_values.shape)
             # _ibv = included bin values
             # this is used to select only unmasked pixels in the analysis
             # (i.e. those with weight!=0)
-            self._ibv = (weights != 0)
+            self._ibv = (self._weights != 0)
             self._bv = self._bin_values[self._ibv]
 
-        binvalRange = self._bv.max() - self._bv.min()
-        # add a little bit to not have the self._bv.max() value create
-        # an extra bin in the np.floor statement below
-        binvalRange *= 1.0+1e-9
-        self.bin_width = binvalRange / self._nbins
+        # compute the min/max values, if necessary
+        if self._min is None:
+            self._min = self._bv.min()
+        if self._max is None:
+            # user didn't supply max value so do it ourselves.
+            # add a little bit to not have the max value create
+            # an extra bin in the np.floor statement below
+            self._max = self._bv.max()
+            self._max += (self._max-self._min) * 1e-9
 
-        self._bin_assignments = np.floor((self._bv - self._bv.min()) /
+        self.bin_width = (self._max - self._min) / float(self._nbins)
+        self._bin_assignments = np.floor((self._bv - self._min) /
                                          self.bin_width)
         self._bin_assignments = (self._bin_assignments.astype(np.int32).
                                  flatten())
         if norm:
-            if weights is None:
+            if self._weights is None:
                 self._norm = (
                     (np.bincount(self._bin_assignments))
                     .astype(np.float))
@@ -86,7 +107,7 @@ class Projector(object):
         Returns
         -------
         histogram : np.ndarray
-            The average intensity in the bin.
+            The intensity in the bin.
         """
 
         if not (image.shape == self._bin_values.shape):
@@ -109,7 +130,7 @@ class Projector(object):
     @property
     def centers(self):
         """
-        Returns bin centers of projected histogram.
+        Returns bin centers of histogram.
 
         Returns:
         --------
@@ -117,12 +138,13 @@ class Projector(object):
             The center of each bin.
         """
         return (np.arange(self._nbins) + 0.5) * self.bin_width + (
-            self._bv.min())
+            self._min)
 
 
-class RadialProjector(Projector):
+class RadialBinImage(BinImage):
     """
-    Class to project a 2-dimensional image onto a radial axis.
+    Create a 1-dimensional histogram by binning a 2-dimensional
+    image in radius.
     """
 
     def __init__(self, xsize, ysize, nbins, norm, xc=None, yc=None, rmin=None,
@@ -132,31 +154,34 @@ class RadialProjector(Projector):
         Parameters:
         -----------
         xsize,ysize: int
-            shape of image in pixels.
+            shape of image in pixels.  see "cartesian" parameter
+            for definition of x/y.
         nbins: int
-            number of bins in projected histogram.
+            number of bins in histogram.
         norm : bool
-            If set to true, normalize projection by the sum of the weights
+            If set to true, normalize histogram by the sum of the weights
             of all pixels contributing to a bin.  If weights=None, then
             divide by the number of pixels contributing to a bin.
-        xc,yc: int
+        xc,yc: int, optional
             location (in pixels) of origin (default: image center).
-        rmin,rmax: int
-            radial range to include in projection, in pixels
-            (default: no limits).
-        phimin,phimax: float
-            phi range to include in projection in the range
-            (-180,180) degrees (default: no limits).  The location
-            of phi=0 depends on the setting of the "cartesian"
-            parameter.
-        weights: 2-dimensional np.ndarray
-            weight to be applied to each pixel in
-            image.  this can be used as a mask if the weight is
-            set to zero. must be the same shape as the image being projected.
-        cartesian: bool
-            if True, use "cartesian" ordering: with x corresponding
+            see "cartesian" parameter for definition of x/y.
+        rmin,rmax: int, optional
+            radial range to include in histogram, in pixels
+            (default: will be computed from pixels with weights!=0).
+        phimin,phimax: float, optional
+            phi range to include.  Values are in the range
+            (-180,180) degrees (default: no limits).  Phi is
+            computed as arctan(y/x) where the meaning of y and x
+            is determined by the setting of the "cartesian" parameter.
+        weights: 2-dimensional np.ndarray, optional
+            weight to be applied to each pixel when binning.
+            this can be used as a mask if the weight is set to zero.
+            must be the same shape as the image being projected.
+            (default: 1 for all pixels)
+        cartesian: bool, optional
+            if True, use "cartesian" ordering, with x corresponding
             to matrix columns and y corresponding to matrix rows.
-            Otherwise the opposite ("matrix" ordering).
+            Otherwise the opposite ("matrix" ordering). (default: True)
         """
 
         if weights is not None:
@@ -181,15 +206,14 @@ class RadialProjector(Projector):
             else:
                 phipix = np.arctan2(xgrid, ygrid) * 180 / np.pi
 
-        if weights is None and (None not in (phimin, phimax, rmin, rmax)):
+        if weights is None and (None not in (phimin, phimax)):
             weights = np.ones((ysize, xsize))  # "cartesian"
         if phimin is not None:
             weights[phipix < phimin] = 0
         if phimax is not None:
-            weights[phipix > phimax] = 0
-        if rmin is not None:
-            weights[rpix < rmin] = 0
-        if rmax is not None:
-            weights[rpix > rmax] = 0
+            # adopt the usual histogramming convention of excluding
+            # the upper edge
+            weights[phipix >= phimax] = 0
 
-        super(RadialProjector, self).__init__(rpix, nbins, norm, weights)
+        super(RadialBinImage, self).__init__(rpix, norm, nbins, rmin, rmax,
+                                             weights)
