@@ -142,6 +142,8 @@ def ring_blur_mask(img, r, rsize, alpha, bins=None, mask=None):
         The  image
     r: 2darray
         The  array which maps pixels to radii
+    rsize: float
+        The size of the pixel
     alpha: float or tuple or, 1darray
         Then number of acceptable standard deviations, if tuple then we use
         a linear distribution of alphas from alpha[0] to alpha[1], if array
