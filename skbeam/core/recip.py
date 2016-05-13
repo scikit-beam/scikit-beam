@@ -41,7 +41,7 @@ calculations.
 """
 from __future__ import absolute_import, division, print_function
 import numpy as np
-from .utils import verbosedict
+from .utils import verbosedict, twotheta_to_q
 from collections import namedtuple
 import time
 
@@ -342,3 +342,37 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
     qr = np.sqrt(qx**2 + qy**2)
 
     return gisaxs_output(alpha_i, theta_f, alpha_f, tilt_angle, qx, qy, qz, qr)
+
+
+def generate_q_bins(rmax, qmax, pixel_size, distance, wavelength):
+    """
+    Generate the Q bins at the resolution of the detector
+    Parameters
+    -----------
+    rmax: float
+        The maximum radial distance on the detector
+    qmax: float
+        The maximum Q on the detector
+    pixel_size: float
+        The size of the pixels, in the same units as rmax
+    distance: float
+        The sample to detector distance, in the same units as rmax
+    wavelength: float
+        The wavelength of the x-rays
+
+    Returns
+    -------
+    ndarray:
+        The bin edges, suitable for np.histogram or
+        scipy.stats.binned_statistic
+    """
+    base_pixels = np.arange(0, rmax, pixel_size)
+    pixel_bottom = base_pixels
+    pixel_top = base_pixels + pixel_size
+    tthb = np.arctan(pixel_bottom / distance)
+    ttht = np.arctan(pixel_top / distance)
+    dq = twotheta_to_q(ttht, wavelength) - twotheta_to_q(tthb, wavelength)
+    fq = np.linspace(0, qmax, len(dq))
+    b = np.zeros(len(fq) + 1)
+    b[1:] = dq + fq
+    return b
