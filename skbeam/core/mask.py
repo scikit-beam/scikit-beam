@@ -176,9 +176,9 @@ def ring_blur_mask(img, q, alpha, rmax, pixel_size, distance, wavelength,
         t_array = (bins[i] <= q) & (q < bins[i + 1])
         int_q[t_array] = i - 1
     # integration
-    mean = sts.binned_statistic(msk_q, msk_img, bins=bins,
+    mean = sts.binned_statistic(msk_q, msk_img, bins=bins[1:],
                                 statistic='mean')[0]
-    std = sts.binned_statistic(msk_q, msk_img, bins=bins,
+    std = sts.binned_statistic(msk_q, msk_img, bins=bins[1:],
                                statistic=np.std)[0]
     if type(alpha) is tuple:
         alpha = np.linspace(alpha[0], alpha[1], len(std))
