@@ -159,6 +159,16 @@ def test_gisaxs():
     assert_array_almost_equal(alpha_f_target, g_output.alpha_f[:, 1])
 
 
+def test_generate_q_bins():
+    rmax = .294
+    qmax = 38
+    pixel_size = .0002
+    distance = .23
+    wavelength = .143
+    a = recip.generate_q_bins(rmax, qmax, pixel_size, distance, wavelength)
+    assert np.any(a)
+
+
 if __name__ == '__main__':
     import nose
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
