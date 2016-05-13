@@ -108,12 +108,14 @@ else:
     shell_dict = verbosedict((k.lower(), v) for k, v in zip(bindingE,
                                                             shell_list))
 
-    XRAYLIB_MAP = verbosedict({'lines': (line_dict, xraylib.LineEnergy),
-                               'cs': (line_dict, xraylib.CS_FluorLine_Kissel),
-                               'binding_e': (shell_dict, xraylib.EdgeEnergy),
-                               'jump': (shell_dict, xraylib.JumpFactor),
-                               'yield': (shell_dict, xraylib.FluorYield),
-                               })
+    XRAYLIB_MAP = verbosedict({
+        'lines': (line_dict, xraylib.LineEnergy),
+        'cs': (line_dict, xraylib.CS_FluorLine_Kissel),
+        'csb': (line_dict, xraylib.CSb_FluorLine_Kissel),
+        'binding_e': (shell_dict, xraylib.EdgeEnergy),
+        'jump': (shell_dict, xraylib.JumpFactor),
+        'yield': (shell_dict, xraylib.FluorYield),
+        })
 
 
 class XrayLibWrap(Mapping):
@@ -241,12 +243,13 @@ class XrayLibWrap_Energy(XrayLibWrap):
     ----------
     element : int
         atomic number
-    info_type : {'cs'}, optional
+    info_type : {'cs', 'csb'}, optional
         option to calculate physics quantities which depend on
         incident energy.
         See Class attribute `opts_info_type` for valid options
 
         :cs: cross section, unit in cm2/g
+        :csb: cross section, unit in barns/atom
 
     incident_energy : float
         incident energy for fluorescence in KeV
@@ -257,9 +260,13 @@ class XrayLibWrap_Energy(XrayLibWrap):
     >>> x = XrayLibWrap_Energy(30, 'cs', 12)
     >>> # Compute the cross section of the Kα1 line.
     >>> x['Ka1'] # cross section for Ka1, unit in cm2/g
-    34.44424057006836
+    34.68250086875594
+    >>> xb = XrayLibWrap_Energy(30, 'csb', 12)
+    >>> # Compute the cross section of the Kα1 line.
+    >>> xb['Ka1'] # cross section for Ka1, unit in barns/atom
+    3765.3415913117224
     """
-    opts_info_type = ['cs']
+    opts_info_type = ['cs', 'csb']
 
     def __init__(self, element, info_type, incident_energy):
         if xraylib is None:
@@ -307,17 +314,25 @@ doc_params = doc_params
 #
 doc_attrs += """    emission_line : `XrayLibWrap`
     cs : function
+    csb : function
     bind_energy : `XrayLibWrap`
     jump_factor : `XrayLibWrap`
     fluor_yield : `XrayLibWrap`
     """
-doc_ex += """>>> # Get the emission energy for the Kα1 line.
-    >>> e.emission_line['Ka1'] #
+doc_ex += """
+    >>> from skbeam.core.constants.xrf import XrfElement as Element
+    >>> e = Element('Zn')
+    >>> # Get the emission energy for the Kα1 line.
+    >>> e.emission_line['Ka1']
     8.638900756835938
 
-    >>> Cross section for emission line Kα1 with 10 keV incident energy
+    >>> # Cross section [barns/atom] for Kα1 line at 10 keV incident energy
+    >>> e.csb(10)['Ka1']
+    5987.081587605121
+
+    >>> # Cross section [cm2/g] for Kα1 line at 10 keV incident energy
     >>> e.cs(10)['Ka1']
-    54.756561279296875
+    55.146912259583296
 
     >>> # fluorescence yield for K shell
     >>> e.fluor_yield['K']
@@ -352,25 +367,25 @@ doc_ex += """>>> # Get the emission energy for the Kα1 line.
      ('mb', 0.0),
      ('mg', 0.0)]
 
-    >>> # List all of the known cross sections
-    >>> e.cs(10).all
-    [('ka1', 54.756561279296875),
-     ('ka2', 28.13692855834961),
-     ('kb1', 7.509212970733643),
+    >>> # List all of the known cross sections [barns/atom]
+    >>> e.csb(10).all
+    [('ka1', 5987.081587605121),
+     ('ka2', 3076.4914784265347),
+     ('kb1', 821.0572112842519),
      ('kb2', 0.0),
-     ('la1', 0.13898827135562897),
-     ('la2', 0.01567710004746914),
-     ('lb1', 0.0791187509894371),
+     ('la1', 188.06856034970164),
+     ('la2', 21.213083101234524),
+     ('lb1', 94.10717616654374),
      ('lb2', 0.0),
-     ('lb3', 0.004138986114412546),
-     ('lb4', 0.002259803470224142),
+     ('lb3', 6.2207984090565),
+     ('lb4', 3.3964315566384187),
      ('lb5', 0.0),
      ('lg1', 0.0),
      ('lg2', 0.0),
      ('lg3', 0.0),
      ('lg4', 0.0),
-     ('ll', 0.008727769367396832),
-     ('ln', 0.00407258840277791),
+     ('ll', 11.809765990232954),
+     ('ln', 4.8441078404731766),
      ('ma1', 0.0),
      ('ma2', 0.0),
      ('mb', 0.0),
@@ -426,10 +441,29 @@ class XrfElement(BasicElement):
            x_section = func(enery)
 
         where `energy` in in keV and `x_section` is in
-        cm²/g
+        cm2/g
         """
         def myfunc(incident_energy):
             return XrayLibWrap_Energy(self.Z, 'cs',
+                                      incident_energy)
+        return myfunc
+
+    @property
+    def csb(self):
+        """Fluorescence cross section function, `function`
+
+        Returns a function of energy which returns the
+        elemental cross section in barns/atom
+
+        The signature of the function is ::
+
+           x_section = func(enery)
+
+        where `energy` in in keV and `x_section` is in
+        barns/atom
+        """
+        def myfunc(incident_energy):
+            return XrayLibWrap_Energy(self.Z, 'csb',
                                       incident_energy)
         return myfunc
 

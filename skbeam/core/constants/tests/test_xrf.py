@@ -37,7 +37,9 @@
 ########################################################################
 from __future__ import absolute_import, division, print_function
 import six
-from numpy.testing import (assert_array_equal, assert_raises)
+import numpy as np
+from numpy.testing import (assert_array_equal, assert_array_almost_equal,
+                           assert_raises)
 from nose.tools import assert_equal, assert_not_equal
 
 from skbeam.core.constants.xrf import (XrfElement, emission_line_search,
@@ -116,6 +118,18 @@ def test_XrayLibWrap_Energy():
             xlwe.incident_energy = incident_energy
             assert_equal(xlwe.incident_energy, incident_energy)
             assert_equal(xlwe.info_type, infotype)
+
+
+def test_cs_different_units():
+    e = XrfElement('Fe')
+    # test at different energies
+    for eng in range(10, 20):
+        cs1 = np.array([v for k, v in e.cs(eng).all])   # unit in cm2/g
+        cs2 = np.array([v for k, v in e.csb(eng).all])  # unit in barns/atom
+        cs1 /= cs1[0]
+        cs2 /= cs2[0]
+        # ratio should be the same no matter which unit is used
+        assert_array_almost_equal(cs1, cs2, decimal=10)
 
 
 def smoke_test_element_creation():
