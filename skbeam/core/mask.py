@@ -131,7 +131,8 @@ def mask_edge(img_shape, edge_size):
     return mask
 
 
-def ring_blur_mask(img, r, rsize, alpha, bins=None, mask=None):
+def ring_blur_mask(img, q, alpha, rmax, pixel_size, distance, wavelength,
+                   mask=None):
     """
     Perform a annular mask, which checks the ring statistics and masks any
     pixels which have a value greater or less than alpha * std away from the
@@ -140,17 +141,20 @@ def ring_blur_mask(img, r, rsize, alpha, bins=None, mask=None):
     ----------
     img: 2darray
         The  image
-    r: 2darray
-        The  array which maps pixels to radii
-    rsize: float
-        The size of the pixel
+    q: 2darray
+        The  array which maps pixels to Q space
     alpha: float or tuple or, 1darray
         Then number of acceptable standard deviations, if tuple then we use
         a linear distribution of alphas from alpha[0] to alpha[1], if array
         then we just use that as the distribution of alphas
-    bins: int, optional
-        Number of bins used in the integration, if not given then max number of
-        pixels +1
+    rmax: float
+        The maximum radial distance on the detector
+    pixel_size: float
+        The size of the pixels, in the same units as rmax
+    distance: float
+        The sample to detector distance, in the same units as rmax
+    wavelength: float
+        The wavelength of the x-rays
     mask: 1darray
         A starting flattened mask
     Returns
@@ -161,28 +165,30 @@ def ring_blur_mask(img, r, rsize, alpha, bins=None, mask=None):
 
     if mask is None:
         mask = np.ones(img.shape).astype(bool)
-    int_r = np.around(r / rsize).astype(int)
-    if bins is None:
-        bins = int_r.max() + 1
     if mask.shape != img.shape:
         mask = mask.reshape(img.shape)
     msk_img = img[mask]
-    msk_r = r[mask]
+    msk_q = q[mask]
+    bins = generate_q_bins(rmax, np.max(q), pixel_size, distance, wavelength)
 
+    int_q = np.zeros(q.shape, dtype=np.int)
+    for i in range(len(bins) - 1):
+        t_array = (bins[i] <= q) & (q < bins[i + 1])
+        int_q[t_array] = i - 1
     # integration
-    mean = sts.binned_statistic(msk_r, msk_img, bins=bins,
-                                range=[0, r.max()], statistic='mean')[0]
-    std = sts.binned_statistic(msk_r, msk_img, bins=bins,
-                               range=[0, r.max()], statistic=np.std)[0]
+    mean = sts.binned_statistic(msk_q, msk_img, bins=bins,
+                                statistic='mean')[0]
+    std = sts.binned_statistic(msk_q, msk_img, bins=bins,
+                               statistic=np.std)[0]
     if type(alpha) is tuple:
-        alpha = np.linspace(alpha[0], alpha[1], bins)
+        alpha = np.linspace(alpha[0], alpha[1], len(std))
     threshold = alpha * std
     lower = mean - threshold
     upper = mean + threshold
 
     # single out the too low and too high pixels
-    too_low = img < lower[int_r]
-    too_hi = img > upper[int_r]
+    too_low = img < lower[int_q]
+    too_hi = img > upper[int_q]
 
     mask = mask * ~too_low * ~too_hi
     return mask.astype(bool)
