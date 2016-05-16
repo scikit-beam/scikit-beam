@@ -160,13 +160,28 @@ def test_gisaxs():
 
 
 def test_generate_q_bins():
-    rmax = .294
-    qmax = 38
-    pixel_size = .0002
-    distance = .23
-    wavelength = .143
-    a = recip.generate_q_bins(rmax, qmax, pixel_size, distance, wavelength)
-    assert np.any(a)
+    import scipy.stats as sts
+    pyfai_geo = recip.geo.Geometry(
+        detector='Perkin', pixel1=.0002, pixel2=.0002,
+        dist=.23,
+        poni1=.209, poni2=.207,
+        # rot1=.0128, rot2=-.015, rot3=-5.2e-8,
+        wavelength=1.43e-11
+    )
+    r = pyfai_geo.rArray((2048, 2048))
+    q = pyfai_geo.qArray((2048, 2048)) / 10
+
+    bins = recip.generate_q_bins(np.max(r)-.5*pyfai_geo.pixel1, pyfai_geo.pixel1, pyfai_geo.dist, .143)
+    int_q = np.zeros(q.shape, dtype=np.int)
+    for i in range(len(bins) - 1):
+        t_array = (bins[i] <= q) & (q < bins[i + 1])
+        int_q[t_array] = i
+
+    iq = sts.binned_statistic(q.ravel(), int_q.ravel(), bins=bins)[0]
+    std = sts.binned_statistic(q.ravel(), int_q.ravel(), bins=bins,
+                               statistic=np.std)[0]
+    assert_array_almost_equal(iq, np.arange(0, len(iq)))
+    assert_array_almost_equal(std, np.zeros(std.shape))
 
 
 if __name__ == '__main__':
