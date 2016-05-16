@@ -43,8 +43,8 @@ from skbeam.core import recip
 
 def test_process_to_q():
     detector_size = (256, 256)
-    pixel_size = (0.0135 * 8, 0.0135 * 8)
-    calibrated_center = (256 / 2.0, 256 / 2.0)
+    pixel_size = (0.0135*8, 0.0135*8)
+    calibrated_center = (256/2.0, 256/2.0)
     dist_sample = 355.0
 
     energy = 640  # (  in eV)
@@ -57,7 +57,7 @@ def test_process_to_q():
                        [-0.7449130975, 0.01265920962, -0.5692399963]])
 
     setting_angles = np.array([[40., 15., 30., 25., 10., 5.],
-                               [90., 60., 0., 30., 10., 5.]])
+                              [90., 60., 0., 30., 10., 5.]])
     # delta=40, theta=15, chi = 90, phi = 30, mu = 10.0, gamma=5.0
     pdict = {}
     pdict['setting_angles'] = setting_angles
@@ -76,7 +76,7 @@ def test_process_to_q():
     # Known HKL values for the given six angles)
     # each entry in list is (pixel_number, known hkl value)
     known_hkl = [(32896, np.array([-0.15471196, 0.19673939, -0.11440936])),
-                 (98432, np.array([0.10205953, 0.45624416, -0.27200778]))]
+                 (98432, np.array([0.10205953,  0.45624416, -0.27200778]))]
 
     for pixel, kn_hkl in known_hkl:
         npt.assert_array_almost_equal(hkl[pixel], kn_hkl, decimal=8)
@@ -95,8 +95,8 @@ def _process_to_q_exception(param_dict, frame_mode):
 
 def test_frame_mode_fail():
     detector_size = (256, 256)
-    pixel_size = (0.0135 * 8, 0.0135 * 8)
-    calibrated_center = (256 / 2.0, 256 / 2.0)
+    pixel_size = (0.0135*8, 0.0135*8)
+    calibrated_center = (256/2.0, 256/2.0)
     dist_sample = 355.0
 
     energy = 640  # (  in eV)
@@ -109,7 +109,7 @@ def test_frame_mode_fail():
                        [-0.7449130975, 0.01265920962, -0.5692399963]])
 
     setting_angles = np.array([[40., 15., 30., 25., 10., 5.],
-                               [90., 60., 0., 30., 10., 5.]])
+                              [90., 60., 0., 30., 10., 5.]])
     # delta=40, theta=15, chi = 90, phi = 30, mu = 10.0, gamma=5.0
     pdict = {}
     pdict['setting_angles'] = setting_angles
@@ -142,19 +142,18 @@ def test_gisaxs():
     pixel_size = (1.0, 1.0)
     detector_size = (5, 4)
     dist_sample = 5.0
-    wavelength = 2 * np.pi * 0.01
+    wavelength = 2*np.pi*0.01
     theta_i = 0.0
 
     g_output = recip.gisaxs(incident_beam, reflected_beam, pixel_size,
                             detector_size, dist_sample, wavelength,
                             theta_i=theta_i)
 
-    theta_f_target = 10 ** (-7) * np.array([-1.0, 0.0, 1.0, 2.0])
-    alpha_f_target = 10 ** (-7) * np.array(
-        [-4.0, -2.0, 7.99387344e-14, 2.0, 4.0])
+    theta_f_target = 10**(-7)*np.array([-1.0, 0.0, 1.0, 2.0])
+    alpha_f_target = 10**(-7)*np.array([-4.0, -2.0, 7.99387344e-14, 2.0, 4.0])
 
     assert_array_almost_equal(0.78539816, g_output.tilt_angle, decimal=8)
-    assert_array_almost_equal(2 * 10 ** (-7), g_output.alpha_i, decimal=8)
+    assert_array_almost_equal(2*10**(-7), g_output.alpha_i, decimal=8)
     assert_array_almost_equal(theta_f_target, g_output.theta_f[1, :],
                               decimal=8)
     assert_array_almost_equal(alpha_f_target, g_output.alpha_f[:, 1])
@@ -172,7 +171,7 @@ def test_generate_q_bins():
     r = pyfai_geo.rArray((2048, 2048))
     q = pyfai_geo.qArray((2048, 2048)) / 10
 
-    bins = recip.generate_q_bins(np.max(r) - .5 * pyfai_geo.pixel1,
+    bins = recip.generate_q_bins(np.max(r)-.5*pyfai_geo.pixel1,
                                  pyfai_geo.pixel1, pyfai_geo.dist, .143)
     int_q = np.zeros(q.shape, dtype=np.int)
     for i in range(len(bins) - 1):
@@ -188,5 +187,4 @@ def test_generate_q_bins():
 
 if __name__ == '__main__':
     import nose
-
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
