@@ -350,7 +350,7 @@ def generate_q_bins(rmax, qmax, pixel_size, distance, wavelength):
     Parameters
     -----------
     rmax: float
-        The maximum radial distance on the detector
+        The maximum radial distance on the detector in distance units
     qmax: float
         The maximum Q on the detector
     pixel_size: float
@@ -366,13 +366,12 @@ def generate_q_bins(rmax, qmax, pixel_size, distance, wavelength):
         The bin edges, suitable for np.histogram or
         scipy.stats.binned_statistic
     """
-    base_pixels = np.arange(0, rmax, pixel_size)
-    pixel_bottom = base_pixels
-    pixel_top = base_pixels + pixel_size
-    tthb = np.arctan(pixel_bottom / distance)
-    ttht = np.arctan(pixel_top / distance)
-    dq = twotheta_to_q(ttht, wavelength) - twotheta_to_q(tthb, wavelength)
-    fq = np.linspace(0, qmax, len(dq))
-    b = np.zeros(len(fq) + 1)
-    b[1:] = dq + fq
-    return b
+    pixel_bottom = np.arange(0, rmax, pixel_size)
+    pixel_top = pixel_bottom + pixel_size
+    bottom_tth = np.arctan(pixel_bottom / distance)
+    top_tth = np.arctan(pixel_top / distance)
+    delta_q = twotheta_to_q(top_tth, wavelength) - twotheta_to_q(bottom_tth, wavelength)
+    bottom_q = np.linspace(0, qmax, len(delta_q))
+    bins = np.zeros(len(bottom_q) + 1)
+    bins[1:] = delta_q + bottom_q
+    return bins
