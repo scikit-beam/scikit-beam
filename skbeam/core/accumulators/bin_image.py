@@ -9,7 +9,7 @@ class BinImage(object):
     user-specified bin for each element of the array.
     """
 
-    def __init__(self, bin_values, norm, nbins, min=None, max=None,
+    def __init__(self, bin_values, norm, nbins, vmin=None, vmax=None,
                  weights=None):
         """
         Parameters
@@ -24,9 +24,10 @@ class BinImage(object):
             of all pixels contributing to a bin (see "weights" parameter).
         nbins : int
             The number of histogram bins.
-        min/max : int/float, optional
-            Lower/Upper limits of returned histogram.  If not specified
-            one will be computed from bin_values/min/max/weights
+        vmin/vmax : int/float, optional
+            Lower/Upper limits of returned histogram.  If either is not
+            specified one will be computed from bin_values, ignoring
+            pixels where weight==0.
         weights : np.ndarray, optional
             A weight for each pixel with the same shape as bin_values.
             These can be set to zero to ignore a pixel, similar to a mask.
@@ -37,18 +38,18 @@ class BinImage(object):
         self._weights = weights
         self._nbins = nbins
         self._norm = None
-        self._min = min
-        self._max = max
+        self._vmin = vmin
+        self._vmax = vmax
 
-        # modify weights to mask additional pixels flagged by min/max limits
-        if self._weights is None and (self._min is not None or
-                                      self._max is not None):
+        # modify weights to mask additional pixels flagged by vmin/vmax limits
+        if self._weights is None and (self._vmin is not None or
+                                      self._vmax is not None):
             self._weights = np.ones_like(bin_values)
-        if self._min is not None:
-            self._weights[bin_values < self._min] = 0
-        if self._max is not None:
-            # exclude max values, consistent with histogram pattern
-            self._weights[bin_values >= self._max] = 0
+        if self._vmin is not None:
+            self._weights[bin_values < self._vmin] = 0
+        if self._vmax is not None:
+            # exclude vmax values, consistent with histogram pattern
+            self._weights[bin_values >= self._vmax] = 0
 
         # compute the bin_values, perhaps using the weights
         if self._weights is None:
@@ -64,21 +65,21 @@ class BinImage(object):
             self._ibv = (self._weights != 0)
             self._bv = self._bin_values[self._ibv]
 
-        # compute the min/max values, if necessary
-        if self._min is None:
-            self._min = self._bv.min()
-        if self._max is None:
-            # user didn't supply max value so do it ourselves.
-            # add a little bit to not have the max value create
+        # compute the vmin/vmax values, if necessary
+        if self._vmin is None:
+            self._vmin = self._bv.min()
+        if self._vmax is None:
+            # user didn't supply vmax value so do it ourselves.
+            # add a little bit to not have the vmax value create
             # an extra bin in the np.floor statement below
-            self._max = self._bv.max()
-            self._max += (self._max-self._min) * 1e-9
+            self._vmax = self._bv.max()
+            self._vmax += (self._vmax-self._vmin) * 1e-9
 
-        self.bin_width = (self._max - self._min) / float(self._nbins)
-        self._bin_assignments = np.floor((self._bv - self._min) /
+        self.bin_width = (self._vmax - self._vmin) / float(self._nbins)
+        self._bin_assignments = np.floor((self._bv - self._vmin) /
                                          self.bin_width)
         self._bin_assignments = (self._bin_assignments.astype(np.int32).
-                                 flatten())
+                                 reshape(-1))
         if norm:
             if self._weights is None:
                 self._norm = (
@@ -88,7 +89,7 @@ class BinImage(object):
                 wt = self._weights[self._ibv]
                 self._norm = (
                     (np.bincount(self._bin_assignments,
-                                 weights=wt.flatten()))
+                                 weights=wt.reshape(-1)))
                     .astype(np.float))
 
             # to avoid divide-by-zero
@@ -116,11 +117,11 @@ class BinImage(object):
 
         if self._weights is None:
             histogram = np.bincount(self._bin_assignments,
-                                    weights=image.flatten())
+                                    weights=image.reshape(-1))
         else:
             weights = image * self._weights
             histogram = np.bincount(self._bin_assignments,
-                                    weights=weights[self._ibv].flatten())
+                                    weights=weights[self._ibv].reshape(-1))
 
         if self._norm is not None:
             histogram /= self._norm
@@ -138,7 +139,7 @@ class BinImage(object):
             The center of each bin.
         """
         return (np.arange(self._nbins) + 0.5) * self.bin_width + (
-            self._min)
+            self._vmin)
 
 
 class RadialBinImage(BinImage):
