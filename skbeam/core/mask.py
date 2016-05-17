@@ -46,6 +46,7 @@ import numpy as np
 
 import logging
 import scipy.stats as sts
+from .recip import generate_q_bins
 logger = logging.getLogger(__name__)
 
 
@@ -131,8 +132,7 @@ def mask_edge(img_shape, edge_size):
     return mask
 
 
-def ring_blur_mask(img, q, alpha, rmax, pixel_size, distance, wavelength,
-                   mask=None):
+def ring_blur_mask(img, q, alpha, bins, mask=None):
     """
     Perform a annular mask, which checks the ring statistics and masks any
     pixels which have a value greater or less than alpha * std away from the
@@ -169,7 +169,6 @@ def ring_blur_mask(img, q, alpha, rmax, pixel_size, distance, wavelength,
         mask = mask.reshape(img.shape)
     msk_img = img[mask]
     msk_q = q[mask]
-    bins = generate_q_bins(rmax, np.max(q), pixel_size, distance, wavelength)
 
     int_q = np.zeros(q.shape, dtype=np.int)
     for i in range(len(bins) - 1):
