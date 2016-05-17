@@ -300,8 +300,9 @@ int matmulti(double *val, int n, double mat[][3]){
 
 
 static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
-  PyArrayObject *gridout = NULL, *Nout = NULL, *stderror = NULL;
+  PyArrayObject *gridout = NULL, *grid2out = NULL, *Nout = NULL, *stderror = NULL;
   PyArrayObject *gridI = NULL;
+  PyObject *_dout = NULL, *_d2out = NULL, *_nout = NULL;
   PyObject *_I;
 
   npy_intp data_size;
@@ -315,14 +316,15 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
 
   int retval;
 
-  static char *kwlist[] = { "data", "xrange", "yrange", "zrange", "ignore_nan", NULL }; 
+  static char *kwlist[] = { "data", "xrange", "yrange", "zrange", "ignore_nan", 
+                            "gridout", "grid2out", "nout", NULL }; 
 
-  if(!PyArg_ParseTupleAndKeywords(args, kwargs, "O(ddd)(ddd)(lll)|d", kwlist, 
+  if(!PyArg_ParseTupleAndKeywords(args, kwargs, "O(ddd)(ddd)(lll)|dOOO", kwlist, 
 				  &_I,
 				  &grid_start[0], &grid_start[1], &grid_start[2],
 				  &grid_stop[0], &grid_stop[1], &grid_stop[2],
 				  &grid_nsteps[0], &grid_nsteps[1], &grid_nsteps[2],
-          &ignore_nan)){
+          &ignore_nan, &_dout, &_d2out, &_nout)){
     return NULL;
   }
 
@@ -341,12 +343,29 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   dims[1] = grid_nsteps[1];
   dims[2] = grid_nsteps[2];
 
-  gridout = (PyArrayObject*)PyArray_SimpleNew(3, dims, NPY_DOUBLE);
+  if(_dout == NULL){
+    gridout = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
+  } else {
+    gridout = (PyArrayObject*)PyArray_FROMANY(_dout, NPY_DOUBLE, 0, 0, NPY_ARRAY_IN_ARRAY);
+  }
   if(!gridout){
     goto error;
   }
 
-  Nout = (PyArrayObject*)PyArray_SimpleNew(3, dims, NPY_ULONG);
+  if(_d2out == NULL){
+    grid2out = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_DOUBLE, 0);
+  } else {
+    grid2out = (PyArrayObject*)PyArray_FROMANY(_d2out, NPY_DOUBLE, 0, 0, NPY_ARRAY_IN_ARRAY);
+  }
+  if(!grid2out){
+    goto error;
+  }
+
+  if(_nout == NULL){
+    Nout = (PyArrayObject*)PyArray_ZEROS(3, dims, NPY_ULONG, 0);
+  } else {
+    Nout = (PyArrayObject*)PyArray_FROMANY(_nout, NPY_ULONG, 0, 0, NPY_ARRAY_IN_ARRAY);
+  }
   if(!Nout){
     goto error;
   }
@@ -359,7 +378,8 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   // Ok now we don't touch Python Object ... Release the GIL
   Py_BEGIN_ALLOW_THREADS
 
-  retval = c_grid3d((double*)PyArray_DATA(gridout), (unsigned long*)PyArray_DATA(Nout),
+  retval = c_grid3d((double*)PyArray_DATA(gridout), (double *)PyArray_DATA(grid2out),
+                    (unsigned long*)PyArray_DATA(Nout),
                     (double*)PyArray_DATA(stderror), (double*)PyArray_DATA(gridI),
 		                grid_start, grid_stop, (unsigned long)data_size, grid_nsteps,
                     ignore_nan);
@@ -374,17 +394,18 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   }
 
   Py_XDECREF(gridI);
-  return Py_BuildValue("NNN", gridout, Nout, stderror);
+  return Py_BuildValue("NNNN", gridout, grid2out, Nout, stderror);
 
 error:
   Py_XDECREF(gridI);
   Py_XDECREF(gridout);
+  Py_XDECREF(grid2out);
   Py_XDECREF(Nout);
   Py_XDECREF(stderror);
   return NULL;
 }
 
-int c_grid3d(double *dout, unsigned long *nout, double *stderror, double *data, 
+int c_grid3d(double *dout, double *d2out, unsigned long *nout, double *stderror, double *data, 
              double *grid_start, double *grid_stop, unsigned long max_data,
              unsigned long *n_grid, int ignore_nan){
 
@@ -497,6 +518,14 @@ int c_grid3d(double *dout, unsigned long *nout, double *stderror, double *data,
       threadData[0].d2out[j] += threadData[n].d2out[j];
     }
   }
+  
+  // Now copy the outputs to the arrays
+
+  for(j=0;j<grid_size;j++){
+    dout[j] += threadData[0].dout[j];
+    d2out[j] += threadData[0].d2out[j];
+    nout[j] += threadData[0].nout[j];
+  }
 
   // Calculate the stderror
 
@@ -504,18 +533,9 @@ int c_grid3d(double *dout, unsigned long *nout, double *stderror, double *data,
     if(threadData[0].nout[j] == 0){
       stderror[j] = 0.0;
     } else {
-      double var = (threadData[0].d2out[j] -
-                    pow(threadData[0].dout[j], 2) / threadData[0].nout[j]) /
-                    threadData[0].nout[j];
-      stderror[j] = pow(var, 0.5) / pow(threadData[0].nout[j], 0.5);
+      double var = (d2out[j] - pow(dout[j], 2) / nout[j]) / nout[j];
+      stderror[j] = pow(var, 0.5) / pow(nout[j], 0.5);
     }
-  }
-
-  // Now copy the outputs to the arrays
-
-  for(j=0;j<grid_size;j++){
-    dout[j] = threadData[0].dout[j];
-    nout[j] = threadData[0].nout[j];
   }
 
   // Now free the memory.

@@ -71,7 +71,7 @@ int calcHKLFromQPhi(double *qPhi, int n, double mat[][3]);
 int processImages(double *delgam, double *anglesp, double *qOutp, double lambda, 
                   int mode, unsigned long nimages, double *ubinvp, CCD *ccd);
 
-int c_grid3d(double *dout, unsigned long *nout, double *sterr, double *data,
+int c_grid3d(double *dout, double *d2out, unsigned long *nout, double *sterr, double *data,
              double *grid_start, double *grid_stop, unsigned long max_data, 
              unsigned long *n_grid, int ignore_nan);
 
