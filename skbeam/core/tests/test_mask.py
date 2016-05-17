@@ -103,8 +103,8 @@ def test_ring_blur_mask():
     np.random.seed(10)
     pixels = []
     for i in range(0, 100):
-        a, b = np.random.randint(low=0, high=2048), np.random.randint(low=0,
-                                                                      high=2048)
+        a, b = np.random.randint(low=0, high=2048), \
+               np.random.randint(low=0, high=2048)
         if np.random.random() > .5:
             # Add some hot pixels
             Z[a, b] = np.random.randint(low=200, high=255)
