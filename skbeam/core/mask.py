@@ -46,7 +46,6 @@ import numpy as np
 
 import logging
 import scipy.stats as sts
-from .recip import generate_q_bins
 logger = logging.getLogger(__name__)
 
 

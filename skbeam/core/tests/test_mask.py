@@ -120,7 +120,7 @@ def test_ring_blur_mask():
     a_not_in_b = a - b
     b_not_in_a = b - a
 
-    # Make certain that we have not over masked 10% of the number of bad pixels
+    # We have not over masked 10% of the number of bad pixels
     assert len(a_not_in_b) / len(b) < .1
     # Make certain that we have masked over 90% of the bad pixels
     assert len(b_not_in_a) / len(b) < .1
