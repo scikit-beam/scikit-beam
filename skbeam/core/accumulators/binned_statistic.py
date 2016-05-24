@@ -300,35 +300,35 @@ class BinnedStatistic(object):
         self.xy += Ncount[self.ni[-1]]
         if self.statistic in ['mean', 'std', 'count']:
             self.flatcount = np.bincount(self.xy, None)
+        self.result = np.empty(self.nbin.prod(), float)
 
     def __call__(self, values):
-        result = np.empty(self.nbin.prod(), float)
 
         if self.statistic == 'mean':
-            result.fill(np.nan)
+            self.result.fill(np.nan)
             flatsum = np.bincount(self.xy, values)
             a = self.flatcount.nonzero()
-            result[a] = flatsum[a] / self.flatcount[a]
+            self.result[a] = flatsum[a] / self.flatcount[a]
         elif self.statistic == 'std':
-            result.fill(0)
+            self.result.fill(0)
             flatsum = np.bincount(self.xy, values)
             flatsum2 = np.bincount(self.xy, values ** 2)
             a = self.flatcount.nonzero()
-            result[a] = np.sqrt(flatsum2[a] / self.flatcount[a] -
-                                (flatsum[a] / self.flatcount[a]) ** 2)
+            self.result[a] = np.sqrt(flatsum2[a] / self.flatcount[a] -
+                                     (flatsum[a] / self.flatcount[a]) ** 2)
         elif self.statistic == 'count':
-            result.fill(0)
+            self.result.fill(0)
             a = np.arange(len(self.flatcount))
-            result[a] = self.flatcount
+            self.result[a] = self.flatcount
         elif self.statistic == 'sum':
-            result.fill(0)
+            self.result.fill(0)
             flatsum = np.bincount(self.xy, values)
             a = np.arange(len(flatsum))
-            result[a] = flatsum
+            self.result[a] = flatsum
         elif self.statistic == 'median':
-            result.fill(np.nan)
+            self.result.fill(np.nan)
             for i in np.unique(self.xy):
-                result[i] = np.median(values[self.xy == i])
+                self.result[i] = np.median(values[self.xy == i])
         elif callable(self.statistic):
             with warnings.catch_warnings():
                 # Numpy generates a warnings for mean/std/... with empty list
@@ -339,25 +339,25 @@ class BinnedStatistic(object):
                 except:
                     null = np.nan
                 np.seterr(**old)
-            result.fill(null)
+            self.result.fill(null)
             for i in np.unique(self.xy):
-                result[i] = self.statistic(values[self.xy == i])
+                self.result[i] = self.statistic(values[self.xy == i])
 
         # Shape into a proper matrix
-        result = result.reshape(np.sort(self.nbin))
+        self.result = self.result.reshape(np.sort(self.nbin))
         for i in np.arange(self.nbin.size):
             j = self.ni.argsort()[i]
-            result = result.swapaxes(i, j)
+            self.result = self.result.swapaxes(i, j)
             self.ni[i], self.ni[j] = self.ni[j], self.ni[i]
 
         # Remove outliers (indices 0 and -1 for each dimension).
         core = self.D * [slice(1, -1)]
-        result = result[core]
+        self.result = self.result[core]
 
-        if (result.shape != self.nbin - 2).any():
+        if (self.result.shape != self.nbin - 2).any():
             raise RuntimeError('Internal Shape Error')
 
-        return BinnedStatisticddResult(result, self.edges, self.xy)
+        return self.result
 
 
 class RadialBinnedStatistic(BinnedStatistic):
@@ -367,7 +367,7 @@ class RadialBinnedStatistic(BinnedStatistic):
     """
 
     def __init__(self, xsize, ysize, statistic='mean', bins=10,
-                 xc=None, yc=None, rrange=None, phimin=None, phimax=None,
+                 xc=None, yc=None, rrange=None, phirange=None,
                  mask=None, cartesian=True):
         """
         Parameters:
@@ -380,11 +380,10 @@ class RadialBinnedStatistic(BinnedStatistic):
         xc,yc: int, optional
             location (in pixels) of origin (default: image center).
             see "cartesian" parameter for definition of x/y.
-        rrange : (float, float) or [(float, float)], optional
-            The lower and upper range of the bins.  If not provided, rrange
-            is simply ``(x.min(), x.max())``.  Values outside the range are
-            ignored.
-        phimin,phimax: float, optional
+        rrange: (float, float), optional
+            The lower and upper radial range of the bins, in pixels.
+            If not provided, all pixel r values are included.
+        phirange: (float, float), optional
             phi range to include.  Values are in the range
             (-180,180) degrees (default: no limits).  Phi is
             computed as arctan(y/x) where the meaning of y and x
@@ -402,34 +401,45 @@ class RadialBinnedStatistic(BinnedStatistic):
             # switch from matrix to cartesian by swapping axes
             xc, yc = yc, xc
             xsize, ysize = ysize, xsize
+
         xc = xsize//2 if xc is None else xc
         yc = ysize//2 if yc is None else yc
         x = np.arange(xsize)-xc
         y = np.arange(ysize)-yc
         xgrid, ygrid = np.meshgrid(x, y)  # "cartesian"
+        self.expected_shape = xgrid.shape
 
         rpix = np.sqrt(xgrid**2 + ygrid**2)
 
-        if phimin is not None or phimax is not None:
+        if phirange is not None:
             if cartesian:
                 phipix = np.arctan2(ygrid, xgrid) * 180 / np.pi
             else:
                 phipix = np.arctan2(xgrid, ygrid) * 180 / np.pi
 
-        # exclude pixels
-        rmin = rpix.min() if rrange is None else rrange[0]
-        if phimin is not None:
-            rpix[phipix < phimin] = rmin-1
-        if phimax is not None:
-            rpix[phipix > phimax] = rmin-1
+        # exclude pixels this is arguably not-ideal, forcing masked
+        # pixels to be outside the histogram range, but it's more
+        # performant, because we don't have to iterate over the array
+        # a second time on each __call__ picking out the same unmasked
+        # pixels
+
+        if rrange is None:
+            rrange = (rpix.min(), rpix.max())
+        excludeval = rrange[0]-1
+        if phirange is not None:
+            rpix[phipix < phirange[0]] = excludeval
+            rpix[phipix > phirange[1]] = excludeval
         if mask is not None:
-            if not (len(mask.shape) == 2):
-                raise ValueError('"mask" must be a 2-dimensional array')
-            rpix[mask == 0] = rmin-1
+            if mask.shape != self.expected_shape:
+                raise ValueError('"mask" has incorrect shape')
+            rpix[mask == 0] = excludeval
 
         super(RadialBinnedStatistic, self).__init__(rpix.reshape(-1),
                                                     statistic,
                                                     bins=bins, range=rrange)
 
     def __call__(self, values):
+        # check for what I believe could be a common error
+        if values.shape != self.expected_shape:
+            raise ValueError('"values" has incorrect shape')
         return super(RadialBinnedStatistic, self).__call__(values.reshape(-1))
