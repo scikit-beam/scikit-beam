@@ -25,7 +25,7 @@ class TestRadialBinnedStatistic(object):
         params = [[self.image.shape[0], self.image.shape[1], False],
                   [self.image.shape[1], self.image.shape[0], True]]
         mykwargs = [{'xc': 0, 'yc': 0, 'rrange': (100, 900), 'bins': 100,
-                     'phimin': 5, 'phimax': 60},
+                     'phirange': (5, 60)},
                     {'xc': 0, 'yc': 0, 'bins': 100}]
         # only test 60 bins where we don't have r-limits, because
         # past that the number of pixels is no longer proportional
@@ -39,7 +39,7 @@ class TestRadialBinnedStatistic(object):
                     radbinstat = RadialBinnedStatistic(xsize, ysize,
                                                        statistic=stat,
                                                        **kwargs)
-                    binned, edges, xy = radbinstat(self.image)
+                    binned = radbinstat(self.image)
                     binned /= binned.max()
                     binned = binned[slice]
                     centeroffset = 0.5*(radbinstat.edges[0][1] -
