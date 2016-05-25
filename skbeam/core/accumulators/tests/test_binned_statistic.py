@@ -34,7 +34,7 @@ class TestRadialBinnedStatistic(object):
 
         for xsize, ysize, cartesian in params:
             for kwargs, slice in zip(mykwargs, myslice):
-                for stat in ['mean', 'sum']:
+                for stat in ['mean', 'median', 'count', 'sum', 'std']:
                     kwargs['cartesian'] = cartesian
                     radbinstat = RadialBinnedStatistic(xsize, ysize,
                                                        statistic=stat,
