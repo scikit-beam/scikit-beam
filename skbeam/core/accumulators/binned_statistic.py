@@ -19,6 +19,10 @@ class BinnedStatistic(object):
     def __init__(self, x, statistic='mean',
                  bins=10, range=None):
         """
+        A refactored version of scipy.stats.binned_statistic to improve
+        performance for the case where binning doesn't need to be
+        re-initialized on every call.
+
         Compute a binned statistic for a set of data.
 
         This is a generalization of a histogram function.  A histogram divides
@@ -28,9 +32,8 @@ class BinnedStatistic(object):
 
         Parameters
         ----------
-        values : array_like
-            The values on which the statistic will be computed.  This must be
-            the same shape as `x`.
+        x : array_like
+            A sequence of values to be binned.
         statistic : string or callable, optional
             The statistic to compute (default is 'mean').
             The following statistics are available:
@@ -48,7 +51,6 @@ class BinnedStatistic(object):
                 values, and outputs a single numerical statistic. This function
                 will be called on the values in each bin.  Empty bins will be
                 represented by function([]), or NaN if this returns an error.
-
         bins : int or sequence of scalars, optional
             If `bins` is an int, it defines the number of equal-width bins in
             the given range (10 by default).  If `bins` is a sequence, it
@@ -60,17 +62,6 @@ class BinnedStatistic(object):
             The lower and upper range of the bins.  If not provided, range
             is simply ``(x.min(), x.max())``.  Values outside the range are
             ignored.
-
-        Returns
-        -------
-        statistic : array
-            The values of the selected statistic in each bin.
-        bin_edges : array of dtype float
-            Return the bin edges ``(length(statistic)+1)``.
-        binnumber : 1-D ndarray of ints
-            This assigns to each observation an integer that represents the bin
-            in which this observation falls. Array has the same length as
-            values.
 
         See Also
         --------
@@ -172,27 +163,6 @@ class BinnedStatistic(object):
         sample : array_like
             Data to histogram passed as a sequence of D arrays of length N, or
             as an (N,D) array.
-        values : array_like
-            The values on which the statistic will be computed.  This must be
-            the same shape as x.
-        statistic : string or callable, optional
-            The statistic to compute (default is 'mean').
-            The following statistics are available:
-
-              * 'mean' : compute the mean of values for points within each bin.
-                Empty bins will be represented by NaN.
-              * 'median' : compute the median of values for points within each
-                bin. Empty bins will be represented by NaN.
-              * 'count' : compute the count of points within each bin.  This is
-                identical to an unweighted histogram.  `values` array is not
-                referenced.
-              * 'sum' : compute the sum of values for points within each bin.
-                This is identical to a weighted histogram.
-              * function : a user-defined function which takes a 1D array of
-                values, and outputs a single numerical statistic. This function
-                will be called on the values in each bin.  Empty bins will be
-                represented by function([]), or NaN if this returns an error.
-
         bins : sequence or int, optional
             The bin specification:
 
@@ -200,23 +170,10 @@ class BinnedStatistic(object):
                 dimension.
               * The number of bins for each dimension (nx, ny, ... =bins)
               * The number of bins for all dimensions (nx=ny=...=bins).
-
         range : sequence, optional
             A sequence of lower and upper bin edges to be used if the
             edges are not given explicitely in `bins`. Defaults to the
             minimum and maximum values along each dimension.
-
-        Returns
-        -------
-        statistic : ndarray, shape(nx1, nx2, nx3,...)
-            The values of the selected statistic in each two-dimensional bin
-        bin_edges : list of ndarrays
-            A list of D arrays describing the (nxi + 1) bin edges for each
-            dimension
-        binnumber : 1-D ndarray of ints
-            This assigns to each observation an integer that
-            represents the bin in which this observation falls. Array
-            has the same length as values.
 
         """
         known_stats = ['mean', 'median', 'count', 'sum', 'std']
@@ -303,6 +260,24 @@ class BinnedStatistic(object):
         self.result = np.empty(self.nbin.prod(), float)
 
     def __call__(self, values):
+        """
+        Parameters
+        ----------
+        values : array_like
+            The values on which the statistic will be computed.  This must be
+            the same shape as `x` in the constructor.
+
+        Returns
+        -------
+        statistic : array
+            The values of the selected statistic in each bin.
+        bin_edges : array of dtype float
+            Return the bin edges ``(length(statistic)+1)``.
+        binnumber : 1-D ndarray of ints
+            This assigns to each observation an integer that represents the bin
+            in which this observation falls. Array has the same length as
+            values.
+        """
 
         if self.statistic == 'mean':
             self.result.fill(np.nan)
