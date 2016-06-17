@@ -13,7 +13,7 @@ work in practice.
 
 The ultimate goal that we seek is a package that would contain much of
 the core functionality and some common tools required across the
-community, but not *everything* domain scientist will ever need. The
+community, but not *everything* a domain scientist will ever need. The
 aim is primarily to avoid duplication for common core tasks, and to
 provide a robust framework upon which to build more complex tools.
 
@@ -101,10 +101,7 @@ Keeping track of affiliated packages
 ------------------------------------
 
 Affiliated packages will be listed in a central location (in addition to
-PyPI) that will allow an easy installation of all the affiliated
-packages, for example with a script that will seamlessly download and
-install all the affiliated packages. The core package will also include
-mechanisms to facilitate this installation process.
+PyPI/conda-forge).
 
 Existing Packages
 -----------------
