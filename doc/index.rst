@@ -134,7 +134,8 @@ as a whole, see :doc:`development/vision`.
    development/releasing
    development/workflow/maintainer_workflow
    development/affiliated-packages
-   changelog
+   development/python_versions
+
 
 ******************
 Indices and Tables
