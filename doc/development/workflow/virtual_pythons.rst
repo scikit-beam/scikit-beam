@@ -49,6 +49,10 @@ accomplish each step are given for both `conda`_ and `virtualenvwrapper`_:
 Set up for virtual environments
 -------------------------------
 
+* `conda`_: No setup is necessary beyond installing the anaconda python
+  distribution.
+
+
 * `virtualenvwrapper`_:
 
   + First, install `virtualenvwrapper`_, which will also install `virtualenv`_,
@@ -59,9 +63,6 @@ Set up for virtual environments
       export PROJECT_HOME=$HOME/
       source /usr/local/bin/virtualenvwrapper.sh
 
-* `conda`_: No setup is necessary beyond installing the anaconda python
-  distribution.
-
 .. _list_env:
 
 List virtual environments
@@ -71,15 +72,16 @@ You do not need to list the virtual environments you have created before using
 them...but sooner or later you will forget what environments you have defined
 and this is the easy way to find out.
 
+* `conda`_: ``conda info -e``
+    + you will always have at least one environment, called ``root``
+    + your active environment is indicated by a ``*``
+
 * `virtualenvwrapper`_: ``workon``
     + If this displays nothing you have no virtual environments
     + If this displays ``workon: command not found`` then you haven't done
       the :ref:`setup_for_env`; do that.
     + For more detailed information about installed environments use
       ``lsvirtualenv``.
-* `conda`_: ``conda info -e``
-    + you will always have at least one environment, called ``root``
-    + your active environment is indicated by a ``*``
 
 .. _create_env:
 
@@ -105,6 +107,17 @@ environment.
 
 **The name you choose cannot have spaces in it.**
 
+* `conda`_:
+    + Make an environment called ``ENV`` with all of the packages in your main
+      anaconda environment::
+
+        ``conda create -n ENV anaconda``
+
+    + More details, and examples that start with none of the packages from
+      your normal python environment, are in the
+      `documentation for the conda command`_ and the
+      `blog post announcing anaconda environments`_.
+
 * `virtualenvwrapper`_:
     + Make an environment called ``ENV`` with all of the packages in your normal
       python environment::
@@ -118,16 +131,6 @@ environment.
       can install packages within the virtual environment.
     + More details and examples are in the
       `virtualenvwrapper command documentation`_.
-* `conda`_:
-    + Make an environment called ``ENV`` with all of the packages in your main
-      anaconda environment::
-
-        ``conda create -n ENV anaconda``
-
-    + More details, and examples that start with none of the packages from
-      your normal python environment, are in the
-      `documentation for the conda command`_ and the
-      `blog post announcing anaconda environments`_.
 
 .. _activate_env:
 
@@ -136,7 +139,7 @@ Activate a virtual environment
 
 To use a new virtual environment you may need to activate it;
 `virtualenvwrapper`_ will try to automatically activate your new environment
-when you create it. Activation does two things (either of which you could do
+when you create it. Activation does three things (which you could do
 manually, though it would be inconvenient):
 
 * Put the ``bin`` directory for the virtual environment at the front of your
@@ -144,17 +147,20 @@ manually, though it would be inconvenient):
 * Add the name of the virtual environment to your command prompt. If you have
   successfully switched to a new environment called ``ENV`` your prompt should
   look something like this: ``(ENV)[~] $``
+* conda provides a mechanism for packages to install scripts or export environmental
+  variables on activation.
 
 The commands below allow you to switch between virtual environments in
 addition to activating new ones.
 
-* `virtualenvwrapper`_: Activate the environment ``ENV`` with::
-
-      workon ENV
-
 * ` conda`: Activate the environment ``ENV`` with::
 
       source activate ENV
+
+
+* `virtualenvwrapper`_: Activate the environment ``ENV`` with::
+
+      workon ENV
 
 
 .. _deactivate_env:
@@ -165,11 +171,12 @@ Deactivate a virtual environment
 At some point you may want to go back to your normal python environment. Do
 that with:
 
+* `conda`_: ``source deactivate``
+
 * `virtualenvwrapper`_: ``deactivate``
     + Note that in ``virtualenvwrapper 4.1.1`` the output of
       ``mkvirtualenv`` says you should use ``source deactivate``; that does
       not seem to actually work.
-* `conda`_: ``source deactivate``
 
 .. _delete_env:
 
@@ -179,11 +186,11 @@ Delete a virtual environment
 In both `virtualenvwrapper`_ and `conda`_ you can simply delete the directory in
 which the ``ENV`` is located; both also provide commands to make that a bit easier.
 
-* `virtualenvwrapper`_: ``rmvirtualenv ENV``
 * `conda`_: ``conda remove --all -n ENV``
+* `virtualenvwrapper`_: ``rmvirtualenv ENV``
+
 
 .. _documentation for virtualenvwrapper: http://virtualenvwrapper.readthedocs.org/en/latest/install.html
 .. _virtualenvwrapper command documentation: http://virtualenvwrapper.readthedocs.org/en/latest/command_ref.html
 .. _documentation for the conda command: http://docs.continuum.io/conda/examples/create.html
 .. _blog post announcing anaconda environments: http://www.continuum.io/blog/conda
-
