@@ -31,10 +31,7 @@ Interface and Dependencies
   :ref:`dev-portable`.
 
 * The new Python 3 formatting style should be used (i.e.
-  ``"{0:s}".format("spam")`` instead of ``"%s" % "spam"``), although
-  when using positional arguments, the position should always be
-  specified (i.e.  ``"{:s}"`` is not compatible with Python
-  2.6).
+  ``"{0:s}".format("spam")`` instead of ``"%s" % "spam"``).
 
 * The core package and affiliated packages should be importable with
   no dependencies other than components already in the Scikit-beam core,
@@ -63,7 +60,7 @@ Interface and Dependencies
       try:
           from opdep import Superclass
       except ImportError:
-          warn(Scikit-beamWarning('opdep is not present, so <functionality below> will not work.'))
+          warn(ScikitbeamWarning('opdep is not present, so <functionality below> will not work.'))
           class SuperClass(object): pass
 
       class Whatever(Superclass):
@@ -97,6 +94,11 @@ Documentation and Testing
 Data and Configuration
 ----------------------
 
+.. warning  ::
+
+    This is inherited from Astropy and needs to be discussed/implemented.
+
+
 * Packages can include data in a directory named ``data`` inside a subpackage
   source directory as long as it is less than about 100 kb. These data should
   always be accessed via the :func:`scikit-beam.utils.data.get_pkg_data_fileobj` or
@@ -129,10 +131,12 @@ errors should follow these rules:
   in favor of more specific exceptions (``IOError``, ``ValueError``,
   etc.).
 
-* For warnings, one should always use ``warnings.warn(message, warning_class)``. These get redirected to ``log.warn`` by default, but one
-  can still use the standard warning-catching mechanism and custom warning
-  classes. The warning class should be either
-  :class:`~scikit-beam.utils.exceptions.Scikit-beamUserWarning` or inherit from it.
+* For warnings, one should always use ``warnings.warn(message,
+  warning_class)``. These get redirected to ``log.warn`` by default,
+  but one can still use the standard warning-catching mechanism and
+  custom warning classes. The warning class should be either
+  :class:`~scikit-beam.utils.exceptions.Scikit-beamUserWarning` or
+  inherit from it.
 
 * For informational and debugging messages, one should always use
   ``log.info(message)`` and ``log.debug(message)``.
@@ -141,7 +145,7 @@ The logging system uses the built-in Python `logging
 <http://docs.python.org/library/logging.html>`_ module. The logger can
 be imported using::
 
-    from scikit-beam import log
+    from scikit-beam import logger
 
 Coding Style/Conventions
 ------------------------
@@ -171,6 +175,11 @@ Coding Style/Conventions
   pointing to the license for the Scikit-beam source code.  This line should say::
 
       # Licensed under a 3-clause BSD style license - see LICENSE.rst
+
+  .. warning ::
+
+    Many files currently have the full 3-clause BSD, this may need
+    some discussion.
 
 * The ``import numpy as np``, ``import matplotlib as mpl``, and ``import
   matplotlib.pyplot as plt`` naming conventions should be used wherever
@@ -225,6 +234,10 @@ Coding Style/Conventions
 
 Unicode guidelines
 ------------------
+
+.. warning ::
+
+   Top level utilities are not implemented yet.
 
 For maximum compatibility, we need to assume that writing non-ascii
 characters to the console or to files will not work.  However, for
@@ -325,6 +338,10 @@ Including C Code
   files that are updated in the repository when important changes are made to
   the ``.pyx`` file.
 
+  .. warning ::
+
+     We should discuss if we want to commit the ``.c`` or not.
+
 * If a C extension has a dependency on an external C library, the source code
   for the library should be bundled with the Scikit-beam core, provided the
   license for the C library is compatible with the Scikit-beam license.
@@ -348,15 +365,12 @@ As of scikit-beam 0.3, the `six`_ library is included to allow supporting Python
 2 and 3 from a single code base.  The use of the `2to3`_ tool has been
 phased out in favor of using ``six``.
 
-To start using ``six`` instead of ``2to3`` in an affiliate package, you first
-need to put the following in the package's ``setup_package.py`` file::
-
-    def requires_2to3():
-        return False
-
 This section is mainly about moving existing code that works with
 ``2to3`` to using ``six``.  It is not a complete guide to Python 2 and
 3 compatibility.
+
+Many more details and tools can be found at `python-future
+<http://python-future.org/automatic_conversion.html>`__
 
 Welcome to the ``__future__``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -373,41 +387,13 @@ All files should also import `six`_, whether they are using it or not,
 just to make moving code between modules easier, as `six`_ gets used *a
 lot*::
 
-    from ..extern import six
-
-(where ``extern`` refers to ``scikit-beam.extern``).  Do not import `six`_
-from the top-level: only import the copy of `six`_ included with
-scikit-beam.
+    import six
 
 Finding places to use six
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Unfortunately, the only way to be certain that code works on both
 Python 2 and 3 is to make sure it is covered by unit tests.
-
-However, the `2to3`_ commandline tool can also be used to locate places
-that require special handling with `six`_.  Starting from Python 2
-code, or code that is known to work on both Python 2 and 3 by
-processing it with the `2to3`_ tool (which is most of the existing code
-in scikit-beam), simply run `2to3`_ on the file to display the changes it
-would make in diff format.  This diff can be used to highlight places
-that need to be updated to use `six`_.
-
-For example, most things that have been renamed between Python 2 and 3
-are in the ``six.moves`` namespace, so given this Python 2 code::
-
-    import cPickle
-
-it can be replaced with::
-
-    from ..extern.six.moves import cPickle
-
-.. note::
-
-    The `modernize <https://pypi.python.org/pypi/modernize>`_ tool
-    aims to convert Python 2 code to portable code that uses `six`_,
-    but at the time of this writing, it is not feature complete and
-    misses many important transformations.
 
 The `six <http://pythonhosted.org/six/>`__ documentation serves as a
 good reference for the sorts of things that need to be updated.
@@ -428,9 +414,6 @@ easiest way to handle this is to force cast them using ``str()``, for
 example::
 
    x = np.array([1.0, 2.0, 3.0], dtype=[(str('name'), '>f8')])
-
-The same is true of structure specifiers in the built-in `struct`
-module on Python 2.6.
 
 ``pytest.mark.skipif`` also requires a "native" string, i.e.::
 
@@ -771,6 +754,6 @@ Further tips and hints relating to the coding guidelines are included below.
 
 .. _Numpy: http://numpy.scipy.org/
 .. _Scipy: http://www.scipy.org/
-.. _matplotlib: http://matplotlib.sourceforge.net/
+.. _matplotlib: http://matplotlib.org
 .. _Cython: http://cython.org/
 .. _PyPI: http://pypi.python.org/pypi
