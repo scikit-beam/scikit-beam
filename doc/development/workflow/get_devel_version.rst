@@ -52,7 +52,7 @@ Step-by-step instructions
 .. _fork_a_copy:
 
 Make your own copy of Scikit-beam on GitHub
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In the language of `GitHub`_, making a copy of someone's code is called making
 a *fork*. A fork is a complete copy of the code and all of its revision
@@ -80,7 +80,7 @@ Make sure git is installed and configured on your computer
 Check by typing, in a terminal::
 
     $ git --version
-    # if git is installed, will get something like: git version 1.8.4
+    # if git is installed, will get something like: git version 1.9.1
 
 If `git`_ is not installed, `get it <http://git-scm.com/downloads>`_.
 
@@ -125,7 +125,7 @@ might push up branches you do not intend to push.
 .. _clone_your_fork:
 
 Copy your fork of Scikit-beam from GitHub to your computer
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 One of the commands below will make a complete copy of your `GitHub`_ fork
 of `Scikit-beam`_ in a directory called ``scikit-beam``; which form you use depends
@@ -142,7 +142,7 @@ authentication.
 .. _set_upstream_master:
 
 Tell git where to look for changes in the development version of Scikit-beam
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Right now your local copy of `Scikit-beam`_ doesn't know where the development
 version of `Scikit-beam`_ is. There is no easy way to keep your local copy up to
@@ -217,20 +217,14 @@ and you should be rewarded with::
 .. _activate_development_scikit-beam:
 
 "Activate" the development version of scikit-beam
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Right now you have the development version of `Scikit-beam`_, but python will not
-see it. Though there are more sophisticated ways of managing multiple versions
-of `Scikit-beam`_, for now this straightforward way will work (if you want to jump
-ahead to the more sophisticated method look at :ref:`virtual_envs`).
+see it.  See  :ref:`virtual_envs` for how to set up a env to work in.  Assuming you are
+using conda ::
 
-.. note::
-    There are a couple of circumstances in which this quick method of
-    activating your copy of `Scikit-beam`_ will NOT work and you need to go
-    straight to using a virtual python environment:
-
-    + You use Python 3.
-    + You want to work on C or Cython code in `Scikit-beam`_.
+  conda create -n skbeam_dev python=3 maplotlib ipython scipy
+  source activate skbeam_dev
 
 In the directory where your copy of `Scikit-beam`_ is type::
 
@@ -238,28 +232,22 @@ In the directory where your copy of `Scikit-beam`_ is type::
 
 Several pages of output will follow the first time you do this; this wouldn't
 be a bad time to get a fresh cup of coffee. At the end of it you should see
-something like  ``Finished processing dependencies for scikit-beam==0.3.dev6272``.
+something like
+``Finished processing dependencies for scikit-beam==0.0.8.post67.dev0+g1dfa736.r0``.
 
 To make sure it has been activated **change to a different directory outside of
-the scikit-beam distribution** and try this in python::
+the scikit-beam distribution** and try this in ipython::
 
-    >>> import scikit-beam
-    >>> scikit-beam.__version__  # doctest: +SKIP
-    '0.3.dev6272'
+   In [1]: import skbeam
 
-The actual version number will be different than in this example, but it
-should have dev in the name.
+   In [2]: skbeam.__version__
+   Out[2]: '0.0.8.post67.dev0+g1dfa736'
 
-.. warning::
-    Right now every time you run Python, the development version of scikit-beam
-    will be used. That is fine for testing but you should make sure you change
-    back to the stable version unless you are developing scikit-beam. If you want
-    to develop scikit-beam, there is a better way of separating the development
-    version from the version you do science with. That method, using a
-    `virtualenv`_, is discussed at :ref:`virtual_envs`.
-
-    For now **remember to change back to your usual version** when you are
-    done with this.
+The actual version number will be different than in this example.  The
+version string is a automatically extracted from git and follows
+`PEP440`_.  For example, this version is 67 commits past the v0.0.8
+tag (``'0.0.8.post67'``), the working tree is dirty (``'dev0'``) and
+the last commit has the SHA ``'1dfa736'``.
 
 .. _test_installation:
 
@@ -276,7 +264,7 @@ If the test *don't* complete successfully, that is itself a bug--please
 To run the tests, navigate back to the directory your copy of scikit-beam is in on
 your computer, then, at the shell prompt, type::
 
-    python setup.py test
+    python run_tests.py
 
 This is another good time to get some coffee or tea. The number of test is
 large. When the test are done running you will see a message something like
@@ -304,30 +292,9 @@ the development version.
 
 Either way, once you are done, make sure you do the next step.
 
-.. _deactivate_development:
-
-"Deactivate" the development version
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Be sure to turn the development version off before you go back to doing
-science work with Scikit-beam.
-
-Navigate to the directory where your local copy of the development version is,
-then run::
-
-    python setup.py develop -u
-
-You should really confirm it is deactivated by **changing to a different
-directory outside of the scikit-beam distribution** and running this in python::
-
-    >>> import scikit-beam
-    >>> scikit-beam.__version__  # doctest: +SKIP
-    '0.2.5'
-
-The actual version number you see will likely be different than this example,
-but it should not have ``'dev'`` in it.
 
 
 .. include:: links.inc
 .. _Git Basics: http://git-scm.com/book/en/Getting-Started-Git-Basics
 .. _Set Up Git at GitHub: http://help.github.com/articles/set-up-git#set-up-git
+.. _PEP440: https://www.python.org/dev/peps/pep-0440/
