@@ -22,28 +22,28 @@ class TestRadialBinnedStatistic(object):
 
     def testRadialBinnedStatistic(self):
 
-        params = [[self.image.shape[0], self.image.shape[1], False],
-                  [self.image.shape[1], self.image.shape[0], True]]
-        mykwargs = [{'xc': 0, 'yc': 0, 'rrange': (100, 900), 'bins': 100,
+        params = [[100, self.image.shape[0], self.image.shape[1], False],
+                  [100, self.image.shape[1], self.image.shape[0], True]]
+        mykwargs = [{'xc': 0, 'yc': 0, 'rrange': (100, 900),
                      'phirange': (5, 60)},
-                    {'xc': 0, 'yc': 0, 'bins': 100}]
+                    {'xc': 0, 'yc': 0}]
         # only test 60 bins where we don't have r-limits, because
         # past that the number of pixels is no longer proportional
         # to the radius
         myslice = [np.s_[:], np.s_[:60]]
 
-        for xsize, ysize, cartesian in params:
+        for bins, xsize, ysize, cartesian in params:
             for kwargs, slice in zip(mykwargs, myslice):
                 for stat in ['mean', 'median', 'count', 'sum', 'std']:
-                    kwargs['cartesian'] = cartesian
-                    radbinstat = RadialBinnedStatistic(xsize, ysize,
+                    radbinstat = RadialBinnedStatistic(bins, xsize, ysize,
+                                                       cartesian,
                                                        statistic=stat,
                                                        **kwargs)
                     binned = radbinstat(self.image)
                     binned /= binned.max()
                     binned = binned[slice]
-                    centeroffset = 0.5*(radbinstat.edges[0][1] -
-                                        radbinstat.edges[0][0])
+                    centeroffset = 0.5*(radbinstat.bin_edges[0][1] -
+                                        radbinstat.bin_edges[0][0])
                     ref = np.sin((radbinstat.edges[0][:-1] + centeroffset) /
                                  self.oscillation_rate * np.pi)[slice]
                     # can't check equality if we use normalization with
@@ -63,7 +63,8 @@ class TestRadialBinnedStatistic(object):
             pass
         # test exception when RadialBinnedStatistic is given 1D array
         try:
-            RadialBinnedStatistic(xsize, ysize, mask=np.array([1, 2, 3, 4]))
+            RadialBinnedStatistic(10, xsize, ysize, True,
+                                  mask=np.array([1, 2, 3, 4]))
             raise RuntimeError('RadialBinnedStatistic failed to raise'
                                ' when passed 1D array')
         except ValueError:

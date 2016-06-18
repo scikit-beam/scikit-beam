@@ -1,96 +1,50 @@
+"""
+Copyright 2001, 2002 Enthought, Inc.
+All rights reserved.
+
+Copyright 2003-2013 SciPy Developers.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+- Redistributions of source code must retain the above copyright
+  notice, this list of conditions and the following disclaimer.
+
+- Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the following
+  disclaimer in the documentation and/or other materials provided
+  with the distribution.
+
+- Neither the name of Enthought nor the names of the SciPy Developers
+  may be used to endorse or promote products derived from this software
+  without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+
 from __future__ import division, print_function, absolute_import
 
 import warnings
 
 import numpy as np
 from scipy._lib.six import callable
-from collections import namedtuple
 
 
-BinnedStatisticResult = namedtuple('BinnedStatisticResult',
-                                   ('statistic', 'bin_edges', 'binnumber'))
-
-BinnedStatisticddResult = namedtuple('BinnedStatisticddResult',
-                                     ('statistic', 'bin_edges',
-                                      'binnumber'))
-
-
-class BinnedStatistic(object):
-    def __init__(self, x, statistic='mean',
+class BinnedStatisticDD(object):
+    def __init__(self, sample, statistic='mean',
                  bins=10, range=None):
-        """
-        A refactored version of scipy.stats.binned_statistic to improve
-        performance for the case where binning doesn't need to be
-        re-initialized on every call.
-
-        Compute a binned statistic for a set of data.
-
-        This is a generalization of a histogram function.  A histogram divides
-        the space into bins, and returns the count of the number of points in
-        each bin.  This function allows the computation of the sum, mean,
-        median, or other statistic of the values within each bin.
-
-        Parameters
-        ----------
-        x : array_like
-            A sequence of values to be binned.
-        statistic : string or callable, optional
-            The statistic to compute (default is 'mean').
-            The following statistics are available:
-
-              * 'mean' : compute the mean of values for points within each bin.
-                Empty bins will be represented by NaN.
-              * 'median' : compute the median of values for points within each
-                bin. Empty bins will be represented by NaN.
-              * 'count' : compute the count of points within each bin.  This is
-                identical to an unweighted histogram.  `values` array is not
-                referenced.
-              * 'sum' : compute the sum of values for points within each bin.
-                This is identical to a weighted histogram.
-              * function : a user-defined function which takes a 1D array of
-                values, and outputs a single numerical statistic. This function
-                will be called on the values in each bin.  Empty bins will be
-                represented by function([]), or NaN if this returns an error.
-        bins : int or sequence of scalars, optional
-            If `bins` is an int, it defines the number of equal-width bins in
-            the given range (10 by default).  If `bins` is a sequence, it
-            defines the bin edges, including the rightmost edge, allowing for
-            non-uniform bin widths.  Values in `x` that are smaller than lowest
-            bin edge are assigned to bin number 0, values beyond the highest
-            bin are assigned to ``bins[-1]``.
-        range : (float, float) or [(float, float)], optional
-            The lower and upper range of the bins.  If not provided, range
-            is simply ``(x.min(), x.max())``.  Values outside the range are
-            ignored.
-
-        See Also
-        --------
-        numpy.histogram, binned_statistic_2d, binned_statistic_dd
-
-        Notes
-        -----
-        All but the last (righthand-most) bin is half-open.  In other words, if
-        `bins` is ``[1, 2, 3, 4]``, then the first bin is ``[1, 2)`` (including
-        1, but excluding 2) and the second ``[2, 3)``.  The last bin, however,
-        is ``[3, 4]``, which *includes* 4.
-        """
-        try:
-            N = len(bins)
-        except TypeError:
-            N = 1
-
-        if N != 1:
-            bins = [np.asarray(bins, float)]
-
-        if range is not None:
-            if len(range) == 2:
-                range = [range]
-
-        self.statistic = statistic
-        self._binned_statistic_dd_init([x], bins, range)
-
-    def _binned_statistic_dd_init(self, sample,
-                                  bins=10, range=None):
         """
         Compute a multidimensional binned statistic for a set of data.
 
@@ -119,6 +73,7 @@ class BinnedStatistic(object):
 
         """
         known_stats = ['mean', 'median', 'count', 'sum', 'std']
+        self.statistic = statistic
         if not callable(self.statistic) and self.statistic not in known_stats:
             raise ValueError('invalid statistic %r' % (self.statistic,))
 
@@ -199,7 +154,14 @@ class BinnedStatistic(object):
         self.xy += Ncount[self.ni[-1]]
         if self.statistic in ['mean', 'std', 'count']:
             self.flatcount = np.bincount(self.xy, None)
-        self.result = np.empty(self.nbin.prod(), float)
+
+    @property
+    def bin_edges(self):
+        """
+        bin_edges : array of dtype float
+        Return the bin edges ``(length(statistic)+1)``.
+        """
+        return self.edges
 
     def __call__(self, values):
         """
@@ -213,14 +175,9 @@ class BinnedStatistic(object):
         -------
         statistic : array
             The values of the selected statistic in each bin.
-        bin_edges : array of dtype float
-            Return the bin edges ``(length(statistic)+1)``.
-        binnumber : 1-D ndarray of ints
-            This assigns to each observation an integer that represents the bin
-            in which this observation falls. Array has the same length as
-            values.
         """
 
+        self.result = np.empty(self.nbin.prod(), float)
         if self.statistic == 'mean':
             self.result.fill(np.nan)
             flatsum = np.bincount(self.xy, values)
@@ -277,23 +234,182 @@ class BinnedStatistic(object):
         return self.result
 
 
-class RadialBinnedStatistic(BinnedStatistic):
+class BinnedStatistic1D(BinnedStatisticDD):
+    def __init__(self, x, statistic='mean',
+                 bins=10, range=None):
+        """
+        A refactored version of scipy.stats.binned_statistic to improve
+        performance for the case where binning doesn't need to be
+        re-initialized on every call.
+
+        Compute a binned statistic for a set of data.
+
+        This is a generalization of a histogram function.  A histogram divides
+        the space into bins, and returns the count of the number of points in
+        each bin.  This function allows the computation of the sum, mean,
+        median, or other statistic of the values within each bin.
+
+        Parameters
+        ----------
+        x : array_like
+            A sequence of values to be binned.
+        statistic : string or callable, optional
+            The statistic to compute (default is 'mean').
+            The following statistics are available:
+
+              * 'mean' : compute the mean of values for points within each bin.
+                Empty bins will be represented by NaN.
+              * 'median' : compute the median of values for points within each
+                bin. Empty bins will be represented by NaN.
+              * 'count' : compute the count of points within each bin.  This is
+                identical to an unweighted histogram.  `values` array is not
+                referenced.
+              * 'sum' : compute the sum of values for points within each bin.
+                This is identical to a weighted histogram.
+              * function : a user-defined function which takes a 1D array of
+                values, and outputs a single numerical statistic. This function
+                will be called on the values in each bin.  Empty bins will be
+                represented by function([]), or NaN if this returns an error.
+        bins : int or sequence of scalars, optional
+            If `bins` is an int, it defines the number of equal-width bins in
+            the given range (10 by default).  If `bins` is a sequence, it
+            defines the bin edges, including the rightmost edge, allowing for
+            non-uniform bin widths.  Values in `x` that are smaller than lowest
+            bin edge are assigned to bin number 0, values beyond the highest
+            bin are assigned to ``bins[-1]``.
+        range : (float, float) or [(float, float)], optional
+            The lower and upper range of the bins.  If not provided, range
+            is simply ``(x.min(), x.max())``.  Values outside the range are
+            ignored.
+
+        See Also
+        --------
+        numpy.histogram, binned_statistic_2d, binned_statistic_dd
+
+        Notes
+        -----
+        All but the last (righthand-most) bin is half-open.  In other words, if
+        `bins` is ``[1, 2, 3, 4]``, then the first bin is ``[1, 2)`` (including
+        1, but excluding 2) and the second ``[2, 3)``.  The last bin, however,
+        is ``[3, 4]``, which *includes* 4.
+        """
+        try:
+            N = len(bins)
+        except TypeError:
+            N = 1
+
+        if N != 1:
+            bins = [np.asarray(bins, float)]
+
+        if range is not None:
+            if len(range) == 2:
+                range = [range]
+
+        super(BinnedStatistic1D, self).__init__([x], statistic=statistic,
+                                                bins=bins, range=range)
+
+    def __call__(self, values):
+        return super(BinnedStatistic1D, self).__call__(values)
+
+
+class BinnedStatistic2D(BinnedStatisticDD):
+    """
+    Compute a bidimensional binned statistic for a set of data.
+
+    This is a generalization of a histogram2d function.  A histogram divides
+    the space into bins, and returns the count of the number of points in
+    each bin.  This function allows the computation of the sum, mean, median,
+    or other statistic of the values within each bin.
+
+    Parameters
+    ----------
+    x : (N,) array_like
+        A sequence of values to be binned along the first dimension.
+    y : (M,) array_like
+        A sequence of values to be binned along the second dimension.
+    values : (N,) array_like
+        The values on which the statistic will be computed.  This must be
+        the same shape as `x`.
+    statistic : string or callable, optional
+        The statistic to compute (default is 'mean').
+        The following statistics are available:
+
+          * 'mean' : compute the mean of values for points within each bin.
+            Empty bins will be represented by NaN.
+          * 'median' : compute the median of values for points within each
+            bin. Empty bins will be represented by NaN.
+          * 'count' : compute the count of points within each bin.  This is
+            identical to an unweighted histogram.  `values` array is not
+            referenced.
+          * 'sum' : compute the sum of values for points within each bin.
+            This is identical to a weighted histogram.
+          * function : a user-defined function which takes a 1D array of
+            values, and outputs a single numerical statistic. This function
+            will be called on the values in each bin.  Empty bins will be
+            represented by function([]), or NaN if this returns an error.
+
+    bins : int or [int, int] or array_like or [array, array], optional
+        The bin specification:
+
+          * the number of bins for the two dimensions (nx=ny=bins),
+          * the number of bins in each dimension (nx, ny = bins),
+          * the bin edges for the two dimensions (x_edges = y_edges = bins),
+          * the bin edges in each dimension (x_edges, y_edges = bins).
+
+    range : (2,2) array_like, optional
+        The leftmost and rightmost edges of the bins along each dimension
+        (if not specified explicitly in the `bins` parameters):
+        [[xmin, xmax], [ymin, ymax]]. All values outside of this range will be
+        considered outliers and not tallied in the histogram.
+
+    See Also
+    --------
+    numpy.histogram2d, binned_statistic, binned_statistic_dd
+
+    """
+
+    def __init__(self, x, y, statistic='mean',
+                 bins=10, range=None):
+        # This code is based on np.histogram2d
+        try:
+            N = len(bins)
+        except TypeError:
+            N = 1
+
+        if N != 1 and N != 2:
+            xedges = yedges = np.asarray(bins, float)
+            bins = [xedges, yedges]
+
+        super(BinnedStatistic2D, self).__init__([x, y], statistic=statistic,
+                                                bins=bins, range=range)
+
+    def __call__(self, values):
+        return super(BinnedStatistic2D, self).__call__(values)
+
+
+class RadialBinnedStatistic(BinnedStatistic1D):
     """
     Create a 1-dimensional histogram by binning a 2-dimensional
     image in radius.
     """
 
-    def __init__(self, xsize, ysize, statistic='mean', bins=10,
-                 xc=None, yc=None, rrange=None, phirange=None,
-                 mask=None, cartesian=True):
+    def __init__(self,  bins, xsize, ysize, cartesian,
+                 xc=None, yc=None, rrange=None, phirange=None, mask=None,
+                 statistic='mean'):
         """
         Parameters:
         -----------
         xsize,ysize: int
             shape of image in pixels.  see "cartesian" parameter
             for definition of x/y.
-        bins: int
-            number of bins in histogram.
+        cartesian: bool, optional
+            if True, use "cartesian" array ordering, with x corresponding
+            to matrix columns and y corresponding to matrix rows.
+            Otherwise the opposite ("matrix" ordering).
+        rbins: int
+            number of radial bins in returned histogram.
+        phibins: int
+            number of phi bins in returned histogram.
         xc,yc: int, optional
             location (in pixels) of origin (default: image center).
             see "cartesian" parameter for definition of x/y.
@@ -308,10 +424,23 @@ class RadialBinnedStatistic(BinnedStatistic):
         mask: 2-dimensional np.ndarray, optional
             array of zero/non-zero values, same shape as image used
             in __call__.  zero values will be ignored.
-        cartesian: bool, optional
-            if True, use "cartesian" ordering, with x corresponding
-            to matrix columns and y corresponding to matrix rows.
-            Otherwise the opposite ("matrix" ordering). (default: True).
+        statistic : string or callable, optional
+            The statistic to compute (default is 'mean').
+            The following statistics are available:
+
+              * 'mean' : compute the mean of values for points within each bin.
+                Empty bins will be represented by NaN.
+              * 'median' : compute the median of values for points within each
+                bin. Empty bins will be represented by NaN.
+              * 'count' : compute the count of points within each bin.  This is
+                identical to an unweighted histogram.  `values` array is not
+                referenced.
+              * 'sum' : compute the sum of values for points within each bin.
+                This is identical to a weighted histogram.
+              * function : a user-defined function which takes a 1D array of
+                values, and outputs a single numerical statistic. This function
+                will be called on the values in each bin.  Empty bins will be
+                represented by function([]), or NaN if this returns an error.
         """
 
         if not cartesian:
@@ -334,7 +463,7 @@ class RadialBinnedStatistic(BinnedStatistic):
             else:
                 phipix = np.arctan2(xgrid, ygrid) * 180 / np.pi
 
-        # exclude pixels this is arguably not-ideal, forcing masked
+        # exclude pixels. this is arguably not-ideal, forcing masked
         # pixels to be outside the histogram range, but it's more
         # performant, because we don't have to iterate over the array
         # a second time on each __call__ picking out the same unmasked
@@ -360,3 +489,101 @@ class RadialBinnedStatistic(BinnedStatistic):
         if values.shape != self.expected_shape:
             raise ValueError('"values" has incorrect shape')
         return super(RadialBinnedStatistic, self).__call__(values.reshape(-1))
+
+
+class RPhiBinnedStatistic(BinnedStatistic2D):
+    """
+    Create a 1-dimensional histogram by binning a 2-dimensional
+    image in radius.
+    """
+
+    def __init__(self, rbins, phibins, xsize, ysize, cartesian,
+                 xc=None, yc=None, rrange=None, phirange=None, mask=None,
+                 statistic='mean'):
+        """
+        Parameters:
+        -----------
+        rbins: int
+            number of radial bins in returned histogram.
+        phibins: int
+            number of phi bins in returned histogram.
+        xsize,ysize: int
+            shape of image in pixels.  see "cartesian" parameter
+            for definition of x/y.
+        cartesian: bool, optional
+            if True, use "cartesian" array ordering, with x corresponding
+            to matrix columns and y corresponding to matrix rows.
+            Otherwise the opposite ("matrix" ordering).
+        xc,yc: int, optional
+            location (in pixels) of origin (default: image center).
+            see "cartesian" parameter for definition of x/y.
+        rrange: (float, float), optional
+            The lower and upper radial range of the bins, in pixels.
+            If not provided, all pixel r values are included.
+        phirange: (float, float), optional
+            phi range to include.  Values are in the range
+            (-180,180) degrees (default: no limits).  Phi is
+            computed as arctan(y/x) where the meaning of y and x
+            is determined by the setting of the "cartesian" parameter.
+        mask: 2-dimensional np.ndarray, optional
+            array of zero/non-zero values, same shape as image used
+            in __call__.  zero values will be ignored.
+        statistic : string or callable, optional
+            The statistic to compute (default is 'mean').
+            The following statistics are available:
+
+              * 'mean' : compute the mean of values for points within each bin.
+                Empty bins will be represented by NaN.
+              * 'median' : compute the median of values for points within each
+                bin. Empty bins will be represented by NaN.
+              * 'count' : compute the count of points within each bin.  This is
+                identical to an unweighted histogram.  `values` array is not
+                referenced.
+              * 'sum' : compute the sum of values for points within each bin.
+                This is identical to a weighted histogram.
+              * function : a user-defined function which takes a 1D array of
+                values, and outputs a single numerical statistic. This function
+                will be called on the values in each bin.  Empty bins will be
+                represented by function([]), or NaN if this returns an error.
+        """
+
+        if not cartesian:
+            # switch from matrix to cartesian by swapping axes
+            xc, yc = yc, xc
+            xsize, ysize = ysize, xsize
+
+        xc = xsize//2 if xc is None else xc
+        yc = ysize//2 if yc is None else yc
+        x = np.arange(xsize)-xc
+        y = np.arange(ysize)-yc
+        xgrid, ygrid = np.meshgrid(x, y)  # "cartesian"
+        self.expected_shape = xgrid.shape
+
+        rpix = np.sqrt(xgrid**2 + ygrid**2)
+
+        if cartesian:
+            phipix = np.arctan2(ygrid, xgrid) * 180 / np.pi
+        else:
+            phipix = np.arctan2(xgrid, ygrid) * 180 / np.pi
+
+        if rrange is None:
+            rrange = (rpix.min(), rpix.max())
+        if phirange is None:
+            phirange = (-180, 180)
+        if mask is not None:
+            if mask.shape != self.expected_shape:
+                raise ValueError('"mask" has incorrect shape')
+            # a somewhat ugly way to mask pixels
+            rpix[mask == 0] = rrange[0]-1
+
+        super(RPhiBinnedStatistic, self).__init__(rpix.reshape(-1),
+                                                  phipix.reshape(-1),
+                                                  statistic,
+                                                  bins=(rbins, phibins),
+                                                  range=(rrange, phirange))
+
+    def __call__(self, values):
+        # check for what I believe could be a common error
+        if values.shape != self.expected_shape:
+            raise ValueError('"values" has incorrect shape')
+        return super(RPhiBinnedStatistic, self).__call__(values.reshape(-1))
