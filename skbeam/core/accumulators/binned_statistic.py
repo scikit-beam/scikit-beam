@@ -219,10 +219,11 @@ class BinnedStatisticDD(object):
 
         # Shape into a proper matrix
         self.result = self.result.reshape(np.sort(self.nbin))
+        ni = np.copy(self.ni)
         for i in np.arange(self.nbin.size):
-            j = self.ni.argsort()[i]
+            j = ni.argsort()[i]
             self.result = self.result.swapaxes(i, j)
-            self.ni[i], self.ni[j] = self.ni[j], self.ni[i]
+            ni[i], ni[j] = ni[j], ni[i]
 
         # Remove outliers (indices 0 and -1 for each dimension).
         core = self.D * [slice(1, -1)]
@@ -387,114 +388,10 @@ class BinnedStatistic2D(BinnedStatisticDD):
         return super(BinnedStatistic2D, self).__call__(values)
 
 
-class RadialBinnedStatistic(BinnedStatistic1D):
-    """
-    Create a 1-dimensional histogram by binning a 2-dimensional
-    image in radius.
-    """
-
-    def __init__(self,  bins, xsize, ysize, cartesian,
-                 xc=None, yc=None, rrange=None, phirange=None, mask=None,
-                 statistic='mean'):
-        """
-        Parameters:
-        -----------
-        xsize,ysize: int
-            shape of image in pixels.  see "cartesian" parameter
-            for definition of x/y.
-        cartesian: bool, optional
-            if True, use "cartesian" array ordering, with x corresponding
-            to matrix columns and y corresponding to matrix rows.
-            Otherwise the opposite ("matrix" ordering).
-        rbins: int
-            number of radial bins in returned histogram.
-        phibins: int
-            number of phi bins in returned histogram.
-        xc,yc: int, optional
-            location (in pixels) of origin (default: image center).
-            see "cartesian" parameter for definition of x/y.
-        rrange: (float, float), optional
-            The lower and upper radial range of the bins, in pixels.
-            If not provided, all pixel r values are included.
-        phirange: (float, float), optional
-            phi range to include.  Values are in the range
-            (-180,180) degrees (default: no limits).  Phi is
-            computed as arctan(y/x) where the meaning of y and x
-            is determined by the setting of the "cartesian" parameter.
-        mask: 2-dimensional np.ndarray, optional
-            array of zero/non-zero values, same shape as image used
-            in __call__.  zero values will be ignored.
-        statistic : string or callable, optional
-            The statistic to compute (default is 'mean').
-            The following statistics are available:
-
-              * 'mean' : compute the mean of values for points within each bin.
-                Empty bins will be represented by NaN.
-              * 'median' : compute the median of values for points within each
-                bin. Empty bins will be represented by NaN.
-              * 'count' : compute the count of points within each bin.  This is
-                identical to an unweighted histogram.  `values` array is not
-                referenced.
-              * 'sum' : compute the sum of values for points within each bin.
-                This is identical to a weighted histogram.
-              * function : a user-defined function which takes a 1D array of
-                values, and outputs a single numerical statistic. This function
-                will be called on the values in each bin.  Empty bins will be
-                represented by function([]), or NaN if this returns an error.
-        """
-
-        if not cartesian:
-            # switch from matrix to cartesian by swapping axes
-            xc, yc = yc, xc
-            xsize, ysize = ysize, xsize
-
-        xc = xsize//2 if xc is None else xc
-        yc = ysize//2 if yc is None else yc
-        x = np.arange(xsize)-xc
-        y = np.arange(ysize)-yc
-        xgrid, ygrid = np.meshgrid(x, y)  # "cartesian"
-        self.expected_shape = xgrid.shape
-
-        rpix = np.sqrt(xgrid**2 + ygrid**2)
-
-        if phirange is not None:
-            if cartesian:
-                phipix = np.arctan2(ygrid, xgrid) * 180 / np.pi
-            else:
-                phipix = np.arctan2(xgrid, ygrid) * 180 / np.pi
-
-        # exclude pixels. this is arguably not-ideal, forcing masked
-        # pixels to be outside the histogram range, but it's more
-        # performant, because we don't have to iterate over the array
-        # a second time on each __call__ picking out the same unmasked
-        # pixels
-
-        if rrange is None:
-            rrange = (rpix.min(), rpix.max())
-        excludeval = rrange[0]-1
-        if phirange is not None:
-            rpix[phipix < phirange[0]] = excludeval
-            rpix[phipix > phirange[1]] = excludeval
-        if mask is not None:
-            if mask.shape != self.expected_shape:
-                raise ValueError('"mask" has incorrect shape')
-            rpix[mask == 0] = excludeval
-
-        super(RadialBinnedStatistic, self).__init__(rpix.reshape(-1),
-                                                    statistic,
-                                                    bins=bins, range=rrange)
-
-    def __call__(self, values):
-        # check for what I believe could be a common error
-        if values.shape != self.expected_shape:
-            raise ValueError('"values" has incorrect shape')
-        return super(RadialBinnedStatistic, self).__call__(values.reshape(-1))
-
-
 class RPhiBinnedStatistic(BinnedStatistic2D):
     """
-    Create a 1-dimensional histogram by binning a 2-dimensional
-    image in radius.
+    Create a 2-dimensional histogram by binning a 2-dimensional
+    image in both radius and phi.
     """
 
     def __init__(self, rbins, phibins, xsize, ysize, cartesian,
@@ -587,3 +484,25 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
         if values.shape != self.expected_shape:
             raise ValueError('"values" has incorrect shape')
         return super(RPhiBinnedStatistic, self).__call__(values.reshape(-1))
+
+
+class RadialBinnedStatistic(RPhiBinnedStatistic):
+    """
+    Create a 1-dimensional histogram by binning a 2-dimensional
+    image in radius.
+    """
+
+    def __init__(self,  bins, xsize, ysize, cartesian,
+                 xc=None, yc=None, rrange=None, phirange=None, mask=None,
+                 statistic='mean'):
+        """
+        See RPhiBinnedStatistic documentation.
+        """
+
+        super(RadialBinnedStatistic, self).__init__(bins, 1, xsize, ysize,
+                                                    cartesian, xc, yc,
+                                                    rrange, phirange, mask,
+                                                    statistic)
+
+    def __call__(self, values):
+        return np.squeeze(super(RadialBinnedStatistic, self).__call__(values))
