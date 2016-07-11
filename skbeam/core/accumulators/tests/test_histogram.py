@@ -23,8 +23,10 @@ def test_1d_histogram():
     binlowhigh = [10, 0, 10.01]
     xf = np.random.random(1000000)*40
     xi = xf.astype(int)
+    xl = xf.tolist()
     wf = np.linspace(1, 10, len(xf))
     wi = wf.copy()
+    wl = wf.tolist()
     vals = [
         [binlowhigh, xf, wf],
         [binlowhigh, xf, 1],
@@ -32,6 +34,7 @@ def test_1d_histogram():
         [binlowhigh, xi, 1],
         [binlowhigh, xf, wi],
         [binlowhigh, xi, wf],
+        [binlowhigh, xl, wl],
     ]
     for binlowhigh, x, w in vals:
         yield _1d_histogram_tester, binlowhigh, x, w
@@ -58,8 +61,11 @@ def test_2d_histogram():
     yf = np.random.random(1000000)*40
     xi = xf.astype(int)
     yi = yf.astype(int)
+    xl = xf.tolist()
+    yl = yf.tolist()
     wf = np.linspace(1, 10, len(xf))
     wi = wf.copy()
+    wl = wf.tolist()
     vals = [
         [[ten, ten], xf, yf, wf],
         [[ten, nine], xf, yf, 1],
@@ -67,7 +73,7 @@ def test_2d_histogram():
         [[ten, ten], xi, yi, 1],
         [[ten, nine], xf, yf, wi],
         [[ten, nine], xi, yi, wf],
-        [[ten, nine], xf, yi, wi],
+        [[ten, nine], xl, yl, wl],
     ]
     for binlowhigh, x, y, w in vals:
         yield _2d_histogram_tester, binlowhigh, x, y, w
