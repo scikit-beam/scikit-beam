@@ -14,9 +14,11 @@ logger = logging.getLogger(__name__)
 DEF MAX_DIMENSIONS = 10
 
 ctypedef fused coordnumtype:
+    np.int8_t
     np.int16_t
     np.int32_t
     np.int64_t
+    np.uint8_t
     np.uint16_t
     np.uint32_t
     np.uint64_t
@@ -24,9 +26,11 @@ ctypedef fused coordnumtype:
     np.float64_t
 
 ctypedef fused wnumtype:
+    np.int8_t
     np.int16_t
     np.int32_t
     np.int64_t
+    np.uint8_t
     np.uint16_t
     np.uint32_t
     np.uint64_t
