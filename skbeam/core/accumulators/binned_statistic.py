@@ -309,9 +309,6 @@ class BinnedStatistic1D(BinnedStatisticDD):
         super(BinnedStatistic1D, self).__init__([x], statistic=statistic,
                                                 bins=bins, range=range)
 
-    def __call__(self, values):
-        return super(BinnedStatistic1D, self).__call__(values)
-
 
 class BinnedStatistic2D(BinnedStatisticDD):
     """
