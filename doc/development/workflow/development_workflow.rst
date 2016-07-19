@@ -31,12 +31,9 @@ development version or stable version is the active one.
 up. It is well worth your time.
 
 Not sure what your first contribution should be? Take a look at the `Scikit-beam
-issue list`_ and grab one labeled "package-novice". These issues are the
+issue list`_ and grab one labeled "New Contributors". These issues are the
 most accessible ones if you are not familiar with the Scikit-beam source
-code. Issues labeled as "effort-low" are expected to take a few hours (at
-most) to address, while the "effort-medium" ones may take a few days. The
-developers are friendly and want you to help, so don't be shy about asking
-questions on the `scikit-beam-dev mailing list`_.
+code.
 
 New to `git`_?
 ==============
@@ -134,7 +131,6 @@ Scikit-beam Guidelines for `git`_
   ``bugfix-for-issue-14`` or ``refactor-database-code``.
 * Make frequent commits, and always include a commit message. Each commit
   should represent one logical set of changes.
-* Ask on the `scikit-beam-dev mailing list`_ if you get stuck.
 * Never merge changes from ``scikit-beam/master`` into your feature branch. If
   changes in the development version require changes to our code you can
   :ref:`rebase`.
@@ -144,8 +140,7 @@ document:
 
 * Change the name of the remote ``origin`` to ``your-github-username``.
 * Name the remote that is the primary Scikit-beam repository
-  ``scikit-beam``; in prior versions of this documentation it was referred to as
-  ``upstream``.
+  ``scikit-beam``.
 
 Workflow
 ========
@@ -251,19 +246,7 @@ Scikit-beam you are working on. Do that with:
 
 .. code-block:: bash
 
-    python setup.py develop  # typically python 2.x, not python 3
-
-or:
-
-.. code-block:: bash
-
-    python3 setup.py install # python 3...
-    # ...though python3 may be called python3.3 or just python,
-    # depending on your system.
-
-If you are using python 3 you will need to re-install after making changes to
-the Scikit-beam source code. Re-installing goes much faster than the initial install
-because it typically does not require new compilation.
+    python setup.py develop
 
 .. _edit-flow:
 

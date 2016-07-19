@@ -14,6 +14,10 @@ packages).
 Testing Framework
 =================
 
+.. warning ::
+
+    We still need to port from nose
+
 The testing framework used by Scikit-beam is the `py.test`_ framework.
 
 .. _py.test: http://pytest.org/latest/
@@ -35,27 +39,18 @@ options require the `pytest-pep8 plugin
 <http://pypi.python.org/pypi/pytest-pep8>`_, which must be installed
 separately.
 
-setup.py test
--------------
 
-The safest way to run the scikit-beam test suite is via the setup command ``test``.
-This is invoked by running ``python setup.py test`` while in the scikit-beam source
-code directory. Run ``python setup.py test --help`` to see the options to the
-test command.
+run_tests.py
+------------
 
-Turn on PEP8 checking by passing ``--pep8`` to the ``test`` command. This will
-turn off regular testing and enable PEP8 testing.
-
-.. note::
-
-    This method of running the tests defaults to the version of `py.test`_
-    that is bundled with Scikit-beam. To use the locally-installed version, you
-    can set the ``ASTROPY_USE_SYSTEM_PYTEST`` environment variable, eg.::
-
-        > ASTROPY_USE_SYSTEM_PYTEST=1 python setup.py test
+There is a script at the top level of skbeam
 
 py.test
 -------
+
+.. warning ::
+
+   This might not work, we still need to finish porting from nose.
 
 An alternative way to run tests from the command line is to switch to the source
 code directory of scikit-beam and simply type::
@@ -104,7 +99,11 @@ default regular tests will also be run but these can be turned off by adding
 .. _scikit-beam.test():
 
 scikit-beam.test()
---------------
+------------------
+
+.. warning ::
+
+    This is not implemented yet
 
 Scikit-beam includes a standalone version of py.test that allows to tests
 to be run even if py.test is not installed. Tests can be run from within

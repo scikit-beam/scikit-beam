@@ -2,6 +2,11 @@
 Writing Command-Line Scripts
 ============================
 
+.. warning ::
+
+    We currently have no CL scripts.  If we want to pick any up is an open question.
+    Leaving this text mostly un-edited from astropy.
+
 Command-line scripts in Scikit-beam should follow a consistent scheme to promote
 readability and compatibility.
 
