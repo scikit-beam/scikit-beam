@@ -169,7 +169,7 @@ class BinnedStatisticDD(object):
         ----------
         values : array_like
             The values on which the statistic will be computed.  This must be
-            the same shape as `x` in the constructor.
+            the same shape as `sample` in the constructor.
 
         Returns
         -------
