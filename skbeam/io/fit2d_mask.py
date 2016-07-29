@@ -7,6 +7,7 @@ import math
 
 from skbeam.io import logger
 
+
 def fit2d_save(mask, filename, dir_path=None):
     """
     Compresses and wraps the mask for Fit2D use
