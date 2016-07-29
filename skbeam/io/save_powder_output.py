@@ -42,10 +42,11 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
+import os
 
 import numpy as np
 
-from .fit2d_mask import _create_file_path
+from skbeam.io import logger
 
 logger = logging.getLogger(__name__)
 
@@ -254,3 +255,41 @@ def _validate_input(tth, intensity, err, ext):
     if ext == '.xye' and err is None:
         raise ValueError("Provide the Error value of intensity"
                          " (for .xye file format err != None)")
+
+
+def _create_file_path(dir_path, output_name, ext):
+    """
+    This function create a output file path to save
+    diffraction intensities.
+
+    Parameters
+    ----------
+    dir_path : str
+        new directory path to save the output data files
+        eg: /Data/experiments/data/
+
+    output_name : str
+        name for the saved output diffraction intensities
+
+    ext : {'.chi', '.dat', '.xye'}
+        save output diffraction intensities into .chi,
+        .dat or .xye file formats.
+
+    Returns
+    -------
+    file_path : str
+        path to save the diffraction intensities
+    """
+
+    if (dir_path) is None:
+        file_path = output_name + ext
+    elif os.path.exists(dir_path):
+        file_path = os.path.join(dir_path, output_name) + ext
+    else:
+        raise ValueError('The given path does not exist.')
+
+    if os.path.isfile(file_path):
+        logger.info("Output file already exists")
+        os.remove(file_path)
+
+    return file_path

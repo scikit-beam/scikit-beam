@@ -45,7 +45,7 @@ import numpy as np
 from skbeam.io.fit2d_mask import fit2d_save
 
 
-def test_save_output():
+def test_save_output_for_smoke():
     filename = "function_values"
     msk = np.ones((2048, 2048))
 
