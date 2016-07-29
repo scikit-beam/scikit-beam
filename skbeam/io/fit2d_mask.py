@@ -76,6 +76,7 @@ header = b"M\x00\x00\x00A\x00\x00\x00S\x00\x00\x00K\x00\x00\x00\x00\x08" \
              b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" \
              b"\x00"
 
+
 def fit2d_save(mask, filename, dir_path=None):
     """
     Compresses and wraps the mask for Fit2D use
