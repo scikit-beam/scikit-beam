@@ -7,10 +7,17 @@ import math
 
 from skbeam.io import logger
 
-
 def fit2d_save(mask, filename, dir_path=None):
     """
     Compresses and wraps the mask for Fit2D use
+    Parameters
+    ----------
+    mask: ndarray
+        The mask
+    filename: str
+        The filename
+    dir_path: str, optional
+        Path to the destination file
     """
     # Fit2d works with inverted masks
     mask = np.flipud(mask)
