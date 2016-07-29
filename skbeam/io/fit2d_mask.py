@@ -108,7 +108,8 @@ def fit2d_save(mask, filename, dir_path=None):
              b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" \
              b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" \
              b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" \
-             b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+             b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" \
+             b"\x00"
     with open(maskname, 'rb') as mask:
         bodypt1 = mask.read(262144)
         bodypt2 = mask.read()
@@ -140,7 +141,7 @@ def _create_file_path(dir_path, output_name, ext):
         save output diffraction intensities into .chi,
         .dat or .xye file formats.
 
-    Returns:
+    Returns
     -------
     file_path : str
         path to save the diffraction intensities
