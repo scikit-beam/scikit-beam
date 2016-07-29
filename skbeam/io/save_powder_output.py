@@ -45,7 +45,7 @@ import logging
 
 import numpy as np
 
-from skbeam.io import _create_file_path
+from .fit2d_mask import _create_file_path
 
 logger = logging.getLogger(__name__)
 

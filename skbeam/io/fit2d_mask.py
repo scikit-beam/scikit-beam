@@ -1,7 +1,11 @@
 from __future__ import print_function, division
+
+import os
+
 import numpy as np
-from . import _create_file_path
 import math
+
+from skbeam.io import logger
 
 
 def fit2d_save(mask, filename, dir_path=None):
@@ -24,7 +28,7 @@ def fit2d_save(mask, filename, dir_path=None):
             for k in range(1, 8):
                 c[i, math.floor(j / 8)] += mask[i, j + k] * (2 ** k)
             j += 8
-    maskname = _create_file_path(dir_path, filename, '.mks')
+    maskname = _create_file_path(dir_path, filename, '.msk')
     with open(maskname, "wb") as fout:
         c.tofile(fout, "", "%x")
     print('mask compressed')
@@ -42,3 +46,40 @@ def fit2d_save(mask, filename, dir_path=None):
         fout.write(total2)
     print('mask finalized')
 
+
+def _create_file_path(dir_path, output_name, ext):
+    """
+    This function create a output file path to save
+    diffraction intensities.
+
+    Parameters
+    ----------
+    dir_path : str
+        new directory path to save the output data files
+        eg: /Data/experiments/data/
+
+    output_name : str
+        name for the saved output diffraction intensities
+
+    ext : {'.chi', '.dat', '.xye'}
+        save output diffraction intensities into .chi,
+        .dat or .xye file formats.
+
+    Returns:
+    -------
+    file_path : str
+        path to save the diffraction intensities
+    """
+
+    if (dir_path) is None:
+        file_path = output_name + ext
+    elif os.path.exists(dir_path):
+        file_path = os.path.join(dir_path, output_name) + ext
+    else:
+        raise ValueError('The given path does not exist.')
+
+    if os.path.isfile(file_path):
+        logger.info("Output file already exists")
+        os.remove(file_path)
+
+    return file_path
