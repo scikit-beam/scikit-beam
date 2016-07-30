@@ -52,5 +52,3 @@ def test_save_output_for_smoke():
     fit2d_save(msk, filename, dir_path=None)
 
     os.remove("function_values.msk")
-if __name__ == '__main__':
-    test_save_output()

@@ -48,8 +48,6 @@ import numpy as np
 
 from skbeam.io import logger
 
-logger = logging.getLogger(__name__)
-
 
 def save_output(tth, intensity, output_name, q_or_2theta, ext='.chi',
                 err=None, dir_path=None):
