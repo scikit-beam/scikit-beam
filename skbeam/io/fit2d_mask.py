@@ -95,7 +95,6 @@ def fit2d_save(mask, filename, dir_path=None):
     b1, b2 = mask.shape
     b28 = b2 // 8
     c = np.zeros((b1, b28), dtype=np.uint8)
-    print('start compression')
     # bitmap compression for Fit2D io
     # TODO: possibly parallizable
     for i in range(0, b1):
@@ -108,7 +107,6 @@ def fit2d_save(mask, filename, dir_path=None):
     maskname = _create_file_path(dir_path, filename, '.msk')
     with open(maskname, "wb") as fout:
         c.tofile(fout, "", "%x")
-    print('mask compressed')
     # Giant long mask header, must be there for fit2d to work with the mask
     with open(maskname, 'rb') as mask:
         bodypt1 = mask.read(262144)
@@ -120,4 +118,3 @@ def fit2d_save(mask, filename, dir_path=None):
     total2 = b"".join(total)
     with open(maskname, "wb") as fout:
         fout.write(total2)
-    print('mask finalized')
