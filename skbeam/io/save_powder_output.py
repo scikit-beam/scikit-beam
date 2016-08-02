@@ -40,10 +40,12 @@
 
 """
 from __future__ import absolute_import, division, print_function
-import numpy as np
+
 import os
-import logging
-logger = logging.getLogger(__name__)
+
+import numpy as np
+
+from skbeam.io import logger
 
 
 def save_output(tth, intensity, output_name, q_or_2theta, ext='.chi',
@@ -270,7 +272,7 @@ def _create_file_path(dir_path, output_name, ext):
         save output diffraction intensities into .chi,
         .dat or .xye file formats.
 
-    Returns:
+    Returns
     -------
     file_path : str
         path to save the diffraction intensities
@@ -284,8 +286,7 @@ def _create_file_path(dir_path, output_name, ext):
         raise ValueError('The given path does not exist.')
 
     if os.path.isfile(file_path):
-        logger.info("Output file of diffraction intensities"
-                    " already exists")
+        logger.info("Output file already exists")
         os.remove(file_path)
 
     return file_path
