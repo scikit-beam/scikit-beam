@@ -111,7 +111,7 @@ def threshold_mask(images, threshold, mask=None):
         yield mask
 
 
-def mask_edge(img_shape, edge_size):
+def margin_mask(img_shape, edge_size):
     """
     Mask the edge of an image
 
@@ -136,6 +136,7 @@ def ring_blur_mask(img, q, alpha, bins, mask=None):
     Perform a annular mask, which checks the ring statistics and masks any
     pixels which have a value greater or less than alpha * std away from the
     mean
+
     Parameters
     ----------
     img: 2darray

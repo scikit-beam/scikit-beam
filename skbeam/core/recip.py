@@ -347,6 +347,7 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
 def generate_q_bins(rmax, pixel_size, distance, wavelength, rmin=0):
     """
     Generate the Q bins at the resolution of the detector
+
     Parameters
     -----------
     rmax: float
