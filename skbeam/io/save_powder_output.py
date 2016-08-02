@@ -45,7 +45,6 @@ import logging
 import os
 
 import numpy as np
-from skbeam.io import logger
 
 logger = logging.getLogger(__name__)
 
