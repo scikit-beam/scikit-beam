@@ -36,8 +36,6 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 
-from skbeam.io.save_powder_output import logger
-
 logger = logging.getLogger(__name__)
 
 try:
