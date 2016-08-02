@@ -32,28 +32,23 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
+
+"""
+    This module is for test output.py saving integrated powder
+    x-ray diffraction intensities into  different file formats.
+    (Output into different file formats, .chi, .dat, .xye, gsas)
+    Added a test to check the GSAS file reader and file writer
+"""
 from __future__ import absolute_import, division, print_function
+import os
+import numpy as np
+from skbeam.io.fit2d_save import fit2d_save
 
-import logging
 
-logger = logging.getLogger(__name__)
+def test_save_output_for_smoke():
+    filename = "function_values"
+    msk = np.ones((2048, 2048))
 
-try:
-    from .net_cdf_io import load_netCDF
-except ImportError:
-    def load_netCDF(*args, **kwargs):
-        # Die at call time so as not to ruin entire io package.
-        raise ImportError("This function requires netCDF4.")
+    fit2d_save(msk, filename, dir_path=None)
 
-from .binary import read_binary
-
-from .avizo_io import load_amiramesh
-
-from .save_powder_output import save_output
-
-from .gsas_file_reader import gsas_reader
-
-from .save_powder_output import gsas_writer
-
-__all__ = ['load_netCDF', 'read_binary', 'load_amiramesh', 'save_output',
-           'gsas_reader', 'gsas_writer']
+    os.remove("function_values.msk")
