@@ -42,7 +42,7 @@
 from __future__ import absolute_import, division, print_function
 import os
 import numpy as np
-from skbeam.io.fit2d_mask import fit2d_save
+from skbeam.io.fit2d_save import fit2d_save
 
 
 def test_save_output_for_smoke():
