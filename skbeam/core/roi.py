@@ -397,6 +397,53 @@ def mean_intensity(images, labeled_array, index=None):
         mean_intensity[n] = ndim.mean(img, labeled_array, index=index)
     return mean_intensity, index
 
+
+
+def bin_1D(x, y, nx=None, min_x=None, max_x=None):
+    """
+    Bin the values in y based on their x-coordinates
+
+    Parameters
+    ----------
+    x : array
+        position
+    y : array
+        intensity
+    nx : integer, optional
+        number of bins to use defaults to default bin value
+    min_x : float, optional
+        Left edge of first bin defaults to minimum value of x
+    max_x : float, optional
+        Right edge of last bin defaults to maximum value of x
+
+    Returns
+    -------
+    edges : array
+        edges of bins, length nx + 1
+
+    val : array
+        sum of values in each bin, length nx
+
+    count : array
+        The number of counts in each bin, length nx
+    """
+    # handle default values
+    if min_x is None:
+        min_x = np.min(x)
+    if max_x is None:
+        max_x = np.max(x)
+    if nx is None:
+        nx = int(max_x - min_x) 
+    # use a weighted histogram to get the bin sum
+    bins = np.linspace(start=min_x, stop=max_x, num=nx+1, endpoint=True)
+    val, _ = np.histogram(a=x, bins=bins, weights=y)
+    # use an un-weighted histogram to get the counts
+    count, _ = np.histogram(a=x, bins=bins)
+    # return the three arrays
+    return bins, val, count
+
+
+
 def circular_average(image, calibrated_center, threshold=0, nx=None,
                      pixel_size=(1, 1),  min_x=None, max_x=None, mask=None):
     """Circular average of the the image data
@@ -413,7 +460,7 @@ def circular_average(image, calibrated_center, threshold=0, nx=None,
         default is zero
     nx : int, optional
         number of bins in x
-        defaults is None, gives the pixel number of the max radius 
+        defaults is 100 bins
     pixel_size : tuple, optional
         The size of a pixel (in a real unit, like mm).
         argument order should be (pixel_height, pixel_width)
@@ -422,8 +469,6 @@ def circular_average(image, calibrated_center, threshold=0, nx=None,
         Left edge of first bin defaults to minimum value of x
     max_x : float, optional number of pixels
         Right edge of last bin defaults to maximum value of x
-    mask: array, bool type
-        same shape as image
     Returns
     -------
     bin_centers : array
@@ -432,29 +477,25 @@ def circular_average(image, calibrated_center, threshold=0, nx=None,
         Radial average of the image. shape is (nx, ).
     """
     radial_val = utils.radial_grid(calibrated_center, image.shape, pixel_size) 
-    ps =np.min( pixel_size )
-    if max_x is None:max_x = np.max(radial_val)/ps
-    if min_x is None:min_x = np.min(radial_val)/ps        
-    if nx is None:        
-        nx = int(max_x - min_x)        
-    if mask is not None:          
+    if mask is not None:  
         mask = np.array( mask, dtype = bool)
         binr = radial_val[mask]
         image_mask =     np.array( image )[mask]        
     else:        
         binr = np.ravel( radial_val ) 
-        image_mask = np.ravel(image)         
-    bin_edges, sums, counts = utils.bin_1D( binr,
+        image_mask = np.ravel(image) 
+    binr_ =   binr /(np.sqrt(pixel_size[1]*pixel_size[0] ))
+    bin_edges, sums, counts = bin_1D(      binr_,
                                            image_mask,
-                                           nx,
+                                           nx=nx,
                                            min_x=min_x,
-                                           max_x=max_x)   
-    
+                                           max_x=max_x) 
     th_mask = counts > threshold
     ring_averages = sums[th_mask] / counts[th_mask]
     bin_centers = utils.bin_edges_to_centers(bin_edges)[th_mask]
     return bin_centers, ring_averages 
 
+ 
 
 
 
