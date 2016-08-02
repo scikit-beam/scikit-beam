@@ -34,9 +34,6 @@
 ########################################################################
 from __future__ import absolute_import, division, print_function
 
-import os
-
-import six
 import logging
 
 from skbeam.io.save_powder_output import logger
@@ -62,42 +59,3 @@ from .save_powder_output import gsas_writer
 
 __all__ = ['load_netCDF', 'read_binary', 'load_amiramesh', 'save_output',
            'gsas_reader', 'gsas_writer']
-
-
-def _create_file_path(dir_path, output_name, ext):
-    """
-    This function create a output file path to save
-    diffraction intensities.
-
-    Parameters
-    ----------
-    dir_path : str
-        new directory path to save the output data files
-        eg: /Data/experiments/data/
-
-    output_name : str
-        name for the saved output diffraction intensities
-
-    ext : {'.chi', '.dat', '.xye'}
-        save output diffraction intensities into .chi,
-        .dat or .xye file formats.
-
-    Returns:
-    -------
-    file_path : str
-        path to save the diffraction intensities
-    """
-
-    if (dir_path) is None:
-        file_path = output_name + ext
-    elif os.path.exists(dir_path):
-        file_path = os.path.join(dir_path, output_name) + ext
-    else:
-        raise ValueError('The given path does not exist.')
-
-    if os.path.isfile(file_path):
-        logger.info("Output file of diffraction intensities"
-                    " already exists")
-        os.remove(file_path)
-
-    return file_path
