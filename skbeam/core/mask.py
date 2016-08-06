@@ -45,6 +45,7 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 
 import logging
+import scipy.stats as sts
 logger = logging.getLogger(__name__)
 
 
@@ -108,3 +109,81 @@ def threshold_mask(images, threshold, mask=None):
         if len(bad_pixels[0]) != 0:
             mask[bad_pixels] = 0
         yield mask
+
+
+def mask_edge(img_shape, edge_size):
+    """
+    Mask the edge of an image
+
+    Parameters
+    -----------
+    img_shape: tuple
+        The shape of the image
+    edge_size: int
+        Number of pixels to mask from the edge
+    Returns
+    --------
+    1darray:
+        The raveled mask array, bad pixels are 0
+    """
+    mask = np.ones(img_shape)
+    mask[:, :edge_size] = 0
+    mask[:, -edge_size:] = 0
+    mask[:edge_size, :] = 0
+    mask[-edge_size:, :] = 0
+    return mask.ravel().astype(bool)
+
+
+def ring_blur_mask(img, r, rsize, alpha, bins=None, mask=None):
+    """
+    Perform a annular mask, which checks the ring statistics and masks any
+    pixels which have a value greater or less than alpha * std away from the
+    mean
+    Parameters
+    ----------
+    img: 2darray
+        The  image
+    r: 2darray
+        The  array which maps pixels to radii
+    alpha: float or tuple or, 1darray
+        Then number of acceptable standard deviations, if tuple then we use
+        a linear distribution of alphas from alpha[0] to alpha[1], if array
+        then we just use that as the distribution of alphas
+    bins: int, optional
+        Number of bins used in the integration, if not given then max number of
+        pixels +1
+    mask: 1darray
+        A starting flattened mask
+    Returns
+    --------
+    1darray:
+        The flattened mask
+    """
+
+    if mask is None:
+        mask = np.ones(img.shape).astype(bool)
+    int_r = np.around(r / rsize).astype(int)
+    if bins is None:
+        bins = int_r.max() + 1
+    if mask.shape != img.shape:
+        mask = mask.reshape(img.shape)
+    msk_img = img[mask]
+    msk_r = r[mask]
+
+    # integration
+    mean = sts.binned_statistic(msk_r, msk_img, bins=bins,
+                                range=[0, r.max()], statistic='mean')[0]
+    std = sts.binned_statistic(msk_r, msk_img, bins=bins,
+                               range=[0, r.max()], statistic=np.std)[0]
+    if type(alpha) is tuple:
+        alpha = np.linspace(alpha[0], alpha[1], bins)
+    threshold = alpha * std
+    lower = mean - threshold
+    upper = mean + threshold
+
+    # single out the too low and too high pixels
+    too_low = img < lower[int_r]
+    too_hi = img > upper[int_r]
+
+    mask = mask * ~too_low * ~too_hi
+    return mask.astype(bool).ravel()
