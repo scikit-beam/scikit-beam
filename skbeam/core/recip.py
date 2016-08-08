@@ -41,7 +41,7 @@ calculations.
 """
 from __future__ import absolute_import, division, print_function
 import numpy as np
-from .utils import verbosedict
+from .utils import verbosedict, twotheta_to_q
 from collections import namedtuple
 import time
 
@@ -342,3 +342,43 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
     qr = np.sqrt(qx**2 + qy**2)
 
     return gisaxs_output(alpha_i, theta_f, alpha_f, tilt_angle, qx, qy, qz, qr)
+
+
+def generate_q_bins(rmax, pixel_size, distance, wavelength, rmin=0):
+    """
+    Generate the Q bins at the resolution of the detector
+
+    Parameters
+    -----------
+    rmax: float
+        The maximum radial distance on the detector in distance units.
+        Note that this should go to the bottom edge of the pixel.
+    pixel_size: float
+        The size of the pixels, in the same units as rmax
+    distance: float
+        The sample to detector distance, in the same units as rmax
+    wavelength: float
+        The wavelength of the x-rays
+    rmin: float, optional
+        The minimum radial distance on the detector in distance units. Defaults
+        to zero. Note that this should be the bottom of the pixel
+
+    Returns
+    -------
+    ndarray:
+        The bin edges, suitable for np.histogram or
+        scipy.stats.binned_statistic
+    """
+    pixel_bottom = np.arange(rmin, rmax, pixel_size)
+    pixel_top = pixel_bottom + pixel_size
+
+    bottom_tth = np.arctan(pixel_bottom[0] / distance)
+    top_tth = np.arctan(pixel_top / distance)
+
+    top_q = twotheta_to_q(top_tth, wavelength)
+
+    bins = np.zeros(len(top_q) + 1)
+
+    bins[0] = twotheta_to_q(bottom_tth, wavelength)
+    bins[1:] = top_q
+    return bins

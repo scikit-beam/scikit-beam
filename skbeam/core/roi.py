@@ -46,6 +46,7 @@ from skimage.draw import line
 import numpy as np
 from . import utils
 import logging
+import scipy.stats as sts
 
 logger = logging.getLogger(__name__)
 
@@ -199,7 +200,7 @@ def ring_edges(inner_radius, width, spacing=0, num_rings=None):
             if num_rings != len(width):
                 raise ValueError("num_rings does not match width list")
         if spacing_is_list:
-            if num_rings-1 != len(spacing):
+            if num_rings - 1 != len(spacing):
                 raise ValueError("num_rings does not match spacing list")
 
     # Now regularlize the input.
@@ -258,14 +259,14 @@ def segmented_rings(edges, segments, center, shape, offset_angle=0):
 
     agrid = utils.angle_grid(center, shape)
 
-    agrid[agrid < 0] = 2*np.pi + agrid[agrid < 0]
+    agrid[agrid < 0] = 2 * np.pi + agrid[agrid < 0]
 
     segments_is_list = isinstance(segments, collections.Iterable)
     if segments_is_list:
         segments = np.asarray(segments) + offset_angle
     else:
         # N equal segments requires N+1 bin edges spanning 0 to 2pi.
-        segments = np.linspace(0, 2*np.pi, num=1+segments, endpoint=True)
+        segments = np.linspace(0, 2 * np.pi, num=1 + segments, endpoint=True)
         segments += offset_angle
 
     # the indices of the bins(angles) to which each value in input
@@ -280,7 +281,7 @@ def segmented_rings(edges, segments, center, shape, offset_angle=0):
     # assign indices value according to angles then rings
     len_segments = len(segments)
     for i in range(len(edges) // 2):
-        indices = (edges[2*i] <= rgrid) & (rgrid < edges[2*i + 1])
+        indices = (edges[2 * i] <= rgrid) & (rgrid < edges[2 * i + 1])
         # Combine "segment #" and "ring #" to get unique label for each.
         label_array[indices] = ind_grid[indices] + (len_segments - 1) * i
 
@@ -398,50 +399,55 @@ def mean_intensity(images, labeled_array, index=None):
     return mean_intensity, index
 
 
-def circular_average(image, calibrated_center, threshold=0, nx=100,
-                     pixel_size=(1, 1),  min_x=None, max_x=None):
+def circular_average(image, r_array, pixel_size=(1, 1), statistic='mean',
+                     min_x=None, max_x=None, mask=None, bins=None):
     """Circular average of the the image data
-    The circular average is also known as the radial integration
+    The circular average is also known as the radial or azimuthal integration
     Parameters
     ----------
     image : array
         Image to compute the average as a function of radius
-    calibrated_center : tuple
-        The center of the image in pixel units
-        argument order should be (row, col)
-    threshold : int, optional
-        Ignore counts above `threshold`
-        default is zero
-    nx : int, optional
-        number of bins in x
-        defaults is 100 bins
+    r_array : array
+        Array which relates pixel positions to radial positions
     pixel_size : tuple, optional
         The size of a pixel (in a real unit, like mm).
         argument order should be (pixel_height, pixel_width)
         default is (1, 1)
+    statistic: str or func, optional
+        The statistic to compute over the integration, defaults to mean
     min_x : float, optional number of pixels
         Left edge of first bin defaults to minimum value of x
     max_x : float, optional number of pixels
         Right edge of last bin defaults to maximum value of x
+    mask: bool array, optional
+        The array of pixels to be removed from the image before integration
+    bins: array, optional
+        The bins to use in the integration, if none given the function will
+        give its best assessment based on the pixel_size and r_array
     Returns
     -------
     bin_centers : array
-        The center of each bin in R. shape is (nx, )
-    ring_averages : array
-        Radial average of the image. shape is (nx, ).
+        The center of each bin in R
+    int_stat : array
+        Radial integrated statistic of the image.
     """
-    radial_val = utils.radial_grid(calibrated_center, image.shape, pixel_size)
+    # If there is no mask, make one
+    if mask is None:
+        mask = np.ones(image.shape, dtype=int).astype(bool)
 
-    bin_edges, sums, counts = utils.bin_1D(np.ravel(radial_val),
-                                           np.ravel(image), nx,
-                                           min_x=min_x,
-                                           max_x=max_x)
-    th_mask = counts > threshold
-    ring_averages = sums[th_mask] / counts[th_mask]
+    if bins is None:
+        res = np.sqrt(np.sum([a ** 2 for a in pixel_size]))
+        bins = np.arange(np.min(r_array) - res/2., np.max(r_array) + res/2.,
+                         res)
+    bin_edges, int_stat, bin_num = sts.binned_statistic(r_array[mask],
+                                                        image[mask],
+                                                        statistic=statistic,
+                                                        bins=bins,
+                                                        range=[min_x, max_x])
 
-    bin_centers = utils.bin_edges_to_centers(bin_edges)[th_mask]
+    bin_centers = utils.bin_edges_to_centers(bin_edges)
 
-    return bin_centers, ring_averages
+    return bin_centers, int_stat
 
 
 def kymograph(images, labels, num):
@@ -638,7 +644,7 @@ def box(shape, v_edges, h_edges=None, h_values=None, v_values=None):
     coords = []
     for h in h_edges:
         for v in v_edges:
-            coords.append((h[0], v[0], h[1]-h[0], v[1] - v[0]))
+            coords.append((h[0], v[0], h[1] - h[0], v[1] - v[0]))
 
     return rectangles(coords, v_values.shape)
 
@@ -670,8 +676,8 @@ def lines(end_points, shape):
                              " elements, giving starting co-ordinates,"
                              " ending co-ordinates for each line")
         rr, cc = line(np.max([points[0], 0]), np.max([points[1], 0]),
-                      np.min([points[2], shape[0]-1]),
-                      np.min([points[3], shape[1]-1]))
+                      np.min([points[2], shape[0] - 1]),
+                      np.min([points[3], shape[1] - 1]))
         label += 1
         label_array[rr, cc] = label
     return label_array
