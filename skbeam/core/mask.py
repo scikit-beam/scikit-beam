@@ -170,14 +170,11 @@ def ring_blur_mask(img, q, alpha, bins, mask=None):
     msk_img = img[mask]
     msk_q = q[mask]
 
-    int_q = np.zeros(q.shape, dtype=np.int)
-    for i in range(len(bins) - 1):
-        t_array = (bins[i] <= q) & (q < bins[i + 1])
-        int_q[t_array] = i - 1
+    int_q = np.digitize(q, bins[:-1], True) - 1
     # integration
-    mean = sts.binned_statistic(msk_q, msk_img, bins=bins[1:],
+    mean = sts.binned_statistic(msk_q, msk_img, bins=bins,
                                 statistic='mean')[0]
-    std = sts.binned_statistic(msk_q, msk_img, bins=bins[1:],
+    std = sts.binned_statistic(msk_q, msk_img, bins=bins,
                                statistic=np.std)[0]
     if type(alpha) is tuple:
         alpha = np.linspace(alpha[0], alpha[1], len(std))
@@ -189,5 +186,5 @@ def ring_blur_mask(img, q, alpha, bins, mask=None):
     too_low = img < lower[int_q]
     too_hi = img > upper[int_q]
 
-    mask = mask * ~too_low * ~too_hi
+    mask *= ~too_low * ~too_hi
     return mask.astype(bool)
