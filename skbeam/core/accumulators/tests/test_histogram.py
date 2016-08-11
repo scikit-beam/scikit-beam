@@ -7,6 +7,7 @@ from skbeam.core.accumulators.histogram import Histogram
 from time import time
 import random
 
+
 def _1d_histogram_tester(binlowhighs, x, weights=1):
     h = Histogram(binlowhighs)
     h.fill(x, weights=weights)
