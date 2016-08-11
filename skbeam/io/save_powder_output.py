@@ -40,9 +40,12 @@
 
 """
 from __future__ import absolute_import, division, print_function
-import numpy as np
-import os
+
 import logging
+import os
+
+import numpy as np
+
 logger = logging.getLogger(__name__)
 
 
