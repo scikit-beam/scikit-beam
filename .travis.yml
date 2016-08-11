@@ -29,7 +29,7 @@ install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
   - conda config --set always_yes true
   - conda update conda
-  - conda config --add channels scikit-xray
+  - conda config --add channels scikit-beam
   - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4 flake8
   - source activate testenv
   # # need to build_ext -i for the tests so that the .so is local to the source
@@ -38,18 +38,69 @@ install:
   - python setup.py install build_ext -i
   - pip install codecov
 
+before_script:
+  # define a merge size check function that ensures no huge file was committed
+  # to the repo by accident
+  - size_check() {
+        GIT_TARGET_EXTRA="+refs/heads/${TRAVIS_BRANCH}";
+        GIT_SOURCE_EXTRA="+refs/pull/${TRAVIS_PULL_REQUEST}/merge";
+        echo TRAVIS_BRANCH=$TRAVIS_BRANCH;
+        echo TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST;
+        echo TRAVIS_REPO_SLUG=$TRAVIS_REPO_SLUG;
+        echo GIT_TARGET_EXTRA=$GIT_TARGET_EXTRA;
+        echo GIT_SOURCE_EXTRA=$GIT_SOURCE_EXTRA;
+        mkdir ~/repo-clone;
+        pushd ~/repo-clone;
+        git init && git remote add -t ${TRAVIS_BRANCH} origin git://github.com/${TRAVIS_REPO_SLUG}.git;
+        git fetch origin ${GIT_TARGET_EXTRA};
+        git checkout -qf FETCH_HEAD;
+        git tag travis-merge-target;
+        git gc --aggressive;
+        TARGET_SIZE=`du -s . | sed -e "s/\t.*//"`;
+        echo TARGET_SIZE=$TARGET_SIZE;
+        git pull origin ${GIT_SOURCE_EXTRA};
+        git gc --aggressive;
+        MERGE_SIZE=`du -s . | sed -e "s/\t.*//"`;
+        popd
+        echo MERGE_SIZE=$MERGE_SIZE;
+        if [ "${MERGE_SIZE}" != "${TARGET_SIZE}" ]; then
+          SIZE_DIFF=`expr \( ${MERGE_SIZE} - ${TARGET_SIZE} \)`;
+        else
+          SIZE_DIFF=0;
+        fi;
+
+        echo SIZE_DIFF=$SIZE_DIFF;
+
+        echo -e "Estimated content size difference = ${SIZE_DIFF} kB";
+
+        if test ${SIZE_DIFF} -lt $1; then
+          echo "Size check passed";
+          return 0;
+        else
+          echo "Size check failed";
+          return 1;
+        fi;
+
+      };
 script:
   - if [ $RUN_TESTS == 'true' ]; then coverage run run_tests.py; fi;
   - if [ $RUN_TESTS == 'true' ]; then flake8 $TRAVIS_BUILD_DIR/skbeam; fi;
+  # Check the merge size to make sure nothing huge was committed, but only do
+  # it on one of the branches
+  - if [ $BUILD_DOCS == 'true' ]; then
+      size_check 100;
+    fi;
   - if [ $BUILD_DOCS == 'true' ]; then
       conda install sphinx numpydoc ipython jupyter pip matplotlib;
       pip install sphinx_bootstrap_theme sphinxcontrib-napoleon;
-      cd ..;
+      pushd ../;
       git clone https://github.com/scikit-beam/scikit-beam-examples.git;
-      cd scikit-beam/doc;
+      popd;
+      cd doc;
       chmod +x build_docs.sh;
       ./build_docs.sh;
     fi;
+
 
 after_success:
   - if [ $RUN_TESTS == 'true' ]; then codecov; fi;

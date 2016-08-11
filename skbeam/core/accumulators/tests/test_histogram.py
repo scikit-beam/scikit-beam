@@ -1,6 +1,8 @@
+from __future__ import division
 import numpy as np
-from numpy.testing import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal, assert_array_equal
 from numpy.testing import assert_almost_equal
+from nose.tools import raises
 from skbeam.core.accumulators.histogram import Histogram
 from time import time
 import random
@@ -21,7 +23,7 @@ def _1d_histogram_tester(binlowhighs, x, weights=1):
 
 def test_1d_histogram():
     binlowhigh = [10, 0, 10.01]
-    xf = np.random.random(1000000)*40
+    xf = np.random.random(1000000) * 40
     xi = xf.astype(int)
     xl = xf.tolist()
     wf = np.linspace(1, 10, len(xf))
@@ -71,8 +73,8 @@ def test_2d_histogram():
     onexi = int(onexf)
     oneyf = random.random()*ten[2]
     oneyi = int(oneyf)
-    xf = np.random.random(1000000)*40
-    yf = np.random.random(1000000)*40
+    xf = np.random.random(1000000) * 40
+    yf = np.random.random(1000000) * 40
     xi = xf.astype(int)
     yi = yf.astype(int)
     xl = xf.tolist()
@@ -98,12 +100,37 @@ def test_2d_histogram():
     for binlowhigh, x, y, w in vals:
         yield _2d_histogram_tester, binlowhigh, x, y, w
 
+
+@raises(AssertionError)
+def test_simple_fail():
+    # This test exposes the half-open vs full-open histogram code difference
+    # between np.histogram and skbeam's histogram.
+    h = Histogram((5, 0, 3))
+    a = np.arange(1, 6)
+    b = np.asarray([1, 1, 2, 3, 2])
+    h.fill(a, weights=b)
+    np_res = np.histogram(a, h.edges[0], weights=b)[0]
+    assert_array_equal(h.values, np_res)
+
+
+def test_simple_pass():
+    # This test exposes the half-open vs full-open histogram code difference
+    # between np.histogram and skbeam's histogram.
+    h = Histogram((5, 0, 3.1))
+    a = np.arange(1, 6)
+    b = np.asarray([1, 1, 2, 3, 2])
+    h.fill(a, weights=b)
+    np_res = np.histogram(a, h.edges[0], weights=b)[0]
+    assert_array_equal(h.values, np_res)
+
+
 if __name__ == '__main__':
     import itertools
+
     x = [1000, 0, 10.01]
     y = [1000, 0, 9.01]
-    xf = np.random.random(1000000)*10*4
-    yf = np.random.random(1000000)*9*15
+    xf = np.random.random(1000000) * 10 * 4
+    yf = np.random.random(1000000) * 9 * 15
     xi = xf.astype(int)
     yi = yf.astype(int)
     wf = np.linspace(1, 10, len(xf))
