@@ -1,4 +1,5 @@
 from skbeam.core.accumulators.binned_statistic import RadialBinnedStatistic
+from nose.tools import assert_raises
 from numpy.testing import assert_array_almost_equal
 import numpy as np
 
@@ -55,17 +56,10 @@ class TestRadialBinnedStatistic(object):
                         # are few pixels
                         assert_array_almost_equal(ref, binned, decimal=1)
         # test exception when BinnedStatistic is given array of incorrect shape
-        try:
+        with assert_raises(ValueError):
             radbinstat(self.image[:10, :10])
-            raise RuntimeError('BinnedStatistic failed to raise exception'
-                               ' when given an array of incorrect shape')
-        except ValueError:
-            pass
+
         # test exception when RadialBinnedStatistic is given 1D array
-        try:
+        with assert_raises(ValueError):
             RadialBinnedStatistic(10, xsize, ysize, True,
                                   mask=np.array([1, 2, 3, 4]))
-            raise RuntimeError('RadialBinnedStatistic failed to raise'
-                               ' when passed 1D array')
-        except ValueError:
-            pass
