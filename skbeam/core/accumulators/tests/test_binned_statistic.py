@@ -1,8 +1,12 @@
-from skbeam.core.accumulators.binned_statistic import RadialBinnedStatistic
+from skbeam.core.accumulators.binned_statistic import (RadialBinnedStatistic,
+                                                       BinnedStatistic1D)
 from nose.tools import assert_raises
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 import numpy as np
 import scipy.stats
+
+stats_list = [('mean', np.mean), ('median', np.median), ('count', len),
+              ('sum', np.sum), ('std', np.std)]
 
 
 class TestRadialBinnedStatistic(object):
@@ -31,10 +35,7 @@ class TestRadialBinnedStatistic(object):
 
         for bins, xsize, ysize, cartesian in params:
             for kwargs in mykwargs:
-                for stat, stat_func in [('mean', np.mean),
-                                        ('median', np.median),
-                                        ('count', len),
-                                        ('sum', np.sum), ('std', np.std)]:
+                for stat, stat_func in stats_list:
 
                     radbinstat = RadialBinnedStatistic(bins, xsize, ysize,
                                                        cartesian,
@@ -70,3 +71,18 @@ class TestRadialBinnedStatistic(object):
         with assert_raises(ValueError):
             RadialBinnedStatistic(10, xsize, ysize, True,
                                   mask=np.array([1, 2, 3, 4]))
+
+
+def test_BinnedStatistics1D():
+    x = np.linspace(0, 2*np.pi, 100)
+    values = np.sin(x * 5)
+
+    for stat, stat_f in stats_list:
+        bs = BinnedStatistic1D(x, statistic=stat, bins=10)
+        bs_f = BinnedStatistic1D(x, statistic=stat_f, bins=10)
+
+        ref, _, _ = scipy.stats.binned_statistic(x, values,
+                                                 statistic=stat, bins=10)
+
+        assert_array_equal(bs(values), ref)
+        assert_array_almost_equal(bs_f(values), ref)
