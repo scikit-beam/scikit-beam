@@ -489,7 +489,7 @@ class RadialBinnedStatistic(RPhiBinnedStatistic):
     image in radius.
     """
 
-    def __init__(self,  bins, xsize, ysize, cartesian,
+    def __init__(self, bins, xsize, ysize, cartesian,
                  xc=None, yc=None, rrange=None, phirange=None, mask=None,
                  statistic='mean'):
         """
