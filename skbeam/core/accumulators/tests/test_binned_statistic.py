@@ -1,60 +1,67 @@
 from skbeam.core.accumulators.binned_statistic import RadialBinnedStatistic
 from nose.tools import assert_raises
-from numpy.testing import assert_array_almost_equal
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 import numpy as np
+import scipy.stats
 
 
 class TestRadialBinnedStatistic(object):
+    oscillation_rate = 10.0
 
     def setup(self):
 
         # Create test image - a sinc function.
         # Integrating in phi will produce sin(x)
 
-        xsize, ysize = (900, 1024)
+        xsize, ysize = (90, 102)
 
         xarr = np.arange(xsize)
         yarr = np.arange(ysize)
         xgrid, ygrid = np.meshgrid(yarr, xarr)
         self.rgrid = np.sqrt(xgrid**2 + ygrid**2)
-        # use 100 here to make the function go through many periods
-        self.oscillation_rate = 100.0
         self.image = np.sinc(self.rgrid / self.oscillation_rate)
 
     def testRadialBinnedStatistic(self):
 
         params = [[100, self.image.shape[0], self.image.shape[1], False],
                   [100, self.image.shape[1], self.image.shape[0], True]]
-        mykwargs = [{'xc': 0, 'yc': 0, 'rrange': (100, 900),
+        mykwargs = [{'xc': 0, 'yc': 0, 'rrange': (10, 90),
                      'phirange': (5, 60)},
                     {'xc': 0, 'yc': 0}]
-        # only test 60 bins where we don't have r-limits, because
-        # past that the number of pixels is no longer proportional
-        # to the radius
-        myslice = [np.s_[:], np.s_[:60]]
 
         for bins, xsize, ysize, cartesian in params:
-            for kwargs, slice in zip(mykwargs, myslice):
-                for stat in ['mean', 'median', 'count', 'sum', 'std']:
+            for kwargs in mykwargs:
+                for stat, stat_func in [('mean', np.mean),
+                                        ('median', np.median),
+                                        ('count', len),
+                                        ('sum', np.sum), ('std', np.std)]:
+
                     radbinstat = RadialBinnedStatistic(bins, xsize, ysize,
                                                        cartesian,
                                                        statistic=stat,
                                                        **kwargs)
+                    radbinstat_f = RadialBinnedStatistic(bins, xsize, ysize,
+                                                         cartesian,
+                                                         statistic=stat_func,
+                                                         **kwargs)
                     binned = radbinstat(self.image)
-                    binned /= binned.max()
-                    binned = binned[slice]
-                    centeroffset = 0.5*(radbinstat.bin_edges[0][1] -
-                                        radbinstat.bin_edges[0][0])
-                    ref = np.sin((radbinstat.edges[0][:-1] + centeroffset) /
-                                 self.oscillation_rate * np.pi)[slice]
+                    binned_f = radbinstat_f(self.image)
+
+                    assert_array_almost_equal(binned_f, binned)
                     # can't check equality if we use normalization with
                     # current testing strategy, but at least check code runs
-                    if stat is 'sum':
-                        # the binned image won't be precisely equal to the
-                        # analytic np.sin formula because the pixel r-values
-                        # are quantized.  this is most dramatic where there
-                        # are few pixels
-                        assert_array_almost_equal(ref, binned, decimal=1)
+                    if 'phirange' not in kwargs:
+                        rrange = kwargs.get('rrange', None)
+                        ref, _, _ = scipy.stats.binned_statistic(
+                            x=self.rgrid.ravel(),
+                            values=self.image.ravel(),
+                            statistic=stat,
+                            range=rrange,
+                            bins=bins,
+                        )
+
+                        assert_array_equal(ref, binned)
+
         # test exception when BinnedStatistic is given array of incorrect shape
         with assert_raises(ValueError):
             radbinstat(self.image[:10, :10])
