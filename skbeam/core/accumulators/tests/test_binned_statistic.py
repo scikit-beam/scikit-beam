@@ -53,7 +53,7 @@ class TestRadialBinnedStatistic(object):
                     # current testing strategy, but at least check code runs
                     if 'phirange' not in kwargs:
                         rrange = kwargs.get('rrange', None)
-                        ref, _, _ = scipy.stats.binned_statistic(
+                        ref, edges, _ = scipy.stats.binned_statistic(
                             x=self.rgrid.ravel(),
                             values=self.image.ravel(),
                             statistic=stat,
@@ -62,7 +62,8 @@ class TestRadialBinnedStatistic(object):
                         )
 
                         assert_array_equal(ref, binned)
-
+                        assert_array_equal(edges, radbinstat.bin_edges)
+                        assert_array_equal(edges, radbinstat_f.bin_edges)
         # test exception when BinnedStatistic is given array of incorrect shape
         with assert_raises(ValueError):
             radbinstat(self.image[:10, :10])
@@ -81,8 +82,10 @@ def test_BinnedStatistics1D():
         bs = BinnedStatistic1D(x, statistic=stat, bins=10)
         bs_f = BinnedStatistic1D(x, statistic=stat_f, bins=10)
 
-        ref, _, _ = scipy.stats.binned_statistic(x, values,
-                                                 statistic=stat, bins=10)
+        ref, edges, _ = scipy.stats.binned_statistic(x, values,
+                                                     statistic=stat, bins=10)
 
         assert_array_equal(bs(values), ref)
         assert_array_almost_equal(bs_f(values), ref)
+        assert_array_equal(edges, bs.bin_edges)
+        assert_array_equal(edges, bs_f.bin_edges)
