@@ -391,8 +391,8 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
     image in both radius and phi.
     """
 
-    def __init__(self, rbins, phibins, xsize, ysize, cartesian,
-                 xc=None, yc=None, rrange=None, phirange=None, mask=None,
+    def __init__(self, rbins, phibins, rowsize, colsize,
+                 rowc=None, colc=None, rrange=None, phirange=None, mask=None,
                  statistic='mean'):
         """
         Parameters:
@@ -401,24 +401,18 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
             number of radial bins in returned histogram.
         phibins: int
             number of phi bins in returned histogram.
-        xsize,ysize: int
-            shape of image in pixels.  see "cartesian" parameter
-            for definition of x/y.
-        cartesian: bool, optional
-            if True, use "cartesian" array ordering, with x corresponding
-            to matrix columns and y corresponding to matrix rows.
-            Otherwise the opposite ("matrix" ordering).
-        xc,yc: int, optional
+        rowsize,colsize: int
+            shape of image in pixels.
+        rowc,colc: int, optional
             location (in pixels) of origin (default: image center).
-            see "cartesian" parameter for definition of x/y.
         rrange: (float, float), optional
             The lower and upper radial range of the bins, in pixels.
             If not provided, all pixel r values are included.
         phirange: (float, float), optional
             phi range to include.  Values are in the range
-            (-180,180) degrees (default: no limits).  Phi is
-            computed as arctan(y/x) where the meaning of y and x
-            is determined by the setting of the "cartesian" parameter.
+            (-pi,pi) radians (default: no limits).  Phi is
+            computed as arctan(col/row), i.e. "matrix" ordering and
+            not "cartesian" ordering.
         mask: 2-dimensional np.ndarray, optional
             array of zero/non-zero values, same shape as image used
             in __call__.  zero values will be ignored.
@@ -441,32 +435,27 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
                 represented by function([]), or NaN if this returns an error.
         """
 
-        if not cartesian:
-            # switch from matrix to cartesian by swapping axes
-            xc, yc = yc, xc
-            xsize, ysize = ysize, xsize
+        rowc = rowsize//2 if rowc is None else rowc
+        colc = colsize//2 if colc is None else colc
+        row = np.arange(rowsize)-rowc
+        col = np.arange(colsize)-colc
+        # meshgrid indexing='ij' option requires numpy 1.7 or later
+        rowgrid, colgrid = np.meshgrid(row, col, indexing='ij')
+        self.expected_shape = rowgrid.shape
 
-        xc = xsize//2 if xc is None else xc
-        yc = ysize//2 if yc is None else yc
-        x = np.arange(xsize)-xc
-        y = np.arange(ysize)-yc
-        xgrid, ygrid = np.meshgrid(x, y)  # "cartesian"
-        self.expected_shape = xgrid.shape
+        rpix = np.sqrt(rowgrid**2 + colgrid**2)
 
-        rpix = np.sqrt(xgrid**2 + ygrid**2)
-
-        if cartesian:
-            phipix = np.arctan2(ygrid, xgrid) * 180 / np.pi
-        else:
-            phipix = np.arctan2(xgrid, ygrid) * 180 / np.pi
+        phipix = np.arctan2(colgrid, rowgrid)
 
         if rrange is None:
             rrange = (rpix.min(), rpix.max())
         if phirange is None:
-            phirange = (-180, 180)
+            phirange = (-np.pi, np.pi)
         if mask is not None:
             if mask.shape != self.expected_shape:
-                raise ValueError('"mask" has incorrect shape')
+                raise ValueError('"mask" has incorrect shape. '
+                                 ' Expected: ' + str(self.expected_shape) +
+                                 ' Received: ' + str(mask.shape))
             # a somewhat ugly way to mask pixels
             rpix[mask == 0] = rrange[0]-1
 
@@ -479,7 +468,9 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
     def __call__(self, values):
         # check for what I believe could be a common error
         if values.shape != self.expected_shape:
-            raise ValueError('"values" has incorrect shape')
+            raise ValueError('"values" has incorrect shape.'
+                             ' Expected: ' + str(self.expected_shape) +
+                             ' Received: ' + str(values.shape))
         return super(RPhiBinnedStatistic, self).__call__(values.reshape(-1))
 
 
@@ -489,15 +480,15 @@ class RadialBinnedStatistic(RPhiBinnedStatistic):
     image in radius.
     """
 
-    def __init__(self, bins, xsize, ysize, cartesian,
-                 xc=None, yc=None, rrange=None, phirange=None, mask=None,
+    def __init__(self, bins, rowsize, colsize,
+                 rowc=None, colc=None, rrange=None, phirange=None, mask=None,
                  statistic='mean'):
         """
         See RPhiBinnedStatistic documentation.
         """
 
-        super(RadialBinnedStatistic, self).__init__(bins, 1, xsize, ysize,
-                                                    cartesian, xc, yc,
+        super(RadialBinnedStatistic, self).__init__(bins, 1, rowsize, colsize,
+                                                    rowc, colc,
                                                     rrange, phirange, mask,
                                                     statistic)
 
