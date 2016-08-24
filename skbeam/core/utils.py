@@ -884,8 +884,8 @@ def grid3d(q, img_stack,
         from ..ext import ctrans
     except ImportError:
         raise NotImplementedError(
-            "ctrans is not available on your platform. See"
-            "https://github.com/scikit-beam/scikit-beam/issues/418"
+            "ctrans is not available on your platform. See "
+            "https://github.com/scikit-beam/scikit-beam/issues/418 "
             "to follow updates to this problem.")
 
     # validate input
