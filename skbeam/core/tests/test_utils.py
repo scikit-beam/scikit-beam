@@ -46,6 +46,10 @@ from nose.tools import assert_equal, assert_true, raises
 import skbeam.core.utils as core
 
 import logging
+try:
+    from pyFAI.geometry import Geometry
+except ImportError:
+    pass
 logger = logging.getLogger(__name__)
 
 
@@ -541,6 +545,21 @@ def test_geometric_series():
 
     assert_array_equal(time_series, [1, 5, 25, 125])
 
+
+def test_bin_grid():
+    geo = Geometry(
+    detector='Perkin', pixel1=.0002, pixel2=.0002,
+    dist=.23,
+    poni1=.209, poni2=.207,
+    # poni1=0, poni2=0,
+    # rot1=.0128, rot2=-.015, rot3=-5.2e-8,
+    wavelength=1.43e-11
+    )
+    r_array = geo.rArray((2048, 2048))
+    img = r_array.copy()
+    x, y = core.bin_grid(img, r_array, (geo.pixel1, geo.pixel2))
+
+    assert_array_almost_equal(y, x, decimal=2)
 
 if __name__ == '__main__':
     import nose

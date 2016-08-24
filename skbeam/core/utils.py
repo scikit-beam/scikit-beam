@@ -1257,7 +1257,7 @@ def bin_grid(image, r_array, pixel_sizes, statistic='mean', mask=None,
         bins = np.arange(np.min(r_array) - res * .5,
                          np.max(r_array) + res * .5, res)
 
-    bin_edge, int_stat, bin_num = sts.binned_statistic(r_array[mask],
+    int_stat, bin_edge, bin_num = sts.binned_statistic(r_array[mask],
                                                        image[mask],
                                                        statistic=statistic,
                                                        bins=bins)
