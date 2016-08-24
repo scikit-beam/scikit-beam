@@ -158,7 +158,7 @@ def test_bin_edges():
         # 2 entries
         {'range_min': 1.234, 'step': np.pi / 10},
         # 1 entry
-        {'range_min': 1.234,},
+        {'range_min': 1.234, },
         # max < min
         {'range_max': 1.234, 'range_min': 5.678, 'step': np.pi / 10},
         # step > max - min
