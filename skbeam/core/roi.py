@@ -398,8 +398,54 @@ def mean_intensity(images, labeled_array, index=None):
     return mean_intensity, index
 
 
-def circular_average(image, calibrated_center, threshold=0, nx=100,
-                     pixel_size=(1, 1),  min_x=None, max_x=None):
+
+def bin_1D(x, y, nx=None, min_x=None, max_x=None):
+    """
+    Bin the values in y based on their x-coordinates
+
+    Parameters
+    ----------
+    x : array
+        position
+    y : array
+        intensity
+    nx : integer, optional
+        number of bins to use defaults to default bin value
+    min_x : float, optional
+        Left edge of first bin defaults to minimum value of x
+    max_x : float, optional
+        Right edge of last bin defaults to maximum value of x
+
+    Returns
+    -------
+    edges : array
+        edges of bins, length nx + 1
+
+    val : array
+        sum of values in each bin, length nx
+
+    count : array
+        The number of counts in each bin, length nx
+    """
+    # handle default values
+    if min_x is None:
+        min_x = np.min(x)
+    if max_x is None:
+        max_x = np.max(x)
+    if nx is None:
+        nx = int(max_x - min_x) 
+    # use a weighted histogram to get the bin sum
+    bins = np.linspace(start=min_x, stop=max_x, num=nx+1, endpoint=True)
+    val, _ = np.histogram(a=x, bins=bins, weights=y)
+    # use an un-weighted histogram to get the counts
+    count, _ = np.histogram(a=x, bins=bins)
+    # return the three arrays
+    return bins, val, count
+
+
+
+def circular_average(image, calibrated_center, threshold=0, nx=None,
+                     pixel_size=(1, 1),  min_x=None, max_x=None, mask=None):
     """Circular average of the the image data
     The circular average is also known as the radial integration
     Parameters
@@ -430,18 +476,27 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
     ring_averages : array
         Radial average of the image. shape is (nx, ).
     """
-    radial_val = utils.radial_grid(calibrated_center, image.shape, pixel_size)
-
-    bin_edges, sums, counts = utils.bin_1D(np.ravel(radial_val),
-                                           np.ravel(image), nx,
+    radial_val = utils.radial_grid(calibrated_center, image.shape, pixel_size) 
+    if mask is not None:  
+        mask = np.array( mask, dtype = bool)
+        binr = radial_val[mask]
+        image_mask =     np.array( image )[mask]        
+    else:        
+        binr = np.ravel( radial_val ) 
+        image_mask = np.ravel(image) 
+    binr_ =   binr /(np.sqrt(pixel_size[1]*pixel_size[0] ))
+    bin_edges, sums, counts = bin_1D(      binr_,
+                                           image_mask,
+                                           nx=nx,
                                            min_x=min_x,
-                                           max_x=max_x)
+                                           max_x=max_x) 
     th_mask = counts > threshold
     ring_averages = sums[th_mask] / counts[th_mask]
-
     bin_centers = utils.bin_edges_to_centers(bin_edges)[th_mask]
+    return bin_centers, ring_averages 
 
-    return bin_centers, ring_averages
+ 
+
 
 
 def kymograph(images, labels, num):
