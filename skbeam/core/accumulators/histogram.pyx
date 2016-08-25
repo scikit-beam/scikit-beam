@@ -14,18 +14,29 @@ logger = logging.getLogger(__name__)
 
 DEF MAX_DIMENSIONS = 10
 
-ctypedef fused xnumtype:
-    np.int_t
-    np.float_t
-
-ctypedef fused ynumtype:
-    np.int_t
-    np.float_t
+ctypedef fused coordnumtype:
+    np.int8_t
+    np.int16_t
+    np.int32_t
+    np.int64_t
+    np.uint8_t
+    np.uint16_t
+    np.uint32_t
+    np.uint64_t
+    np.float32_t
+    np.float64_t
 
 ctypedef fused wnumtype:
-    np.int_t
-    np.float_t
-
+    np.int8_t
+    np.int16_t
+    np.int32_t
+    np.int64_t
+    np.uint8_t
+    np.uint16_t
+    np.uint32_t
+    np.uint64_t
+    np.float32_t
+    np.float64_t
 
 cdef void* _getarrayptr(np.ndarray a):
     return <void*> a.data
@@ -94,10 +105,13 @@ class Histogram:
 
         Parameters
         ----------
-        coords : iterable of numpy arrays
-            The length of coords is equivalent to the dimensionality of
-            the histogram.
-        weights
+        coords : iterable of values.  Values can be np.ndarrays, integers,
+            floats, or list/tuple of int/float. The length of coords is
+            equivalent to the dimensionality of the histogram.  The data
+            types of the coords must be the same.
+        weights: int/float/np.ndarray, optional.  Defaults to 1.
+            The amount each histogram bin (determined by coords) is
+            to be incremented.
 
         Returns
         -------
@@ -109,6 +123,15 @@ class Histogram:
             raise ValueError(emsg.format(len(coords), self.ndims))
 
         weights = np.asarray(weights).reshape(-1)
+
+        # for user-friendliness, translate int/float/list/tuple to arrays
+        if type(coords[0]) is int or type(coords[0]) is float:
+            coords = tuple(np.array([c],dtype=float) for c in coords)
+        elif type(coords[0]) is tuple or type(coords[0]) is list:
+            coords = tuple(np.array(c,dtype=float) for c in coords)
+
+        if type(weights) is list or type (weights) is tuple:
+            weights = tuple(np.array(w,dtype=float) for w in weights)
 
         nexpected = len(coords[0])
         for x in coords:
@@ -134,7 +157,7 @@ class Histogram:
         return
 
 
-    def _fill1d(self, np.ndarray[xnumtype, ndim=1] xval,
+    def _fill1d(self, np.ndarray[coordnumtype, ndim=1] xval,
                 np.ndarray[wnumtype, ndim=1] weight):
         cdef np.ndarray[np.float_t, ndim=1] data = self.values
         cdef np.float_t low = self._lows[0]
@@ -151,8 +174,8 @@ class Histogram:
         return
 
 
-    def _fill2d(self, np.ndarray[xnumtype, ndim=1] xval,
-                np.ndarray[ynumtype, ndim=1] yval,
+    def _fill2d(self, np.ndarray[coordnumtype, ndim=1] xval,
+                np.ndarray[coordnumtype, ndim=1] yval,
                 np.ndarray[wnumtype, ndim=1] weight):
         cdef np.float_t [:,:] data = self.values
         cdef np.float_t [:] low = self._lows
@@ -255,13 +278,13 @@ class Histogram:
         return [bin_edges_to_centers(edge) for edge in self.edges]
 
 
-cdef long find_indices(xnumtype pos, double low, double high, double binsize):
+cdef long find_indices(coordnumtype pos, double low, double high, double binsize):
     if not (low <= pos < high):
         return -1
     return int((pos - low) / binsize)
 
 
-cdef void fillonecy(xnumtype xval, wnumtype weight,
+cdef void fillonecy(coordnumtype xval, wnumtype weight,
                     np.float_t* pdata,
                     double low, double high, double binsize):
     iidx = find_indices(xval, low, high, binsize)
