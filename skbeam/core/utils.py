@@ -50,11 +50,11 @@ import numpy as np
 from itertools import tee
 
 import logging
+import scipy.stats as sts
+
 logger = logging.getLogger(__name__)
 
-
 md_value = namedtuple("md_value", ['value', 'units'])
-
 
 _defaults = {
     "bins": 100,
@@ -94,6 +94,7 @@ class MD_dict(MutableMapping):
     >>> tt['nested.b'].units
     'm'
     """
+
     def __init__(self, md_dict=None):
         # TODO properly walk the input on upgrade dicts -> MD_dict
         if md_dict is None:
@@ -194,6 +195,7 @@ class verbosedict(dict):
     A sub-class of dict which raises more verbose errors if
     a key is not found.
     """
+
     def __getitem__(self, key):
         try:
             v = dict.__getitem__(self, key)
@@ -202,13 +204,13 @@ class verbosedict(dict):
                 new_msg = ("You tried to access the key '{key}' "
                            "which does not exist.  The "
                            "extant keys are: {valid_keys}").format(
-                               key=key, valid_keys=list(self))
+                    key=key, valid_keys=list(self))
             else:
                 new_msg = ("You tried to access the key '{key}' "
                            "which does not exist.  There "
                            "are {num} extant keys, which is too many to "
                            "show you").format(
-                               key=key, num=len(self))
+                    key=key, num=len(self))
             six.reraise(KeyError, KeyError(new_msg), sys.exc_info()[2])
         return v
 
@@ -583,7 +585,7 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
         nx = int(max_x - min_x)
 
     # use a weighted histogram to get the bin sum
-    bins = np.linspace(start=min_x, stop=max_x, num=nx+1, endpoint=True)
+    bins = np.linspace(start=min_x, stop=max_x, num=nx + 1, endpoint=True)
     val, _ = np.histogram(a=x, bins=bins, weights=y)
     # use an un-weighted histogram to get the counts
     count, _ = np.histogram(a=x, bins=bins)
@@ -620,7 +622,7 @@ def radial_grid(center, shape, pixel_size=None):
 
     X, Y = np.meshgrid(pixel_size[1] * (np.arange(shape[1]) - center[1]),
                        pixel_size[0] * (np.arange(shape[0]) - center[0]))
-    return np.sqrt(X*X + Y*Y)
+    return np.sqrt(X * X + Y * Y)
 
 
 def angle_grid(center, shape, pixel_size=None):
@@ -795,7 +797,7 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
         if step > (range_max - range_min):
             raise ValueError("The step can not be greater than the difference "
                              "between min and max")
-        nbins = int((range_max - range_min)//step)
+        nbins = int((range_max - range_min) // step)
         ret = range_min + np.arange(nbins + 1) * step
         # if the last value is greater than the max (should never happen)
         if ret[-1] > range_max:
@@ -882,8 +884,8 @@ def grid3d(q, img_stack,
         from ..ext import ctrans
     except ImportError:
         raise NotImplementedError(
-            "ctrans is not available on your platform. See"
-            "https://github.com/scikit-beam/scikit-beam/issues/418"
+            "ctrans is not available on your platform. See "
+            "https://github.com/scikit-beam/scikit-beam/issues/418 "
             "to follow updates to this problem.")
 
     # validate input
@@ -944,7 +946,7 @@ def grid3d(q, img_stack,
     if binary_mask is not None:
         q = q[np.ravel(binary_mask)]
 
-    #            3D grid of the data set
+    # 3D grid of the data set
     # starting time for gridding
     t1 = time.time()
 
@@ -955,7 +957,7 @@ def grid3d(q, img_stack,
 
     # ending time for the gridding
     t2 = time.time()
-    logger.info("Done processed in {0} seconds".format(t2-t1))
+    logger.info("Done processed in {0} seconds".format(t2 - t1))
 
     # No. of values zero in the grid
     empt_nb = (occupancy == 0).sum()
@@ -1160,7 +1162,7 @@ def multi_tau_lags(multitau_levels, multitau_channels):
                          .format(multitau_channels))
 
     # total number of channels ( or total number of delay times)
-    tot_channels = (multitau_levels + 1)*multitau_channels//2
+    tot_channels = (multitau_levels + 1) * multitau_channels // 2
 
     lag = []
     dict_lags = {}
@@ -1168,8 +1170,8 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     dict_lags[1] = lag_steps
     for i in range(2, multitau_levels + 1):
         y = []
-        for j in range(0, multitau_channels//2):
-            value = (multitau_channels//2 + j)*(2**(i - 1))
+        for j in range(0, multitau_channels // 2):
+            value = (multitau_channels // 2 + j) * (2 ** (i - 1))
             lag.append(value)
             y.append(value)
         dict_lags[i] = y
@@ -1215,6 +1217,51 @@ def geometric_series(common_ratio, number_of_images, first_term=1):
 
     geometric_series = [first_term]
 
-    while geometric_series[-1]*common_ratio < number_of_images:
-        geometric_series.append(geometric_series[-1]*common_ratio)
+    while geometric_series[-1] * common_ratio < number_of_images:
+        geometric_series.append(geometric_series[-1] * common_ratio)
     return geometric_series
+
+
+def bin_grid(image, r_array, pixel_sizes, statistic='mean', mask=None,
+             bins=None):
+    """
+    Bin and integrate an image, given the radial array of pixels
+
+    Parameters
+    ----------
+    image: np.array
+        The image in quesion
+    r_array: np.array
+        The array which maps pixel positions to tilt/rotation corrected radii
+    pixel_sizes: tuple
+        The size of the pixels in the same units as the r_array
+    statistic: str or func, optional
+        The statistic to compute over the integration, defaults to mean
+    mask: bool array, optional
+        The array of pixels to be removed from the image before integration
+    bins: array, optional
+        The bins to use in the integration, if none given the function will
+        give its best assessment based on the pixel_size and r_array
+
+    Returns
+    -------
+    bin_centers : array
+        The center of each bin in R
+    int_stat : array
+        Radial integrated statistic of the image.
+    """
+    if mask is None:
+        mask = np.ones(image.shape, dtype=int).astype(bool)
+    if bins is None:
+        res = np.hypot(*pixel_sizes)
+        bins = np.arange(np.min(r_array) - res * .5,
+                         np.max(r_array) + res * .5, res)
+
+    int_stat, bin_edge, bin_num = sts.binned_statistic(r_array[mask],
+                                                       image[mask],
+                                                       statistic=statistic,
+                                                       bins=bins)
+
+    bin_centers = bin_edges_to_centers(bin_edge)
+
+    return bin_centers, int_stat

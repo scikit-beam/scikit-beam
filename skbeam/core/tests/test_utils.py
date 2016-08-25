@@ -43,9 +43,18 @@ from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_almost_equal)
 from nose.tools import assert_equal, assert_true, raises
 
+from skbeam.testing.decorators import known_fail_if
+
 import skbeam.core.utils as core
 
 import logging
+
+try:
+    from pyFAI.geometry import Geometry
+    pf = True
+except ImportError:
+    pf = False
+    pass
 logger = logging.getLogger(__name__)
 
 
@@ -178,8 +187,8 @@ def test_grid3d():
     # slice tricks
     # this make a list of slices, the imaginary value in the
     # step is interpreted as meaning 'this many values'
-    slc = [slice(_min + (_max - _min)/(s * 2),
-                 _max - (_max - _min)/(s * 2),
+    slc = [slice(_min + (_max - _min) / (s * 2),
+                 _max - (_max - _min) / (s * 2),
                  1j * s)
            for _min, _max, s in zip(q_min, q_max, dqn)]
     # use the numpy slice magic to make X, Y, Z these are dense meshes with
@@ -220,8 +229,8 @@ def test_process_grid_std_err():
     # slice tricks
     # this make a list of slices, the imaginary value in the
     # step is interpreted as meaning 'this many values'
-    slc = [slice(_min + (_max - _min)/(s * 2),
-                 _max - (_max - _min)/(s * 2),
+    slc = [slice(_min + (_max - _min) / (s * 2),
+                 _max - (_max - _min) / (s * 2),
                  1j * s)
            for _min, _max, s in zip(q_min, q_max, dqn)]
     # use the numpy slice magic to make X, Y, Z these are dense meshes with
@@ -240,12 +249,12 @@ def test_process_grid_std_err():
     # check the values are as expected
     npt.assert_array_equal(mean,
                            np.ones_like(X) * np.mean(np.arange(1, 101)))
-    npt.assert_array_equal(occupancy, np.ones_like(occupancy)*100)
+    npt.assert_array_equal(occupancy, np.ones_like(occupancy) * 100)
     # need to convert std -> ste (standard error)
     # according to wikipedia ste = std/sqrt(n)
     npt.assert_array_almost_equal(std_err,
                                   (np.ones_like(occupancy) *
-                                   np.std(np.arange(1, 101))/np.sqrt(100)))
+                                   np.std(np.arange(1, 101)) / np.sqrt(100)))
 
 
 def test_bin_edge2center():
@@ -268,7 +277,7 @@ def test_small_verbosedict():
         assert_equal(eval(six.text_type(e)), expected_string)
     else:
         # did not raise a KeyError
-        assert(False)
+        assert (False)
 
 
 def test_large_verbosedict():
@@ -289,7 +298,7 @@ def test_large_verbosedict():
         assert_equal(eval(six.text_type(e)), expected_sting)
     else:
         # did not raise a KeyError
-        assert(False)
+        assert (False)
 
 
 def test_d_q_conversion():
@@ -325,15 +334,15 @@ def test_radius_to_twotheta():
 
     two_theta = np.array(
         [0.46364761, 0.47177751, 0.47984053, 0.48783644, 0.49576508,
-         0.5036263,   0.51142,    0.51914611, 0.52680461, 0.53439548,
-         0.54191875,  0.54937448, 0.55676277, 0.56408372, 0.57133748,
-         0.57852421,  0.58564412, 0.5926974,  0.59968432, 0.60660511,
-         0.61346007,  0.62024949, 0.62697369, 0.63363301, 0.6402278,
-         0.64675843,  0.65322528, 0.65962874, 0.66596924, 0.67224718,
-         0.67846301,  0.68461716, 0.6907101,  0.69674228, 0.70271418,
-         0.70862627,  0.71447905, 0.720273,   0.72600863, 0.73168643,
-         0.73730693,  0.74287063, 0.74837805, 0.75382971, 0.75922613,
-         0.76456784,  0.76985537, 0.77508925, 0.78027,    0.78539816])
+         0.5036263, 0.51142, 0.51914611, 0.52680461, 0.53439548,
+         0.54191875, 0.54937448, 0.55676277, 0.56408372, 0.57133748,
+         0.57852421, 0.58564412, 0.5926974, 0.59968432, 0.60660511,
+         0.61346007, 0.62024949, 0.62697369, 0.63363301, 0.6402278,
+         0.64675843, 0.65322528, 0.65962874, 0.66596924, 0.67224718,
+         0.67846301, 0.68461716, 0.6907101, 0.69674228, 0.70271418,
+         0.70862627, 0.71447905, 0.720273, 0.72600863, 0.73168643,
+         0.73730693, 0.74287063, 0.74837805, 0.75382971, 0.75922613,
+         0.76456784, 0.76985537, 0.77508925, 0.78027, 0.78539816])
 
     assert_array_almost_equal(two_theta,
                               core.radius_to_twotheta(dist_sample,
@@ -524,7 +533,7 @@ def test_angle_grid():
     a = core.angle_grid((3, 3), (7, 7))
     assert_equal(a[3, -1], 0)
     assert_almost_equal(a[3, 0], np.pi)
-    assert_almost_equal(a[4, 4], np.pi/4)  # (1, 1) should be 45 degrees
+    assert_almost_equal(a[4, 4], np.pi / 4)  # (1, 1) should be 45 degrees
     # The documented domain is [-pi, pi].
     correct_domain = np.all((a < np.pi + 0.1) & (a > -np.pi - 0.1))
     assert_true(correct_domain)
@@ -542,6 +551,24 @@ def test_geometric_series():
     assert_array_equal(time_series, [1, 5, 25, 125])
 
 
+@known_fail_if(not pf)
+def test_bin_grid():
+    geo = Geometry(
+        detector='Perkin', pixel1=.0002, pixel2=.0002,
+        dist=.23,
+        poni1=.209, poni2=.207,
+        # poni1=0, poni2=0,
+        # rot1=.0128, rot2=-.015, rot3=-5.2e-8,
+        wavelength=1.43e-11
+    )
+    r_array = geo.rArray((2048, 2048))
+    img = r_array.copy()
+    x, y = core.bin_grid(img, r_array, (geo.pixel1, geo.pixel2))
+
+    assert_array_almost_equal(y, x, decimal=2)
+
+
 if __name__ == '__main__':
     import nose
+
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
