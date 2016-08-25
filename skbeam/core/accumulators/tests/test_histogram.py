@@ -5,6 +5,7 @@ from numpy.testing import assert_almost_equal
 from nose.tools import raises
 from skbeam.core.accumulators.histogram import Histogram
 from time import time
+import random
 
 
 def _1d_histogram_tester(binlowhighs, x, weights=1):
@@ -25,8 +26,12 @@ def test_1d_histogram():
     binlowhigh = [10, 0, 10.01]
     xf = np.random.random(1000000) * 40
     xi = xf.astype(int)
+    xl = xf.tolist()
     wf = np.linspace(1, 10, len(xf))
     wi = wf.copy()
+    wl = wf.tolist()
+    onexf = random.random()*binlowhigh[2]
+    onexi = int(onexf)
     vals = [
         [binlowhigh, xf, wf],
         [binlowhigh, xf, 1],
@@ -34,6 +39,11 @@ def test_1d_histogram():
         [binlowhigh, xi, 1],
         [binlowhigh, xf, wi],
         [binlowhigh, xi, wf],
+        [binlowhigh, xl, wl],
+        [binlowhigh, xi, wl],
+        [binlowhigh, xl, wi],
+        [binlowhigh, onexf,  1],
+        [binlowhigh, onexi, 1],
     ]
     for binlowhigh, x, w in vals:
         yield _1d_histogram_tester, binlowhigh, x, w
@@ -43,7 +53,11 @@ def _2d_histogram_tester(binlowhighs, x, y, weights=1):
     h = Histogram(*binlowhighs)
     h.fill(x, y, weights=weights)
     if np.isscalar(weights):
-        ynp = np.histogram2d(x, y, bins=h.edges)[0]
+        if np.isscalar(x):
+            assert np.isscalar(y), 'If x is a scalar, y must be also'
+            ynp = np.histogram2d([x], [y], bins=h.edges)[0]
+        else:
+            ynp = np.histogram2d(x, y, bins=h.edges)[0]
     else:
         ynp = np.histogram2d(x, y, bins=h.edges, weights=weights)[0]
     assert_array_almost_equal(ynp, h.values)
@@ -56,12 +70,19 @@ def _2d_histogram_tester(binlowhighs, x, y, weights=1):
 def test_2d_histogram():
     ten = [10, 0, 10.01]
     nine = [9, 0, 9.01]
-    xf = np.random.random(1000000) * 40
-    yf = np.random.random(1000000) * 40
+    onexf = random.random()*ten[2]
+    onexi = int(onexf)
+    oneyf = random.random()*ten[2]
+    oneyi = int(oneyf)
+    xf = np.random.random(1000000)*40
+    yf = np.random.random(1000000)*40
     xi = xf.astype(int)
     yi = yf.astype(int)
+    xl = xf.tolist()
+    yl = yf.tolist()
     wf = np.linspace(1, 10, len(xf))
     wi = wf.copy()
+    wl = wf.tolist()
     vals = [
         [[ten, ten], xf, yf, wf],
         [[ten, nine], xf, yf, 1],
@@ -69,7 +90,13 @@ def test_2d_histogram():
         [[ten, ten], xi, yi, 1],
         [[ten, nine], xf, yf, wi],
         [[ten, nine], xi, yi, wf],
-        [[ten, nine], xf, yi, wi],
+        [[ten, nine], xl, yl, wl],
+        [[ten, nine], xi, yi, wl],
+        [[ten, nine], xf, yf, wl],
+        [[ten, nine], xl, yl, wi],
+        [[ten, nine], xl, yl, wf],
+        [[ten, nine], onexf, oneyf, 1],
+        [[ten, nine], onexi, oneyi, 1],
     ]
     for binlowhigh, x, y, w in vals:
         yield _2d_histogram_tester, binlowhigh, x, y, w
