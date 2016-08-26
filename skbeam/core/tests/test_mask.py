@@ -111,7 +111,7 @@ def test_ring_blur_mask():
             # and dead pixels
             Z[a, b] = np.random.randint(low=0, high=10)
         pixels.append((a, b))
-    pixel_size = [getattr(g, a) for a in ['pixel1', 'pixel2']]
+    pixel_size = [getattr(g, k) for k in ['pixel1', 'pixel2']]
     rres = np.hypot(*pixel_size)
     bins = np.arange(np.min(r) - rres/2., np.max(r) + rres / 2., rres)
     msk = mask.ring_blur_mask(Z, r, (3., 3),  bins)
