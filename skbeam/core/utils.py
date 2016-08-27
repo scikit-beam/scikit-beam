@@ -1249,6 +1249,12 @@ def bin_grid(image, r_array, pixel_sizes, statistic='mean', mask=None,
         The center of each bin in R
     int_stat : array
         Radial integrated statistic of the image.
+
+    See Also
+    --------
+    circular_average : circularly average an image, assuming linear radial
+        spacing (less general)
+
     """
     if mask is None:
         mask = np.ones(image.shape, dtype=int).astype(bool)

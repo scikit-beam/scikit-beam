@@ -436,9 +436,8 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
     See Also
     --------
     bad_to_nan_gen : Create a mask with np.nan entries
-
-    Notes
-    -----
+    bin_grid : Bin and integrate an image, given the radial array of pixels
+        Useful for nonlinear spacing (Ewald curvature)
     """
     radial_val = utils.radial_grid(calibrated_center, image.shape, pixel_size)
 
