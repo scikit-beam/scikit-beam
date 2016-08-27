@@ -425,7 +425,7 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
         Right edge of last bin defaults to maximum value of x
     mask : mask for 2D data. Assumes 1 is non masked and 0 masked.
         None defaults to no mask.
-    
+
     Returns
     -------
     bin_centers : array
