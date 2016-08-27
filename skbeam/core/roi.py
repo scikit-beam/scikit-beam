@@ -456,7 +456,7 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
 
     bin_centers = utils.bin_edges_to_centers(bin_edges)[th_mask]
 
-    return bin_centers, ring_averages 
+    return bin_centers, ring_averages
 
 
 def kymograph(images, labels, num):
