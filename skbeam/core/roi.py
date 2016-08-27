@@ -399,7 +399,7 @@ def mean_intensity(images, labeled_array, index=None):
 
 
 def circular_average(image, calibrated_center, threshold=0, nx=100,
-                     pixel_size=(1, 1),  min_x=None, max_x=None):
+                     pixel_size=(1, 1),  min_x=None, max_x=None, mask=None):
     """Circular average of the the image data
     The circular average is also known as the radial integration
     Parameters
@@ -410,7 +410,7 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
         The center of the image in pixel units
         argument order should be (row, col)
     threshold : int, optional
-        Ignore counts above `threshold`
+        Ignore counts below `threshold`
         default is zero
     nx : int, optional
         number of bins in x
@@ -423,14 +423,28 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
         Left edge of first bin defaults to minimum value of x
     max_x : float, optional number of pixels
         Right edge of last bin defaults to maximum value of x
+    mask : mask for 2D data. Assumes 1 is non masked and 0 masked.
+        None defaults to no mask.
+
     Returns
     -------
     bin_centers : array
         The center of each bin in R. shape is (nx, )
     ring_averages : array
         Radial average of the image. shape is (nx, ).
+
+    See Also
+    --------
+    bad_to_nan_gen : Create a mask with np.nan entries
+    bin_grid : Bin and integrate an image, given the radial array of pixels
+        Useful for nonlinear spacing (Ewald curvature)
     """
     radial_val = utils.radial_grid(calibrated_center, image.shape, pixel_size)
+
+    if mask is not None:
+        w = np.where(mask == 1)
+        radial_val = radial_val[w]
+        image = image[w]
 
     bin_edges, sums, counts = utils.bin_1D(np.ravel(radial_val),
                                            np.ravel(image), nx,
