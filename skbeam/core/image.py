@@ -41,6 +41,7 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 from . import utils
 import logging
+from scipy.ndimage.filters import gaussian_filter
 logger = logging.getLogger(__name__)
 
 
@@ -170,3 +171,53 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None,
     CIMG = np.interp(radial_val, radii, intensities, right=0)
 
     return CIMG
+
+
+def gaussfill(img, mask, sigma=30, poisson=False, Navg=None):
+    """
+        Fill in masked regions with smoothing by Gaussian kernel.
+
+        Parameters
+        ----------
+        img : 2D numpy array
+            the input image
+
+        mask : 2D array
+            the mask (1 include, 0 exclude)
+
+        sigma : float, optional
+            the standard deviation for the Gaussian kernel (twice this should
+            be about the longest void in mask)
+
+        poisson : bool, optional
+            sample the intensity of the filled regions from a Poisson
+            distribution
+
+        Navg : int, optional
+            the number of images averaged to mimick for the Poissonization (if
+            True)
+
+        Returns
+        -------
+        imgf : the filled image
+
+        Notes
+        -----
+        Not all gaps may be filled with this method. Set a larger sigma to fill
+        in larger gaps, at the cost of loss of resolution.
+        To obtain new mask (not all pixels may be filled), it is
+        recommended to run the mask through this.
+    """
+    imgf = np.copy(img)*mask
+    imgg = gaussian_filter(img*mask, sigma)
+    imgmsk = gaussian_filter(mask*1., sigma)
+    imgmskrat = gaussian_filter(mask*0.+1, sigma)
+    w = np.where((mask < .1)*(imgmsk > 0))
+    imgf[w] = imgg[w]/imgmsk[w]*imgmskrat[w]
+    if poisson:
+        if Navg is None:
+            Navg = 1.
+        # some threshold since poisson doesnt work at high vals
+        imgf[w] = np.random.poisson(imgf[w]*(imgf[w] < 1e9)*Navg)/Navg
+
+    return imgf
