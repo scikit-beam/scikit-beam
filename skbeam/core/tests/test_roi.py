@@ -318,21 +318,28 @@ def test_circular_average():
                                                max_x=10, nx=None)
     assert_array_almost_equal(bin_cen1, [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5,
                                          7.5, 8.5])
+
     mask = np.ones_like(image)
     mask[4:6, 2:3] = 0
 
+    simg = np.zeros_like(image)
+    
     bin_cen_masked, ring_avg_masked = roi.circular_average(image,
                                                            calib_center,
                                                            min_x=0,
                                                            max_x=10,
                                                            nx=6,
-                                                           mask=mask)
+                                                           mask=mask,SIMG=simg)
 
     assert_array_almost_equal(bin_cen_masked, [0.83333333,  2.5, 4.16666667,
                               5.83333333,  7.5, 9.16666667])
 
     assert_array_almost_equal(ring_avg_masked, [8.88888889,  3.84615385,  2.5,
                               0.,  0.,  0.])
+
+    assert_array_almost_equal(simg[0], [ 0.,  0., 0.00357216,
+                             0.67225279,  1.10147073, 1.25, 1.10147073,
+                             0.67225279, 0.00357216,  0. , 0. ,  0.])
 
 
 def test_kymograph():
