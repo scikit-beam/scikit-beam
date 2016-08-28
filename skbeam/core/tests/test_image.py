@@ -8,6 +8,7 @@ from scipy.ndimage.morphology import binary_dilation
 import skbeam.core.image as nimage
 
 
+from numpy.testing import assert_array_almost_equal
 from nose.tools import assert_equal, assert_raises
 
 
