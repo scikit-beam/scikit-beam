@@ -2,11 +2,11 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 from skbeam.core import roi
 import numpy.random
+from numpy.testing import assert_array_almost_equal
 import skimage.draw as skd
 from scipy.ndimage.morphology import binary_dilation
 import skbeam.core.image as nimage
 
-from numpy.testing import assert_array_almost_equal
 
 from nose.tools import assert_equal, assert_raises
 
@@ -79,6 +79,18 @@ def test_construct_circ_avg_image():
     with assert_raises(ValueError):
         nimage.construct_circ_avg_image(bin_cen, ring_avg, center=calib_center,
                                         pixel_size=(2, 1))
+
+
+def test_gaussfill():
+    img = np.arange(100, dtype=float).reshape((10, 10))
+    mask = np.ones_like(img)
+    mask[4] = 0
+    img_s = nimage.gaussfill(img, mask, sigma=3)
+
+    assert_array_almost_equal(img_s[4], [43.07573008, 43.33184697, 43.81476674,
+                              44.47224713, 45.23831993, 46.04106681,
+                              46.80713961, 47.46462001, 47.94753977,
+                              48.20365666])
 
 
 if __name__ == '__main__':
