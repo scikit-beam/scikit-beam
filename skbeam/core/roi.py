@@ -459,7 +459,7 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
 
     # does not make sense if there is no mask
     if(SIMG is not None and mask is not None):
-        SIMGtmp =  np.zeros(SIMG.shape)
+        SIMGtmp = np.zeros(SIMG.shape)
         SIMGtmp = np.interp(radial_val, bin_centers, ring_averages)
         SIMG[w] = SIMGtmp
 
