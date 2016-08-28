@@ -91,6 +91,10 @@ def test_gaussfill():
                               44.47224713, 45.23831993, 46.04106681,
                               46.80713961, 47.46462001, 47.94753977,
                               48.20365666])
+    np.random.seed(13423)
+    img_s = nimage.gaussfill(img, mask, sigma=3, poisson=True, Navg=2)
+    assert_array_almost_equal(img_s[4], [45.5, 44., 39., 39., 44.5,
+                              47.5, 43., 34.5, 45., 53.])
 
 
 if __name__ == '__main__':
