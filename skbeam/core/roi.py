@@ -399,7 +399,8 @@ def mean_intensity(images, labeled_array, index=None):
 
 
 def circular_average(image, calibrated_center, threshold=0, nx=100,
-                     pixel_size=(1, 1),  min_x=None, max_x=None, mask=None):
+                     pixel_size=(1, 1),  min_x=None, max_x=None,
+                     mask=None, SIMG=None):
     """Circular average of the the image data
     The circular average is also known as the radial integration
     Parameters
@@ -425,6 +426,7 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
         Right edge of last bin defaults to maximum value of x
     mask : mask for 2D data. Assumes 1 is non masked and 0 masked.
         None defaults to no mask.
+    SIMG : a reference to the re-interpolated image (if desired)
 
     Returns
     -------
@@ -454,6 +456,14 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
     ring_averages = sums[th_mask] / counts[th_mask]
 
     bin_centers = utils.bin_edges_to_centers(bin_edges)[th_mask]
+
+    if(SIMG is not None):
+        SIMGtmp =  np.zeros(SIMG.shape)
+        SIMGtmp = np.interp(radial_val, bin_centers, ring_averages)
+        if mask is None:
+            np.copyto(SIMG,SIMGtmp)
+        else:
+            SIMG[w] = SIMGtmp
 
     return bin_centers, ring_averages
 
