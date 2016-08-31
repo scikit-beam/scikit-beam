@@ -479,9 +479,9 @@ def construct_circ_avg_image(radii, intensities, center=None, dims=None,
     dims : 2 tuple of floats, optional
         [dy, dx] (row, col)
         dy, dx are the dimensions in row,col format
-        If either center or dims are not set, it will assume the dimensions to be twice
-        the maximum radius and the center to be the center of the image:
-        (img.shape[0]-1)/2., (img.shape[1]-1)/2.)
+        If either center or dims are not set, it will assume the dimensions to
+        be twice the maximum radius and the center to be the center of the
+        image: (img.shape[0]-1)/2., (img.shape[1]-1)/2.)
 
     pixel_size : tuple, optional
         The size of a pixel (in a real unit, like mm).
@@ -512,9 +512,6 @@ def construct_circ_avg_image(radii, intensities, center=None, dims=None,
                           int(np.max(radii/pixel_size[1])+.5))
         dims = 2*maxr_y+1, 2*maxr_x+1
         center = maxr_y, maxr_x
-    else:
-        center = centerdims[0], centerdims[1]
-        dims = centerdims[2], centerdims[3]
 
     radial_val = utils.radial_grid(center, dims, pixel_size)
     CIMG = np.zeros(dims)

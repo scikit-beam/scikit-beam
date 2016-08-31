@@ -322,8 +322,6 @@ def test_circular_average():
     mask = np.ones_like(image)
     mask[4:6, 2:3] = 0
 
-    simg = np.zeros_like(image)
-
     bin_cen_masked, ring_avg_masked = roi.circular_average(image,
                                                            calib_center,
                                                            min_x=0,
@@ -336,6 +334,38 @@ def test_circular_average():
 
     assert_array_almost_equal(ring_avg_masked, [8.88888889,  3.84615385,  2.5,
                               0.,  0.,  0.])
+
+
+def test_construct_circ_avg_image():
+    # need to test with center and dims and without
+    # and test anisotropic pixels
+    image = np.zeros((12, 12))
+    calib_center = (2, 2)
+    inner_radius = 1
+
+    edges = roi.ring_edges(inner_radius, width=1, spacing=1, num_rings=2)
+    labels = roi.rings(edges, calib_center, image.shape)
+    image[labels == 1] = 10
+    image[labels == 2] = 10
+
+    bin_cen, ring_avg = roi.circular_average(image, calib_center, nx=6)
+
+    # check that the beam center and dims yield the circavg in the right place
+    cimg = roi.construct_circ_avg_image(bin_cen, ring_avg, dims=image.shape,
+                                        center=calib_center)
+    assert_array_almost_equal(cimg[2], np.array([5.0103283, 6.15384615,
+                              6.15384615, 6.15384615, 5.0103283, 3.79296498,
+                              2.19422113, 0.51063356, 0., 0., 0., 0.]))
+
+    # check that the default values center in the same place
+    cimg2 = roi.construct_circ_avg_image(bin_cen, ring_avg)
+
+    assert_array_almost_equal(cimg2[12], np.array([0., 0., 0., 0., 0.,
+                              0., 0., 0.51063356, 2.19422113, 3.79296498,
+                              5.0103283, 6.15384615, 6.15384615, 6.15384615,
+                              5.0103283, 3.79296498, 2.19422113, 0.51063356,
+                              0., 0., 0., 0., 0., 0., 0.]))
+
 
 def test_kymograph():
     calib_center = (25, 25)
