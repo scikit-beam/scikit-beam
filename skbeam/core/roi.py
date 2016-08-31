@@ -459,7 +459,7 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
     return bin_centers, ring_averages
 
 
-def construct_circ_avg_image(radii, intensities, centerdims=None,
+def construct_circ_avg_image(radii, intensities, center=None, dims=None,
                              pixel_size=(1, 1)):
     """ Constructs a 2D image from circular averaged data
         where radii are given in units of pixels.
@@ -472,14 +472,17 @@ def construct_circ_avg_image(radii, intensities, centerdims=None,
         the radii (must be in pixels)
     intensities : 1D array of floats
         the intensities for the radii
-    centerdims : 4 tuple of floats, optional
-        [y0, x0, dy, dx]
-        where y0, x0 is the center (in row,col format)
-        and dy, dx are the dimensions in row,col format
-
-        If it is not set, it will assume the dimensions to be twice
+    center: 2 tuple of floats, optional
+        [y0, x0] (row, col)
+        y0, x0 is the center (in row,col format)
+        dims also needs be set if using this option
+    dims : 2 tuple of floats, optional
+        [dy, dx] (row, col)
+        dy, dx are the dimensions in row,col format
+        If either center or dims are not set, it will assume the dimensions to be twice
         the maximum radius and the center to be the center of the image:
         (img.shape[0]-1)/2., (img.shape[1]-1)/2.)
+
     pixel_size : tuple, optional
         The size of a pixel (in a real unit, like mm).
         argument order should be (pixel_height, pixel_width)
@@ -503,7 +506,7 @@ def construct_circ_avg_image(radii, intensities, centerdims=None,
     Example
     -------
     """
-    if centerdims is None:
+    if center is None or dims is None:
         # round up, also take into account pixel size change
         maxr_y, maxr_x = (int(np.max(radii/pixel_size[0])+.5),
                           int(np.max(radii/pixel_size[1])+.5))
