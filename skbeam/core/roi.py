@@ -400,7 +400,7 @@ def mean_intensity(images, labeled_array, index=None):
 
 def circular_average(image, calibrated_center, threshold=0, nx=100,
                      pixel_size=(1, 1),  min_x=None, max_x=None,
-                     mask=None, SIMG=None):
+                     mask=None):
     """Circular average of the the image data
     The circular average is also known as the radial integration
     Parameters
@@ -426,7 +426,6 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
         Right edge of last bin defaults to maximum value of x
     mask : mask for 2D data. Assumes 1 is non masked and 0 masked.
         None defaults to no mask.
-    SIMG : a reference to the re-interpolated image (if desired)
 
     Returns
     -------
@@ -457,13 +456,68 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
 
     bin_centers = utils.bin_edges_to_centers(bin_edges)[th_mask]
 
-    # does not make sense if there is no mask
-    if(SIMG is not None and mask is not None):
-        SIMGtmp = np.zeros(SIMG.shape)
-        SIMGtmp = np.interp(radial_val, bin_centers, ring_averages)
-        SIMG[w] = SIMGtmp
-
     return bin_centers, ring_averages
+
+
+def construct_circ_avg_image(radii, intensities, centerdims=None,
+                             pixel_size=(1, 1)):
+    """ Constructs a 2D image from circular averaged data
+        where radii are given in units of pixels.
+        Normally, data will be taken from circular_average and used to
+        re-interpolate into an image.
+
+    Parameters
+    ----------
+    radii : 1D array of floats
+        the radii (must be in pixels)
+    intensities : 1D array of floats
+        the intensities for the radii
+    centerdims : 4 tuple of floats, optional
+        [y0, x0, dy, dx]
+        where y0, x0 is the center (in row,col format)
+        and dy, dx are the dimensions in row,col format
+
+        If it is not set, it will assume the dimensions to be twice
+        the maximum radius and the center to be the center of the image:
+        (img.shape[0]-1)/2., (img.shape[1]-1)/2.)
+    pixel_size : tuple, optional
+        The size of a pixel (in a real unit, like mm).
+        argument order should be (pixel_height, pixel_width)
+        default is (1, 1)
+
+    Returns
+    -------
+    IMG : the interpolated circular averaged image
+
+    See Also
+    --------
+    circular_average : compute circular average of an image
+    bin_grid : Bin and integrate an image, given the radial array of pixels
+        Useful for nonlinear spacing (Ewald curvature)
+
+    Notes
+    -----
+    Some pixels may not be filled if the dimensions chosen are too large.
+        Run this code again on a list of values equal to 1 to obtain a mask.
+
+    Example
+    -------
+    """
+    if centerdims is None:
+        # round up, also take into account pixel size change
+        maxr_y, maxr_x = (int(np.max(radii/pixel_size[0])+.5),
+                          int(np.max(radii/pixel_size[1])+.5))
+        dims = 2*maxr_y+1, 2*maxr_x+1
+        center = maxr_y, maxr_x
+    else:
+        center = centerdims[0], centerdims[1]
+        dims = centerdims[2], centerdims[3]
+
+    radial_val = utils.radial_grid(center, dims, pixel_size)
+    CIMG = np.zeros(dims)
+    CIMG = np.interp(radial_val, radii, intensities)
+
+    return CIMG
 
 
 def kymograph(images, labels, num):
