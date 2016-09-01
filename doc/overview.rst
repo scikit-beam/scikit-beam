@@ -1,6 +1,6 @@
-********
-Overview
-********
+======================
+ Project organization
+======================
 
 Here we describe a broad overview of the Scikit-Beam project and its parts.
 

@@ -1,8 +1,12 @@
-=============================
- :mod:`core.constants` Module
-=============================
+=====================================
+ :mod:`skbeam.core.constants` Module
+=====================================
+
+.. automodule:: skbeam.core.constants
+
 
 .. currentmodule:: skbeam.core.constants.basic
+
 
 Elemental data
 --------------
@@ -32,7 +36,7 @@ data.  For the most part users should access this data through the
    XrayLibWrap_Energy
    emission_line_search
    XrfElement
-   
+
 .. currentmodule:: skbeam.core.constants.xrs
 
 Powder Diffraction Standards

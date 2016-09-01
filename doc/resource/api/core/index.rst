@@ -18,5 +18,5 @@ Contents:
    recip
    roi
    spectroscopy
+   speckle
    utils
-

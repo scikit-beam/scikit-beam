@@ -2,16 +2,19 @@
 Complete Reference (API)
 ========================
 
-Contents:
+Core
+----
 
 .. toctree::
    :maxdepth: 2
 
+   core/index
+   io/index
+
+Domain name spaces
+------------------
+
+.. toctree::
+
    diffraction
    fluorescence
-   core/index
-   io/avizo_io
-   io/binary
-   io/gsas_file_reader
-   io/net_cdf_io
-   io/save_powder_output

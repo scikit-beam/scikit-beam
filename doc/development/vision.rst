@@ -1,4 +1,4 @@
-:orphan:
+.. _vision:
 
 
 Vision for a Common Python Package for x-ray, electron and neutrons

@@ -344,3 +344,5 @@ epub_copyright = u'2014-2015 Brookhaven National Lab'
 
 # If false, no index is generated.
 #epub_use_index = True
+
+default_role = 'py:any'

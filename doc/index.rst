@@ -1,77 +1,56 @@
-.. Skbeam documentation master file, created by
-   sphinx-quickstart on Tue Jul 26 02:59:34 2011.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 :tocdepth: 2
 
-######################################
-Scikit-beam Core Package Documentation
-######################################
+==================
+ Scikit-beam Core
+==================
 
-Welcome to the scikit-beam documentation! Scikit-beam is a
-community-driven package intended to contain much of the core
-functionality and some common tools needed for performing x-ray,
-electron, and neutron science with Python.
 
-.. _user-docs:
+The :ref:`vision<vision>` of `scikit-beam` is to provide simple
+functions useful for the X-ray, Neutron and Electron communities.  The
+primary goal of the scikit-beam project is to provide a centralized
+repository for algorithms that are used in these three scientific
+domains.  `scikit-beam` functions accept and return standard Python
+and numpy datatypes, so they integrate well with other packages from
+the scientific Python community.  Further, the modular design of
+scikit-beam allows its components to be easily reused in ways not
+envisioned by the authors.
 
-******************
-User Documentation
-******************
 
-**Skbeam at a glance**
+
+Scikit-beam is being developed at the National Synchrotron Light
+Source II at Brookhaven National Lab and also in collaboration with
+scientists at the LCLS-II and APS.
+
+
+Supported techniques
+====================
+
+* Differential Phase Contrast (:mod:`~skbeam.core.dpc`)
+* CDI (:mod:`~skbeam.core.cdi`)
+* MultiTau correlation (:mod:`~skbeam.core.correlation`)
+* X-Ray Speckle Visibility Spectroscopy (XSVS) (:mod:`~skbeam.core.speckle`)
+* X-ray Fluorescence  (:mod:`~skbeam.fluorescence`)
+* Fast histograms
+* Access to basic constants (:mod:`~skbeam.core.constants`)
+
+
+.. _installation:
+
+Installation
+============
 
 .. toctree::
    :maxdepth: 1
 
-   overview
    install
    getting_started
 
-**Core data structures and transformations**
 
-TODO
-
-**Connecting up: Files and I/O**
-
-TODO
-
-**Nuts and bolts of Skbeam**
-
-Documentation
--------------
-.. toctree::
-   :maxdepth: 1
-
-   logging
-   warnings
-
-
-**Skbeam project details**
-
-.. toctree::
-   :maxdepth: 1
-
-   stability
-   whatsnew/index
-   known_issues
-   credits
-   license
-
-.. _getting_help:
-
-************
-Getting help
-************
-
-TBD
 
 .. _reporting_issues:
 
-****************
 Reporting Issues
-****************
+================
 
 If you have found a bug in scikit-beam please report it. The preferred
 way is to create a new issue on the scikit-beam `GitHub issue page
@@ -85,11 +64,22 @@ also provide information about your operating system and a full Python
 stack trace; the Skbeam developers will walk you through obtaining a
 stack trace if it is necessary.
 
+API Docs
+--------
 
 
-************
+
+.. toctree::
+   :maxdepth: 3
+
+   resource/api/index
+
+
+.. _contributing:
+
+
 Contributing
-************
+============
 
 The scikit-beam project is made both by and for its users, so we
 highly encourage contributions at all levels.  This spans the gamut
@@ -112,9 +102,8 @@ necessary):
 
 .. _developer-docs:
 
-***********************
 Developer Documentation
-***********************
+=======================
 
 The developer documentation contains instructions for how to contribute to
 Skbeam or affiliated packages, as well as coding, documentation, and
@@ -124,6 +113,7 @@ as a whole, see :doc:`development/vision`.
 .. toctree::
    :maxdepth: 1
 
+   overview
    development/workflow/development_workflow
    development/codeguide
    development/docguide
@@ -135,11 +125,28 @@ as a whole, see :doc:`development/vision`.
    development/workflow/maintainer_workflow
    development/affiliated-packages
    development/python_versions
+   logging
+   warnings
+   development/vision
+   resource/dev_guide/index
+
+other
+=====
+.. toctree::
+   :maxdepth: 1
 
 
-******************
+.. toctree::
+   :maxdepth: 1
+
+   stability
+   whatsnew/index
+   known_issues
+   credits
+   license
+
 Indices and Tables
-******************
+==================
 
 * :ref:`genindex`
 * :ref:`modindex`

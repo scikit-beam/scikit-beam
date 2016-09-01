@@ -36,6 +36,8 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
+'''Constants
+'''
 from .basic import BasicElement
 from .xrs import calibration_standards
 from .xrf import XrfElement, emission_line_search
