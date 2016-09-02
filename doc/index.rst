@@ -34,7 +34,7 @@ Supported techniques
 * Access to basic constants (:mod:`~skbeam.core.constants`)
 
 
-.. _installation:
+.. _installation_tl:
 
 Installation
 ============
@@ -73,7 +73,6 @@ API Docs
    :maxdepth: 3
 
    resource/api/index
-
 
 .. _contributing:
 
@@ -124,11 +123,10 @@ as a whole, see :doc:`development/vision`.
    development/releasing
    development/workflow/maintainer_workflow
    development/affiliated-packages
-   development/python_versions
-   logging
-   warnings
    development/vision
    resource/dev_guide/index
+   api_changes
+   python_versions
 
 other
 =====
@@ -139,11 +137,9 @@ other
 .. toctree::
    :maxdepth: 1
 
-   stability
    whatsnew/index
    known_issues
-   credits
-   license
+
 
 Indices and Tables
 ==================

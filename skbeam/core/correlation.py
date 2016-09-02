@@ -249,6 +249,7 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
     namedtuple
         A `results` object is yielded after every image has been processed.
         This `reults` object contains, in this order:
+
         - `g2`: the normalized correlation
           shape is (len(lag_steps), num_rois)
         - `lag_steps`: the times at which the correlation was computed
@@ -261,6 +262,7 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
     is defined as
 
     .. math::
+
         g_2(q, t') = \\frac{<I(q, t)I(q, t + t')> }{<I(q, t)>^2}
 
         t' > 0
@@ -274,10 +276,12 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
 
     References
     ----------
+
     .. [1] D. Lumma, L. B. Lurio, S. G. J. Mochrie and M. Sutton,
-        "Area detector based photon correlation in the regime of
-        short data batches: Data reduction for dynamic x-ray
-        scattering," Rev. Sci. Instrum., vol 71, p 3274-3289, 2000.
+       "Area detector based photon correlation in the regime of
+       short data batches: Data reduction for dynamic x-ray
+       scattering," Rev. Sci. Instrum., vol 71, p 3274-3289, 2000.
+
     """
 
     if internal_state is None:
@@ -441,7 +445,7 @@ def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1):
 
 def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
                   two_time_internal_state=None):
-    """ Generator implementation of two-time correlation
+    """Generator implementation of two-time correlation
 
     If you do not want multi-tau correlation, set num_levels to 1 and
     num_bufs to the number of images you wish to correlate
@@ -450,8 +454,11 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
     inexpensively by downsampling the data, iteratively combining successive
     frames.
 
-    The longest lag time computed is num_levels * num_bufs.
-    ** see comments on multi_tau_auto_corr
+    The longest lag time computed is ``num_levels * num_bufs``.
+
+    See Also
+    --------
+    comments on `multi_tau_auto_corr`
 
     Parameters
     ----------
@@ -476,6 +483,7 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
     namedtuple
         A ``results`` object is yielded after every image has been processed.
         This `reults` object contains, in this order:
+
         - ``g2``: the normalized correlation
           shape is (num_rois, len(lag_steps), len(lag_steps))
         - ``lag_steps``: the times at which the correlation was computed
@@ -498,13 +506,16 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
     on the time difference ``t``, and hence the two-time correlation contour
     lines are parallel.
 
+    [1]_
+
     References
     ----------
 
-    .. [1]
-        A. Fluerasu, A. Moussaid, A. Mandsen and A. Schofield, "Slow dynamics
-        and aging in collodial gels studied by x-ray photon correlation
-        spectroscopy," Phys. Rev. E., vol 76, p 010401(1-4), 2007.
+    .. [1] A. Fluerasu, A. Moussaid, A. Mandsen and A. Schofield,
+       "Slow dynamics and aging in collodial gels studied by x-ray
+       photon correlation spectroscopy," Phys. Rev. E., vol 76, p
+       010401(1-4), 2007.
+
     """
     if two_time_internal_state is None:
         two_time_internal_state = _init_state_two_time(num_levels, num_bufs,

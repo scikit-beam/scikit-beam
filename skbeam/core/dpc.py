@@ -203,8 +203,7 @@ dpc_fit.solver = ['Nelder-Mead', 'Powell', 'CG', 'BFGS', 'Anneal', 'L-BFGS-B',
 
 
 def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
-    """
-    Reconstruct the final phase image.
+    """Reconstruct the final phase image.
 
     Parameters
     ----------
@@ -221,9 +220,13 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
         Scanning step size in y direction (in micro-meter).
 
     padding : int, optional
-        Pad a N-by-M array to be a (N*(2*padding+1))-by-(M*(2*padding+1)) array
-        with the image in the middle with a (N*padding, M*padding) thick edge
+
+        Pad a N-by-M array to be a
+        ``(N*(2*padding+1))``-by-``(M*(2*padding+1))`` array with the
+        image in the middle with a (N*padding, M*padding) thick edge
         of zeros. Default is 0.
+
+
         padding = 0 --> v (the original image, size = (N, M))
                         0 0 0
         padding = 1 --> 0 v 0 (the padded image, size = (3 * N, 3 * M))
@@ -451,9 +454,12 @@ def reconstruct_phase_from_partial_info(dpc_state, energy, scan_xstep,
         If True, scale gx and gy according to the experiment set up.
         If False, ignore pixel_size, focus_to_det, energy. Default is True.
     padding : int, optional
-        Pad a N-by-M array to be a (N*(2*padding+1))-by-(M*(2*padding+1)) array
-        with the image in the middle with a (N*padding, M*padding) thick edge
-        of zeros. Default is 0.
+
+        Pad a N-by-M array to be a
+        ``(N*(2*padding+1))``-by-``(M*(2*padding+1))`` array with the image in
+        the middle with a (N*padding, M*padding) thick edge of
+        zeros. Default is 0.
+
         padding = 0 --> v (the original image, size = (N, M))
                         0 0 0
         padding = 1 --> 0 v 0 (the padded image, size = (3 * N, 3 * M))
@@ -470,6 +476,7 @@ def reconstruct_phase_from_partial_info(dpc_state, energy, scan_xstep,
         The final reconstructed phase image.
     amplitude : ndarray
         Amplitude of the sample transmission function.
+
     """
     if weighting < 0 or weighting > 1:
         raise ValueError('weighting should be within the range of [0, 1]!')

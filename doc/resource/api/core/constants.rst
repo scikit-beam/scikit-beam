@@ -9,7 +9,7 @@
 
 
 Elemental data
---------------
+==============
 Tools for working with elemental constants.
 
 .. autosummary::
@@ -21,7 +21,7 @@ Tools for working with elemental constants.
 .. currentmodule:: skbeam.core.constants.xrf
 
 X-ray fluorescence data
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
 The c library `xraylib <https://github.com/tschoonj/xraylib/wiki>`__
 provides a programmatic interface to x-ray fluorescence constants.  We
@@ -40,7 +40,7 @@ data.  For the most part users should access this data through the
 .. currentmodule:: skbeam.core.constants.xrs
 
 Powder Diffraction Standards
-----------------------------
+============================
 
 
 .. autosummary::
@@ -58,7 +58,7 @@ Powder Diffraction Standards
 
 
 Converting :math:`2\theta` between wavelengths
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------
 Given that
 
     .. math ::

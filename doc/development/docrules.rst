@@ -1,9 +1,9 @@
 .. doctest-skip-all
 .. _doc-rules:
 
-=======================
-Scikit-beam Docstring Rules
-=======================
+=============================
+ Scikit-beam Docstring Rules
+=============================
 
 The original source for these docstring standards is the Skbeam_ project, and
 the associated numpydoc_ tools. The most up-to-date version of these standards
@@ -13,7 +13,7 @@ guidelines below have been adapted to the Scikit-beam package.
 
 
 Overview
---------
+========
 We mostly follow the standard Python style conventions as described here:
  * `Style Guide for C Code <http://python.org/dev/peps/pep-0007/>`_
  * `Style Guide for Python Code <http://python.org/dev/peps/pep-0008/>`_
@@ -53,7 +53,7 @@ after which you may use it::
   np.fft.fft2(...)
 
 Docstring Standard
-------------------
+==================
 A documentation string (docstring) is a string that describes a module,
 function, class, or method definition.  The docstring is a special attribute
 of the object (``object.__doc__``) and, for consistency, is surrounded by
@@ -69,11 +69,11 @@ NumPy, SciPy_, and the scikits follow a common convention for
 docstrings that provides for consistency, while also allowing our
 toolchain to produce well-formatted reference guides.  This document
 describes the current community consensus for such a standard.  If you
-have suggestions for improvements, post them on the `numpy-discussion
-list`_.
+have suggestions for improvements, post them on the numpy-discussion
+list.
 
 Our docstring standard uses `re-structured text (reST)
-<http://docutils.sourceforge.net/rst.html>`_ syntax and is rendered
+<http://docutils.sourceforge.net/rst.html>`__ syntax and is rendered
 using Sphinx_ (a pre-processor that understands the particular
 documentation style we are using).  While a rich set of
 markup is available, we limit ourselves to a very basic subset, in
@@ -89,7 +89,7 @@ The length of docstring lines should be kept to 75 characters to
 facilitate reading the docstrings in text terminals.
 
 Sections
---------
+========
 The sections of the docstring are:
 
 1. **Short summary**
@@ -245,7 +245,7 @@ The sections of the docstring are:
          Human readable error message, or None on success.
 
    Support for the **Yields** section was added in `numpydoc
-   <https://github.com/numpy/numpydoc>`_ version 0.6.
+   <https://github.com/numpy/numpydoc>`__ version 0.6.
 
 7. **Other Parameters**
 
@@ -433,10 +433,10 @@ The sections of the docstring are:
 
 
 Documenting classes
--------------------
+===================
 
 Class docstring
-```````````````
+---------------
 Use the same sections as outlined above (all except ``Returns`` are
 applicable).  The constructor (``__init__``) should also be documented
 here, the **Parameters** section of the docstring details the constructors
@@ -497,7 +497,7 @@ Do not list private methods in the **methods** section.
 Note that `self` is *not* listed as the first parameter of methods.
 
 Method docstrings
-`````````````````
+-----------------
 Document these as you would any other function.  Do not include
 ``self`` in the list of parameters.  If a method has an equivalent function
 (which is the case for many ndarray methods for example), the function
@@ -508,7 +508,7 @@ as appropriate.
 
 
 Documenting class instances
----------------------------
+===========================
 Instances of classes that are part of the Skbeam API (for example `np.r_`
 `np,c_`, `np.index_exp`, etc.) may require some care. To give these
 instances a useful docstring, we do the following:
@@ -524,15 +524,15 @@ instances a useful docstring, we do the following:
 
 
 Documenting generators
-----------------------
+======================
 Generators should be documented just as functions are documented. The
 only difference is that one should use the **Yields** section instead
 of the **Returns** section. Support for the **Yields** section was added in
-`numpydoc <https://github.com/numpy/numpydoc>`_ version 0.6.
+`numpydoc <https://github.com/numpy/numpydoc>`__ version 0.6.
 
 
 Documenting constants
----------------------
+=====================
 Use the same sections as outlined for functions where applicable::
 
    1. summary
@@ -548,7 +548,7 @@ documentation built with Sphinx.
 
 
 Documenting modules
--------------------
+===================
 Each module should have a docstring with at least a summary line. Other
 sections are optional, and should be used in the same order as for documenting
 functions when they are appropriate::
@@ -570,7 +570,7 @@ belong in docstrings.
 
 
 Other points to keep in mind
-----------------------------
+============================
 * Equations : as discussed in the **Notes** section above, LaTeX formatting
   should be kept to a minimum.  Often it's possible to show equations as
   Python code or pseudo-code instead, which is much more readable in a
@@ -600,7 +600,7 @@ Other points to keep in mind
   with type `array_like`.
 
 Common reST concepts
---------------------
+====================
 For paragraphs, indentation is significant and indicates indentation in the
 output. New paragraphs are marked with a blank line.
 
@@ -620,7 +620,7 @@ Line spacing and indentation are significant and should be carefully
 followed.
 
 Conclusion
-----------
+==========
 
 `An example <http://github.com/numpy/numpy/blob/master/doc/example.py>`_ of the
 format shown here is available.  Refer to `How to Build API/Reference
@@ -639,3 +639,4 @@ HTML using::
 .. _Matplotlib: http://matplotlib.org
 .. _SciPy: http://www.scipy.org
 .. _Sphinx: http://sphinx.pocoo.org
+.. _Skbeam: http://scikit-beam.github.io/scikit-beam/

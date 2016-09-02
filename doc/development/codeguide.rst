@@ -1,5 +1,7 @@
 .. doctest-skip-all
 .. _code-guide:
+.. |minimum_numpy_version| replace:: ``1.10``
+
 
 =================
 Coding Guidelines
@@ -757,3 +759,4 @@ Further tips and hints relating to the coding guidelines are included below.
 .. _matplotlib: http://matplotlib.org
 .. _Cython: http://cython.org/
 .. _PyPI: http://pypi.python.org/pypi
+.. _2to3: https://docs.python.org/3.5/library/2to3.html

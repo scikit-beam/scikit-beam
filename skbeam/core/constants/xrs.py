@@ -66,12 +66,6 @@ class HKL(namedtuple('HKL', 'h k l')):
     k : int
     l : int
 
-    Attributes
-    ----------
-    length
-    h
-    k
-    l
     '''
     __slots__ = ()
 
@@ -105,11 +99,6 @@ class Reflection(namedtuple('Reflection', ('d', 'hkl', 'q'))):
     q : float
         q-value of the reflection
 
-    Attributes
-    ----------
-    d
-    HKL
-    q
     """
     __slots__ = ()
 

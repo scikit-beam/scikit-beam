@@ -140,11 +140,6 @@ class XrayLibWrap(Mapping):
         :jump: absorption jump factor
         :yield: fluorescence yield
 
-    Attributes
-    ----------
-    info_type : str
-
-
     Examples
     --------
     Access the lines for zinc
@@ -233,11 +228,6 @@ class XrayLibWrap_Energy(XrayLibWrap):
     to perform calculation on fluorescence
     cross section, or other incident energy
     related quantity.
-
-    Attributes
-    ----------
-    incident_energy : float
-    info_type : str
 
     Parameters
     ----------
@@ -398,13 +388,11 @@ class XrfElement(BasicElement):
     __doc__ = """{}
     Parameters
     ----------{}
-    Attributes
-    ----------{}
+
     Examples
     --------{}
     """.format(doc_title,
                doc_params,
-               doc_attrs,
                doc_ex)
 
     def __init__(self, element):

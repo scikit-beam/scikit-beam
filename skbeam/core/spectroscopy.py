@@ -93,7 +93,7 @@ def find_largest_peak(x, y, window=None):
     the counts.
 
     The region around the peak can be approximated by
-    Y = Y0 * exp(- (X - X0)**2 / (2 * sigma **2))
+    :math:`Y = Y0 * exp(- (X - X0)**2 / (2 * sigma **2))`
 
     Parameters
     ----------

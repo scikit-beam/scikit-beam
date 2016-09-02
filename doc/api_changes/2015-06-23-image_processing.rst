@@ -1,5 +1,6 @@
-Image Processing: Arithmetic changes
------------------------
+======================================
+ Image Processing: Arithmetic changes
+======================================
 Changed the name of the package folder img_proc to image_processing for
 explicit clarity for users.
 Changed the name of module mathops.py to arithmetic.py since this module

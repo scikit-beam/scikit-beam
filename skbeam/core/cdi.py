@@ -241,7 +241,7 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
     Run reconstruction with difference map algorithm.
 
     Parameters
-    ---------
+    ----------
     diffracted_pattern : array
         diffraction pattern from experiments
     sample_obj : array

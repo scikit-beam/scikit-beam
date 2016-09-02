@@ -1,6 +1,8 @@
-************
-Installation
-************
+.. |minimum_numpy_version| replace:: 1.10
+
+==============
+ Installation
+==============
 
 Requirements
 ============
@@ -101,7 +103,7 @@ at `PyPI <https://pypi.python.org/pypi/scikit-beam>`_.
 
 
 Testing an installed Scikit-Beam
-----------------------------
+--------------------------------
 
 The easiest way to test your installed version of scikit-beam is running
 correctly is to use the :ref:`scikit-beam.test()` function::
@@ -166,13 +168,13 @@ Obtaining the source packages
 -----------------------------
 
 Source packages
-^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~
 
 The latest stable source package for Scikit-beam can be `downloaded here
 <https://pypi.python.org/pypi/scikit-beam>`_.
 
 Development repository
-^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~
 
 The latest development version of Scikit-beam can be cloned from github
 using this command::
@@ -221,7 +223,7 @@ which will install into a default directory in your home directory.
 
 
 External C libraries
-^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~
 
 The Scikit-beam source ships with the C source code of a number of
 libraries.  By default, these internal copies are used to build
@@ -252,7 +254,7 @@ the system `libexpat <http://www.libexpat.org/>`_, add the following to the
 
 
 The required version of setuptools is not available
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If upon running the ``setup.py`` script you get a message like
 
@@ -281,7 +283,7 @@ ask on the Scikit-beam mailing list.
 
 
 The Windows installer can't find Python in the registry
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This is a common issue with Windows installers for Python packages that do not
 support the new User Access Control (UAC) framework added in Windows Vista and

@@ -10,7 +10,7 @@ Scientific Algorithms
 
 .. autosummary::
    :toctree: generated/
-   
+
    cdi.cdi_recon
    correlation.multi_tau_auto_corr
    dpc.recon
@@ -48,7 +48,7 @@ Peak fitting
 ~~~~~~~~~~~~
 .. autosummary::
    :toctree: generated/
-   
+
    feature.peak_refinement
    feature.refine_quadratic
    feature.refine_log_quadratic
@@ -59,7 +59,7 @@ Peak finding
 ~~~~~~~~~~~~
 .. autosummary::
    :toctree: generated/
-   
+
    image.find_ring_center_acorr_1D
    spectroscopy.find_largest_peak
 
@@ -97,22 +97,22 @@ Helper functions
 
 Generating ROIs
 ---------------
+.. automodule:: skbeam.core.arithmetic
+
 .. autosummary::
    :toctree: generated/
 
-   roi.roi_kymograph
+   roi.kymograph
    roi.circular_average
-   roi.combine_mean_intensity
    roi.mean_intensity
-   roi.mean_intensity_sets
    roi.roi_pixel_values
    roi.roi_max_counts
    roi.segmented_rings
    roi.ring_edges
    roi.rings
    roi.rectangles
-   
-   
+
+
 Physical relations
 ------------------
 .. autosummary::
@@ -129,18 +129,21 @@ Physical relations
 
 Boolean Logic
 -------------
+.. automodule:: skbeam.core.arithmetic
+
 .. autosummary::
    :toctree: generated/
-   
-    arithmetic.logical_nand
-    arithmetic.logical_nor
-    arithmetic.logical_sub
+
+    logical_nand
+    logical_nor
+    logical_sub
 
 Calibration
 -----------
+.. automodule:: skbeam.core.calibration
+
 .. autosummary::
    :toctree: generated/
-   
-   utils.estimate_d_blind
-   utils.refine_center
-   
+
+   calibration.estimate_d_blind
+   calibration.refine_center

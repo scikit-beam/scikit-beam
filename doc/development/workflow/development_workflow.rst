@@ -1,8 +1,8 @@
 .. _development-workflow:
 
-===============================
-How to make a code contribution
-===============================
+=================================
+ How to make a code contribution
+=================================
 
 This document outlines the process for contributing code to the Scikit-beam
 project.
@@ -120,7 +120,7 @@ walks you through recovering from `git`_ mistakes is the
 .. _scikit-beam-git:
 
 Scikit-beam Guidelines for `git`_
-=============================
+=================================
 
 * Don't use your ``master`` branch for anything.
 * Make a new branch, called a *feature branch*, for each separable set of
@@ -172,7 +172,7 @@ Some additional topics related to `git`_ are in :ref:`additional-git`.
 .. _fetch-latest:
 
 Fetch the latest Scikit-beam
-========================
+============================
 
 From time to time you should fetch the development version (i.e. Scikit-beam
 ``scikit-beam/master``) changes from GitHub::

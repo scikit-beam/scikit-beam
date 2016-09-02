@@ -372,8 +372,9 @@ def mean_intensity(images, labeled_array, index=None):
     mean_intensity : array
         The mean intensity of each ROI for all `images`
         Dimensions:
-            len(mean_intensity) == len(index)
-            len(mean_intensity[0]) == len(images)
+
+          -  len(mean_intensity) == len(index)
+          -  len(mean_intensity[0]) == len(images)
     index : list
         The labels for each element of the `mean_intensity` list
     """
@@ -399,9 +400,10 @@ def mean_intensity(images, labeled_array, index=None):
 
 
 def circular_average(image, calibrated_center, threshold=0, nx=100,
-                     pixel_size=(1, 1),  min_x=None, max_x=None, mask=None):
+                     pixel_size=(1, 1), min_x=None, max_x=None, mask=None):
     """Circular average of the the image data
     The circular average is also known as the radial integration
+
     Parameters
     ----------
     image : array

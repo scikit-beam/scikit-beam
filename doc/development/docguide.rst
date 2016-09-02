@@ -1,8 +1,8 @@
 .. _documentation-guidelines:
 
-=====================
-Writing Documentation
-=====================
+=======================
+ Writing Documentation
+=======================
 
 High-quality, consistent documentation for the science code is one of
 the major goals of the Scikit-beam project.  Hence, we describe our
@@ -15,14 +15,14 @@ often lacking in scientific software.)
 
 
 Building the Documentation from source
---------------------------------------
+======================================
 
 For information about building the documentation from source, see
 the :ref:`builddocs` section in the installation instructions.
 
 
 Scikit-beam Documentation Rules and Guidelines
-------------------------------------------
+==============================================
 
 This section describes the standards for documentation format affiliated
 packages that must follow for consideration of integration into the core
@@ -57,7 +57,7 @@ The details of the docstring format are described on a separate page:
 
 
 numpydoc Extension
-^^^^^^^^^^^^^^^^^^
+------------------
 This extension (and some related extensions) are a port of the
 `numpydoc <http://pypi.python.org/pypi/numpydoc/0.3.1>`_ extension
 written by the NumPy_ and SciPy_, projects, with some tweaks for

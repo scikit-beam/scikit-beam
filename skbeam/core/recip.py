@@ -267,28 +267,29 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
     namedtuple
         `gisaxs_output` object is returned
         This `gisaxs_output` object contains, in this order:
+
         - alpha_i : float
-            incident angle
+          incident angle
         - theta_f : array
-            out of plane angle
-            shape (detector_size[0], detector_size[1])
+          out of plane angle
+          shape (detector_size[0], detector_size[1])
         - alpha_f : array
-            exit angle
-            shape (detector_size[0], detector_size[1])
+          exit angle
+          shape (detector_size[0], detector_size[1])
         - tilt_angle : float
-            tilt angle
+          tilt angle
         - qx : array
-            x component of the scattering wave vector
-            shape (detector_size[0], detector_size[1])
+          x component of the scattering wave vector
+          shape (detector_size[0], detector_size[1])
         - qy : array
-            y component of the scattering wave vector
-            shape (detector_size[0], detector_size[1])
+          y component of the scattering wave vector
+          shape (detector_size[0], detector_size[1])
         - qz : array
-            z component of the scattering wave vector
-            shape (detector_size[0], detector_size[1])
+          z component of the scattering wave vector
+          shape (detector_size[0], detector_size[1])
         - qr : array
-            q parallel component
-            shape (detector_size[0], detector_size[1])
+          q parallel component
+          shape (detector_size[0], detector_size[1])
 
     Notes
     -----
@@ -297,8 +298,8 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
     References
     ----------
     .. [1] R. Lazzari, "IsGISAXS: a program for grazing-incidence small-
-        angle X-ray scattering analysis of supported islands," J. Appl.
-        Cryst., vol 35, p 406-421, 2002.
+       angle X-ray scattering analysis of supported islands," J. Appl.
+       Cryst., vol 35, p 406-421, 2002.
     """
     inc_x, inc_y = incident_beam
     refl_x, refl_y = reflected_beam

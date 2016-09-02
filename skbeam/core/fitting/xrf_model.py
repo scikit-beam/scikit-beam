@@ -973,6 +973,7 @@ class ModelSpectrum(object):
 
 def get_line_energy(elemental_line):
     """Return the energy of the first line in K, L or M series.
+
     Parameters
     ----------
     elemental_line : str
@@ -1356,10 +1357,12 @@ def _log_and_fit(row_num, *args):
     logger.info('Row number at {}'.format(row_num))
     return fit_per_line_nnls(*args)
 
+
 def fit_pixel_multiprocess_nnls(exp_data, matv, param,
                                 use_snip=False):
     """
     Multiprocess fit of experiment data.
+
     Parameters
     ----------
     exp_data : array

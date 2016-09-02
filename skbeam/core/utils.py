@@ -1051,20 +1051,20 @@ def d_to_q(d):
 
 
 def q_to_twotheta(q, wavelength):
-    """
+    r"""
     Helper function to convert q to two-theta.
 
     By definition the relationship is:
 
     ..math ::
 
-        \\sin\\left(\\frac{2\\theta}{2}\right) = \\frac{\\lambda q}{4 \\pi}
+        \sin\left(\frac{2\theta}{2}\right) = \frac{\lambda q}{4 \pi}
 
     thus
 
     ..math ::
 
-        2\\theta_n = 2 \\arcsin\\left(\\frac{\\lambda q}{4 \\pi}\\right
+        2\theta_n = 2 \arcsin\left(\frac{\lambda q}{4 \pi}\right
 
     Parameters
     ----------
@@ -1077,9 +1077,7 @@ def q_to_twotheta(q, wavelength):
     Returns
     -------
     two_theta : array
-        An array of :math:`2\\theta` values
-
-
+        An array of :math:`2\theta` values
     """
     q = np.asarray(q)
     wavelength = float(wavelength)
@@ -1088,25 +1086,27 @@ def q_to_twotheta(q, wavelength):
 
 
 def twotheta_to_q(two_theta, wavelength):
-    """
+    r"""
     Helper function to convert two-theta to q
 
-    By definition the relationship is:
+    By definition the relationship is
 
     ..math ::
 
-        \\sin\\left(\\frac{2\\theta}{2}\right) = \\frac{\\lambda q}{4 \\pi}
+        \sin\left(\frac{2\theta}{2}\right) = \frac{\lambda q}{4 \pi}
 
     thus
 
     ..math ::
 
-        q = \\frac{4 \\pi \\sin\\left(\\frac{2\\theta}{2}\right)}{\\lambda}
+        q = \frac{4 \pi \sin\left(\frac{2\theta}{2}\right)}{\lambda}
+
+
 
     Parameters
     ----------
     two_theta : array
-        An array of :math:`2\\theta` values
+        An array of :math:`2\theta` values
 
     wavelength : float
         Wavelength of the incoming x-rays

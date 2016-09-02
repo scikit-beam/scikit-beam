@@ -1,6 +1,6 @@
-****************************
-Getting Started with Scikit-beam
-****************************
+==================================
+ Getting Started with Scikit-beam
+==================================
 
 Importing scikit-beam
 =====================

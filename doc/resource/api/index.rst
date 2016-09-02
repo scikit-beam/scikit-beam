@@ -10,6 +10,7 @@ Core
 
    core/index
    io/index
+   core
 
 Domain name spaces
 ------------------

@@ -1,6 +1,6 @@
-====================================
-Building Scikit-beam and its Subpackages
-====================================
+==========================================
+ Building Scikit-beam and its Subpackages
+==========================================
 
 The build process currently uses the `setuptools
 <https://bitbucket.org/pypa/setuptools>`_ package to build and install the
@@ -8,7 +8,7 @@ scikit-beam core (and any affiliated packages that use the template).
 
 
 Customizing setup/build for subpackages
----------------------------------------
+=======================================
 
 As is typical, there is a single ``setup.py`` file that is used for the whole
 ``scikit-beam`` package.  To customize setup parameters for a given sub-package, a

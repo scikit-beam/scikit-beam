@@ -269,8 +269,9 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 
-intersphinx_mapping = {'python': ('http://docs.python.org/2.7', None),
-                       'numpy': ('http://docs.scipy.org/doc/numpy',None),
+intersphinx_mapping = {'python': ('http://docs.python.org/3.5', None),
+                       'numpy': ('http://docs.scipy.org/doc/numpy', None),
+                       'matplotlib': ('http://matplotlib.org', None)
                        }
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
@@ -345,4 +346,4 @@ epub_copyright = u'2014-2015 Brookhaven National Lab'
 # If false, no index is generated.
 #epub_use_index = True
 
-default_role = 'py:any'
+default_role = 'any'

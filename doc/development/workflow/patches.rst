@@ -40,7 +40,7 @@ Then, the workflow is the following::
    # Make the patch files
    git format-patch -M -C master
 
-Then, send the generated patch files to the `scikit-beam-dev mailing list`_ |emdash|
+Then, send the generated patch files to the scikit-beam-dev mailing list |emdash|
 where we will thank you warmly.
 
 In detail
@@ -102,7 +102,7 @@ In detail
       0001-BF-added-tests-for-Funny-bug.patch
       0002-BF-added-fix-for-Funny-bug.patch
 
-   Send these files to the `scikit-beam-dev mailing list`_.
+   Send these files to the scikit-beam-dev mailing list.
 
 When you are done, to switch back to the main copy of the
 code, just return to the ``master`` branch::

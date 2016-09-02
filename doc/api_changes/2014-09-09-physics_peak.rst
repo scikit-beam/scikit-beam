@@ -1,5 +1,6 @@
-Changes
-----
+=========
+ Changes
+=========
 - changed function arguments, including add center positions, and put independent variable x as first argument to function
 
 from ::
@@ -10,7 +11,7 @@ to::
 
   def gauss_peak(x, area, center, sigma)
 
-- from ::
+from ::
 
   gauss_step(area, sigma, dx, peak_e)
 
