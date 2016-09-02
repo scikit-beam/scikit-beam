@@ -459,7 +459,7 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
     return bin_centers, ring_averages
 
 
-def construct_circ_avg_image(radii, intensities, center=None, dims=None,
+def construct_circ_avg_image(radii, intensities, dims=None, center=None,
                              pixel_size=(1, 1)):
     """ Constructs a 2D image from circular averaged data
         where radii are given in units of pixels.
@@ -472,17 +472,16 @@ def construct_circ_avg_image(radii, intensities, center=None, dims=None,
         the radii (must be in pixels)
     intensities : 1D array of floats
         the intensities for the radii
+    dims : 2 tuple of floats, optional
+        [dy, dx] (row, col)
+        dy, dx are the dimensions in row,col format If the dims are not set, it
+        will assume the dimensions to be (2*maxr+1) where maxr is the maximum
+        radius. Note in the case of rectangular pixels (pixel_size not 1:1)
+        that the `maxr' value will be different in each dimension
     center: 2 tuple of floats, optional
         [y0, x0] (row, col)
         y0, x0 is the center (in row,col format)
-        dims also needs be set if using this option
-    dims : 2 tuple of floats, optional
-        [dy, dx] (row, col)
-        dy, dx are the dimensions in row,col format
-        If either center or dims are not set, it will assume the dimensions to
-        be twice the maximum radius and the center to be the center of the
-        image: (img.shape[0]-1)/2., (img.shape[1]-1)/2.)
-
+        if not centered, assumes center is (dims[0]-1)/2., (dims[1]-1)/2.
     pixel_size : tuple, optional
         The size of a pixel (in a real unit, like mm).
         argument order should be (pixel_height, pixel_width)
@@ -506,12 +505,17 @@ def construct_circ_avg_image(radii, intensities, center=None, dims=None,
     Example
     -------
     """
-    if center is None or dims is None:
+    if dims is None:
         # round up, also take into account pixel size change
         maxr_y, maxr_x = (int(np.max(radii/pixel_size[0])+.5),
                           int(np.max(radii/pixel_size[1])+.5))
         dims = 2*maxr_y+1, 2*maxr_x+1
-        center = maxr_y, maxr_x
+    if center is None:
+        if dims is None:
+            print("Error: Specifying a dims but not a center does not make"
+                  " sense and may lead to unexpected results. Exiting")
+            raise ValueError
+        center = (dims[0]-1)/2., (dims[1] - 1)/2.
 
     radial_val = utils.radial_grid(center, dims, pixel_size)
     CIMG = np.zeros(dims)
