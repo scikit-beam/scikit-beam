@@ -7,12 +7,10 @@ describe the function
 Change API of img_to_relative_xyi
 ---------------------------------
 
-- from ::
+from ::
 
   def img_to_relative_xyi(img, calibrated_center, pixel_size=None, **kwargs)
 
-  to::
+to::
 
   def img_to_relative_xyi(img, cx, cy, pixel_size_x=None, pixel_size_y=None):
-
-

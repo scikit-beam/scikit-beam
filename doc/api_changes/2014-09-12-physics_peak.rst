@@ -7,7 +7,7 @@ Changes
 
   elastic_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime, area, epsilon=2.96)
 
-  to ::
+to ::
 
   elastic_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime, coherent_sct_amplitude, epsilon=2.96)
 
@@ -19,7 +19,7 @@ Changes
                    compton_hi_f_tail, compton_hi_gamma,
                    area, epsilon=2.96, matrix=False)
 
-  to ::
+to ::
 
   def compton_peak(x, coherent_sct_energy, fwhm_offset, fwhm_fanoprime,
                    compton_angle, compton_fwhm_corr, compton_amplitude,

@@ -1,6 +1,6 @@
 Changes
 ----
-- changed function name from :code:`process_grid` to :code:`grid3d`
+- changed function name from :obj:`process_grid` to :obj:`grid3d`
 - changed function signature from: ::
    def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
 to ::

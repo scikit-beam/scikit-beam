@@ -3,7 +3,8 @@ Changes to circular_average function
 
 Added min_x and max_x parameters for the circular_average function
 
-Note:
+Note::
+
     min_x : float, optional
         Left edge of first bin defaults to minimum value of x
     max_x : float, optional

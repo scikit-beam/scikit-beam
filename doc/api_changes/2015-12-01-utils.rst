@@ -4,11 +4,11 @@ Changes to bin_1D function
 Earlier the bin_1D function if the nx(number of bins) is None
     (if nx is None)
 
-- from ::
+from ::
 
   nx = core._defaults["bins"]
 
-  to::
+to::
 
   nx = int(max_x - min_x)
 
