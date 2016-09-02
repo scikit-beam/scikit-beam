@@ -353,6 +353,7 @@ def test_construct_circ_avg_image():
     # check that the beam center and dims yield the circavg in the right place
     cimg = roi.construct_circ_avg_image(bin_cen, ring_avg, dims=image.shape,
                                         center=calib_center)
+
     assert_array_almost_equal(cimg[2], np.array([5.0103283, 6.15384615,
                               6.15384615, 6.15384615, 5.0103283, 3.79296498,
                               2.19422113, 0.51063356, 0., 0., 0., 0.]))
@@ -365,6 +366,15 @@ def test_construct_circ_avg_image():
                               5.0103283, 6.15384615, 6.15384615, 6.15384615,
                               5.0103283, 3.79296498, 2.19422113, 0.51063356,
                               0., 0., 0., 0., 0., 0., 0.]))
+
+    # check that anisotropic pixels are treated properly
+    cimg3 = roi.construct_circ_avg_image(bin_cen, ring_avg, dims=image.shape,
+                                         pixel_size=(2, 1))
+
+    assert_array_almost_equal(cimg3[5], np.array([0., 1.16761618, 2.80022015,
+                              4.16720388, 5.250422, 6.08400137, 6.08400137,
+                              5.250422,  4.16720388, 2.80022015,
+                              1.16761618,  0.]))
 
 
 def test_kymograph():
