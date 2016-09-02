@@ -376,6 +376,10 @@ def test_construct_circ_avg_image():
                               5.250422,  4.16720388, 2.80022015,
                               1.16761618,  0.]))
 
+    with assert_raises(ValueError):
+        roi.construct_circ_avg_image(bin_cen, ring_avg, center=calib_center,
+                                     pixel_size=(2, 1))
+
 
 def test_kymograph():
     calib_center = (25, 25)

@@ -506,15 +506,17 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None,
     -------
     """
     if dims is None:
+        if center is not None:
+            print("Error: Specifying a dims but not a center does not make"
+                  " sense and may lead to unexpected results. Exiting")
+            raise ValueError
+
         # round up, also take into account pixel size change
         maxr_y, maxr_x = (int(np.max(radii/pixel_size[0])+.5),
                           int(np.max(radii/pixel_size[1])+.5))
         dims = 2*maxr_y+1, 2*maxr_x+1
+
     if center is None:
-        if dims is None:
-            print("Error: Specifying a dims but not a center does not make"
-                  " sense and may lead to unexpected results. Exiting")
-            raise ValueError
         center = (dims[0]-1)/2., (dims[1] - 1)/2.
 
     radial_val = utils.radial_grid(center, dims, pixel_size)
