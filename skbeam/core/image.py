@@ -131,7 +131,7 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None,
         (set to None for the value at the minimum radius)
     right : float, optional
         pixels larger than the maximum radius are set to this value
-        (set to None for the value at the minimum radius)
+        (set to None for the value at the maximum radius)
 
     Returns
     -------
