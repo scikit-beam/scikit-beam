@@ -460,7 +460,7 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
 
 
 def construct_circ_avg_image(radii, intensities, dims=None, center=None,
-                             pixel_size=(1, 1)):
+                             pixel_size=(1, 1), left=0, right=0):
     """ Constructs a 2D image from circular averaged data
         where radii are given in units of pixels.
         Normally, data will be taken from circular_average and used to
@@ -486,6 +486,12 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None,
         The size of a pixel (in a real unit, like mm).
         argument order should be (pixel_height, pixel_width)
         default is (1, 1)
+    left : float, optional
+        pixels smaller than the minimum radius are set to this value
+        (set to None for the value at the minimum radius)
+    right : float, optional
+        pixels larger than the maximum radius are set to this value
+        (set to None for the value at the minimum radius)
 
     Returns
     -------
@@ -494,16 +500,17 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None,
     See Also
     --------
     circular_average : compute circular average of an image
+        Pixels smaller than the minimum radius are set to the value at that
+        minimum radius.
+        Pixels larger than the maximum radius are set to zero.
     bin_grid : Bin and integrate an image, given the radial array of pixels
         Useful for nonlinear spacing (Ewald curvature)
 
     Notes
     -----
     Some pixels may not be filled if the dimensions chosen are too large.
-        Run this code again on a list of values equal to 1 to obtain a mask.
-
-    Example
-    -------
+        Run this code again on a list of values equal to 1 to obtain a mask
+        (and set left=0 and right=0).
     """
     if dims is None:
         if center is not None:
