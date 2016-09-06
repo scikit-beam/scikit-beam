@@ -51,7 +51,7 @@ def test_construct_circ_avg_image():
 
     # check that the beam center and dims yield the circavg in the right place
     cimg = nimage.construct_circ_avg_image(bin_cen, ring_avg, dims=image.shape,
-                                        center=calib_center)
+                                           center=calib_center)
 
     assert_array_almost_equal(cimg[2], np.array([5.0103283, 6.15384615,
                               6.15384615, 6.15384615, 5.0103283, 3.79296498,
@@ -67,8 +67,9 @@ def test_construct_circ_avg_image():
                               0., 0., 0., 0., 0., 0., 0.]))
 
     # check that anisotropic pixels are treated properly
-    cimg3 = nimage.construct_circ_avg_image(bin_cen, ring_avg, dims=image.shape,
-                                         pixel_size=(2, 1))
+    cimg3 = nimage.construct_circ_avg_image(bin_cen, ring_avg,
+                                            dims=image.shape,
+                                            pixel_size=(2, 1))
 
     assert_array_almost_equal(cimg3[5], np.array([0., 1.16761618, 2.80022015,
                               4.16720388, 5.250422, 6.08400137, 6.08400137,
@@ -77,7 +78,7 @@ def test_construct_circ_avg_image():
 
     with assert_raises(ValueError):
         nimage.construct_circ_avg_image(bin_cen, ring_avg, center=calib_center,
-                                     pixel_size=(2, 1))
+                                        pixel_size=(2, 1))
 
 
 if __name__ == '__main__':
