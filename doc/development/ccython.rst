@@ -4,11 +4,15 @@
 C or Cython Extensions
 ======================
 
+.. warning::
+
+   This page has not been fully adapted from astropy
+
 Scikit-beam supports using C extensions for wrapping C libraries and Cython for
 speeding up computationally-intensive calculations. Both Cython and C extension
 building can be customized using the ``get_extensions`` function of the
 ``setup_package.py`` file. If defined, this function must return a list of
-`distutils.core.Extension` objects. The creation process is left to the
+:class:`distutils.core.Extension` objects. The creation process is left to the
 subpackage designer, and can be customized however is relevant for the
 extensions in the subpackage.
 
@@ -40,7 +44,7 @@ you probably want to install its header files along side the Python module.
        all of the header files.
 
     2) Use the ``get_package_data`` hook in ``setup_package.py`` to
-       install those header files.  For example, the `scikit-beam.wcs`
+       install those header files.  For example, the ``scikit-beam.wcs``
        package has this::
 
            def get_package_data():
@@ -54,8 +58,8 @@ Unfortunately, anything that requires a C or Cython extension will fail to
 import until the build phase has completed. In this cases, the
 ``_ASTROPY_SETUP_`` variable can be used to determine if the package is being
 imported as part of the build and choose to not import problematic modules.
-``_ASTROPY_SETUP_`` is inserted into the builtins, and is `True` when inside
-of scikit-beam's ``setup.py`` script, and `False` otherwise.
+``_ASTROPY_SETUP_`` is inserted into the builtins, and is :obj:`True` when inside
+of scikit-beam's ``setup.py`` script, and :obj:`False` otherwise.
 
 For example, suppose there is a subpackage ``foo`` that needs to
 import a module called ``version.py`` at build time in order to set

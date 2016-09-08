@@ -7,6 +7,11 @@
 Testing Guidelines
 ==================
 
+.. warning::
+
+   This page is not fully adapted from astropy
+
+
 This section describes the testing framework and format standards for tests in
 Scikit-beam core packages (this also serves as recommendations for affiliated
 packages).
@@ -144,7 +149,7 @@ Enable PEP8 compliance testing with ``pep8=True`` in the call to
     This method of running the tests defaults to the version of
     `py.test`_ that is bundled with Scikit-beam. To use the locally-installed
     version, you should set the ``ASTROPY_USE_SYSTEM_PYTEST`` environment
-    variable (see :doc:`/config/index`) or the `py.test`_ method described
+    variable  or the `py.test`_ method described
     above.
 
 Tox
@@ -349,8 +354,8 @@ Working with data files
 -----------------------
 
 Tests that need to make use of a data file should use the
-`~scikit-beam.utils.data.get_pkg_data_fileobj` or
-`~scikit-beam.utils.data.get_pkg_data_filename` functions.  These functions
+:func:`~scikit-beam.utils.data.get_pkg_data_fileobj` or
+:func:`~scikit-beam.utils.data.get_pkg_data_filename` functions.  These functions
 search locally first, and then on the scikit-beam data server or an arbitrary
 URL, and return a file-like object or a local filename, respectively.  They
 automatically cache the data locally if remote data is obtained, and from
@@ -359,7 +364,7 @@ note specific to dealing with the cache in tests.
 
 They also support the use of an MD5 hash to get a specific version of a data
 file.  This hash can be obtained prior to submitting a file to the scikit-beam
-data server by using the `~scikit-beam.utils.data.compute_hash` function on a
+data server by using the :func:`~scikit-beam.utils.data.compute_hash` function on a
 local copy of the file.
 
 Tests that may retrieve remote data should be marked with the
@@ -408,13 +413,13 @@ Tests that use the file cache
 By default, the Scikit-beam test runner sets up a clean file cache in a temporary
 directory that is used only for that test run and then destroyed.  This is to
 ensure consistency between test runs, as well as to not clutter users' caches
-(i.e. the cache directory returned by `~scikit-beam.config.get_cache_dir`) with
+(i.e. the cache directory returned by :func:`~scikit-beam.config.get_cache_dir`) with
 test files.
 
 However, some test authors (especially for affiliated packages) may find it
 desirable to cache files downloaded during a test run in a more permanent
 location (e.g. for large data sets).  To this end the
-`~scikit-beam.config.set_temp_cache` helper may be used.  It can be used either as
+:func:`~scikit-beam.config.set_temp_cache` helper may be used.  It can be used either as
 a context manager within a test to temporarily set the cache to a custom
 location, or as a *decorator* that takes effect for an entire test function
 (not including setup or teardown, which would have to be decorated separately).
@@ -635,7 +640,7 @@ Testing warnings
 ----------------
 
 In order to test that warnings are triggered as expected in certain
-situations, you can use the `scikit-beam.tests.helper.catch_warnings`
+situations, you can use the :func:`scikit-beam.tests.helper.catch_warnings`
 context manager.  Unlike the `warnings.catch_warnings` context manager
 in the standard library, this one will reset all warning state before
 hand so one is assured to get the warnings reported, regardless of
@@ -658,7 +663,7 @@ a real-world example::
    function argument to test that warnings are triggered.  This method has
    been found to be problematic in at least one case (`pull request 1174
    <https://github.com/scikit-beam/scikit-beam/pull/1174#issuecomment-20249309>`_)
-   so the `scikit-beam.tests.helper.catch_warnings` context manager is
+   so the :func:`scikit-beam.tests.helper.catch_warnings` context manager is
    preferred.
 
 Testing configuration parameters
@@ -669,7 +674,7 @@ are reset to their default values when the test runner starts up.
 
 Sometimes you'll want to test the behavior of code when a certain
 configuration item is set to a particular value.  In that case, you
-can use the `scikit-beam.config.ConfigItem.set_temp` context manager to
+can use the :func:`scikit-beam.config.ConfigItem.set_temp` context manager to
 temporarily set a configuration item to that value, test within that
 context, and have it automatically return to its original value.
 

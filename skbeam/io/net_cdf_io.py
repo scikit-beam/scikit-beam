@@ -8,7 +8,6 @@ Sector 13BMD, GSECars.
 """
 from __future__ import division, absolute_import, print_function
 import os
-from netCDF4 import Dataset
 
 
 def load_netCDF(file_name):
@@ -62,6 +61,7 @@ def load_netCDF(file_name):
         acquisition or reconstruction. If a scale factor is not present,
         then a default value of 1.0 is used.
     """
+    from netCDF4 import Dataset
 
     with Dataset(os.path.normpath(file_name), 'r') as src_file:
         data = src_file.variables['VOLUME']

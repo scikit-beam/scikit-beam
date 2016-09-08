@@ -11,6 +11,7 @@ Core
    core/index
    io/index
    core
+   core/mask
 
 Domain name spaces
 ------------------

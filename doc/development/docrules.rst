@@ -494,7 +494,7 @@ If it is necessary to explain a private method (use with care!), it can
 be referred to in the **Extended Summary** or the **Notes** section.
 Do not list private methods in the **methods** section.
 
-Note that `self` is *not* listed as the first parameter of methods.
+Note that ``self`` is *not* listed as the first parameter of methods.
 
 Method docstrings
 -----------------
@@ -509,8 +509,8 @@ as appropriate.
 
 Documenting class instances
 ===========================
-Instances of classes that are part of the Skbeam API (for example `np.r_`
-`np,c_`, `np.index_exp`, etc.) may require some care. To give these
+Instances of classes that are part of the Skbeam API (for example :obj:`np.r_`
+:obj:`np,c_`, :obj:`np.index_exp`, etc.) may require some care. To give these
 instances a useful docstring, we do the following:
 
 * Single instance: If only a single instance of a class is exposed,
@@ -595,9 +595,9 @@ Other points to keep in mind
   be useful is for marking a known bug that is not yet fixed.
 
 * array_like : For functions that take arguments which can have not only
-  a type `ndarray`, but also types that can be converted to an ndarray
+  a type ``ndarray``, but also types that can be converted to an ndarray
   (i.e. scalar types, sequence types), those arguments can be documented
-  with type `array_like`.
+  with type ``array_like``.
 
 Common reST concepts
 ====================

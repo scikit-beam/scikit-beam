@@ -66,7 +66,7 @@ documentation :file:`/doc/resource/api/utils` folder, create a file named
        fitting
 
 Also, add the :file:`/doc/resource/api/utils/index.rst` to
-:file:`/doc/resource/api/index.rst`.  This will tell :prog:`sphinx` to include
+:file:`/doc/resource/api/index.rst`.  This will tell ``sphinx`` to include
 the new package in the API documentation.
 
 Now, let's create a module called :file:`fitting.py` in the :file:`utils`

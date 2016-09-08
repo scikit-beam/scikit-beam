@@ -2,6 +2,10 @@
  Building Scikit-beam and its Subpackages
 ==========================================
 
+.. warning::
+
+   This page still needs to be adapted from astropy
+
 The build process currently uses the `setuptools
 <https://bitbucket.org/pypa/setuptools>`_ package to build and install the
 scikit-beam core (and any affiliated packages that use the template).
@@ -27,12 +31,12 @@ process:
 
     It is recommended that all such data be in a directory named ``data`` inside
     the package within which it is supposed to be used.  This package data should
-    be accessed via the `scikit-beam.utils.data.get_pkg_data_filename` and
-    `scikit-beam.utils.data.get_pkg_data_fileobj` functions.
+    be accessed via the ``scikit-beam.utils.data.get_pkg_data_filename`` and
+    ``scikit-beam.utils.data.get_pkg_data_fileobj`` functions.
 
 * ``get_extensions``
     This provides information for building C or Cython extensions. If defined,
-    it should return a list of `distutils.core.Extension` objects controlling
+    it should return a list of :class:`distutils.core.Extension` objects controlling
     the Cython/C build process (see below for more detail).
 
 * ``get_build_options``
@@ -45,7 +49,7 @@ process:
     - *doc*: A short doc string for the option, displayed by
       ``setup.py build --help``.
 
-    - *is_bool* (optional): When `True`, the option is a boolean
+    - *is_bool* (optional): When :obj:`True`, the option is a boolean
       option and doesn't have an associated value.
 
 * ``get_external_libraries``

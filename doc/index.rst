@@ -44,7 +44,7 @@ Installation
 
    install
    getting_started
-
+   installation
 
 
 .. _reporting_issues:
@@ -127,6 +127,7 @@ as a whole, see :doc:`development/vision`.
    resource/dev_guide/index
    api_changes
    python_versions
+   warnings
 
 other
 =====
@@ -138,8 +139,10 @@ other
    :maxdepth: 1
 
    whatsnew/index
+   whats_new
    known_issues
-
+   examples/index
+   introduction
 
 Indices and Tables
 ==================

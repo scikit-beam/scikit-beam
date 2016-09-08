@@ -8,6 +8,3 @@ Demos
 
 
 .. automodule:: skbeam.core.calibration
-   :members:
-   :show-inheritance:
-   :undoc-members:

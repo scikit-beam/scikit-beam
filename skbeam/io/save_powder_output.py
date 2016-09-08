@@ -139,6 +139,7 @@ def gsas_writer(tth, intensity, output_name, mode=None,
                 err=None, dir_path=None):
     """
     Save diffraction intensities into .gsas file format
+
     Parameters
     ----------
     tth : ndarray

@@ -9,7 +9,6 @@ Scientific Algorithms
 ---------------------
 
 .. autosummary::
-   :toctree: generated/
 
    cdi.cdi_recon
    correlation.multi_tau_auto_corr
@@ -25,7 +24,6 @@ Dictionary-like classes
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autosummary::
-   :toctree: generated/
 
    utils.MD_dict
    utils.verbosedict
@@ -34,7 +32,6 @@ Dictionary-like classes
 Image warping functions
 -----------------------
 .. autosummary::
-   :toctree: generated/
 
    utils.img_to_relative_xyi
    utils.radial_grid
@@ -47,7 +44,6 @@ Peak
 Peak fitting
 ~~~~~~~~~~~~
 .. autosummary::
-   :toctree: generated/
 
    feature.peak_refinement
    feature.refine_quadratic
@@ -58,7 +54,6 @@ Peak fitting
 Peak finding
 ~~~~~~~~~~~~
 .. autosummary::
-   :toctree: generated/
 
    image.find_ring_center_acorr_1D
    spectroscopy.find_largest_peak
@@ -66,7 +61,6 @@ Peak finding
 Image pre-processing
 --------------------
 .. autosummary::
-   :toctree: generated/
 
    utils.subtract_reference_images
 
@@ -77,7 +71,6 @@ Histograms and Integration
 Binning
 ~~~~~~~
 .. autosummary::
-   :toctree: generated/
 
    utils.bin_1D
    utils.wedge_integration
@@ -87,7 +80,6 @@ Binning
 Helper functions
 ----------------
 .. autosummary::
-   :toctree: generated/
 
    utils.pairwise
    utils.geometric_series
@@ -97,10 +89,8 @@ Helper functions
 
 Generating ROIs
 ---------------
-.. automodule:: skbeam.core.arithmetic
 
 .. autosummary::
-   :toctree: generated/
 
    roi.kymograph
    roi.circular_average
@@ -116,7 +106,6 @@ Generating ROIs
 Physical relations
 ------------------
 .. autosummary::
-   :toctree: generated/
 
    utils.q_to_d
    utils.d_to_q
@@ -129,21 +118,17 @@ Physical relations
 
 Boolean Logic
 -------------
-.. automodule:: skbeam.core.arithmetic
 
 .. autosummary::
-   :toctree: generated/
 
-    logical_nand
-    logical_nor
-    logical_sub
+    arithmetic.logical_nand
+    arithmetic.logical_nor
+    arithmetic.logical_sub
 
 Calibration
 -----------
-.. automodule:: skbeam.core.calibration
 
 .. autosummary::
-   :toctree: generated/
 
    calibration.estimate_d_blind
    calibration.refine_center

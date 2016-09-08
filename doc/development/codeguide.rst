@@ -7,6 +7,8 @@
 Coding Guidelines
 =================
 
+.. warning::  This page is not fully adopted from astropy
+
 This section describes requirements and guidelines that should be followed
 both for the core package and for affiliated packages.
 
@@ -114,7 +116,7 @@ Data and Configuration
   :mod:`scikit-beam.utils.data` should be used.
 
 * All persistent configuration should use the
-  `scikit-beam.config.ConfigurationItem` mechanism.  Such configuration items
+  :class:`scikit-beam.config.ConfigurationItem` mechanism.  Such configuration items
   should be placed at the top of the module or package that makes use of them,
   and supply a description sufficient for users to understand what the setting
   changes.
@@ -247,14 +249,14 @@ those that have a correctly configured Unicode environment, we should
 allow them to opt-in to take advantage of Unicode output when
 appropriate.  Therefore, there is a global configuration option,
 ``scikit-beam.conf.unicode_output`` to enable Unicode output of values, set
-to `False` by default.
+to :obj:`False` by default.
 
 The following conventions should be used for classes that define the
 standard string conversion methods (``__str__``, ``__repr__``,
 ``__unicode__``, ``__bytes__``, and ``__format__``).  In the bullets
-below, the phrase "unicode instance" is used to refer to `unicode` on
-Python 2 and `str` on Python 3.  The phrase "bytes instance" is used
-to refer to `str` on Python 2 and `bytes` on Python 3.
+below, the phrase "unicode instance" is used to refer to :class:`unicode` on
+Python 2 and :class:`str` on Python 3.  The phrase "bytes instance" is used
+to refer to :class:`str` on Python 2 and :class:`bytes` on Python 3.
 
 - ``__repr__``: Return a "unicode instance" (for historical reasons,
   could also be a "bytes instance" on Python 2, though not preferred)
@@ -264,13 +266,13 @@ to refer to `str` on Python 2 and `bytes` on Python 3.
   instance" containing only 7-bit characters.
 
 - ``__unicode__`` on Python 2 / ``__str__`` on Python 3: Return a "unicode
-  instance".  If ``scikit-beam.conf.unicode_output`` is `False`, it must contain
-  only 7-bit characters.  If ``scikit-beam.conf.unicode_output`` is `True`, it
+  instance".  If ``scikit-beam.conf.unicode_output`` is :obj:`False`, it must contain
+  only 7-bit characters.  If ``scikit-beam.conf.unicode_output`` is :obj:`True`, it
   may contain non-ascii characters when applicable.
 
 - ``__format__``: Return a "unicode instance".  If
-  ``scikit-beam.UNICODE_OUTPUT`` is `False`, it must contain only 7-bit
-  characters.  If ``scikit-beam.conf.unicode_output`` is `True`, it may contain
+  ``scikit-beam.UNICODE_OUTPUT`` is :obj:`False`, it must contain only 7-bit
+  characters.  If ``scikit-beam.conf.unicode_output`` is :obj:`True`, it may contain
   non-ascii characters when applicable.
 
 For classes that are expected to roundtrip through strings (unicode or
@@ -426,7 +428,7 @@ Iteration
 
 The behavior of the methods for iterating over the items, values and
 keys of a dictionary has changed in Python 3.  Additionally, other
-built-in functions such as `zip`, `range` and `map` have changed to
+built-in functions such as :func:`zip`, :func:`range` and :func:`map` have changed to
 return iterators rather than temporary lists.
 
 In many cases, the performance implications of iterating vs. creating
@@ -497,13 +499,19 @@ of that and still support Python 2::
     >>> '\\u'
     '\\u'
 
+.. _numpy-compatibility:
+
 Compatibility between versions of Numpy
 ---------------------------------------
+
+.. warning::
+
+   This does not exist yet
 
 In general, code should aim to be compatible with the lowest supported version
 of NumPy_.  Sometimes, however, it is inefficient to code repeatedly around
 bugs in earlier versions. For those cases, code can be added to
-`scikit-beam.utils.compat.numpy`; see the corresponding :ref:`instructions
+``scikit-beam.utils.compat.numpy``; see the corresponding :ref:`instructions
 <numpy-compatibility>` for details.
 
 Requirements Specific to Affiliated Packages
@@ -741,7 +749,7 @@ Catching of exceptions should always use this syntax::
 This avoids the old style syntax of ``except ImportError, e`` or
 ``except (ValueError,TypeError), e``, which is dangerous because it's easy to
 instead accidentally do something like ``except ValueError,TypeError``, which
-won't catch `~.exceptions.TypeError`.
+won't catch :class:`TypeError`.
 
 
 Additional Resources

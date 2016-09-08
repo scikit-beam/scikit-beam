@@ -53,7 +53,8 @@ clean:
 	rm -rf tutorial/*.rst
 
 notebooks:
-	make -C example notebooks
+	@echo "skipping examples for now"
+	# make -C example notebooks
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
