@@ -1,8 +1,8 @@
-================================
- :mod:`core.correlation` Module
-================================
+========================================
+ :mod:`~skbeam.core.correlation` Module
+========================================
 
 .. automodule:: skbeam.core.correlation
    :members:
-   :show-inheritance:
-   :undoc-members:
+
+.. currentmodule:: skbeam.core.correlation
