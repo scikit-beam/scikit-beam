@@ -54,7 +54,7 @@ def test_threshold_mask():
     img_stack[6][8, 8] = 75
     img_stack[7][6, 6] = 80
 
-    th = mask.threshold_mask(img_stack, 75)
+    th = mask.threshold(img_stack, 75)
 
     for final in th:
         pass
@@ -114,7 +114,7 @@ def test_ring_blur_mask():
     pixel_size = [getattr(g, k) for k in ['pixel1', 'pixel2']]
     rres = np.hypot(*pixel_size)
     bins = np.arange(np.min(r) - rres/2., np.max(r) + rres / 2., rres)
-    msk = mask.ring_blur_mask(Z, r, (3., 3),  bins)
+    msk = mask.binned_outlier(Z, r, (3., 3), bins)
     a = set(zip(*np.nonzero(~msk)))
     b = set(pixels)
     a_not_in_b = a - b

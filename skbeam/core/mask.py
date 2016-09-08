@@ -79,7 +79,7 @@ def bad_to_nan_gen(images, bad):
             yield im
 
 
-def threshold_mask(images, threshold, mask=None):
+def threshold(images, threshold, mask=None):
     """
     This generator sets all pixels whose value is greater than `threshold`
     to 0 and yields the thresholded images out
@@ -111,7 +111,7 @@ def threshold_mask(images, threshold, mask=None):
         yield mask
 
 
-def margin_mask(img_shape, edge_size):
+def margin(img_shape, edge_size):
     """
     Mask the edge of an image
 
@@ -132,9 +132,9 @@ def margin_mask(img_shape, edge_size):
     return mask
 
 
-def ring_blur_mask(img, r, alpha, bins, mask=None):
+def binned_outlier(img, r, alpha, bins, mask=None):
     """
-    Perform a annular mask, which checks the ring statistics and masks any
+    Generates a mask by identifying outlier pixels in bins and masks any
     pixels which have a value greater or less than alpha * std away from the
     mean
 
@@ -143,19 +143,13 @@ def ring_blur_mask(img, r, alpha, bins, mask=None):
     img: 2darray
         The  image
     r: 2darray
-        The  array which maps pixels to Q space
+        The  array which maps pixels to bins
     alpha: float or tuple or, 1darray
         Then number of acceptable standard deviations, if tuple then we use
         a linear distribution of alphas from alpha[0] to alpha[1], if array
         then we just use that as the distribution of alphas
-    rmax: float
-        The maximum radial distance on the detector
-    pixel_size: float
-        The size of the pixels, in the same units as rmax
-    distance: float
-        The sample to detector distance, in the same units as rmax
-    wavelength: float
-        The wavelength of the x-rays
+    bins: list
+        The bin edges
     mask: 1darray
         A starting flattened mask
 
