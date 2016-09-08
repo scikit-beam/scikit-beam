@@ -1,7 +1,7 @@
 Supported versions of Python
 ----------------------------
 
-The primary development target of the `scikit-beam` is python 3.5.
+The primary development target of the ``scikit-beam`` is python 3.5+.
 Affiliated packages are encouraged, but not rquired to support legacy
 python when practical.  The core library will support 2.7 as long as
 the upstream scientific libraries do.

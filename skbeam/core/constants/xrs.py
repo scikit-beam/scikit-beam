@@ -146,7 +146,7 @@ class PowderStandard(object):
 
     def convert_2theta(self, wavelength):
         """
-        Convert the measured 2theta values to a different wavelength
+        Convert the measured $2theta$ values to a different wavelength
 
         Parameters
         ----------

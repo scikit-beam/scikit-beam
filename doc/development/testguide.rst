@@ -641,7 +641,7 @@ Testing warnings
 
 In order to test that warnings are triggered as expected in certain
 situations, you can use the :func:`scikit-beam.tests.helper.catch_warnings`
-context manager.  Unlike the `warnings.catch_warnings` context manager
+context manager.  Unlike the :obj:`warnings.catch_warnings` context manager
 in the standard library, this one will reset all warning state before
 hand so one is assured to get the warnings reported, regardless of
 what errors may have been emitted by other tests previously.  Here is
@@ -689,8 +689,8 @@ Testing with Unicode literals
 -----------------------------
 
 Python 2 can run code in two modes: by default, string literals are
-8-bit `bytes` objects.  However, when ``from __future__ import
-unicode_literals`` is used, string literals are `unicode` objects.  In
+8-bit :obj:`bytes` objects.  However, when ``from __future__ import
+unicode_literals`` is used, string literals are :obj:`unicode` objects.  In
 order to ensure that scikit-beam supports user code written in both
 styles, the testing framework has a special feature to run a module
 containing tests in both modes.  Simply add the comment::
@@ -698,8 +698,8 @@ containing tests in both modes.  Simply add the comment::
     # TEST_UNICODE_LITERALS
 
 anywhere in the file, and all tests in that file will be tested twice:
-once in the default mode where string literals are `bytes`, and again
-where string literals are `unicode`.
+once in the default mode where string literals are :obj:`bytes`, and again
+where string literals are :obj:`unicode`.
 
 Marking blocks of code to exclude from coverage
 -----------------------------------------------

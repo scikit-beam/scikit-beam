@@ -10,14 +10,14 @@ scikit-beam along with some planned work for the future.  If any of the planned
 work looks interesting to you, please jump in and contribute on `github
 <https://github.com/scikit-beam/scikit-beam>`_!
 
-See our :doc:`/example` section for curated Jupyter notebooks that walk through
-using these algorithms.
+.. See our :doc:`/example` section for curated Jupyter notebooks that walk through
+   using these algorithms.
 
 Currently implemented
 =====================
 
-* Differential Phase Contrast (`~skbeam.core.dpc`)
-* CDI (`~skbeam.core.cdi`)
+* Differential Phase Contrast (:mod:`~skbeam.core.dpc`)
+* CDI (:mod:`~skbeam.core.cdi`)
 * MultiTau correlation
 * Fast 2-D image conversion to Q
 * Fast gridding of 3-D point cloud into 2-D plane
@@ -25,7 +25,8 @@ Currently implemented
 * X-ray Fluorescence
     * `Fitting GUI <https://github.com/NSLS-II/pyxrf>`_
 * Fast histograms
-* Access to basic constants (`~skbeam.core.constants`)
+* Access to basic constants (:mod:`~skbeam.core.constants`)
+
 
 Under active development
 ========================

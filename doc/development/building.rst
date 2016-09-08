@@ -49,7 +49,7 @@ process:
     - *doc*: A short doc string for the option, displayed by
       ``setup.py build --help``.
 
-    - *is_bool* (optional): When :obj:`True`, the option is a boolean
+    - *is_bool* (optional): When `True`, the option is a boolean
       option and doesn't have an associated value.
 
 * ``get_external_libraries``

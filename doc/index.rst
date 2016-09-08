@@ -5,11 +5,11 @@
 ==================
 
 
-The :ref:`vision<vision>` of `scikit-beam` is to provide simple
+The :ref:`vision<vision>` of ``scikit-beam`` is to provide simple
 functions useful for the X-ray, Neutron and Electron communities.  The
 primary goal of the scikit-beam project is to provide a centralized
 repository for algorithms that are used in these three scientific
-domains.  `scikit-beam` functions accept and return standard Python
+domains.  ``scikit-beam`` functions accept and return standard Python
 and numpy datatypes, so they integrate well with other packages from
 the scientific Python community.  Further, the modular design of
 scikit-beam allows its components to be easily reused in ways not

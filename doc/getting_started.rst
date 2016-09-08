@@ -39,16 +39,20 @@ as a drop-in replacement, the following syntax is also acceptable::
 Getting started with subpackages
 ================================
 
+.. warning::
+
+   This is not implemented in skbeam yet
+
 Because different subpackages have very different functionality, further
 suggestions for getting started are in the documentation for the subpackages,
 which you can reach by browsing the sections listed in the :ref:`user-docs`.
 
 Or, if you want to dive right in, you can either look at docstrings for
 particular a package or object, or access their documentation using the
-`~skbeam.find_api_page` function. For example, doing this::
+:func:`~skbeam.find_api_page` function. For example, doing this::
 
     >>> from skbeam import find_api_page
     >>> find_api_page(corr.multi_tau_auto_corr)  # doctest: +SKIP
 
 Will bring up the documentation for the
-`~skbeam.core.correlation.multi_tau_auto_corr` in your browser.
+:func:`~skbeam.core.correlation.multi_tau_auto_corr` in your browser.

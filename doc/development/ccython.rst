@@ -58,8 +58,8 @@ Unfortunately, anything that requires a C or Cython extension will fail to
 import until the build phase has completed. In this cases, the
 ``_ASTROPY_SETUP_`` variable can be used to determine if the package is being
 imported as part of the build and choose to not import problematic modules.
-``_ASTROPY_SETUP_`` is inserted into the builtins, and is :obj:`True` when inside
-of scikit-beam's ``setup.py`` script, and :obj:`False` otherwise.
+``_ASTROPY_SETUP_`` is inserted into the builtins, and is `True` when inside
+of scikit-beam's ``setup.py`` script, and `False` otherwise.
 
 For example, suppose there is a subpackage ``foo`` that needs to
 import a module called ``version.py`` at build time in order to set

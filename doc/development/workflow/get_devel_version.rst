@@ -15,7 +15,7 @@ Try the development version
     most of it is one-time setup. You can count on one hand the number of
     `git`_ commands you will need to regularly use to keep your local copy
     of `Scikit-beam`_ up to date. If you find this taking more than an hour email
-    the :ref:`scikit-beam developers list for help <getting_help>`
+    the scikit-beam developers.
 
 
 Trying out the development version of Scikit-beam is useful in three ways:
@@ -44,7 +44,7 @@ version of Scikit-beam on your computer:
 #. :ref:`activate_development_scikit-beam`
 #. :ref:`test_installation`
 #. :ref:`try_devel`
-#. :ref:`deactivate_development`
+
 
 Step-by-step instructions
 -------------------------
@@ -290,7 +290,6 @@ Or, just for fun, try out one of the
 `new features <http://scikit-beam.readthedocs.org/en/latest/changelog.html>`_ in
 the development version.
 
-Either way, once you are done, make sure you do the next step.
 
 
 

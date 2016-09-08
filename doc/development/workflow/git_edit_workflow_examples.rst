@@ -7,6 +7,10 @@
  Contributing code to Scikit-beam, a worked example
 ====================================================
 
+.. warning::
+
+   This still needs to be adapted for skbeam
+
 This example is based on fixing `Issue 1761`_ from the list
 of `Scikit-beam issues on GitHub <https://github.com/scikit-beam/scikit-beam/issues>`_.
 It resulted in `pull request 1917`_.
@@ -95,7 +99,7 @@ You should at least run the relevant tests before you make any changes to make
 sure that your python environment is set up properly.
 
 The first challenge is figuring out where to look for relevant tests. `Issue
-1761`_ is a problem in the `~scikit-beam.coordinates` package, so the tests for
+1761`_ is a problem in the :obj:`~scikit-beam.coordinates` package, so the tests for
 it are in ``scikit-beam/coordinates/tests``. The rest of Scikit-beam has a similar
 layout, described at :ref:`testing-guidelines`.
 
@@ -415,7 +419,7 @@ the check for the scalar case.
 One could imagine two different desirable outcomes here:
 
 + ``len(scalar_coordinate)`` behaves just like ``len(scalar_angle)``, raising
-  a `~.exceptions.TypeError` for a scalar coordinate.
+  a `TypeError` for a scalar coordinate.
 + ``len(scalar_coordinate)`` returns 1 since there is one coordinate.
 
 If you encounter a case like this and are not sure what to do, ask. The best
@@ -427,7 +431,7 @@ you chose and why; instructions for that are below.
 Testing for an expected error
 -----------------------------
 
-In this case I opted for raising a `~.exceptions.TypeError`, because
+In this case I opted for raising a `TypeError`, because
 the user needs to know that the coordinate they created is not going to
 behave like an array of one coordinate if they try to index it later on. It
 also provides an opportunity to demonstrate a test when the desired result

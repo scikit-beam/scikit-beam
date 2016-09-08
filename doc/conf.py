@@ -33,6 +33,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
               'sphinx.ext.autosummary',
               'sphinx.ext.extlinks',
+              'sphinx.ext.intersphinx',
               'plot_generator',
               'numpydoc',
               'IPython.sphinxext.ipython_directive',
@@ -347,4 +348,4 @@ epub_copyright = u'2014-2015 Brookhaven National Lab'
 # If false, no index is generated.
 #epub_use_index = True
 
-default_role = 'any'
+# default_role = 'any'

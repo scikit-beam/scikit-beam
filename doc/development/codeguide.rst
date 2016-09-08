@@ -1,6 +1,7 @@
 .. doctest-skip-all
-.. _code-guide:
+
 .. |minimum_numpy_version| replace:: ``1.10``
+.. _code-guide:
 
 
 =================
@@ -249,7 +250,7 @@ those that have a correctly configured Unicode environment, we should
 allow them to opt-in to take advantage of Unicode output when
 appropriate.  Therefore, there is a global configuration option,
 ``scikit-beam.conf.unicode_output`` to enable Unicode output of values, set
-to :obj:`False` by default.
+to `False` by default.
 
 The following conventions should be used for classes that define the
 standard string conversion methods (``__str__``, ``__repr__``,
@@ -266,13 +267,13 @@ to refer to :class:`str` on Python 2 and :class:`bytes` on Python 3.
   instance" containing only 7-bit characters.
 
 - ``__unicode__`` on Python 2 / ``__str__`` on Python 3: Return a "unicode
-  instance".  If ``scikit-beam.conf.unicode_output`` is :obj:`False`, it must contain
-  only 7-bit characters.  If ``scikit-beam.conf.unicode_output`` is :obj:`True`, it
+  instance".  If ``scikit-beam.conf.unicode_output`` is `False`, it must contain
+  only 7-bit characters.  If ``scikit-beam.conf.unicode_output`` is `True`, it
   may contain non-ascii characters when applicable.
 
 - ``__format__``: Return a "unicode instance".  If
-  ``scikit-beam.UNICODE_OUTPUT`` is :obj:`False`, it must contain only 7-bit
-  characters.  If ``scikit-beam.conf.unicode_output`` is :obj:`True`, it may contain
+  ``scikit-beam.UNICODE_OUTPUT`` is `False`, it must contain only 7-bit
+  characters.  If ``scikit-beam.conf.unicode_output`` is `True`, it may contain
   non-ascii characters when applicable.
 
 For classes that are expected to roundtrip through strings (unicode or

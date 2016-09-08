@@ -5,6 +5,8 @@
 .. currentmodule:: skbeam.core
 
 
+.. _user-docs:
+
 Scientific Algorithms
 ---------------------
 
