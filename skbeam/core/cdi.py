@@ -254,8 +254,8 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
     start_avg : float, optional
         define the point to start doing average.
         default is 0.8.
-    pi_modulus_flag : str, optional
-        'Complex' or 'Real', defining the way to perform pi_modulus
+    pi_modulus_flag : {'complex', 'real'}, optional
+        'complex' or 'real', defining the way to perform pi_modulus
         calculation.
         default is 'Complex'.
     sw_flag : Bool, optional
@@ -310,9 +310,15 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
     diffracted_pattern = np.array(diffracted_pattern)     # diffraction data
     diffracted_pattern = np.fft.fftshift(diffracted_pattern)
 
+    pi_modulus_flag = pi_modulus_flag.lower()
     real_operation = False
-    if pi_modulus_flag.lower() == 'real':
+    if pi_modulus_flag == 'real':
         real_operation = True
+    elif pi_modulus_flag == 'complex':
+        real_operation = False
+    else:
+        raise ValueError('py_modulus_flag must be one of {"complex",'
+                         'real"} not' '{!r}'.format(pi_modulus_flag))
 
     gamma_1 = -1/beta
     gamma_2 = 1/beta

@@ -128,6 +128,7 @@ doc_ex = """
 
 @functools.total_ordering
 class BasicElement(object):
+
     # define the docs
     __doc__ = """{}
     Parameters
