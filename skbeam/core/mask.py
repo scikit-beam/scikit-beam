@@ -160,7 +160,7 @@ def binned_outlier(img, r, alpha, bins, mask=None):
     """
 
     if mask is None:
-        working_mask = np.ones_like(img.shape).astype(bool)
+        working_mask = np.ones(img.shape).astype(bool)
     else:
         working_mask = mask.copy()
     if working_mask.shape != img.shape:
