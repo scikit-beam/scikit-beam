@@ -86,6 +86,20 @@ def test_bad_to_nan_gen():
     assert not np.isnan(np.asarray(y)[4]).all()
 
 
+def test_margin():
+    size = (10, 10)
+    edge = 1
+    mask1 = mask.margin(size, edge)
+    mask2 = np.zeros(size)
+    mask2[:, :edge] = 1
+    mask2[:, -edge:] = 1
+    mask2[:edge, :] = 1
+    mask2[-edge:, :] = 1
+    mask2 = mask2.astype(bool)
+    assert_array_equal(mask1, ~mask2)
+
+
+
 def test_ring_blur_mask():
     from skbeam.core import recip
     g = recip.geo.Geometry(
@@ -127,4 +141,4 @@ def test_ring_blur_mask():
 
 if __name__ == '__main__':
     import nose
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
+    nose.runmodule(argv=['-s', '--with-doctest', '-x'], exit=False)

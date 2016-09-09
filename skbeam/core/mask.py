@@ -127,9 +127,9 @@ def margin(img_shape, edge_size):
     2darray:
         The mask array, bad pixels are 0
     """
-    mask = np.zeros(img_shape, dtype=bool)
-    mask[edge_size:-edge_size, edge_size:-edge_size] = True
-    return mask
+    mask = np.ones(img_shape, dtype=bool)
+    mask[edge_size:-edge_size, edge_size:-edge_size] = 0.
+    return ~mask
 
 
 def binned_outlier(img, r, alpha, bins, mask=None):
@@ -160,11 +160,13 @@ def binned_outlier(img, r, alpha, bins, mask=None):
     """
 
     if mask is None:
-        mask = np.ones(img.shape).astype(bool)
-    if mask.shape != img.shape:
-        mask = mask.reshape(img.shape)
-    msk_img = img[mask]
-    msk_r = r[mask]
+        wroking_mask = np.ones_like(img.shape).astype(bool)
+    else:
+        working_mask = mask.copy()
+    if working_mask.shape != img.shape:
+        working_mask = working_mask.reshape(img.shape)
+    msk_img = img[working_mask]
+    msk_r = r[working_mask]
 
     int_r = np.digitize(r, bins[:-1], True) - 1
     # integration
@@ -179,8 +181,7 @@ def binned_outlier(img, r, alpha, bins, mask=None):
     upper = mean + threshold
 
     # single out the too low and too high pixels
-    too_low = img < lower[int_r]
-    too_hi = img > upper[int_r]
+    working_mask *= img > lower[int_r]
+    working_mask *= img < upper[int_r]
 
-    mask *= ~too_low * ~too_hi
-    return mask.astype(bool)
+    return working_mask.astype(bool)
