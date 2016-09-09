@@ -99,7 +99,6 @@ def test_margin():
     assert_array_equal(mask1, ~mask2)
 
 
-
 def test_ring_blur_mask():
     from skbeam.core import recip
     g = recip.geo.Geometry(
