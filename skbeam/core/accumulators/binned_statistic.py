@@ -391,9 +391,8 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
     image in both radius and phi.
     """
 
-    def __init__(self, rbins, phibins, rowsize, colsize,
-                 rowc=None, colc=None, rrange=None, phirange=None, mask=None,
-                 statistic='mean'):
+    def __init__(self, rowsize, colsize, bins=10, range=None,
+                 rowc=None, colc=None, mask=None, statistic='mean'):
         """
         Parameters:
         -----------
@@ -447,23 +446,20 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
 
         phipix = np.arctan2(colgrid, rowgrid)
 
-        if rrange is None:
-            rrange = (rpix.min(), rpix.max())
-        if phirange is None:
-            phirange = (-np.pi, np.pi)
         if mask is not None:
             if mask.shape != self.expected_shape:
                 raise ValueError('"mask" has incorrect shape. '
                                  ' Expected: ' + str(self.expected_shape) +
                                  ' Received: ' + str(mask.shape))
             # a somewhat ugly way to mask pixels
-            rpix[mask == 0] = rrange[0]-1
+            # need to bury this in lower level class
+            # rpix[mask == 0] = rrange[0]-1
 
         super(RPhiBinnedStatistic, self).__init__(rpix.reshape(-1),
                                                   phipix.reshape(-1),
                                                   statistic,
-                                                  bins=(rbins, phibins),
-                                                  range=(rrange, phirange))
+                                                  bins=bins,
+                                                  range=range)
 
     def __call__(self, values):
         # check for what I believe could be a common error
@@ -480,17 +476,17 @@ class RadialBinnedStatistic(RPhiBinnedStatistic):
     image in radius.
     """
 
-    def __init__(self, bins, rowsize, colsize,
-                 rowc=None, colc=None, rrange=None, phirange=None, mask=None,
+    def __init__(self, rowsize, colsize, bins=10, range=None,
+                 rowc=None, colc=None, mask=None,
                  statistic='mean'):
         """
         See RPhiBinnedStatistic documentation.
         """
 
-        super(RadialBinnedStatistic, self).__init__(bins, 1, rowsize, colsize,
+        super(RadialBinnedStatistic, self).__init__(rowsize, colsize,
+                                                    (bins, 1), range,
                                                     rowc, colc,
-                                                    rrange, phirange, mask,
-                                                    statistic)
+                                                    mask, statistic)
 
     def __call__(self, values):
         return np.squeeze(super(RadialBinnedStatistic, self).__call__(values))
