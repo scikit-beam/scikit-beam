@@ -39,6 +39,7 @@ tools, not just straight wrapping of np/scipy/scikit images.
 """
 from __future__ import absolute_import, division, print_function
 import numpy as np
+from . import utils
 import logging
 logger = logging.getLogger(__name__)
 
@@ -96,3 +97,76 @@ def _corr_ax1(input_image):
         np.argmax(np.correlate(v, v[::-1], mode='full')/norm_mask) / 2
         for v in input_image]
     return np.histogram(est_by_row, bins=np.arange(0, dim + 1))
+
+
+def construct_circ_avg_image(radii, intensities, dims=None, center=None,
+                             pixel_size=(1, 1), left=0, right=0):
+    """ Constructs a 2D image from circular averaged data
+        where radii are given in units of pixels.
+        Normally, data will be taken from circular_average and used to
+        re-interpolate into an image.
+
+    Parameters
+    ----------
+    radii : 1D array of floats
+        the radii (must be in pixels)
+    intensities : 1D array of floats
+        the intensities for the radii
+    dims : 2 tuple of floats, optional
+        [dy, dx] (row, col)
+        dy, dx are the dimensions in row,col format If the dims are not set, it
+        will assume the dimensions to be (2*maxr+1) where maxr is the maximum
+        radius. Note in the case of rectangular pixels (pixel_size not 1:1)
+        that the `maxr' value will be different in each dimension
+    center: 2 tuple of floats, optional
+        [y0, x0] (row, col)
+        y0, x0 is the center (in row,col format)
+        if not centered, assumes center is (dims[0]-1)/2., (dims[1]-1)/2.
+    pixel_size : tuple, optional
+        The size of a pixel (in a real unit, like mm).
+        argument order should be (pixel_height, pixel_width)
+        default is (1, 1)
+    left : float, optional
+        pixels smaller than the minimum radius are set to this value
+        (set to None for the value at the minimum radius)
+    right : float, optional
+        pixels larger than the maximum radius are set to this value
+        (set to None for the value at the maximum radius)
+
+    Returns
+    -------
+    IMG : the interpolated circular averaged image
+
+    See Also
+    --------
+    circular_average : compute circular average of an image
+        Pixels smaller than the minimum radius are set to the value at that
+        minimum radius.
+        Pixels larger than the maximum radius are set to zero.
+    bin_grid : Bin and integrate an image, given the radial array of pixels
+        Useful for nonlinear spacing (Ewald curvature)
+
+    Notes
+    -----
+    Some pixels may not be filled if the dimensions chosen are too large.
+        Run this code again on a list of values equal to 1 to obtain a mask
+        (and set left=0 and right=0).
+    """
+    if dims is None:
+        if center is not None:
+            raise ValueError("Specifying a dims but not a center does not "
+                             "make sense and may lead to unexpected results.")
+
+        # round up, also take into account pixel size change
+        maxr_y, maxr_x = (int(np.max(radii/pixel_size[0])+.5),
+                          int(np.max(radii/pixel_size[1])+.5))
+        dims = 2*maxr_y+1, 2*maxr_x+1
+
+    if center is None:
+        center = (dims[0]-1)/2., (dims[1] - 1)/2.
+
+    radial_val = utils.radial_grid(center, dims, pixel_size)
+    CIMG = np.zeros(dims)
+    CIMG = np.interp(radial_val, radii, intensities, right=0)
+
+    return CIMG
