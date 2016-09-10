@@ -318,7 +318,6 @@ def test_circular_average():
                                                max_x=10, nx=None)
     assert_array_almost_equal(bin_cen1, [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5,
                                          7.5, 8.5])
-
     mask = np.ones_like(image)
     mask[4:6, 2:3] = 0
 

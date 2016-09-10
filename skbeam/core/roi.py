@@ -399,8 +399,7 @@ def mean_intensity(images, labeled_array, index=None):
 
 
 def circular_average(image, calibrated_center, threshold=0, nx=100,
-                     pixel_size=(1, 1),  min_x=None, max_x=None,
-                     mask=None):
+                     pixel_size=(1, 1),  min_x=None, max_x=None, mask=None):
     """Circular average of the the image data
     The circular average is also known as the radial integration
     Parameters
