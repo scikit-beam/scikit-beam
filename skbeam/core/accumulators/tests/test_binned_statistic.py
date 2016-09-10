@@ -49,7 +49,8 @@ class TestRadialBinnedStatistic(object):
                 # current testing strategy, but at least check code runs
 
                 rrange = kwargs.get('range', None)
-                if rrange is not None: rrange=rrange[0]
+                if rrange is not None:
+                    rrange = rrange[0]
                 ref, edges, _ = scipy.stats.binned_statistic(
                     x=self.rgrid.ravel(),
                     values=self.image.ravel(),

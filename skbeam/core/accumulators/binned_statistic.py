@@ -396,22 +396,25 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
         """
         Parameters:
         -----------
-        rbins: int
-            number of radial bins in returned histogram.
-        phibins: int
-            number of phi bins in returned histogram.
         rowsize,colsize: int
             shape of image in pixels.
+        bins : int or [int, int] or array_like or [array, array], optional
+            The bin specification:
+            * number of bins for the two dimensions (nr=nphi=bins),
+            * number of bins in each dimension (nr, nphi = bins),
+            * bin edges for the two dimensions (r_edges = phi_edges = bins),
+            * the bin edges in each dimension (r_edges, phi_edges = bins).
+            Phi has a range of -pi to pi and is defined as arctan(col/row)
+            (i.e. y is column and x is row, or "matrix" format,
+            not "cartesian")
+        range : (2,2) array_like, optional
+            The leftmost and rightmost edges of the bins along each dimension
+            (if not specified explicitly in the `bins` parameters):
+            [[rmin, rmax], [phimin, phimax]]. All values outside of this range
+            will be considered outliers and not tallied in the histogram.
+            See "bins" parameter for definition of phi.
         rowc,colc: int, optional
             location (in pixels) of origin (default: image center).
-        rrange: (float, float), optional
-            The lower and upper radial range of the bins, in pixels.
-            If not provided, all pixel r values are included.
-        phirange: (float, float), optional
-            phi range to include.  Values are in the range
-            (-pi,pi) radians (default: no limits).  Phi is
-            computed as arctan(col/row), i.e. "matrix" ordering and
-            not "cartesian" ordering.
         mask: 2-dimensional np.ndarray, optional
             array of zero/non-zero values, same shape as image used
             in __call__.  zero values will be ignored.
