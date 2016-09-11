@@ -466,7 +466,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
                 will be called on the values in each bin.  Empty bins will be
                 represented by function([]), or NaN if this returns an error.
         """
-        rpix, phipix = get_r_phi(rowsize, colsize, origin)
+        rpix, phipix = get_r_phi(shape, origin)
 
         self.expected_shape = rpix.shape
         if mask is not None:
