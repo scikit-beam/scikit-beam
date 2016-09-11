@@ -32,14 +32,25 @@ class TestRadialBinnedStatistic(object):
                      'range': (10, 90)},
                     {'rowc': 0, 'colc': 0}]
         bins, rowsize, colsize = 100, self.image.shape[0], self.image.shape[1]
+        mask_ones = np.ones_like(self.image)
+        mask_random = np.random.randint(2, size=self.image.shape)
         for kwargs in mykwargs:
             for stat, stat_func in stats_list:
 
+                if stat is 'sum':
+                    # in this case we can compare our masked
+                    # result to binned_statistic
+                    mask = mask_random
+                else:
+                    mask = mask_ones
+
                 radbinstat = RadialBinnedStatistic(rowsize, colsize, bins,
                                                    statistic=stat,
+                                                   mask=mask,
                                                    **kwargs)
                 radbinstat_f = RadialBinnedStatistic(rowsize, colsize, bins,
                                                      statistic=stat_func,
+                                                     mask=mask,
                                                      **kwargs)
                 binned = radbinstat(self.image)
                 binned_f = radbinstat_f(self.image)
@@ -51,7 +62,7 @@ class TestRadialBinnedStatistic(object):
                 range = kwargs.get('range', None)
                 ref, edges, _ = scipy.stats.binned_statistic(
                     x=self.rgrid.ravel(),
-                    values=self.image.ravel(),
+                    values=(self.image*mask).ravel(),
                     statistic=stat,
                     range=range,
                     bins=bins,

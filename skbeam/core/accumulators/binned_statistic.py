@@ -134,12 +134,13 @@ class BinnedStatisticDD(object):
         # Compute the bin number each sample falls into.
         Ncount = {}
         for i in np.arange(self.D):
-            # Apply mask in a non-ideal way by setting value outside range
+            # Apply mask in a non-ideal way by setting value outside range.
+            # Would be better to do this using bincount "weights"
             thissample = sample[:, i]
             thismask = mask[:, i]
             thissample[thismask == 0] = (self.edges[i][0] -
-                                         0.01 * np.fabs(self.edges[i][0]))
-            Ncount[i] = np.digitize(sample[:, i], self.edges[i])
+                                         0.01 * (1+np.fabs(self.edges[i][0])))
+            Ncount[i] = np.digitize(thissample, self.edges[i])
 
         # Using digitize, values that fall on an edge are put in the
         # right bin.  For the rightmost bin, we want values equal to
@@ -472,6 +473,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
                                                   phipix.reshape(-1),
                                                   statistic,
                                                   bins=bins,
+                                                  mask=mask.reshape(-1),
                                                   range=range)
 
     def __call__(self, values):
@@ -542,6 +544,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
         super(RadialBinnedStatistic, self).__init__(rpix.reshape(-1),
                                                     statistic,
                                                     bins=bins,
+                                                    mask=mask.reshape(-1),
                                                     range=range)
 
     def __call__(self, values):
