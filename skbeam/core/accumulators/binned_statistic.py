@@ -397,9 +397,15 @@ class BinnedStatistic2D(BinnedStatisticDD):
         return super(BinnedStatistic2D, self).__call__(values)
 
 
-def get_r_phi(rowsize, colsize, rowc, colc):
-    rowc = rowsize//2 if rowc is None else rowc
-    colc = colsize//2 if colc is None else colc
+def get_r_phi(shape, origin):
+    rowsize = shape[0]
+    colsize = shape[1]
+    if origin is None:
+        rowc = rowsize//2
+        colc = colsize//2
+    else:
+        rowc = origin[0]
+        colc = origin[1]
     row = np.arange(rowsize)-rowc
     col = np.arange(colsize)-colc
     # meshgrid indexing='ij' option requires numpy 1.7 or later
@@ -415,13 +421,13 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
     image in both radius and phi.
     """
 
-    def __init__(self, rowsize, colsize, bins=10, range=None,
-                 rowc=None, colc=None, mask=None, statistic='mean'):
+    def __init__(self, shape, bins=10, range=None,
+                 origin=None, mask=None, statistic='mean'):
         """
         Parameters:
         -----------
-        rowsize,colsize: int
-            shape of image in pixels.
+        shape: tuple of ints of length 2.
+            shape of image.
         bins : int or [int, int] or array_like or [array, array], optional
             The bin specification:
             * number of bins for the two dimensions (nr=nphi=bins),
@@ -437,9 +443,9 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
             [[rmin, rmax], [phimin, phimax]]. All values outside of this range
             will be considered outliers and not tallied in the histogram.
             See "bins" parameter for definition of phi.
-        rowc,colc: int, optional
+        origin: tuple of ints with length 2, optional
             location (in pixels) of origin (default: image center).
-        mask: 2-dimensional np.ndarray, optional
+        mask: 2-dimensional np.ndarray of ints, optional
             array of zero/non-zero values, same shape as image used
             in __call__.  zero values will be ignored.
         statistic : string or callable, optional
@@ -460,7 +466,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
                 will be called on the values in each bin.  Empty bins will be
                 represented by function([]), or NaN if this returns an error.
         """
-        rpix, phipix = get_r_phi(rowsize, colsize, rowc, colc)
+        rpix, phipix = get_r_phi(rowsize, colsize, origin)
 
         self.expected_shape = rpix.shape
         if mask is not None:
@@ -491,13 +497,13 @@ class RadialBinnedStatistic(BinnedStatistic1D):
     image in both radius and phi.
     """
 
-    def __init__(self, rowsize, colsize, bins=10, range=None,
-                 rowc=None, colc=None, mask=None, statistic='mean'):
+    def __init__(self, shape, bins=10, range=None,
+                 origin=None, mask=None, statistic='mean'):
         """
         Parameters:
         -----------
-        rowsize,colsize: int
-            shape of image in pixels.
+        shape: tuple of ints of length 2.
+            shape of image.
         bins : int or sequence of scalars, optional
             If `bins` is an int, it defines the number of equal-width bins in
             the given range (10 by default).  If `bins` is a sequence, it
@@ -509,9 +515,9 @@ class RadialBinnedStatistic(BinnedStatistic1D):
             The lower and upper range of the bins.  If not provided, range
             is simply ``(x.min(), x.max())``.  Values outside the range are
             ignored.
-        rowc,colc: int, optional
+        origin: tuple of ints with length 2, optional
             location (in pixels) of origin (default: image center).
-        mask: 2-dimensional np.ndarray, optional
+        mask: 2-dimensional np.ndarray of ints, optional
             array of zero/non-zero values, same shape as image used
             in __call__.  zero values will be ignored.
         statistic : string or callable, optional
@@ -532,7 +538,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
                 will be called on the values in each bin.  Empty bins will be
                 represented by function([]), or NaN if this returns an error.
         """
-        rpix, _ = get_r_phi(rowsize, colsize, rowc, colc)
+        rpix, _ = get_r_phi(shape, origin)
         self.expected_shape = rpix.shape
 
         if mask is not None:

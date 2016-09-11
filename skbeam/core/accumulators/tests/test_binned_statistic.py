@@ -28,10 +28,10 @@ class TestRadialBinnedStatistic(object):
 
     def testRadialBinnedStatistic(self):
 
-        mykwargs = [{'rowc': 0, 'colc': 0,
+        mykwargs = [{'origin': (0, 0),
                      'range': (10, 90)},
-                    {'rowc': 0, 'colc': 0}]
-        bins, rowsize, colsize = 100, self.image.shape[0], self.image.shape[1]
+                    {'origin': (0, 0)}]
+        bins, shape = 100, self.image.shape
         mask_ones = np.ones_like(self.image)
         mask_random = np.random.randint(2, size=self.image.shape)
         for kwargs in mykwargs:
@@ -44,11 +44,11 @@ class TestRadialBinnedStatistic(object):
                 else:
                     mask = mask_ones
 
-                radbinstat = RadialBinnedStatistic(rowsize, colsize, bins,
+                radbinstat = RadialBinnedStatistic(shape, bins,
                                                    statistic=stat,
                                                    mask=mask,
                                                    **kwargs)
-                radbinstat_f = RadialBinnedStatistic(rowsize, colsize, bins,
+                radbinstat_f = RadialBinnedStatistic(shape, bins,
                                                      statistic=stat_func,
                                                      mask=mask,
                                                      **kwargs)
@@ -77,7 +77,7 @@ class TestRadialBinnedStatistic(object):
 
         # test exception when RadialBinnedStatistic is given 1D array
         with assert_raises(ValueError):
-            RadialBinnedStatistic(self.image.shape[0], self.image.shape[1], 10,
+            RadialBinnedStatistic(self.image.shape, 10,
                                   mask=np.array([1, 2, 3, 4]))
 
 
