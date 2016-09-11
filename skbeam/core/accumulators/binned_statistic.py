@@ -44,7 +44,7 @@ from scipy._lib.six import callable
 
 class BinnedStatisticDD(object):
     def __init__(self, sample, statistic='mean',
-                 bins=10, range=None):
+                 bins=10, range=None, mask=None):
         """
         Compute a multidimensional binned statistic for a set of data.
 
@@ -72,6 +72,9 @@ class BinnedStatisticDD(object):
             minimum and maximum values along each dimension.
 
         """
+        if mask is None:
+            mask = np.ones_like(sample)
+
         known_stats = ['mean', 'median', 'count', 'sum', 'std']
         self.statistic = statistic
         if not callable(self.statistic) and self.statistic not in known_stats:
@@ -84,6 +87,7 @@ class BinnedStatisticDD(object):
         except (AttributeError, ValueError):
             # Sample is a sequence of 1D arrays.
             sample = np.atleast_2d(sample).T
+            mask = np.atleast_2d(mask).T
             N, self.D = sample.shape
 
         self.nbin = np.empty(self.D, int)
@@ -130,6 +134,11 @@ class BinnedStatisticDD(object):
         # Compute the bin number each sample falls into.
         Ncount = {}
         for i in np.arange(self.D):
+            # Apply mask in a non-ideal way by setting value outside range
+            thissample = sample[:, i]
+            thismask = mask[:, i]
+            thissample[thismask == 0] = (self.edges[i][0] -
+                                         0.01 * np.fabs(self.edges[i][0]))
             Ncount[i] = np.digitize(sample[:, i], self.edges[i])
 
         # Using digitize, values that fall on an edge are put in the
@@ -237,7 +246,7 @@ class BinnedStatisticDD(object):
 
 class BinnedStatistic1D(BinnedStatisticDD):
     def __init__(self, x, statistic='mean',
-                 bins=10, range=None):
+                 bins=10, range=None, mask=None):
         """
         A refactored version of scipy.stats.binned_statistic to improve
         performance for the case where binning doesn't need to be
@@ -307,7 +316,8 @@ class BinnedStatistic1D(BinnedStatisticDD):
                 range = [range]
 
         super(BinnedStatistic1D, self).__init__([x], statistic=statistic,
-                                                bins=bins, range=range)
+                                                bins=bins, range=range,
+                                                mask=mask)
 
 
 class BinnedStatistic2D(BinnedStatisticDD):
@@ -367,7 +377,7 @@ class BinnedStatistic2D(BinnedStatisticDD):
     """
 
     def __init__(self, x, y, statistic='mean',
-                 bins=10, range=None):
+                 bins=10, range=None, mask=None):
         # This code is based on np.histogram2d
         try:
             N = len(bins)
@@ -379,7 +389,8 @@ class BinnedStatistic2D(BinnedStatisticDD):
             bins = [xedges, yedges]
 
         super(BinnedStatistic2D, self).__init__([x, y], statistic=statistic,
-                                                bins=bins, range=range)
+                                                bins=bins, range=range,
+                                                mask=mask)
 
     def __call__(self, values):
         return super(BinnedStatistic2D, self).__call__(values)
