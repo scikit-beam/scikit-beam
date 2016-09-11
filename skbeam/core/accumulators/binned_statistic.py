@@ -426,7 +426,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
         """
         Parameters:
         -----------
-        shape: tuple of ints of length 2.
+        shape : tuple of ints of length 2.
             shape of image.
         bins : int or [int, int] or array_like or [array, array], optional
             The bin specification:
@@ -443,9 +443,9 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
             [[rmin, rmax], [phimin, phimax]]. All values outside of this range
             will be considered outliers and not tallied in the histogram.
             See "bins" parameter for definition of phi.
-        origin: tuple of ints with length 2, optional
+        origin : tuple of ints with length 2, optional
             location (in pixels) of origin (default: image center).
-        mask: 2-dimensional np.ndarray of ints, optional
+        mask : 2-dimensional np.ndarray of ints, optional
             array of zero/non-zero values, same shape as image used
             in __call__.  zero values will be ignored.
         statistic : string or callable, optional
@@ -493,8 +493,8 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
 
 class RadialBinnedStatistic(BinnedStatistic1D):
     """
-    Create a 2-dimensional histogram by binning a 2-dimensional
-    image in both radius and phi.
+    Create a 1-dimensional histogram by binning a 2-dimensional
+    image in radius.
     """
 
     def __init__(self, shape, bins=10, range=None,
@@ -511,10 +511,14 @@ class RadialBinnedStatistic(BinnedStatistic1D):
             non-uniform bin widths.  Values in `x` that are smaller than lowest
             bin edge are assigned to bin number 0, values beyond the highest
             bin are assigned to ``bins[-1]``.
+            Phi has a range of -pi to pi and is defined as arctan(col/row)
+            (i.e. y is column and x is row, or "matrix" format,
+            not "cartesian")
         range : (float, float) or [(float, float)], optional
             The lower and upper range of the bins.  If not provided, range
             is simply ``(x.min(), x.max())``.  Values outside the range are
             ignored.
+            See "bins" parameter for definition of phi.
         origin: tuple of ints with length 2, optional
             location (in pixels) of origin (default: image center).
         mask: 2-dimensional np.ndarray of ints, optional
