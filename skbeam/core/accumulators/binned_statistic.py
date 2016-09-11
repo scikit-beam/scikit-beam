@@ -135,7 +135,7 @@ class BinnedStatisticDD(object):
         Ncount = {}
         for i in np.arange(self.D):
             # Apply mask in a non-ideal way by setting value outside range.
-            # Would be better to do this using bincount "weights"
+            # Would be better to do this using bincount "weights", perhaps.
             thissample = sample[:, i]
             thismask = mask[:, i]
             thissample[thismask == 0] = (self.edges[i][0] -
