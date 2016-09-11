@@ -29,7 +29,7 @@ class TestRadialBinnedStatistic(object):
     def testRadialBinnedStatistic(self):
 
         mykwargs = [{'rowc': 0, 'colc': 0,
-                     'range': ((10, 90), (-np.pi, np.pi))},
+                     'range': (10, 90)},
                     {'rowc': 0, 'colc': 0}]
         bins, rowsize, colsize = 100, self.image.shape[0], self.image.shape[1]
         for kwargs in mykwargs:
@@ -48,14 +48,12 @@ class TestRadialBinnedStatistic(object):
                 # can't check equality if we use normalization with
                 # current testing strategy, but at least check code runs
 
-                rrange = kwargs.get('range', None)
-                if rrange is not None:
-                    rrange = rrange[0]
+                range = kwargs.get('range', None)
                 ref, edges, _ = scipy.stats.binned_statistic(
                     x=self.rgrid.ravel(),
                     values=self.image.ravel(),
                     statistic=stat,
-                    range=rrange,
+                    range=range,
                     bins=bins,
                 )
 

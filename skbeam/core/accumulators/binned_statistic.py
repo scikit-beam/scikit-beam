@@ -385,6 +385,18 @@ class BinnedStatistic2D(BinnedStatisticDD):
         return super(BinnedStatistic2D, self).__call__(values)
 
 
+def get_r_phi(rowsize, colsize, rowc, colc):
+    rowc = rowsize//2 if rowc is None else rowc
+    colc = colsize//2 if colc is None else colc
+    row = np.arange(rowsize)-rowc
+    col = np.arange(colsize)-colc
+    # meshgrid indexing='ij' option requires numpy 1.7 or later
+    rowgrid, colgrid = np.meshgrid(row, col, indexing='ij')
+    rpix = np.sqrt(rowgrid**2 + colgrid**2)
+    phipix = np.arctan2(colgrid, rowgrid)
+    return rpix, phipix
+
+
 class RPhiBinnedStatistic(BinnedStatistic2D):
     """
     Create a 2-dimensional histogram by binning a 2-dimensional
@@ -436,27 +448,14 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
                 will be called on the values in each bin.  Empty bins will be
                 represented by function([]), or NaN if this returns an error.
         """
+        rpix, phipix = get_r_phi(rowsize, colsize, rowc, colc)
 
-        rowc = rowsize//2 if rowc is None else rowc
-        colc = colsize//2 if colc is None else colc
-        row = np.arange(rowsize)-rowc
-        col = np.arange(colsize)-colc
-        # meshgrid indexing='ij' option requires numpy 1.7 or later
-        rowgrid, colgrid = np.meshgrid(row, col, indexing='ij')
-        self.expected_shape = rowgrid.shape
-
-        rpix = np.sqrt(rowgrid**2 + colgrid**2)
-
-        phipix = np.arctan2(colgrid, rowgrid)
-
+        self.expected_shape = rpix.shape
         if mask is not None:
             if mask.shape != self.expected_shape:
                 raise ValueError('"mask" has incorrect shape. '
                                  ' Expected: ' + str(self.expected_shape) +
                                  ' Received: ' + str(mask.shape))
-            # a somewhat ugly way to mask pixels
-            # need to bury this in lower level class
-            # rpix[mask == 0] = rrange[0]-1
 
         super(RPhiBinnedStatistic, self).__init__(rpix.reshape(-1),
                                                   phipix.reshape(-1),
@@ -473,23 +472,71 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
         return super(RPhiBinnedStatistic, self).__call__(values.reshape(-1))
 
 
-class RadialBinnedStatistic(RPhiBinnedStatistic):
+class RadialBinnedStatistic(BinnedStatistic1D):
     """
-    Create a 1-dimensional histogram by binning a 2-dimensional
-    image in radius.
+    Create a 2-dimensional histogram by binning a 2-dimensional
+    image in both radius and phi.
     """
 
     def __init__(self, rowsize, colsize, bins=10, range=None,
-                 rowc=None, colc=None, mask=None,
-                 statistic='mean'):
+                 rowc=None, colc=None, mask=None, statistic='mean'):
         """
-        See RPhiBinnedStatistic documentation.
-        """
+        Parameters:
+        -----------
+        rowsize,colsize: int
+            shape of image in pixels.
+        bins : int or sequence of scalars, optional
+            If `bins` is an int, it defines the number of equal-width bins in
+            the given range (10 by default).  If `bins` is a sequence, it
+            defines the bin edges, including the rightmost edge, allowing for
+            non-uniform bin widths.  Values in `x` that are smaller than lowest
+            bin edge are assigned to bin number 0, values beyond the highest
+            bin are assigned to ``bins[-1]``.
+        range : (float, float) or [(float, float)], optional
+            The lower and upper range of the bins.  If not provided, range
+            is simply ``(x.min(), x.max())``.  Values outside the range are
+            ignored.
+        rowc,colc: int, optional
+            location (in pixels) of origin (default: image center).
+        mask: 2-dimensional np.ndarray, optional
+            array of zero/non-zero values, same shape as image used
+            in __call__.  zero values will be ignored.
+        statistic : string or callable, optional
+            The statistic to compute (default is 'mean').
+            The following statistics are available:
 
-        super(RadialBinnedStatistic, self).__init__(rowsize, colsize,
-                                                    (bins, 1), range,
-                                                    rowc, colc,
-                                                    mask, statistic)
+              * 'mean' : compute the mean of values for points within each bin.
+                Empty bins will be represented by NaN.
+              * 'median' : compute the median of values for points within each
+                bin. Empty bins will be represented by NaN.
+              * 'count' : compute the count of points within each bin.  This is
+                identical to an unweighted histogram.  `values` array is not
+                referenced.
+              * 'sum' : compute the sum of values for points within each bin.
+                This is identical to a weighted histogram.
+              * function : a user-defined function which takes a 1D array of
+                values, and outputs a single numerical statistic. This function
+                will be called on the values in each bin.  Empty bins will be
+                represented by function([]), or NaN if this returns an error.
+        """
+        rpix, _ = get_r_phi(rowsize, colsize, rowc, colc)
+        self.expected_shape = rpix.shape
+
+        if mask is not None:
+            if mask.shape != self.expected_shape:
+                raise ValueError('"mask" has incorrect shape. '
+                                 ' Expected: ' + str(self.expected_shape) +
+                                 ' Received: ' + str(mask.shape))
+
+        super(RadialBinnedStatistic, self).__init__(rpix.reshape(-1),
+                                                    statistic,
+                                                    bins=bins,
+                                                    range=range)
 
     def __call__(self, values):
-        return np.squeeze(super(RadialBinnedStatistic, self).__call__(values))
+        # check for what I believe could be a common error
+        if values.shape != self.expected_shape:
+            raise ValueError('"values" has incorrect shape.'
+                             ' Expected: ' + str(self.expected_shape) +
+                             ' Received: ' + str(values.shape))
+        return super(RadialBinnedStatistic, self).__call__(values.reshape(-1))
