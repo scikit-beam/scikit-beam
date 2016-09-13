@@ -295,7 +295,7 @@ class BinnedStatistic1D(BinnedStatisticDD):
             is simply ``(x.min(), x.max())``.  Values outside the range are
             ignored.
         mask : array_like
-            array of ones and zeros with the same shape as `x`.
+            ones and zeros with the same shape as `x`.
             Values with mask==0 will be ignored.
 
         See Also
@@ -376,7 +376,7 @@ class BinnedStatistic2D(BinnedStatisticDD):
         [[xmin, xmax], [ymin, ymax]]. All values outside of this range will be
         considered outliers and not tallied in the histogram.
     mask : array_like
-        array of ones and zeros with the same shape as `x`.
+        ones and zeros with the same shape as `x`.
         Values with mask==0 will be ignored.
 
     See Also
@@ -454,8 +454,8 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
         origin : tuple of ints with length 2, optional
             location (in pixels) of origin (default: image center).
         mask : 2-dimensional np.ndarray of ints, optional
-            array of zero/non-zero values, same shape as image used
-            in __call__.  zero values will be ignored.
+            array of zero/non-zero values, with shape `shape`.
+            zero values will be ignored.
         statistic : string or callable, optional
             The statistic to compute (default is 'mean').
             The following statistics are available:
@@ -476,7 +476,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
         """
         rpix, phipix = get_r_phi(shape, origin)
 
-        self.expected_shape = rpix.shape
+        self.expected_shape = shape
         if mask is not None:
             if mask.shape != self.expected_shape:
                 raise ValueError('"mask" has incorrect shape. '
@@ -510,7 +510,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
         """
         Parameters:
         -----------
-        shape: tuple of ints of length 2.
+        shape : tuple of ints of length 2.
             shape of image.
         bins : int or sequence of scalars, optional
             If `bins` is an int, it defines the number of equal-width bins in
@@ -527,11 +527,11 @@ class RadialBinnedStatistic(BinnedStatistic1D):
             is simply ``(x.min(), x.max())``.  Values outside the range are
             ignored.
             See "bins" parameter for definition of phi.
-        origin: tuple of ints with length 2, optional
+        origin : tuple of ints with length 2, optional
             location (in pixels) of origin (default: image center).
-        mask: 2-dimensional np.ndarray of ints, optional
-            array of zero/non-zero values, same shape as image used
-            in __call__.  zero values will be ignored.
+        mask : 2-dimensional np.ndarray of ints, optional
+            array of zero/non-zero values, with shape `shape`.
+            zero values will be ignored.
         statistic : string or callable, optional
             The statistic to compute (default is 'mean').
             The following statistics are available:
@@ -551,7 +551,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
                 represented by function([]), or NaN if this returns an error.
         """
         rpix, _ = get_r_phi(shape, origin)
-        self.expected_shape = rpix.shape
+        self.expected_shape = shape
 
         if mask is not None:
             if mask.shape != self.expected_shape:
