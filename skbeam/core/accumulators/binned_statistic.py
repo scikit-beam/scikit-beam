@@ -70,7 +70,9 @@ class BinnedStatisticDD(object):
             A sequence of lower and upper bin edges to be used if the
             edges are not given explicitely in `bins`. Defaults to the
             minimum and maximum values along each dimension.
-
+        mask : array_like
+            array of ones and zeros with the same shape as `sample`.
+            Values with mask==0 will be ignored.
         """
         if mask is None:
             mask = np.ones_like(sample)
@@ -292,6 +294,9 @@ class BinnedStatistic1D(BinnedStatisticDD):
             The lower and upper range of the bins.  If not provided, range
             is simply ``(x.min(), x.max())``.  Values outside the range are
             ignored.
+        mask : array_like
+            array of ones and zeros with the same shape as `x`.
+            Values with mask==0 will be ignored.
 
         See Also
         --------
@@ -370,6 +375,9 @@ class BinnedStatistic2D(BinnedStatisticDD):
         (if not specified explicitly in the `bins` parameters):
         [[xmin, xmax], [ymin, ymax]]. All values outside of this range will be
         considered outliers and not tallied in the histogram.
+    mask : array_like
+        array of ones and zeros with the same shape as `x`.
+        Values with mask==0 will be ignored.
 
     See Also
     --------
