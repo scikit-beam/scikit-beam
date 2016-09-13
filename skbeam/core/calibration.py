@@ -32,13 +32,14 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-"""
-This is the module for calibration functions and data
+"""Automatically calibrate a diffraction beam line given a powder sample of a
+known sample.
 """
 
 from __future__ import absolute_import, division, print_function
 
 from collections import deque
+from string import Template
 
 import numpy as np
 import scipy.signal
@@ -60,6 +61,7 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
     rough estimate of what d should be.
 
     For the peaks found the detector-sample distance is estimated via
+
     .. math ::
 
         D = \\frac{r}{\\tan 2\\theta}
@@ -73,7 +75,8 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
     name : str
         The name of the calibration standard.  Used to look up the
         expected peak location
-        For valid options, see the name attribute on this function
+
+        Valid options: $name_ops
 
     wavelength : float
         The wavelength of scattered x-ray in nm
@@ -131,6 +134,9 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
 # Set an attribute for the calibration names that are valid options.  This
 # attribute also aids in autowrapping into VisTrails
 estimate_d_blind.name = list(calibration_standards)
+if estimate_d_blind.__doc__ is not None:
+    estimate_d_blind.__doc__ = Template(estimate_d_blind.__doc__).substitute(
+        name_ops=repr(sorted(estimate_d_blind.name)))
 
 
 def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,

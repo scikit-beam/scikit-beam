@@ -66,12 +66,6 @@ class HKL(namedtuple('HKL', 'h k l')):
     k : int
     l : int
 
-    Attributes
-    ----------
-    length
-    h
-    k
-    l
     '''
     __slots__ = ()
 
@@ -105,11 +99,6 @@ class Reflection(namedtuple('Reflection', ('d', 'hkl', 'q'))):
     q : float
         q-value of the reflection
 
-    Attributes
-    ----------
-    d
-    HKL
-    q
     """
     __slots__ = ()
 
@@ -157,7 +146,7 @@ class PowderStandard(object):
 
     def convert_2theta(self, wavelength):
         """
-        Convert the measured 2theta values to a different wavelength
+        Convert the measured $2theta$ values to a different wavelength
 
         Parameters
         ----------
@@ -252,6 +241,7 @@ A dictionary holding known powder-pattern calibration standards
 
 # Alumina (Al2O3), (Standard Reference Material 676a) taken from
 # https://www-s.nist.gov/srmors/certificates/676a.pdf?CFID=3259108&CFTOKEN=fa5bb0075f99948c-FA6ABBDA-9691-7A6B-FBE24BE35748DC08&jsessionid=f030e1751fc5365cac74417053f2c344f675
+#: Mapping of known calibration standards and their reflections
 calibration_standards = {
     'Si': PowderStandard.from_lambda_2theta_hkl(
         name='Si',

@@ -5,12 +5,13 @@
 .. currentmodule:: skbeam.core
 
 
+.. _user-docs:
+
 Scientific Algorithms
 ---------------------
 
 .. autosummary::
-   :toctree: generated/
-   
+
    cdi.cdi_recon
    correlation.multi_tau_auto_corr
    dpc.recon
@@ -25,7 +26,6 @@ Dictionary-like classes
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autosummary::
-   :toctree: generated/
 
    utils.MD_dict
    utils.verbosedict
@@ -34,7 +34,6 @@ Dictionary-like classes
 Image warping functions
 -----------------------
 .. autosummary::
-   :toctree: generated/
 
    utils.img_to_relative_xyi
    utils.radial_grid
@@ -47,8 +46,7 @@ Peak
 Peak fitting
 ~~~~~~~~~~~~
 .. autosummary::
-   :toctree: generated/
-   
+
    feature.peak_refinement
    feature.refine_quadratic
    feature.refine_log_quadratic
@@ -58,15 +56,13 @@ Peak fitting
 Peak finding
 ~~~~~~~~~~~~
 .. autosummary::
-   :toctree: generated/
-   
+
    image.find_ring_center_acorr_1D
    spectroscopy.find_largest_peak
 
 Image pre-processing
 --------------------
 .. autosummary::
-   :toctree: generated/
 
    utils.subtract_reference_images
 
@@ -77,7 +73,6 @@ Histograms and Integration
 Binning
 ~~~~~~~
 .. autosummary::
-   :toctree: generated/
 
    utils.bin_1D
    utils.wedge_integration
@@ -87,7 +82,6 @@ Binning
 Helper functions
 ----------------
 .. autosummary::
-   :toctree: generated/
 
    utils.pairwise
    utils.geometric_series
@@ -97,26 +91,23 @@ Helper functions
 
 Generating ROIs
 ---------------
-.. autosummary::
-   :toctree: generated/
 
-   roi.roi_kymograph
+.. autosummary::
+
+   roi.kymograph
    roi.circular_average
-   roi.combine_mean_intensity
    roi.mean_intensity
-   roi.mean_intensity_sets
    roi.roi_pixel_values
    roi.roi_max_counts
    roi.segmented_rings
    roi.ring_edges
    roi.rings
    roi.rectangles
-   
-   
+
+
 Physical relations
 ------------------
 .. autosummary::
-   :toctree: generated/
 
    utils.q_to_d
    utils.d_to_q
@@ -129,18 +120,17 @@ Physical relations
 
 Boolean Logic
 -------------
+
 .. autosummary::
-   :toctree: generated/
-   
+
     arithmetic.logical_nand
     arithmetic.logical_nor
     arithmetic.logical_sub
 
 Calibration
 -----------
+
 .. autosummary::
-   :toctree: generated/
-   
-   utils.estimate_d_blind
-   utils.refine_center
-   
+
+   calibration.estimate_d_blind
+   calibration.refine_center

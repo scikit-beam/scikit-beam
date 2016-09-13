@@ -95,10 +95,12 @@ In general, it is a bad idea to work directly on the *master* branch
 work on ::
 
    git branch new_feature
+
 where 'new_feature' is the name of your branch.  The branch name should
 be chosen to be descriptive of the type of work you plan to do.  For example
 'add_bin1D_function' or 'fix_bug_in_bin1D'.
 To see the results of this run ::
+
    git branch
 
 again which should now print out ::
@@ -321,7 +323,7 @@ This is the mechanism to share code with in the group, as once you
 have pushed **commit**\ s to github, anyone who can see your repository
 can **fetch** them and begin to work with them.
 
-.. _git-merging
+.. _git-merging:
 
 
 Merging

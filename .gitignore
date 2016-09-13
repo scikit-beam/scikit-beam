@@ -96,3 +96,5 @@ generated/
 
 # Generated cython files in any subdirectory of /skbeam/
 /skbeam/**/*.c
+
+**/_as_gen/*.rst

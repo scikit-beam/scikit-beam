@@ -1,23 +1,30 @@
-=============================
- :mod:`core.constants` Module
-=============================
+=====================================
+ :mod:`~skbeam.core.constants`
+=====================================
+
+.. automodule:: skbeam.core.constants
+
 
 .. currentmodule:: skbeam.core.constants.basic
 
+
 Elemental data
---------------
+==============
 Tools for working with elemental constants.
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: _as_gen
+   :nosignatures:
 
    BasicElement
 
 
-.. currentmodule:: skbeam.core.constants.xrf
 
 X-ray fluorescence data
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
+
+.. automodule:: skbeam.core.constants.xrf
+
 
 The c library `xraylib <https://github.com/tschoonj/xraylib/wiki>`__
 provides a programmatic interface to x-ray fluorescence constants.  We
@@ -26,21 +33,24 @@ data.  For the most part users should access this data through the
 `Element` object which manages the creation and access to these objects.
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: _as_gen
+   :nosignatures:
 
    XrayLibWrap
    XrayLibWrap_Energy
    emission_line_search
    XrfElement
-   
-.. currentmodule:: skbeam.core.constants.xrs
+
+
 
 Powder Diffraction Standards
-----------------------------
+============================
 
+.. automodule:: skbeam.core.constants.xrs
 
 .. autosummary::
-   :toctree: generated/
+   :toctree: _as_gen
+   :nosignatures:
 
    calibration_standards
    PowderStandard
@@ -54,7 +64,7 @@ Powder Diffraction Standards
 
 
 Converting :math:`2\theta` between wavelengths
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------
 Given that
 
     .. math ::

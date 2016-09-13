@@ -13,7 +13,6 @@
 
 import sys
 import os
-import sphinx_bootstrap_theme
 import matplotlib as mpl
 mpl.use("Agg")
 
@@ -33,8 +32,8 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.coverage',
               'sphinx.ext.mathjax',
               'sphinx.ext.autosummary',
-              'sphinxcontrib.napoleon',
               'sphinx.ext.extlinks',
+              'sphinx.ext.intersphinx',
               'plot_generator',
               'numpydoc',
               'IPython.sphinxext.ipython_directive',
@@ -119,20 +118,13 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'bootstrap'
+html_theme = 'alabaster'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {
-                      'source_link_position': "footer",
-                      'bootswatch_theme': "spacelab",
-                      'navbar_sidebarrel': False,
-                      'bootstrap_version': "3",
-                      'navbar_links': [("Tutorial", "tutorial")],
-                     }
+html_theme_options = {}
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -153,7 +145,7 @@ html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static', 'featured-thumbnails']
+html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -278,8 +270,10 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 
-intersphinx_mapping = {'python': ('http://docs.python.org/2.7', None),
-                       'numpy': ('http://docs.scipy.org/doc/numpy',None),
+intersphinx_mapping = {'python': ('http://docs.python.org/3.5', None),
+                       'numpy': ('http://docs.scipy.org/doc/numpy', None),
+                       'matplotlib': ('http://matplotlib.org', None),
+                       'numpy': ('http://numpy.org', None),
                        }
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
@@ -353,3 +347,5 @@ epub_copyright = u'2014-2015 Brookhaven National Lab'
 
 # If false, no index is generated.
 #epub_use_index = True
+
+# default_role = 'any'
