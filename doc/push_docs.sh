@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e # exit with nonzero exit code if anything fails
 
+git config --global user.email "Travis@nomail"
+git config --global user.name "Travis"
+git config --global push.default simple
+
 # go to the out directory and create a *new* Git repo
 cd _build/html
 git init
@@ -11,9 +15,6 @@ touch .nojekyll
 git add .
 git commit -m "Deploy to GitHub Pages"
 
-git config --global user.email "Travis@nomail"
-git config --global user.name "Travis"
-git config --global push.default simple
 git remote add origin git@github.com:scikit-beam/scikit-beam.git
 
 git push origin master:gh-pages --force
