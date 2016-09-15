@@ -107,6 +107,10 @@ script:
 after_success:
   - if [ $RUN_TESTS == 'true' ]; then codecov; fi;
   - if [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PULL_REQUEST == 'false' ] && [ $BUILD_DOCS ]; then
+      openssl aes-256-cbc -K $encrypted_b4ed46da4197_key -iv $encrypted_b4ed46da4197_iv -in skbeam-docs-deploy.enc -out skbeam-docs-deploy -d;
+      eval `ssh-agent -s`;
+      chmod 600 skbeam-docs-deploy;
+      ssh-add skbeam-docs-deploy;
       pushd doc;
       chmod +x push_docs.sh;
       ./push_docs.sh;
