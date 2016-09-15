@@ -97,16 +97,18 @@ script:
       pushd ../;
       git clone https://github.com/scikit-beam/scikit-beam-examples.git;
       popd;
-      cd doc;
+      pushd doc;
       chmod +x build_docs.sh;
       ./build_docs.sh;
+      popd;
     fi;
 
 
 after_success:
   - if [ $RUN_TESTS == 'true' ]; then codecov; fi;
   - if [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PULL_REQUEST == 'false' ] && [ $BUILD_DOCS ]; then
-      cd doc;
+      pushd doc;
       chmod +x push_docs.sh;
       ./push_docs.sh;
+      popd;
     fi;
