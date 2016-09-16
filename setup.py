@@ -29,18 +29,33 @@ def cython_ext():
 
 setup(
     name='scikit-beam',
+
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
+
     author='Brookhaven National Lab',
+
     description="Data analysis tools for X-ray science",
+
     packages=setuptools.find_packages(exclude=['doc']),
+    package_data={
+        'skbeam.core.constants': ['data/*.dat']
+    },
+
+    install_requires=[
+        'six',
+        'numpy'
+    ],  # essential dependencies only
+
     include_dirs=[np.get_include()],
-    package_data={'skbeam.core.constants': ['data/*.dat']},
-    install_requires=['six', 'numpy'],  # essential deps only
     ext_modules=c_ext() + cython_ext(),
+
     url='http://github.com/scikit-beam/scikit-beam',
+
     keywords='Xray Analysis',
+
     license='BSD',
+
     classifiers=['Development Status :: 3 - Alpha',
                  "License :: OSI Approved :: BSD License",
                  "Programming Language :: Python :: 2.7",
