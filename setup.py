@@ -1,31 +1,9 @@
 #!/usr/bin/env python
 
 import setuptools
-from distutils.core import setup, Extension
 import versioneer
-import numpy as np
-import sys
-from Cython.Build import cythonize
 
-def c_ext():
-    if os.name == 'nt':
-        # we are on windows. Do not compile the extension. Tons of errors are
-        # spit out when we compile on AppVeyor.
-        # https://gist.github.com/ericdill/bdc86eb81e338ca4624b
-        return []
-
-    # compile for MacOS without openmp
-    if sys.platform == 'darwin':
-        return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'])]
-    # compile the extension on Linux.
-    return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'],
-                      extra_compile_args=['-fopenmp'],
-                      extra_link_args=['-lgomp'])]
-
-
-def cython_ext():
-    return cythonize("**/*.pyx")
-
+from skbuild import setup
 
 setup(
     name='scikit-beam',
@@ -46,9 +24,6 @@ setup(
         'six',
         'numpy'
     ],  # essential dependencies only
-
-    include_dirs=[np.get_include()],
-    ext_modules=c_ext() + cython_ext(),
 
     url='http://github.com/scikit-beam/scikit-beam',
 
