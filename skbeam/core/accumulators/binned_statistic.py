@@ -71,11 +71,13 @@ class BinnedStatisticDD(object):
             edges are not given explicitely in `bins`. Defaults to the
             minimum and maximum values along each dimension.
         mask : array_like
-            array of ones and zeros with the same shape as `sample`.
-            Values with mask==0 will be ignored.
+            array of ones and zeros with total size N (see documentation
+            for `sample`). Values with mask==0 will be ignored.
+
+        Note: If using numpy versions < 1.10.0, you may notice slow behavior of
+        this constructor. This has to do with digitize, which was optimized
+        from 1.10.0 onwards.
         """
-        if mask is None:
-            mask = np.ones_like(sample)
 
         known_stats = ['mean', 'median', 'count', 'sum', 'std']
         self.statistic = statistic
@@ -89,8 +91,10 @@ class BinnedStatisticDD(object):
         except (AttributeError, ValueError):
             # Sample is a sequence of 1D arrays.
             sample = np.atleast_2d(sample).T
-            mask = np.atleast_2d(mask).T
             N, self.D = sample.shape
+
+        if mask is None:
+            mask = np.ones((N))
 
         self.nbin = np.empty(self.D, int)
         self.edges = self.D * [None]
@@ -139,9 +143,8 @@ class BinnedStatisticDD(object):
             # Apply mask in a non-ideal way by setting value outside range.
             # Would be better to do this using bincount "weights", perhaps.
             thissample = sample[:, i]
-            thismask = mask[:, i]
-            thissample[thismask == 0] = (self.edges[i][0] -
-                                         0.01 * (1+np.fabs(self.edges[i][0])))
+            thissample[mask == 0] = (self.edges[i][0] -
+                                     0.01 * (1+np.fabs(self.edges[i][0])))
             Ncount[i] = np.digitize(thissample, self.edges[i])
 
         # Using digitize, values that fall on an edge are put in the
@@ -551,8 +554,8 @@ class RadialBinnedStatistic(BinnedStatistic1D):
                 represented by function([]), or NaN if this returns an error.
         """
         rpix, _ = get_r_phi(shape, origin)
-        self.expected_shape = shape
 
+        self.expected_shape = shape
         if mask is not None:
             if mask.shape != self.expected_shape:
                 raise ValueError('"mask" has incorrect shape. '
