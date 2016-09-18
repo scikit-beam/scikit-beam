@@ -460,6 +460,9 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
                 will be called on the values in each bin.  Empty bins will be
                 represented by function([]), or NaN if this returns an error.
         """
+        if origin is None:
+            origin = shape[0]//2, shape[1]//2
+
         rpix = radial_grid(origin, shape)
         phipix = angle_grid(origin, shape)
 
@@ -538,6 +541,9 @@ class RadialBinnedStatistic(BinnedStatistic1D):
                 will be called on the values in each bin.  Empty bins will be
                 represented by function([]), or NaN if this returns an error.
         """
+        if origin is None:
+            origin = shape[0]//2, shape[1]//2
+
         rpix = radial_grid(origin, shape)
 
         self.expected_shape = shape

@@ -616,9 +616,6 @@ def radial_grid(center, shape, pixel_size=None):
         The distance of each pixel from `center`
         Shape of the return value is equal to the `shape` input parameter
     """
-    if center is None:
-        center = shape[0]//2, shape[1]//2
-
     if pixel_size is None:
         pixel_size = (1, 1)
 
@@ -654,9 +651,6 @@ def angle_grid(center, shape, pixel_size=None):
     :math:`\\theta \\el [-\pi, \pi]`.  In array indexing and the conventional
     axes for images (origin in upper left), positive y is downward.
     """
-    if center is None:
-        center = shape[0]//2, shape[1]//2
-
     if pixel_size is None:
         pixel_size = (1, 1)
 
