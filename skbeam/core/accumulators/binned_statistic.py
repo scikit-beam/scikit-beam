@@ -546,11 +546,12 @@ class RadialBinnedStatistic(BinnedStatistic1D):
                 raise ValueError('"mask" has incorrect shape. '
                                  ' Expected: ' + str(self.expected_shape) +
                                  ' Received: ' + str(mask.shape))
+            mask = mask.reshape(-1)
 
         super(RadialBinnedStatistic, self).__init__(rpix.reshape(-1),
                                                     statistic,
                                                     bins=bins,
-                                                    mask=mask.reshape(-1),
+                                                    mask=mask,
                                                     range=range)
 
     def __call__(self, values):
