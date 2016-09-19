@@ -94,9 +94,6 @@ class BinnedStatisticDD(object):
             sample = np.atleast_2d(sample).T
             N, self.D = sample.shape
 
-        if mask is None:
-            mask = np.ones((N))
-
         self.nbin = np.empty(self.D, int)
         self.edges = self.D * [None]
         dedges = self.D * [None]
@@ -144,8 +141,9 @@ class BinnedStatisticDD(object):
             # Apply mask in a non-ideal way by setting value outside range.
             # Would be better to do this using bincount "weights", perhaps.
             thissample = sample[:, i]
-            thissample[mask == 0] = (self.edges[i][0] -
-                                     0.01 * (1+np.fabs(self.edges[i][0])))
+            if mask is not None:
+                thissample[mask == 0] = (self.edges[i][0] -
+                                         0.01 * (1+np.fabs(self.edges[i][0])))
             Ncount[i] = np.digitize(thissample, self.edges[i])
 
         # Using digitize, values that fall on an edge are put in the
@@ -428,9 +426,9 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
             * number of bins in each dimension (nr, nphi = bins),
             * bin edges for the two dimensions (r_edges = phi_edges = bins),
             * the bin edges in each dimension (r_edges, phi_edges = bins).
-            Phi has a range of -pi to pi and is defined as arctan(col/row)
-            (i.e. y is column and x is row, or "matrix" format,
-            not "cartesian")
+            Phi has a range of -pi to pi and is defined as arctan(row/col)
+            (i.e. x is column and y is row, or "cartesian" format,
+            not "matrix")
         range : (2,2) array_like, optional
             The leftmost and rightmost edges of the bins along each dimension
             (if not specified explicitly in the `bins` parameters):
@@ -510,9 +508,9 @@ class RadialBinnedStatistic(BinnedStatistic1D):
             non-uniform bin widths.  Values in `x` that are smaller than lowest
             bin edge are assigned to bin number 0, values beyond the highest
             bin are assigned to ``bins[-1]``.
-            Phi has a range of -pi to pi and is defined as arctan(col/row)
-            (i.e. y is column and x is row, or "matrix" format,
-            not "cartesian")
+            Phi has a range of -pi to pi and is defined as arctan(row/col)
+            (i.e. x is column and y is row, or "cartesian" format,
+            not "matrix")
         range : (float, float) or [(float, float)], optional
             The lower and upper range of the bins.  If not provided, range
             is simply ``(x.min(), x.max())``.  Values outside the range are
