@@ -40,6 +40,7 @@ import warnings
 
 import numpy as np
 from scipy._lib.six import callable
+from ..utils import radial_grid, angle_grid
 
 
 class BinnedStatisticDD(object):
@@ -408,24 +409,6 @@ class BinnedStatistic2D(BinnedStatisticDD):
         return super(BinnedStatistic2D, self).__call__(values)
 
 
-def get_r_phi(shape, origin):
-    rowsize = shape[0]
-    colsize = shape[1]
-    if origin is None:
-        rowc = rowsize//2
-        colc = colsize//2
-    else:
-        rowc = origin[0]
-        colc = origin[1]
-    row = np.arange(rowsize)-rowc
-    col = np.arange(colsize)-colc
-    # meshgrid indexing='ij' option requires numpy 1.7 or later
-    rowgrid, colgrid = np.meshgrid(row, col, indexing='ij')
-    rpix = np.sqrt(rowgrid**2 + colgrid**2)
-    phipix = np.arctan2(colgrid, rowgrid)
-    return rpix, phipix
-
-
 class RPhiBinnedStatistic(BinnedStatistic2D):
     """
     Create a 2-dimensional histogram by binning a 2-dimensional
@@ -477,7 +460,11 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
                 will be called on the values in each bin.  Empty bins will be
                 represented by function([]), or NaN if this returns an error.
         """
-        rpix, phipix = get_r_phi(shape, origin)
+        if origin is None:
+            origin = shape[0]//2, shape[1]//2
+
+        rpix = radial_grid(origin, shape)
+        phipix = angle_grid(origin, shape)
 
         self.expected_shape = shape
         if mask is not None:
@@ -485,12 +472,13 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
                 raise ValueError('"mask" has incorrect shape. '
                                  ' Expected: ' + str(self.expected_shape) +
                                  ' Received: ' + str(mask.shape))
+            mask = mask.reshape(-1)
 
         super(RPhiBinnedStatistic, self).__init__(rpix.reshape(-1),
                                                   phipix.reshape(-1),
                                                   statistic,
                                                   bins=bins,
-                                                  mask=mask.reshape(-1),
+                                                  mask=mask,
                                                   range=range)
 
     def __call__(self, values):
@@ -553,7 +541,10 @@ class RadialBinnedStatistic(BinnedStatistic1D):
                 will be called on the values in each bin.  Empty bins will be
                 represented by function([]), or NaN if this returns an error.
         """
-        rpix, _ = get_r_phi(shape, origin)
+        if origin is None:
+            origin = shape[0]//2, shape[1]//2
+
+        rpix = radial_grid(origin, shape)
 
         self.expected_shape = shape
         if mask is not None:
@@ -561,11 +552,12 @@ class RadialBinnedStatistic(BinnedStatistic1D):
                 raise ValueError('"mask" has incorrect shape. '
                                  ' Expected: ' + str(self.expected_shape) +
                                  ' Received: ' + str(mask.shape))
+            mask = mask.reshape(-1)
 
         super(RadialBinnedStatistic, self).__init__(rpix.reshape(-1),
                                                     statistic,
                                                     bins=bins,
-                                                    mask=mask.reshape(-1),
+                                                    mask=mask,
                                                     range=range)
 
     def __call__(self, values):

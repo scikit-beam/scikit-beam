@@ -24,7 +24,7 @@ class TestRadialBinnedStatistic(object):
         colarr = np.arange(colsize)
         rowgrid, colgrid = np.meshgrid(rowarr, colarr, indexing='ij')
         self.rgrid = np.sqrt(rowgrid**2 + colgrid**2)
-        self.phigrid = np.arctan2(colgrid, rowgrid)
+        self.phigrid = np.arctan2(rowgrid, colgrid)
 
         self.image = np.sinc(self.rgrid / self.oscillation_rate)
 
