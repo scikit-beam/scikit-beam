@@ -40,11 +40,12 @@ import warnings
 
 import numpy as np
 from scipy._lib.six import callable
+from ..utils import radial_grid, angle_grid
 
 
 class BinnedStatisticDD(object):
     def __init__(self, sample, statistic='mean',
-                 bins=10, range=None):
+                 bins=10, range=None, mask=None):
         """
         Compute a multidimensional binned statistic for a set of data.
 
@@ -70,8 +71,15 @@ class BinnedStatisticDD(object):
             A sequence of lower and upper bin edges to be used if the
             edges are not given explicitely in `bins`. Defaults to the
             minimum and maximum values along each dimension.
+        mask : array_like
+            array of ones and zeros with total size N (see documentation
+            for `sample`). Values with mask==0 will be ignored.
 
+        Note: If using numpy versions < 1.10.0, you may notice slow behavior of
+        this constructor. This has to do with digitize, which was optimized
+        from 1.10.0 onwards.
         """
+
         known_stats = ['mean', 'median', 'count', 'sum', 'std']
         self.statistic = statistic
         if not callable(self.statistic) and self.statistic not in known_stats:
@@ -130,7 +138,13 @@ class BinnedStatisticDD(object):
         # Compute the bin number each sample falls into.
         Ncount = {}
         for i in np.arange(self.D):
-            Ncount[i] = np.digitize(sample[:, i], self.edges[i])
+            # Apply mask in a non-ideal way by setting value outside range.
+            # Would be better to do this using bincount "weights", perhaps.
+            thissample = sample[:, i]
+            if mask is not None:
+                thissample[mask == 0] = (self.edges[i][0] -
+                                         0.01 * (1+np.fabs(self.edges[i][0])))
+            Ncount[i] = np.digitize(thissample, self.edges[i])
 
         # Using digitize, values that fall on an edge are put in the
         # right bin.  For the rightmost bin, we want values equal to
@@ -237,7 +251,7 @@ class BinnedStatisticDD(object):
 
 class BinnedStatistic1D(BinnedStatisticDD):
     def __init__(self, x, statistic='mean',
-                 bins=10, range=None):
+                 bins=10, range=None, mask=None):
         """
         A refactored version of scipy.stats.binned_statistic to improve
         performance for the case where binning doesn't need to be
@@ -282,6 +296,9 @@ class BinnedStatistic1D(BinnedStatisticDD):
             The lower and upper range of the bins.  If not provided, range
             is simply ``(x.min(), x.max())``.  Values outside the range are
             ignored.
+        mask : array_like
+            ones and zeros with the same shape as `x`.
+            Values with mask==0 will be ignored.
 
         See Also
         --------
@@ -307,7 +324,8 @@ class BinnedStatistic1D(BinnedStatisticDD):
                 range = [range]
 
         super(BinnedStatistic1D, self).__init__([x], statistic=statistic,
-                                                bins=bins, range=range)
+                                                bins=bins, range=range,
+                                                mask=mask)
 
 
 class BinnedStatistic2D(BinnedStatisticDD):
@@ -359,6 +377,9 @@ class BinnedStatistic2D(BinnedStatisticDD):
         (if not specified explicitly in the `bins` parameters):
         [[xmin, xmax], [ymin, ymax]]. All values outside of this range will be
         considered outliers and not tallied in the histogram.
+    mask : array_like
+        ones and zeros with the same shape as `x`.
+        Values with mask==0 will be ignored.
 
     See Also
     --------
@@ -367,7 +388,7 @@ class BinnedStatistic2D(BinnedStatisticDD):
     """
 
     def __init__(self, x, y, statistic='mean',
-                 bins=10, range=None):
+                 bins=10, range=None, mask=None):
         # This code is based on np.histogram2d
         try:
             N = len(bins)
@@ -379,7 +400,8 @@ class BinnedStatistic2D(BinnedStatisticDD):
             bins = [xedges, yedges]
 
         super(BinnedStatistic2D, self).__init__([x, y], statistic=statistic,
-                                                bins=bins, range=range)
+                                                bins=bins, range=range,
+                                                mask=mask)
 
     def __call__(self, values):
         return super(BinnedStatistic2D, self).__call__(values)
@@ -391,31 +413,33 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
     image in both radius and phi.
     """
 
-    def __init__(self, rbins, phibins, rowsize, colsize,
-                 rowc=None, colc=None, rrange=None, phirange=None, mask=None,
-                 statistic='mean'):
+    def __init__(self, shape, bins=10, range=None,
+                 origin=None, mask=None, statistic='mean'):
         """
         Parameters:
         -----------
-        rbins: int
-            number of radial bins in returned histogram.
-        phibins: int
-            number of phi bins in returned histogram.
-        rowsize,colsize: int
-            shape of image in pixels.
-        rowc,colc: int, optional
+        shape : tuple of ints of length 2.
+            shape of image.
+        bins : int or [int, int] or array_like or [array, array], optional
+            The bin specification:
+            * number of bins for the two dimensions (nr=nphi=bins),
+            * number of bins in each dimension (nr, nphi = bins),
+            * bin edges for the two dimensions (r_edges = phi_edges = bins),
+            * the bin edges in each dimension (r_edges, phi_edges = bins).
+            Phi has a range of -pi to pi and is defined as arctan(row/col)
+            (i.e. x is column and y is row, or "cartesian" format,
+            not "matrix")
+        range : (2,2) array_like, optional
+            The leftmost and rightmost edges of the bins along each dimension
+            (if not specified explicitly in the `bins` parameters):
+            [[rmin, rmax], [phimin, phimax]]. All values outside of this range
+            will be considered outliers and not tallied in the histogram.
+            See "bins" parameter for definition of phi.
+        origin : tuple of ints with length 2, optional
             location (in pixels) of origin (default: image center).
-        rrange: (float, float), optional
-            The lower and upper radial range of the bins, in pixels.
-            If not provided, all pixel r values are included.
-        phirange: (float, float), optional
-            phi range to include.  Values are in the range
-            (-pi,pi) radians (default: no limits).  Phi is
-            computed as arctan(col/row), i.e. "matrix" ordering and
-            not "cartesian" ordering.
-        mask: 2-dimensional np.ndarray, optional
-            array of zero/non-zero values, same shape as image used
-            in __call__.  zero values will be ignored.
+        mask : 2-dimensional np.ndarray of ints, optional
+            array of zero/non-zero values, with shape `shape`.
+            zero values will be ignored.
         statistic : string or callable, optional
             The statistic to compute (default is 'mean').
             The following statistics are available:
@@ -434,36 +458,26 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
                 will be called on the values in each bin.  Empty bins will be
                 represented by function([]), or NaN if this returns an error.
         """
+        if origin is None:
+            origin = shape[0]//2, shape[1]//2
 
-        rowc = rowsize//2 if rowc is None else rowc
-        colc = colsize//2 if colc is None else colc
-        row = np.arange(rowsize)-rowc
-        col = np.arange(colsize)-colc
-        # meshgrid indexing='ij' option requires numpy 1.7 or later
-        rowgrid, colgrid = np.meshgrid(row, col, indexing='ij')
-        self.expected_shape = rowgrid.shape
+        rpix = radial_grid(origin, shape)
+        phipix = angle_grid(origin, shape)
 
-        rpix = np.sqrt(rowgrid**2 + colgrid**2)
-
-        phipix = np.arctan2(colgrid, rowgrid)
-
-        if rrange is None:
-            rrange = (rpix.min(), rpix.max())
-        if phirange is None:
-            phirange = (-np.pi, np.pi)
+        self.expected_shape = shape
         if mask is not None:
             if mask.shape != self.expected_shape:
                 raise ValueError('"mask" has incorrect shape. '
                                  ' Expected: ' + str(self.expected_shape) +
                                  ' Received: ' + str(mask.shape))
-            # a somewhat ugly way to mask pixels
-            rpix[mask == 0] = rrange[0]-1
+            mask = mask.reshape(-1)
 
         super(RPhiBinnedStatistic, self).__init__(rpix.reshape(-1),
                                                   phipix.reshape(-1),
                                                   statistic,
-                                                  bins=(rbins, phibins),
-                                                  range=(rrange, phirange))
+                                                  bins=bins,
+                                                  mask=mask,
+                                                  range=range)
 
     def __call__(self, values):
         # check for what I believe could be a common error
@@ -474,23 +488,80 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
         return super(RPhiBinnedStatistic, self).__call__(values.reshape(-1))
 
 
-class RadialBinnedStatistic(RPhiBinnedStatistic):
+class RadialBinnedStatistic(BinnedStatistic1D):
     """
     Create a 1-dimensional histogram by binning a 2-dimensional
     image in radius.
     """
 
-    def __init__(self, bins, rowsize, colsize,
-                 rowc=None, colc=None, rrange=None, phirange=None, mask=None,
-                 statistic='mean'):
+    def __init__(self, shape, bins=10, range=None,
+                 origin=None, mask=None, statistic='mean'):
         """
-        See RPhiBinnedStatistic documentation.
-        """
+        Parameters:
+        -----------
+        shape : tuple of ints of length 2.
+            shape of image.
+        bins : int or sequence of scalars, optional
+            If `bins` is an int, it defines the number of equal-width bins in
+            the given range (10 by default).  If `bins` is a sequence, it
+            defines the bin edges, including the rightmost edge, allowing for
+            non-uniform bin widths.  Values in `x` that are smaller than lowest
+            bin edge are assigned to bin number 0, values beyond the highest
+            bin are assigned to ``bins[-1]``.
+            Phi has a range of -pi to pi and is defined as arctan(row/col)
+            (i.e. x is column and y is row, or "cartesian" format,
+            not "matrix")
+        range : (float, float) or [(float, float)], optional
+            The lower and upper range of the bins.  If not provided, range
+            is simply ``(x.min(), x.max())``.  Values outside the range are
+            ignored.
+            See "bins" parameter for definition of phi.
+        origin : tuple of ints with length 2, optional
+            location (in pixels) of origin (default: image center).
+        mask : 2-dimensional np.ndarray of ints, optional
+            array of zero/non-zero values, with shape `shape`.
+            zero values will be ignored.
+        statistic : string or callable, optional
+            The statistic to compute (default is 'mean').
+            The following statistics are available:
 
-        super(RadialBinnedStatistic, self).__init__(bins, 1, rowsize, colsize,
-                                                    rowc, colc,
-                                                    rrange, phirange, mask,
-                                                    statistic)
+              * 'mean' : compute the mean of values for points within each bin.
+                Empty bins will be represented by NaN.
+              * 'median' : compute the median of values for points within each
+                bin. Empty bins will be represented by NaN.
+              * 'count' : compute the count of points within each bin.  This is
+                identical to an unweighted histogram.  `values` array is not
+                referenced.
+              * 'sum' : compute the sum of values for points within each bin.
+                This is identical to a weighted histogram.
+              * function : a user-defined function which takes a 1D array of
+                values, and outputs a single numerical statistic. This function
+                will be called on the values in each bin.  Empty bins will be
+                represented by function([]), or NaN if this returns an error.
+        """
+        if origin is None:
+            origin = shape[0]//2, shape[1]//2
+
+        rpix = radial_grid(origin, shape)
+
+        self.expected_shape = shape
+        if mask is not None:
+            if mask.shape != self.expected_shape:
+                raise ValueError('"mask" has incorrect shape. '
+                                 ' Expected: ' + str(self.expected_shape) +
+                                 ' Received: ' + str(mask.shape))
+            mask = mask.reshape(-1)
+
+        super(RadialBinnedStatistic, self).__init__(rpix.reshape(-1),
+                                                    statistic,
+                                                    bins=bins,
+                                                    mask=mask,
+                                                    range=range)
 
     def __call__(self, values):
-        return np.squeeze(super(RadialBinnedStatistic, self).__call__(values))
+        # check for what I believe could be a common error
+        if values.shape != self.expected_shape:
+            raise ValueError('"values" has incorrect shape.'
+                             ' Expected: ' + str(self.expected_shape) +
+                             ' Received: ' + str(values.shape))
+        return super(RadialBinnedStatistic, self).__call__(values.reshape(-1))
