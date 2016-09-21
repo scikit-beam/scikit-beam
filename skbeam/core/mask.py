@@ -45,6 +45,7 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 
 import logging
+import scipy.stats as sts
 logger = logging.getLogger(__name__)
 
 
@@ -78,7 +79,7 @@ def bad_to_nan_gen(images, bad):
             yield im
 
 
-def threshold_mask(images, threshold, mask=None):
+def threshold(images, threshold, mask=None):
     """
     This generator sets all pixels whose value is greater than `threshold`
     to 0 and yields the thresholded images out
@@ -108,3 +109,79 @@ def threshold_mask(images, threshold, mask=None):
         if len(bad_pixels[0]) != 0:
             mask[bad_pixels] = 0
         yield mask
+
+
+def margin(img_shape, edge_size):
+    """
+    Mask the edge of an image
+
+    Parameters
+    -----------
+    img_shape: tuple
+        The shape of the image
+    edge_size: int
+        Number of pixels to mask from the edge
+
+    Returns
+    --------
+    2darray:
+        The mask array, bad pixels are 0
+    """
+    mask = np.ones(img_shape, dtype=bool)
+    mask[edge_size:-edge_size, edge_size:-edge_size] = 0.
+    return ~mask
+
+
+def binned_outlier(img, r, alpha, bins, mask=None):
+    """
+    Generates a mask by identifying outlier pixels in bins and masks any
+    pixels which have a value greater or less than alpha * std away from the
+    mean
+
+    Parameters
+    ----------
+    img: 2darray
+        The  image
+    r: 2darray
+        The  array which maps pixels to bins
+    alpha: float or tuple or, 1darray
+        Then number of acceptable standard deviations, if tuple then we use
+        a linear distribution of alphas from alpha[0] to alpha[1], if array
+        then we just use that as the distribution of alphas
+    bins: list
+        The bin edges
+    mask: 1darray
+        A starting flattened mask
+
+    Returns
+    --------
+    2darray:
+        The mask
+    """
+
+    if mask is None:
+        working_mask = np.ones(img.shape).astype(bool)
+    else:
+        working_mask = mask.copy()
+    if working_mask.shape != img.shape:
+        working_mask = working_mask.reshape(img.shape)
+    msk_img = img[working_mask]
+    msk_r = r[working_mask]
+
+    int_r = np.digitize(r, bins[:-1], True) - 1
+    # integration
+    mean = sts.binned_statistic(msk_r, msk_img, bins=bins,
+                                statistic='mean')[0]
+    std = sts.binned_statistic(msk_r, msk_img, bins=bins,
+                               statistic=np.std)[0]
+    if type(alpha) is tuple:
+        alpha = np.linspace(alpha[0], alpha[1], len(std))
+    threshold = alpha * std
+    lower = mean - threshold
+    upper = mean + threshold
+
+    # single out the too low and too high pixels
+    working_mask *= img > lower[int_r]
+    working_mask *= img < upper[int_r]
+
+    return working_mask.astype(bool)
