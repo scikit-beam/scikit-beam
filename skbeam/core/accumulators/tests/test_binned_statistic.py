@@ -5,6 +5,7 @@ from nose.tools import assert_raises
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 import numpy as np
 import scipy.stats
+from ...utils import bin_edges_to_centers
 
 stats_list = [('mean', np.mean), ('median', np.median), ('count', len),
               ('sum', np.sum), ('std', np.std)]
@@ -69,10 +70,13 @@ class TestRadialBinnedStatistic(object):
                     range=kwrange,
                     bins=bins,
                 )
+                centers = bin_edges_to_centers(edges)
 
                 assert_array_equal(ref, binned)
                 assert_array_equal(edges, radbinstat.bin_edges[0])
                 assert_array_equal(edges, radbinstat_f.bin_edges[0])
+                assert_array_equal(centers, radbinstat.bin_centers[0])
+                assert_array_equal(centers, radbinstat_f.bin_centers[0])
 
         bins = (100, 2)
         myrphikwargs = [{'origin': (0, 0),
