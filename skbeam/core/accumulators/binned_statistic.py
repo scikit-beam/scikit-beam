@@ -181,8 +181,8 @@ class BinnedStatisticDD(object):
     @property
     def bin_centers(self):
         """
-        bin_edges : array of dtype float
-        Return the bin edges ``(length(statistic)+1)``.
+        bin_centers : array of dtype float
+        Return the bin centers ``(length(statistic))``.
         """
         return self._centers
 
