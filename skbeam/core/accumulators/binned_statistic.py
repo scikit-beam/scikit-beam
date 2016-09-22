@@ -39,7 +39,6 @@ from __future__ import division, print_function, absolute_import
 import warnings
 
 import numpy as np
-from scipy._lib.six import callable
 from ..utils import radial_grid, angle_grid
 
 
