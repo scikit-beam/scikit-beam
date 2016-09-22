@@ -39,7 +39,7 @@ from __future__ import division, print_function, absolute_import
 import warnings
 
 import numpy as np
-from ..utils import radial_grid, angle_grid
+from ..utils import radial_grid, angle_grid, bin_edges_to_centers
 
 
 class BinnedStatisticDD(object):
@@ -95,6 +95,7 @@ class BinnedStatisticDD(object):
 
         self.nbin = np.empty(self.D, int)
         self.edges = self.D * [None]
+        self._centers = self.D * [None]
         dedges = self.D * [None]
 
         try:
@@ -130,6 +131,7 @@ class BinnedStatisticDD(object):
             else:
                 self.edges[i] = np.asarray(bins[i], float)
                 self.nbin[i] = len(self.edges[i]) + 1  # +1 for outlier bins
+            self._centers[i] = bin_edges_to_centers(self.edges[i])
             dedges[i] = np.diff(self.edges[i])
 
         self.nbin = np.asarray(self.nbin)
@@ -175,6 +177,14 @@ class BinnedStatisticDD(object):
         Return the bin edges ``(length(statistic)+1)``.
         """
         return self.edges
+
+    @property
+    def bin_centers(self):
+        """
+        bin_edges : array of dtype float
+        Return the bin edges ``(length(statistic)+1)``.
+        """
+        return self._centers
 
     def __call__(self, values):
         """
