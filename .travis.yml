@@ -24,7 +24,7 @@ before_install:
   - chmod +x miniconda.sh
   - ./miniconda.sh -b -p ~/mc
   - export PATH=~/mc/bin:$PATH
-  - conda update conda
+  - conda update conda --yes
   - export CONDARC=ci/condarc
 
 install:
