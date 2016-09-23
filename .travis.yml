@@ -13,11 +13,16 @@ env:
 matrix:
   include:
     - python: 3.5
-      env: BUILD_DOCS=true RUN_TESTS=false
+      env: BUILD_DOCS=true RUN_TESTS=false NUMPY=1.11
 python:
   - 2.7
   - 3.4
   - 3.5
+
+env:
+  - NUMPY=1.10
+  - NUMPY=1.11
+
 
 before_install:
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
@@ -29,7 +34,7 @@ before_install:
 
 install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
-  - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4 flake8
+  - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy=$NUMPY scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4 flake8
   - source activate testenv
   - pip install pyFAI
   # # need to build_ext -i for the tests so that the .so is local to the source
