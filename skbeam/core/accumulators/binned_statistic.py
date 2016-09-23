@@ -336,6 +336,22 @@ class BinnedStatistic1D(BinnedStatisticDD):
                                                 bins=bins, range=range,
                                                 mask=mask)
 
+    @property
+    def bin_edges(self):
+        """
+        bin_edges : 1D array of dtype float
+        Return the bin edges.
+        """
+        return super(BinnedStatistic1D, self).bin_edges[0]
+
+    @property
+    def bin_centers(self):
+        """
+        bin_centers : 1D array of dtype float
+        Return the bin centers.
+        """
+        return super(BinnedStatistic1D, self).bin_centers[0]
+
 
 class BinnedStatistic2D(BinnedStatisticDD):
     """
@@ -566,22 +582,6 @@ class RadialBinnedStatistic(BinnedStatistic1D):
                                                     bins=bins,
                                                     mask=mask,
                                                     range=range)
-
-    @property
-    def bin_edges(self):
-        """
-        bin_edges : 1D array of dtype float
-        Return the bin edges.
-        """
-        return super(RadialBinnedStatistic, self).bin_edges[0]
-
-    @property
-    def bin_centers(self):
-        """
-        bin_centers : 1D array of dtype float
-        Return the bin centers.
-        """
-        return super(RadialBinnedStatistic, self).bin_centers[0]
 
     def __call__(self, values):
         # check for what I believe could be a common error

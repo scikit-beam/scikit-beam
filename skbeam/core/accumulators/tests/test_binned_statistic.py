@@ -150,5 +150,5 @@ def test_BinnedStatistics1D():
 
         assert_array_equal(bs(values), ref)
         assert_array_almost_equal(bs_f(values), ref)
-        assert_array_equal(edges, bs.bin_edges[0])
-        assert_array_equal(edges, bs_f.bin_edges[0])
+        assert_array_equal(edges, bs.bin_edges)
+        assert_array_equal(edges, bs_f.bin_edges)
