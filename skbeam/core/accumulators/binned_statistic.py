@@ -567,6 +567,22 @@ class RadialBinnedStatistic(BinnedStatistic1D):
                                                     mask=mask,
                                                     range=range)
 
+    @property
+    def bin_edges(self):
+        """
+        bin_edges : 1D array of dtype float
+        Return the bin edges.
+        """
+        return super(RadialBinnedStatistic, self).bin_edges[0]
+
+    @property
+    def bin_centers(self):
+        """
+        bin_centers : 1D array of dtype float
+        Return the bin centers.
+        """
+        return super(RadialBinnedStatistic, self).bin_centers[0]
+
     def __call__(self, values):
         # check for what I believe could be a common error
         if values.shape != self.expected_shape:
