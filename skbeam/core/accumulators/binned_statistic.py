@@ -444,7 +444,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
             [[rmin, rmax], [phimin, phimax]]. All values outside of this range
             will be considered outliers and not tallied in the histogram.
             See "bins" parameter for definition of phi.
-        origin : tuple of ints with length 2, optional
+        origin : tuple of floats with length 2, optional
             location (in pixels) of origin (default: image center).
         mask : 2-dimensional np.ndarray of ints, optional
             array of zero/non-zero values, with shape `shape`.
@@ -468,7 +468,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
                 represented by function([]), or NaN if this returns an error.
         """
         if origin is None:
-            origin = shape[0]/2., shape[1]/2.
+            origin = shape[0]/2, shape[1]/2
 
         rpix = radial_grid(origin, shape)
         phipix = angle_grid(origin, shape)
@@ -525,7 +525,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
             is simply ``(x.min(), x.max())``.  Values outside the range are
             ignored.
             See "bins" parameter for definition of phi.
-        origin : tuple of ints with length 2, optional
+        origin : tuple of floats with length 2, optional
             location (in pixels) of origin (default: image center).
         mask : 2-dimensional np.ndarray of ints, optional
             array of zero/non-zero values, with shape `shape`.
@@ -549,7 +549,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
                 represented by function([]), or NaN if this returns an error.
         """
         if origin is None:
-            origin = shape[0]/2., shape[1]/2.
+            origin = shape[0]/2, shape[1]/2
 
         rpix = radial_grid(origin, shape)
 
