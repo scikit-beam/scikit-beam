@@ -73,10 +73,10 @@ class TestRadialBinnedStatistic(object):
                 centers = bin_edges_to_centers(edges)
 
                 assert_array_equal(ref, binned)
-                assert_array_equal(edges, radbinstat.bin_edges[0])
-                assert_array_equal(edges, radbinstat_f.bin_edges[0])
-                assert_array_equal(centers, radbinstat.bin_centers[0])
-                assert_array_equal(centers, radbinstat_f.bin_centers[0])
+                assert_array_equal(edges, radbinstat.bin_edges)
+                assert_array_equal(edges, radbinstat_f.bin_edges)
+                assert_array_equal(centers, radbinstat.bin_centers)
+                assert_array_equal(centers, radbinstat_f.bin_centers)
 
         bins = (100, 2)
         myrphikwargs = [{'origin': (0, 0),
@@ -150,5 +150,5 @@ def test_BinnedStatistics1D():
 
         assert_array_equal(bs(values), ref)
         assert_array_almost_equal(bs_f(values), ref)
-        assert_array_equal(edges, bs.bin_edges[0])
-        assert_array_equal(edges, bs_f.bin_edges[0])
+        assert_array_equal(edges, bs.bin_edges)
+        assert_array_equal(edges, bs_f.bin_edges)
