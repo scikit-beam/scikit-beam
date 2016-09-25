@@ -468,7 +468,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
                 represented by function([]), or NaN if this returns an error.
         """
         if origin is None:
-            origin = shape[0]/2, shape[1]/2
+            origin = (shape[0]-1)/2., (shape[1]-1)/2.
 
         rpix = radial_grid(origin, shape)
         phipix = angle_grid(origin, shape)
@@ -549,7 +549,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
                 represented by function([]), or NaN if this returns an error.
         """
         if origin is None:
-            origin = shape[0]/2, shape[1]/2
+            origin = (shape[0]-1)/2, (shape[1]-1)/2
 
         rpix = radial_grid(origin, shape)
 

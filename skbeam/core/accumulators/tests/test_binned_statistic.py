@@ -45,7 +45,7 @@ class TestRadialBinnedStatistic(object):
                 else:
                     origin = None
                 if origin is None:
-                    origin = self.rowsize/2., self.colsize/2.
+                    origin = (self.rowsize-1)/2., (self.colsize-1)/2.
 
                 # need to calculate these every time in loop since origin
                 # changes
@@ -106,7 +106,7 @@ class TestRadialBinnedStatistic(object):
                 else:
                     origin = None
                 if origin is None:
-                    origin = self.rowsize/2., self.colsize/2.
+                    origin = (self.rowsize-1)/2., (self.colsize-1)/2.
 
                 # need to calculate these every time in loop since origin
                 # changes
