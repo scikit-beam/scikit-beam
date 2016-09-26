@@ -44,6 +44,8 @@ import logging
 from scipy.ndimage.filters import gaussian_filter
 logger = logging.getLogger(__name__)
 
+from core.stats import poissonize
+
 
 def find_ring_center_acorr_1D(input_image):
     """
@@ -214,10 +216,8 @@ def gaussfill(img, mask, sigma=30, poisson=False, Navg=None):
     imgmskrat = gaussian_filter(mask*0.+1, sigma)
     w = np.where((mask < .1)*(imgmsk > 0))
     imgf[w] = imgg[w]/imgmsk[w]*imgmskrat[w]
+
     if poisson:
-        if Navg is None:
-            Navg = 1.
-        # some threshold since poisson doesnt work at high vals
-        imgf[w] = np.random.poisson(imgf[w]*(imgf[w] < 1e9)*Navg)/Navg
+        imgf[w] = poissonize(imgf[w], Navg=Navg)
 
     return imgf
