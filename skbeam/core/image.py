@@ -44,7 +44,7 @@ import logging
 from scipy.ndimage.filters import gaussian_filter
 logger = logging.getLogger(__name__)
 
-from core.stats import poissonize
+from skbeam.core.stats import poissonize
 
 
 def find_ring_center_acorr_1D(input_image):
