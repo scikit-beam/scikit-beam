@@ -103,7 +103,7 @@ def poissonize(data, Navg=None):
 
         Notes
         -----
-            If larger than some threshold, the Poisson 
+            If larger than some threshold, the Poisson
 
     '''
     if Navg is None:
