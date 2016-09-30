@@ -169,10 +169,10 @@ def dropletanal(np.ndarray[np.int_t, ndim=2, mode="c"] img, \
         in the image. As a side effect it modifies the dropletmap into cycles so
         further processing will become easier. The cycles link pixels of same
         droplet. So the code:
-     	pos=dropletmap(id);
+            pos=dropletmap(id);
 	do { //do stuff with pixel img(pos)
-	   pos=dropletmap(pos)}
-	   }
+            pos=dropletmap(pos)}
+            }
 	while(pos!=id);
         will loop through pixels of droplet id. Save a copy of dropletmap
         if you want to use it later. (Really is only easier to process this
@@ -208,10 +208,12 @@ def dropletanal(np.ndarray[np.int_t, ndim=2, mode="c"] img, \
     cdef np.ndarray[np.float_t, ndim=1, mode="c"] ycen = np.zeros(npeaks, dtype=np.float_)
     cdef np.ndarray[np.int_t, ndim=1, mode="c"] adus = np.zeros(npeaks, dtype=np.int_)
     cdef np.ndarray[np.int_t, ndim=1, mode="c"] idlist = np.zeros(npeaks, dtype=np.int_)
+    # make a copy of the label array
+    cdef np.ndarray[np.int_t, ndim=2, mode="c"] dimg2 = np.copy(dimg)
 
     d = img.shape
 
-    raw_dropletanal(&img[0,0], &dimg[0,0], &npix[0], &xcen[0], &ycen[0],\
+    raw_dropletanal(&img[0,0], &dimg2[0,0], &npix[0], &xcen[0], &ycen[0],\
                     &adus[0], &idlist[0], npeaks, d[1], d[0])
 
     return npix, xcen, ycen, adus, idlist
