@@ -150,7 +150,7 @@ def binned_outlier(img, r, alpha, bins, mask=None):
         then we just use that as the distribution of alphas
     bins: list
         The bin edges
-    mask: 1darray
+    mask: 1darray, bool
         A starting flattened mask
 
     Returns
@@ -162,7 +162,7 @@ def binned_outlier(img, r, alpha, bins, mask=None):
     if mask is None:
         working_mask = np.ones(img.shape).astype(bool)
     else:
-        working_mask = mask.copy()
+        working_mask = np.copy(mask).astype(bool)
     if working_mask.shape != img.shape:
         working_mask = working_mask.reshape(img.shape)
     msk_img = img[working_mask]
