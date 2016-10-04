@@ -13,24 +13,28 @@ env:
 matrix:
   include:
     - python: 3.5
-      env: BUILD_DOCS=true RUN_TESTS=false
+      env: BUILD_DOCS=true RUN_TESTS=false NUMPY=1.11
 python:
   - 2.7
   - 3.4
   - 3.5
 
+env:
+  - NUMPY=1.10
+  - NUMPY=1.11
+
+
 before_install:
-  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-3.5.5-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.5.5-Linux-x86_64.sh -O miniconda.sh; fi
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
-  - ./miniconda.sh -b -p /home/travis/mc
-  - export PATH=/home/travis/mc/bin:$PATH
+  - ./miniconda.sh -b -p ~/mc
+  - export PATH=~/mc/bin:$PATH
+  - conda update conda --yes
+  - export CONDARC=ci/condarc
 
 install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
-  - conda config --set always_yes true
-  - conda update conda
-  - conda config --add channels lightsource2
-  - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4 flake8
+  - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy=$NUMPY scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4 flake8
   - source activate testenv
   - pip install pyFAI
   # # need to build_ext -i for the tests so that the .so is local to the source
