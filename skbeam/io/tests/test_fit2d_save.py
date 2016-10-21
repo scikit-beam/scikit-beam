@@ -42,13 +42,18 @@
 from __future__ import absolute_import, division, print_function
 import os
 import numpy as np
-from skbeam.io.fit2d_save import fit2d_save
+from skbeam.io.fit2d_io import fit2d_save, read_fit2d_msk
+from numpy.testing import assert_array_equal
 
 
 def test_save_output_for_smoke():
     filename = "function_values"
-    msk = np.ones((2048, 2048))
+    msk = np.random.random_integers(
+        0, 1, (np.random.random_integers(0, 200),
+               np.random.random_integers(0, 200))).astype(bool)
 
     fit2d_save(msk, filename, dir_path=None)
+    msk2 = read_fit2d_msk(filename)
+    assert_array_equal(msk2, msk)
 
     os.remove("function_values.msk")
