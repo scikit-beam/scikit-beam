@@ -42,7 +42,7 @@
 from __future__ import absolute_import, division, print_function
 import os
 import numpy as np
-from skbeam.io.fit2d_io import fit2d_save, read_fit2d_msk
+from skbeam.io.fit2d import fit2d_save, read_fit2d_msk
 from numpy.testing import assert_array_equal
 
 
