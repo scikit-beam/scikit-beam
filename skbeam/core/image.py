@@ -166,7 +166,6 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None,
         center = (dims[0]-1)/2., (dims[1] - 1)/2.
 
     radial_val = utils.radial_grid(center, dims, pixel_size)
-    CIMG = np.zeros(dims)
     CIMG = np.interp(radial_val, radii, intensities, right=0)
 
     return CIMG
