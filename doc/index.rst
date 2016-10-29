@@ -31,8 +31,24 @@ Supported techniques
 * X-Ray Speckle Visibility Spectroscopy (XSVS) (:mod:`~skbeam.core.speckle`)
 * X-ray Fluorescence  (:mod:`~skbeam.fluorescence`)
 * Fast histograms
-* Access to basic constants (:mod:`~skbeam.core.constants`)
 
+Other utilities
+===============
+
+* Basic constants (:mod:`~skbeam.core.constants`)
+* Logical convenience functions (:mod:`~skbeam.core.arithmetic`)
+* Utilities to estimating the center of a ring pattern and the
+  sample-to-detector distance of a powder pattern
+  (:mod:`~skbeam.core.calibration`)
+* Peak extraction (:mod:`~skbeam.core.feature`)
+* Mask pixels based on a threshold; as a statistical outlier within a bin; for
+  proximity to canvas edge (margin). (:mod:`~skbeam.core.mask`)
+* Compute reciprocol space coordinates of pixels. (:mod:`~skbeam.core.recip`)
+* Draw and manipulate ROI mask; draw kymograph; compute statistics on ROIs.
+  (:mod:`~skbeam.core.roi`)
+* Misc. utilities (:mod:`~skbeam.core.utils`)
+* A thin wrapper around ``scipy.stats.binned_statistic``
+  (:mod:`~skbeam.core.stats`)
 
 .. _installation_tl:
 
