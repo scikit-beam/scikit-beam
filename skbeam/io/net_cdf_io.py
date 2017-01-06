@@ -16,8 +16,8 @@ def load_netCDF(file_name):
     APS-Sector 13 GSECARS extension) file into a numpy array for further
     analysis.
 
-    Required Dependencies
-    ---------------------
+    Required Dependencies:
+
     netcdf4 : Python/numpy interface to the netCDF ver. 4 library
         Package name: netcdf4-python
         Install from: https://github.com/Unidata/netcdf4-python

@@ -71,8 +71,8 @@ def logical_nand(x1, x2, out=None):
         NAND operation on corresponding elements of `x1` and `x2`.
 
 
-    Example
-    -------
+    Examples
+    --------
     >>> x1 = [[0,0,1,0,0], [2,1,1,1,2], [2,0,1,0,2]]
     >>> x2 = [[0,0,0,0,0], [2,1,1,1,2], [0,0,0,0,0]]
     >>> logical_nand(x1, x2)
@@ -108,8 +108,8 @@ def logical_nor(x1, x2, out=None):
         Boolean result with the same shape as `x1` and `x2` of the logical
         NOR operation on corresponding elements of `x1` and `x2`.
 
-    Example
-    -------
+    Examples
+    --------
     >>> x1 = [[0,0,1,0,0], [2,1,1,1,2], [2,0,1,0,2]]
     >>> x2 = [[0,0,0,0,0], [2,1,1,1,2], [0,0,0,0,0]]
     >>> logical_nor(x1, x2)
@@ -146,8 +146,8 @@ def logical_sub(x1, x2, out=None):
         Boolean result with the same shape as `x1` and `x2` of the logical
         SUBTRACT operation on corresponding elements of `x1` and `x2`.
 
-    Example
-    -------
+    Examples
+    --------
     >>> x1 = [[0,0,1,0,0], [2,1,1,1,2], [2,0,1,0,2]]
     >>> x2 = [[0,0,0,0,0], [2,1,1,1,2], [0,0,0,0,0]]
     >>> logical_sub(x1, x2)
