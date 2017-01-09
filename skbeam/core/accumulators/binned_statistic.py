@@ -212,6 +212,7 @@ class BinnedStatisticDD(object):
             The values of the selected statistic in each bin.
         """
 
+        self.statistic = statistic
         if statistic is not None:
             if self.statistic in ['mean', 'std', 'count']:
                 self.flatcount = np.bincount(self.xy, None)
