@@ -79,9 +79,10 @@ class BinnedStatisticDD(object):
         from 1.10.0 onwards.
         """
 
-        known_stats = ['mean', 'median', 'count', 'sum', 'std']
+        self.known_stats = ['mean', 'median', 'count', 'sum', 'std']
         self.statistic = statistic
-        if not callable(self.statistic) and self.statistic not in known_stats:
+        if not callable(
+                self.statistic) and self.statistic not in self.known_stats:
             raise ValueError('invalid statistic %r' % (self.statistic,))
 
         # This code is based on np.histogramdd
@@ -186,7 +187,7 @@ class BinnedStatisticDD(object):
         """
         return self._centers
 
-    def __call__(self, values):
+    def __call__(self, values, statistic=None):
         """
         Parameters
         ----------
@@ -196,9 +197,17 @@ class BinnedStatisticDD(object):
 
         Returns
         -------
-        statistic : array
+        statistic_values : array
             The values of the selected statistic in each bin.
         """
+
+        if statistic is not None:
+            self.statistic = statistic
+            if not callable(
+                    self.statistic) and self.statistic not in self.known_stats:
+                raise ValueError('invalid statistic %r' % (self.statistic,))
+            if self.statistic in ['mean', 'std', 'count']:
+                self.flatcount = np.bincount(self.xy, None)
 
         self.result = np.empty(self.nbin.prod(), float)
         if self.statistic == 'mean':
