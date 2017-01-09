@@ -7,13 +7,132 @@ A catalog of new features, improvements, and bug-fixes in each release.
 Follow links to the relevant GitHub issue or pull request for specific
 code changes and any related discussion.
 
-v0.0.9 (Future)
----------------
+Future
+------
 In Progress
 ===========
 - `PR #373 <https://github.com/scikit-beam/scikit-beam/pull/373>`_: Major overhaul of the docs
 - `PR #403 <https://github.com/scikit-beam/scikit-beam/pull/401>`_: Adding four time correlation
 
+`v0.0.10 <https://github.com/scikit-beam/scikit-beam/tree/v0.0.10>`__ (2017-01-09)
+----------------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/scikit-beam/scikit-beam/compare/v0.0.9...v0.0.10>`__
+
+**Closed issues:**
+
+-  ENH: make ``BinnedStatisticDD`` statistic in call
+   `#481 <https://github.com/scikit-beam/scikit-beam/issues/481>`__
+
+**Merged pull requests:**
+
+-  `#482 <https://github.com/scikit-beam/scikit-beam/pull/482>`__
+   Modify the computed statistic on calling BinnedStatisticDD instances
+   (`CJ-Wright <https://github.com/CJ-Wright>`__)
+-  `#479 <https://github.com/scikit-beam/scikit-beam/pull/479>`__
+   Include API docs for more of the modules
+   (`danielballan <https://github.com/danielballan>`__)
+-  `#478 <https://github.com/scikit-beam/scikit-beam/pull/478>`__
+   Minor speed gains for skbeam.core.image.construct_circ_avg_image
+   (`ordirules <https://github.com/ordirules>`__)
+-  `#477 <https://github.com/scikit-beam/scikit-beam/pull/477>`__
+   Use fabio for fit2d IO
+   (`CJ-Wright <https://github.com/CJ-Wright>`__)
+-  `#476 <https://github.com/scikit-beam/scikit-beam/pull/476>`__
+   Ensure automasking mask is boolean
+   (`ordirules <https://github.com/ordirules>`__)
+-  `#475 <https://github.com/scikit-beam/scikit-beam/pull/475>`__
+   Make the image center a float and other associated changes
+   (`ordirules <https://github.com/ordirules>`__)
+-  `#474 <https://github.com/scikit-beam/scikit-beam/pull/474>`__
+   Use explicit condarc for travis
+   (`ericdill <https://github.com/ericdill>`__)
+-  `#473 <https://github.com/scikit-beam/scikit-beam/pull/473>`__
+   Simplify usage of 1D BinnedStatistic
+   (`chrisvam <https://github.com/chrisvam>`__)
+
+
+`v0.0.9 <https://github.com/scikit-beam/scikit-beam/tree/v0.0.9>`__ (2016-09-23)
+--------------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/scikit-beam/scikit-beam/compare/v0.0.8...v0.0.9>`__
+
+**Closed issues:**
+
+-  ENH: save masks in Fit2D format
+   `#454 <https://github.com/scikit-beam/scikit-beam/issues/454>`__
+-  copy size-checks of pull-requests from pyqtgraph
+   `#420 <https://github.com/scikit-beam/scikit-beam/issues/420>`__
+-  Issues about fitting summarized on Monday meeting 10/27/2014
+   `#184 <https://github.com/scikit-beam/scikit-beam/issues/184>`__
+-  Alignment algorithm for nano XRF tomography
+   `#97 <https://github.com/scikit-beam/scikit-beam/issues/97>`__
+-  Register 1-D curves: Fit, Scale & Shift
+   `#44 <https://github.com/scikit-beam/scikit-beam/issues/44>`__
+-  Automated builds with conda-forge
+   `#443 <https://github.com/scikit-beam/scikit-beam/issues/443>`__
+
+**Merged pull requests:**
+
+-  `#470 <https://github.com/scikit-beam/scikit-beam/pull/470>`__
+   added bin\_centers property
+   (`ordirules <https://github.com/ordirules>`__)
+-  `#469 <https://github.com/scikit-beam/scikit-beam/pull/469>`__
+   don't use scipy.\_lib.six callable
+   (`chrisvam <https://github.com/chrisvam>`__)
+-  `#466 <https://github.com/scikit-beam/scikit-beam/pull/466>`__
+   Generalize binning
+   (`chrisvam <https://github.com/chrisvam>`__)
+-  `#463 <https://github.com/scikit-beam/scikit-beam/pull/463>`__
+   Add interpolation feature for masked circular averaged images
+   (`ordirules <https://github.com/ordirules>`__)
+-  `#462 <https://github.com/scikit-beam/scikit-beam/pull/462>`__
+   Masking added to circular average as an option
+   (`ordirules <https://github.com/ordirules>`__)
+-  `#459 <https://github.com/scikit-beam/scikit-beam/pull/459>`__
+   ENH: better circular average
+   (`CJ-Wright <https://github.com/CJ-Wright>`__)
+-  `#456 <https://github.com/scikit-beam/scikit-beam/pull/456>`__
+   Fit2d save2
+   (`CJ-Wright <https://github.com/CJ-Wright>`__)
+-  `#453 <https://github.com/scikit-beam/scikit-beam/pull/453>`__
+   Binstat cp
+   (`tacaswell <https://github.com/tacaswell>`__)
+-  `#451 <https://github.com/scikit-beam/scikit-beam/pull/451>`__
+   CI: fix source of packages
+   (`tacaswell <https://github.com/tacaswell>`__)
+-  `#450 <https://github.com/scikit-beam/scikit-beam/pull/450>`__
+   Hist cp
+   (`tacaswell <https://github.com/tacaswell>`__)
+-  `#445 <https://github.com/scikit-beam/scikit-beam/pull/445>`__
+   ENH: Updates to allow sequential processing
+   (`stuwilkins <https://github.com/stuwilkins>`__)
+-  `#441 <https://github.com/scikit-beam/scikit-beam/pull/441>`__
+   Unit change in xrf cross section
+   (`licode <https://github.com/licode>`__)
+-  `#438 <https://github.com/scikit-beam/scikit-beam/pull/438>`__
+   Finish up and supersede #434
+   (`ericdill <https://github.com/ericdill>`__)
+-  `#435 <https://github.com/scikit-beam/scikit-beam/pull/435>`__
+   ENH: Add edge and ring blur masks to scikit-beam
+   (`CJ-Wright <https://github.com/CJ-Wright>`__)
+-  `#432 <https://github.com/scikit-beam/scikit-beam/pull/432>`__
+   DOC: Fixed reference
+   (`stuwilkins <https://github.com/stuwilkins>`__)
+-  `#428 <https://github.com/scikit-beam/scikit-beam/pull/428>`__
+   BUG: took out the repeated labels parameter
+   (`sameera2004 <https://github.com/sameera2004>`__)
+-  `#426 <https://github.com/scikit-beam/scikit-beam/pull/426>`__
+   Roi more
+   (`sameera2004 <https://github.com/sameera2004>`__)
+-  `#422 <https://github.com/scikit-beam/scikit-beam/pull/422>`__
+   Convert reciprocal space and 3d grinder to OpenMP
+   (`stuwilkins <https://github.com/stuwilkins>`__)
+-  `#373 <https://github.com/scikit-beam/scikit-beam/pull/373>`__
+   Doc rewrite
+   (`tacaswell <https://github.com/tacaswell>`__)
 
 v0.0.8
 ------
