@@ -43,6 +43,8 @@ from ..utils import radial_grid, angle_grid, bin_edges_to_centers
 
 
 class BinnedStatisticDD(object):
+    std_ = ('mean', 'median', 'count', 'sum', 'std')
+
     def __init__(self, sample, statistic='mean',
                  bins=10, range=None, mask=None):
         """
@@ -79,10 +81,7 @@ class BinnedStatisticDD(object):
         from 1.10.0 onwards.
         """
 
-        known_stats = ['mean', 'median', 'count', 'sum', 'std']
         self.statistic = statistic
-        if not callable(self.statistic) and self.statistic not in known_stats:
-            raise ValueError('invalid statistic %r' % (self.statistic,))
 
         # This code is based on np.histogramdd
         try:
@@ -144,7 +143,8 @@ class BinnedStatisticDD(object):
             thissample = sample[:, i]
             if mask is not None:
                 thissample[mask == 0] = (self.edges[i][0] -
-                                         0.01 * (1+np.fabs(self.edges[i][0])))
+                                         0.01 * (
+                                         1 + np.fabs(self.edges[i][0])))
             Ncount[i] = np.digitize(thissample, self.edges[i])
 
         # Using digitize, values that fall on an edge are put in the
@@ -186,7 +186,19 @@ class BinnedStatisticDD(object):
         """
         return self._centers
 
-    def __call__(self, values):
+    @property
+    def statistic(self):
+        return self.statistic
+
+    @statistic.setter
+    def statistic(self, new_statistic):
+        if not callable(
+                self.statistic) and self.statistic not in std_:
+            raise ValueError('invalid statistic %r' % (self.statistic,))
+        else:
+            self.statistic = new_statistic
+
+    def __call__(self, values, statistic=None):
         """
         Parameters
         ----------
@@ -196,9 +208,14 @@ class BinnedStatisticDD(object):
 
         Returns
         -------
-        statistic : array
+        statistic_values : array
             The values of the selected statistic in each bin.
         """
+
+        if statistic is not None:
+            self.statistic = statistic
+            if self.statistic in ['mean', 'std', 'count']:
+                self.flatcount = np.bincount(self.xy, None)
 
         self.result = np.empty(self.nbin.prod(), float)
         if self.statistic == 'mean':
@@ -484,7 +501,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
                 represented by function([]), or NaN if this returns an error.
         """
         if origin is None:
-            origin = (shape[0]-1)/2., (shape[1]-1)/2.
+            origin = (shape[0] - 1) / 2., (shape[1] - 1) / 2.
 
         rpix = radial_grid(origin, shape)
         phipix = angle_grid(origin, shape)
@@ -565,7 +582,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
                 represented by function([]), or NaN if this returns an error.
         """
         if origin is None:
-            origin = (shape[0]-1)/2, (shape[1]-1)/2
+            origin = (shape[0] - 1) / 2, (shape[1] - 1) / 2
 
         rpix = radial_grid(origin, shape)
 
