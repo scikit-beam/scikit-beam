@@ -82,9 +82,6 @@ class BinnedStatisticDD(object):
         """
 
         self.statistic = statistic
-        if not callable(
-                self.statistic) and self.statistic not in std_:
-            raise ValueError('invalid statistic %r' % (self.statistic,))
 
         # This code is based on np.histogramdd
         try:
@@ -188,6 +185,16 @@ class BinnedStatisticDD(object):
         Return the bin centers ``(length(statistic))``.
         """
         return self._centers
+
+    @property
+    def statistic(self):
+        return self.statistic
+
+    @statistic.setter
+    def statistic(self, new_statistic):
+        if not callable(
+                self.statistic) and self.statistic not in std_:
+            raise ValueError('invalid statistic %r' % (self.statistic,))
 
     def __call__(self, values, statistic=None):
         """
