@@ -213,10 +213,6 @@ class BinnedStatisticDD(object):
         """
 
         if statistic is not None:
-            self.statistic = statistic
-            if not callable(
-                    self.statistic) and self.statistic not in std_:
-                raise ValueError('invalid statistic %r' % (self.statistic,))
             if self.statistic in ['mean', 'std', 'count']:
                 self.flatcount = np.bincount(self.xy, None)
 
