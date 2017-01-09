@@ -43,6 +43,8 @@ from ..utils import radial_grid, angle_grid, bin_edges_to_centers
 
 
 class BinnedStatisticDD(object):
+    std_ = ('mean', 'median', 'count', 'sum', 'std')
+
     def __init__(self, sample, statistic='mean',
                  bins=10, range=None, mask=None):
         """
@@ -79,10 +81,9 @@ class BinnedStatisticDD(object):
         from 1.10.0 onwards.
         """
 
-        self.known_stats = ['mean', 'median', 'count', 'sum', 'std']
         self.statistic = statistic
         if not callable(
-                self.statistic) and self.statistic not in self.known_stats:
+                self.statistic) and self.statistic not in std_:
             raise ValueError('invalid statistic %r' % (self.statistic,))
 
         # This code is based on np.histogramdd
@@ -145,7 +146,8 @@ class BinnedStatisticDD(object):
             thissample = sample[:, i]
             if mask is not None:
                 thissample[mask == 0] = (self.edges[i][0] -
-                                         0.01 * (1+np.fabs(self.edges[i][0])))
+                                         0.01 * (
+                                         1 + np.fabs(self.edges[i][0])))
             Ncount[i] = np.digitize(thissample, self.edges[i])
 
         # Using digitize, values that fall on an edge are put in the
@@ -204,7 +206,7 @@ class BinnedStatisticDD(object):
         if statistic is not None:
             self.statistic = statistic
             if not callable(
-                    self.statistic) and self.statistic not in self.known_stats:
+                    self.statistic) and self.statistic not in std_:
                 raise ValueError('invalid statistic %r' % (self.statistic,))
             if self.statistic in ['mean', 'std', 'count']:
                 self.flatcount = np.bincount(self.xy, None)
@@ -493,7 +495,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
                 represented by function([]), or NaN if this returns an error.
         """
         if origin is None:
-            origin = (shape[0]-1)/2., (shape[1]-1)/2.
+            origin = (shape[0] - 1) / 2., (shape[1] - 1) / 2.
 
         rpix = radial_grid(origin, shape)
         phipix = angle_grid(origin, shape)
@@ -574,7 +576,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
                 represented by function([]), or NaN if this returns an error.
         """
         if origin is None:
-            origin = (shape[0]-1)/2, (shape[1]-1)/2
+            origin = (shape[0] - 1) / 2, (shape[1] - 1) / 2
 
         rpix = radial_grid(origin, shape)
 
