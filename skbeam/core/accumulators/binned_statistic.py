@@ -192,9 +192,8 @@ class BinnedStatisticDD(object):
 
     @statistic.setter
     def statistic(self, new_statistic):
-        if not callable(
-                self.statistic) and self.statistic not in std_:
-            raise ValueError('invalid statistic %r' % (self.statistic,))
+        if not callable(new_statistic) and new_statistic not in std_:
+            raise ValueError('invalid statistic %r' % (new_statistic,))
         else:
             self._statistic = new_statistic
 
