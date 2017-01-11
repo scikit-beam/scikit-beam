@@ -188,7 +188,7 @@ class BinnedStatisticDD(object):
 
     @property
     def statistic(self):
-        return self.statistic
+        return self._statistic
 
     @statistic.setter
     def statistic(self, new_statistic):
@@ -196,7 +196,7 @@ class BinnedStatisticDD(object):
                 self.statistic) and self.statistic not in std_:
             raise ValueError('invalid statistic %r' % (self.statistic,))
         else:
-            self.statistic = new_statistic
+            self._statistic = new_statistic
 
     def __call__(self, values, statistic=None):
         """
