@@ -81,8 +81,6 @@ class BinnedStatisticDD(object):
         from 1.10.0 onwards.
         """
 
-        self.statistic = statistic
-
         # This code is based on np.histogramdd
         try:
             # Sample is an ND-array.
@@ -167,8 +165,15 @@ class BinnedStatisticDD(object):
         for i in np.arange(0, self.D - 1):
             self.xy += Ncount[self.ni[i]] * self.nbin[self.ni[i + 1:]].prod()
         self.xy += Ncount[self.ni[-1]]
-        if self.statistic in ['mean', 'std', 'count']:
-            self.flatcount = np.bincount(self.xy, None)
+        self._flatcount = None  # will be computed if needed
+
+    @property
+    def flatcount(self):
+        # Compute flatcount the first time it is accessed. Some statistics
+        # never access it.
+        if self._flatcount is None:
+            self._flatcount = np.bincount(self.xy, None)
+        return self._flatcount
 
     @property
     def bin_edges(self):
