@@ -44,17 +44,19 @@ import os
 import numpy as np
 from skbeam.io.fit2d import fit2d_save, read_fit2d_msk
 from numpy.testing import assert_array_equal
+from tempfile import tempdir
 import pytest
 
 @pytest.mark.xfail(raises=IOError)
 def test_save_output_fit2d():
+    tdir = tempdir()
     filename = "function_values"
     msk = np.random.random_integers(
         0, 1, (np.random.random_integers(0, 200),
                np.random.random_integers(0, 200))).astype(bool)
 
-    fit2d_save(msk, filename, dir_path=None)
-    msk2 = read_fit2d_msk(filename)
+    fit2d_save(msk, filename, dir_path=tdir)
+    msk2 = read_fit2d_msk(os.path.join(tdir, filename))
     assert_array_equal(msk2, msk)
 
-    os.remove("function_values.msk")
+    os.remove(tdir)
