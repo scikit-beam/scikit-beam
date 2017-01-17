@@ -46,6 +46,14 @@ from .utils import multi_tau_lags
 from .roi import extract_label_indices
 from collections import namedtuple
 import numpy as np
+from numpy.fft import fft2, ifft2, fftshift
+# for a convenient status bar
+try:
+    from tqdm import tqdm
+except ImportError:
+    def tqdm(iterator):
+        return iterator
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -842,3 +850,237 @@ def one_time_from_two_time(two_time_corr):
         for j in range(two_time_corr.shape[2]):
             one_time_corr[:, j] = np.trace(g, offset=j)/two_time_corr.shape[2]
     return one_time_corr
+
+
+class CrossCorrelator:
+    '''
+        Compute a 1D or 2D cross-correlation on data.
+
+        This uses a mask, which may be binary (array of 0's and 1's),
+        or a list of non-negative integer id's to compute cross-correlations
+        separately on.
+
+        Examples
+        --------
+        >> ccorr = CrossCorrelator(mask.shape, mask=mask)
+        >> # correlated image
+        >> cimg = cc(img)
+        or, mask may m
+        >> cc = CrossCorrelator(ids)
+            (where ids is same shape as img)
+            cc1 = cc(img)
+
+    '''
+    # TODO : when mask is None, don't compute a mask, submasks
+    def __init__(self, shape, mask=None, normalization='regular', axes=None):
+        '''
+            Prepare the spatial correlator for various regions specified by the
+            id's in the image.
+
+            Parameters
+            ----------
+
+            mask : an array of integers. Each non-zero integer represents a
+            unique bin. Zero integers are assumed to be ignored regions.
+                if None, creates a mask with all points set to 1
+            normalization:
+                'regular' : divide by pixel number
+                'symavg' : use symmetric averaging or not (can be overridden by
+                    calling routine)
+
+            axes : the axes to perform the fft on can either be a 2tuple or 1
+                number.  The former computes a 2D correlation and latter 1D
+                correlation.
+                (defaults to (-2, -1) if None)
+
+        '''
+        if axes is None:
+            if len(shape) == 2:
+                axes = (-2, -1)
+            elif len(shape) == 1:
+                axes = (-1,)
+
+        if normalization is None:
+            normalization = ['symavg', 'regular']
+        elif type(normalization) is not list:
+            normalization = list([normalization])
+
+        self.axes = axes
+        self.normalization = normalization
+
+        if mask is None:
+            mask = np.ones(shape)
+
+        # the IDs for the image, called mask
+        self.mask = mask
+        # initialize all the masks for the correlation
+
+        # not really clean, but making a list of arrays holding the masks
+        # for each id. Ideally, mask is binary so this is one element
+        # to quickly index original images
+        self.pxlsts = list()
+        self.submasks = list()
+        # to quickly index the sub images
+        self.subpxlsts = list()
+        # the temporary images (double the size for the cross correlation)
+        self.tmpimgs = list()
+        self.ids = np.sort(np.unique(mask))
+        # remove the zero since we ignore, but only if it is there (sometimes
+        # may not be)
+        if self.ids[0] == 0:
+            self.ids = self.ids[1:]
+
+        self.nids = len(self.ids)
+        self.maskcorrs = list()
+        # regions where the correlations are not zero
+        self.pxlst_maskcorrs = list()
+
+        # basically saving bunch of mask related stuff like indexing etc, just
+        # to save some time when actually computing the cross correlations
+        for idno in self.ids:
+            masktmp = (mask == idno)
+            self.pxlsts.append(np.where(masktmp.ravel() == 1)[0])
+
+            # this could be replaced by skimage cropping and padding
+            submasktmp = _crop_from_mask(masktmp)
+            submask = _expand_image(submasktmp)
+
+            tmpimg = np.zeros_like(submask)
+
+            self.submasks.append(submask)
+            self.subpxlsts.append(np.where(submask.ravel() == 1)[0])
+            self.tmpimgs.append(tmpimg)
+            maskcorr = _cross_corr(submask)
+            # quick fix for finite numbers should be integer so
+            # choose some small value to threshold
+            maskcorr *= maskcorr > .5
+            self.maskcorrs.append(maskcorr)
+            self.pxlst_maskcorrs.append(maskcorr > 0)
+
+    def __call__(self, img1, img2=None, normalization=None, PF=False,
+                 return_indices=False):
+        ''' Run the analysis on an image, or two
+
+        TODO : do for two images
+        '''
+        if normalization is None:
+            normalization = self.normalization
+
+        # right now doesn't work , ened to add tmpimgs2
+        if img2 is None:
+            img2 = img1
+
+        ccorrs = list()
+        if PF:
+            rngiter = tqdm(range(self.nids))
+        else:
+            rngiter = range(self.nids)
+
+        for i in rngiter:
+            self.tmpimgs[i] *= 0
+            self.tmpimgs[i].ravel()[
+                                    self.subpxlsts[i]
+                                    ] = img1.ravel()[self.pxlsts[i]]
+            # also multiply by maskcorrs > 0 to ignore invalid regions
+            ccorr = _cross_corr(self.tmpimgs[i])*(self.maskcorrs[i] > 0)
+
+            w = self.pxlst_maskcorrs[i]
+            if 'symavg' in normalization:
+                # do symmetric averaging
+                Icorr = _cross_corr(self.tmpimgs[i] *
+                                    self.submasks[i], self.submasks[i])
+                Icorr2 = _cross_corr(self.submasks[i], self.tmpimgs[i] *
+                                     self.submasks[i])
+                ccorr[w] *= self.maskcorrs[i][w]/Icorr[w]/Icorr2[w]
+
+            if 'regular' in normalization:
+                ccorr[w] /= self.maskcorrs[i][w] * \
+                            np.average(self.tmpimgs[i].
+                                       ravel()[self.subpxlsts[i]])**2
+
+            ccorrs.append(ccorr)
+
+        if len(ccorrs) == 1:
+            ccorrs = ccorrs[0]
+
+        return ccorrs
+
+
+def _cross_corr(img1, img2=None, axes=None):
+    '''Compute the cross correlation of two images.
+        Right now does not take mask into account.
+        todo: take mask into account (requires extra calculations)
+        note : changed to iFFT(FFT(img1)^* x FFT(img2))
+            so that a shift right means that image 2 is to the right of image 1
+            old calcluation was iFFT(FFT(img1) x FFT(img2)^*)  (note change of
+            order of conjugate)
+
+        wrap : if False, double the array before convolution (to avoid wrap
+            around) if True, do nothing to image
+            If wrap is true, it also returns a mask
+    '''
+    if axes is None:
+        if img1.ndim == 2:
+            axes = -2, -1
+        else:
+            axes = -1,
+
+    if img2 is None:
+        img2 = img1
+
+    imgc = fftshift(ifft2(np.conj(fft2(img1, axes=axes)) *
+                    fft2(img2, axes=axes), axes=axes).real)
+
+    return imgc
+
+
+def _crop_from_mask(mask):
+    '''
+        Crop an image from a given mask
+        returns the sub-selected pixels, as well as the new masked image
+
+        works for a 2D or 1D case
+
+    '''
+    dims = mask.shape
+    pxlst = np.where(mask.ravel() != 0)[0]
+    # this is the assumed width along the fastest-varying dimension
+    if len(dims) > 1:
+        imgwidth = dims[1]
+    else:
+        imgwidth = 1
+    # A[row,col] where row is y and col is x
+    # (matrix notation)
+    pixely = pxlst % imgwidth
+    pixelx = pxlst//imgwidth
+
+    minpixelx = np.min(pixelx)
+    minpixely = np.min(pixely)
+    maxpixelx = np.max(pixelx)
+    maxpixely = np.max(pixely)
+
+    oldimg = np.zeros(dims)
+    oldimg.ravel()[pxlst] = 1
+    if len(dims) > 1:
+        mask = np.copy(oldimg[minpixelx:maxpixelx+1, minpixely:maxpixely+1])
+    else:
+        mask = np.copy(oldimg[minpixelx:maxpixelx+1])
+
+    return mask
+
+
+def _expand_image(img):
+    ''' make an image with twice the size, plus one.
+
+        works with 1D samples as well
+    '''
+    imgold = img
+    dims = imgold.shape
+    if len(dims) > 1:
+        img = np.zeros((dims[0]*2+1, dims[1]*2+1))
+        img[:dims[0], :dims[1]] = imgold
+    else:
+        img = np.zeros((dims[0]*2+1))
+        img[:dims[0]] = imgold
+
+    return img
