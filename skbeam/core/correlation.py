@@ -861,15 +861,12 @@ class CrossCorrelator:
         separately on.
 
         The symmetric averaging scheme introduced here is inspired by a paper
-        from Schätzel, although the implementation is novel in that it allows
-        for the usage of arbitrary masks. Reference to Schatzel's original
-        paper is here:
-            Schätzel, Klaus, Martin Drewel, and Sven Stimac. “Photon
-            correlation measurements at large lag times: improving statistical
-            accuracy.” Journal of Modern Optics 35.4 (1988): 711-718.
+        from Schätzel [1], although the implementation is novel in that it
+        allows for the usage of arbitrary masks.
 
         Examples
         --------
+
         >> ccorr = CrossCorrelator(mask.shape, mask=mask)
         >> # correlated image
         >> cimg = cc(img)
@@ -877,6 +874,14 @@ class CrossCorrelator:
         >> cc = CrossCorrelator(ids)
         #(where ids is same shape as img)
         >> cc1 = cc(img)
+
+        References
+        ----------
+        .. [1] Schätzel, Klaus, Martin Drewel, and Sven Stimac. “Photon
+               correlation measurements at large lag times: improving
+               statistical accuracy.” Journal of Modern Optics 35.4 (1988):
+               711-718.
+
 
     '''
     # TODO : when mask is None, don't compute a mask, submasks
