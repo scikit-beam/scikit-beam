@@ -880,8 +880,6 @@ class CrossCorrelator:
 
     '''
     # TODO : when mask is None, don't compute a mask, submasks
-    # TODO : do for 2 images
-    # TODO : allow for a wrap around (such as angular correlation)
     def __init__(self, shape, mask=None, normalization=None, axes=None,
                  wrap=False):
         '''
