@@ -46,7 +46,7 @@ from .utils import multi_tau_lags
 from .roi import extract_label_indices
 from collections import namedtuple
 import numpy as np
-from numpy.fft import fft2, ifft2, fftshift
+from scipy.signal import fftconvolve
 # for a convenient status bar
 try:
     from tqdm import tqdm
@@ -861,8 +861,8 @@ class CrossCorrelator:
         separately on.
 
         The symmetric averaging scheme introduced here is inspired by a paper
-        from Schätzel [1], although the implementation is novel in that it
-        allows for the usage of arbitrary masks.
+        from Schätzel, although the implementation is novel in that it
+        allows for the usage of arbitrary masks. [1]_
 
         Examples
         --------
@@ -885,7 +885,7 @@ class CrossCorrelator:
 
     '''
     # TODO : when mask is None, don't compute a mask, submasks
-    def __init__(self, shape, mask=None, normalization=None, axes=None,
+    def __init__(self, shape, mask=None, normalization=None,
                  wrap=False):
         '''
             Prepare the spatial correlator for various regions specified by the
@@ -909,28 +909,17 @@ class CrossCorrelator:
                     'symavg' : use symmetric averaging
                 Defaults to ['regular'] normalization
 
-            axes : 1 or 2-tuple
-                the axes to perform the fft on The former computes a 2D
-                (defaults to (-2, -1) if None)
-
             wrap : bool, optional
                 If False, assume dimensions don't wrap around. If True
                     assume they do. The latter is useful for circular
                     dimensions such as angle.
         '''
-        if axes is None:
-            if len(shape) == 2:
-                axes = (-2, -1)
-            elif len(shape) == 1:
-                axes = (-1,)
-
         if normalization is None:
             normalization = ['regular']
         elif not isinstance(normalization, list):
             normalization = list([normalization])
 
         self.wrap = wrap
-        self.axes = axes
         self.normalization = normalization
 
         if mask is None:
@@ -1073,7 +1062,7 @@ class CrossCorrelator:
         return ccorrs
 
 
-def _cross_corr(img1, img2=None, axes=None):
+def _cross_corr(img1, img2=None):
     ''' Compute the cross correlation of one (or two) images.
 
         Parameters
@@ -1086,21 +1075,20 @@ def _cross_corr(img1, img2=None, axes=None):
             to the right of img1 will lead to a shift of the point of
             highest correlation to the right.
             Default is set to None
-
-        axes : 1 or 2-tuple
-            the axis or axes to perform the cross correlation on
     '''
-    if axes is None:
-        if img1.ndim == 2:
-            axes = -2, -1
-        else:
-            axes = -1,
+    ndim = img1.ndim
 
     if img2 is None:
         img2 = img1
 
-    imgc = fftshift(ifft2(fft2(img1, axes=axes) *
-                    np.conj(fft2(img2, axes=axes)), axes=axes).real)
+    if img1.shape != img2.shape:
+        errorstr = "Image shapes don't match. "
+        errorstr += "(img1 : {},{}; img2 : {},{})"\
+            .format(*img1.shape, *img2.shape)
+        raise ValueError()
+
+    reverse_index = (*((slice(None, None, -1),)*ndim),)
+    imgc = fftconvolve(img1, img2[reverse_index], mode='same')
 
     return imgc
 
