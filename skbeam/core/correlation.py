@@ -1085,7 +1085,7 @@ def _cross_corr(img1, img2=None):
         errorstr = "Image shapes don't match. "
         errorstr += "(img1 : {},{}; img2 : {},{})"\
             .format(*img1.shape, *img2.shape)
-        raise ValueError()
+        raise ValueError(errorstr)
 
     reverse_index = (*((slice(None, None, -1),)*ndim),)
     imgc = fftconvolve(img1, img2[reverse_index], mode='same')
