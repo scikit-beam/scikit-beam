@@ -869,11 +869,14 @@ class CrossCorrelator:
 
         >> ccorr = CrossCorrelator(mask.shape, mask=mask)
         >> # correlated image
-        >> cimg = cc(img)
+        >> cimg = cc(img1)
         or, mask may m
         >> cc = CrossCorrelator(ids)
-        #(where ids is same shape as img)
-        >> cc1 = cc(img)
+        #(where ids is same shape as img1)
+        >> cc1 = cc(img1)
+        >> cc12 = cc(img1, img2)
+        # if img2 shifts right of img1, point of maximum correlation is shifted
+        # right from correlation center
 
         References
         ----------
@@ -1096,19 +1099,20 @@ def _cross_corr(img1, img2=None):
 def _crop_from_mask(mask):
     '''
         Crop an image from a given mask
-        returns the sub-selected pixels, as well as the new masked image
 
         Parameters
         ----------
+
         mask : 1d or 2d np.ndarray
             The data to be cropped. This consists of integers >=0.
             Regions with 0 are masked and regions > 1 are kept.
 
-       Returns
-       -------
-       mask : 1d or 2d np.ndarray
-           The cropped image. This image is cropped as much as possible
-           without losing unmasked data.
+        Returns
+        -------
+
+        mask : 1d or 2d np.ndarray
+            The cropped image. This image is cropped as much as possible
+            without losing unmasked data.
     '''
     dims = mask.shape
     pxlst = np.where(mask.ravel() != 0)[0]
@@ -1139,8 +1143,7 @@ def _crop_from_mask(mask):
 
 
 def _expand_image(img):
-    ''' Convenience routine to make an image with twice the size, plus
-            one.
+    ''' Convenience routine to make an image with twice the size, plus one.
 
         Parameters
         ----------
