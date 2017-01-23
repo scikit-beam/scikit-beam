@@ -712,6 +712,8 @@ def auto_find_center_rings(avg_img, sigma=1, no_rings=4, min_samples=3,
         The minimum number of data points to fit a model to.
     residual_threshold : float, optional
         Maximum distance for a data point to be classified as an inlier.
+    max_trials : int, optional
+        Maximum number of iterations for random sample selection.
 
     Returns
     -------
