@@ -1070,7 +1070,7 @@ def _cross_corr(img1, img2=None):
 
         Parameters
         ----------
-        img1 : 1d or 2d np.ndarray
+        img1 : np.ndarray
             the image or curve to cross correlate
 
         img2 : 1d or 2d np.ndarray, optional
@@ -1090,7 +1090,10 @@ def _cross_corr(img1, img2=None):
             .format(*img1.shape, *img2.shape)
         raise ValueError(errorstr)
 
-    reverse_index = (*((slice(None, None, -1),)*ndim),)
+    # need to reverse indices for second image
+    # fftconvolve(A,B) = FFT^(-1)(FFT(A)*FFT(B))
+    # but need FFT^(-1)(FFT(A(x))*conj(FFT(B(x)))) = FFT^(-1)(A(x)*B(-x))
+    reverse_index = [slice(None, None, -1) for i in range(ndim)]
     imgc = fftconvolve(img1, img2[reverse_index], mode='same')
 
     return imgc
