@@ -408,3 +408,4 @@ def test_auto_find_center_rings():
     center, image, radii = roi.auto_find_center_rings(image, no_rings=2)
 
     assert_equal((99, 99), center)
+    assert_almost_equal((41., 78., 121.), np.round(radii[0:3]))
