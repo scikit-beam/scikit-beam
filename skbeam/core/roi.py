@@ -696,9 +696,9 @@ def lines(end_points, shape):
 
 
 def auto_find_center_rings(avg_img, sigma=1, no_rings=4, min_samples=3,
-                           residual_threshold=1):
+                           residual_threshold=1, max_trials=1000):
     """This will find the center of the speckle pattern and the radii of the
-    most intense rings
+    most intense rings.
 
     Parameters
     ----------
@@ -722,6 +722,11 @@ def auto_find_center_rings(avg_img, sigma=1, no_rings=4, min_samples=3,
         directly index into an array
     radii : list
         values of the radii of the rings
+
+    Note
+    ----
+    scikit-image ransac method(http://www.imagexd.org/tutorial/lessons/1_ransac.html)
+    is used to automatically find the center and the most intense rings.
     """
 
     image = img_as_float(color.rgb2gray(avg_img))
@@ -732,7 +737,8 @@ def auto_find_center_rings(avg_img, sigma=1, no_rings=4, min_samples=3,
 
     for i in range(no_rings):
         model_robust, inliers = ransac(edge_pts_xy, CircleModel, min_samples,
-                                       residual_threshold, max_trials=1000)
+                                       residual_threshold,
+                                       max_trials=max_trials)
         if i == 0:
             center = int(model_robust.params[0]), int(model_robust.params[1])
         radii.append(model_robust.params[2])
