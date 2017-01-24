@@ -1036,8 +1036,6 @@ class CrossCorrelator:
             else:
                 ccorr = _cross_corr(self.tmpimgs[i], self.tmpimgs2[i]) * \
                         (self.maskcorrs[i] > 0)
-            # only select valid regions
-            w = self.pxlst_maskcorrs[i]
 
             # now handle the normalizations
             if 'symavg' in normalization:
@@ -1050,9 +1048,13 @@ class CrossCorrelator:
                 else:
                     Icorr2 = _cross_corr(self.submasks[i], self.tmpimgs2[i] *
                                          self.submasks[i])
+                # there is an extra condition that Icorr*Icorr2 != 0
+                w = np.where(np.abs(Icorr*Icorr2) > 0)
                 ccorr[w] *= self.maskcorrs[i][w]/Icorr[w]/Icorr2[w]
 
             if 'regular' in normalization:
+                # only run on overlapping regions for correlation
+                w = self.pxlst_maskcorrs[i]
                 ccorr[w] /= self.maskcorrs[i][w] * \
                             np.average(self.tmpimgs[i].
                                        ravel()[self.subpxlsts[i]])**2
