@@ -397,3 +397,16 @@ def test_lines():
 
     assert_raises(ValueError, roi.lines,
                   ([10, 12, 30], [30, 45, 50, 256]), shape)
+
+
+def test_auto_find_center_rings():
+
+    x = np.linspace(-5, 5, 200)
+    X, Y = np.meshgrid(x, x)
+    image = 100 * np.cos(np.sqrt(x**2 + Y**2))**2 + 50
+
+    center, image, radii = roi.auto_find_center_rings(image, sigma=20,
+                                                      no_rings=2)
+
+    assert_equal((99, 99), center)
+    assert_array_equal(41., np.round(radii[0]))

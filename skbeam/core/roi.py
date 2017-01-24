@@ -43,6 +43,8 @@ from __future__ import absolute_import, division, print_function
 import collections
 import scipy.ndimage.measurements as ndim
 from skimage.draw import line
+from skimage import img_as_float, feature, color, draw
+from skimage.measure import ransac, CircleModel
 import numpy as np
 from . import utils
 import logging
@@ -691,3 +693,62 @@ def lines(end_points, shape):
         label += 1
         label_array[rr, cc] = label
     return label_array
+
+
+def auto_find_center_rings(avg_img, sigma=1, no_rings=4, min_samples=3,
+                           residual_threshold=1, max_trials=1000):
+    """This will find the center of the speckle pattern and the radii of the
+    most intense rings.
+
+    Parameters
+    ----------
+    avg_img : 2D array
+        shape of the image
+    sigma : float, optional
+        Standard deviation of the Gaussian filter.
+    no_rings : int, optional
+        number of rings
+    min_sample : int, optional
+        The minimum number of data points to fit a model to.
+    residual_threshold : float, optional
+        Maximum distance for a data point to be classified as an inlier.
+    max_trials : int, optional
+        Maximum number of iterations for random sample selection.
+
+    Returns
+    -------
+    center : tuple
+        center co-ordinates of the speckle pattern
+    image : 2D array
+        Indices of pixels that belong to the rings,
+        directly index into an array
+    radii : list
+        values of the radii of the rings
+
+    Note
+    ----
+    scikit-image ransac method(http://www.imagexd.org/tutorial/lessons/1_ransac.html)
+    is used to automatically find the center and the most intense rings.
+    """
+
+    image = img_as_float(color.rgb2gray(avg_img))
+    edges = feature.canny(image, sigma)
+    coords = np.column_stack(np.nonzero(edges))
+    edge_pts_xy = coords[:, ::-1]
+    radii = []
+
+    for i in range(no_rings):
+        model_robust, inliers = ransac(edge_pts_xy, CircleModel, min_samples,
+                                       residual_threshold,
+                                       max_trials=max_trials)
+        if i == 0:
+            center = int(model_robust.params[0]), int(model_robust.params[1])
+        radii.append(model_robust.params[2])
+
+        rr, cc = draw.circle_perimeter(center[1], center[0],
+                                       int(model_robust.params[2]),
+                                       shape=image.shape)
+        image[rr, cc] = i + 1
+        edge_pts_xy = edge_pts_xy[-inliers]
+
+    return center, image, radii
