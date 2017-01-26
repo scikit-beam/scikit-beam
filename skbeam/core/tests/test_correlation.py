@@ -45,8 +45,10 @@ from skbeam.core.correlation import (multi_tau_auto_corr,
                                      lazy_one_time,
                                      lazy_two_time, two_time_corr,
                                      two_time_state_to_results,
-                                     one_time_from_two_time)
+                                     one_time_from_two_time,
+                                     CrossCorrelator)
 from skbeam.core.mask import bad_to_nan_gen
+from skbeam.core.roi import ring_edges, segmented_rings
 
 
 logger = logging.getLogger(__name__)
@@ -220,6 +222,143 @@ def test_one_time_from_two_time():
     assert_array_almost_equal(one_time[0, :], np.array([1.0, 0.9, 0.8, 0.7,
                                                         0.6, 0.5, 0.4, 0.3,
                                                         0.2, 0.1]))
+
+
+def test_CrossCorrelator1d():
+    ''' Test the 1d version of the cross correlator with these methods:
+        -method='regular', no mask
+        -method='regular', masked
+        -method='symavg', no mask
+        -method='symavg', masked
+     '''
+    np.random.seed(123)
+    # test 1D data
+    sigma = .1
+    Npoints = 100
+    x = np.linspace(-10, 10, Npoints)
+
+    sigma = .2
+    # purposely have sparsely filled values (with lots of zeros)
+    peak_positions = (np.random.random(10)-.5)*20
+    y = np.zeros_like(x)
+    for peak_position in peak_positions:
+        y += np.exp(-(x-peak_position)**2/2./sigma**2)
+
+    mask_1D = np.ones_like(y)
+    mask_1D[10:20] = 0
+    mask_1D[60:90] = 0
+    mask_1D[111:137] = 0
+    mask_1D[211:237] = 0
+    mask_1D[411:537] = 0
+
+    mask_1D *= mask_1D[::-1]
+
+    cc1D = CrossCorrelator(mask_1D.shape)
+    cc1D_symavg = CrossCorrelator(mask_1D.shape, normalization='symavg')
+    cc1D_masked = CrossCorrelator(mask_1D.shape, mask=mask_1D)
+    cc1D_masked_symavg = CrossCorrelator(mask_1D.shape, mask=mask_1D,
+                                         normalization='symavg')
+
+    ycorr_1D = cc1D(y)
+    ycorr_1D_masked = cc1D_masked(y*mask_1D)
+    ycorr_1D_symavg = cc1D_symavg(y)
+    ycorr_1D_masked_symavg = cc1D_masked_symavg(y*mask_1D)
+
+    assert_array_almost_equal(ycorr_1D[::20],
+                              np.array([-0.00000000e+00, 3.07601970e-04,
+                                        3.32507751e-01, 1.02397712e+00,
+                                        1.26985028e+00, 3.49160599e+00,
+                                        1.26985028e+00, 1.02397712e+00,
+                                        3.32507751e-01, 3.07601970e-04,
+                                        -0.00000000e+00]))
+
+    assert_array_almost_equal(ycorr_1D_masked[::20],
+                              np.array([0., -0., -0., 0.2543123, -0.,
+                                        2.7509325,  0., 0.2543123, -0., 0.,
+                                        0.]))
+
+    assert_array_almost_equal(ycorr_1D_symavg[::20],
+                              np.array([0., 1.34544882, 0.48030268,
+                                        0.84947094, 0.90258003, 3.49160599,
+                                        0.90258003, 0.84947094, 0.48030268,
+                                        1.34544882, 0.]))
+
+    assert_array_almost_equal(ycorr_1D_masked_symavg[::20],
+                              np.array([0., 0., 0., 0.3464006, 0., 2.7509325,
+                                        -0., 0.3464006, 0., 0., 0.]))
+
+
+def testCrossCorrelator2d():
+    ''' Test the 2D case of the cross correlator.
+        With non-binary labels.
+    '''
+    np.random.seed(123)
+    # test 2D data
+    Npoints2 = 10
+    x2 = np.linspace(-10, 10, Npoints2)
+    X, Y = np.meshgrid(x2, x2)
+    Z = np.random.random((Npoints2, Npoints2))
+
+    np.random.seed(123)
+    sigma = .2
+    # purposely have sparsely filled values (with lots of zeros)
+    # place peaks in random positions
+    peak_positions = (np.random.random((2, 10))-.5)*20
+    for peak_position in peak_positions:
+        Z += np.exp(-((X - peak_position[0])**2 +
+                    (Y - peak_position[1])**2)/2./sigma**2)
+
+    mask_2D = np.ones_like(Z)
+    mask_2D[1:2, 1:2] = 0
+    mask_2D[7:9, 4:6] = 0
+    mask_2D[1:2, 9:] = 0
+
+    # Compute with segmented rings
+    edges = ring_edges(1, 3, num_rings=2)
+    segments = 5
+    x0, y0 = np.array(mask_2D.shape)//2
+
+    maskids = segmented_rings(edges, segments, (y0, x0), mask_2D.shape)
+
+    cc2D_ids = CrossCorrelator(mask_2D.shape, mask=maskids)
+    cc2D_ids_symavg = CrossCorrelator(mask_2D.shape, mask=maskids,
+                                      normalization='symavg')
+
+    ycorr_ids_2D = cc2D_ids(Z)
+    ycorr_ids_2D_symavg = cc2D_ids_symavg(Z)
+    index = 0
+    ycorr_ids_2D[index][ycorr_ids_2D[index].shape[0]//2]
+    assert_array_almost_equal(ycorr_ids_2D[index]
+                              [ycorr_ids_2D[index].shape[0]//2],
+                              np.array([-0., 1.22195059, 1.08685771,
+                                        1.43246508, 1.08685771, 1.22195059, 0.
+                                        ])
+                              )
+
+    index = 1
+    ycorr_ids_2D[index][ycorr_ids_2D[index].shape[0]//2]
+    assert_array_almost_equal(ycorr_ids_2D[index]
+                              [ycorr_ids_2D[index].shape[0]//2],
+                              np.array([-0., 1.24324268, 0.80748997,
+                                        1.35790022, 0.80748997, 1.24324268, 0.
+                                        ])
+                              )
+
+    index = 0
+    ycorr_ids_2D_symavg[index][ycorr_ids_2D[index].shape[0]//2]
+    assert_array_almost_equal(ycorr_ids_2D_symavg[index]
+                              [ycorr_ids_2D[index].shape[0]//2],
+                              np.array([0., 0.84532695, 1.16405848, 1.43246508,
+                                        1.16405848, 0.84532695, 0.])
+                              )
+
+    index = 1
+    ycorr_ids_2D_symavg[index][ycorr_ids_2D[index].shape[0]//2]
+    assert_array_almost_equal(ycorr_ids_2D_symavg[index]
+                              [ycorr_ids_2D[index].shape[0]//2],
+                              np.array([0., 0.94823482, 0.8629459, 1.35790022,
+                                        0.8629459, 0.94823482, 0.])
+                              )
 
 
 if __name__ == '__main__':
