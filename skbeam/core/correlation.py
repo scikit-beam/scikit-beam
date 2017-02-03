@@ -942,6 +942,9 @@ class CrossCorrelator:
         self.tmpimgs = list()
         self.tmpimgs2 = list()
         self.centers = list()
+        self.shapes = list()  # the shapes of each correlation
+        # the positions of each axes of each correlation
+        self.positions = list()
 
         self.ids = np.sort(np.unique(mask))
         # remove the zero since we ignore, but only if it is there (sometimes
@@ -980,7 +983,21 @@ class CrossCorrelator:
             self.maskcorrs.append(maskcorr)
             self.pxlst_maskcorrs.append(maskcorr > 0)
             # centers are shape//2 as performed by fftshift
+            center = np.array(maskcorr.shape)//2
             self.centers.append(np.array(maskcorr.shape)//2)
+            self.shapes.append(np.array(maskcorr.shape))
+            if mask.ndim == 1:
+                self.positions.append(np.arange(maskcorr.shape[0]) - center[0])
+            elif mask.ndim == 2:
+                self.positions.append([np.arange(maskcorr.shape[0]) -
+                                       center[0],
+                                       np.arange(maskcorr.shape[1]) -
+                                       center[1]])
+
+        if len(self.ids) == 1:
+            self.positions = self.positions[0]
+            self.centers = self.centers[0]
+            self.shapes = self.shapes[0]
 
     def __call__(self, img1, img2=None, normalization=None):
         ''' Run the cross correlation on an image/curve or against two
@@ -1056,8 +1073,8 @@ class CrossCorrelator:
                 # only run on overlapping regions for correlation
                 w = self.pxlst_maskcorrs[i]
                 ccorr[w] /= self.maskcorrs[i][w] * \
-                            np.average(self.tmpimgs[i].
-                                       ravel()[self.subpxlsts[i]])**2
+                    np.average(self.tmpimgs[i].
+                               ravel()[self.subpxlsts[i]])**2
 
             ccorrs.append(ccorr)
 
