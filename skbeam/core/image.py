@@ -184,7 +184,7 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
 
         angles : 1d array of coordinates, ascending order
             must be in units of radians
-            domain *must* be -pi, pi
+            domain *must* be 0 to 2*pi monotonically increasing (or a subset)
             if it is not, code will *try* to repair this
 
         image : 2d array the image to interpolate from
@@ -218,14 +218,17 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
     interp_obj_mask = RectBivariateSpline(radii, angles, mask)
 
     radial_val = utils.radial_grid(center, dims, pixel_size)
+    # keep in domain 0 to 2*pi
     angle_val = utils.angle_grid(center, dims, pixel_size) % (2*np.pi)
     # want to quickly interpolate, but remain mask aware.
     # as a trick, interpolate both the image and the mask
     # whatever in the mask gets interpolated below 1, we know
+
     # the data is affected by mask, mask it out.
     new_img = interp_obj(radial_val, angle_val, grid=False)
     new_mask = interp_obj_mask(radial_val, angle_val, grid=False)
     w = np.where(new_mask < .99)
     new_mask[w] = 0
     new_img[w] = 0
+
     return new_img
