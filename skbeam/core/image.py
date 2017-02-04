@@ -41,6 +41,7 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 from . import utils
 import logging
+from scipy.interpolate import RectBivariateSpline
 logger = logging.getLogger(__name__)
 
 
@@ -170,3 +171,61 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None,
     CIMG = np.interp(radial_val, radii, intensities, right=0)
 
     return CIMG
+
+
+def construct_rphi_avg_image(radii, angles, image, mask=None,
+                             center=None, dims=None, pixel_size=(1, 1)):
+    '''  Construct a 2D image in rectangular coordinates from
+        a polar coordinate image. Assumes a 2D array of data. If data is
+        missing, use mask.
+
+        radii : 1d array of coordinates, ascending order. The radii
+            must be in units of pixels.
+
+        angles : 1d array of coordinates, ascending order
+            must be in units of radians
+            domain *must* be -pi, pi
+            if it is not, code will *try* to repair this
+
+        image : 2d array the image to interpolate from
+
+        mask : 2d array, optional
+            the masked data (0 masked, 1 not masked). Defaults to None,
+            which means assume all points are valid.
+
+        center : 2 tuple of floats, optional
+
+        dims : the new image dimensions, in terms of pixel values
+            (same units as radii)
+
+    '''
+    if dims is None:
+        if center is not None:
+            raise ValueError("Specifying a dims but not a center does not "
+                             "make sense and may lead to unexpected results.")
+        # round up, also take into account pixel size change
+        maxr_y, maxr_x = (int(np.max(radii/pixel_size[0])+.5),
+                          int(np.max(radii/pixel_size[1])+.5))
+        dims = 2*maxr_y+1, 2*maxr_x+1
+
+    if center is None:
+        center = (dims[0]-1)/2., (dims[1] - 1)/2.
+
+    if mask is None:
+        mask = np.ones_like(image)
+
+    interp_obj = RectBivariateSpline(radii, angles, image)
+    interp_obj_mask = RectBivariateSpline(radii, angles, mask)
+
+    radial_val = utils.radial_grid(center, dims, pixel_size)
+    angle_val = utils.angle_grid(center, dims, pixel_size) % (2*np.pi)
+    # want to quickly interpolate, but remain mask aware.
+    # as a trick, interpolate both the image and the mask
+    # whatever in the mask gets interpolated below 1, we know
+    # the data is affected by mask, mask it out.
+    new_img = interp_obj(radial_val, angle_val, grid=False)
+    new_mask = interp_obj_mask(radial_val, angle_val, grid=False)
+    w = np.where(new_mask < .99)
+    new_mask[w] = 0
+    new_img[w] = 0
+    return new_img
