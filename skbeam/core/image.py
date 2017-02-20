@@ -216,7 +216,6 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
             else:
                 raise ValueError("Mask not right dimensions."
                                  "Expected 2 got {}".format(mask.ndim))
-        # tried but did not work
         image[np.where(mask == 0)] = np.nan
     if shape is None:
         if center is not None:
