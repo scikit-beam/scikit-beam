@@ -648,7 +648,8 @@ def angle_grid(center, shape, pixel_size=None):
 
     Note
     ----
-    :math:`\\theta`, the counter-clockwise angle from the positive x axis
+    :math:`\\theta`, the counter-clockwise angle from the positive x axis,
+    assuming the positive y-axis points upward.
     :math:`\\theta \\el [-\pi, \pi]`.  In array indexing and the conventional
     axes for images (origin in upper left), positive y is downward.
     """
@@ -1271,3 +1272,75 @@ def bin_grid(image, r_array, pixel_sizes, statistic='mean', mask=None,
     bin_centers = bin_edges_to_centers(bin_edge)
 
     return bin_centers, int_stat
+
+
+def bilinear_interpolate(im, x, y, wrapx=False, wrapy=False):
+    '''
+        Quick bilinear interpolation. Performs a linear interpolation
+        between neighboring pixels. Useful for interpolating masked
+        data, where the missing regions are replaced by np.nan values
+        (thus any pixel interpolated incorporating these pixels is also
+        np.nan).
+
+        Parameters
+        ----------
+        im : 2d np.ndarray
+            the image
+
+        x : 1d np.ndarray
+            the columns (im[y,x])
+
+        y : 1d np.ndarray
+            the rows (im[y,x])
+
+        wrapx : bool, optional
+            whether or not to wrap boundaries for x (columns)
+
+        wrapy : bool, optional
+            whether or not to wrap boundaries for y (columns)
+
+        Notes
+        -----
+        http://stackoverflow.com/questions/12729228/
+        simple-efficient-bilinear-interpolation-of-images-in-numpy-and-python
+        but modified to allow for wrap around (useful for angles)
+    '''
+    x = np.asarray(x)
+    y = np.asarray(y)
+
+    x0 = np.floor(x).astype(int)
+    x1 = x0 + 1
+    y0 = np.floor(y).astype(int)
+    y1 = y0 + 1
+
+    # if wrapping, make distinction between location
+    # and index. Else, they are the same.
+    if wrapx:
+        x0ind = x0 % im.shape[1]
+        x1ind = x1 % im.shape[1]
+    else:
+        x0 = np.clip(x0, 0, im.shape[1]-1)
+        x1 = np.clip(x1, 0, im.shape[1]-1)
+        x0ind = x0
+        x1ind = x1
+
+    if wrapy:
+        y0ind = y0 % im.shape[0]
+        y1ind = y1 % im.shape[0]
+    else:
+        y0 = np.clip(y0, 0, im.shape[0]-1)
+        y1 = np.clip(y1, 0, im.shape[0]-1)
+        y0ind = y0
+        y1ind = y1
+
+    Ia = im[y0ind, x0ind]
+    Ib = im[y1ind, x0ind]
+    Ic = im[y0ind, x1ind]
+    Id = im[y1ind, x1ind]
+
+    wa = (x1-x) * (y1-y)
+    wb = (x1-x) * (y-y0)
+    wc = (x-x0) * (y1-y)
+    wd = (x-x0) * (y-y0)
+
+    return wa*Ia + wb*Ib + wc*Ic + wd*Id
