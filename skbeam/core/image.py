@@ -231,9 +231,7 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
 
     radial_val = utils.radial_grid(center, shape, pixel_size).ravel()
     angle_val = utils.angle_grid(center, shape, pixel_size).ravel() % (2*np.pi)
-    phi0 = angles[0]
-    angles = (angles-phi0) % (2*np.pi)
-    angle_val = (angle_val - phi0) % (2*np.pi)
+    angles = angles % (2*np.pi)
 
     radial_edges = utils.bin_edges(np.min(radii), np.max(radii), len(radii))
     angle_edges = utils.bin_edges(np.min(angles), np.max(angles), len(angles))
