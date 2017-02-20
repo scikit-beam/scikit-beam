@@ -192,6 +192,7 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
             ascending angle goes clockwise in this plane.
 
         image : 2d array the image to interpolate from
+            rows are radii, columns are angles, ex: img[radii, angles]
 
         mask : 2d array, optional
             the masked data (0 masked, 1 not masked). Defaults to None,
@@ -239,9 +240,7 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
     radial_bins = np.digitize(radial_val, radial_edges, right=False) - 1
     angle_bins = np.digitize(angle_val, angle_edges, right=False) - 1
 
-    new_img = np.zeros(shape, dtype=float)
-    new_img.ravel()[:] = utils.bilinear_interpolate(image, angle_bins,
-                                                    radial_bins,
-                                                    wrapx=True)
+    new_img = utils.bilinear_interpolate(image, angle_bins, radial_bins,
+                                         wrapx=True).reshape(shape)
 
     return new_img
