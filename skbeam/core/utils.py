@@ -1287,17 +1287,19 @@ def bilinear_interpolate(im, x, y, wrapx=False, wrapy=False):
         im : 2d np.ndarray
             the image
 
-        x : 1d np.ndarray
+        x : 1d np.ndarray (floats)
             the columns (im[y,x])
 
-        y : 1d np.ndarray
+        y : 1d np.ndarray (floats)
             the rows (im[y,x])
 
         wrapx : bool, optional
             whether or not to wrap boundaries for x (columns)
+            If not, endpoints are equal to first and last points
 
         wrapy : bool, optional
             whether or not to wrap boundaries for y (columns)
+            If not, endpoints are equal to first and last points
 
         Notes
         -----
@@ -1307,6 +1309,10 @@ def bilinear_interpolate(im, x, y, wrapx=False, wrapy=False):
     '''
     x = np.asarray(x)
     y = np.asarray(y)
+    if not wrapx:
+        x = np.clip(x, 0, im.shape[1]-1)
+    if not wrapy:
+        y = np.clip(y, 0, im.shape[1]-1)
 
     x0 = np.floor(x).astype(int)
     x1 = x0 + 1
@@ -1319,19 +1325,21 @@ def bilinear_interpolate(im, x, y, wrapx=False, wrapy=False):
         x0ind = x0 % im.shape[1]
         x1ind = x1 % im.shape[1]
     else:
-        x0 = np.clip(x0, 0, im.shape[1]-1)
-        x1 = np.clip(x1, 0, im.shape[1]-1)
-        x0ind = x0
-        x1ind = x1
+        #x0 = np.clip(x0, 0, im.shape[1]-1)
+        #x1 = np.clip(x1, 0, im.shape[1]-1)
+        x0ind = np.clip(x0,0,im.shape[1]-1)
+        x1ind = np.clip(x1,0,im.shape[1]-1)
 
     if wrapy:
         y0ind = y0 % im.shape[0]
         y1ind = y1 % im.shape[0]
     else:
-        y0 = np.clip(y0, 0, im.shape[0]-1)
-        y1 = np.clip(y1, 0, im.shape[0]-1)
-        y0ind = y0
-        y1ind = y1
+        #y0 = np.clip(y0, 0, im.shape[0]-1)
+        #y1 = np.clip(y1, 0, im.shape[0]-1)
+        #y0ind = y0
+        #y1ind = y1
+        y0ind = np.clip(y0,0,im.shape[0]-1)
+        y1ind = np.clip(y1,0,im.shape[0]-1)
 
     Ia = im[y0ind, x0ind]
     Ib = im[y1ind, x0ind]

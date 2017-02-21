@@ -567,6 +567,60 @@ def test_bin_grid():
 
     assert_array_almost_equal(y, x, decimal=2)
 
+def test_bilinear_interpolate():
+    ''' INCOMPLETE! '''
+    Na, Nr = 11, 11
+    angles = np.linspace(0., 2*np.pi, Na)
+    radii = np.linspace(10, 20, Nr)
+    ANGLES, RADII = np.meshgrid(angles, radii)
+
+    im = np.cos(ANGLES*6)**2*RADII
+
+    #angles_newind= np.array([-3, 2, 3, 11,2])
+    #radii_newind= np.array([2, -3, 3, 2, 11])
+    # this test looks for regions that interpolate outside boundaries
+    # as well, ensuring they approach correct values
+    # see suggested plots (using matplotlib) as a comment below tests
+    angles_newind = np.arange(Na*4)
+    radii_newind =  np.arange(Nr*4)
+    ANGLES_new, RADII_new = np.meshgrid(angles_newind, radii_newind)
+
+    newim = core.bilinear_interpolate(im, ANGLES_new/2., RADII_new/2., wrapx=False, wrapy=False)
+    newim_wrapx = core.bilinear_interpolate(im, ANGLES_new/2., RADII_new/2., wrapx=True,wrapy=False)
+    newim_wrapy = core.bilinear_interpolate(im, ANGLES_new/2., RADII_new/2., wrapy=True,wrapx=False)
+
+    assert_array_almost_equal(newim[0,::8], np.array([10., 6.54508497,
+                                                      0.95491503, 10.,
+                                                      10., 10.]))
+    assert_array_almost_equal(newim[::8,0], np.array([ 10.,  14.,  18.,
+                                                      20.,  20.,  20.]))
+
+    assert_array_almost_equal(newim_wrapx[0,::8], np.array([10.,
+                                                            6.54508497,
+                                                            0.95491503,
+                                                            6.54508497,
+                                                            10.,
+                                                            6.54508497]))
+
+    assert_array_almost_equal(newim_wrapy[::8,0], np.array([ 10.,  14.,
+                                                            18.,  11.,
+                                                            15.,  19.]))
+
+    '''
+    Suggested plots for debugging (should look sensible)
+
+    newim_wrapxy = bilinear_interpolate(im, ANGLES_new/2., RADII_new/2., wrapy=True,wrapx=True)
+    figure(1);clf();
+    imshow(im)
+    figure(0);clf();
+    subplot(221);imshow(newim)
+    subplot(222);imshow(newim_wrapx)
+    subplot(223);imshow(newim_wrapy)
+    subplot(224);imshow(newim_wrapxy)
+    '''
+
+
+
 
 if __name__ == '__main__':
     import nose
