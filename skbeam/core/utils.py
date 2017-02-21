@@ -1303,6 +1303,7 @@ def bilinear_interpolate(im, x, y, wrapx=False, wrapy=False):
 
         Notes
         -----
+        Idea taken from here (but modified):
         http://stackoverflow.com/questions/12729228/
         simple-efficient-bilinear-interpolation-of-images-in-numpy-and-python
         but modified to allow for wrap around (useful for angles)
@@ -1327,15 +1328,15 @@ def bilinear_interpolate(im, x, y, wrapx=False, wrapy=False):
         x0ind = x0 % im.shape[1]
         x1ind = x1 % im.shape[1]
     else:
-        x0ind = np.clip(x0,0,im.shape[1]-1)
-        x1ind = np.clip(x1,0,im.shape[1]-1)
+        x0ind = np.clip(x0, 0, im.shape[1]-1)
+        x1ind = np.clip(x1, 0, im.shape[1]-1)
 
     if wrapy:
         y0ind = y0 % im.shape[0]
         y1ind = y1 % im.shape[0]
     else:
-        y0ind = np.clip(y0,0,im.shape[0]-1)
-        y1ind = np.clip(y1,0,im.shape[0]-1)
+        y0ind = np.clip(y0, 0, im.shape[0]-1)
+        y1ind = np.clip(y1, 0, im.shape[0]-1)
 
     Ia = im[y0ind, x0ind]
     Ib = im[y1ind, x0ind]
