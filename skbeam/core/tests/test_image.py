@@ -81,6 +81,63 @@ def test_construct_circ_avg_image():
                                         pixel_size=(2, 1))
 
 
+def test_construct_rphi_avg_image():
+    Nr, Na = 40, 40
+    Nx, Ny = 44, 44
+    angles = np.linspace(0, 2*np.pi, Na)
+    radii = np.linspace(0, 10, Nr)
+
+    ANGLES, RADII = np.meshgrid(angles, radii)
+    Z = np.cos(ANGLES*2)**2*RADII**2
+
+    mask = np.ones_like(Z)
+    mask[1:8] = 0
+    mask[:, 1:8] = 0
+    mask[:, 5:12] = 0
+    mask[7:18] = 0
+
+    Z_masked = Z*mask
+
+    shape = np.array([Nx, Ny])
+
+    Zproj = nimage.construct_rphi_avg_image(radii, angles, Z, shape=shape)
+    Zproj_masked = nimage.construct_rphi_avg_image(radii, angles, Z_masked,
+                                                   shape=shape, mask=mask)
+
+    Zproj_anis = nimage.construct_rphi_avg_image(radii, angles, Z,
+                                                 shape=shape, pixel_size=(1,
+                                                                          .5))
+    Zproj_anis_masked = nimage.construct_rphi_avg_image(radii, angles,
+                                                        Z_masked, shape=shape,
+                                                        mask=mask,
+                                                        pixel_size=(1, .5))
+
+    assert_array_almost_equal(Zproj[::8, 22], np.array([94.27280128,
+                                                       71.43462807,
+                                                       22.73133464,
+                                                       4.69655674,
+                                                       94.27280128,
+                                                       99.35251313]))
+
+    assert_array_almost_equal(Zproj_masked[::8, 22], np.array([94.27280128,
+                                                               71.43462807,
+                                                               22.73133464,
+                                                               np.nan, np.nan,
+                                                               np.nan]))
+
+    assert_array_almost_equal(Zproj_anis[::8, 22], np.array([94.27280128,
+                                                             94.27280128,
+                                                             22.73133464,
+                                                             6.19808029,
+                                                             99.35251313,
+                                                             99.35251313]))
+
+    assert_array_almost_equal(Zproj_anis_masked[::8, 22],
+                              np.array([94.27280128, 94.27280128,
+                                        22.73133464, np.nan, np.nan,
+                                        np.nan]))
+
+
 if __name__ == '__main__':
     import nose
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
