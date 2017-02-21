@@ -1309,6 +1309,7 @@ def bilinear_interpolate(im, x, y, wrapx=False, wrapy=False):
     '''
     x = np.asarray(x)
     y = np.asarray(y)
+    # clip if not wrapping
     if not wrapx:
         x = np.clip(x, 0, im.shape[1]-1)
     if not wrapy:
@@ -1321,12 +1322,11 @@ def bilinear_interpolate(im, x, y, wrapx=False, wrapy=False):
 
     # if wrapping, make distinction between location
     # and index. Else, they are the same.
+    # if not wrapping, make sure index clips
     if wrapx:
         x0ind = x0 % im.shape[1]
         x1ind = x1 % im.shape[1]
     else:
-        #x0 = np.clip(x0, 0, im.shape[1]-1)
-        #x1 = np.clip(x1, 0, im.shape[1]-1)
         x0ind = np.clip(x0,0,im.shape[1]-1)
         x1ind = np.clip(x1,0,im.shape[1]-1)
 
@@ -1334,10 +1334,6 @@ def bilinear_interpolate(im, x, y, wrapx=False, wrapy=False):
         y0ind = y0 % im.shape[0]
         y1ind = y1 % im.shape[0]
     else:
-        #y0 = np.clip(y0, 0, im.shape[0]-1)
-        #y1 = np.clip(y1, 0, im.shape[0]-1)
-        #y0ind = y0
-        #y1ind = y1
         y0ind = np.clip(y0,0,im.shape[0]-1)
         y1ind = np.clip(y1,0,im.shape[0]-1)
 
