@@ -196,7 +196,8 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
             Note that if the domain interval exceeds 2*pi, values
             outside this range are ignored for interpolation.
             Ex : angles = [0, ..., 6.25, 2*np.pi]
-                The last point modulo 2*pi is 0 so it is ignored
+                The last point modulo 2*pi is 0 which is the same as first
+                point so it is ignored
 
         image : 2d array the image to interpolate from
             rows are radii, columns are angles, ex: img[radii, angles]
@@ -213,13 +214,13 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
         ----
         This function uses a simple linear interpolation from scipy:
             `scipy.interpolate.RegularGridInterpolator`
-            More complex interpolators (i.e. splines) cannot
-            be used with this algorithm.
+            More complex interpolation techniques (i.e. splines) cannot be used
+            with this algorithm.
 
         Returns
         -------
         new_img : 2d np.ndarray
-            The reconstructed image
+            The reconstructed image. Masked regions are filled with np.nan
 
     '''
     if mask is not None:
@@ -282,6 +283,7 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
     interpolator = RegularGridInterpolator((radii, anglesp), imagep,
                                            bounds_error=False,
                                            fill_value=np.nan)
+
     new_img = interpolator((radial_val, angle_val))
     new_img = new_img.reshape(shape)
 
