@@ -41,6 +41,7 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 from . import utils
 import logging
+from scipy.interpolate import RegularGridInterpolator
 logger = logging.getLogger(__name__)
 
 
@@ -182,6 +183,7 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
         ----------
         radii : 1d array of coordinates, ascending order.
             The radii values (in units of pixels)
+            These may be non-uniformly spaced.
 
         angles : 1d array of coordinates, ascending order
             The angle values (in units of radians)
@@ -190,6 +192,11 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
             where x are the columns of the image and y are the rows
             (img[y,x]), then 0 degrees is the -x direction, and
             ascending angle goes clockwise in this plane.
+            These may be non-uniformly spaced.
+            Note that if the domain interval exceeds 2*pi, values
+            outside this range are ignored for interpolation.
+            Ex : angles = [0, ..., 6.25, 2*np.pi]
+                The last point modulo 2*pi is 0 so it is ignored
 
         image : 2d array the image to interpolate from
             rows are radii, columns are angles, ex: img[radii, angles]
@@ -201,6 +208,13 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
         center : 2 tuple of floats, optional
 
         shape : the new image shape, in terms of pixel values
+
+        Note
+        ----
+        This function uses a simple linear interpolation from scipy:
+            `scipy.interpolate.RegularGridInterpolator`
+            More complex interpolators (i.e. splines) cannot
+            be used with this algorithm.
 
         Returns
         -------
@@ -230,17 +244,43 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
     if center is None:
         center = (shape[0]-1)/2., (shape[1] - 1)/2.
 
+    # 1 . There are a few cases to consider here for the angles:
+    #   i. [0,..., 2*pi] -> [0,..,0]
+    #   ii. [0, ... , 2*pi, ...5*pi] -> [0, ..., 0, ...]
+    #   iii. [0,..., a < 2*pi] -> [0, ..., a< 2*pi] (easy)
+    #   iv. [.12, ..., 2*pi, ...] -> [0, ...]
+
+    # 1.a : modulo 2*pi
+    angles = angles % (2*np.pi)
+    # 1.b : subtract minimum
+    anglemin = angles[0]
+    angles -= anglemin
+    # 1.c : find any extra cross-overs and ignore them
+    adiff = np.where(np.diff(angles) < 0)[0]
+    if len(adiff) > 0:
+        # ignore rest of cross-over points for safety
+        # docs ask you not to have this case, but take care of it anyway
+        angles = angles[:adiff[0]+1]
+        image = image[:, :adiff[0]+1]
+
+    # 2 : since the interpolation will be linear, and the angles wrap, we
+    # need to add the first angle position to the end and vice versa
+    # 2.a : add bounds to angle
+    anglesp = np.concatenate(([angles[-1]-2*np.pi], angles,
+                              [angles[0]+2*np.pi]))
+    # 2.b : add bounds to image
+    imagep = np.zeros((image.shape[0], image.shape[1]+2))
+    imagep[:, 0] = image[:, -1]
+    imagep[:, 1:image.shape[1]+1] = image
+    imagep[:, -1] = image[:, 0]
+
     radial_val = utils.radial_grid(center, shape, pixel_size).ravel()
     angle_val = utils.angle_grid(center, shape, pixel_size).ravel() % (2*np.pi)
-    angles = angles % (2*np.pi)
+    # 1.d : subtract minimum for interpolated values as well
+    angle_val -= anglemin
 
-    radial_edges = utils.bin_edges(np.min(radii), np.max(radii), len(radii))
-    angle_edges = utils.bin_edges(np.min(angles), np.max(angles), len(angles))
-
-    radial_bins = np.digitize(radial_val, radial_edges, right=False) - 1
-    angle_bins = np.digitize(angle_val, angle_edges, right=False) - 1
-
-    new_img = utils.bilinear_interpolate(image, angle_bins, radial_bins,
-                                         wrapx=True).reshape(shape)
+    interpolator = RegularGridInterpolator((radii, anglesp), imagep)
+    new_img = interpolator((radial_val, angle_val))
+    new_img = new_img.reshape(shape)
 
     return new_img
