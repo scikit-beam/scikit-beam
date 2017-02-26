@@ -279,7 +279,9 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
     # 1.d : subtract minimum for interpolated values as well
     angle_val -= anglemin
 
-    interpolator = RegularGridInterpolator((radii, anglesp), imagep)
+    interpolator = RegularGridInterpolator((radii, anglesp), imagep,
+                                           bounds_error=False,
+                                           fill_value=np.nan)
     new_img = interpolator((radial_val, angle_val))
     new_img = new_img.reshape(shape)
 
