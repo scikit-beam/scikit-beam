@@ -567,20 +567,6 @@ def test_bin_grid():
 
     assert_array_almost_equal(y, x, decimal=2)
 
-    '''
-    Suggested plots for debugging (should look sensible)
-
-    newim_wrapxy = bilinear_interpolate(im, ANGLES_new/2., RADII_new/2.,
-                                        wrapy=True,wrapx=True)
-    figure(1);clf();
-    imshow(im)
-    figure(0);clf();
-    subplot(221);imshow(newim)
-    subplot(222);imshow(newim_wrapx)
-    subplot(223);imshow(newim_wrapy)
-    subplot(224);imshow(newim_wrapxy)
-    '''
-
 
 if __name__ == '__main__':
     import nose
