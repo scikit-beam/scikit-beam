@@ -568,6 +568,11 @@ def test_bin_grid():
     assert_array_almost_equal(y, x, decimal=2)
 
 
+def time_binning():
+    
+
+
+
 if __name__ == '__main__':
     import nose
 
