@@ -61,6 +61,24 @@ class BinnedStatisticDD(object):
         sample : array_like
             Data to histogram passed as a sequence of D arrays of length N, or
             as an (N,D) array.
+        statistic : string or callable, optional
+            The statistic to compute (default is 'mean'). To compute multiple
+            statistics efficiently, override this at __call__ time.
+            The following statistics are available:
+
+              * 'mean' : compute the mean of values for points within each bin.
+                Empty bins will be represented by NaN.
+              * 'median' : compute the median of values for points within each
+                bin. Empty bins will be represented by NaN.
+              * 'count' : compute the count of points within each bin.  This is
+                identical to an unweighted histogram.  `values` array is not
+                referenced.
+              * 'sum' : compute the sum of values for points within each bin.
+                This is identical to a weighted histogram.
+              * function : a user-defined function which takes a 1D array of
+                values, and outputs a single numerical statistic. This function
+                will be called on the values in each bin.  Empty bins will be
+                represented by function([]), or NaN if this returns an error.
         bins : sequence or int, optional
             The bin specification:
 
@@ -166,6 +184,7 @@ class BinnedStatisticDD(object):
             self.xy += Ncount[self.ni[i]] * self.nbin[self.ni[i + 1:]].prod()
         self.xy += Ncount[self.ni[-1]]
         self._flatcount = None  # will be computed if needed
+        self._statistic = statistic
 
     @property
     def flatcount(self):
@@ -209,57 +228,72 @@ class BinnedStatisticDD(object):
         values : array_like
             The values on which the statistic will be computed.  This must be
             the same shape as `sample` in the constructor.
+        statistic : string or callable, optional
+            The statistic to compute (default is whatever was passed in when
+            this object was instantiated).
+            The following statistics are available:
+
+              * 'mean' : compute the mean of values for points within each bin.
+                Empty bins will be represented by NaN.
+              * 'median' : compute the median of values for points within each
+                bin. Empty bins will be represented by NaN.
+              * 'count' : compute the count of points within each bin.  This is
+                identical to an unweighted histogram.  `values` array is not
+                referenced.
+              * 'sum' : compute the sum of values for points within each bin.
+                This is identical to a weighted histogram.
+              * function : a user-defined function which takes a 1D array of
+                values, and outputs a single numerical statistic. This function
+                will be called on the values in each bin.  Empty bins will be
+                represented by function([]), or NaN if this returns an error.
 
         Returns
         -------
         statistic_values : array
             The values of the selected statistic in each bin.
         """
-
-        if statistic is not None:
-            self.statistic = statistic
-            if self.statistic in ['mean', 'std', 'count']:
-                self.flatcount = np.bincount(self.xy, None)
+        if statistic is None:
+            statistic = self.statistic
 
         self.result = np.empty(self.nbin.prod(), float)
-        if self.statistic == 'mean':
+        if statistic == 'mean':
             self.result.fill(np.nan)
             flatsum = np.bincount(self.xy, values)
             a = self.flatcount.nonzero()
             self.result[a] = flatsum[a] / self.flatcount[a]
-        elif self.statistic == 'std':
+        elif statistic == 'std':
             self.result.fill(0)
             flatsum = np.bincount(self.xy, values)
             flatsum2 = np.bincount(self.xy, values ** 2)
             a = self.flatcount.nonzero()
             self.result[a] = np.sqrt(flatsum2[a] / self.flatcount[a] -
                                      (flatsum[a] / self.flatcount[a]) ** 2)
-        elif self.statistic == 'count':
+        elif statistic == 'count':
             self.result.fill(0)
             a = np.arange(len(self.flatcount))
             self.result[a] = self.flatcount
-        elif self.statistic == 'sum':
+        elif statistic == 'sum':
             self.result.fill(0)
             flatsum = np.bincount(self.xy, values)
             a = np.arange(len(flatsum))
             self.result[a] = flatsum
-        elif self.statistic == 'median':
+        elif statistic == 'median':
             self.result.fill(np.nan)
             for i in np.unique(self.xy):
                 self.result[i] = np.median(values[self.xy == i])
-        elif callable(self.statistic):
+        elif callable(statistic):
             with warnings.catch_warnings():
                 # Numpy generates a warnings for mean/std/... with empty list
                 warnings.filterwarnings('ignore', category=RuntimeWarning)
                 old = np.seterr(invalid='ignore')
                 try:
-                    null = self.statistic([])
+                    null = statistic([])
                 except:
                     null = np.nan
                 np.seterr(**old)
             self.result.fill(null)
             for i in np.unique(self.xy):
-                self.result[i] = self.statistic(values[self.xy == i])
+                self.result[i] = statistic(values[self.xy == i])
 
         # Shape into a proper matrix
         self.result = self.result.reshape(np.sort(self.nbin))
@@ -389,9 +423,6 @@ class BinnedStatistic2D(BinnedStatisticDD):
         A sequence of values to be binned along the first dimension.
     y : (M,) array_like
         A sequence of values to be binned along the second dimension.
-    values : (N,) array_like
-        The values on which the statistic will be computed.  This must be
-        the same shape as `x`.
     statistic : string or callable, optional
         The statistic to compute (default is 'mean').
         The following statistics are available:
@@ -449,8 +480,39 @@ class BinnedStatistic2D(BinnedStatisticDD):
                                                 bins=bins, range=range,
                                                 mask=mask)
 
-    def __call__(self, values):
-        return super(BinnedStatistic2D, self).__call__(values)
+    def __call__(self, values, statistic=None):
+        """
+        Parameters
+        ----------
+        values : array_like
+            The values on which the statistic will be computed.  This must
+            match the dimensions of ``x`` and ``y`` that were passed in when
+            this object was instantiated.
+        statistic : string or callable, optional
+            The statistic to compute (default is whatever was passed in when
+            this object was instantiated).
+            The following statistics are available:
+
+              * 'mean' : compute the mean of values for points within each bin.
+                Empty bins will be represented by NaN.
+              * 'median' : compute the median of values for points within each
+                bin. Empty bins will be represented by NaN.
+              * 'count' : compute the count of points within each bin.  This is
+                identical to an unweighted histogram.  `values` array is not
+                referenced.
+              * 'sum' : compute the sum of values for points within each bin.
+                This is identical to a weighted histogram.
+              * function : a user-defined function which takes a 1D array of
+                values, and outputs a single numerical statistic. This function
+                will be called on the values in each bin.  Empty bins will be
+                represented by function([]), or NaN if this returns an error.
+
+        Returns
+        -------
+        statistic_values : array
+            The values of the selected statistic in each bin.
+        """
+        return super(BinnedStatistic2D, self).__call__(values, statistic)
 
 
 class RPhiBinnedStatistic(BinnedStatistic2D):
@@ -525,13 +587,45 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
                                                   mask=mask,
                                                   range=range)
 
-    def __call__(self, values):
+    def __call__(self, values, statistic=None):
+        """
+        Parameters
+        ----------
+        values : array_like
+            The values on which the statistic will be computed.  This must
+            match the ``shape`` that passed in when this object was
+            instantiated.
+        statistic : string or callable, optional
+            The statistic to compute (default is whatever was passed in when
+            this object was instantiated).
+            The following statistics are available:
+
+              * 'mean' : compute the mean of values for points within each bin.
+                Empty bins will be represented by NaN.
+              * 'median' : compute the median of values for points within each
+                bin. Empty bins will be represented by NaN.
+              * 'count' : compute the count of points within each bin.  This is
+                identical to an unweighted histogram.  `values` array is not
+                referenced.
+              * 'sum' : compute the sum of values for points within each bin.
+                This is identical to a weighted histogram.
+              * function : a user-defined function which takes a 1D array of
+                values, and outputs a single numerical statistic. This function
+                will be called on the values in each bin.  Empty bins will be
+                represented by function([]), or NaN if this returns an error.
+
+        Returns
+        -------
+        statistic_values : array
+            The values of the selected statistic in each bin.
+        """
         # check for what I believe could be a common error
         if values.shape != self.expected_shape:
             raise ValueError('"values" has incorrect shape.'
                              ' Expected: ' + str(self.expected_shape) +
                              ' Received: ' + str(values.shape))
-        return super(RPhiBinnedStatistic, self).__call__(values.reshape(-1))
+        return super(RPhiBinnedStatistic, self).__call__(values.reshape(-1),
+                                                         statistic)
 
 
 class RadialBinnedStatistic(BinnedStatistic1D):
@@ -604,10 +698,42 @@ class RadialBinnedStatistic(BinnedStatistic1D):
                                                     mask=mask,
                                                     range=range)
 
-    def __call__(self, values):
+    def __call__(self, values, statistic=None):
+        """
+        Parameters
+        ----------
+        values : array_like
+            The values on which the statistic will be computed.  This must
+            match the ``shape`` that passed in when this object was
+            instantiated.
+        statistic : string or callable, optional
+            The statistic to compute (default is whatever was passed in when
+            this object was instantiated).
+            The following statistics are available:
+
+              * 'mean' : compute the mean of values for points within each bin.
+                Empty bins will be represented by NaN.
+              * 'median' : compute the median of values for points within each
+                bin. Empty bins will be represented by NaN.
+              * 'count' : compute the count of points within each bin.  This is
+                identical to an unweighted histogram.  `values` array is not
+                referenced.
+              * 'sum' : compute the sum of values for points within each bin.
+                This is identical to a weighted histogram.
+              * function : a user-defined function which takes a 1D array of
+                values, and outputs a single numerical statistic. This function
+                will be called on the values in each bin.  Empty bins will be
+                represented by function([]), or NaN if this returns an error.
+
+        Returns
+        -------
+        statistic_values : array
+            The values of the selected statistic in each bin.
+        """
         # check for what I believe could be a common error
         if values.shape != self.expected_shape:
             raise ValueError('"values" has incorrect shape.'
                              ' Expected: ' + str(self.expected_shape) +
                              ' Received: ' + str(values.shape))
-        return super(RadialBinnedStatistic, self).__call__(values.reshape(-1))
+        return super(RadialBinnedStatistic, self).__call__(values.reshape(-1),
+                                                           statistic)
