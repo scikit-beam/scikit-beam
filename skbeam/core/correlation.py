@@ -1187,3 +1187,186 @@ def _expand_image(img):
         img[:dims[0]] = imgold
 
     return img
+
+
+def one_time_using_time_stamps(num_levels, num_bufs, labels, images,
+                               time_diff):
+    """
+    This function computes the one-time correlation function using
+    variable time stamps data.
+
+    Parameters
+    ----------
+    num_levels : int
+        how many generations of downsampling to perform, i.e.,
+        the depth of the binomial tree of averaged frames
+    num_bufs : int, must be even
+        maximum lag step to compute in each generation of
+        downsampling
+    labels : array
+        Labeled array of the same shape as the image stack.
+        Each ROI is represented by sequential integers starting at one.  For
+        example, if you have four ROIs, they must be labeled 1, 2, 3,
+        4. Background is labeled as 0
+    images : 4D array or 3D array
+        image data
+    time_diff : list
+        time difference between images as a list
+
+    Returns
+    -------
+    g2 : array
+        matrix of normalized one-time correlation results
+        for variable time stamps
+        shape (number of labels(ROI), all possible times to bin)
+    all_lags : array
+        delay or lag steps for the variable time stamps one-time correlation
+        analysis
+        shape all possible times to bin
+    """
+    num_levels = 1   # todo higher levels
+    label_array = []
+    pixel_list = []
+
+    if images.ndim == 4:
+        images = images.reshape(images.shape[0] * images.shape[1],
+                                        images.shape[2], images.shape[3])
+
+    label_array, pixel_list = roi.extract_label_indices(labels)
+    # map the indices onto a sequential list of integers starting at 1
+    label_mapping = {label: n+1
+                     for n, label in enumerate(np.unique(label_array))}
+    # remap the label array to go from 1 -> max(_labels)
+    for label, n in label_mapping.items():
+        label_array[label_array == label] = n
+
+    # number of ROI's
+    num_rois = len(label_mapping)
+
+    # stash the number of pixels in the label array
+    num_pixels = np.bincount(label_array)[1:]
+
+    # to increment buffer
+    cur = np.ones(num_levels, dtype=np.int64)
+
+    time_bin, all_lags = time_binning12(time_diff)
+
+    # G holds the un normalized auto- correlation result. We
+    # accumulate computations into G as the algorithm proceeds.
+    G = np.zeros((len(all_lags), num_rois), dtype=np.float64)
+    # matrix for normalizing G into g2
+
+    past_intensity = np.zeros_like(G)
+    # matrix for normalizing G into g2
+    future_intensity = np.zeros_like(G)
+
+    buf = np.zeros((num_levels, num_bufs, len(pixel_list)),
+                   dtype=np.float64)
+
+    time_track = np.zeros_like(all_lags, dtype=np.int64)
+
+    j = 0
+
+    for image in images:
+
+        # Compute the correlations for all higher levels.
+        timing = time_bin[j]
+        level = 0
+
+        # increment buffer
+        cur[0] = (1 + cur[0]) % num_bufs
+
+        # Put the ROI pixels into the ring buffer.
+        buf[0, cur[0] - 1] = np.ravel(image)[pixel_list]
+        buf_no = cur[0] - 1
+
+        # Compute the correlations between the first level
+        # (undownsampled) frames. This modifies G,
+        # past_intensity, future_intensity,
+        # and img_per_level in place!
+        _one_time_process_time_stamps(buf, G, past_intensity,
+                                      future_intensity, label_array,
+                                      num_bufs, num_pixels, time_track,
+                                      level, buf_no, timing, all_lags)
+
+        j +=1
+
+    # If any past intensities are zero, then g2 cannot be normalized at
+    # those levels. This if/else code block is basically preventing
+    # divide-by-zero errors.
+    if len(np.where(past_intensity == 0)[0]) != 0:
+        g_max = np.where(past_intensity == 0)[0][0]
+    else:
+        g_max = past_intensity.shape[0]
+
+    g2 = (G[:g_max]/ (past_intensity[:g_max] *
+                             future_intensity[:g_max]))
+    return g2.T, all_lags
+
+
+def _one_time_process_time_stamps(buf, G, past_intensity_norm,
+                                  future_intensity_norm, label_array,
+                                  num_bufs, num_pixels, time_track, level,
+                                  buf_no, time_bin, all_lags):
+    """Reference implementation of the inner loop
+     of lazy_one_time_using_time_stamps
+
+    This helper function calculates G, past_intensity_norm and
+    future_intensity_norm at each level, symmetric normalization is used.
+
+    .. warning :: This modifies inputs in place.
+
+    Parameters
+    ----------
+    buf : array
+        image data array to use for correlation
+    G : array
+        matrix of auto-correlation function without normalizations
+    past_intensity_norm : array
+        matrix of past intensity normalizations
+    future_intensity_norm : array
+        matrix of future intensity normalizations
+    label_array : array
+        labeled array where all nonzero values are ROIs
+    num_bufs : int, even
+        number of buffers(channels)
+    num_pixels : array
+        number of pixels in certain ROI's
+        ROI's, dimensions are : [number of ROI's]X1
+    img_per_level : array
+        to track how many images processed in each level
+    level : int
+        the current multi-tau level
+    buf_no : int
+        the current buffer number
+    time_bin : list
+        list of time binning
+    all_lags : array
+         all possible time lags from the time difference
+
+    Notes
+    -----
+    .. math::
+        G = <I(\tau)I(\tau + delay)>
+    .. math::
+        past_intensity_norm = <I(\tau)>
+    .. math::
+        future_intensity_norm = <I(\tau + delay)>
+    """
+    for i, item in enumerate(time_bin):
+        # compute the index into the autocorrelation matrix
+        ii = np.where(all_lags == item)[0]
+        time_track[ii] += 1
+
+        delay_no = (buf_no - i) % num_bufs
+
+        # get the images for correlating
+        past_img = buf[level, delay_no]
+        future_img = buf[level, buf_no]
+
+        for w, arr in zip([past_img*future_img, past_img, future_img],
+                          [G, past_intensity_norm, future_intensity_norm]):
+                binned = np.bincount(label_array, weights=w)[1:]
+                arr[ii] += ((binned / num_pixels -
+                             arr[ii]) / time_track[ii])
+    return None  # modifies arguments in place!
