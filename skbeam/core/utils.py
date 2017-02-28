@@ -1273,16 +1273,16 @@ def bin_grid(image, r_array, pixel_sizes, statistic='mean', mask=None,
     return bin_centers, int_stat
 
 
-def time_binning(time_diff):
+def time_binning(time_diff, ff=2):
     """
     Bin the time differences into all possible bins
 
     Parameters
     ----------
     time_diff : list
-        time difference
-        ex: time difference from the previous image
-            for each image as a list
+        time difference from previous image for each image as a list
+    ff : int, optional
+        desired float point format
 
     Returns
     -------
@@ -1294,12 +1294,13 @@ def time_binning(time_diff):
     """
     time_bins = []
     all_lags = []
+    ff_p = '.' + str(ff) + 'f'
     for c, t in enumerate(time_diff):
-        time_b = []
         stamp = 0
-        for item in (time_diff[:c][::-1]):
-            time_b.append(stamp)
-            all_lags.append(stamp)
+        time_b = []
+        for item in (time_diff[:c+1][::-1]):
+            time_b.append(float(format(stamp, ff_p)))
+            all_lags.append(float(format(stamp, ff_p)))
             stamp += item
         time_bins.append(time_b)
-    return time_bins[1:], np.unique(np.sort(all_lags))
+    return time_bins, np.unique(np.sort(all_lags))
