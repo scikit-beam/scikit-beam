@@ -184,7 +184,7 @@ class BinnedStatisticDD(object):
             self.xy += Ncount[self.ni[i]] * self.nbin[self.ni[i + 1:]].prod()
         self.xy += Ncount[self.ni[-1]]
         self._flatcount = None  # will be computed if needed
-        self._statistic = statistic
+        self.statistic = statistic
 
     @property
     def flatcount(self):
