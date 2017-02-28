@@ -251,11 +251,11 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
     #   iii. [0,..., a < 2*pi] -> [0, ..., a< 2*pi] (easy)
     #   iv. [.12, ..., 2*pi, ...] -> [0, ...]
 
-    # 1.a : modulo 2*pi
-    angles = angles % (2*np.pi)
-    # 1.b : subtract minimum
+    # 1.a : subtract minimum
     anglemin = angles[0]
     angles -= anglemin
+    # 1.b : modulo 2*pi
+    angles = angles % (2*np.pi)
     # 1.c : find any extra cross-overs and ignore them
     adiff = np.where(np.diff(angles) < 0)[0]
     if len(adiff) > 0:
@@ -276,9 +276,10 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
     imagep[:, -1] = image[:, 0]
 
     radial_val = utils.radial_grid(center, shape, pixel_size).ravel()
-    angle_val = utils.angle_grid(center, shape, pixel_size).ravel() % (2*np.pi)
+    angle_val = utils.angle_grid(center, shape, pixel_size).ravel()
     # 1.d : subtract minimum for interpolated values as well
     angle_val -= anglemin
+    angle_val = angle_val % (2*np.pi)
 
     interpolator = RegularGridInterpolator((radii, anglesp), imagep,
                                            bounds_error=False,
