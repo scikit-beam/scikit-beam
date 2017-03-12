@@ -870,7 +870,7 @@ class CrossCorrelator:
         >> ccorr = CrossCorrelator(mask.shape, mask=mask)
         >> # correlated image
         >> cimg = cc(img1)
-        or, mask may m
+        or, mask may may be ids
         >> cc = CrossCorrelator(ids)
         #(where ids is same shape as img1)
         >> cc1 = cc(img1)
@@ -888,8 +888,7 @@ class CrossCorrelator:
 
     '''
     # TODO : when mask is None, don't compute a mask, submasks
-    def __init__(self, shape, mask=None, normalization=None,
-                 wrap=False):
+    def __init__(self, shape, mask=None, normalization=None):
         '''
             Prepare the spatial correlator for various regions specified by the
             id's in the image.
@@ -911,18 +910,11 @@ class CrossCorrelator:
                     'regular' : divide by pixel number
                     'symavg' : use symmetric averaging
                 Defaults to ['regular'] normalization
-
-            wrap : bool, optional
-                If False, assume dimensions don't wrap around. If True
-                    assume they do. The latter is useful for circular
-                    dimensions such as angle.
         '''
         if normalization is None:
             normalization = ['regular']
         elif not isinstance(normalization, list):
             normalization = list([normalization])
-
-        self.wrap = wrap
         self.normalization = normalization
 
         if mask is None:
@@ -966,8 +958,7 @@ class CrossCorrelator:
             # this could be replaced by skimage cropping and padding
             submasktmp = _crop_from_mask(masktmp)
 
-            if self.wrap is False:
-                submask = _expand_image(submasktmp)
+            submask = _expand_image(submasktmp)
 
             tmpimg = np.zeros_like(submask)
 
