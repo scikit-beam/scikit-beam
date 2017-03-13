@@ -184,7 +184,7 @@ class BinnedStatisticDD(object):
             self.xy += Ncount[self.ni[i]] * self.nbin[self.ni[i + 1:]].prod()
         self.xy += Ncount[self.ni[-1]]
         self._flatcount = None  # will be computed if needed
-        self._statistic = statistic
+        self.statistic = statistic
 
     @property
     def flatcount(self):
@@ -216,7 +216,7 @@ class BinnedStatisticDD(object):
 
     @statistic.setter
     def statistic(self, new_statistic):
-        if not callable(new_statistic) and new_statistic not in std_:
+        if not callable(new_statistic) and new_statistic not in self.std_:
             raise ValueError('invalid statistic %r' % (new_statistic,))
         else:
             self._statistic = new_statistic
