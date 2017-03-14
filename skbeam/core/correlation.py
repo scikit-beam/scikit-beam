@@ -1101,13 +1101,11 @@ class CrossCorrelator:
             if 'regular' in normalization:
                 if self_correlation:
                     ccorr /= self.maskcorrs[i] * \
-                        np.average(tmpimg[ppiis,
-                        ppjjs])**2
+                        np.average(tmpimg[ppiis, ppjjs])**2
                 else:
-                    ccorr /= self.maskcorrs[i] * \
-                        np.average(tmpimg[ppiis,
-                        ppjjs])*np.average(tmpimg2[ppiis,
-                        ppjjs])
+                    ccorr /= self.maskcorrs[i] *\
+                             np.average(tmpimg[ppiis, ppjjs]) *\
+                             np.average(tmpimg2[ppiis, ppjjs])
             ccorrs.append(ccorr)
 
         if len(ccorrs) == 1:
