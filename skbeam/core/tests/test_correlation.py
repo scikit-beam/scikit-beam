@@ -330,8 +330,8 @@ def testCrossCorrelator2d():
     ycorr_ids_2D[index][ycorr_ids_2D[index].shape[0]//2]
     assert_array_almost_equal(ycorr_ids_2D[index]
                               [ycorr_ids_2D[index].shape[0]//2],
-                              np.array([-0., 1.22195059, 1.08685771,
-                                        1.43246508, 1.08685771, 1.22195059, 0.
+                              np.array([ 1.22195059, 1.08685771,
+                                        1.43246508, 1.08685771, 1.22195059
                                         ])
                               )
 
@@ -339,8 +339,8 @@ def testCrossCorrelator2d():
     ycorr_ids_2D[index][ycorr_ids_2D[index].shape[0]//2]
     assert_array_almost_equal(ycorr_ids_2D[index]
                               [ycorr_ids_2D[index].shape[0]//2],
-                              np.array([-0., 1.24324268, 0.80748997,
-                                        1.35790022, 0.80748997, 1.24324268, 0.
+                              np.array([1.24324268, 0.80748997,
+                                        1.35790022, 0.80748997, 1.24324268
                                         ])
                               )
 
@@ -348,16 +348,16 @@ def testCrossCorrelator2d():
     ycorr_ids_2D_symavg[index][ycorr_ids_2D[index].shape[0]//2]
     assert_array_almost_equal(ycorr_ids_2D_symavg[index]
                               [ycorr_ids_2D[index].shape[0]//2],
-                              np.array([0., 0.84532695, 1.16405848, 1.43246508,
-                                        1.16405848, 0.84532695, 0.])
+                              np.array([0.84532695, 1.16405848, 1.43246508,
+                                        1.16405848, 0.84532695])
                               )
 
     index = 1
     ycorr_ids_2D_symavg[index][ycorr_ids_2D[index].shape[0]//2]
     assert_array_almost_equal(ycorr_ids_2D_symavg[index]
                               [ycorr_ids_2D[index].shape[0]//2],
-                              np.array([0., 0.94823482, 0.8629459, 1.35790022,
-                                        0.8629459, 0.94823482, 0.])
+                              np.array([0.94823482, 0.8629459, 1.35790022,
+                                        0.8629459, 0.94823482])
                               )
 
 
