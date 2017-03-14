@@ -887,7 +887,6 @@ class CrossCorrelator:
 
 
     '''
-    # TODO : when mask is None, don't compute a mask, submasks
     def __init__(self, shape, mask=None, normalization=None):
         '''
             Prepare the spatial correlator for various regions specified by the
@@ -920,53 +919,64 @@ class CrossCorrelator:
         if mask is None:
             mask = np.ones(shape)
 
-        # row_indices, col_indices : the list of xindex, yindex into original image
-        # row_subindices, col_subindices : the list of xindex, yindex into smaller image for FFT
+        # A terse nomenclature was chosen for ease of reading code.
+        # Here is the Nomenclature (for both init and call sections):
+        #   1. pi, pj: the list of yindex (rows), xindex (cols) into original
+        #       image
+        #   2. pis, pjs : a subselection of the above
+        #   3. ppii, ppjj : the list of yindex (rows), xindex (cols) into
+        #       smaller image for FFT
+        #   4. ppiis, ppjjs : a subselection of the above
+        #   5. bind : the bin id per pixel (defined by mask)
+        #   6. idpos : a list of pointers into the position arrays for each id
+
+
         # initialize subregions information for the correlation
         # first find indices of subregions and sort them by subregion id
-        
-        row_indices, col_indices = np.where(mask != 0)
-        bind = mask[row_indices, col_indices]
+        pi, pj = np.where(mask != 0)
+        # typing not necessary, but it may be better to be explicit
+        # (especially if we cythonize in the future)
+        bind = mask[pi, pj].astype(np.uint32)
+
+        # sort them so that we can easily index into subregions with one number
         order = np.argsort(bind)
         bind = bind[order]
-        row_indices = row_indices[order]
-        col_indices = col_indices[order]  # sort them all
+        pi = pi[order]
+        pj = pj[order] 
 
-        # make array of pointers into position arrays
-        # bind = [1,1,1,2,2,2,2,3,3,3...]
-        index_starts = 0
+        # make array of pointers into these subregions
+        idpos = 0
         inds_tmp = 1 + np.where(np.not_equal(bind[1:], bind[:-1]))[0]
-        index_starts = np.append(index_starts, inds_tmp)
-        index_starts = np.append(index_starts, len(bind))
-        self.index_starts = index_starts
-        # not necessary, but keep maybe for futur debugging
-        # self.ids = bind[index_starts[:-1]]
-        self.nids = len(index_starts[:-1])
+        idpos = np.append(idpos, inds_tmp)
+        idpos = np.append(idpos, len(bind)).astype(np.uint32)
+        self.idpos = idpos
+
+        self.nids = len(idpos[:-1])
+
         # finds the shape of the subregions
-        shapes = list()
+        shapes = np.zeros((self.nids, 4), dtype=np.uint32)
         for i in range(self.nids):
-            index_start, index_end = index_starts[i], index_starts[i+1]
-            row_min = row_indices[index_start:index_end].min()
-            row_max = row_indices[index_start:index_end].max()
-            col_min = col_indices[index_start:index_end].min()
-            col_max = col_indices[index_start:index_end].max()
-            shapes.append([row_min, row_max, col_min, col_max])
-        shapes = np.array(shapes)
+            index_start, index_end = idpos[i], idpos[i+1]
+            row_min = pi[index_start:index_end].min()
+            row_max = pi[index_start:index_end].max()
+            col_min = pj[index_start:index_end].min()
+            col_max = pj[index_start:index_end].max()
+            shapes[i] = [row_min, row_max, col_min, col_max]
 
         #make indices for subregions arrays and their shapes
-        row_subindices = row_indices.copy()
-        col_subindices = col_indices.copy()
+        ppii = pi.copy()
+        ppjj = pj.copy()
         # subtract the minimum index, this trick 
         # will then index into some other array properly
         for i in range(self.nids):
-            index_start, index_stop = index_starts[i], index_starts[i+1]
-            row_subindices[index_start:index_stop] -= shapes[i,0]
-            col_subindices[index_start:index_stop] -= shapes[i,2]
+            index_start, index_stop = idpos[i], idpos[i+1]
+            ppii[index_start:index_stop] -= shapes[i,0]
+            ppjj[index_start:index_stop] -= shapes[i,2]
         # now save to object
-        self.row_subindices = row_subindices
-        self.col_subindices = col_subindices
-        self.row_indices = row_indices
-        self.col_indices = col_indices
+        self.ppii = ppii
+        self.ppjj = ppjj
+        self.pi = pi
+        self.pj = pj
 
         # redefine shapes to be the shapes of the subregions
         # make shapes be for regions
@@ -990,10 +1000,10 @@ class CrossCorrelator:
         # to save some time when actually computing the cross correlations
         for i in range(self.nids):
             submask = np.zeros(self.shapes[i, :])
-            index_start, index_stop = index_starts[i], index_starts[i+1]
-            row_subindices_sel = row_subindices[index_start:index_stop]
-            col_subindices_sel = col_subindices[index_start:index_stop]
-            submask[row_subindices_sel, col_subindices_sel] = 1
+            index_start, index_stop = idpos[i], idpos[i+1]
+            ppiis = ppii[index_start:index_stop]
+            ppjjs = ppjj[index_start:index_stop]
+            submask[ppiis, ppjjs] = 1
             self.submasks.append(submask)
 
             maskcorr = _cross_corr(submask)
@@ -1052,29 +1062,29 @@ class CrossCorrelator:
         ccorrs = list()
         rngiter = tqdm(range(self.nids))
 
-        index_starts = self.index_starts
+        idpos = self.idpos
         for i in rngiter:
-            index_start, index_stop = index_starts[i], index_starts[i+1]
-            row_subindices_sel = self.row_subindices[index_start:index_stop]
-            col_subindices_sel = self.col_subindices[index_start:index_stop]
-            row_indices_sel = self.row_indices[index_start:index_stop]
-            col_indices_sel = self.col_indices[index_start:index_stop]
+            index_start, index_stop = idpos[i], idpos[i+1]
+            ppiis = self.ppii[index_start:index_stop]
+            ppjjs = self.ppjj[index_start:index_stop]
+            pis = self.pi[index_start:index_stop]
+            pjs = self.pj[index_start:index_stop]
             tmpimg = np.zeros(self.shapes[i,:])
-            tmpimg[row_subindices_sel, col_subindices_sel] =\
-                img1[row_indices_sel, col_indices_sel]
+            tmpimg[ppiis, ppjjs] = img1[pis, pjs]
 
             if not self_correlation:
                 tmpimg2 = np.zeros_like(tmpimg)
-                tmpimg2[row_subindices_sel, col_subindices_sel] = \
-                    img2[row_indices_sel, col_indices_sel]
-                tmpimg2[row_subindices_sel, col_subindices_sel] =\
-                    img2[row_indices_sel, col_indices_sel]
+                tmpimg2[ppiis, ppjjs] = img2[pis, pjs]
+                tmpimg2[ppiis, ppjjs] = img2[pis, pjs]
 
             if self_correlation:
                 ccorr = _cross_corr(tmpimg)
             else:
                 ccorr = _cross_corr(tmpimg, tmpimg2)
 
+            # the selection of non-zero regions in correlation
+            # non-overlapping region
+            w = self.pxlst_maskcorrs[i] #NEED THIS?
             # now handle the normalizations
             if 'symavg' in normalization:
                 # do symmetric averaging
@@ -1086,23 +1096,19 @@ class CrossCorrelator:
                 else:
                     Icorr2 = _cross_corr(self.submasks[i], tmpimg2 *
                                          self.submasks[i])
-                # there is an extra condition that Icorr*Icorr2 != 0
-                w = np.where(np.abs(Icorr*Icorr2) > 0) #DO WE NEED THIS (use i,j).
+                # If Icorr*Icorr2 == 0, then we'll get np.nan
                 ccorr[w] *= self.maskcorrs[i][w]/Icorr[w]/Icorr2[w]
 
             if 'regular' in normalization:
-                # only run on overlapping regions for correlation
-                w = self.pxlst_maskcorrs[i] #NEED THIS?
-
                 if self_correlation:
                     ccorr[w] /= self.maskcorrs[i][w] * \
-                        np.average(tmpimg[row_subindices_sel,
-                        col_subindices_sel])**2
+                        np.average(tmpimg[ppiis,
+                        ppjjs])**2
                 else:
                     ccorr[w] /= self.maskcorrs[i][w] * \
-                        np.average(tmpimg[row_subindices_sel,
-                        col_subindices_sel])*np.average(tmpimg2[row_subindices_sel,
-                        col_subindices_sel])
+                        np.average(tmpimg[ppiis,
+                        ppjjs])*np.average(tmpimg2[ppiis,
+                        ppjjs])
             ccorrs.append(ccorr)
 
         if len(ccorrs) == 1:
