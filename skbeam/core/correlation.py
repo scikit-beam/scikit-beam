@@ -1082,10 +1082,10 @@ class CrossCorrelator:
             else:
                 ccorr = _cross_corr(tmpimg, tmpimg2)
 
-            # the selection of non-zero regions in correlation
-            # non-overlapping region
-            w = self.pxlst_maskcorrs[i] #NEED THIS?
-            # now handle the normalizations
+            #w = self.pxlst_maskcorrs[i] #NEED THIS?
+            # Note, in this code, non-overlapping regions will now get np.nan
+            # also, for sym averaging, if Icorr*Icorr2==0, then we also get
+            # np.nan
             if 'symavg' in normalization:
                 # do symmetric averaging
                 Icorr = _cross_corr(tmpimg *
@@ -1096,16 +1096,15 @@ class CrossCorrelator:
                 else:
                     Icorr2 = _cross_corr(self.submasks[i], tmpimg2 *
                                          self.submasks[i])
-                # If Icorr*Icorr2 == 0, then we'll get np.nan
-                ccorr[w] *= self.maskcorrs[i][w]/Icorr[w]/Icorr2[w]
+                ccorr *= self.maskcorrs[i]/Icorr/Icorr2
 
             if 'regular' in normalization:
                 if self_correlation:
-                    ccorr[w] /= self.maskcorrs[i][w] * \
+                    ccorr /= self.maskcorrs[i] * \
                         np.average(tmpimg[ppiis,
                         ppjjs])**2
                 else:
-                    ccorr[w] /= self.maskcorrs[i][w] * \
+                    ccorr /= self.maskcorrs[i] * \
                         np.average(tmpimg[ppiis,
                         ppjjs])*np.average(tmpimg2[ppiis,
                         ppjjs])
