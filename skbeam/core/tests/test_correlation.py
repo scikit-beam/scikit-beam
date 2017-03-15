@@ -224,69 +224,72 @@ def test_one_time_from_two_time():
                                                         0.2, 0.1]))
 
 
-#def test_CrossCorrelator1d():
-#    ''' Test the 1d version of the cross correlator with these methods:
-#        -method='regular', no mask
-#        -method='regular', masked
-#        -method='symavg', no mask
-#        -method='symavg', masked
-#     '''
-#    np.random.seed(123)
-#    # test 1D data
-#    sigma = .1
-#    Npoints = 100
-#    x = np.linspace(-10, 10, Npoints)
-#
-#    sigma = .2
-#    # purposely have sparsely filled values (with lots of zeros)
-#    peak_positions = (np.random.random(10)-.5)*20
-#    y = np.zeros_like(x)
-#    for peak_position in peak_positions:
-#        y += np.exp(-(x-peak_position)**2/2./sigma**2)
-#
-#    mask_1D = np.ones_like(y)
-#    mask_1D[10:20] = 0
-#    mask_1D[60:90] = 0
-#    mask_1D[111:137] = 0
-#    mask_1D[211:237] = 0
-#    mask_1D[411:537] = 0
-#
-#    mask_1D *= mask_1D[::-1]
-#
-#    cc1D = CrossCorrelator(mask_1D.shape)
-#    cc1D_symavg = CrossCorrelator(mask_1D.shape, normalization='symavg')
-#    cc1D_masked = CrossCorrelator(mask_1D.shape, mask=mask_1D)
-#    cc1D_masked_symavg = CrossCorrelator(mask_1D.shape, mask=mask_1D,
-#                                         normalization='symavg')
-#
-#    ycorr_1D = cc1D(y)
-#    ycorr_1D_masked = cc1D_masked(y*mask_1D)
-#    ycorr_1D_symavg = cc1D_symavg(y)
-#    ycorr_1D_masked_symavg = cc1D_masked_symavg(y*mask_1D)
-#
-#    assert_array_almost_equal(ycorr_1D[::20],
-#                              np.array([-0.00000000e+00, 3.07601970e-04,
-#                                        3.32507751e-01, 1.02397712e+00,
-#                                        1.26985028e+00, 3.49160599e+00,
-#                                        1.26985028e+00, 1.02397712e+00,
-#                                        3.32507751e-01, 3.07601970e-04,
-#                                        -0.00000000e+00]))
-#
-#    assert_array_almost_equal(ycorr_1D_masked[::20],
-#                              np.array([0., -0., -0., 0.2543123, -0.,
-#                                        2.7509325,  0., 0.2543123, -0., 0.,
-#                                        0.]))
-#
-#    assert_array_almost_equal(ycorr_1D_symavg[::20],
-#                              np.array([0., 1.34544882, 0.48030268,
-#                                        0.84947094, 0.90258003, 3.49160599,
-#                                        0.90258003, 0.84947094, 0.48030268,
-#                                        1.34544882, 0.]))
-#
-#    assert_array_almost_equal(ycorr_1D_masked_symavg[::20],
-#                              np.array([0., 0., 0., 0.3464006, 0., 2.7509325,
-#                                        -0., 0.3464006, 0., 0., 0.]))
-#
+def test_CrossCorrelator1d():
+    ''' Test the 1d version of the cross correlator with these methods:
+        -method='regular', no mask
+        -method='regular', masked
+        -method='symavg', no mask
+        -method='symavg', masked
+     '''
+    np.random.seed(123)
+    # test 1D data
+    sigma = .1
+    Npoints = 100
+    x = np.linspace(-10, 10, Npoints)
+
+    sigma = .2
+    # purposely have sparsely filled values (with lots of zeros)
+    peak_positions = (np.random.random(10)-.5)*20
+    y = np.zeros_like(x)
+    for peak_position in peak_positions:
+        y += np.exp(-(x-peak_position)**2/2./sigma**2)
+
+    mask_1D = np.ones_like(y)
+    mask_1D[10:20] = 0
+    mask_1D[60:90] = 0
+    mask_1D[111:137] = 0
+    mask_1D[211:237] = 0
+    mask_1D[411:537] = 0
+
+    mask_1D *= mask_1D[::-1]
+
+    cc1D = CrossCorrelator(mask_1D.shape)
+    cc1D_symavg = CrossCorrelator(mask_1D.shape, normalization='symavg')
+    cc1D_masked = CrossCorrelator(mask_1D.shape, mask=mask_1D)
+    cc1D_masked_symavg = CrossCorrelator(mask_1D.shape, mask=mask_1D,
+                                         normalization='symavg')
+
+    ycorr_1D = cc1D(y)
+    ycorr_1D_masked = cc1D_masked(y*mask_1D)
+    ycorr_1D_symavg = cc1D_symavg(y)
+    ycorr_1D_masked_symavg = cc1D_masked_symavg(y*mask_1D)
+
+    assert_array_almost_equal(ycorr_1D[::20],
+                              np.array([-1.155123e-14, 6.750373e-03,
+                                       6.221636e-01, 7.105527e-01,
+                                       1.187275e+00, 2.984563e+00,
+                                       1.092725e+00, 1.198341e+00,
+                                       1.045922e-01, 5.451511e-06]))
+
+    assert_array_almost_equal(ycorr_1D_masked[::20],
+                              np.array([-5.172377e-16, np.inf, 7.481473e-01,
+                                       6.066887e-02, 4.470989e-04,
+                                       2.330335e+00, np.inf, 7.109758e-01,
+                                       -np.inf, 2.275846e-14]))
+
+    assert_array_almost_equal(ycorr_1D_symavg[::20],
+                              np.array([-5.3002753,  1.54268227,  0.86220476,
+                                        0.57715207,  0.86503802, 2.94383202,
+                                        0.7587901,  0.99763715, 0.16800951,
+                                        1.23506293]))
+
+    assert_array_almost_equal(ycorr_1D_masked_symavg[::20][:-1],
+                              np.array([-5.30027530e-01, 0.00000000e+00,
+                                        1.99940257e+00, 7.33127871e-02,
+                                        1.00000000e+00, 2.15887870e+00,
+                                        0.00000000e+00, 9.12832602e-01,
+                                        -0.00000000e+00]))
+
 
 def testCrossCorrelator2d():
     ''' Test the 2D case of the cross correlator.
@@ -330,7 +333,7 @@ def testCrossCorrelator2d():
     ycorr_ids_2D[index][ycorr_ids_2D[index].shape[0]//2]
     assert_array_almost_equal(ycorr_ids_2D[index]
                               [ycorr_ids_2D[index].shape[0]//2],
-                              np.array([ 1.22195059, 1.08685771,
+                              np.array([1.22195059, 1.08685771,
                                         1.43246508, 1.08685771, 1.22195059
                                         ])
                               )

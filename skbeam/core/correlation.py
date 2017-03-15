@@ -919,6 +919,14 @@ class CrossCorrelator:
         if mask is None:
             mask = np.ones(shape)
 
+        self.shape = shape
+        self.ndim = len(shape)
+        if self.ndim == 1:
+            mask = mask.reshape((1, shape[0]))
+
+        if self.ndim > 2:
+            raise ValueError("Dimensions other than 1 or 2 not supported")
+
         # A terse nomenclature was chosen for ease of reading code.
         # Here is the Nomenclature (for both init and call sections):
         #   1. pi, pj: the list of yindex (rows), xindex (cols) into original
@@ -1014,9 +1022,9 @@ class CrossCorrelator:
             # centers are shape//2 as performed by fftshift
             center = np.array(maskcorr.shape)//2
             self.centers.append(np.array(maskcorr.shape)//2)
-            if mask.ndim == 1:
-                self.positions.append(np.arange(maskcorr.shape[0]) - center[0])
-            elif mask.ndim == 2:
+            if self.ndim == 1:
+                self.positions.append(np.arange(maskcorr.shape[1]) - center[1])
+            elif self.ndim == 2:
                 self.positions.append([np.arange(maskcorr.shape[0]) -
                                        center[0],
                                        np.arange(maskcorr.shape[1]) -
@@ -1054,10 +1062,26 @@ class CrossCorrelator:
         if normalization is None:
             normalization = self.normalization
 
+        if img1.shape != self.shape:
+            raise ValueError("Image not expected shape." +
+                             "Got {}, ".format(img.shape) +
+                             "expected {}".format(self.shape)
+                             )
+        # reshape for 1D case
+        if self.ndim == 1:
+            img1 = img1.reshape((1, self.shape[0]))
+
         if img2 is None:
             self_correlation = True
         else:
             self_correlation = False
+            if img2.shape != self.shape:
+                raise ValueError("Second image not expected shape. " +
+                                 "Got {}".format(img2.shape) +
+                                 " expected {}".format(self.shape))
+            if self.ndim == 1:
+                img2 = img2.reshape((1, self.shape[0]))
+
 
         ccorrs = list()
         rngiter = tqdm(range(self.nids))
@@ -1105,6 +1129,8 @@ class CrossCorrelator:
                     ccorr /= self.maskcorrs[i] *\
                              np.average(tmpimg[ppiis, ppjjs]) *\
                              np.average(tmpimg2[ppiis, ppjjs])
+            if self.ndim == 1:
+                ccorr = ccorr.reshape(-1)
             ccorrs.append(ccorr)
 
         if len(ccorrs) == 1:
