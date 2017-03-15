@@ -37,7 +37,7 @@ import logging
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal
-from nose.tools import assert_raises
+from nose.tools import assert_raises, assert_equal
 
 import skbeam.core.utils as utils
 from skbeam.core.correlation import (multi_tau_auto_corr,
@@ -253,11 +253,14 @@ def test_CrossCorrelator1d():
 
     mask_1D *= mask_1D[::-1]
 
+
     cc1D = CrossCorrelator(mask_1D.shape)
     cc1D_symavg = CrossCorrelator(mask_1D.shape, normalization='symavg')
     cc1D_masked = CrossCorrelator(mask_1D.shape, mask=mask_1D)
     cc1D_masked_symavg = CrossCorrelator(mask_1D.shape, mask=mask_1D,
                                          normalization='symavg')
+
+    assert_equal(cc1D.nids, 1)
 
     ycorr_1D = cc1D(y)
     ycorr_1D_masked = cc1D_masked(y*mask_1D)
@@ -327,6 +330,9 @@ def testCrossCorrelator2d():
     cc2D_ids_symavg = CrossCorrelator(mask_2D.shape, mask=maskids,
                                       normalization='symavg')
 
+    # 10 ids
+    assert_equal(cc2D_ids.nids, 10)
+
     ycorr_ids_2D = cc2D_ids(Z)
     ycorr_ids_2D_symavg = cc2D_ids_symavg(Z)
     index = 0
@@ -362,6 +368,21 @@ def testCrossCorrelator2d():
                               np.array([0.94823482, 0.8629459, 1.35790022,
                                         0.8629459, 0.94823482])
                               )
+
+def test_CrossCorrelator_badinputs():
+    with assert_raises(ValueError):
+        CrossCorrelator((1,1,1))
+
+    with assert_raises(ValueError):
+        cc = CrossCorrelator((10,10))
+        a = np.ones((10,11))
+        cc(a)
+
+    with assert_raises(ValueError):
+        cc = CrossCorrelator((10,10))
+        a = np.ones((10,10))
+        a2 = np.ones((10,11))
+        cc(a,a2)
 
 
 if __name__ == '__main__':

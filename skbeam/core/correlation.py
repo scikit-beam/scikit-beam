@@ -1064,7 +1064,7 @@ class CrossCorrelator:
 
         if img1.shape != self.shape:
             raise ValueError("Image not expected shape." +
-                             "Got {}, ".format(img.shape) +
+                             "Got {}, ".format(img1.shape) +
                              "expected {}".format(self.shape)
                              )
         # reshape for 1D case
