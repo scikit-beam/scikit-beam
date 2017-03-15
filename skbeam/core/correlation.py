@@ -925,7 +925,7 @@ class CrossCorrelator:
         #       image
         #   2. pis, pjs : a subselection of the above
         #   3. ppii, ppjj : the list of yindex (rows), xindex (cols) into
-        #       smaller image for FFT
+        #       smaller sub images
         #   4. ppiis, ppjjs : a subselection of the above
         #   5. bind : the bin id per pixel (defined by mask)
         #   6. idpos : a list of pointers into the position arrays for each id
