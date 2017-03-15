@@ -854,7 +854,7 @@ def one_time_from_two_time(two_time_corr):
 
 class CrossCorrelator:
     '''
-        Compute a 2D cross-correlation on data.
+        Compute a 1D or 2D cross-correlation on data.
 
         This uses a mask, which may be binary (array of 0's and 1's),
         or a list of non-negative integer id's to compute cross-correlations
@@ -1081,7 +1081,6 @@ class CrossCorrelator:
                                  " expected {}".format(self.shape))
             if self.ndim == 1:
                 img2 = img2.reshape((1, self.shape[0]))
-
 
         ccorrs = list()
         rngiter = tqdm(range(self.nids))

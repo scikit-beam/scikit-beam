@@ -253,7 +253,6 @@ def test_CrossCorrelator1d():
 
     mask_1D *= mask_1D[::-1]
 
-
     cc1D = CrossCorrelator(mask_1D.shape)
     cc1D_symavg = CrossCorrelator(mask_1D.shape, normalization='symavg')
     cc1D_masked = CrossCorrelator(mask_1D.shape, mask=mask_1D)
@@ -369,20 +368,21 @@ def testCrossCorrelator2d():
                                         0.8629459, 0.94823482])
                               )
 
+
 def test_CrossCorrelator_badinputs():
     with assert_raises(ValueError):
-        CrossCorrelator((1,1,1))
+        CrossCorrelator((1, 1, 1))
 
     with assert_raises(ValueError):
-        cc = CrossCorrelator((10,10))
-        a = np.ones((10,11))
+        cc = CrossCorrelator((10, 10))
+        a = np.ones((10, 11))
         cc(a)
 
     with assert_raises(ValueError):
-        cc = CrossCorrelator((10,10))
-        a = np.ones((10,10))
-        a2 = np.ones((10,11))
-        cc(a,a2)
+        cc = CrossCorrelator((10, 10))
+        a = np.ones((10, 10))
+        a2 = np.ones((10, 11))
+        cc(a, a2)
 
 
 if __name__ == '__main__':
