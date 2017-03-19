@@ -88,3 +88,31 @@ def statistics_1D(x, y, stat='mean', nx=None, min_x=None, max_x=None):
     val, _, _ = scipy.stats.binned_statistic(x, y, statistic=stat, bins=bins)
     # return the two arrays
     return bins, val
+
+
+def poissonize(data, Navg=None):
+    ''' This function will sample the points from image from a poisson
+            distribution.
+
+        Parameters
+        ----------
+        img : the data in question
+
+        Navg : Specify the number of images this is an average of
+            Poisson will be sampled from (data*Navg)
+
+        Notes
+        -----
+            If larger than some threshold, the Poisson
+
+    '''
+    if Navg is None:
+        Navg = 1.
+    # some threshold since poisson doesnt work at high vals
+    _poiss_thresh = 1e18
+    data = np.random.poisson(data*(data < _poiss_thresh)*Navg)/Navg
+    w = np.where(data > _poiss_thresh)
+    if len(w[0]) > 0:
+        data[w] = np.nan
+
+    return data
