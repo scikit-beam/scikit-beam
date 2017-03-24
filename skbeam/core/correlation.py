@@ -1017,6 +1017,7 @@ class CrossCorrelator:
             maskcorr = _cross_corr(submask)
             # choose some small value to threshold
             maskcorr *= maskcorr > .5
+            maskcorr[np.where(maskcorr == 0)] = np.nan
             self.maskcorrs.append(maskcorr)
             self.pxlst_maskcorrs.append(maskcorr > 0)
             # centers are shape//2 as performed by fftshift

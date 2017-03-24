@@ -272,12 +272,11 @@ def test_CrossCorrelator1d():
                                        1.187275e+00, 2.984563e+00,
                                        1.092725e+00, 1.198341e+00,
                                        1.045922e-01, 5.451511e-06]))
-
     assert_array_almost_equal(ycorr_1D_masked[::20],
-                              np.array([-5.172377e-16, np.inf, 7.481473e-01,
+                              np.array([-5.172377e-16, np.nan, 7.481473e-01,
                                        6.066887e-02, 4.470989e-04,
-                                       2.330335e+00, np.inf, 7.109758e-01,
-                                       -np.inf, 2.275846e-14]))
+                                       2.330335e+00, np.nan, 7.109758e-01,
+                                       np.nan, 2.275846e-14]))
 
     assert_array_almost_equal(ycorr_1D_symavg[::20],
                               np.array([-5.3002753,  1.54268227,  0.86220476,
@@ -286,11 +285,11 @@ def test_CrossCorrelator1d():
                                         1.23506293]))
 
     assert_array_almost_equal(ycorr_1D_masked_symavg[::20][:-1],
-                              np.array([-5.30027530e-01, 0.00000000e+00,
+                              np.array([-5.30027530e-01, np.nan,
                                         1.99940257e+00, 7.33127871e-02,
                                         1.00000000e+00, 2.15887870e+00,
-                                        0.00000000e+00, 9.12832602e-01,
-                                        -0.00000000e+00]))
+                                        np.nan, 9.12832602e-01,
+                                        np.nan]))
 
 
 def testCrossCorrelator2d():
