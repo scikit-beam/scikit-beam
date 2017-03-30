@@ -185,3 +185,11 @@ def test_BinnedStatistics1D():
         assert_array_almost_equal(bs_f(values), ref)
         assert_array_equal(edges, bs.bin_edges)
         assert_array_equal(edges, bs_f.bin_edges)
+
+    rbinstat = BinnedStatistic1D(x)
+    # make sure wrong shape is caught
+    with assert_raises(ValueError):
+        rbinstat(x[:-2])
+
+    # try with same shape, should be fine
+    rbinstat(x)

@@ -620,7 +620,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
             The values of the selected statistic in each bin.
         """
         # check for what I believe could be a common error
-        if values.shape != self.expected_shape:
+        if tuple(values.shape) != tuple(self.expected_shape):
             raise ValueError('"values" has incorrect shape.'
                              ' Expected: ' + str(self.expected_shape) +
                              ' Received: ' + str(values.shape))
@@ -731,7 +731,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
             The values of the selected statistic in each bin.
         """
         # check for what I believe could be a common error
-        if values.shape != self.expected_shape:
+        if tuple(values.shape) != tuple(self.expected_shape):
             raise ValueError('"values" has incorrect shape.'
                              ' Expected: ' + str(self.expected_shape) +
                              ' Received: ' + str(values.shape))
