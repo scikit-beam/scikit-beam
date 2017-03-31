@@ -572,7 +572,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
         rpix = radial_grid(origin, shape)
         phipix = angle_grid(origin, shape)
 
-        self.expected_shape = shape
+        self.expected_shape = tuple(shape)
         if mask is not None:
             if mask.shape != self.expected_shape:
                 raise ValueError('"mask" has incorrect shape. '
@@ -620,7 +620,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
             The values of the selected statistic in each bin.
         """
         # check for what I believe could be a common error
-        if tuple(values.shape) != tuple(self.expected_shape):
+        if values.shape != self.expected_shape:
             raise ValueError('"values" has incorrect shape.'
                              ' Expected: ' + str(self.expected_shape) +
                              ' Received: ' + str(values.shape))
@@ -684,7 +684,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
 
         rpix = radial_grid(origin, shape)
 
-        self.expected_shape = shape
+        self.expected_shape = tuple(shape)
         if mask is not None:
             if mask.shape != self.expected_shape:
                 raise ValueError('"mask" has incorrect shape. '
@@ -731,7 +731,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
             The values of the selected statistic in each bin.
         """
         # check for what I believe could be a common error
-        if tuple(values.shape) != tuple(self.expected_shape):
+        if values.shape != self.expected_shape:
             raise ValueError('"values" has incorrect shape.'
                              ' Expected: ' + str(self.expected_shape) +
                              ' Received: ' + str(values.shape))
