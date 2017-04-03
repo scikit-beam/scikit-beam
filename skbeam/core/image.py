@@ -260,8 +260,10 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
     adiff = np.where(np.diff(angles) < 0)[0]
     if len(adiff) > 0:
         errorstr = "Error, domain exceeds 2*pi\n"
-        errorstr += "Hint : common error is to use np.linspace(0, 2*np.pi)\n"
-        errorstr += "Use np.linspace(0, 2*np.pi, endpoint=False)\n"
+        errorstr += "Hint : common error is to "
+        errorstr += "use np.linspace(0, 2*np.pi, 100), for example\n"
+        errorstr += "Use np.linspace(0, 2*np.pi, 100, endpoint=False)"
+        errorstr += " instead\n"
 
         raise ValueError(errorstr)
 
