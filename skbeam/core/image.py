@@ -175,9 +175,9 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None,
 
 def construct_rphi_avg_image(radii, angles, image, mask=None,
                              center=None, shape=None, pixel_size=(1, 1)):
-    '''  Construct a 2D image in rectangular coordinates from
-        a polar coordinate image. Assumes a 2D array of data. If data is
-        missing, use mask.
+    ''' Construct a 2D Cartesian (x,y) image from a polar coordinate image.
+
+        Assumes a 2D array of data. If data is missing, use mask.
 
         Parameters
         ----------
@@ -259,10 +259,11 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
     # 1.c : find any extra cross-overs and ignore them
     adiff = np.where(np.diff(angles) < 0)[0]
     if len(adiff) > 0:
-        # ignore rest of cross-over points for safety
-        # docs ask you not to have this case, but take care of it anyway
-        angles = angles[:adiff[0]+1]
-        image = image[:, :adiff[0]+1]
+        errorstr = "Error, domain exceeds 2*pi\n"
+        errorstr += "Hint : common error is to use np.linspace(0, 2*np.pi)\n"
+        errorstr += "Use np.linspace(0, 2*np.pi, endpoint=False)\n"
+
+        raise ValueError(errorstr)
 
     # 2 : since the interpolation will be linear, and the angles wrap, we
     # need to add the first angle position to the end and vice versa

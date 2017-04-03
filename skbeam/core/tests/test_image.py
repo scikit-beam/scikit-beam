@@ -86,7 +86,7 @@ def test_construct_rphi_avg_image():
     Nx, Ny = 44, 44
 
     angles1 = np.linspace(0, 2*np.pi-.1, Na)
-    angles2 = np.linspace(0, 2*np.pi, Na)
+    angles2 = np.linspace(0, 2*np.pi, Na, endpoint=False)
     angles3 = np.linspace(0, 2*np.pi+.1, Na)
     radii = np.linspace(0, 10, Nr)
 
@@ -116,7 +116,8 @@ def test_construct_rphi_avg_image():
     # version  1
     Zproj1 = nimage.construct_rphi_avg_image(radii, angles1, Z1, shape=shape)
     Zproj2 = nimage.construct_rphi_avg_image(radii, angles2, Z2, shape=shape)
-    Zproj3 = nimage.construct_rphi_avg_image(radii, angles3, Z3, shape=shape)
+    with assert_raises(ValueError):
+        nimage.construct_rphi_avg_image(radii, angles3, Z3, shape=shape)
 
     # try masked versions
     Zproj_masked = nimage.construct_rphi_avg_image(radii, angles_masked,
@@ -134,23 +135,18 @@ def test_construct_rphi_avg_image():
                                                          np.nan, np.nan]))
 
     assert_array_almost_equal(Zproj2[::8, 22], np.array([np.nan, np.nan,
-                                                         29.05890337,
-                                                         5.42518691,
-                                                         np.nan, np.nan]))
-
-    assert_array_almost_equal(Zproj3[::8, 22], np.array([np.nan, np.nan,
-                                                         28.8578586,
-                                                         5.4202544,
+                                                         28.834469,
+                                                         5.465199,
                                                          np.nan, np.nan]))
 
     assert_array_almost_equal(Zproj_masked[::8, 22], np.array([np.nan, np.nan,
-                                                               29.05890337,
+                                                               28.834469,
                                                                np.nan, np.nan,
                                                                np.nan]))
 
     assert_array_almost_equal(Zproj_anis[::8, 22], np.array([np.nan, np.nan,
-                                                             29.31298607,
-                                                             6.00312798,
+                                                             29.491395,
+                                                             5.939956,
                                                              np.nan, np.nan]))
 
 if __name__ == '__main__':
