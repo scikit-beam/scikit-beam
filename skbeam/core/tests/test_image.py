@@ -81,6 +81,74 @@ def test_construct_circ_avg_image():
                                         pixel_size=(2, 1))
 
 
+def test_construct_rphi_avg_image():
+    Nr, Na = 40, 40
+    Nx, Ny = 44, 44
+
+    angles1 = np.linspace(0, 2*np.pi-.1, Na)
+    angles2 = np.linspace(0, 2*np.pi, Na, endpoint=False)
+    angles3 = np.linspace(0, 2*np.pi+.1, Na)
+    radii = np.linspace(0, 10, Nr)
+
+    ANGLES1, RADII = np.meshgrid(angles1, radii)
+    ANGLES2, RADII = np.meshgrid(angles2, radii)
+    ANGLES3, RADII = np.meshgrid(angles3, radii)
+    Z1 = np.cos(ANGLES1*2)**2*RADII**2
+    Z2 = np.cos(ANGLES2*2)**2*RADII**2
+    Z3 = np.cos(ANGLES3*2)**2*RADII**2
+
+    mask = np.ones_like(RADII)
+    mask[1:8] = 0
+    mask[:, 1:8] = 0
+    mask[:, 5:12] = 0
+    mask[7:18] = 0
+
+    # only try mask on one, rest is redundant
+    Z_masked = Z2*mask
+    angles_masked = angles2
+
+    # ony try one version for anisotropy
+    Z_anis = Z2
+    angles_anis = angles2
+
+    shape = np.array([Nx, Ny])
+
+    # version  1
+    Zproj1 = nimage.construct_rphi_avg_image(radii, angles1, Z1, shape=shape)
+    Zproj2 = nimage.construct_rphi_avg_image(radii, angles2, Z2, shape=shape)
+    with assert_raises(ValueError):
+        nimage.construct_rphi_avg_image(radii, angles3, Z3, shape=shape)
+
+    # try masked versions
+    Zproj_masked = nimage.construct_rphi_avg_image(radii, angles_masked,
+                                                   Z_masked, shape=shape,
+                                                   mask=mask)
+
+    # anisotropy version
+    Zproj_anis = nimage.construct_rphi_avg_image(radii, angles_anis, Z_anis,
+                                                 shape=shape,
+                                                 pixel_size=(1, .5))
+
+    assert_array_almost_equal(Zproj1[::8, 22], np.array([np.nan, np.nan,
+                                                         28.9543923,
+                                                         5.44672546,
+                                                         np.nan, np.nan]))
+
+    assert_array_almost_equal(Zproj2[::8, 22], np.array([np.nan, np.nan,
+                                                         28.834469,
+                                                         5.465199,
+                                                         np.nan, np.nan]))
+
+    assert_array_almost_equal(Zproj_masked[::8, 22], np.array([np.nan, np.nan,
+                                                               28.834469,
+                                                               np.nan, np.nan,
+                                                               np.nan]))
+
+    assert_array_almost_equal(Zproj_anis[::8, 22], np.array([np.nan, np.nan,
+                                                             29.491395,
+                                                             5.939956,
+                                                             np.nan, np.nan]))
+
 if __name__ == '__main__':
     import nose
     nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

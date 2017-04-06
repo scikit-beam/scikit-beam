@@ -41,6 +41,7 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 from . import utils
 import logging
+from scipy.interpolate import RegularGridInterpolator
 logger = logging.getLogger(__name__)
 
 
@@ -169,3 +170,124 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None,
     CIMG = np.interp(radial_val, radii, intensities, right=0)
 
     return CIMG
+
+
+def construct_rphi_avg_image(radii, angles, image, mask=None,
+                             center=None, shape=None, pixel_size=(1, 1)):
+    ''' Construct a 2D Cartesian (x,y) image from a polar coordinate image.
+
+        Assumes a 2D array of data. If data is missing, use mask.
+
+        Parameters
+        ----------
+        radii : 1d array of coordinates, ascending order.
+            The radii values (in units of pixels)
+            These may be non-uniformly spaced.
+
+        angles : 1d array of coordinates, ascending order
+            The angle values (in units of radians)
+            Domain *must* be monotonically increasing (or a subset) if
+            we plot the reconstructed image in a typical x-y plane,
+            where x are the columns of the image and y are the rows
+            (img[y,x]), then 0 degrees is the -x direction, and
+            ascending angle goes clockwise in this plane.
+            These may be non-uniformly spaced.
+            Note that if the domain interval exceeds 2*pi, values
+            outside this range are ignored for interpolation.
+            Ex : angles = [0, ..., 6.25, 2*np.pi]
+                The last point modulo 2*pi is 0 which is the same as first
+                point so it is ignored
+
+        image : 2d array the image to interpolate from
+            rows are radii, columns are angles, ex: img[radii, angles]
+
+        mask : 2d array, optional
+            the masked data (0 masked, 1 not masked). Defaults to None,
+            which means assume all points are valid.
+
+        center : 2 tuple of floats, optional
+
+        shape : the new image shape, in terms of pixel values
+
+        Note
+        ----
+        This function uses a simple linear interpolation from scipy:
+            `scipy.interpolate.RegularGridInterpolator`
+            More complex interpolation techniques (i.e. splines) cannot be used
+            with this algorithm.
+
+        Returns
+        -------
+        new_img : 2d np.ndarray
+            The reconstructed image. Masked regions are filled with np.nan
+
+    '''
+    if mask is not None:
+        if mask.shape != image.shape:
+            if mask.ndim == 2:
+                raise ValueError("Mask shape ({}, {}) ".format(*mask.shape) +
+                                 "does not match expected" +
+                                 " shape of ({},{})".format(*shape))
+            else:
+                raise ValueError("Mask not right dimensions."
+                                 "Expected 2 got {}".format(mask.ndim))
+        image[np.where(mask == 0)] = np.nan
+    if shape is None:
+        if center is not None:
+            raise ValueError("Specifying a shape but not a center does not "
+                             "make sense and may lead to unexpected results.")
+        # round up, also take into account pixel size change
+        maxr_y, maxr_x = (int(np.max(radii/pixel_size[0])+.5),
+                          int(np.max(radii/pixel_size[1])+.5))
+        shape = 2*maxr_y+1, 2*maxr_x+1
+
+    if center is None:
+        center = (shape[0]-1)/2., (shape[1] - 1)/2.
+
+    # 1 . There are a few cases to consider here for the angles:
+    #   i. [0,..., 2*pi] -> [0,..,0]
+    #   ii. [0, ... , 2*pi, ...5*pi] -> [0, ..., 0, ...]
+    #   iii. [0,..., a < 2*pi] -> [0, ..., a< 2*pi] (easy)
+    #   iv. [.12, ..., 2*pi, ...] -> [0, ...]
+
+    # 1.a : subtract minimum
+    anglemin = angles[0]
+    angles -= anglemin
+    # 1.b : modulo 2*pi
+    angles = angles % (2*np.pi)
+    # 1.c : find any extra cross-overs and ignore them
+    adiff = np.where(np.diff(angles) < 0)[0]
+    if len(adiff) > 0:
+        errorstr = "Error, domain exceeds 2*pi\n"
+        errorstr += "Hint : common error is to "
+        errorstr += "use np.linspace(0, 2*np.pi, 100), for example\n"
+        errorstr += "Use np.linspace(0, 2*np.pi, 100, endpoint=False)"
+        errorstr += " instead\n"
+
+        raise ValueError(errorstr)
+
+    # 2 : since the interpolation will be linear, and the angles wrap, we
+    # need to add the first angle position to the end and vice versa
+    # 2.a : add bounds to angle
+    anglesp = np.concatenate(([angles[-1]-2*np.pi], angles,
+                              [angles[0]+2*np.pi]))
+    # 2.b : add bounds to image
+    imagep = np.zeros((image.shape[0], image.shape[1]+2))
+    imagep[:, 0] = image[:, -1]
+    imagep[:, 1:image.shape[1]+1] = image
+    imagep[:, -1] = image[:, 0]
+
+    radial_val = utils.radial_grid(center, shape, pixel_size).ravel()
+    angle_val = utils.angle_grid(center, shape, pixel_size).ravel()
+    # 1.d : subtract minimum for interpolated values as well
+    angle_val -= anglemin
+    angle_val = angle_val % (2*np.pi)
+
+    interpolator = RegularGridInterpolator((radii, anglesp), imagep,
+                                           bounds_error=False,
+                                           fill_value=np.nan)
+
+    new_img = interpolator((radial_val, angle_val))
+    new_img = new_img.reshape(shape)
+
+    return new_img
