@@ -634,8 +634,8 @@ class RadialBinnedStatistic(BinnedStatistic1D):
     image in radius.
     """
 
-    def __init__(self, shape, bins=10, range=None,
-                 origin=None, mask=None, statistic='mean'):
+    def __init__(self, shape, bins=10, range=None, origin=None, mask=None,
+            rpix=None, statistic='mean'):
         """
         Parameters:
         -----------
@@ -661,6 +661,9 @@ class RadialBinnedStatistic(BinnedStatistic1D):
         mask : 2-dimensional np.ndarray of ints, optional
             array of zero/non-zero values, with shape `shape`.
             zero values will be ignored.
+        r_map : the map of pixel radii for each pixel. This is useful when the
+            detector has some curvature or is a more complex 2D shape embedded
+            in a 3D space (for example, Ewald curvature).
         statistic : string or callable, optional
             The statistic to compute (default is 'mean').
             The following statistics are available:
@@ -682,7 +685,8 @@ class RadialBinnedStatistic(BinnedStatistic1D):
         if origin is None:
             origin = (shape[0] - 1) / 2, (shape[1] - 1) / 2
 
-        rpix = radial_grid(origin, shape)
+        if rpix is None:
+            rpix = radial_grid(origin, shape)
 
         self.expected_shape = tuple(shape)
         if mask is not None:
