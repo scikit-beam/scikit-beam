@@ -187,8 +187,8 @@ def test_grid3d():
     # slice tricks
     # this make a list of slices, the imaginary value in the
     # step is interpreted as meaning 'this many values'
-    slc = [slice(_min + (_max - _min) / (s * 2),
-                 _max - (_max - _min) / (s * 2),
+    slc = [slice(_min + (_max - _min) // (s * 2),
+                 _max - (_max - _min) // (s * 2),
                  1j * s)
            for _min, _max, s in zip(q_min, q_max, dqn)]
     # use the numpy slice magic to make X, Y, Z these are dense meshes with
@@ -229,8 +229,8 @@ def test_process_grid_std_err():
     # slice tricks
     # this make a list of slices, the imaginary value in the
     # step is interpreted as meaning 'this many values'
-    slc = [slice(_min + (_max - _min) / (s * 2),
-                 _max - (_max - _min) / (s * 2),
+    slc = [slice(_min + (_max - _min) // (s * 2),
+                 _max - (_max - _min) // (s * 2),
                  1j * s)
            for _min, _max, s in zip(q_min, q_max, dqn)]
     # use the numpy slice magic to make X, Y, Z these are dense meshes with
