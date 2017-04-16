@@ -1,0 +1,154 @@
+GIT commands
+============
+
+1. Create empty central shared repository for project pyapps:
+=============================================================
+on afs:
+mkdir ~/git-repo
+cd git-repo
+
+git init --bare pyapps.git
+Initialized empty Git repository in /reg/neh/home1/dubrovin/LCLS/git-repo/pyapps.git/
+
+
+2. clone (any) repo to local work repository
+============================================
+create working copy of local repository (for example on afs):
+mkdir git-work
+cd git-work
+git clone path-to/git-repo/pyapps.git
+
+Example using ssh on nfs:
+mkdir ~/LCLS/git-work
+cd ~/LCLS/git-work
+git clone ssh://dubrovin@pcds113.slac.stanford.edu/afs/slac.stanford.edu/u/br/dubrovin/git-repo/pyapps.git
+
+Also note that the *.git extension is omitted from the cloned repository. This reflects the non-bare status of the local copy.
+cd pyapps
+# Start working on the project
+
+
+3. configure git
+================
+git config --global user.name Mikhail
+git config --global user.email dubrovin@slac.stanford.edu
+git config --system core.editor emacs
+
+Or edit file ~/.gitconfig
+git config --global --edit
+
+
+4. add & commit
+===============
+You can propose changes (add it to the Index) using
+git add <filename>
+git add <directory>
+git add *
+git add -p; begins interactive staging session
+git status
+
+
+5. push changes
+===============
+
+commit to the HEAD of local repository:
+git commit -m "Commit message"
+
+push changes to remote repository:
+git push origin master
+
+if local repository was not clonned,
+connect local repository to remote server:
+git remote get origin <server>
+
+List all currently configured remote repositories:
+git remote -v
+
+
+6. branching
+============
+
+List all the branches in your repo, and also tell you what branch you're currently in:	
+git branch
+
+Switch from one branch to another:	
+git checkout <branchname>
+
+create a new branch named "feature_x" and switch to it using
+git checkout -b feature_x
+
+switch back to master
+git checkout master
+
+and delete the branch again
+git branch -d feature_x
+
+a branch is not available to others unless you push the branch to your remote repository
+git push origin <branch>
+
+
+7. update & merge
+=================
+to update your local repository to the newest commit, execute 
+git pull
+
+in your working directory to fetch and merge remote changes.
+to merge another branch into your active branch (e.g. master), use
+git merge <branch>
+
+in both cases git tries to auto-merge changes. 
+Unfortunately, this is not always possible and results in conflicts. 
+You are responsible to merge those conflicts manually by editing the files shown by git. 
+After changing, you need to mark them as merged with
+git add <filename>
+
+before merging changes, you can also preview them by using
+git diff <source_branch> <target_branch>
+
+
+8. tagging
+==========
+it's recommended to create tags for software releases. this is a known concept, which also exists in SVN. 
+You can create a new tag named 1.0.0 by executing
+git tag 1.0.0 1b2e1d63ff
+
+the 1b2e1d63ff stands for the first 10 characters of the commit id you want to reference with your tag. 
+You can get the commit id by looking at the... 
+
+
+9. log
+======
+in its simplest form, you can study repository history using.. 
+git log
+
+You can add a lot of parameters to make the log look like what you want. To see only the commits of a certain author:
+git log --author=bob
+
+To see a very compressed log where each commit is one line:
+git log --pretty=oneline
+
+Or maybe you want to see an ASCII art tree of all the branches, decorated with the names of tags and branches: 
+git log --graph --oneline --decorate --all
+
+See only which files have changed: 
+git log --name-status
+
+These are just a few of the possible parameters you can use. For more, see git log --help
+replace local changes
+
+In case you did something wrong, you can replace local changes using the command
+git checkout -- <filename>
+
+this replaces the changes in your working tree with the last content in HEAD. 
+Changes already added to the index, as well as new files, will be kept.
+
+If you instead want to drop all your local changes and commits, 
+fetch the latest history from the server and point your local master branch at it like this
+git fetch origin
+git reset --hard origin/master
+
+
+Misc commands
+=============
+
+git mv old new
