@@ -23,6 +23,7 @@
 - [Basic Plotting of X-Ray Fluorescence Elemental Lines](https://github.com/scikit-beam/scikit-beam-examples/blob/master/demos/xrf/plot_xrf_spectrum.ipynb)
 
 ## Quick start
+add
 
 ### install with conda
 
