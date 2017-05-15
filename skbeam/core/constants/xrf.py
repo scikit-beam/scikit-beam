@@ -49,7 +49,7 @@ from ..utils import verbosedict
 
 logger = logging.getLogger(__name__)
 
-line_name = ['Ka1', 'Ka2', 'Kb1', 'Kb2', 'La1', 'La2', 'Lb1', 'Lb2',
+line_name = ['Ka1', 'Ka2', 'Kb1', 'Kb2', 'Kb3', 'La1', 'La2', 'Lb1', 'Lb2',
              'Lb3', 'Lb4', 'Lb5', 'Lg1', 'Lg2', 'Lg3', 'Lg4', 'Ll',
              'Ln', 'Ma1', 'Ma2', 'Mb', 'Mg']
 

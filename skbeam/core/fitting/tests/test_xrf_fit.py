@@ -247,4 +247,4 @@ def test_pixel_fit_multiprocess():
             # Only compare the fitting parameters, such as area of each peak.
             continue
         # compare with default value 1e5, and get difference < 1%
-        assert_true(abs(v[0, 0] * 0.01 - default_area) / default_area < 1e-2)
+        assert_true(abs(v[0, 0] * 0.01 - default_area) / default_area < 5*1e-2)
