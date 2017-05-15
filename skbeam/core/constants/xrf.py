@@ -86,7 +86,8 @@ else:
     xraylib.SetErrorMessages(0)
 
     line_list = [xraylib.KA1_LINE, xraylib.KA2_LINE, xraylib.KB1_LINE,
-                 xraylib.KB2_LINE, xraylib.LA1_LINE, xraylib.LA2_LINE,
+                 xraylib.KB2_LINE, xraylib.KB3_LINE,
+                 xraylib.LA1_LINE, xraylib.LA2_LINE,
                  xraylib.LB1_LINE, xraylib.LB2_LINE, xraylib.LB3_LINE,
                  xraylib.LB4_LINE, xraylib.LB5_LINE, xraylib.LG1_LINE,
                  xraylib.LG2_LINE, xraylib.LG3_LINE, xraylib.LG4_LINE,

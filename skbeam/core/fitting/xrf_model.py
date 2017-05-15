@@ -85,7 +85,7 @@ M_LINE = ['Hf_M', 'Ta_M', 'W_M', 'Re_M', 'Os_M', 'Ir_M', 'Pt_M', 'Au_M',
           'Dy_M', 'Ho_M', 'Er_M', 'Tm_M', 'Yb_M', 'Lu_M', 'Th_M', 'Pa_M',
           'U_M']
 
-K_TRANSITIONS = ['ka1', 'ka2', 'kb1', 'kb2']
+K_TRANSITIONS = ['ka1', 'ka2', 'kb1', 'kb2', 'kb3']
 L_TRANSITIONS = ['la1', 'la2', 'lb1', 'lb2', 'lb3', 'lb4', 'lb5',
                  'lg1', 'lg2', 'lg3', 'lg4', 'll', 'ln']
 M_TRANSITIONS = ['ma1', 'ma2', 'mb', 'mg']
