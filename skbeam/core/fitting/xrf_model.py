@@ -85,7 +85,7 @@ M_LINE = ['Hf_M', 'Ta_M', 'W_M', 'Re_M', 'Os_M', 'Ir_M', 'Pt_M', 'Au_M',
           'Dy_M', 'Ho_M', 'Er_M', 'Tm_M', 'Yb_M', 'Lu_M', 'Th_M', 'Pa_M',
           'U_M']
 
-K_TRANSITIONS = ['ka1', 'ka2', 'kb1', 'kb2', 'kb3']
+K_TRANSITIONS = ['ka1', 'ka2', 'ka3', 'kb1', 'kb2', 'kb3', 'kb4', 'kb5']
 L_TRANSITIONS = ['la1', 'la2', 'lb1', 'lb2', 'lb3', 'lb4', 'lb5',
                  'lg1', 'lg2', 'lg3', 'lg4', 'll', 'ln']
 M_TRANSITIONS = ['ma1', 'ma2', 'mb', 'mg']
@@ -612,9 +612,12 @@ class ModelSpectrum(object):
 
             logger.debug(' --- Started building %s peak. ---', element)
 
-            for num, item in enumerate(e.emission_line.all[:4]):
+            for num, item in enumerate(e.emission_line.all):
                 line_name = item[0]
                 val = item[1]
+
+                if 'k' not in line_name:
+                    continue
 
                 if e.cs(incident_energy)[line_name] == 0:
                     continue
@@ -626,7 +629,7 @@ class ModelSpectrum(object):
                                         param_hints_to_copy)
 
                 element_mod.set_param_hint('epsilon', value=self.epsilon,
-                                         vary=False)
+                                           vary=False)
 
                 area_name = str(element)+'_'+str(line_name)+'_area'
                 if area_name in parameter:
@@ -638,14 +641,14 @@ class ModelSpectrum(object):
                     element_mod.set_param_hint('delta_sigma', value=0, vary=False)
                 elif line_name == 'ka2':
                     element_mod.set_param_hint('area', value=default_area, vary=True,
-                                             expr=str(element)+'_ka1_'+'area')
+                                               expr=str(element)+'_ka1_'+'area')
                     element_mod.set_param_hint('delta_sigma', value=0, vary=False,
-                                             expr=str(element)+'_ka1_'+'delta_sigma')
+                                                expr=str(element)+'_ka1_'+'delta_sigma')
                     element_mod.set_param_hint('delta_center', value=0, vary=False,
-                                             expr=str(element)+'_ka1_'+'delta_center')
+                                                expr=str(element)+'_ka1_'+'delta_center')
                 else:
                     element_mod.set_param_hint('area', value=default_area, vary=True,
-                                             expr=str(element)+'_ka1_'+'area')
+                                                expr=str(element)+'_ka1_'+'area')
                     element_mod.set_param_hint('delta_center', value=0, vary=False)
                     element_mod.set_param_hint('delta_sigma', value=0, vary=False)
 
@@ -689,14 +692,15 @@ class ModelSpectrum(object):
             e = Element(element)
             if e.cs(incident_energy)['la1'] == 0:
                 logger.debug('{0} La1 emission line is not activated '
-                             'at this energy {1}'.format(element,
-                                                         incident_energy))
+                             'at this energy {1}'.format(element, incident_energy))
                 return
 
-            for num, item in enumerate(e.emission_line.all[4:-4]):
-
+            for num, item in enumerate(e.emission_line.all):
                 line_name = item[0]
                 val = item[1]
+
+                if 'l' not in line_name:
+                    continue
 
                 if e.cs(incident_energy)[line_name] == 0:
                     continue
@@ -763,10 +767,12 @@ class ModelSpectrum(object):
                              'at this energy {1}'.format(element, incident_energy))
                 return
 
-            for num, item in enumerate(e.emission_line.all[-4:]):
-
+            for num, item in enumerate(e.emission_line.all):
                 line_name = item[0]
                 val = item[1]
+
+                if 'm' not in line_name:
+                    continue
 
                 if e.cs(incident_energy)[line_name] == 0:
                     continue
