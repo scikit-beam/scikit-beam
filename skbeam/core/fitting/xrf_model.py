@@ -63,8 +63,9 @@ from .background import snip_method
 logger = logging.getLogger(__name__)
 
 
-# emission line energy between (1, 30) keV
-K_LINE = ['Na_K', 'Mg_K', 'Al_K', 'Si_K', 'P_K', 'S_K', 'Cl_K', 'Ar_K', 'K_K',
+# emission line energy between (0, 30) keV
+K_LINE = ['Li_K', 'Be_K', 'B_K',  'C_K',  'N_K', 'O_K', 'F_K', 'Ne_K',
+          'Na_K', 'Mg_K', 'Al_K', 'Si_K', 'P_K', 'S_K', 'Cl_K', 'Ar_K', 'K_K',
           'Ca_K', 'Sc_K', 'Ti_K', 'V_K', 'Cr_K', 'Mn_K', 'Fe_K', 'Co_K',
           'Ni_K', 'Cu_K', 'Zn_K', 'Ga_K', 'Ge_K', 'As_K', 'Se_K', 'Br_K',
           'Kr_K', 'Rb_K', 'Sr_K', 'Y_K', 'Zr_K', 'Nb_K', 'Mo_K', 'Tc_K',
