@@ -49,7 +49,7 @@ from ..utils import verbosedict
 
 logger = logging.getLogger(__name__)
 
-line_name = ['Ka1', 'Ka2', 'Kb1', 'Kb2', 'La1', 'La2', 'Lb1', 'Lb2',
+line_name = ['Ka1', 'Ka2', 'Ka3', 'Kb1', 'Kb2', 'Kb3', 'Kb4', 'kb5', 'La1', 'La2', 'Lb1', 'Lb2',
              'Lb3', 'Lb4', 'Lb5', 'Lg1', 'Lg2', 'Lg3', 'Lg4', 'Ll',
              'Ln', 'Ma1', 'Ma2', 'Mb', 'Mg']
 
@@ -85,8 +85,9 @@ else:
     xraylib.XRayInit()
     xraylib.SetErrorMessages(0)
 
-    line_list = [xraylib.KA1_LINE, xraylib.KA2_LINE, xraylib.KB1_LINE,
-                 xraylib.KB2_LINE, xraylib.LA1_LINE, xraylib.LA2_LINE,
+    line_list = [xraylib.KA1_LINE, xraylib.KA2_LINE, xraylib.KA3_LINE,
+                 xraylib.KB1_LINE, xraylib.KB2_LINE, xraylib.KB3_LINE, xraylib.KB4_LINE, xraylib.KB5_LINE,
+                 xraylib.LA1_LINE, xraylib.LA2_LINE,
                  xraylib.LB1_LINE, xraylib.LB2_LINE, xraylib.LB3_LINE,
                  xraylib.LB4_LINE, xraylib.LB5_LINE, xraylib.LG1_LINE,
                  xraylib.LG2_LINE, xraylib.LG3_LINE, xraylib.LG4_LINE,
