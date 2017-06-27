@@ -170,7 +170,7 @@ class BinnedStatisticDD(object):
 
         for i in np.arange(self.D):
             # Rounding precision
-            decimal = int(-np.log10(dedges[i].min())) + 6
+            decimal = int(-np.log10(np.maximum(1e-6, dedges[i].min()))) + 6
             # Find which points are on the rightmost edge.
             on_edge = np.where(np.around(sample[:, i], decimal) ==
                                np.around(self.edges[i][-1], decimal))[0]
