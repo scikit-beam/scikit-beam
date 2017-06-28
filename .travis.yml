@@ -38,7 +38,7 @@ before_install:
 
 install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
-  - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy=$NUMPY scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4 flake8
+  - conda create -n testenv pip nose pytest python=$TRAVIS_PYTHON_VERSION numpy=$NUMPY scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4 flake8
   - source activate testenv
   - pip install pyFAI
   # # need to build_ext -i for the tests so that the .so is local to the source
@@ -93,7 +93,7 @@ before_script:
       };
 script:
   - coverage run run_tests.py
-  - coverage report -m 
+  - coverage report -m
   - if [ $RUN_TESTS == 'true' ]; then flake8 $TRAVIS_BUILD_DIR/skbeam; fi;
   # Check the merge size to make sure nothing huge was committed, but only do
   # it on one of the branches
