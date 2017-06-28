@@ -92,7 +92,8 @@ before_script:
 
       };
 script:
-  - if [ $RUN_TESTS == 'true' ]; then coverage run run_tests.py; fi;
+  - coverage run run_tests.py
+  - coverage report -m 
   - if [ $RUN_TESTS == 'true' ]; then flake8 $TRAVIS_BUILD_DIR/skbeam; fi;
   # Check the merge size to make sure nothing huge was committed, but only do
   # it on one of the branches
