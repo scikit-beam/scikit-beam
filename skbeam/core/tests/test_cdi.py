@@ -65,7 +65,7 @@ def test_gauss():
 
 def test_find_support():
     shape_v = [100, 100]
-    cenv = shape_v[0]/2
+    cenv = shape_v[0] // 2
     r = 20
     a = np.zeros(shape_v)
     a[cenv-r:cenv+r, cenv-r:cenv+r] = 1.0

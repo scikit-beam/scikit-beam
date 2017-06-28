@@ -1,3 +1,4 @@
+# coding=utf-8
 # ######################################################################
 # Developed at the NSLS-II, Brookhaven National Laboratory             #
 # Developed by Sameera K. Abeykoon, February 2014                      #
@@ -1160,8 +1161,8 @@ def _cross_corr(img1, img2=None):
 
     if img1.shape != img2.shape:
         errorstr = "Image shapes don't match. "
-        errorstr += "(img1 : {},{}; img2 : {},{})"\
-            .format(*img1.shape, *img2.shape)
+        errorstr += "(img1 : {}; img2 : {})"\
+            .format(img1.shape, img2.shape)
         raise ValueError(errorstr)
 
     # need to reverse indices for second image
