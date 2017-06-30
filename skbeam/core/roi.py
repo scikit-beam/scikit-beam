@@ -248,6 +248,10 @@ def segmented_rings(edges, segments, center, shape, offset_angle=0):
         ROI are 1, 2, 3, corresponding to the order they are specified
         in edges and segments
 
+    See Also
+    --------
+    ring_edges : Calculate the inner and outer radius of a set of rings.
+
     """
     edges = np.asarray(edges).ravel()
     if not 0 == len(edges) % 2:
@@ -727,8 +731,9 @@ def auto_find_center_rings(avg_img, sigma=1, no_rings=4, min_samples=3,
 
     Note
     ----
-    scikit-image ransac method(http://www.imagexd.org/tutorial/lessons/1_ransac.html)
-    is used to automatically find the center and the most intense rings.
+    scikit-image ransac
+    method(http://www.imagexd.org/tutorial/lessons/1_ransac.html) is used to
+    automatically find the center and the most intense rings.
     """
 
     image = img_as_float(color.rgb2gray(avg_img))
