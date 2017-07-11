@@ -279,13 +279,13 @@ def test_CrossCorrelator1d():
                                        np.nan, 2.275846e-14]))
 
     assert_array_almost_equal(ycorr_1D_symavg[::20],
-                              np.array([3.347542,  1.54268227,  0.86220476,
+                              np.array([-5.3002753,  1.54268227,  0.86220476,
                                         0.57715207,  0.86503802, 2.94383202,
                                         0.7587901,  0.99763715, 0.16800951,
                                         1.23506293]))
 
     assert_array_almost_equal(ycorr_1D_masked_symavg[::20][:-1],
-                              np.array([1.391322, np.nan,
+                              np.array([-5.30027530e-01, np.nan,
                                         1.99940257e+00, 7.33127871e-02,
                                         1.00000000e+00, 2.15887870e+00,
                                         np.nan, 9.12832602e-01,
