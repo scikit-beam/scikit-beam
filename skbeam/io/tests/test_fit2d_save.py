@@ -44,8 +44,9 @@ import os
 import numpy as np
 from skbeam.io.fit2d import fit2d_save, read_fit2d_msk
 from numpy.testing import assert_array_equal
+import pytest
 
-
+@pytest.mark.xfail(raises=IOError)
 def test_save_output_fit2d():
     filename = "function_values"
     msk = np.random.random_integers(
