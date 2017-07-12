@@ -1,3 +1,4 @@
+# coding=utf-8
 # ######################################################################
 # Developed at the NSLS-II, Brookhaven National Laboratory             #
 # Developed by Sameera K. Abeykoon, February 2014                      #
@@ -113,7 +114,7 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
     i_min = num_bufs // 2 if level else 0
     for i in range(i_min, min(img_per_level[level], num_bufs)):
         # compute the index into the autocorrelation matrix
-        t_index = level * num_bufs / 2 + i
+        t_index = level * num_bufs // 2 + i
         delay_no = (buf_no - i) % num_bufs
 
         # get the images for correlating
@@ -203,7 +204,7 @@ def _init_state_one_time(num_levels, num_bufs, labels):
 
     # G holds the un normalized auto- correlation result. We
     # accumulate computations into G as the algorithm proceeds.
-    G = np.zeros(((num_levels + 1) * num_bufs / 2, num_rois),
+    G = np.zeros(((num_levels + 1) * num_bufs // 2, num_rois),
                  dtype=np.float64)
     # matrix for normalizing G into g2
     past_intensity = np.zeros_like(G)
@@ -660,7 +661,7 @@ def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
         i_min = num_bufs//2
 
     for i in range(i_min, min(img_per_level[level], num_bufs)):
-        t_index = level*num_bufs/2 + i
+        t_index = level*num_bufs//2 + i
 
         delay_no = (buf_no - i) % num_bufs
 
@@ -689,7 +690,7 @@ def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
                    int(tind2+i)] = (tmp_binned/(pi_binned *
                                                 fi_binned))*num_pixels
         else:
-            g2[:, tind1, tind2] = tmp_binned/(pi_binned * fi_binned)*num_pixels
+            g2[:, int(tind1), int(tind2)] = tmp_binned/(pi_binned * fi_binned)*num_pixels
 
 
 def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
@@ -1160,8 +1161,8 @@ def _cross_corr(img1, img2=None):
 
     if img1.shape != img2.shape:
         errorstr = "Image shapes don't match. "
-        errorstr += "(img1 : {},{}; img2 : {},{})"\
-            .format(*img1.shape, *img2.shape)
+        errorstr += "(img1 : {}; img2 : {})"\
+            .format(img1.shape, img2.shape)
         raise ValueError(errorstr)
 
     # need to reverse indices for second image

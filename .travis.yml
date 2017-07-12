@@ -10,18 +10,22 @@ env:
     - BUILD_DOCS: false
     - GH_REF: github.com/scikit-beam/scikit-beam.git
     - secure: "KzntGlmLDUZlAB8ZiSRBtONJypv4atrnFxl+THCW8kg6YbiODcCxG9cez7mfmh63wpJ54+zeGvgGljeVvjb7bjB2p+4hZy+mLoP9xoE1w5qF4XaQ5YTOYaSQqCeWa5cEIi+854gFX7gOfW5qL+EJf7h3HtmndI15zaU5gOPjSDU="
+
 matrix:
   include:
-    - python: 3.5
-      env: BUILD_DOCS=true RUN_TESTS=false NUMPY=1.11
+    - python: 3.6
+      env: BUILD_DOCS=true RUN_TESTS=false NUMPY=1.13
+
 python:
   - 2.7
-  - 3.4
   - 3.5
+  - 3.6
 
 env:
   - NUMPY=1.10
   - NUMPY=1.11
+  - NUMPY=1.12
+  - NUMPY=1.13
 
 
 before_install:
@@ -34,7 +38,7 @@ before_install:
 
 install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
-  - conda create -n testenv pip nose python=$TRAVIS_PYTHON_VERSION numpy=$NUMPY scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4 flake8
+  - conda create -n testenv pip nose pytest python=$TRAVIS_PYTHON_VERSION numpy=$NUMPY scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4 flake8
   - source activate testenv
   - pip install pyFAI
   # # need to build_ext -i for the tests so that the .so is local to the source
@@ -88,7 +92,8 @@ before_script:
 
       };
 script:
-  - if [ $RUN_TESTS == 'true' ]; then coverage run run_tests.py; fi;
+  - coverage run run_tests.py
+  - coverage report -m
   - if [ $RUN_TESTS == 'true' ]; then flake8 $TRAVIS_BUILD_DIR/skbeam; fi;
   # Check the merge size to make sure nothing huge was committed, but only do
   # it on one of the branches

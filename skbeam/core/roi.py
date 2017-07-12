@@ -754,6 +754,6 @@ def auto_find_center_rings(avg_img, sigma=1, no_rings=4, min_samples=3,
                                        int(model_robust.params[2]),
                                        shape=image.shape)
         image[rr, cc] = i + 1
-        edge_pts_xy = edge_pts_xy[-inliers]
+        edge_pts_xy = edge_pts_xy[~inliers]
 
     return center, image, radii
