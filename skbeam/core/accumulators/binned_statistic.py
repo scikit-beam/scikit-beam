@@ -635,7 +635,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
     """
 
     def __init__(self, shape, bins=10, range=None, origin=None, mask=None,
-            rpix=None, statistic='mean'):
+                 rpix=None, statistic='mean'):
         """
         Parameters:
         -----------
