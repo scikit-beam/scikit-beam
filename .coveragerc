@@ -4,7 +4,6 @@ source=skbeam
 omit =
     */python?.?/*
     */site-packages/nose/*
-    *test*
     skbeam/__init__.py
     # ignore _version.py and versioneer.py
     .*version.*
