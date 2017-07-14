@@ -84,12 +84,12 @@ class TestRadialBinnedStatistic(object):
                     radbinstat = RadialBinnedStatistic(shape, bins,
                                                        statistic=stat,
                                                        mask=mask,
-                                                       rpix=self.rgrid,
+                                                       r_map=self.rgrid,
                                                        **kwargs)
                     radbinstat_f = RadialBinnedStatistic(shape, bins,
                                                          statistic=stat_func,
                                                          mask=mask,
-                                                         rpix=self.rgrid,
+                                                         r_map=self.rgrid,
                                                          **kwargs)
                 binned = radbinstat(self.image)
                 binned_f = radbinstat_f(self.image)
@@ -190,7 +190,7 @@ class TestRadialBinnedStatistic(object):
     def testRadialBinnedStatistic(self):
         self._testRadialBinnedStatistic()
 
-    def testRadialBinnedStatistic_rpix(self):
+    def testRadialBinnedStatistic_rmap(self):
         self._testRadialBinnedStatistic(rfac=1.1)
 
 

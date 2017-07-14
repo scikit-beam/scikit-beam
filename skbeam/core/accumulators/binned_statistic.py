@@ -569,8 +569,8 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
         if origin is None:
             origin = (shape[0] - 1) / 2., (shape[1] - 1) / 2.
 
-        rpix = radial_grid(origin, shape)
-        phipix = angle_grid(origin, shape)
+        r_map = radial_grid(origin, shape)
+        phi_map = angle_grid(origin, shape)
 
         self.expected_shape = tuple(shape)
         if mask is not None:
@@ -580,8 +580,8 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
                                  ' Received: ' + str(mask.shape))
             mask = mask.reshape(-1)
 
-        super(RPhiBinnedStatistic, self).__init__(rpix.reshape(-1),
-                                                  phipix.reshape(-1),
+        super(RPhiBinnedStatistic, self).__init__(r_map.reshape(-1),
+                                                  phi_map.reshape(-1),
                                                   statistic,
                                                   bins=bins,
                                                   mask=mask,
@@ -635,7 +635,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
     """
 
     def __init__(self, shape, bins=10, range=None, origin=None, mask=None,
-                 rpix=None, statistic='mean'):
+                 r_map=None, statistic='mean'):
         """
         Parameters:
         -----------
@@ -685,8 +685,8 @@ class RadialBinnedStatistic(BinnedStatistic1D):
         if origin is None:
             origin = (shape[0] - 1) / 2, (shape[1] - 1) / 2
 
-        if rpix is None:
-            rpix = radial_grid(origin, shape)
+        if r_map is None:
+            r_map = radial_grid(origin, shape)
 
         self.expected_shape = tuple(shape)
         if mask is not None:
@@ -696,7 +696,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
                                  ' Received: ' + str(mask.shape))
             mask = mask.reshape(-1)
 
-        super(RadialBinnedStatistic, self).__init__(rpix.reshape(-1),
+        super(RadialBinnedStatistic, self).__init__(r_map.reshape(-1),
                                                     statistic,
                                                     bins=bins,
                                                     mask=mask,
