@@ -26,7 +26,10 @@ class TestRadialBinnedStatistic(object):
         colarr = np.arange(self.colsize)
         self.rowgrid, self.colgrid = np.meshgrid(rowarr, colarr, indexing='ij')
 
-    def testRadialBinnedStatistic(self):
+    def _testRadialBinnedStatistic(self, rfac=None):
+        ''' rfac : make the rgrid non-linear and supply to
+            RadialBinnedStatistic.
+        '''
 
         mykwargs = [{'origin': (0, 0),
                      'range': (10, 90)},
@@ -52,6 +55,9 @@ class TestRadialBinnedStatistic(object):
                 # rows are y, cols are x, as in angle_grid in core.utils
                 self.rgrid = np.sqrt((self.rowgrid-origin[0])**2 +
                                      (self.colgrid-origin[1])**2)
+                if rfac is not None:
+                    self.rgrid = self.rgrid**rfac
+
                 self.phigrid = np.arctan2(self.rowgrid-origin[0],
                                           self.colgrid-origin[1])
 
@@ -65,14 +71,26 @@ class TestRadialBinnedStatistic(object):
                     mask = mask_ones
 
                 # test radial case
-                radbinstat = RadialBinnedStatistic(shape, bins,
-                                                   statistic=stat,
-                                                   mask=mask,
-                                                   **kwargs)
-                radbinstat_f = RadialBinnedStatistic(shape, bins,
-                                                     statistic=stat_func,
-                                                     mask=mask,
-                                                     **kwargs)
+                if rfac is None:
+                    radbinstat = RadialBinnedStatistic(shape, bins,
+                                                       statistic=stat,
+                                                       mask=mask,
+                                                       **kwargs)
+                    radbinstat_f = RadialBinnedStatistic(shape, bins,
+                                                         statistic=stat_func,
+                                                         mask=mask,
+                                                         **kwargs)
+                else:
+                    radbinstat = RadialBinnedStatistic(shape, bins,
+                                                       statistic=stat,
+                                                       mask=mask,
+                                                       r_map=self.rgrid,
+                                                       **kwargs)
+                    radbinstat_f = RadialBinnedStatistic(shape, bins,
+                                                         statistic=stat_func,
+                                                         mask=mask,
+                                                         r_map=self.rgrid,
+                                                         **kwargs)
                 binned = radbinstat(self.image)
                 binned_f = radbinstat_f(self.image)
 
@@ -168,6 +186,12 @@ class TestRadialBinnedStatistic(object):
         with assert_raises(ValueError):
             RadialBinnedStatistic(self.image.shape, 10,
                                   mask=np.array([1, 2, 3, 4]))
+
+    def testRadialBinnedStatistic(self):
+        self._testRadialBinnedStatistic()
+
+    def testRadialBinnedStatistic_rmap(self):
+        self._testRadialBinnedStatistic(rfac=1.1)
 
 
 def test_BinnedStatistics1D():
