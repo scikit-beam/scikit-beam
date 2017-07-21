@@ -40,7 +40,6 @@ install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
   - conda create -n testenv pip nose pytest python=$TRAVIS_PYTHON_VERSION numpy=$NUMPY scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4 flake8 pyfai
   - source activate testenv
-  - if [$TRAVIS_PYTHON_VERION == '2.7']; then pip install backports.tempfile; fi;
   # # need to build_ext -i for the tests so that the .so is local to the source
   # # code.  We could also setup.py develop, but I'm not sure if that is any
   # # better
