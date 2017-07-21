@@ -15,6 +15,9 @@ matrix:
   include:
     - python: 3.6
       env: BUILD_DOCS=true RUN_TESTS=false NUMPY=1.13
+  exclude:
+  - env: NUMPY=1.10
+    python: 3.6
 
 python:
   - 2.7
@@ -26,10 +29,6 @@ env:
   - NUMPY=1.11
   - NUMPY=1.12
   - NUMPY=1.13
-
-exclude:
-  - env: NUMPY=1.10
-    python: 3.6
 
 
 before_install:
