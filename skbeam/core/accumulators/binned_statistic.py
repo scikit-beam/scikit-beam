@@ -197,7 +197,7 @@ class BinnedStatisticDD(object):
                 and N is the number of data points.
         '''
         N, = self.xy.shape
-        binmap = np.zeros((self.D, N))
+        binmap = np.zeros((self.D, N), dtype=int)
         denominator = 1
 
         for i in range(self.D):

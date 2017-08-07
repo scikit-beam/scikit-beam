@@ -1,11 +1,13 @@
 from skbeam.core.accumulators.binned_statistic import (RadialBinnedStatistic,
                                                        RPhiBinnedStatistic,
-                                                       BinnedStatistic1D)
+                                                       BinnedStatistic1D,
+                                                       BinnedStatisticDD)
 from nose.tools import assert_raises
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 import numpy as np
 import scipy.stats
 from ...utils import bin_edges_to_centers
+from skbeam.core.utils import radial_grid, angle_grid
 
 stats_list = [('mean', np.mean), ('median', np.median), ('count', len),
               ('sum', np.sum), ('std', np.std)]
@@ -217,3 +219,55 @@ def test_BinnedStatistics1D():
 
     # try with same shape, should be fine
     rbinstat(x)
+
+
+def test_binmap():
+    ''' These tests can be run in notebooks and the binmaps plotted.
+        If this ever returns an error, it is suggested to plot the maps and see
+        if they look sensible.
+    '''
+    # generate fake data on the fly
+    shape = np.array([100, 100])
+
+    R = radial_grid(shape/2, shape)
+    Phi = angle_grid(shape/2., shape)
+
+    img = R*np.cos(5*Phi)
+    rs = RPhiBinnedStatistic(img.shape)
+
+    binmap = rs.binmap.reshape((-1, *img.shape))
+
+    assert_array_almost_equal(binmap[0][40][::10], np.array([8, 6, 5, 4, 2, 2,
+                                                             2, 4, 5, 6]))
+
+
+def test_binmap3d():
+    ''' These tests can be run in notebooks and the binmaps plotted.
+        If this ever returns an error, it is suggested to plot the maps and see
+        if they look sensible.
+    '''
+    # test the 3d version separately
+    Nx, Ny = 101, 101
+    x = np.arange(Nx)-Nx/2.
+    y = np.arange(Ny)-Ny/2.
+    X, Y = np.meshgrid(x, y)
+    X = X.ravel()
+    Y = Y.ravel()
+    # choose the Z variation as some arbitrary value
+    Z = np.hypot(X, Y)
+    # d arrays lenghtn or array length N, D array
+    # try both versions of input either:
+    # a tuple of the vals
+    vals1 = [X, Y, Z]
+    # or an N, D array (yes, it's transposed...)
+    vals2 = np.array([X, Y, Z]).T
+    binstat1 = BinnedStatisticDD(vals1, bins=(10, 10, 10))
+    binstat2 = BinnedStatisticDD(vals2, bins=(10, 10, 10))
+
+    rbinmap1 = binstat1.binmap
+    rbinmap2 = binstat2.binmap
+
+    assert_array_almost_equal(rbinmap1[0][::1000], rbinmap2[0][::1000])
+    assert_array_almost_equal(rbinmap1[0][::1000], np.array([1, 10,  9,  8, 7,
+                                                             6,  5,  4,  3, 2,
+                                                             1]))
