@@ -235,7 +235,7 @@ def test_binmap():
     img = R*np.cos(5*Phi)
     rs = RPhiBinnedStatistic(img.shape)
 
-    binmap = rs.binmap.reshape((-1, *img.shape))
+    binmap = rs.binmap.reshape((-1, img.shape[0], img.shape[1]))
 
     assert_array_almost_equal(binmap[0][40][::10], np.array([8, 6, 5, 4, 2, 2,
                                                              2, 4, 5, 6]))
