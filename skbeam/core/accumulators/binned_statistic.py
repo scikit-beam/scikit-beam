@@ -187,6 +187,30 @@ class BinnedStatisticDD(object):
         self.statistic = statistic
 
     @property
+    def binmap(self):
+        ''' Return the map of the bins per dimension.
+                i.e. reverse transformation of flattened to unflattened bins
+
+            Returns
+            -------
+            D np.ndarrays of length N where D is the number of dimensions
+                and N is the number of data points.
+        '''
+        N, = self.xy.shape
+        binmap = np.zeros((self.D, N), dtype=int)
+        denominator = 1
+
+        for i in range(self.D):
+            ind = self.D - i - 1
+            subbinmap = (self.xy // denominator)
+            if i < self.D - 1:
+                subbinmap = subbinmap % self.nbin[self.ni[ind - 1]]
+            binmap[ind] = subbinmap
+            denominator *= self.nbin[self.ni[ind]]
+
+        return binmap
+
+    @property
     def flatcount(self):
         # Compute flatcount the first time it is accessed. Some statistics
         # never access it.
