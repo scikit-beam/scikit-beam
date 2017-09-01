@@ -1078,12 +1078,12 @@ def q_to_twotheta(q, wavelength):
     Returns
     -------
     two_theta : array
-        An array of :math:`2\theta` values
+        An array of :math:`2\theta` values in degrees
     """
     q = np.asarray(q)
     wavelength = float(wavelength)
     pre_factor = wavelength / (4 * np.pi)
-    return 2 * np.arcsin(q * pre_factor)
+    return np.rad2deg(2 * np.arcsin(q * pre_factor))
 
 
 def twotheta_to_q(two_theta, wavelength):
