@@ -1066,6 +1066,27 @@ def define_range(data, low, high, a0, a1):
     return x0, y0
 
 
+def extract_strategy(param, name):
+    """
+    Extract given strategy from param dict.
+
+    Parameters
+    ----------
+    param : dict
+        saving all parameters for data fitting
+    name : str
+        strategy name
+
+    Returns
+    -------
+    dict :
+        with given strategy as value
+    """
+    param_new = copy.deepcopy(param)
+    return {k: v[name] for k, v in six.iteritems(param_new)
+            if k != 'non_fitting_values'}
+
+
 def compute_escape_peak(spectrum, ratio, params,
                         escape_e=1.73998):
     """
