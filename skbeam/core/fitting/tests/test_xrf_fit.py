@@ -11,7 +11,7 @@ from nose.tools import assert_true, raises, assert_raises
 from skbeam.core.fitting.base.parameter_data import get_para, e_calibration
 from skbeam.core.fitting.xrf_model import (
     ModelSpectrum, ParamController, linear_spectrum_fitting,
-    construct_linear_model, trim, sum_area, compute_escape_peak,
+    construct_linear_model, trim, define_range, sum_area, compute_escape_peak,
     register_strategy,  update_parameter_dict, _set_parameter_hint,
     fit_pixel_multiprocess_nnls, _STRATEGY_REGISTRY, calculate_area
 )
@@ -111,6 +111,18 @@ def test_fit():
         if 'area' in k:
             assert_equal(v['value'], result.values[k])
 
+
+def test_define_range():
+    y0 = synthetic_spectrum()
+    low = 0
+    high = 2000
+    x,y = define_range(y0, low, high, 0, 1)
+    assert_equal(y0, y)
+
+    low = 1
+    high = 1000
+    x,y = define_range(y0, low, high, 0, 1)
+    assert(len(y)==1000)
 
 def test_register():
     new_strategy = e_calibration
