@@ -6,7 +6,7 @@ from nose.tools import assert_raises
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 import numpy as np
 import scipy.stats
-from ...utils import bin_edges_to_centers
+from skbeam.core.utils import bin_edges_to_centers
 from skbeam.core.utils import radial_grid, angle_grid
 
 stats_list = [('mean', np.mean), ('median', np.median), ('count', len),

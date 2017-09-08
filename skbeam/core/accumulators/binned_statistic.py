@@ -546,7 +546,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
     """
 
     def __init__(self, shape, bins=10, range=None,
-                 origin=None, mask=None, statistic='mean'):
+                 origin=None, mask=None, r_map=None, statistic='mean'):
         """
         Parameters:
         -----------
@@ -572,6 +572,9 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
         mask : 2-dimensional np.ndarray of ints, optional
             array of zero/non-zero values, with shape `shape`.
             zero values will be ignored.
+        r_map : the map of pixel radii for each pixel. This is useful when the
+            detector has some curvature or is a more complex 2D shape embedded
+            in a 3D space (for example, Ewald curvature).
         statistic : string or callable, optional
             The statistic to compute (default is 'mean').
             The following statistics are available:
@@ -593,7 +596,9 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
         if origin is None:
             origin = (shape[0] - 1) / 2., (shape[1] - 1) / 2.
 
-        r_map = radial_grid(origin, shape)
+        if r_map is None:
+            r_map = radial_grid(origin, shape)
+
         phi_map = angle_grid(origin, shape)
 
         self.expected_shape = tuple(shape)
