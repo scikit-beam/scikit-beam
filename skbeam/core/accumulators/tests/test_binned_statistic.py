@@ -8,6 +8,7 @@ import numpy as np
 import scipy.stats
 from ...utils import bin_edges_to_centers
 from skbeam.core.utils import radial_grid, angle_grid
+import pytest
 
 stats_list = [('mean', np.mean), ('median', np.median), ('count', len),
               ('sum', np.sum), ('std', np.std)]
@@ -196,21 +197,21 @@ class TestRadialBinnedStatistic(object):
         self._testRadialBinnedStatistic(rfac=1.1)
 
 
-def test_BinnedStatistics1D():
+@pytest.mark.parametrize(['stat', 'stat_f'], stats_list)
+def test_BinnedStatistics1D(stat, stat_f):
     x = np.linspace(0, 2*np.pi, 100)
     values = np.sin(x * 5)
 
-    for stat, stat_f in stats_list:
-        bs = BinnedStatistic1D(x, statistic=stat, bins=10)
-        bs_f = BinnedStatistic1D(x, statistic=stat_f, bins=10)
+    bs = BinnedStatistic1D(x, statistic=stat, bins=10)
+    bs_f = BinnedStatistic1D(x, statistic=stat_f, bins=10)
 
-        ref, edges, _ = scipy.stats.binned_statistic(x, values,
-                                                     statistic=stat, bins=10)
+    ref, edges, _ = scipy.stats.binned_statistic(x, values,
+                                                 statistic=stat, bins=10)
 
-        assert_array_equal(bs(values), ref)
-        assert_array_almost_equal(bs_f(values), ref)
-        assert_array_equal(edges, bs.bin_edges)
-        assert_array_equal(edges, bs_f.bin_edges)
+    assert_array_equal(bs(values), ref)
+    assert_array_almost_equal(bs_f(values), ref)
+    assert_array_equal(edges, bs.bin_edges)
+    assert_array_equal(edges, bs_f.bin_edges)
 
     rbinstat = BinnedStatistic1D(x)
     # make sure wrong shape is caught

@@ -321,7 +321,7 @@ class BinnedStatisticDD(object):
             unique_is = np.unique(self.xy)
             with Pool() as p:
                 def op(i):
-                    self.result[i] = np.max(values[self.xy == i])
+                    self.result[i] = statistic(values[self.xy == i])
                 p.map(op, unique_is)
         # Shape into a proper matrix
         self.result = self.result.reshape(np.sort(self.nbin))
