@@ -318,12 +318,12 @@ class BinnedStatisticDD(object):
                     null = np.nan
                 np.seterr(**old)
             self.result.fill(null)
-            unique_is = np.unique(self.xy)
             p = Pool()
 
             def op(i):
                 self.result[i] = statistic(values[self.xy == i])
-            p.map(op, unique_is)
+
+            [_ for _ in p.imap_unordered(op, np.unique(self.xy), 10)]
         # Shape into a proper matrix
         self.result = self.result.reshape(np.sort(self.nbin))
         ni = np.copy(self.ni)
