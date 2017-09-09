@@ -40,6 +40,7 @@ import warnings
 
 import numpy as np
 from ..utils import radial_grid, angle_grid, bin_edges_to_centers
+from multiprocessing.dummy import Pool
 
 
 class BinnedStatisticDD(object):
@@ -160,7 +161,7 @@ class BinnedStatisticDD(object):
             if mask is not None:
                 thissample[mask == 0] = (self.edges[i][0] -
                                          0.01 * (
-                                         1 + np.fabs(self.edges[i][0])))
+                                             1 + np.fabs(self.edges[i][0])))
             Ncount[i] = np.digitize(thissample, self.edges[i])
 
         # Using digitize, values that fall on an edge are put in the
@@ -305,6 +306,7 @@ class BinnedStatisticDD(object):
             self.result.fill(np.nan)
             for i in np.unique(self.xy):
                 self.result[i] = np.median(values[self.xy == i])
+        # TODO: put median inside this block (since it is the same)
         elif callable(statistic):
             with warnings.catch_warnings():
                 # Numpy generates a warnings for mean/std/... with empty list
@@ -316,9 +318,11 @@ class BinnedStatisticDD(object):
                     null = np.nan
                 np.seterr(**old)
             self.result.fill(null)
-            for i in np.unique(self.xy):
-                self.result[i] = statistic(values[self.xy == i])
-
+            unique_is = np.unique(self.xy)
+            with Pool() as p:
+                def op(i):
+                    self.result[i] = np.max(values[self.xy == i])
+                p.map(op, unique_is)
         # Shape into a proper matrix
         self.result = self.result.reshape(np.sort(self.nbin))
         ni = np.copy(self.ni)
