@@ -1034,6 +1034,59 @@ def trim(x, y, low, high):
     return x[mask], y[mask]
 
 
+def define_range(data, low, high, a0, a1):
+    """
+    Cut x range based on offset and linear term of a linear function.
+    a0 and a1 should be defined in param_dict.
+
+    Parameters
+    ----------
+    data : 1D array
+        raw spectrum
+    low : float
+        low bound in KeV
+    high : float
+        high bound in KeV
+    a0 : float
+        offset term of energy calibration
+    a1 : float
+        linear term of energy calibration
+
+    Returns
+    -------
+    x : array
+        trimmed channel number
+    y : array
+        trimmed spectrum according to x
+    """
+    x = np.arange(data.size)
+    low_new = int(np.around((low - a0)/a1))
+    high_new = int(np.around((high - a0)/a1))
+    x0, y0 = trim(x, data, low_new, high_new)
+    return x0, y0
+
+
+def extract_strategy(param, name):
+    """
+    Extract given strategy from param dict.
+
+    Parameters
+    ----------
+    param : dict
+        saving all parameters for data fitting
+    name : str
+        strategy name
+
+    Returns
+    -------
+    dict :
+        with given strategy as value
+    """
+    param_new = copy.deepcopy(param)
+    return {k: v[name] for k, v in six.iteritems(param_new)
+            if k != 'non_fitting_values'}
+
+
 def compute_escape_peak(spectrum, ratio, params,
                         escape_e=1.73998):
     """
