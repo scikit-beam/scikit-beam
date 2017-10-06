@@ -1065,7 +1065,7 @@ def q_to_twotheta(q, wavelength):
 
     ..math ::
 
-        2\theta_n = 2 \arcsin\left(\frac{\lambda q}{4 \pi}\right
+        2\theta_n = 2 \arcsin\left(\frac{\lambda q}{4 \pi}\right)
 
     Parameters
     ----------
