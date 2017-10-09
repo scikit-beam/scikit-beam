@@ -1006,7 +1006,7 @@ def q_to_d(q):
 
     By definition the relationship is:
 
-    ..math ::
+    .. math::
 
         q = \\frac{2 \pi}{d}
 
@@ -1032,7 +1032,7 @@ def d_to_q(d):
 
     By definition the relationship is:
 
-    ..math ::
+    .. math::
 
         d = \\frac{2 \pi}{q}
 
@@ -1057,15 +1057,15 @@ def q_to_twotheta(q, wavelength):
 
     By definition the relationship is:
 
-    ..math ::
+    .. math::
 
         \sin\left(\frac{2\theta}{2}\right) = \frac{\lambda q}{4 \pi}
 
     thus
 
-    ..math ::
+    .. math::
 
-        2\theta_n = 2 \arcsin\left(\frac{\lambda q}{4 \pi}\right
+        2\theta_n = 2 \arcsin\left(\frac{\lambda q}{4 \pi}\right)
 
     Parameters
     ----------
@@ -1092,13 +1092,13 @@ def twotheta_to_q(two_theta, wavelength):
 
     By definition the relationship is
 
-    ..math ::
+    .. math::
 
         \sin\left(\frac{2\theta}{2}\right) = \frac{\lambda q}{4 \pi}
 
     thus
 
-    ..math ::
+    .. math::
 
         q = \frac{4 \pi \sin\left(\frac{2\theta}{2}\right)}{\lambda}
 
