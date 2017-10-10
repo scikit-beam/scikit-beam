@@ -572,9 +572,10 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
         mask : 2-dimensional np.ndarray of ints, optional
             array of zero/non-zero values, with shape `shape`.
             zero values will be ignored.
-        r_map : the map of pixel radii for each pixel. This is useful when the
-            detector has some curvature or is a more complex 2D shape embedded
-            in a 3D space (for example, Ewald curvature).
+        r_map : 2d np.ndarray of floats, optional
+            The map of pixel radii for each pixel. For example, r_map can be
+            used to define the radius of each pixel relative to the origin in
+            reciprocal space (on the Ewald sphere).
         statistic : string or callable, optional
             The statistic to compute (default is 'mean').
             The following statistics are available:
