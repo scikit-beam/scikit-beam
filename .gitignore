@@ -98,3 +98,7 @@ generated/
 /skbeam/**/*.c
 
 **/_as_gen/*.rst
+
+# scikit-build
+_skbuild
+MANIFEST
