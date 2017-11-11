@@ -40,7 +40,6 @@ import warnings
 
 import numpy as np
 from ..utils import radial_grid, angle_grid, bin_edges_to_centers
-from multiprocessing.dummy import Pool
 
 
 class BinnedStatisticDD(object):
@@ -318,12 +317,17 @@ class BinnedStatisticDD(object):
                     null = np.nan
                 np.seterr(**old)
             self.result.fill(null)
-            p = Pool()
 
-            def op(i):
-                self.result[i] = statistic(values[self.xy == i])
+            # Sort by bin number
+            idx = self.xy.argsort()
+            vfs = values[idx]
+            # Get the count for each bin
+            h = np.bincount(self.xy)
+            i = 0
+            for j, k in enumerate(h):
+                self.result[j] = statistic(vfs[i: i+k])
+                i += k
 
-            [_ for _ in p.imap_unordered(op, np.unique(self.xy), 10)]
         # Shape into a proper matrix
         self.result = self.result.reshape(np.sort(self.nbin))
         ni = np.copy(self.ni)
