@@ -325,7 +325,8 @@ class BinnedStatisticDD(object):
             h = np.bincount(self.xy)
             i = 0
             for j, k in enumerate(h):
-                self.result[j] = statistic(vfs[i: i+k])
+                if k > 0:
+                    self.result[j] = statistic(vfs[i: i + k])
                 i += k
 
         # Shape into a proper matrix
