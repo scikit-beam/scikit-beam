@@ -301,18 +301,17 @@ class BinnedStatisticDD(object):
             flatsum = np.bincount(self.xy, values)
             a = np.arange(len(flatsum))
             self.result[a] = flatsum
-        elif statistic == 'median':
-            self.result.fill(np.nan)
-            for i in np.unique(self.xy):
-                self.result[i] = np.median(values[self.xy == i])
-        # TODO: put median inside this block (since it is the same)
-        elif callable(statistic):
+        elif callable(statistic) or statistic == 'median':
+            if statistic == 'median':
+                internal_statistic = np.median
+            else:
+                internal_statistic = statistic
             with warnings.catch_warnings():
                 # Numpy generates a warnings for mean/std/... with empty list
                 warnings.filterwarnings('ignore', category=RuntimeWarning)
                 old = np.seterr(invalid='ignore')
                 try:
-                    null = statistic([])
+                    null = internal_statistic([])
                 except:
                     null = np.nan
                 np.seterr(**old)
@@ -321,12 +320,10 @@ class BinnedStatisticDD(object):
             # Sort by bin number
             idx = self.xy.argsort()
             vfs = values[idx]
-            # Get the count for each bin
-            h = np.bincount(self.xy)
             i = 0
-            for j, k in enumerate(h):
+            for j, k in enumerate(np.bincount(self.xy)):
                 if k > 0:
-                    self.result[j] = statistic(vfs[i: i + k])
+                    self.result[j] = internal_statistic(vfs[i: i + k])
                 i += k
 
         # Shape into a proper matrix
