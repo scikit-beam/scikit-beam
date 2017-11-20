@@ -160,7 +160,7 @@ class BinnedStatisticDD(object):
             if mask is not None:
                 thissample[mask == 0] = (self.edges[i][0] -
                                          0.01 * (
-                                         1 + np.fabs(self.edges[i][0])))
+                                             1 + np.fabs(self.edges[i][0])))
             Ncount[i] = np.digitize(thissample, self.edges[i])
 
         # Using digitize, values that fall on an edge are put in the
@@ -301,23 +301,30 @@ class BinnedStatisticDD(object):
             flatsum = np.bincount(self.xy, values)
             a = np.arange(len(flatsum))
             self.result[a] = flatsum
-        elif statistic == 'median':
-            self.result.fill(np.nan)
-            for i in np.unique(self.xy):
-                self.result[i] = np.median(values[self.xy == i])
-        elif callable(statistic):
+        elif callable(statistic) or statistic == 'median':
+            if statistic == 'median':
+                internal_statistic = np.median
+            else:
+                internal_statistic = statistic
             with warnings.catch_warnings():
                 # Numpy generates a warnings for mean/std/... with empty list
                 warnings.filterwarnings('ignore', category=RuntimeWarning)
                 old = np.seterr(invalid='ignore')
                 try:
-                    null = statistic([])
+                    null = internal_statistic([])
                 except:
                     null = np.nan
                 np.seterr(**old)
             self.result.fill(null)
-            for i in np.unique(self.xy):
-                self.result[i] = statistic(values[self.xy == i])
+
+            # Sort by bin number
+            idx = self.xy.argsort()
+            vfs = values[idx]
+            i = 0
+            for j, k in enumerate(np.bincount(self.xy)):
+                if k > 0:
+                    self.result[j] = internal_statistic(vfs[i: i + k])
+                i += k
 
         # Shape into a proper matrix
         self.result = self.result.reshape(np.sort(self.nbin))
