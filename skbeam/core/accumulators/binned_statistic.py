@@ -100,6 +100,8 @@ class BinnedStatisticDD(object):
         """
 
         # This code is based on np.histogramdd
+        self.bincount = None
+        self.argsort_index = None
         try:
             # Sample is an ND-array.
             N, self.D = sample.shape
@@ -317,11 +319,14 @@ class BinnedStatisticDD(object):
                 np.seterr(**old)
             self.result.fill(null)
 
-            # Sort by bin number
-            idx = self.xy.argsort()
-            vfs = values[idx]
+            if not self.argsort_index:
+                # Sort by bin number
+                self.argsort_index = self.xy.argsort()
+            vfs = values[self.argsort_index]
+            if not self.bincount:
+                self.bincount = np.bincount(self.xy)
             i = 0
-            for j, k in enumerate(np.bincount(self.xy)):
+            for j, k in enumerate(self.bincount):
                 if k > 0:
                     self.result[j] = internal_statistic(vfs[i: i + k])
                 i += k
