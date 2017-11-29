@@ -319,11 +319,11 @@ class BinnedStatisticDD(object):
                 np.seterr(**old)
             self.result.fill(null)
 
-            if not self.argsort_index:
+            if self.argsort_index is None:
                 # Sort by bin number
                 self.argsort_index = self.xy.argsort()
             vfs = values[self.argsort_index]
-            if not self.bincount:
+            if self.bincount is None:
                 self.bincount = np.bincount(self.xy)
             i = 0
             for j, k in enumerate(self.bincount):
