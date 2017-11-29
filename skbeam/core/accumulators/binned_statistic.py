@@ -100,7 +100,6 @@ class BinnedStatisticDD(object):
         """
 
         # This code is based on np.histogramdd
-        self.bincount = None
         self.argsort_index = None
         try:
             # Sample is an ND-array.
@@ -221,6 +220,14 @@ class BinnedStatisticDD(object):
         return self._flatcount
 
     @property
+    def argsort_index(self):
+        # Compute flatcount the first time it is accessed. Some statistics
+        # never access it.
+        if self._argsort_index is None:
+            self._argsort_index = self.xy.argsort()
+        return self._argsort_index
+
+    @property
     def bin_edges(self):
         """
         bin_edges : array of dtype float
@@ -319,14 +326,9 @@ class BinnedStatisticDD(object):
                 np.seterr(**old)
             self.result.fill(null)
 
-            if self.argsort_index is None:
-                # Sort by bin number
-                self.argsort_index = self.xy.argsort()
             vfs = values[self.argsort_index]
-            if self.bincount is None:
-                self.bincount = np.bincount(self.xy)
             i = 0
-            for j, k in enumerate(self.bincount):
+            for j, k in enumerate(self.flatcount):
                 if k > 0:
                     self.result[j] = internal_statistic(vfs[i: i + k])
                 i += k
