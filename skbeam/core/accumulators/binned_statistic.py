@@ -100,7 +100,6 @@ class BinnedStatisticDD(object):
         """
 
         # This code is based on np.histogramdd
-        self.argsort_index = None
         try:
             # Sample is an ND-array.
             N, self.D = sample.shape
@@ -185,6 +184,7 @@ class BinnedStatisticDD(object):
             self.xy += Ncount[self.ni[i]] * self.nbin[self.ni[i + 1:]].prod()
         self.xy += Ncount[self.ni[-1]]
         self._flatcount = None  # will be computed if needed
+        self._argsort_index = None
         self.statistic = statistic
 
     @property
