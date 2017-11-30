@@ -221,7 +221,7 @@ class BinnedStatisticDD(object):
 
     @property
     def argsort_index(self):
-        # Compute flatcount the first time it is accessed. Some statistics
+        # Compute argsort the first time it is accessed. Some statistics
         # never access it.
         if self._argsort_index is None:
             self._argsort_index = self.xy.argsort()
