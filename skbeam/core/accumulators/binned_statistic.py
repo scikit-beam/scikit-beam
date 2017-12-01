@@ -184,6 +184,7 @@ class BinnedStatisticDD(object):
             self.xy += Ncount[self.ni[i]] * self.nbin[self.ni[i + 1:]].prod()
         self.xy += Ncount[self.ni[-1]]
         self._flatcount = None  # will be computed if needed
+        self._argsort_index = None
         self.statistic = statistic
 
     @property
@@ -217,6 +218,14 @@ class BinnedStatisticDD(object):
         if self._flatcount is None:
             self._flatcount = np.bincount(self.xy, None)
         return self._flatcount
+
+    @property
+    def argsort_index(self):
+        # Compute argsort the first time it is accessed. Some statistics
+        # never access it.
+        if self._argsort_index is None:
+            self._argsort_index = self.xy.argsort()
+        return self._argsort_index
 
     @property
     def bin_edges(self):
@@ -317,11 +326,9 @@ class BinnedStatisticDD(object):
                 np.seterr(**old)
             self.result.fill(null)
 
-            # Sort by bin number
-            idx = self.xy.argsort()
-            vfs = values[idx]
+            vfs = values[self.argsort_index]
             i = 0
-            for j, k in enumerate(np.bincount(self.xy)):
+            for j, k in enumerate(self.flatcount):
                 if k > 0:
                     self.result[j] = internal_statistic(vfs[i: i + k])
                 i += k
