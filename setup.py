@@ -27,15 +27,24 @@ def c_ext():
 
     # compile for MacOS without openmp
     if sys.platform == 'darwin':
-        return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'])]
+        return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'],
+                          include_dirs=['src'])]
     # compile the extension on Linux.
     return [Extension('skbeam.ext.ctrans', ['src/ctrans.c'],
+                      include_dirs=['src'],
                       extra_compile_args=['-fopenmp'],
                       extra_link_args=['-lgomp'])]
 
 
+# add all cython extensions here
 def cython_ext():
-    return cythonize("**/*.pyx")
+    try:
+        ext = cythonize("skbeam/core/accumulators/histogram.pyx")
+    except ValueError:
+        # likely the file is already compiled
+        ext = [Extension("skbeam.core.accumulators.histogram",
+                         ["skbeam/core/accumulators/histogram.c"])]
+    return ext
 
 
 setup(
