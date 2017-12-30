@@ -51,18 +51,18 @@ class TestRadialBinnedStatistic(object):
                 else:
                     origin = None
                 if origin is None:
-                    origin = (self.rowsize-1)/2., (self.colsize-1)/2.
+                    origin = (self.rowsize - 1) / 2., (self.colsize - 1) / 2.
 
                 # need to calculate these every time in loop since origin
                 # changes
                 # rows are y, cols are x, as in angle_grid in core.utils
-                self.rgrid = np.sqrt((self.rowgrid-origin[0])**2 +
-                                     (self.colgrid-origin[1])**2)
+                self.rgrid = np.sqrt((self.rowgrid - origin[0]) ** 2 +
+                                     (self.colgrid - origin[1]) ** 2)
                 if rfac is not None:
-                    self.rgrid = self.rgrid**rfac
+                    self.rgrid = self.rgrid ** rfac
 
-                self.phigrid = np.arctan2(self.rowgrid-origin[0],
-                                          self.colgrid-origin[1])
+                self.phigrid = np.arctan2(self.rowgrid - origin[0],
+                                          self.colgrid - origin[1])
 
                 self.image = np.sinc(self.rgrid / self.oscillation_rate)
 
@@ -102,7 +102,7 @@ class TestRadialBinnedStatistic(object):
                 kwrange = kwargs.get('range', None)
                 ref, edges, _ = scipy.stats.binned_statistic(
                     x=self.rgrid.ravel(),
-                    values=(self.image*mask).ravel(),
+                    values=(self.image * mask).ravel(),
                     statistic=stat,
                     range=kwrange,
                     bins=bins,
@@ -117,7 +117,7 @@ class TestRadialBinnedStatistic(object):
 
         bins = (100, 2)
         myrphikwargs = [{'origin': (0, 0),
-                         'range': ((10, 90), (0, np.pi/2))},
+                         'range': ((10, 90), (0, np.pi / 2))},
                         {'origin': (0, 0)},
                         {'origin': None}]
         for kwargs in myrphikwargs:
@@ -127,15 +127,15 @@ class TestRadialBinnedStatistic(object):
                 else:
                     origin = None
                 if origin is None:
-                    origin = (self.rowsize-1)/2., (self.colsize-1)/2.
+                    origin = (self.rowsize - 1) / 2., (self.colsize - 1) / 2.
 
                 # need to calculate these every time in loop since origin
                 # changes
                 # rows are y, cols are x, as in angle_grid in core.utils
-                self.rgrid = np.sqrt((self.rowgrid-origin[0])**2 +
-                                     (self.colgrid-origin[1])**2)
-                self.phigrid = np.arctan2(self.rowgrid-origin[0],
-                                          self.colgrid-origin[1])
+                self.rgrid = np.sqrt((self.rowgrid - origin[0]) ** 2 +
+                                     (self.colgrid - origin[1]) ** 2)
+                self.phigrid = np.arctan2(self.rowgrid - origin[0],
+                                          self.colgrid - origin[1])
 
                 self.image = np.sinc(self.rgrid / self.oscillation_rate)
 
@@ -169,7 +169,7 @@ class TestRadialBinnedStatistic(object):
                 ref, redges, phiedges, _ = scipy.stats.binned_statistic_2d(
                     x=self.rgrid.ravel(),
                     y=self.phigrid.ravel(),
-                    values=(self.image*mask).ravel(),
+                    values=(self.image * mask).ravel(),
                     statistic=stat,
                     range=kwrange,
                     bins=bins,
@@ -199,7 +199,7 @@ class TestRadialBinnedStatistic(object):
 
 @pytest.mark.parametrize(['stat', 'stat_f'], stats_list)
 def test_BinnedStatistics1D(stat, stat_f):
-    x = np.linspace(0, 2*np.pi, 100)
+    x = np.linspace(0, 2 * np.pi, 100)
     values = np.sin(x * 5)
 
     bs = BinnedStatistic1D(x, statistic=stat, bins=10)
@@ -230,10 +230,10 @@ def test_binmap():
     # generate fake data on the fly
     shape = np.array([100, 100])
 
-    R = radial_grid(shape/2, shape)
-    Phi = angle_grid(shape/2., shape)
+    R = radial_grid(shape / 2, shape)
+    Phi = angle_grid(shape / 2., shape)
 
-    img = R*np.cos(5*Phi)
+    img = R * np.cos(5 * Phi)
     rs = RPhiBinnedStatistic(img.shape)
 
     binmap = rs.binmap.reshape((-1, img.shape[0], img.shape[1]))
@@ -249,8 +249,8 @@ def test_binmap3d():
     '''
     # test the 3d version separately
     Nx, Ny = 101, 101
-    x = np.arange(Nx)-Nx/2.
-    y = np.arange(Ny)-Ny/2.
+    x = np.arange(Nx) - Nx / 2.
+    y = np.arange(Ny) - Ny / 2.
     X, Y = np.meshgrid(x, y)
     X = X.ravel()
     Y = Y.ravel()
@@ -269,6 +269,32 @@ def test_binmap3d():
     rbinmap2 = binstat2.binmap
 
     assert_array_almost_equal(rbinmap1[0][::1000], rbinmap2[0][::1000])
-    assert_array_almost_equal(rbinmap1[0][::1000], np.array([1, 10,  9,  8, 7,
-                                                             6,  5,  4,  3, 2,
+    assert_array_almost_equal(rbinmap1[0][::1000], np.array([1, 10, 9, 8, 7,
+                                                             6, 5, 4, 3, 2,
                                                              1]))
+
+
+@pytest.mark.parametrize(['stat', 'stat_f'], stats_list)
+def test_BinnedStatistics1D_mask(stat, stat_f):
+    x = np.linspace(0, 2 * np.pi, 100)
+    values = np.sin(x * 5)
+    mask = np.random.randint(2, size=x.shape, dtype=bool)
+    ref, edges, _ = scipy.stats.binned_statistic(x[mask], values[mask],
+                                                 statistic=stat, bins=10)
+
+    bs = BinnedStatistic1D(x, statistic=stat, bins=10, mask=mask)
+    bs_f = BinnedStatistic1D(x, statistic=stat_f, bins=10, mask=mask)
+
+    assert_array_almost_equal(bs(values), bs_f(values))
+    assert_array_equal(bs(values), ref)
+    assert_array_almost_equal(bs_f(values), ref)
+    assert_array_equal(edges, bs.bin_edges)
+    assert_array_equal(edges, bs_f.bin_edges)
+
+    rbinstat = BinnedStatistic1D(x)
+    # make sure wrong shape is caught
+    with assert_raises(ValueError):
+        rbinstat(x[:-2])
+
+    # try with same shape, should be fine
+    rbinstat(x)
