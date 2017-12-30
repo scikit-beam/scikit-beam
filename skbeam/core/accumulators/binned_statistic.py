@@ -162,7 +162,8 @@ class BinnedStatisticDD(object):
             # Would be better to do this using bincount "weights", perhaps.
             thissample = sample[:, i]
             if mask is not None:
-                thissample[~mask] = np.floor(self.edges[i][0] - 0.01 * (1 + np.fabs(self.edges[i][0])))
+                thissample[~mask] = np.floor(
+                    self.edges[i][0] - 0.01 * (1 + np.fabs(self.edges[i][0])))
             Ncount[i] = np.digitize(thissample, self.edges[i])
 
         # Using digitize, values that fall on an edge are put in the
