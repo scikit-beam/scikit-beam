@@ -278,7 +278,8 @@ def test_binmap3d():
 def test_BinnedStatistics1D_mask(stat, stat_f):
     x = np.linspace(0, 2 * np.pi, 100)
     values = np.sin(x * 5)
-    mask = np.random.randint(2, size=x.shape, dtype=bool)
+    mask = np.random.randint(2, size=x.shape)
+    mask = mask.astype(bool)
     ref, edges, _ = scipy.stats.binned_statistic(x[mask], values[mask],
                                                  statistic=stat, bins=10)
 
