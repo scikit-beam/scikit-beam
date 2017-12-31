@@ -125,8 +125,8 @@ class BinnedStatisticDD(object):
         # Used only if number of bins is given.
         if range is None:
             if mask is not None:
-                smin = np.atleast_1d(np.array(sample[mask].min(axis=0), float))
-                smax = np.atleast_1d(np.array(sample[mask].max(axis=0), float))
+                smin = np.atleast_1d(np.array(sample[mask == 1].min(axis=0), float))
+                smax = np.atleast_1d(np.array(sample[mask == 1].max(axis=0), float))
             else:
                 smin = np.atleast_1d(np.array(sample.min(axis=0), float))
                 smax = np.atleast_1d(np.array(sample.max(axis=0), float))
@@ -162,7 +162,7 @@ class BinnedStatisticDD(object):
             # Would be better to do this using bincount "weights", perhaps.
             thissample = sample[:, i]
             if mask is not None:
-                thissample[~mask] = np.floor(
+                thissample[mask == 0] = np.floor(
                     self.edges[i][0] - 0.01 * (1 + np.fabs(self.edges[i][0])))
             Ncount[i] = np.digitize(thissample, self.edges[i])
 
