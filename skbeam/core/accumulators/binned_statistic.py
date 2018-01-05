@@ -185,6 +185,7 @@ class BinnedStatisticDD(object):
         self.xy += Ncount[self.ni[-1]]
         self._flatcount = None  # will be computed if needed
         self.statistic = statistic
+        self._xy_argsort = None  # will be computed if needed
 
     @property
     def binmap(self):
@@ -244,6 +245,12 @@ class BinnedStatisticDD(object):
             raise ValueError('invalid statistic %r' % (new_statistic,))
         else:
             self._statistic = new_statistic
+
+    @property
+    def xy_argsort(self):
+        if self._xy_argsort is None:
+            self._xy_argsort = self.xy.argsort()
+        return self._xy_argsort
 
     def __call__(self, values, statistic=None):
         """
@@ -318,10 +325,10 @@ class BinnedStatisticDD(object):
             self.result.fill(null)
 
             # Sort by bin number
-            idx = self.xy.argsort()
+            idx = self.xy_argsort
             vfs = values[idx]
             i = 0
-            for j, k in enumerate(np.bincount(self.xy)):
+            for j, k in enumerate(self.flatcount):
                 if k > 0:
                     self.result[j] = internal_statistic(vfs[i: i + k])
                 i += k
