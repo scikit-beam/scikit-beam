@@ -3,10 +3,40 @@
 import setuptools
 from distutils.core import setup, Extension
 import versioneer
-import numpy as np
 import os
 import sys
-from Cython.Build import cythonize
+import importlib
+
+# Install required dependencies before setup()
+deps = {
+        'numpy': {
+            'module': 'numpy',
+            'function': None,
+            'alias': 'np'
+            },
+        'cython': {
+            'module': 'Cython.Build',
+            'function': 'cythonize',
+            'alias': None,
+            },
+        }
+
+
+def _import(module, function=None, alias=None):
+    if function:
+        globals()[function] = getattr(importlib.import_module(module), function)
+    if alias:
+        globals()[alias] = importlib.import_module(module)
+
+
+for lib, dep in deps.items():
+    try:
+        _import(**dep)
+    except ImportError:
+        import pip
+        pip.main(['install', lib])
+        _import(**dep)
+
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
