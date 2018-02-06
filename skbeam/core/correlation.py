@@ -965,7 +965,7 @@ class CrossCorrelator:
         self.nids = len(idpos[:-1])
 
         # finds the shape of the subregions
-        shapes = np.zeros((self.nids, 4), dtype=np.uint32)
+        extents = np.zeros((self.nids, 4), dtype=np.uint32)
         for i in range(self.nids):
             index_start, index_end = idpos[i], idpos[i+1]
             rows = pi[index_start:index_end]//width
@@ -974,7 +974,7 @@ class CrossCorrelator:
             row_max = rows.max()
             col_min = cols.min()
             col_max = cols.max()
-            shapes[i] = [row_min, row_max, col_min, col_max]
+            extents[i] = [row_min, row_max, col_min, col_max]
 
         # make indices for subregions arrays and their shapes
         ppii = pi.copy()
@@ -984,7 +984,10 @@ class CrossCorrelator:
         for i in range(self.nids):
             index_start, index_stop = idpos[i], idpos[i+1]
             # row*width + col
-            ppii[index_start:index_stop] -= shapes[i, 0]*width + shapes[i,0]
+            row = ppii[index_start:index_stop]//width
+            ppii[index_start:index_stop] -= extents[i, 0]*width + extents[i, 2]
+            # also subtract leftover elements from row
+            ppii[index_start:index_stop] -= extents[i, 2]*(row-extents[i,0])
             #ppii[index_start:index_stop]%width -= shapes[i, 0]
             #ppjj[index_start:index_stop] -= shapes[i, 2]
         # now save to object
@@ -995,7 +998,7 @@ class CrossCorrelator:
 
         # redefine shapes to be the shapes of the subregions
         # make shapes be for regions
-        shapes = np.array(1 + (np.diff(shapes, axis=-1)[:, [0, 2]]))
+        shapes = np.array(1 + (np.diff(extents, axis=-1)[:, [0, 2]]))
         self.shapes = shapes
         # We now have two sets of positions of the subregions (pi,pj) in
         # subregion and (pii,pjj) in images. pos is a pointer such that
