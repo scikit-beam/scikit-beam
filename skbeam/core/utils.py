@@ -1019,7 +1019,7 @@ def q_to_d(q):
     Returns
     -------
     d : array
-       An array of d (plane) spacing
+       An array of d (plane) spacing in the inverse of the units of ``q``
 
     """
     return (2 * np.pi) / np.asarray(q)
@@ -1044,7 +1044,7 @@ def d_to_q(d):
     Returns
     -------
     q : array
-        An array of q values
+        An array of q values in the inverse of the units of ``d``
 
 
     """
@@ -1078,7 +1078,7 @@ def q_to_twotheta(q, wavelength):
     Returns
     -------
     two_theta : array
-        An array of :math:`2\theta` values
+        An array of :math:`2\theta` values in radians
     """
     q = np.asarray(q)
     wavelength = float(wavelength)
@@ -1115,7 +1115,8 @@ def twotheta_to_q(two_theta, wavelength):
     Returns
     -------
     q : array
-        An array of :math:`q` values
+        An array of :math:`q` values in the inverse of the units
+        of ``wavelength``
     """
     two_theta = np.asarray(two_theta)
     wavelength = float(wavelength)
