@@ -921,11 +921,14 @@ class CrossCorrelator:
             mask = np.ones(shape)
 
         self.shape = shape
-        # for 1d quick indexing
-        width = shape[0]
         self.ndim = len(shape)
         if self.ndim == 1:
             mask = mask.reshape((1, shape[0]))
+            # for 1d quick indexing
+            width = shape[0]
+        elif self.ndim == 2:
+            width = shape[1]
+
 
         if self.ndim > 2:
             raise ValueError("Dimensions other than 1 or 2 not supported")
@@ -986,8 +989,12 @@ class CrossCorrelator:
             # row*width + col
             row = ppii[index_start:index_stop]//width
             ppii[index_start:index_stop] -= extents[i, 0]*width + extents[i, 2]
-            # also subtract leftover elements from row
-            ppii[index_start:index_stop] -= extents[i, 2]*(row-extents[i,0])
+            new_width = extents[i, 3] - extents[i, 2] + 1
+            # the subregion has a new width
+            old_rows = ppii[index_start:index_stop] // width
+            old_cols = ppii[index_start:index_stop] % width
+            ppii[index_start:index_stop] = old_rows*new_width + old_cols
+
             #ppii[index_start:index_stop]%width -= shapes[i, 0]
             #ppjj[index_start:index_stop] -= shapes[i, 2]
         # now save to object
@@ -1097,8 +1104,12 @@ class CrossCorrelator:
         ccorrs = list()
         rngiter = tqdm(range(self.nids))
 
-        # for 1d indexing
-        width = self.shape[0]
+        if self.ndim == 1:
+            # for 1d quick indexing
+            width = self.shape[0]
+        elif self.ndim == 2:
+            width = self.shape[1]
+
 
         idpos = self.idpos
         for i in rngiter:
