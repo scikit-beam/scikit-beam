@@ -196,6 +196,9 @@ class BinnedStatisticDD(object):
             -------
             D np.ndarrays of length N where D is the number of dimensions
                 and N is the number of data points.
+                For each dimension, the min bin id is 0 and max n+1 where n is
+                the number of bins in that dimension. The ids 0 and n+1 mark
+                the outliers of the bins.
         '''
         N, = self.xy.shape
         binmap = np.zeros((self.D, N), dtype=int)
