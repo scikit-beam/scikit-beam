@@ -536,7 +536,7 @@ def img_to_relative_xyi(img, cx, cy, pixel_size_x=None, pixel_size_y=None):
     else:
         raise ValueError('pixel_size_x and pixel_size_y must both be None or '
                          'greater than zero. You passed in values for '
-                         'pixel_size_x of {0} and pixel_size_y of {1]'
+                         'pixel_size_x of {0} and pixel_size_y of {1}'
                          ''.format(pixel_size_x, pixel_size_y))
 
     # Caswell's incredible terse rewrite
