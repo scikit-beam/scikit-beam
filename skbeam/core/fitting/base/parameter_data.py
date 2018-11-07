@@ -321,7 +321,7 @@ default_param = {
         'tool_tip': 'width**2 = (b1/2.3548)**2 + 3.85*b2*E',
         'value': 0.178},
     'non_fitting_values': {
-        'element_list': 'Ar, Fe, Ce_L, Pt_M',
+        'element_list': ["Ar", "Fe", "Ce_L", "Pt_M"],
         'energy_bound_low': {
             'value': 1.5,
             'default_value': 1.5,
