@@ -33,8 +33,12 @@ for lib, dep in deps.items():
     try:
         _import(**dep)
     except ImportError:
-        import pip
-        pip.main(['install', lib])
+        try:
+            from pip import main # old API
+        except ImportError:
+            from pip._internal import main # new API
+            
+        main(['install', lib])
         _import(**dep)
 
 
