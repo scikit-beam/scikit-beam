@@ -11,8 +11,129 @@ Future
 ------
 In Progress
 ===========
-- `PR #373 <https://github.com/scikit-beam/scikit-beam/pull/373>`_: Major overhaul of the docs
 - `PR #403 <https://github.com/scikit-beam/scikit-beam/pull/401>`_: Adding four time correlation
+
+`v0.0.15 <https://github.com/scikit-beam/scikit-beam/tree/v0.0.15>`__ (2019-06-06)
+----------------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/scikit-beam/scikit-beam/compare/v0.0.14...v0.0.15>`__
+
+**Merged pull requests:**
+
+-  `#537 <https://github.com/scikit-beam/scikit-beam/pull/537>`__
+   Turn element_list to a list of strings
+   (`Ksouravsingh <https://github.com/Ksouravsingh>`__)
+-  `#536 <https://github.com/scikit-beam/scikit-beam/pull/536>`__
+   Fix format string
+   (`ksunden <https://github.com/ksunden>`__)
+
+
+`v0.0.14 <https://github.com/scikit-beam/scikit-beam/tree/v0.0.14>`__ (2018-09-05)
+----------------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/scikit-beam/scikit-beam/compare/v0.0.13...v0.0.14>`__
+
+**Closed issues:**
+
+-  2D SavitzkyGolay smoothing algorithm
+   `#531 <https://github.com/scikit-beam/scikit-beam/issues/485>`__
+
+**Merged pull requests:**
+
+-  `#538 <https://github.com/scikit-beam/scikit-beam/pull/500>`__
+   Added .editorconfig
+   (`KOLANICH <https://github.com/KOLANICH>`__)
+-  `#535 <https://github.com/scikit-beam/scikit-beam/pull/500>`__
+   Improve binmap doc
+   (`jrmlhermitte <https://github.com/jrmlhermitte>`__)
+-  `#532 <https://github.com/scikit-beam/scikit-beam/pull/500>`__
+   Add 2D Savitzky–Golay filter
+   (`mpmdean <https://github.com/mpmdean>`__)
+-  `#515 <https://github.com/scikit-beam/scikit-beam/pull/500>`__
+   WIP: twotheta in degrees
+   (`CJ-Wright <https://github.com/CJ-Wright>`__)
+
+`v0.0.13 <https://github.com/scikit-beam/scikit-beam/tree/v0.0.13>`__ (2018-01-10)
+----------------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/scikit-beam/scikit-beam/compare/v0.0.12...v0.0.13>`__
+
+**Closed issues:**
+
+-  Cythonize binned statistic?
+   `#519 <https://github.com/scikit-beam/scikit-beam/issues/485>`__
+-  Math is not rendering properly in the docs Documentation
+   `#516 <https://github.com/scikit-beam/scikit-beam/issues/485>`__
+-  bug in lazy_one_time
+   `#512 <https://github.com/scikit-beam/scikit-beam/issues/485>`__
+
+**Merged pull requests:**
+
+-  `#530 <https://github.com/scikit-beam/scikit-beam/pull/530>`__
+   ENH: speed up binned statistic by stashing np.argsort(xy)
+   (`CJ-Wright <https://github.com/CJ-Wright>`__)
+-  `#524 <https://github.com/scikit-beam/scikit-beam/pull/524>`__
+   ENH: speed up by caching bincount and argsort
+   (`CJ-Wright <https://github.com/CJ-Wright>`__)
+-  `#518 <https://github.com/scikit-beam/scikit-beam/pull/518>`__
+   ENH: Added r_map option to RPhiBinnedStatistic
+   (`jrmlhermitte <https://github.com/jrmlhermitte>`__)
+-  `#517 <https://github.com/scikit-beam/scikit-beam/pull/517>`__
+   Move some fitting related functions from pyxrf to skbeam
+   (`licode <https://github.com/licode>`__)
+-  `#513 <https://github.com/scikit-beam/scikit-beam/pull/513>`__
+   ENH: added binmap to binned_statistic
+   (`jrmlhermitte <https://github.com/jrmlhermitte>`__)
+-  `#500 <https://github.com/scikit-beam/scikit-beam/pull/500>`__
+   ENH: speed up binned_statistic
+   (`CJ-Wright <https://github.com/CJ-Wright>`__)
+
+`v0.0.12 <https://github.com/scikit-beam/scikit-beam/tree/v0.0.12>`__ (2017-07-26)
+----------------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/scikit-beam/scikit-beam/compare/v0.0.11...v0.0.12>`__
+
+**Merged pull requests:**
+
+-  `#508 <https://github.com/scikit-beam/scikit-beam/pull/508>`__
+   Add rpix
+   (`jrmlhermitte <https://github.com/jrmlhermitte>`__)
+-  `#504 <https://github.com/scikit-beam/scikit-beam/pull/504>`__
+   CI: python/numpy version change in ci
+   (`licode <https://github.com/licode>`__)
+
+
+`v0.0.11 <https://github.com/scikit-beam/scikit-beam/tree/v0.0.11>`__ (2017-06-23)
+----------------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/scikit-beam/scikit-beam/compare/v0.0.10...v0.0.11>`__
+
+**Merged pull requests:**
+
+-  `#497 <https://github.com/scikit-beam/scikit-beam/pull/497>`__
+   Add k lines
+   (`licode <https://github.com/licode>`__)
+-  `#496 <https://github.com/scikit-beam/scikit-beam/pull/496>`__
+   Made links work
+   (`habi <https://github.com/habi>`__)
+-  `#494 <https://github.com/scikit-beam/scikit-beam/pull/494>`__
+   New and improved Cross correlator
+   (`jrmlhermitte <https://github.com/jrmlhermitte>`__)
+-  `#489 <https://github.com/scikit-beam/scikit-beam/pull/489>`__
+   ENH : added construct_rphi_image
+   (`jrmlhermitte <https://github.com/jrmlhermitte>`__)
+-  `#488 <https://github.com/scikit-beam/scikit-beam/pull/488>`__
+   Automatically find the center and the rings
+   (`sameera2004 <https://github.com/sameera2004>`__)
+-  `#487 <https://github.com/scikit-beam/scikit-beam/pull/487>`__
+   Spatial Correlations
+   (`jrmlhermitte <https://github.com/jrmlhermitte>`__)
+
 
 `v0.0.10 <https://github.com/scikit-beam/scikit-beam/tree/v0.0.10>`__ (2017-01-09)
 ----------------------------------------------------------------------------------
