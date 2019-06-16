@@ -324,7 +324,7 @@ class BinnedStatisticDD(object):
                 old = np.seterr(invalid='ignore')
                 try:
                     null = internal_statistic([])
-                except:
+                except Exception:
                     null = np.nan
                 np.seterr(**old)
             self.result.fill(null)
