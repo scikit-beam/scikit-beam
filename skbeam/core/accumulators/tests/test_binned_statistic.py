@@ -368,6 +368,10 @@ def test_rphi_binstat_incorrect_values_raises():
 
 
 def test_mutation_of_bins_raises():
+    # NOTE: The aim of this test is to specifically test the raising of
+    # RuntimeError within the __call__ method of binnedstatistic. It seems
+    # that the only way for this to occur is a mutation of the underlying
+    # attributes after insantiation.
     coordinate_values = np.array([[0, 0, 0, 0]]).T
     bins = np.array([[-1, 0, 1]])
 
