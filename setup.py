@@ -7,45 +7,44 @@ import os
 import sys
 import importlib
 
-# Install required dependencies before setup()
-deps = {
-        'numpy': {
-            'module': 'numpy',
-            'function': None,
-            'alias': 'np'
-            },
-        'cython': {
-            'module': 'Cython.Build',
-            'function': 'cythonize',
-            'alias': None,
-            },
-        }
+import numpy as np
+from Cython.Build import cythonize
 
-
-def _import(module, function=None, alias=None):
-    if function:
-        globals()[function] = getattr(importlib.import_module(module), function)
-    if alias:
-        globals()[alias] = importlib.import_module(module)
-
-
-for lib, dep in deps.items():
-    try:
-        _import(**dep)
-    except ImportError:
-        import pip
-        pip.main(['install', lib])
-        _import(**dep)
+## Install required dependencies before setup()
+#deps = {
+#        'numpy': {
+#            'module': 'numpy',
+#            'function': None,
+#            'alias': 'np'
+#            },
+#        'cython': {
+#            'module': 'Cython.Build',
+#            'function': 'cythonize',
+#            'alias': None,
+#            },
+#        }
+#
+#
+#def _import(module, function=None, alias=None):
+#    if function:
+#        globals()[function] = getattr(importlib.import_module(module), function)
+#    if alias:
+#        globals()[alias] = importlib.import_module(module)
+#
+#
+#for lib, dep in deps.items():
+#    try:
+#        _import(**dep)
+#    except ImportError:
+#        import pip
+#        pip.main(['install', lib])
+#        _import(**dep)
 
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
 # README file and 2) it's easier to type in the README file than to put a raw
 # string in below ...
-
-
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
 def c_ext():
