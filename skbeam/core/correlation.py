@@ -372,7 +372,7 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
 
     For parameter description, please reference the docstring for
     lazy_one_time. Note that there is an API difference between this function
-    and `lazy_one_time`. The `images` arugment is at the end of this function
+    and `lazy_one_time`. The `images` argument is at the end of this function
     signature here for backwards compatibility, but is the first argument in
     the `lazy_one_time()` function. The semantics of the variables remain
     unchanged.
@@ -465,9 +465,7 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
 
     The longest lag time computed is ``num_levels * num_bufs``.
 
-    See Also
-    --------
-    comments on `multi_tau_auto_corr`
+    See Also: ``multi_tau_auto_corr`` for a non-generator implementation
 
     Parameters
     ----------

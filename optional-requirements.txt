@@ -1,4 +1,5 @@
-lmfit==0.8.1
+# Need to bump to 0.8.3 since that's the earliest available on conda-forge
+lmfit==0.8.3
 scipy
 scikit-image
 xraylib
