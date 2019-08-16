@@ -220,7 +220,8 @@ def _copy_model_param_hints(target, source, params):
         target.set_param_hint(label,
                               value=source[label].value,
                               expr=label)
-
+                              # expr=None)
+                              # expr = '')
 
 def update_parameter_dict(param, fit_results):
     """
