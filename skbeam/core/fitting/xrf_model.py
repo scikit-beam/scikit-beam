@@ -219,9 +219,17 @@ def _copy_model_param_hints(target, source, params):
     for label in params:
         target.set_param_hint(label,
                               value=source[label].value,
-                              expr=label)
-                              # expr=None)
-                              # expr = '')
+                              expr=None)
+
+def _copy_model_param_hints_EXPR(target, source, params):
+
+    for label in params:
+        value = source[label].value
+        for hint_name, hint_values in target.param_hints.items():
+            if label in hint_name and label != hint_name and 'compton' not in hint_name:
+                hint_values[label] = value
+                hint_values['expr'] =  label
+
 
 def update_parameter_dict(param, fit_results):
     """
@@ -951,6 +959,12 @@ class ModelSpectrum(object):
 
         for element in self.elemental_lines:
             self.mod += self.setup_element_model(element)
+
+        # This is just a copy of the parameter list. Multiple occurrances.
+        param_hints_to_copy = ['e_offset', 'e_linear', 'e_quadratic',
+                               'fwhm_offset', 'fwhm_fanoprime']
+        _copy_model_param_hints_EXPR(self.mod, self.compton_param,
+                                param_hints_to_copy)
 
     def model_fit(self, channel_number, spectrum, weights=None,
                   method='leastsq', **kwargs):
