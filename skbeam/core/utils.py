@@ -1301,9 +1301,11 @@ def bin_grid(image, r_array, pixel_sizes, statistic='mean', mask=None,
         Returns
         -------
         data : list
-            A list of tuples that contains data from each cut. Each tuple contains the angle of the cut taken, an array of the intensity values sampled along the line cut
-            and an array of the corresponding radii relative to center at each point sampled along the
-            line cut.
+            A list of tuples that contains data from each cut. Each tuple
+            contains the angle of the cut taken, an array of the intensity
+            values sampled along the line cut and an array of the
+            corresponding radii relative to center at each point sampled
+            along the line cut.
 
         """
         height = image.shape[0]
