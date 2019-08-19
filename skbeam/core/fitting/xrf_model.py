@@ -199,7 +199,9 @@ def _set_parameter_hint(param_name, input_dict, input_model):
 
 def _copy_model_param_hints(target, source, params):
     """
-    Copy parameters from one model to another
+    Copy parameters (set hints) from one model to another
+    (Always sets the attribute 'expr' to None, use only on incomplete models
+               used for model evaluation)
 
     .. warning
 
@@ -214,21 +216,83 @@ def _copy_model_param_hints(target, source, params):
 
     params : list
        The names of the parameters to copy
+
+
+    Note: compatibility with lmfit 0.9.13
+    The issue: scikit-beam is mostly using lmfit models to generate
+    spectra of individual components based on parameters of spectral lines.
+    Fitting is performed mostly using 'nnls' function from SciPy package.
+    Setting 'expr' attribute of a parameter tied to some other parameter that does
+    not belong to the model (not in Parameters object) will cause the program
+    to crash when 'expr' is evaluated by asteval. Parameters object is created
+    by calling Model.calling Model.make_params() function, which creates
+    new Parameters object and sets initial values of parameters based on supplied hints.
+    Once the set of hints is applied to the parameters, each 'eval' string
+    is evaluated by asteval (this was not the case in lmfit 0.8.3). If the expression
+    'expr' refers to a parameter that does not belong to the set, the program crashes.
+
+    Example: a model describing spectrum for the line 'Ar_ka1_fwhm_offset' must be
+    initialized with the value of a global parameter 'fwhm_offset' and then tied to
+    it during fitting ('fwhm_offset' determines fwhm offset for each line).
+    The parameter named 'fwhm_offset' does not exist in the set of parameters that
+    describe a single line, so if we set 'expr="fwhm_offset"', then the program
+    will crash during Model.make_params() call. On the other hand, if we are
+    creating complete model for fitting that contain parameters of multiple lines as well as
+    global parameters, Model.make_params() call will succeed.
+
+    Solution:
+      -- Incomplete single-line models (used for setting up linear model): set 'expr=None'
+         in the hints before calling Model.make_params(), i.e. use this function.
+      -- Complete models (used for fitting): set 'expr=label', where label is the name
+         of a global parameter, after all parameters are assembled, i.e. use the function
+         _copy_model_param_hints_EXPR (see below). Since typical approach in scikit-beam is
+         to assemble complex models out of multitude of incomplete single-line models and
+         _copy_model_param_hints will be called for initialization of each of the single-line
+         models.
     """
 
     for label in params:
         target.set_param_hint(label,
                               value=source[label].value,
-                              expr=None)
+                              expr=None)  # Originally was expr=label
 
 def _copy_model_param_hints_EXPR(target, source, params):
+    """
+    Copy parameters (set hints) from one model to another
+    (Sets the attribute 'expr' to the source parameter name,
+     use only on complete models that can be used for model fitting)
+
+    .. warning
+
+       This updates ``target`` in-place
+
+    Parameters
+    ----------
+    target : lmfit.Model
+        The model to be updated
+    source : lmfit.Model
+        The model to copy from
+
+    params : list
+       The names of the parameters to copy
+
+
+    Note: function is part of the fix for compatibility with lmfit 0.9.13.
+    Dmitri G. (08/19/2019)
+    """
+
+    # Only parameters that describe spectral lines and contain substring defined by 'label'
+    #    should be tied to global parameter defined by 'label'. The global parameter should
+    #    not be tied to itself (label != hint_name). Also the parameter should not contain
+    #    prefix "compton", since compton lines have their own set of parameters with matching
+    #    names, but not tied to the parameters of spectral lines.
 
     for label in params:
         value = source[label].value
         for hint_name, hint_values in target.param_hints.items():
             if label in hint_name and label != hint_name and 'compton' not in hint_name:
                 hint_values[label] = value
-                hint_values['expr'] =  label
+                hint_values['expr'] = label
 
 
 def update_parameter_dict(param, fit_results):
@@ -990,6 +1054,7 @@ class ModelSpectrum(object):
         pars = self.mod.make_params()
         result = self.mod.fit(spectrum, pars, x=channel_number, weights=weights,
                               method=method, fit_kws=kwargs)
+
         return result
 
 
