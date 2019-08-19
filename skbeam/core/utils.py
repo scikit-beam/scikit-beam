@@ -1357,9 +1357,6 @@ def bin_grid(image, r_array, pixel_sizes, statistic='mean', mask=None,
                 col1 = width - 1
 
 
-            #print("r0, c0: ",row0,col0)
-            #print("r1, c1: ", row1, col1)
-
             r, c = np.linspace(row0, row1, num), np.linspace(col0, col1, num) #sample 1000 points between endpoints
             im_slice = t[r.astype(np.int), c.astype(np.int)]  #extract data from these indexed locations
             im_slice = im_slice[::q]
@@ -1383,10 +1380,6 @@ def bin_grid(image, r_array, pixel_sizes, statistic='mean', mask=None,
                 axes[0].plot([col0, col1], [row0, row1], 'ro-')
                 axes[0].axis('image')
 
-                #if(center_x != None and center_y != None):
-                   # axes[0].scatter(center_x, center_y, s= 50, c='red')
-
-                #if mute_graph != True:
                 axes[1].plot(radius, im_slice)
                 plt.xlabel("Radius", fontsize = 15)
                 plt.ylabel("Intensity", fontsize = 15)
@@ -1399,7 +1392,7 @@ def bin_grid(image, r_array, pixel_sizes, statistic='mean', mask=None,
                 break
             curr = curr + increment
 
-        if(mute_graph==False and center_x != None and center_y != None):
+        if(mute_graph == False and center_x != None and center_y != None):
                     axes[0].scatter(center_x, center_y, s= 50, c='red')
         plt.show()
         return data
