@@ -1300,9 +1300,9 @@ def bin_grid(image, r_array, pixel_sizes, statistic='mean', mask=None,
 
         Returns
         -------
-        data : tuple
-            For each line cut made, returns the angle of the cut, an array of the intensity values sampled
-            and an array of the corresponding radii relative to center at each data point along the
+        data : list
+            A list of tuples that contains data from each cut. Each tuple contains the angle of the cut taken, an array of the intensity values sampled along the line cut
+            and an array of the corresponding radii relative to center at each point sampled along the
             line cut.
 
         """
@@ -1313,7 +1313,7 @@ def bin_grid(image, r_array, pixel_sizes, statistic='mean', mask=None,
         if mute_graph == False:
             fig, axes = plt.subplots(nrows=2, figsize = (10,10))
             axes[0].scatter(center_x, center_y, s= 50, c='red')
-            
+
         curr = angle
         data = []
 
