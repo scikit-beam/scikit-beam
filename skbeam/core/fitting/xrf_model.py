@@ -199,9 +199,9 @@ def _set_parameter_hint(param_name, input_dict, input_model):
 
 def _copy_model_param_hints(target, source, params):
     """
-    Copy parameters (set hints) from one model to another
-    (Always sets the attribute 'expr' to None, use only on incomplete models
-               used for model evaluation)
+    Copy parameters (set hints) from Parameters object (source) to a model (target)
+    ( Sets the attribute 'expr' in the model hint to to None -
+      apply only to incomplete models used for model evaluation)
 
     .. warning
 
@@ -257,11 +257,11 @@ def _copy_model_param_hints(target, source, params):
                               expr=None)  # Originally was expr=label
 
 
-def _copy_model_param_hints_EXPR(target, source, params):
+def _copy_model_param_hints_EXPR(target, source, *, param_hints_elements=None, param_hints_elastic=None):
     """
-    Copy parameters (set hints) from one model to another
-    (Sets the attribute 'expr' to the source parameter name,
-     use only on complete models that can be used for model fitting)
+    Copy parameters (set hints) from Parameters object (source) to a model (target)
+    ( Sets the attribute 'expr' in the model hint to the copied parameter name,
+      use only on complete models that can be used for model fitting)
 
     .. warning
 
@@ -271,10 +271,12 @@ def _copy_model_param_hints_EXPR(target, source, params):
     ----------
     target : lmfit.Model
         The model to be updated
-    source : lmfit.Model
+    source : lmfit.Parameters
         The model to copy from
-    params : list
-       The names of the parameters to copy
+    params_hints_elements : list
+       The names of the parameters to copy for element models
+    params_hints_ellastic : list
+       The names of the parameters to copy for elastic scattering model
 
 
     Note: function is part of the fix for compatibility with lmfit 0.9.13.
@@ -287,10 +289,24 @@ def _copy_model_param_hints_EXPR(target, source, params):
     #    prefix "compton", since compton lines have their own set of parameters with matching
     #    names, but not tied to the parameters of spectral lines.
 
-    for label in params:
-        value = source[label].value
-        for hint_name, hint_values in target.param_hints.items():
-            if label in hint_name and label != hint_name and 'compton' not in hint_name:
+    if param_hints_elements is None:
+        param_hints_elements = []
+    if param_hints_elastic is None:
+        param_hints_elastic = []
+
+    for hint_name, hint_values in target.param_hints.items():
+        # Compton scattering component has its independent set of parameters
+        if hint_name.startswith('compton'):
+            continue
+        # The sets of hints for ellastic and element models are different
+        if hint_name.startswith('elastic'):
+            params = param_hints_elastic
+        else:
+            params = param_hints_elements
+        # Now go through the selected list of labels
+        for label in params:
+            value = source[label].value
+            if hint_name.endswith(label) and (label != hint_name) and not hint_name.startswith('compton'):
                 hint_values[label] = value
                 hint_values['expr'] = label
 
@@ -405,6 +421,7 @@ class ParamController(object):
             K lines of Sodium, the K lines of Magnesium, and the M
             lines of Platinum
         """
+
         self._original_params = copy.deepcopy(params)
         self.params = copy.deepcopy(params)
         self.element_list = list(elemental_lines)  # to copy it
@@ -596,6 +613,15 @@ class ModelSpectrum(object):
             K lines of Sodium, the K lines of Magnesium, and the M
             lines of Platinum
         """
+
+        # Names of global(common) model parameters used in full assembled element models
+        self._global_param_hints_elements_to_copy = ['e_offset', 'e_linear', 'e_quadratic',
+                                                     'fwhm_offset', 'fwhm_fanoprime']
+        # ... for ellastic scattering model
+        self._global_param_hints_elastic_to_copy = ['e_offset', 'e_linear', 'e_quadratic',
+                                                    'fwhm_offset', 'fwhm_fanoprime',
+                                                    'coherent_sct_energy']
+
         self.params = copy.deepcopy(params)
         self.elemental_lines = list(elemental_lines)  # to copy
         self.incident_energy = self.params['coherent_sct_energy']['value']
@@ -630,8 +656,9 @@ class ModelSpectrum(object):
         """
         setup parameters related to Elastic model
         """
-        param_hints_elastic = ['e_offset', 'e_linear', 'e_quadratic',
-                               'fwhm_offset', 'fwhm_fanoprime', 'coherent_sct_energy']
+
+        # The list is changed later in the function, so create a copy
+        param_hints_elastic = self._global_param_hints_elastic_to_copy.copy()
 
         elastic = ElasticModel(prefix='elastic_')
 
@@ -673,8 +700,8 @@ class ModelSpectrum(object):
 
         all_element_mod = None
         # global parameters
-        param_hints_to_copy = ['e_offset', 'e_linear', 'e_quadratic',
-                               'fwhm_offset', 'fwhm_fanoprime']
+
+        param_hints_to_copy = self._global_param_hints_elements_to_copy
 
         if elemental_line in K_LINE:
             element = elemental_line.split('_')[0]
@@ -1025,10 +1052,12 @@ class ModelSpectrum(object):
             self.mod += self.setup_element_model(element)
 
         # This is just a copy of the parameter list. Multiple occurrances.
-        param_hints_to_copy = ['e_offset', 'e_linear', 'e_quadratic',
-                               'fwhm_offset', 'fwhm_fanoprime']
+        param_hints_elements = self._global_param_hints_elements_to_copy
+        param_hints_elastic = self._global_param_hints_elastic_to_copy
+
         _copy_model_param_hints_EXPR(self.mod, self.compton_param,
-                                param_hints_to_copy)
+                                     param_hints_elements=param_hints_elements,
+                                     param_hints_elastic=param_hints_elastic)
 
     def model_fit(self, channel_number, spectrum, weights=None,
                   method='leastsq', **kwargs):
