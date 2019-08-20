@@ -273,7 +273,6 @@ def _copy_model_param_hints_EXPR(target, source, params):
         The model to be updated
     source : lmfit.Model
         The model to copy from
-
     params : list
        The names of the parameters to copy
 
