@@ -43,7 +43,7 @@ from __future__ import absolute_import, division, print_function
 import collections
 import scipy.ndimage.measurements as ndim
 from skimage.draw import line
-from skimage import img_as_float, feature, color, draw, transfrom
+from skimage import img_as_float, feature, color, draw, transform
 from skimage.measure import ransac, CircleModel
 import numpy as np
 from . import utils
