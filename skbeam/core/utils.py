@@ -68,6 +68,7 @@ class NotInstalledError(ImportError):
     '''
     Custom exception that should be subclassed to handle
     specific missing libraries
+
     '''
     pass
 
@@ -75,9 +76,11 @@ class NotInstalledError(ImportError):
 class MD_dict(MutableMapping):
     """
     A class to make dealing with the meta-data scheme for DataExchange easier
+
     Examples
     --------
     Getting and setting data by path is possible
+
     >>> tt = MD_dict()
     >>> tt['name'] = 'test'
     >>> tt['nested.a'] = 2
@@ -214,12 +217,15 @@ class verbosedict(dict):
 
 class RCParamDict(MutableMapping):
     """A class to make dealing with storing default values easier.
+
     RC params is a hold- over from the UNIX days where configuration
     files are 'rc' files.  See
     http://en.wikipedia.org/wiki/Configuration_file
+
     Examples
     --------
     Getting and setting data by path is possible
+
     >>> tt = RCParamDict()
     >>> tt['name'] = 'test'
     >>> tt['nested.a'] = 2
@@ -439,25 +445,30 @@ def subtract_reference_images(imgs, is_reference):
     background/dark current/reference images.  The nearest reference
     image in the reverse temporal direction is subtracted from each
     measured image.
+
     Parameters
     ----------
     imgs : numpy.ndarray
         Array of 2-D images
+
     is_reference : 1-D boolean array
         true  : image is reference image
         false : image is measured image
+
     Returns
     -------
     img_corr : numpy.ndarray
         len(img_corr) == len(img_arr) - len(is_reference_img == true)
         img_corr is the array of measured images minus the reference
         images.
+
     Raises
     ------
     ValueError
         Possible causes:
             is_reference contains no true values
             Raised when the first image in the array is not a reference image.
+
     """
     # an array of 1, 0, 1,.. should work too
     if not is_reference[0]:
@@ -485,6 +496,7 @@ def img_to_relative_xyi(img, cx, cy, pixel_size_x=None, pixel_size_y=None):
     Convert the 2D image to a list of x y I coordinates where
     x == x_img - detector_center[0] and
     y == y_img - detector_center[1]
+
     Parameters
     ----------
     img: `ndarray`
@@ -499,6 +511,7 @@ def img_to_relative_xyi(img, cx, cy, pixel_size_x=None, pixel_size_y=None):
         Pixel size in y
     **kwargs: dict
         Bucket for extra parameters in an unpacked dictionary
+
     Returns
     -------
     x : `ndarray`
@@ -537,6 +550,7 @@ def img_to_relative_xyi(img, cx, cy, pixel_size_x=None, pixel_size_y=None):
 def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     """
     Bin the values in y based on their x-coordinates
+
     Parameters
     ----------
     x : array
@@ -549,12 +563,15 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
         Left edge of first bin defaults to minimum value of x
     max_x : float, optional
         Right edge of last bin defaults to maximum value of x
+
     Returns
     -------
     edges : array
         edges of bins, length nx + 1
+
     val : array
         sum of values in each bin, length nx
+
     count : array
         The number of counts in each bin, length nx
     """
@@ -578,6 +595,7 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
 
 def radial_grid(center, shape, pixel_size=None):
     """Convert a cartesian grid (x,y) to the radius relative to some center
+
     Parameters
     ----------
     center : tuple
@@ -591,6 +609,7 @@ def radial_grid(center, shape, pixel_size=None):
         The physical size of the pixels.
         len(pixel_size) should be the same as len(shape)
         defaults to (1,1)
+
     Returns
     -------
     r : array
@@ -609,19 +628,24 @@ def radial_grid(center, shape, pixel_size=None):
 def angle_grid(center, shape, pixel_size=None):
     """
     Make a grid of angular positions.
+
     Read note for our conventions here -- there be dragons!
+
     Parameters
     ----------
     center : tuple
         point in image where r=0; may be a float giving subpixel precision.
         Order is (rr, cc).
+
     shape: tuple
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. Order is (rr, cc).
+
     Returns
     -------
     agrid : array
         angular position (in radians) of each array element in range [-pi, pi]
+
     Note
     ----
     :math:`\\theta`, the counter-clockwise angle from the positive x axis,
@@ -645,12 +669,15 @@ def radius_to_twotheta(dist_sample, radius):
     """
     Converts radius from the calibrated center to scattering angle
     (2:math:`2\\theta`) with known detector to sample distance.
+
     Parameters
     ----------
     dist_sample : float
         distance from the sample to the detector (mm)
+
     radius : array
         The L2 norm of the distance of each pixel from the calibrated center.
+
     Returns
     -------
     two_theta : array
@@ -663,23 +690,30 @@ def wedge_integration(src_data, center, theta_start,
                       delta_theta, r_inner, delta_r):
     """
     Implementation of caking.
+
     Parameters
     ----------
     scr_data : ndarray
         The source-data to be integrated
+
     center : ndarray
         The center of the ring in pixels
+
     theta_start : float
         The angle of the start of the wedge from the
         image y-axis in degrees
+
     delta_theta : float
         The angular width of the wedge in degrees.  Positive
         angles go clockwise, negative go counter-clockwise.
+
     r_inner : float
         The inner radius in pixel units, Must be non-negative
+
     delta_r : float
         The length of the wedge in the radial direction
         in pixel units. Must be non-negative
+
     Returns
     -------
     float
@@ -693,18 +727,23 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
     Generate bin edges.  The last value in the returned array is
     the right edge of the last bin, the rest of the values are the
     left edges of each bin.
+
     If `range_max` is specified all bin edges will be less than or
     equal to it's value.
+
     If `range_min` is specified all bin edges will be greater than
     or equal to it's value
+
     If `nbins` is specified then there will be than number of bins and
     the returned array will have length `nbins + 1` (as the right most
     edge is included)
+
     If `step` is specified then bin width is approximately `step` (It is
     not exact due to the nature of floats). The arrays generated by
     `np.cumsum(np.ones(nbins) * step)` and `np.arange(nbins) * step` are
     not identical.  This function uses the second method in all cases
     where `step` is specified.
+
     .. warning :: If the set :code:`(range_min, range_max, step)` is
         given there is no guarantee that :code:`range_max - range_min`
         is an integer multiple of :code:`step`.  In this case the left
@@ -714,17 +753,22 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
         :code:`step` (this is the same behavior as the built-in
         :code:`range()`).  It is not recommended to specify bins in this
         manner.
+
     Parameters
     ----------
     range_min : float, optional
         The minimum value that may be included as a bin edge
+
     range_max : float, optional
         The maximum value that may be included as a bin edge
+
     nbins : int, optional
         The number of bins, if specified the length of the returned
         value will be nbins + 1
+
     step : float, optional
         The step between the bins
+
     Returns
     -------
     edges : np.array
@@ -785,9 +829,11 @@ def grid3d(q, img_stack,
            ymax=None, zmin=None, zmax=None,
            binary_mask=None):
     """Grid irregularly spaced data points onto a regular grid via histogramming
+
     This function will process the set of reciprocal space values (q), the
     image stack (img_stack) and grid the image data based on the bounds
     provided, using defaults if none are provided.
+
     Parameters
     ----------
     q : ndarray
@@ -819,6 +865,7 @@ def grid3d(q, img_stack,
         Binary mask can be two different shapes.
         - 1: 2-D with binary_mask.shape == np.asarray(img_stack[0]).shape
         - 2: 3-D with binary_mask.shape == np.asarray(img_stack).shape
+
     Returns
     -------
     mean : ndarray
@@ -832,6 +879,7 @@ def grid3d(q, img_stack,
     bounds : list
         tuple of (min, max, step) for x, y, z in order: [x_bounds,
         y_bounds, z_bounds]
+
     """
     try:
         from ..ext import ctrans
@@ -927,11 +975,13 @@ def bin_edges_to_centers(input_edges):
     """
     Helper function for turning a array of bin edges into
     an array of bin centers
+
     Parameters
     ----------
     input_edges : array-like
         N + 1 values which are the left edges of N bins
         and the right edge of the last bin
+
     Returns
     -------
     centers : ndarray
@@ -953,17 +1003,24 @@ def q_to_d(q):
     """
     Helper function to convert :math:`d` to :math:`q`.  The point
     of this function is to prevent fat-fingered typos.
+
     By definition the relationship is:
+
     .. math::
+
         q = \\frac{2 \pi}{d}
+
+
     Parameters
     ----------
     q : array
         An array of q values
+
     Returns
     -------
     d : array
        An array of d (plane) spacing in the inverse of the units of ``q``
+
     """
     return (2 * np.pi) / np.asarray(q)
 
@@ -972,17 +1029,24 @@ def d_to_q(d):
     """
     Helper function to convert :math:`d` to :math:`q`.
     The point of this function is to prevent fat-fingered typos.
+
     By definition the relationship is:
+
     .. math::
+
         d = \\frac{2 \pi}{q}
+
     Parameters
     ----------
     d : array
        An array of d (plane) spacing
+
     Returns
     -------
     q : array
         An array of q values in the inverse of the units of ``d``
+
+
     """
     return (2 * np.pi) / np.asarray(d)
 
@@ -990,18 +1054,27 @@ def d_to_q(d):
 def q_to_twotheta(q, wavelength):
     r"""
     Helper function to convert q to two-theta.
+
     By definition the relationship is:
+
     .. math::
+
         \sin\left(\frac{2\theta}{2}\right) = \frac{\lambda q}{4 \pi}
+
     thus
+
     .. math::
+
         2\theta_n = 2 \arcsin\left(\frac{\lambda q}{4 \pi}\right)
+
     Parameters
     ----------
     q : array
         An array of :math:`q` values
+
     wavelength : float
         Wavelength of the incoming x-rays
+
     Returns
     -------
     two_theta : array
@@ -1016,18 +1089,29 @@ def q_to_twotheta(q, wavelength):
 def twotheta_to_q(two_theta, wavelength):
     r"""
     Helper function to convert two-theta to q
+
     By definition the relationship is
+
     .. math::
+
         \sin\left(\frac{2\theta}{2}\right) = \frac{\lambda q}{4 \pi}
+
     thus
+
     .. math::
+
         q = \frac{4 \pi \sin\left(\frac{2\theta}{2}\right)}{\lambda}
+
+
+
     Parameters
     ----------
     two_theta : array
         An array of :math:`2\theta` values
+
     wavelength : float
         Wavelength of the incoming x-rays
+
     Returns
     -------
     q : array
@@ -1044,6 +1128,7 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     """
     Standard multiple-tau algorithm for finding the lag times (delay
     times).
+
     Parameters
     ----------
     multitau_levels : int
@@ -1051,6 +1136,7 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     multitau_channels : int
         number of channels or number of buffers in auto-correlators
         normalizations (must be even)
+
     Returns
     -------
     total_channels : int
@@ -1059,11 +1145,14 @@ def multi_tau_lags(multitau_levels, multitau_channels):
         delay or lag steps for the multiple tau analysis
     dict_lags : dict
         dictionary of delays for each multitau_levels
+
     Notes
     -----
     The multi-tau correlation scheme was used for finding the lag times
     (delay times).
+
     References: text [1]_
+
     .. [1] K. Schätzela, M. Drewela and  S. Stimaca, "Photon correlation
        measurements at large lag times: Improving statistical accuracy,"
        J. Mod. Opt., vol 35, p 711–718, 1988.
@@ -1101,23 +1190,30 @@ def geometric_series(common_ratio, number_of_images, first_term=1):
     ex: number_of_images = 100, first_term =1
     common_ratio = 2, geometric_series =  1, 2, 4, 8, 16, 32, 64
     common_ratio = 3, geometric_series =  1, 3, 9, 27, 81
+
     Parameters
     ----------
     common_ratio : float
         common ratio of the series
+
     number_of_images : int
         number of images
+
     first_term : float, optional
         first term in the series
+
     Return
     ------
     geometric_series : list
         time series
+
     Notes
     -----
     .. math::
         a + ar + ar^2 + ar^3 + ar^4 + ...
+
     a - first term in the series
+
     r - is the common ratio
     """
 
@@ -1132,6 +1228,7 @@ def bin_grid(image, r_array, pixel_sizes, statistic='mean', mask=None,
              bins=None):
     """
     Bin and integrate an image, given the radial array of pixels
+
     Parameters
     ----------
     image: np.array
@@ -1147,16 +1244,19 @@ def bin_grid(image, r_array, pixel_sizes, statistic='mean', mask=None,
     bins: array, optional
         The bins to use in the integration, if none given the function will
         give its best assessment based on the pixel_size and r_array
+
     Returns
     -------
     bin_centers : array
         The center of each bin in R
     int_stat : array
         Radial integrated statistic of the image.
+
     See Also
     --------
     circular_average : circularly average an image, assuming linear radial
         spacing (less general)
+
     """
     if mask is None:
         mask = np.ones(image.shape, dtype=int).astype(bool)
