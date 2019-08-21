@@ -20,7 +20,6 @@ matrix:
     python: 3.6
 
 python:
-  - 2.7
   - 3.6
 
 env:

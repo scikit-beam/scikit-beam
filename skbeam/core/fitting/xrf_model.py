@@ -199,7 +199,9 @@ def _set_parameter_hint(param_name, input_dict, input_model):
 
 def _copy_model_param_hints(target, source, params):
     """
-    Copy parameters from one model to another
+    Copy parameters (set hints) from Parameters object (source) to a model (target)
+    ( Sets the attribute 'expr' in the model hint to to None -
+      apply only to incomplete models used for model evaluation)
 
     .. warning
 
@@ -214,12 +216,99 @@ def _copy_model_param_hints(target, source, params):
 
     params : list
        The names of the parameters to copy
+
+
+    Note: compatibility with lmfit 0.9.13
+    The issue: scikit-beam is mostly using lmfit models to generate
+    spectra of individual components based on parameters of spectral lines.
+    Fitting is performed mostly using 'nnls' function from SciPy package.
+    Setting 'expr' attribute of a parameter tied to some other parameter that does
+    not belong to the model (not in Parameters object) will cause the program
+    to crash when 'expr' is evaluated by asteval. Parameters object is created
+    by calling Model.calling Model.make_params() function, which creates
+    new Parameters object and sets initial values of parameters based on supplied hints.
+    Once the set of hints is applied to the parameters, each 'eval' string
+    is evaluated by asteval (this was not the case in lmfit 0.8.3). If the expression
+    'expr' refers to a parameter that does not belong to the set, the program crashes.
+
+    Example: a model describing spectrum for the line 'Ar_ka1_fwhm_offset' must be
+    initialized with the value of a global parameter 'fwhm_offset' and then tied to
+    it during fitting ('fwhm_offset' determines fwhm offset for each line).
+    The parameter named 'fwhm_offset' does not exist in the set of parameters that
+    describe a single line, so if we set 'expr="fwhm_offset"', then the program
+    will crash during Model.make_params() call. On the other hand, if we are
+    creating complete model for fitting that contain parameters of multiple lines as well as
+    global parameters, Model.make_params() call will succeed.
+
+    Solution:
+      -- Incomplete single-line models (used for setting up linear model): set 'expr=None'
+         in the hints before calling Model.make_params(), i.e. use this function.
+      -- Complete models (used for fitting): set 'expr=label', where label is the name
+         of a global parameter, after all parameters are assembled, i.e. use the function
+         _copy_model_param_hints_EXPR (see below). Since typical approach in scikit-beam is
+         to assemble complex models out of multitude of incomplete single-line models and
+         _copy_model_param_hints will be called for initialization of each of the single-line
+         models.
     """
 
     for label in params:
         target.set_param_hint(label,
                               value=source[label].value,
-                              expr=label)
+                              expr=None)  # Originally was expr=label
+
+
+def _copy_model_param_hints_EXPR(target, source, *, param_hints_elements=None, param_hints_elastic=None):
+    """
+    Copy parameters (set hints) from Parameters object (source) to a model (target)
+    ( Sets the attribute 'expr' in the model hint to the copied parameter name,
+      use only on complete models that can be used for model fitting)
+
+    .. warning
+
+       This updates ``target`` in-place
+
+    Parameters
+    ----------
+    target : lmfit.Model
+        The model to be updated
+    source : lmfit.Parameters
+        The model to copy from
+    params_hints_elements : list
+       The names of the parameters to copy for element models
+    params_hints_ellastic : list
+       The names of the parameters to copy for elastic scattering model
+
+
+    Note: function is part of the fix for compatibility with lmfit 0.9.13.
+    Dmitri G. (08/19/2019)
+    """
+
+    # Only parameters that describe spectral lines and contain substring defined by 'label'
+    #    should be tied to global parameter defined by 'label'. The global parameter should
+    #    not be tied to itself (label != hint_name). Also the parameter should not contain
+    #    prefix "compton", since compton lines have their own set of parameters with matching
+    #    names, but not tied to the parameters of spectral lines.
+
+    if param_hints_elements is None:
+        param_hints_elements = []
+    if param_hints_elastic is None:
+        param_hints_elastic = []
+
+    for hint_name, hint_values in target.param_hints.items():
+        # Compton scattering component has its independent set of parameters
+        if hint_name.startswith('compton'):
+            continue
+        # The sets of hints for ellastic and element models are different
+        if hint_name.startswith('elastic'):
+            params = param_hints_elastic
+        else:
+            params = param_hints_elements
+        # Now go through the selected list of labels
+        for label in params:
+            value = source[label].value
+            if hint_name.endswith(label) and (label != hint_name) and not hint_name.startswith('compton'):
+                hint_values[label] = value
+                hint_values['expr'] = label
 
 
 def update_parameter_dict(param, fit_results):
@@ -332,6 +421,7 @@ class ParamController(object):
             K lines of Sodium, the K lines of Magnesium, and the M
             lines of Platinum
         """
+
         self._original_params = copy.deepcopy(params)
         self.params = copy.deepcopy(params)
         self.element_list = list(elemental_lines)  # to copy it
@@ -523,6 +613,15 @@ class ModelSpectrum(object):
             K lines of Sodium, the K lines of Magnesium, and the M
             lines of Platinum
         """
+
+        # Names of global(common) model parameters used in full assembled element models
+        self._global_param_hints_elements_to_copy = ['e_offset', 'e_linear', 'e_quadratic',
+                                                     'fwhm_offset', 'fwhm_fanoprime']
+        # ... for ellastic scattering model
+        self._global_param_hints_elastic_to_copy = ['e_offset', 'e_linear', 'e_quadratic',
+                                                    'fwhm_offset', 'fwhm_fanoprime',
+                                                    'coherent_sct_energy']
+
         self.params = copy.deepcopy(params)
         self.elemental_lines = list(elemental_lines)  # to copy
         self.incident_energy = self.params['coherent_sct_energy']['value']
@@ -557,8 +656,9 @@ class ModelSpectrum(object):
         """
         setup parameters related to Elastic model
         """
-        param_hints_elastic = ['e_offset', 'e_linear', 'e_quadratic',
-                               'fwhm_offset', 'fwhm_fanoprime', 'coherent_sct_energy']
+
+        # The list is changed later in the function, so create a copy
+        param_hints_elastic = self._global_param_hints_elastic_to_copy.copy()
 
         elastic = ElasticModel(prefix='elastic_')
 
@@ -600,8 +700,8 @@ class ModelSpectrum(object):
 
         all_element_mod = None
         # global parameters
-        param_hints_to_copy = ['e_offset', 'e_linear', 'e_quadratic',
-                               'fwhm_offset', 'fwhm_fanoprime']
+
+        param_hints_to_copy = self._global_param_hints_elements_to_copy
 
         if elemental_line in K_LINE:
             element = elemental_line.split('_')[0]
@@ -951,6 +1051,14 @@ class ModelSpectrum(object):
         for element in self.elemental_lines:
             self.mod += self.setup_element_model(element)
 
+        # This is just a copy of the parameter list. Multiple occurrances.
+        param_hints_elements = self._global_param_hints_elements_to_copy
+        param_hints_elastic = self._global_param_hints_elastic_to_copy
+
+        _copy_model_param_hints_EXPR(self.mod, self.compton_param,
+                                     param_hints_elements=param_hints_elements,
+                                     param_hints_elastic=param_hints_elastic)
+
     def model_fit(self, channel_number, spectrum, weights=None,
                   method='leastsq', **kwargs):
         """
@@ -975,6 +1083,7 @@ class ModelSpectrum(object):
         pars = self.mod.make_params()
         result = self.mod.fit(spectrum, pars, x=channel_number, weights=weights,
                               method=method, fit_kws=kwargs)
+
         return result
 
 
