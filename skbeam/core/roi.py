@@ -760,7 +760,7 @@ def auto_find_center_rings(avg_img, sigma=1, no_rings=4, min_samples=3,
 
     return center, image, radii
 
-def find_center_rings_hough(image, num_rings, rad_range, intensity_thresh, sigma, v_range = None):
+def find_center_rings_hough(image, num_rings, rad_range, intensity_thresh, sigma, v_range = None, mute_graph = False):
     """
     Take angled cut or multiple incremented cuts of a image data.
 
@@ -781,8 +781,6 @@ def find_center_rings_hough(image, num_rings, rad_range, intensity_thresh, sigma
 
     Returns
     -------
-    center_pt : array
-        Average center of the candidate circles
     center :list
         Center coordinates of candidate circles as (x,y) tuples
     radii: array
@@ -803,21 +801,23 @@ def find_center_rings_hough(image, num_rings, rad_range, intensity_thresh, sigma
                                                total_num_peaks=num_rings)
 
     # Draw them
-    fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(10, 4))
+    if mute_graph == False:
+        fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(10, 4))
     Z = color.gray2rgb(image)
 
     centers =[]
     for center_y, center_x, radius in zip(cy, cx, radii):
-        centers.append(center_x, center_y)
-        circy, circx = draw.circle_perimeter(center_y, center_x, radius,
+        centers.append((center_x, center_y))
+        if mute_graph == False:
+            circy, circx = draw.circle_perimeter(center_y, center_x, radius,
                                         shape=Z.shape)
-        ax.scatter(x = circx,y =circy, s = 1, c = 'red')
-    center_pt = [np.average(cx), np.average(cy)]
+            ax.scatter(center_x, center_y, s =20, c = 'red')
+            ax.scatter(x = circx,y =circy, s = 1, c = 'red')
 
-    ax.scatter(center_pt[0], center_pt[1], s =20, c = 'red')
-    if v_range != None:
-        ax.imshow(image, cmap="viridis", vmin = v_range[0], vmax = v_range[1])
-    else:
-        ax.imshow(image, cmap="viridis")
+    if mute_graph == False:
+        if v_range != None:
+            ax.imshow(image, cmap="viridis", vmin = v_range[0], vmax = v_range[1])
+        else:
+            ax.imshow(image, cmap="viridis")
     plt.show()
-    return center_pt, centers, radii
+    return centers, radii
