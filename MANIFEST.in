@@ -3,3 +3,5 @@ include skbeam/_version.py
 include requirements.txt
 include optional-requirements.txt
 include LICENSE
+recursive-include docs *.rst conf.py Makefile make.bat
+recursive-include * *.pyx *.h *.c
