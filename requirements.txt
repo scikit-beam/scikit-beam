@@ -1,3 +1,7 @@
-setuptools
-six
+fabio
+lmfit
 numpy
+pyfai
+scikit-image
+scipy
+six

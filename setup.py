@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
-import setuptools
-from distutils.core import setup, Extension
-import versioneer
 import os
 import sys
+from os import path
+
+from setuptools import Extension, find_packages, setup
 
 import numpy as np
+import versioneer
 from Cython.Build import cythonize
 
 
@@ -29,6 +30,12 @@ def c_ext():
 def cython_ext():
     return cythonize("**/*.pyx")
 
+here = path.abspath(path.dirname(__file__))
+with open(path.join(here, 'requirements.txt')) as requirements_file:
+    # Parse requirements.txt, ignoring any commented-out lines.
+    requirements = [line for line in requirements_file.read().splitlines()
+                    if not line.startswith('#')]
+
 
 setup(
     name='scikit-beam',
@@ -36,18 +43,19 @@ setup(
     cmdclass=versioneer.get_cmdclass(),
     author='Brookhaven National Lab',
     description="Data analysis tools for X-ray science",
-    packages=setuptools.find_packages(exclude=['doc']),
+    packages=find_packages(exclude=['doc']),
     include_dirs=[np.get_include()],
     package_data={'skbeam.core.constants': ['data/*.dat']},
-    install_requires=['six', 'numpy'],  # essential deps only
+    setup_requires=['Cython', 'numpy'],
+    install_requires=requirements,
     ext_modules=c_ext() + cython_ext(),
     url='http://github.com/scikit-beam/scikit-beam',
     keywords='Xray Analysis',
     license='BSD',
     classifiers=['Development Status :: 3 - Alpha',
                  "License :: OSI Approved :: BSD License",
-                 "Programming Language :: Python :: 2.7",
-                 "Programming Language :: Python :: 3.4",
+                 "Programming Language :: Python :: 3.6",
+                 "Programming Language :: Python :: 3.7",
                  "Topic :: Scientific/Engineering :: Physics",
                  "Topic :: Scientific/Engineering :: Chemistry",
                  "Topic :: Software Development :: Libraries",

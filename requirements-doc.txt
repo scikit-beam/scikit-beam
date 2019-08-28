@@ -1,0 +1,7 @@
+ipython
+jupyter
+matplotlib
+numpydoc
+sphinx
+sphinx_bootstrap_theme
+sphinxcontrib-napoleon
