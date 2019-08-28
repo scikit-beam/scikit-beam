@@ -1,9 +1,7 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-
-# NFS crud
-.nfs*
+*$py.class
 
 # C extensions
 *.so
@@ -11,20 +9,27 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
-bin/
 build/
 develop-eggs/
 dist/
+downloads/
 eggs/
+.eggs/
 lib/
 lib64/
 parts/
 sdist/
 var/
+venv/
 *.egg-info/
 .installed.cfg
 *.egg
-doc/_build
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
 
 # Installer logs
 pip-log.txt
@@ -33,68 +38,46 @@ pip-delete-this-directory.txt
 # Unit test / coverage reports
 htmlcov/
 .tox/
-cover/
 .coverage
+.coverage.*
 .cache
 nosetests.xml
 coverage.xml
-cover/
+*,cover
+.hypothesis/
 
 # Translations
 *.mo
-
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
-
-# Rope
-.ropeproject
+*.pot
 
 # Django stuff:
 *.log
-*.pot
 
 # Sphinx documentation
-docs/_build/
+doc/_build/
+doc/resource/api/core/_as_gen/
 
+# pytest
+.pytest_cache/
+
+# PyBuilder
+target/
+
+# Editor files
 #mac
 .DS_Store
 *~
 
+#vim
+*.swp
+*.swo
+
 #pycharm
 .idea/*
 
-#Dolphin browser files
-.directory/
-.directory
 
-#Binary data files
-*.volume
-*.am
-*.tiff
-*.tif
-*.dat
-*.DAT
+#Ipython Notebook
+.ipynb_checkpoints
 
-#generated documntation files
-generated/
-
-#ipython notebook
-.ipynb_checkpoints/
-
-#vim
-*.swp
-
-#data files
-*.zip
-*.jpg
-
-# ctags
-.tags*
-/tags
-
-# Generated cython files in any subdirectory of /skbeam/
-/skbeam/**/*.c
-
-**/_as_gen/*.rst
+# Project-specific ignores:
+skbeam/core/accumulators/histogram.c
