@@ -1,4 +1,3 @@
-Cython
 fabio
 lmfit
 numpy
