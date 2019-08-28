@@ -1,3 +1,9 @@
+Cython
+fabio
+lmfit
+numpy
+pyfai
+scikit-image
+scipy
 setuptools
 six
-numpy

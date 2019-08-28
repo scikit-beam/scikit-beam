@@ -13,34 +13,39 @@ env:
 
 matrix:
   include:
-    - python: 3.6
-      env: BUILD_DOCS=true RUN_TESTS=false NUMPY=1.13
+    - python: 3.7
+      env: BUILD_DOCS=true RUN_TESTS=true NUMPY=1.17
   exclude:
   - env: NUMPY=1.10
     python: 3.6
 
 python:
   - 3.6
+  - 3.7
 
 env:
   - NUMPY=1.13
   - NUMPY=1.14
   - NUMPY=1.15
   - NUMPY=1.16
+  - NUMPY=1.17
 
 
 before_install:
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
   - ./miniconda.sh -b -p ~/mc
-  - export PATH=~/mc/bin:$PATH
+  - source ~/mc/etc/profile.d/conda.sh
   - conda update conda --yes
   - export CONDARC=ci/condarc
 
 install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
-  - conda create -n testenv pip nose "pytest<4.0" python=$TRAVIS_PYTHON_VERSION numpy=$NUMPY scipy scikit-image six coverage cython xraylib lmfit=0.8.3 netcdf4 flake8 pyfai
-  - source activate testenv
+  - conda create -n testenv python=$TRAVIS_PYTHON_VERSION
+  - conda activate testenv
+  - conda install xraylib  # this is the only package not available on PyPI
+  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
   # # need to build_ext -i for the tests so that the .so is local to the source
   # # code.  We could also setup.py develop, but I'm not sure if that is any
   # # better
@@ -91,6 +96,7 @@ before_script:
         fi;
 
       };
+
 script:
   - coverage run run_tests.py
   - coverage report -m
@@ -101,8 +107,7 @@ script:
       size_check 100;
     fi;
   - if [ $BUILD_DOCS == 'true' ]; then
-      conda install sphinx numpydoc ipython jupyter pip matplotlib;
-      pip install sphinx_bootstrap_theme sphinxcontrib-napoleon;
+      pip install -r requirements-doc.txt
       pushd ../;
       git clone https://github.com/scikit-beam/scikit-beam-examples.git;
       popd;
@@ -111,7 +116,6 @@ script:
       ./build_docs.sh;
       popd;
     fi;
-
 
 after_success:
   - if [ $RUN_TESTS == 'true' ]; then codecov; fi;
