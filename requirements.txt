@@ -4,5 +4,4 @@ numpy
 pyfai
 scikit-image
 scipy
-setuptools
 six
