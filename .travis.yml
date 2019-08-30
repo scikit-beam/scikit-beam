@@ -17,10 +17,10 @@ matrix:
       env: BUILD_DOCS=true RUN_VALIDATION=false NUMPY=1.17
     - os: osx
       language: generic
-      env: PYTHON=3.6
+      env: TRAVIS_PYTHON_VERSION=3.6
     - os: osx
       language: generic
-      env: PYTHON=3.7
+      env: TRAVIS_PYTHON_VERSION=3.7
   exclude:
     - env: NUMPY=1.10
       python: 3.6
