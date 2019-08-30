@@ -56,6 +56,8 @@ install:
   # # better
   - python setup.py install build_ext -i
   - pip install codecov
+  - conda list
+  - pip list
 
 before_script:
   # define a merge size check function that ensures no huge file was committed
