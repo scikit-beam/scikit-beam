@@ -1,0 +1,5 @@
+nnls_fit functions
+------------------
+
+:obj:`weighted_nnls_fit` was removed. Weighted nnls fitting was combined into
+:obj:`nnls_fit`, which includes weights as a new argument.

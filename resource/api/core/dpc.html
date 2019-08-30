@@ -1,0 +1,455 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>core.dpc Module &#8212; scikit-beam 0.0.18.post10+g384742b documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="core.feature Module" href="feature.html" />
+    <link rel="prev" title="correlation Module" href="correlation.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-skbeam.core.dpc">
+<span id="core-dpc-module"></span><h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.dpc</span></code> Module<a class="headerlink" href="#module-skbeam.core.dpc" title="Permalink to this headline">¶</a></h1>
+<p>This module is for Differential Phase Contrast (DPC) imaging based on
+Fourier shift fitting</p>
+<dl class="function">
+<dt id="skbeam.core.dpc.dpc_fit">
+<code class="sig-prename descclassname">skbeam.core.dpc.</code><code class="sig-name descname">dpc_fit</code><span class="sig-paren">(</span><em class="sig-param">rss</em>, <em class="sig-param">ref_reduction</em>, <em class="sig-param">diff_reduction</em>, <em class="sig-param">start_point</em>, <em class="sig-param">solver='Nelder-Mead'</em>, <em class="sig-param">tol=1e-06</em>, <em class="sig-param">max_iters=2000</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.dpc.dpc_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nonlinear fitting for 2 points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>rss</strong><span class="classifier">callable</span></dt><dd><p>Objective function to be minimized in DPC fitting.</p>
+</dd>
+<dt><strong>ref_reduction</strong><span class="classifier">ndarray</span></dt><dd><p>Extra argument passed to the objective function. In DPC, it’s the sum
+of the reference image data along x or y direction.</p>
+</dd>
+<dt><strong>diff_reduction</strong><span class="classifier">ndarray</span></dt><dd><p>Extra argument passed to the objective function. In DPC, it’s the sum
+of one captured diffraction pattern along x or y direction.</p>
+</dd>
+<dt><strong>start_point</strong><span class="classifier">list</span></dt><dd><p>start_point[0], start-searching value for the amplitude of the sample
+transmission function at one scanning point.
+start_point[1], start-searching value for the phase gradient (along x
+or y direction) of the sample transmission function at one scanning
+point.</p>
+</dd>
+<dt><strong>solver</strong><span class="classifier">str, optional</span></dt><dd><p>Type of solver, one of the following (default ‘Nelder-Mead’):
+* ‘Nelder-Mead’
+* ‘Powell’
+* ‘CG’
+* ‘BFGS’
+* ‘Anneal’
+* ‘L-BFGS-B’
+* ‘TNC’
+* ‘COBYLA’
+* ‘SLSQP’</p>
+</dd>
+<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Termination criteria of nonlinear fitting. Default is 1e-6.</p>
+</dd>
+<dt><strong>max_iters</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum iterations of nonlinear fitting. Default is 2000.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>tuple</dt><dd><p>Fitting result: intensity attenuation and phase gradient.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="skbeam.core.dpc.dpc_internal_state">
+<em class="property">class </em><code class="sig-prename descclassname">skbeam.core.dpc.</code><code class="sig-name descname">dpc_internal_state</code><span class="sig-paren">(</span><em class="sig-param">ax</em>, <em class="sig-param">ay</em>, <em class="sig-param">gx</em>, <em class="sig-param">gy</em>, <em class="sig-param">ref_fx</em>, <em class="sig-param">ref_fy</em>, <em class="sig-param">index</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.dpc.dpc_internal_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#tuple" title="(in Python v3.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="method">
+<dt id="skbeam.core.dpc.dpc_internal_state.ax">
+<em class="property">property </em><code class="sig-name descname">ax</code><a class="headerlink" href="#skbeam.core.dpc.dpc_internal_state.ax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="skbeam.core.dpc.dpc_internal_state.ay">
+<em class="property">property </em><code class="sig-name descname">ay</code><a class="headerlink" href="#skbeam.core.dpc.dpc_internal_state.ay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="skbeam.core.dpc.dpc_internal_state.gx">
+<em class="property">property </em><code class="sig-name descname">gx</code><a class="headerlink" href="#skbeam.core.dpc.dpc_internal_state.gx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="skbeam.core.dpc.dpc_internal_state.gy">
+<em class="property">property </em><code class="sig-name descname">gy</code><a class="headerlink" href="#skbeam.core.dpc.dpc_internal_state.gy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="skbeam.core.dpc.dpc_internal_state.index">
+<em class="property">property </em><code class="sig-name descname">index</code><a class="headerlink" href="#skbeam.core.dpc.dpc_internal_state.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 6</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="skbeam.core.dpc.dpc_internal_state.ref_fx">
+<em class="property">property </em><code class="sig-name descname">ref_fx</code><a class="headerlink" href="#skbeam.core.dpc.dpc_internal_state.ref_fx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="skbeam.core.dpc.dpc_internal_state.ref_fy">
+<em class="property">property </em><code class="sig-name descname">ref_fy</code><a class="headerlink" href="#skbeam.core.dpc.dpc_internal_state.ref_fy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 5</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.dpc.dpc_runner">
+<code class="sig-prename descclassname">skbeam.core.dpc.</code><code class="sig-name descname">dpc_runner</code><span class="sig-paren">(</span><em class="sig-param">ref</em>, <em class="sig-param">image_sequence</em>, <em class="sig-param">start_point</em>, <em class="sig-param">pixel_size</em>, <em class="sig-param">focus_to_det</em>, <em class="sig-param">scan_rows</em>, <em class="sig-param">scan_cols</em>, <em class="sig-param">scan_xstep</em>, <em class="sig-param">scan_ystep</em>, <em class="sig-param">energy</em>, <em class="sig-param">padding=0</em>, <em class="sig-param">weighting=0.5</em>, <em class="sig-param">solver='Nelder-Mead'</em>, <em class="sig-param">roi=None</em>, <em class="sig-param">bad_pixels=None</em>, <em class="sig-param">negate=True</em>, <em class="sig-param">scale=True</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.dpc.dpc_runner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wraps <cite>lazy_dpc</cite></p>
+<p>See docstring for <cite>lazy_dpc</cite> and <cite>reconstruct_phase_from_partial_info</cite>
+for the input parameters for this function and what it returns</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.dpc.image_reduction">
+<code class="sig-prename descclassname">skbeam.core.dpc.</code><code class="sig-name descname">image_reduction</code><span class="sig-paren">(</span><em class="sig-param">im</em>, <em class="sig-param">roi=None</em>, <em class="sig-param">bad_pixels=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.dpc.image_reduction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum the image data over rows and columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>im</strong><span class="classifier">ndarray</span></dt><dd><p>Input image.</p>
+</dd>
+<dt><strong>roi</strong><span class="classifier">ndarray, optional</span></dt><dd><p>[r, c, row, col], selects ROI im[r : r + row, c : c + col]. Default is
+None, which uses the whole image.</p>
+</dd>
+<dt><strong>bad_pixels</strong><span class="classifier">list, optional</span></dt><dd><p>List of (row, column) tuples marking bad pixels.
+[(1, 5), (2, 6)] –&gt; 2 bad pixels –&gt; (1, 5) and (2, 6). Default is
+None.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>xline</strong><span class="classifier">ndarray</span></dt><dd><p>The row vector of the sums of each column.</p>
+</dd>
+<dt><strong>yline</strong><span class="classifier">ndarray</span></dt><dd><p>The column vector of the sums of each row.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.dpc.lazy_dpc">
+<code class="sig-prename descclassname">skbeam.core.dpc.</code><code class="sig-name descname">lazy_dpc</code><span class="sig-paren">(</span><em class="sig-param">ref</em>, <em class="sig-param">image_sequence</em>, <em class="sig-param">start_point</em>, <em class="sig-param">scan_rows</em>, <em class="sig-param">scan_cols</em>, <em class="sig-param">solver='Nelder-Mead'</em>, <em class="sig-param">roi=None</em>, <em class="sig-param">bad_pixels=None</em>, <em class="sig-param">dpc_state=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.dpc.lazy_dpc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Controller function to run the whole Differential Phase Contrast (DPC)
+imaging calculation.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ref</strong><span class="classifier">ndarray</span></dt><dd><p>The reference image for a DPC calculation.</p>
+</dd>
+<dt><strong>image_sequence</strong><span class="classifier">iterable of 2D arrays</span></dt><dd><p>Return diffraction patterns (2D Numpy arrays) when iterated over.</p>
+</dd>
+<dt><strong>start_point</strong><span class="classifier">list</span></dt><dd><p>start_point[0], start-searching value for the amplitude of the sample
+transmission function at one scanning point.
+start_point[1], start-searching value for the phase gradient (along x
+or y direction) of the sample transmission function at one scanning
+point.</p>
+</dd>
+<dt><strong>scan_rows</strong><span class="classifier">int</span></dt><dd><p>Number of scanned rows.</p>
+</dd>
+<dt><strong>scan_cols</strong><span class="classifier">int</span></dt><dd><p>Number of scanned columns.</p>
+</dd>
+<dt><strong>solver</strong><span class="classifier">str, optional</span></dt><dd><p>Type of solver, one of the following (default ‘Nelder-Mead’):
+* ‘Nelder-Mead’
+* ‘Powell’
+* ‘CG’
+* ‘BFGS’
+* ‘Anneal’
+* ‘L-BFGS-B’
+* ‘TNC’
+* ‘COBYLA’
+* ‘SLSQP’</p>
+</dd>
+<dt><strong>roi</strong><span class="classifier">ndarray, optional</span></dt><dd><p>[r, c, row, col], selects ROI im[r : r + row, c : c + col]. Default is
+None.</p>
+</dd>
+<dt><strong>bad_pixels</strong><span class="classifier">list, optional</span></dt><dd><p>List of (row, column) tuples marking bad pixels.
+[(1, 5), (2, 6)] –&gt; 2 bad pixels –&gt; (1, 5) and (2, 6). Default is
+None.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>dpc_state</strong><span class="classifier">namedtuple</span></dt><dd><p>The internal state that <cite>dpc_runner</cite> requires for each iteration.
+Can be passed to reconstruct_phase_from_partial_info which, along
+with some additional info, will produce the final phase image</p>
+</dd>
+<dt>References: text <a class="reference internal" href="#r11d682c6f947-1" id="id1">[1]</a></dt><dd></dd>
+</dl>
+<dl class="citation">
+<dt class="label" id="r11d682c6f947-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Yan, H. et al. Quantitative x-ray phase imaging at the nanoscale by
+..</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>multilayer Laue lenses. Sci. Rep. 3, 1307; DOI:10.1038/srep01307 (2013).</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.dpc.recon">
+<code class="sig-prename descclassname">skbeam.core.dpc.</code><code class="sig-name descname">recon</code><span class="sig-paren">(</span><em class="sig-param">gx</em>, <em class="sig-param">gy</em>, <em class="sig-param">scan_xstep</em>, <em class="sig-param">scan_ystep</em>, <em class="sig-param">padding=0</em>, <em class="sig-param">weighting=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.dpc.recon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reconstruct the final phase image.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>gx</strong><span class="classifier">ndarray</span></dt><dd><p>Phase gradient along x direction.</p>
+</dd>
+<dt><strong>gy</strong><span class="classifier">ndarray</span></dt><dd><p>Phase gradient along y direction.</p>
+</dd>
+<dt><strong>scan_xstep</strong><span class="classifier">float</span></dt><dd><p>Scanning step size in x direction (in micro-meter).</p>
+</dd>
+<dt><strong>scan_ystep</strong><span class="classifier">float</span></dt><dd><p>Scanning step size in y direction (in micro-meter).</p>
+</dd>
+<dt><strong>padding</strong><span class="classifier">int, optional</span></dt><dd><p>Pad a N-by-M array to be a
+<code class="docutils literal notranslate"><span class="pre">(N*(2*padding+1))</span></code>-by-<code class="docutils literal notranslate"><span class="pre">(M*(2*padding+1))</span></code> array with the
+image in the middle with a (N*padding, M*padding) thick edge
+of zeros. Default is 0.</p>
+<dl class="simple">
+<dt>padding = 0 –&gt; v (the original image, size = (N, M))</dt><dd><p>0 0 0</p>
+</dd>
+<dt>padding = 1 –&gt; 0 v 0 (the padded image, size = (3 * N, 3 * M))</dt><dd><p>0 0 0</p>
+</dd>
+</dl>
+</dd>
+<dt><strong>weighting</strong><span class="classifier">float, optional</span></dt><dd><p>Weighting parameter for the phase gradient along x and y direction when
+constructing the final phase image.
+Valid in [0, 1]. Default value = 0.5, which means that gx and gy
+equally contribute to the final phase image.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>phase</strong><span class="classifier">ndarray</span></dt><dd><p>Final phase image.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.dpc.reconstruct_phase_from_partial_info">
+<code class="sig-prename descclassname">skbeam.core.dpc.</code><code class="sig-name descname">reconstruct_phase_from_partial_info</code><span class="sig-paren">(</span><em class="sig-param">dpc_state</em>, <em class="sig-param">energy</em>, <em class="sig-param">scan_xstep</em>, <em class="sig-param">scan_ystep</em>, <em class="sig-param">pixel_size=None</em>, <em class="sig-param">focus_to_det=None</em>, <em class="sig-param">negate=True</em>, <em class="sig-param">scale=True</em>, <em class="sig-param">padding=0</em>, <em class="sig-param">weighting=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.dpc.reconstruct_phase_from_partial_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using the partial results from dpc_runner, reconstruct the phase image</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>dpc_state</strong><span class="classifier">namedtuple</span></dt><dd><p>The thing yielded from <cite>dpc_runner</cite></p>
+</dd>
+<dt><strong>energy</strong><span class="classifier">float</span></dt><dd><p>Energy of the scanning x-ray in keV.</p>
+</dd>
+<dt><strong>focus_to_det</strong><span class="classifier">float</span></dt><dd><p>Focus to detector distance in um.</p>
+</dd>
+<dt><strong>scan_xstep</strong><span class="classifier">float</span></dt><dd><p>Scanning step size in x direction (in micro-meter).</p>
+</dd>
+<dt><strong>scan_ystep</strong><span class="classifier">float</span></dt><dd><p>Scanning step size in y direction (in micro-meter).</p>
+</dd>
+<dt><strong>pixel_size</strong><span class="classifier">Number, optional</span></dt><dd><p>The size of the detector pixels.  Pixels must be square. If
+<cite>pixel_size and `focus_to_det</cite> are provided, it is assumed that you
+want to scale the image.</p>
+</dd>
+<dt><strong>focus_to_det</strong><span class="classifier">Number, optional</span></dt><dd><p>The distance from the focal point of the beam to the detector.
+Must be provided as a pair with <cite>pixel_size</cite>.</p>
+</dd>
+<dt><strong>negate</strong><span class="classifier">bool, optional</span></dt><dd><p>If True (default), negate the phase gradient along x direction before
+reconstructing the final phase image. Default is True.</p>
+</dd>
+<dt><strong>scale</strong><span class="classifier">bool, optional</span></dt><dd><p>If True, scale gx and gy according to the experiment set up.
+If False, ignore pixel_size, focus_to_det, energy. Default is True.</p>
+</dd>
+<dt><strong>padding</strong><span class="classifier">int, optional</span></dt><dd><p>Pad a N-by-M array to be a
+<code class="docutils literal notranslate"><span class="pre">(N*(2*padding+1))</span></code>-by-<code class="docutils literal notranslate"><span class="pre">(M*(2*padding+1))</span></code> array with the image in
+the middle with a (N*padding, M*padding) thick edge of
+zeros. Default is 0.</p>
+<dl class="simple">
+<dt>padding = 0 –&gt; v (the original image, size = (N, M))</dt><dd><p>0 0 0</p>
+</dd>
+<dt>padding = 1 –&gt; 0 v 0 (the padded image, size = (3 * N, 3 * M))</dt><dd><p>0 0 0</p>
+</dd>
+</dl>
+</dd>
+<dt><strong>weighting</strong><span class="classifier">float, optional</span></dt><dd><p>Weighting parameter for the phase gradient along x and y direction when
+constructing the final phase image.
+Valid in [0, 1]. Default value = 0.5, which means that gx and gy
+equally contribute to the final phase image.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>phase</strong><span class="classifier">ndarray</span></dt><dd><p>The final reconstructed phase image.</p>
+</dd>
+<dt><strong>amplitude</strong><span class="classifier">ndarray</span></dt><dd><p>Amplitude of the sample transmission function.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Complete Reference (API)</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#core">Core</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Core API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../io/index.html">IO API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../core.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core</span></code> subpackge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mask.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.mask</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#domain-name-spaces">Domain name spaces</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Complete Reference (API)</a><ul>
+  <li><a href="index.html">Core API</a><ul>
+      <li>Previous: <a href="correlation.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">correlation</span></code> Module</a></li>
+      <li>Next: <a href="feature.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.feature</span></code> Module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../../_sources/resource/api/core/dpc.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

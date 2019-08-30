@@ -1,0 +1,6 @@
+skbeam.core.speckle.normalize\_bin\_edges
+=========================================
+
+.. currentmodule:: skbeam.core.speckle
+
+.. autofunction:: normalize_bin_edges

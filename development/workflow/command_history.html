@@ -1,0 +1,725 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Condensed example of contributing code to Scikit-beam &#8212; scikit-beam 0.0.18.post10+g384742b documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="condensed-example-of-contributing-code-to-scikit-beam">
+<span id="command-history"></span><h1>Condensed example of contributing code to Scikit-beam<a class="headerlink" href="#condensed-example-of-contributing-code-to-scikit-beam" title="Permalink to this headline">¶</a></h1>
+<p>There are two versions:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#with-output"><span class="std std-ref">Example, with output</span></a> (easier to read along with)</p></li>
+<li><p><a class="reference internal" href="#no-output"><span class="std std-ref">Example, no output</span></a> (easier to cut and paste from)</p></li>
+</ul>
+<div class="section" id="example-with-output">
+<span id="with-output"></span><h2>Example, with output<a class="headerlink" href="#example-with-output" title="Permalink to this headline">¶</a></h2>
+<p>In this version the commands are on the lines that begin <code class="docutils literal notranslate"><span class="pre">$</span></code> others are
+comments or output.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">#</span>
+<span class="c1"># Setup</span>
+<span class="c1">#</span>
+<span class="c1"># Start by cloning the repo from your GitHub account if you need to...</span>
+$ git clone https://github.com/mwcraig/astropy.git apy-bugs
+Cloning into <span class="s1">&#39;apy-bugs&#39;</span>...                                                      
+remote: Counting objects: <span class="m">44980</span>, <span class="k">done</span>.                                          
+remote: Compressing objects: <span class="m">100</span>% <span class="o">(</span><span class="m">11772</span>/11772<span class="o">)</span>, <span class="k">done</span>.                          
+remote: Total <span class="m">44980</span> <span class="o">(</span>delta <span class="m">32930</span><span class="o">)</span>, reused <span class="m">44980</span> <span class="o">(</span>delta <span class="m">32930</span><span class="o">)</span>                   
+Receiving objects: <span class="m">100</span>% <span class="o">(</span><span class="m">44980</span>/44980<span class="o">)</span>, <span class="m">18</span>.13 MiB <span class="p">|</span> <span class="m">3</span>.57 MiB/s, <span class="k">done</span>.            
+Resolving deltas: <span class="m">100</span>% <span class="o">(</span><span class="m">32930</span>/32930<span class="o">)</span>, <span class="k">done</span>.                                     
+Checking connectivity... <span class="k">done</span>.  
+
+<span class="c1"># ...then navigate to that clone in a terminal, and...</span>
+$ <span class="nb">cd</span> apy-bugs
+<span class="c1"># ...rename the origin remote make its meaning clearer and...</span>
+$ git remote rename origin mwcraig
+<span class="c1"># ...remember to set up the official remote.</span>
+$ git remote add astropy git://github.com/astropy/astropy.git
+
+<span class="c1"># get the latest from the official repo</span>
+$ git fetch astropy
+remote: Counting objects: <span class="m">37</span>, <span class="k">done</span>.                                             
+remote: Compressing objects: <span class="m">100</span>% <span class="o">(</span><span class="m">30</span>/30<span class="o">)</span>, <span class="k">done</span>.                                
+remote: Total <span class="m">37</span> <span class="o">(</span>delta <span class="m">10</span><span class="o">)</span>, reused <span class="m">23</span> <span class="o">(</span>delta <span class="m">7</span><span class="o">)</span>                                
+Unpacking objects: <span class="m">100</span>% <span class="o">(</span><span class="m">37</span>/37<span class="o">)</span>, <span class="k">done</span>.                                          
+From git://github.com/astropy/astropy                                           
+ * <span class="o">[</span>new branch<span class="o">]</span>      master     -&gt; astropy/master                               
+ * <span class="o">[</span>new branch<span class="o">]</span>      stable     -&gt; astropy/stable                               
+ * <span class="o">[</span>new branch<span class="o">]</span>      v0.1.x     -&gt; astropy/v0.1.x                               
+ * <span class="o">[</span>new branch<span class="o">]</span>      v0.2.x     -&gt; astropy/v0.2.x                               
+ * <span class="o">[</span>new branch<span class="o">]</span>      v0.3.x     -&gt; astropy/v0.3.x  
+<span class="c1">#</span>
+<span class="c1"># Make a new branch for this fix</span>
+<span class="c1">#</span>
+$ git branch i-1761 astropy/master <span class="c1"># branch just for this work</span>
+Branch i-1761 <span class="nb">set</span> up to track remote branch master from astropy.
+
+$ git checkout i-1761               <span class="c1"># work on this branch</span>
+Switched to branch <span class="s1">&#39;i-1761&#39;</span>                                                     
+Your branch is up-to-date with <span class="s1">&#39;astropy/master&#39;</span>. 
+
+<span class="c1"># let my github account know about this branch</span>
+$ git push --set-upstream mwcraig i-1761 <span class="c1"># Hey GitHub, get ready to receive my work</span>
+Branch i-1761 <span class="nb">set</span> up to track remote branch i-1761 from mwcraig.                
+Everything up-to-date  
+
+<span class="c1">#</span>
+<span class="c1"># Make a python environment for this work -- conda version shown</span>
+<span class="c1">#</span>
+$ conda create -n apy-1761 --clone root   <span class="c1"># copy my default environment</span>
+Output not shown
+
+$ <span class="nb">source</span> activate apy-1761                <span class="c1"># switch to this environment</span>
+prepending /Users/mcraig/anaconda/envs/apy-1761/bin to PATH
+
+<span class="c1"># next step DOES NOT WORK in python 3</span>
+$ python setup.py develop   <span class="c1"># install astropy, python 2</span>
+<span class="c1"># using python 3? do this instead: python3 setup.py install</span>
+Configured with: --prefix<span class="o">=</span>/Applications/Xcode.app/Contents/Developer/usr --with-
+gxx-include-dir<span class="o">=</span>/usr/include/c++/4.2.1                                          
+running develop                                                                 
+running egg_info                                                                
+writing requirements to astropy.egg-info/requires.txt                           
+writing astropy.egg-info/PKG-INFO
+...
+Using /Users/mcraig/anaconda/envs/apy-1761/lib/python2.7/site-packages          
+Finished processing dependencies <span class="k">for</span> <span class="nv">astropy</span><span class="o">==</span><span class="m">0</span>.4.dev6873  
+
+<span class="c1">#</span>
+<span class="c1"># Check setup by running tests</span>
+<span class="c1">#</span>
+$ <span class="nb">cd</span> astropy/coordinates/tests    <span class="c1"># get ready to run coordinate tests</span>
+$ py.test                         <span class="c1"># test</span>
+<span class="o">=============================</span> <span class="nb">test</span> session <span class="nv">starts</span> <span class="o">==============================</span>
+platform darwin -- Python <span class="m">2</span>.7.6 -- pytest-2.4.2
+
+Running tests with Astropy version <span class="m">0</span>.4.dev6877.
+Running tests in /Users/mcraig/Development/astronomy/apy-bugs/astropy/coordinates/tests.
+
+Platform: Darwin-13.0.0-x86_64-i386-64bit
+
+Executable: /Users/mcraig/anaconda/envs/apy-1761/bin/python
+
+Full Python Version:
+<span class="m">2</span>.7.6 <span class="p">|</span>Anaconda <span class="m">1</span>.8.0 <span class="o">(</span>x86_64<span class="o">)</span><span class="p">|</span> <span class="o">(</span>default, Nov <span class="m">11</span> <span class="m">2013</span>, <span class="m">10</span>:49:09<span class="o">)</span>
+<span class="o">[</span>GCC <span class="m">4</span>.0.1 <span class="o">(</span>Apple Inc. build <span class="m">5493</span><span class="o">)]</span>
+
+encodings: sys: ascii, locale: US-ASCII, filesystem: utf-8, unicode bits: <span class="m">15</span>
+byteorder: little
+float info: dig: <span class="m">15</span>, mant_dig: <span class="m">15</span>
+
+Numpy: <span class="m">1</span>.7.1
+Scipy: <span class="m">0</span>.13.0
+Matplotlib: <span class="m">1</span>.3.1
+h5py: <span class="m">2</span>.2.0
+
+plugins: capturelog
+collected <span class="m">103</span> items / <span class="m">2</span> skipped
+
+test_angles.py .......................
+test_angular_separation.py ..
+test_api.py ............
+test_arrays.py .............
+test_distance.py ........
+test_formatting.py ....................
+test_matching.py ....
+test_name_resolve.py ss
+test_transformations.py ...............
+accuracy/test_fk4_no_e_fk4.py .
+accuracy/test_fk4_no_e_fk5.py .
+accuracy/test_galactic_fk4.py .
+accuracy/test_icrs_fk5.py .
+
+<span class="o">===================</span> <span class="m">101</span> passed, <span class="m">4</span> skipped in <span class="m">152</span>.23 <span class="nv">seconds</span> <span class="o">===================</span>
+
+$ ls   <span class="c1"># what is here?</span>
+__init__.py                test_api.pyc                                         
+__init__.pyc               test_arrays.py                                       
+__pycache__                test_distance.py                                     
+accuracy                   test_formatting.py                                   
+test_angles.py             test_matching.py                                     
+test_angular_separation.py test_name_resolve.py                                 
+test_api.py                test_transformations.py  
+<span class="c1">#</span>
+<span class="c1"># Write a test in test_arrays.py to expose this bug</span>
+<span class="c1"># </span>
+<span class="c1"># After edit, re-test</span>
+<span class="c1">#</span>
+$ py.test test_arrays.py <span class="c1"># Hopefully this FAILS--we are trying to expose bug</span>
+                                                                                
+Running tests with Astropy version <span class="m">0</span>.4.dev6873.                                 
+Running tests in test_arrays.py.                                                
+                                                                                
+Platform: Darwin-13.0.0-x86_64-i386-64bit                                       
+                                                                                
+Executable: /Users/mcraig/anaconda/envs/apy-1761/bin/python                     
+                                                                                
+Full Python Version:                                                            
+<span class="m">2</span>.7.6 <span class="p">|</span>Anaconda <span class="m">1</span>.8.0 <span class="o">(</span>x86_64<span class="o">)</span><span class="p">|</span> <span class="o">(</span>default, Nov <span class="m">11</span> <span class="m">2013</span>, <span class="m">10</span>:49:09<span class="o">)</span>                
+<span class="o">[</span>GCC <span class="m">4</span>.0.1 <span class="o">(</span>Apple Inc. build <span class="m">5493</span><span class="o">)]</span>                                             
+                                                                                
+encodings: sys: ascii, locale: US-ASCII, filesystem: utf-8, unicode bits: <span class="m">15</span>    
+byteorder: little                                                               
+float info: dig: <span class="m">15</span>, mant_dig: <span class="m">15</span>                                               
+                                                                                
+Numpy: <span class="m">1</span>.7.1                                                                    
+Scipy: <span class="m">0</span>.13.0                                                                   
+Matplotlib: <span class="m">1</span>.3.1                                                               
+h5py: <span class="m">2</span>.2.0                                                                     
+                                                                                
+plugins: capturelog                                                             
+collected <span class="m">13</span> items                                                              
+                                                                                
+test_arrays.py ............F                                                    
+                                                                                
+<span class="o">===================================</span> <span class="nv">FAILURES</span> <span class="o">===================================</span>
+________________________________ test_array_len ________________________________
+                                                                                
+    def test_array_len<span class="o">()</span>:                                                       
+        from .. import ICRS                                                     
+                                                                                
+        <span class="nv">input_length</span> <span class="o">=</span> <span class="m">5</span>                                                        
+        <span class="nv">ra</span> <span class="o">=</span> np.linspace<span class="o">(</span><span class="m">0</span>, <span class="m">360</span>, input_length<span class="o">)</span>                                  
+        <span class="nv">dec</span> <span class="o">=</span> np.linspace<span class="o">(</span><span class="m">0</span>, <span class="m">90</span>, input_length<span class="o">)</span>                                  
+                                                                                
+        <span class="nv">c</span> <span class="o">=</span> ICRS<span class="o">(</span>ra, dec, <span class="nv">unit</span><span class="o">=(</span>u.degree, u.degree<span class="o">))</span>                            
+                                                                                
+&gt;       assert len<span class="o">(</span>c<span class="o">)</span> <span class="o">==</span> input_length                                           
+E       TypeError: object of <span class="nb">type</span> <span class="s1">&#39;ICRS&#39;</span> has no len<span class="o">()</span>                           
+                                                                                
+test_arrays.py:291: <span class="nv">TypeError</span>                                                   
+<span class="o">=====================</span> <span class="m">1</span> failed, <span class="m">12</span> passed in <span class="m">2</span>.49 <span class="nv">seconds</span> <span class="o">======================</span>
+
+<span class="c1"># Good, failure, as expected.</span>
+<span class="c1">#</span>
+<span class="c1"># what did we do? Remind me, git</span>
+<span class="c1">#</span>
+$ git status                     
+On branch i-1761                                                                
+Your branch is up-to-date with <span class="s1">&#39;mwcraig/i-1761&#39;</span>.                                
+                                                                                
+Changes not staged <span class="k">for</span> commit:                                                  
+  <span class="o">(</span>use <span class="s2">&quot;git add &lt;file&gt;...&quot;</span> to update what will be committed<span class="o">)</span>                    
+  <span class="o">(</span>use <span class="s2">&quot;git checkout -- &lt;file&gt;...&quot;</span> to discard changes in working directory<span class="o">)</span>     
+                                                                                
+        modified:   test_arrays.py                                              
+                                                                                
+no changes added to commit <span class="o">(</span>use <span class="s2">&quot;git add&quot;</span> and/or <span class="s2">&quot;git commit -a&quot;</span><span class="o">)</span>       
+
+<span class="c1">#</span>
+<span class="c1"># How about more detail, git?</span>
+$ git diff
+diff --git a/astropy/coordinates/tests/test_arrays.py b/astropy/coordinates/test
+index 2785b59..7eecfbb <span class="m">100644</span>                                                   
+--- a/astropy/coordinates/tests/test_arrays.py                                  
++++ b/astropy/coordinates/tests/test_arrays.py                                  
+@@ -278,3 +278,14 @@ def test_array_indexing<span class="o">()</span>:                                 
+     assert c2.equinox <span class="o">==</span> c1.equinox                                            
+     assert c3.equinox <span class="o">==</span> c1.equinox                                            
+     assert c4.equinox <span class="o">==</span> c1.equinox                                            
++                                                                               
++def test_array_len<span class="o">()</span>:                                                          
++    from .. import ICRS                                                        
++                                                                               
++    <span class="nv">input_length</span> <span class="o">=</span> <span class="m">5</span>                                                           
++    <span class="nv">ra</span> <span class="o">=</span> np.linspace<span class="o">(</span><span class="m">0</span>, <span class="m">360</span>, input_length<span class="o">)</span>                                     
++    <span class="nv">dec</span> <span class="o">=</span> np.linspace<span class="o">(</span><span class="m">0</span>, <span class="m">90</span>, input_length<span class="o">)</span>                                     
++                                                                               
++    <span class="nv">c</span> <span class="o">=</span> ICRS<span class="o">(</span>ra, dec, <span class="nv">unit</span><span class="o">=(</span>u.degree, u.degree<span class="o">))</span>                               
++                                                                               
++    assert len<span class="o">(</span>c<span class="o">)</span> <span class="o">==</span> input_length 
+
+<span class="c1">#</span>
+<span class="c1"># Stage, then commit</span>
+$ git add test_arrays.py          <span class="c1"># get ready to commit</span>
+<span class="c1"># always include a message with your commits</span>
+$ git commit -m<span class="s1">&#39;Add test for array coordinate length (issue #1761)&#39;</span>
+<span class="o">[</span>i-1761 23ba4ce<span class="o">]</span> Add <span class="nb">test</span> <span class="k">for</span> array coordinate length <span class="o">(</span>issue <span class="c1">#1761)             </span>
+ <span class="m">1</span> file changed, <span class="m">11</span> insertions<span class="o">(</span>+<span class="o">)</span>   
+
+<span class="c1">#</span>
+<span class="c1"># Now fix the bug...edit ../coordsystems.py</span>
+<span class="c1">#</span>
+<span class="c1"># Code fix made in editor</span>
+<span class="c1">#</span>
+<span class="c1"># Test change</span>
+<span class="c1">#</span>
+$ py.test test_arrays.py   <span class="c1"># Did our fix actually fix the problem?</span>
+<span class="o">=============================</span> <span class="nb">test</span> session <span class="nv">starts</span> <span class="o">==============================</span>
+platform darwin -- Python <span class="m">2</span>.7.6 -- pytest-2.4.2                                 
+                                                                                
+Running tests with Astropy version <span class="m">0</span>.4.dev6874.                                 
+Running tests in test_arrays.py.                                                
+                                                                                
+Platform: Darwin-13.0.0-x86_64-i386-64bit                                       
+                                                                                
+Executable: /Users/mcraig/anaconda/envs/apy-1761/bin/python                     
+                                                                                
+Full Python Version:                                                            
+<span class="m">2</span>.7.6 <span class="p">|</span>Anaconda <span class="m">1</span>.8.0 <span class="o">(</span>x86_64<span class="o">)</span><span class="p">|</span> <span class="o">(</span>default, Nov <span class="m">11</span> <span class="m">2013</span>, <span class="m">10</span>:49:09<span class="o">)</span>                
+<span class="o">[</span>GCC <span class="m">4</span>.0.1 <span class="o">(</span>Apple Inc. build <span class="m">5493</span><span class="o">)]</span>                                             
+                                                                                
+encodings: sys: ascii, locale: US-ASCII, filesystem: utf-8, unicode bits: <span class="m">15</span>    
+byteorder: little                                                               
+float info: dig: <span class="m">15</span>, mant_dig: <span class="m">15</span>                                               
+                                                                                
+Numpy: <span class="m">1</span>.7.1                                                                    
+Scipy: <span class="m">0</span>.13.0                                                                   
+Matplotlib: <span class="m">1</span>.3.1                                                               
+h5py: <span class="m">2</span>.2.0                                                                     
+                                                                                
+plugins: capturelog                                                             
+collected <span class="m">13</span> items                                                              
+                                                                                
+test_arrays.py .............                                                    
+                                                                                
+<span class="o">==========================</span> <span class="m">13</span> passed in <span class="m">2</span>.60 <span class="nv">seconds</span> <span class="o">===========================</span>
+
+<span class="c1"># Great! We fixed it!</span>
+<span class="c1">#</span>
+<span class="c1"># Run all of the coordinate tests to make sure we broke nothing...</span>
+$ py.test                        <span class="c1"># do all of the coordinate tests pass?</span>
+<span class="o">=============================</span> <span class="nb">test</span> session <span class="nv">starts</span> <span class="o">==============================</span>
+platform darwin -- Python <span class="m">2</span>.7.6 -- pytest-2.4.2
+
+Running tests with Astropy version <span class="m">0</span>.4.dev6877.
+Running tests in /Users/mcraig/Development/astronomy/apy-bugs/astropy/coordinates/tests.
+
+Platform: Darwin-13.0.0-x86_64-i386-64bit
+
+Executable: /Users/mcraig/anaconda/envs/apy-1761/bin/python
+
+Full Python Version:
+<span class="m">2</span>.7.6 <span class="p">|</span>Anaconda <span class="m">1</span>.8.0 <span class="o">(</span>x86_64<span class="o">)</span><span class="p">|</span> <span class="o">(</span>default, Nov <span class="m">11</span> <span class="m">2013</span>, <span class="m">10</span>:49:09<span class="o">)</span>
+<span class="o">[</span>GCC <span class="m">4</span>.0.1 <span class="o">(</span>Apple Inc. build <span class="m">5493</span><span class="o">)]</span>
+
+encodings: sys: ascii, locale: US-ASCII, filesystem: utf-8, unicode bits: <span class="m">15</span>
+byteorder: little
+float info: dig: <span class="m">15</span>, mant_dig: <span class="m">15</span>
+
+Numpy: <span class="m">1</span>.7.1
+Scipy: <span class="m">0</span>.13.0
+Matplotlib: <span class="m">1</span>.3.1
+h5py: <span class="m">2</span>.2.0
+
+plugins: capturelog
+collected <span class="m">103</span> items / <span class="m">2</span> skipped
+
+test_angles.py .......................
+test_angular_separation.py ..
+test_api.py ............
+test_arrays.py .............
+test_distance.py ........
+test_formatting.py ....................
+test_matching.py ....
+test_name_resolve.py ss
+test_transformations.py ...............
+accuracy/test_fk4_no_e_fk4.py .
+accuracy/test_fk4_no_e_fk5.py .
+accuracy/test_galactic_fk4.py .
+accuracy/test_icrs_fk5.py .
+
+<span class="o">===================</span> <span class="m">101</span> passed, <span class="m">4</span> skipped in <span class="m">152</span>.23 <span class="nv">seconds</span> <span class="o">===================</span>
+
+<span class="c1"># So far, so good, now check ALL tests</span>
+$ <span class="nb">cd</span> ../../..                       <span class="c1"># up to the top level to check all of the tests</span>
+$ python setup.py <span class="nb">test</span>           <span class="c1"># grab a coffee now; this takes a while</span>
+onfigured with: --prefix<span class="o">=</span>/Applications/Xcode.app/Contents/Developer/usr --with-gxx-include-dir<span class="o">=</span>/usr/include/c++/4.2.1
+Freezing version number to astropy/version.py
+running <span class="nb">test</span>
+running build
+running build_py
+copying astropy/version.py -&gt; build/lib.macosx-10.5-x86_64-2.7/astropy
+copying astropy/coordinates/tests/test_arrays.py -&gt; build/lib.macosx-10.5-x86_64-2.7/astropy/coordinates/tests
+...
+OUTPUT TRUNCATED
+
+<span class="c1">#</span>
+<span class="c1"># Success! Commit our change</span>
+<span class="c1">#</span>
+$ git status                     <span class="c1"># check what we have changed, if you forgot</span>
+On branch i-1761                                                                
+Your branch is ahead of <span class="s1">&#39;mwcraig/i-1761&#39;</span> by <span class="m">1</span> commit.                           
+  <span class="o">(</span>use <span class="s2">&quot;git push&quot;</span> to publish your <span class="nb">local</span> commits<span class="o">)</span>                                
+                                                                                
+Changes not staged <span class="k">for</span> commit:                                                  
+  <span class="o">(</span>use <span class="s2">&quot;git add &lt;file&gt;...&quot;</span> to update what will be committed<span class="o">)</span>                    
+  <span class="o">(</span>use <span class="s2">&quot;git checkout -- &lt;file&gt;...&quot;</span> to discard changes in working directory<span class="o">)</span>     
+                                                                                
+        modified:   astropy/coordinates/coordsystems.py                         
+                                                                                
+no changes added to commit <span class="o">(</span>use <span class="s2">&quot;git add&quot;</span> and/or <span class="s2">&quot;git commit -a&quot;</span><span class="o">)</span> 
+
+<span class="c1"># stage change</span>
+$ git add astropy/coordinates/coordsystems.py <span class="c1"># Copy and paste path from git status</span>
+                                             <span class="c1"># unless you like typing</span>
+<span class="c1"># commit, with message!</span>
+$ git commit -m<span class="s2">&quot;</span>
+<span class="s2">    &gt; Add len() to coordinates</span>
+<span class="s2">    &gt;</span>
+<span class="s2">    &gt; Closes #1761&quot;</span>
+<span class="o">[</span>i-1761 9688f7e<span class="o">]</span> Add len<span class="o">()</span> to coordinates                                       
+ <span class="m">1</span> file changed, <span class="m">2</span> insertions<span class="o">(</span>+<span class="o">)</span>  
+
+<span class="c1"># copy changes to the i-1761 branch in my github account...</span>
+$ git push           <span class="c1"># or not--can wait until you are completely done</span>
+Counting objects: <span class="m">52</span>, <span class="k">done</span>.                                                     
+Delta compression using up to <span class="m">2</span> threads.                                        
+Compressing objects: <span class="m">100</span>% <span class="o">(</span><span class="m">11</span>/11<span class="o">)</span>, <span class="k">done</span>.                                        
+Writing objects: <span class="m">100</span>% <span class="o">(</span><span class="m">11</span>/11<span class="o">)</span>, <span class="m">1</span>.01 KiB <span class="p">|</span> <span class="m">0</span> bytes/s, <span class="k">done</span>.                      
+Total <span class="m">11</span> <span class="o">(</span>delta <span class="m">9</span><span class="o">)</span>, reused <span class="m">0</span> <span class="o">(</span>delta <span class="m">0</span><span class="o">)</span>                                          
+To https://github.com/mwcraig/astropy.git                                       
+   7fa981e..9688f7e  i-1761 -&gt; i-1761  
+
+<span class="c1">#</span>
+<span class="c1"># Oops! Forgot to include some tests!</span>
+<span class="c1">#</span>
+$ <span class="nb">cd</span> astropy/coordinates/tests   <span class="c1"># back to add more tests</span>
+<span class="c1">#</span>
+<span class="c1"># edit test_arrays.py to add tests to test_array_len</span>
+<span class="c1">#</span>
+<span class="c1"># Now re-test</span>
+<span class="c1">#</span>
+$ py.test test_arrays.py  <span class="c1"># do these tests pass with the new tests?</span>
+<span class="o">=============================</span> <span class="nb">test</span> session <span class="nv">starts</span> <span class="o">==============================</span>
+platform darwin -- Python <span class="m">2</span>.7.6 -- pytest-2.4.2                                 
+                                                                                
+Running tests with Astropy version <span class="m">0</span>.4.dev6874.                                 
+Running tests in test_arrays.py.                                                
+                                                                                
+Platform: Darwin-13.0.0-x86_64-i386-64bit                                       
+                                                                                
+Executable: /Users/mcraig/anaconda/envs/apy-1761/bin/python                     
+                                                                                
+Full Python Version:                                                            
+<span class="m">2</span>.7.6 <span class="p">|</span>Anaconda <span class="m">1</span>.8.0 <span class="o">(</span>x86_64<span class="o">)</span><span class="p">|</span> <span class="o">(</span>default, Nov <span class="m">11</span> <span class="m">2013</span>, <span class="m">10</span>:49:09<span class="o">)</span>                
+<span class="o">[</span>GCC <span class="m">4</span>.0.1 <span class="o">(</span>Apple Inc. build <span class="m">5493</span><span class="o">)]</span>                                             
+                                                                                
+encodings: sys: ascii, locale: US-ASCII, filesystem: utf-8, unicode bits: <span class="m">15</span>    
+byteorder: little                                                               
+float info: dig: <span class="m">15</span>, mant_dig: <span class="m">15</span>                                               
+                                                                                
+Numpy: <span class="m">1</span>.7.1                                                                    
+Scipy: <span class="m">0</span>.13.0                                                                   
+Matplotlib: <span class="m">1</span>.3.1                                                               
+h5py: <span class="m">2</span>.2.0                                                                     
+                                                                                
+plugins: capturelog                                                             
+collected <span class="m">13</span> items                                                              
+                                                                                
+test_arrays.py .............                                                    
+                                                                                
+<span class="o">==========================</span> <span class="m">13</span> passed in <span class="m">2</span>.60 <span class="nv">seconds</span> <span class="o">===========================</span>
+
+<span class="c1">#</span>
+<span class="c1">#   yes! now move up a couple of levels to check all tests</span>
+<span class="c1">#</span>
+<span class="c1">#   Do I really have to re-test everything? It certainly never hurts and</span>
+<span class="c1">#   potentially saves time for the maintainers if you have introduced a bug.</span>
+<span class="c1">#</span>
+$ <span class="nb">cd</span> ../../..          <span class="c1"># back to the top level</span>
+$ python setup.py <span class="nb">test</span> <span class="c1"># grab another coffee....</span>
+OUTPUT OMITTED
+
+<span class="c1">#</span>
+<span class="c1"># Success! Time to commit</span>
+<span class="c1">#</span>
+$ git status           <span class="c1"># optional, but useful for figuring out what to add</span>
+On branch i-1761                                                                
+Your branch is up-to-date with <span class="s1">&#39;mwcraig/i-1761&#39;</span>.                                
+                                                                                
+Changes not staged <span class="k">for</span> commit:                                                  
+  <span class="o">(</span>use <span class="s2">&quot;git add &lt;file&gt;...&quot;</span> to update what will be committed<span class="o">)</span>                    
+  <span class="o">(</span>use <span class="s2">&quot;git checkout -- &lt;file&gt;...&quot;</span> to discard changes in working directory<span class="o">)</span>     
+                                                                                
+        modified:   astropy/coordinates/tests/test_arrays.py                                              
+                                                                                
+no changes added to commit <span class="o">(</span>use <span class="s2">&quot;git add&quot;</span> and/or <span class="s2">&quot;git commit -a&quot;</span><span class="o">)</span>
+
+<span class="c1"># </span>
+<span class="c1"># Stage...</span>
+$ git add astropy/coordinates/tests/test_arrays.py <span class="c1"># use path git status supplies</span>
+
+<span class="c1"># Commit, with a message...</span>
+$ git commit -m<span class="s2">&quot;Add tests of len() for scalar coordinate and length 1 coordinate&quot;</span>
+<span class="o">[</span>i-1761 ed92c2d<span class="o">]</span> Add tests of len<span class="o">()</span> <span class="k">for</span> scalar coordinate and length <span class="m">1</span> coordinat
+e                                                                               
+ <span class="m">1</span> file changed, <span class="m">10</span> insertions<span class="o">(</span>+<span class="o">)</span>, <span class="m">5</span> deletions<span class="o">(</span>-<span class="o">)</span> 
+
+<span class="c1"># Almost done...</span>
+<span class="c1">#</span>
+<span class="c1"># Edit the changelog in CHANGES.rst</span>
+<span class="c1">#</span>
+<span class="c1"># Then commit changes</span>
+<span class="c1">#</span>
+$ git add CHANGES.rst
+$ git commit -m<span class="s2">&quot;Add changelog entry for 1761&quot;</span>
+<span class="o">[</span>i-1761 bf6fcfc<span class="o">]</span> Add changelog entry <span class="k">for</span> <span class="m">1761</span>                                   
+ <span class="m">1</span> file changed, <span class="m">2</span> insertions<span class="o">(</span>+<span class="o">)</span>                                                
+
+<span class="c1">#</span>
+<span class="c1"># Push changes to my GitHub account</span>
+<span class="c1">#</span>
+$ git push   <span class="c1"># make sure all of our changes are in our github account</span>
+Counting objects: <span class="m">47</span>, <span class="k">done</span>.                                                     
+Delta compression using up to <span class="m">2</span> threads.                                        
+Compressing objects: <span class="m">100</span>% <span class="o">(</span><span class="m">8</span>/8<span class="o">)</span>, <span class="k">done</span>.                                          
+Writing objects: <span class="m">100</span>% <span class="o">(</span><span class="m">8</span>/8<span class="o">)</span>, <span class="m">836</span> bytes <span class="p">|</span> <span class="m">0</span> bytes/s, <span class="k">done</span>.                       
+Total <span class="m">8</span> <span class="o">(</span>delta <span class="m">6</span><span class="o">)</span>, reused <span class="m">0</span> <span class="o">(</span>delta <span class="m">0</span><span class="o">)</span>                                           
+To https://github.com/mwcraig/astropy.git                                       
+   9688f7e..bf6fcfc  i-1761 -&gt; i-1761 
+
+<span class="c1">#</span>
+<span class="c1"># Go to GitHub to make pull request. Remember to switch to this branch before </span>
+<span class="c1"># pushing the pull request button.</span>
+<span class="c1">#</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="example-no-output">
+<span id="no-output"></span><h2>Example, no output<a class="headerlink" href="#example-no-output" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">#</span>
+<span class="c1"># Setup</span>
+<span class="c1">#</span>
+<span class="c1"># Start by cloning the repo from your GitHub account if you need to...</span>
+git clone https://github.com/mwcraig/astropy.git apy-bugs
+<span class="c1"># ...then navigate to that clone in a terminal, and...</span>
+<span class="nb">cd</span> apy-bugs
+<span class="c1"># ...rename the origin remote make its meaning clearer and...</span>
+git remote rename origin mwcraig
+<span class="c1"># ...remember to set up the official remote.</span>
+git remote add astropy git://github.com/astropy/astropy.git
+<span class="c1"># get the latest from the official repo</span>
+git fetch astropy
+<span class="c1">#</span>
+<span class="c1"># Make a new branch for this fix</span>
+<span class="c1">#</span>
+git branch i-1761 astropy/master <span class="c1"># branch just for this work</span>
+git checkout i-1761               <span class="c1"># work on this branch</span>
+git push --set-upstream mwcraig i-1761 <span class="c1"># Hey GitHub, get ready to receive my work</span>
+<span class="c1">#</span>
+<span class="c1"># Make a python environment for this work -- conda version shown</span>
+<span class="c1">#</span>
+conda create -n apy-1761 --clone root   <span class="c1"># copy my default environment</span>
+<span class="nb">source</span> activate apy-1761                <span class="c1"># switch to this environment</span>
+<span class="c1"># next step DOES NOT WORK in python 3</span>
+python setup.py develop                 <span class="c1"># install astropy</span>
+<span class="c1">#</span>
+<span class="c1"># Check setup by running tests</span>
+<span class="c1">#</span>
+<span class="nb">cd</span> astropy/coordinates/tests    <span class="c1"># get ready to run coordinate tests</span>
+py.test                         <span class="c1"># test</span>
+ls                              <span class="c1"># what is here?</span>
+<span class="c1">#</span>
+<span class="c1"># Write a test in test_arrays.py to expose this bug</span>
+<span class="c1"># </span>
+<span class="c1"># After edit, re-test</span>
+<span class="c1">#</span>
+py.test test_arrays.py          <span class="c1"># Hopefully this succeeds</span>
+<span class="c1">#</span>
+<span class="c1"># Commit changes to local git</span>
+<span class="c1">#</span>
+git status                      <span class="c1"># what did we do? Remind me, git</span>
+git add test_arrays.py          <span class="c1"># get ready to commit</span>
+<span class="c1"># always include a message with your commits</span>
+git commit -m<span class="s1">&#39;Add test for array coordinate length (issue #1761)&#39;</span>
+git status                      <span class="c1"># Best to be informed!</span>
+<span class="c1">#</span>
+<span class="c1"># Edit test_arrays.py</span>
+<span class="c1">#</span>
+<span class="nb">cd</span> ..                           <span class="c1"># up a level to coordinates</span>
+<span class="c1">#</span>
+<span class="c1"># Code fix made in editor</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># Test change</span>
+<span class="c1">#</span>
+py.test tests/test_arrays.py   <span class="c1"># Did our fix actually fix the problem?</span>
+py.test                        <span class="c1"># do all of the coordinate tests pass?</span>
+<span class="nb">cd</span> ../..                       <span class="c1"># up to the top level to check all of the tests</span>
+python setup.py <span class="nb">test</span>           <span class="c1"># grab a coffee now; this takes a while</span>
+<span class="c1">#</span>
+<span class="c1"># Success! Commit our change</span>
+<span class="c1">#</span>
+git status                     <span class="c1"># check what we have changed, if you forgot</span>
+git add astropy/coordinates/coordsystems.py  <span class="c1"># Copy and paste path from git status</span>
+                                             <span class="c1"># unless you like typing</span>
+<span class="c1"># check git staus again if you want...or not.</span>
+<span class="c1"># commit, with message!</span>
+git commit -m<span class="s2">&quot;</span>
+<span class="s2">    &gt; Add len() to coordinates</span>
+<span class="s2">    &gt;</span>
+<span class="s2">    &gt; Closes #1761&quot;</span>
+git push                       <span class="c1"># or not--can wait until you are completely done</span>
+<span class="c1">#</span>
+<span class="c1"># Oops! Forgot to include some tests!</span>
+<span class="c1">#</span>
+<span class="nb">cd</span> astropy/coordinates/tests   <span class="c1"># back to add more tests</span>
+<span class="c1">#</span>
+<span class="c1"># edit test_arrays.py to add tests to test_array_len</span>
+<span class="c1">#</span>
+<span class="c1"># Now re-test</span>
+<span class="c1">#</span>
+py.test test_arrays.py  <span class="c1"># do these tests pass with the new tests?</span>
+<span class="c1">#   yes! now move up a couple of levels to check all tests</span>
+<span class="c1">#</span>
+<span class="c1">#   Do I really have to re-test everything? It certainly never hurts and</span>
+<span class="c1">#   potentially saves time for the maintainers if you have introduced a bug.</span>
+<span class="c1">#</span>
+<span class="nb">cd</span> ../../..          <span class="c1"># back to the top level</span>
+python setup.py <span class="nb">test</span> <span class="c1"># grab another coffee....</span>
+<span class="c1">#</span>
+<span class="c1"># Success! Time to commit</span>
+<span class="c1">#</span>
+git status           <span class="c1"># optional, but useful for figuring out what to add</span>
+git add astropy/coordinates/tests/test_arrays.py <span class="c1"># use path git status supplies</span>
+<span class="c1"># Commit, with a message...</span>
+git commit -m<span class="s2">&quot;Add tests of len() for scalar coordinate and length 1 coordinate&quot;</span>
+<span class="c1">#</span>
+<span class="c1"># Edit the changelog in CHANGES.rst</span>
+<span class="c1">#</span>
+<span class="c1"># Then commit changes</span>
+<span class="c1">#</span>
+git add CHANGES.rst
+git commit -m<span class="s2">&quot;Add changelog entry for 1761&quot;</span>
+<span class="c1">#</span>
+<span class="c1"># Push changes to my GitHub account</span>
+<span class="c1">#</span>
+git push   <span class="c1"># make sure all of our changes are in our github account</span>
+<span class="c1">#</span>
+<span class="c1"># Go to GitHub to make pull request. Remember to switch to this branch before </span>
+<span class="c1"># pushing the pull request button.</span>
+<span class="c1">#</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../resource/api/index.html">Complete Reference (API)</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../resource/dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/development/workflow/command_history.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

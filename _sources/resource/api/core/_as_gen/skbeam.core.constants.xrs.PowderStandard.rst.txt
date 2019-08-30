@@ -1,0 +1,32 @@
+skbeam.core.constants.xrs.PowderStandard
+========================================
+
+.. currentmodule:: skbeam.core.constants.xrs
+
+.. autoclass:: PowderStandard
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PowderStandard.__init__
+      ~PowderStandard.convert_2theta
+      ~PowderStandard.from_d
+      ~PowderStandard.from_lambda_2theta_hkl
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PowderStandard.name
+      ~PowderStandard.reflections
+   
+   

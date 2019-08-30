@@ -1,0 +1,32 @@
+skbeam.core.constants.xrs.Reflection
+====================================
+
+.. currentmodule:: skbeam.core.constants.xrs
+
+.. autoclass:: Reflection
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Reflection.__init__
+      ~Reflection.count
+      ~Reflection.index
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Reflection.d
+      ~Reflection.hkl
+      ~Reflection.q
+   
+   

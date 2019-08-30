@@ -1,0 +1,15 @@
+=========
+ Changes
+=========
+
+- changed function name from :obj:`process_grid` to :obj:`grid3d`
+- changed function signature from: ::
+
+     def process_grid(tot_set, i_stack, q_min=None, q_max=None, dqn=None):
+
+  to ::
+
+     def grid3d(q, img_stack,
+                nx=None, ny=None, nz=None,
+                xmin=None, xmax=None, ymin=None,
+                ymax=None, zmin=None, zmax=None):

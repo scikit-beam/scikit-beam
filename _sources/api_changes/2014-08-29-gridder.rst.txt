@@ -1,0 +1,6 @@
+moved gridder from recip.py -> core.py
+--------------------------------------
+
+Moved the gridder code from recip.py -> core.py
+as there is nothing specific to reciprocal space in
+the gridder code.

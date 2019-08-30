@@ -1,0 +1,385 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Try the development version &#8212; scikit-beam 0.0.18.post10+g384742b documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="How to make a code contribution" href="development_workflow.html" />
+    <link rel="prev" title="fluorescence Module" href="../../resource/api/fluorescence.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="try-the-development-version">
+<span id="get-devel"></span><h1>Try the development version<a class="headerlink" href="#try-the-development-version" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference external" href="http://git-scm.com/">git</a> is the name of a source code management system. It is used to keep
+track of changes made to code and to manage contributions coming from
+several different people. If you want to read more about <a class="reference external" href="http://git-scm.com/">git</a> right now
+take a look at <a class="reference external" href="http://git-scm.com/book/en/Getting-Started-Git-Basics">Git Basics</a>.</p>
+<p>If you have never used <a class="reference external" href="http://git-scm.com/">git</a> before, allow one hour the first time you do
+this. You will not need to do this every time you want to contribute;
+most of it is one-time setup. You can count on one hand the number of
+<a class="reference external" href="http://git-scm.com/">git</a> commands you will need to regularly use to keep your local copy
+of <a class="reference external" href="http://scikit-beam.github.io/scikit-beam/">Scikit-beam</a> up to date. If you find this taking more than an hour email
+the scikit-beam developers.</p>
+</div>
+<p>Trying out the development version of Scikit-beam is useful in three ways:</p>
+<ul class="simple">
+<li><p>More users testing new features helps uncover bugs before the feature is
+released.</p></li>
+<li><p>A bug in the most recent stable release might have been fixed in the
+development version. Knowing whether that is the case can make your bug
+reports more useful.</p></li>
+<li><p>You will need to go through all of these steps before contributing any
+code to Scikit-beam. Practicing now will save you time later if you plan to
+contribute.</p></li>
+</ul>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>Conceptually, there are several steps to getting a working copy of the latest
+version of Scikit-beam on your computer:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#fork-a-copy"><span class="std std-ref">Make your own copy of Scikit-beam on GitHub</span></a>; this copy is called a <em>fork</em> (if you don’t have an
+account on <a class="reference external" href="http://github.com">github</a> yet, go there now and make one).</p></li>
+<li><p><a class="reference internal" href="#check-git-install"><span class="std std-ref">Make sure git is installed and configured on your computer</span></a></p></li>
+<li><p><a class="reference internal" href="#clone-your-fork"><span class="std std-ref">Copy your fork of Scikit-beam from GitHub to your computer</span></a>; this is called making a <em>clone</em> of the repository.</p></li>
+<li><p><a class="reference internal" href="#set-upstream-master"><span class="std std-ref">Tell git where to look for changes in the development version of Scikit-beam</span></a></p></li>
+<li><p><a class="reference internal" href="#make-a-branch"><span class="std std-ref">Create your own private workspace</span></a>; this is called making a <em>branch</em>.</p></li>
+<li><p><a class="reference internal" href="#activate-development-scikit-beam"><span class="std std-ref">“Activate” the development version of scikit-beam</span></a></p></li>
+<li><p><a class="reference internal" href="#test-installation"><span class="std std-ref">Test your development copy</span></a></p></li>
+<li><p><a class="reference internal" href="#try-devel"><span class="std std-ref">Try out the development version</span></a></p></li>
+</ol>
+</div>
+<div class="section" id="step-by-step-instructions">
+<h2>Step-by-step instructions<a class="headerlink" href="#step-by-step-instructions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="make-your-own-copy-of-scikit-beam-on-github">
+<span id="fork-a-copy"></span><h3>Make your own copy of Scikit-beam on GitHub<a class="headerlink" href="#make-your-own-copy-of-scikit-beam-on-github" title="Permalink to this headline">¶</a></h3>
+<p>In the language of <a class="reference external" href="http://github.com">GitHub</a>, making a copy of someone’s code is called making
+a <em>fork</em>. A fork is a complete copy of the code and all of its revision
+history.</p>
+<ol class="arabic">
+<li><p>Log into your <a class="reference external" href="http://github.com">GitHub</a> account.</p></li>
+<li><p>Go to the <a class="reference external" href="https://github.com/scikit-beam/scikit-beam">Scikit-beam GitHub</a> home page.</p></li>
+<li><p>Click on the <em>fork</em> button:</p>
+<img alt="../../_images/forking_button.png" src="../../_images/forking_button.png" />
+<p>After a short pause and an animation of Octocat scanning a book on a
+flatbed scanner, you should find yourself at the home page for your own
+forked copy of <a class="reference external" href="http://scikit-beam.github.io/scikit-beam/">Scikit-beam</a>.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="make-sure-git-is-installed-and-configured-on-your-computer">
+<span id="check-git-install"></span><h3>Make sure git is installed and configured on your computer<a class="headerlink" href="#make-sure-git-is-installed-and-configured-on-your-computer" title="Permalink to this headline">¶</a></h3>
+<p><strong>Check that git is installed:</strong></p>
+<p>Check by typing, in a terminal:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git --version
+# if git is installed, will get something like: git version 1.9.1
+</pre></div>
+</div>
+<p>If <a class="reference external" href="http://git-scm.com/">git</a> is not installed, <a class="reference external" href="http://git-scm.com/downloads">get it</a>.</p>
+<p><strong>Basic git configuration:</strong></p>
+<p>Follow the instructions at <a class="reference external" href="http://help.github.com/articles/set-up-git#set-up-git">Set Up Git at GitHub</a> to take care of two
+essential items:</p>
+<ul class="simple">
+<li><p>Set your user name and email in your copy of <a class="reference external" href="http://git-scm.com/">git</a></p></li>
+<li><p>Set up authentication so you don’t have to type your github password every
+time you need to access github from the command line. The default method at
+<a class="reference external" href="http://help.github.com/articles/set-up-git#set-up-git">Set Up Git at GitHub</a> may require administrative privileges; if that is a
+problem, set up authentication
+<a class="reference external" href="https://help.github.com/articles/generating-ssh-keys">using SSH keys instead</a></p></li>
+</ul>
+<p>We also recommend setting up <a class="reference external" href="http://git-scm.com/">git</a> so that when you copy changes from your
+computer to <a class="reference external" href="http://github.com">GitHub</a> only the copy (called a <em>branch</em>) of Scikit-beam that you are
+working on gets pushed up to GitHub.  <em>If</em> your version of git is 1.7.11 or,
+greater, you can do that with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">config</span> <span class="o">--</span><span class="k">global</span> <span class="n">push</span><span class="o">.</span><span class="n">default</span> <span class="n">simple</span>
+</pre></div>
+</div>
+<p>If you skip this step now it is not a problem; <a class="reference external" href="http://git-scm.com/">git</a> will remind you to do it in
+those cases when it is relevant.  If your version of git is less than 1.7.11,
+you can still continue without this, but it may lead to confusion later, as you
+might push up branches you do not intend to push.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Make sure you make a note of which authentication method you set up
+because it affects the command you use to copy your GitHub fork to your
+computer.</p>
+<p>If you set up password caching (the default method) the URLs will look like
+<code class="docutils literal notranslate"><span class="pre">https://github.com/your-user-name/scikit-beam.git</span></code>.</p>
+<p>If you set up SSH keys the URLs you use for making copies will look
+something like <code class="docutils literal notranslate"><span class="pre">git&#64;github.com:your-user-name/scikit-beam.git</span></code>.</p>
+</div>
+</div>
+<div class="section" id="copy-your-fork-of-scikit-beam-from-github-to-your-computer">
+<span id="clone-your-fork"></span><h3>Copy your fork of Scikit-beam from GitHub to your computer<a class="headerlink" href="#copy-your-fork-of-scikit-beam-from-github-to-your-computer" title="Permalink to this headline">¶</a></h3>
+<p>One of the commands below will make a complete copy of your <a class="reference external" href="http://github.com">GitHub</a> fork
+of <a class="reference external" href="http://scikit-beam.github.io/scikit-beam/">Scikit-beam</a> in a directory called <code class="docutils literal notranslate"><span class="pre">scikit-beam</span></code>; which form you use depends
+on what kind of authentication you set up in the previous step:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># Use this form if you setup SSH keys...
+$ git clone git@github.com:your-user-name/scikit-beam.git
+# ...otherwise use this form:
+$ git clone https://github.com/your-user-name/scikit-beam.git
+</pre></div>
+</div>
+<p>If there is an error at this stage it is probably an error in setting up
+authentication.</p>
+</div>
+<div class="section" id="tell-git-where-to-look-for-changes-in-the-development-version-of-scikit-beam">
+<span id="set-upstream-master"></span><h3>Tell git where to look for changes in the development version of Scikit-beam<a class="headerlink" href="#tell-git-where-to-look-for-changes-in-the-development-version-of-scikit-beam" title="Permalink to this headline">¶</a></h3>
+<p>Right now your local copy of <a class="reference external" href="http://scikit-beam.github.io/scikit-beam/">Scikit-beam</a> doesn’t know where the development
+version of <a class="reference external" href="http://scikit-beam.github.io/scikit-beam/">Scikit-beam</a> is. There is no easy way to keep your local copy up to
+date. In <a class="reference external" href="http://git-scm.com/">git</a> the name for another location of the same repository is a
+<em>remote</em>. The repository that contains the latest “official” development
+version is traditionally called the <em>upstream</em> remote, but here we use a
+more meaningful name for the remote: <em>scikit-beam</em>.</p>
+<p>Change into the <code class="docutils literal notranslate"><span class="pre">scikit-beam</span></code> directory you created in the previous step and
+let <a class="reference external" href="http://git-scm.com/">git</a> know about about the scikit-beam remote:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">scikit</span><span class="o">-</span><span class="n">beam</span>
+<span class="n">git</span> <span class="n">remote</span> <span class="n">add</span> <span class="n">scikit</span><span class="o">-</span><span class="n">beam</span> <span class="n">git</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">/</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+<p>You can check that everything is set up properly so far by asking <a class="reference external" href="http://git-scm.com/">git</a> to
+show you all of the remotes it knows about for your local repository of
+<a class="reference external" href="http://scikit-beam.github.io/scikit-beam/">Scikit-beam</a> with <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">remote</span> <span class="pre">-v</span></code>, which should display something like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span>   <span class="n">git</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">/</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">.</span><span class="n">git</span> <span class="p">(</span><span class="n">fetch</span><span class="p">)</span>
+<span class="n">scikit</span><span class="o">-</span><span class="n">beam</span>   <span class="n">git</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">/</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">.</span><span class="n">git</span> <span class="p">(</span><span class="n">push</span><span class="p">)</span>
+<span class="n">origin</span>     <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">your</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">name</span><span class="o">/</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">.</span><span class="n">git</span> <span class="p">(</span><span class="n">fetch</span><span class="p">)</span>
+<span class="n">origin</span>     <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">your</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">name</span><span class="o">/</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">.</span><span class="n">git</span> <span class="p">(</span><span class="n">push</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that <a class="reference external" href="http://git-scm.com/">git</a> already knew about one remote, called <em>origin</em>; that is your
+fork of Scikit-beam on <a class="reference external" href="http://github.com">GitHub</a>.</p>
+<p>To make more explicit that origin is really <em>your</em> fork of Scikit-beam, rename that
+remote to your <a class="reference external" href="http://github.com">GitHub</a> user name:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">remote</span> <span class="n">rename</span> <span class="n">origin</span> <span class="n">your</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">name</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="create-your-own-private-workspace">
+<span id="make-a-branch"></span><h3>Create your own private workspace<a class="headerlink" href="#create-your-own-private-workspace" title="Permalink to this headline">¶</a></h3>
+<p>One of the nice things about <a class="reference external" href="http://git-scm.com/">git</a> is that it is easy to make what is
+essentially your own private workspace to try out coding ideas. <a class="reference external" href="http://git-scm.com/">git</a>
+calls these workspaces <em>branches</em>.</p>
+<p>Your repository already has several branches; see them if you want by running
+<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">branch</span> <span class="pre">-a</span></code>. Most of them are on <code class="docutils literal notranslate"><span class="pre">remotes/origin</span></code>; in other words,
+they exist on your remote copy of Scikit-beam on GitHub.</p>
+<p>There is one special branch, called <em>master</em>. Right now it is the one you are
+working on; you can tell because it has a marker next to it in your list of
+branches: <code class="docutils literal notranslate"><span class="pre">*</span> <span class="pre">master</span></code>.</p>
+<p>To make a long story short, you never want to work on master. Always work on a branch.</p>
+<p>To avoid potential confusion down the road, make your own branch now; this
+one you can call anything you like (when making contributions you should use
+a meaningful more name):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">branch</span> <span class="n">my</span><span class="o">-</span><span class="n">own</span><span class="o">-</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span>
+</pre></div>
+</div>
+<p>You are <em>not quite</em> done yet. Git knows about this new branch; run
+<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">branch</span></code> and you get:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">*</span> <span class="n">master</span>
+  <span class="n">my</span><span class="o">-</span><span class="n">own</span><span class="o">-</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">*</span></code> indicates you are still working on master. To work on your branch
+instead you need to <em>check out</em> the branch <code class="docutils literal notranslate"><span class="pre">my-own-scikit-beam</span></code>. Do that with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="n">my</span><span class="o">-</span><span class="n">own</span><span class="o">-</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span>
+</pre></div>
+</div>
+<p>and you should be rewarded with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Switched</span> <span class="n">to</span> <span class="n">branch</span> <span class="s1">&#39;my-own-scikit-beam&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="activate-the-development-version-of-scikit-beam">
+<span id="activate-development-scikit-beam"></span><h3>“Activate” the development version of scikit-beam<a class="headerlink" href="#activate-the-development-version-of-scikit-beam" title="Permalink to this headline">¶</a></h3>
+<p>Right now you have the development version of <a class="reference external" href="http://scikit-beam.github.io/scikit-beam/">Scikit-beam</a>, but python will not
+see it.  See  <a class="reference internal" href="virtual_pythons.html#virtual-envs"><span class="std std-ref">Python virtual environments</span></a> for how to set up a env to work in.  Assuming you are
+using conda</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">skbeam_dev</span> <span class="n">python</span><span class="o">=</span><span class="mi">3</span> <span class="n">maplotlib</span> <span class="n">ipython</span> <span class="n">scipy</span>
+<span class="n">source</span> <span class="n">activate</span> <span class="n">skbeam_dev</span>
+</pre></div>
+</div>
+<p>In the directory where your copy of <a class="reference external" href="http://scikit-beam.github.io/scikit-beam/">Scikit-beam</a> is type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">develop</span>
+</pre></div>
+</div>
+<p>Several pages of output will follow the first time you do this; this wouldn’t
+be a bad time to get a fresh cup of coffee. At the end of it you should see
+something like
+<code class="docutils literal notranslate"><span class="pre">Finished</span> <span class="pre">processing</span> <span class="pre">dependencies</span> <span class="pre">for</span> <span class="pre">scikit-beam==0.0.8.post67.dev0+g1dfa736.r0</span></code>.</p>
+<p>To make sure it has been activated <strong>change to a different directory outside of
+the scikit-beam distribution</strong> and try this in ipython:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="kn">import</span> <span class="nn">skbeam</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">skbeam</span><span class="o">.</span><span class="n">__version__</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="s1">&#39;0.0.8.post67.dev0+g1dfa736&#39;</span>
+</pre></div>
+</div>
+<p>The actual version number will be different than in this example.  The
+version string is a automatically extracted from git and follows
+<a class="reference external" href="https://www.python.org/dev/peps/pep-0440/">PEP440</a>.  For example, this version is 67 commits past the v0.0.8
+tag (<code class="docutils literal notranslate"><span class="pre">'0.0.8.post67'</span></code>), the working tree is dirty (<code class="docutils literal notranslate"><span class="pre">'dev0'</span></code>) and
+the last commit has the SHA <code class="docutils literal notranslate"><span class="pre">'1dfa736'</span></code>.</p>
+</div>
+<div class="section" id="test-your-development-copy">
+<span id="test-installation"></span><h3>Test your development copy<a class="headerlink" href="#test-your-development-copy" title="Permalink to this headline">¶</a></h3>
+<p>Testing is an important part of making sure <a class="reference external" href="http://scikit-beam.github.io/scikit-beam/">Scikit-beam</a> produces reliable,
+reproducible results. Before you try out a new feature or think you have found
+a bug make sure the tests run properly on your system.</p>
+<p>If the test <em>don’t</em> complete successfully, that is itself a bug–please
+<a class="reference external" href="http://github.com/scikit-beam/scikit-beam/issues">report it</a>.</p>
+<p>To run the tests, navigate back to the directory your copy of scikit-beam is in on
+your computer, then, at the shell prompt, type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_tests</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>This is another good time to get some coffee or tea. The number of test is
+large. When the test are done running you will see a message something like
+this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">4741</span> <span class="n">passed</span><span class="p">,</span> <span class="mi">85</span> <span class="n">skipped</span><span class="p">,</span> <span class="mi">11</span> <span class="n">xfailed</span>
+</pre></div>
+</div>
+<p>Skips and xfails are fine, but if there are errors or failures please
+<a class="reference external" href="http://github.com/scikit-beam/scikit-beam/issues">report them</a>.</p>
+</div>
+<div class="section" id="try-out-the-development-version">
+<span id="try-devel"></span><h3>Try out the development version<a class="headerlink" href="#try-out-the-development-version" title="Permalink to this headline">¶</a></h3>
+<p>If you are going through this to ramp up to making more contributions to
+<a class="reference external" href="http://scikit-beam.github.io/scikit-beam/">Scikit-beam</a> you don’t actually have to do anything here.</p>
+<p>If you are doing this because you have found a bug and are checking that it
+still exists in the development version, try running your code.</p>
+<p>Or, just for fun, try out one of the
+<a class="reference external" href="http://scikit-beam.readthedocs.org/en/latest/changelog.html">new features</a> in
+the development version.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../resource/api/index.html">Complete Reference (API)</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../resource/dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../../resource/api/fluorescence.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">fluorescence</span></code> Module</a></li>
+      <li>Next: <a href="development_workflow.html" title="next chapter">How to make a code contribution</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/development/workflow/get_devel_version.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

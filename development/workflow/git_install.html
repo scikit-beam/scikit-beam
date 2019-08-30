@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Install and configure git &#8212; scikit-beam 0.0.18.post10+g384742b documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="install-and-configure-git">
+<span id="install-git"></span><h1>Install and configure git<a class="headerlink" href="#install-and-configure-git" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="get-git">
+<h2>Get git<a class="headerlink" href="#get-git" title="Permalink to this headline">¶</a></h2>
+<p>Installers and instructions for all platforms are available at
+<a class="reference external" href="http://git-scm.com/downloads">http://git-scm.com/downloads</a></p>
+</div>
+<div class="section" id="essential-configuration">
+<span id="essential-config"></span><h2>Essential configuration<a class="headerlink" href="#essential-configuration" title="Permalink to this headline">¶</a></h2>
+<p>Though technically not required to install <a class="reference external" href="http://git-scm.com/">git</a> and get it running, configure <a class="reference external" href="http://git-scm.com/">git</a> so that you get credit for your contributions:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">config</span> <span class="o">--</span><span class="k">global</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span> <span class="s2">&quot;Your Name&quot;</span>
+<span class="n">git</span> <span class="n">config</span> <span class="o">--</span><span class="k">global</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span> <span class="n">you</span><span class="nd">@yourdomain</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">com</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Use the same email address here that you used for setting up your GitHub
+account to save yourself a couple of steps later, when you connect your
+git to GitHub.</p>
+</div>
+<p>Check it with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git config --list
+user.name=Your Name
+user.email=you@yourdomain.example.com
+# ...likely followed by many other configuration values
+</pre></div>
+</div>
+</div>
+<div class="section" id="get-a-git-gui-optional">
+<span id="git-gui-options"></span><h2>Get a git GUI (optional)<a class="headerlink" href="#get-a-git-gui-optional" title="Permalink to this headline">¶</a></h2>
+<p>There are several good, free graphical interfaces for git.
+Even if you are proficient with <a class="reference external" href="http://git-scm.com/">git</a> at the command line a GUI can be useful.</p>
+<p>Mac and Windows:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://www.sourcetreeapp.com/">SourceTree</a></p></li>
+<li><p>The github client for <a class="reference external" href="http://mac.github.com/">Mac</a> or <a class="reference external" href="http://windows.github.com/">Windows</a></p></li>
+</ul>
+<p>Linux, Mac and Windows:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://git-cola.github.io/">git-cola</a></p></li>
+</ul>
+<p>There is a more extensive list of <a class="reference external" href="http://git-scm.com/downloads/guis">git GUIs</a>, including non-free options, for
+all platforms.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../resource/api/index.html">Complete Reference (API)</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../resource/dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/development/workflow/git_install.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

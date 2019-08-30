@@ -1,0 +1,351 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>core.feature Module &#8212; scikit-beam 0.0.18.post10+g384742b documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Fitting API" href="fitting/index.html" />
+    <link rel="prev" title="core.dpc Module" href="dpc.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-skbeam.core.feature">
+<span id="core-feature-module"></span><h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.feature</span></code> Module<a class="headerlink" href="#module-skbeam.core.feature" title="Permalink to this headline">¶</a></h1>
+<p>This module contains code for extracting features from data</p>
+<dl class="exception">
+<dt id="skbeam.core.feature.PeakRejection">
+<em class="property">exception </em><code class="sig-prename descclassname">skbeam.core.feature.</code><code class="sig-name descname">PeakRejection</code><a class="headerlink" href="#skbeam.core.feature.PeakRejection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.5/library/exceptions.html#Exception" title="(in Python v3.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Custom exception class to indicate that the refine function rejected
+the candidate peak.</p>
+<p>This uses the exception handling framework in a method akin to
+<cite>StopIteration</cite> to indicate that there will be no return value.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.feature.filter_n_largest">
+<code class="sig-prename descclassname">skbeam.core.feature.</code><code class="sig-name descname">filter_n_largest</code><span class="sig-paren">(</span><em class="sig-param">y</em>, <em class="sig-param">cands</em>, <em class="sig-param">N</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.feature.filter_n_largest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters the N largest candidate peaks</p>
+<p>Return a maximum of N largest candidates.  If N &gt; len(cands) then
+all of the cands will be returned sorted, else the indices
+of the N largest peaks will be returned in descending order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>y</strong><span class="classifier">array</span></dt><dd><p>Independent variable</p>
+</dd>
+<dt><strong>cands</strong><span class="classifier">array</span></dt><dd><p>An array containing the indices of candidate peaks</p>
+</dd>
+<dt><strong>N</strong><span class="classifier">int</span></dt><dd><p>The maximum number of peaks to return, sorted by size.
+Must be positive</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>cands</strong><span class="classifier">array</span></dt><dd><p>An array of the indices of up to the N largest candidates</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.feature.filter_peak_height">
+<code class="sig-prename descclassname">skbeam.core.feature.</code><code class="sig-name descname">filter_peak_height</code><span class="sig-paren">(</span><em class="sig-param">y</em>, <em class="sig-param">cands</em>, <em class="sig-param">thresh</em>, <em class="sig-param">window=5</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.feature.filter_peak_height" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter to remove candidate that are too small.  This
+is implemented by looking at the relative height (max - min)
+of the peak in a window around the candidate peak.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>y</strong><span class="classifier">array</span></dt><dd><p>Independent variable</p>
+</dd>
+<dt><strong>cands</strong><span class="classifier">array</span></dt><dd><p>An array containing the indices of candidate peaks</p>
+</dd>
+<dt><strong>thresh</strong><span class="classifier">int</span></dt><dd><p>The minimum peak-to-peak size of the candidate peak to be accepted</p>
+</dd>
+<dt><strong>window</strong><span class="classifier">int, optional</span></dt><dd><p>The size of the window around the peak to consider</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>cands</strong><span class="classifier">array</span></dt><dd><p>An array of the indices which pass the filter</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.feature.peak_refinement">
+<code class="sig-prename descclassname">skbeam.core.feature.</code><code class="sig-name descname">peak_refinement</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">cands</em>, <em class="sig-param">window</em>, <em class="sig-param">refine_function</em>, <em class="sig-param">refine_args=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.feature.peak_refinement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Refine candidate locations</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>The independent variable, does not need to be evenly spaced.</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">array</span></dt><dd><p>The dependent variable.  Must correspond 1:1 with the values in <cite>x</cite></p>
+</dd>
+<dt><strong>cands</strong><span class="classifier">array</span></dt><dd><p>Array of the indices in <cite>x</cite> (and <cite>y</cite>) for the candidate peaks.</p>
+</dd>
+<dt><strong>refine_function</strong><span class="classifier">function</span></dt><dd><p>A function which takes a section of data with a peak in it and returns
+the location and height of the peak to sub-sample accuracy.  Additional
+parameters can be passed through via the refine_args kwarg.
+The function signature must be:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">center</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="n">refine_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This function may raise <cite>PeakRejection</cite> to indicate no suitable
+peak was found</p>
+</dd>
+<dt><strong>window</strong><span class="classifier">int</span></dt><dd><p>How many samples to extract on either side of the
+candidate locations are passed to the refine function.  The
+window will be truncated near the boundaries.  The length of the
+data passed to the refine function will be (2 * window + 1).</p>
+</dd>
+<dt><strong>refine_args</strong><span class="classifier">dict, optional</span></dt><dd><p>The passed to the refine_function</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>peak_locations</strong><span class="classifier">array</span></dt><dd><p>The locations of the peaks</p>
+</dd>
+<dt><strong>peak_heights</strong><span class="classifier">array</span></dt><dd><p>The heights of the peaks</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">512</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">512</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tt</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="mf">150.55</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tt</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="mf">450.75</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cands</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">argrelmax</span><span class="p">(</span><span class="n">tt</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">peak_refinement</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">cands</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">refine_quadratic</span><span class="p">))</span>
+<span class="go">(array([ 150.62286432,  450.7909412 ]), array([ 0.96435832,  0.96491501]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">peak_refinement</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">cands</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">refine_log_quadratic</span><span class="p">))</span>
+<span class="go">(array([ 150.55,  450.75]), array([ 1.,  1.]))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.feature.refine_log_quadratic">
+<code class="sig-prename descclassname">skbeam.core.feature.</code><code class="sig-name descname">refine_log_quadratic</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">Rval_thresh=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.feature.refine_log_quadratic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempts to refine the peaks by fitting a quadratic to the log of
+the y-data.  This is a linear approximation of fitting a Gaussian.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>Independent variable</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">array</span></dt><dd><p>Dependent variable</p>
+</dd>
+<dt><strong>Rval_thresh</strong><span class="classifier">float, optional</span></dt><dd><p>Threshold for R^2 value of fit,  If the computed R^2 is worse than
+this threshold PeakRejection will be raised</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>Refined estimate for center</p>
+</dd>
+<dt><strong>height</strong><span class="classifier">float</span></dt><dd><p>Refined estimate for height</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>PeakRejection</dt><dd><p>Raised to indicate that no suitable peak was found in the
+interval</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.feature.refine_quadratic">
+<code class="sig-prename descclassname">skbeam.core.feature.</code><code class="sig-name descname">refine_quadratic</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">Rval_thresh=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.feature.refine_quadratic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempts to refine the peaks by fitting to
+a quadratic function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>Independent variable</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">array</span></dt><dd><p>Dependent variable</p>
+</dd>
+<dt><strong>Rval_thresh</strong><span class="classifier">float, optional</span></dt><dd><p>Threshold for R^2 value of fit,  If the computed R^2 is worse than
+this threshold PeakRejection will be raised</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>Refined estimate for center</p>
+</dd>
+<dt><strong>height</strong><span class="classifier">float</span></dt><dd><p>Refined estimate for height</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>PeakRejection</dt><dd><p>Raised to indicate that no suitable peak was found in the
+interval</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Complete Reference (API)</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#core">Core</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Core API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../io/index.html">IO API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../core.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core</span></code> subpackge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mask.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.mask</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#domain-name-spaces">Domain name spaces</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Complete Reference (API)</a><ul>
+  <li><a href="index.html">Core API</a><ul>
+      <li>Previous: <a href="dpc.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.dpc</span></code> Module</a></li>
+      <li>Next: <a href="fitting/index.html" title="next chapter">Fitting API</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../../_sources/resource/api/core/feature.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

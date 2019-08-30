@@ -1,0 +1,15 @@
+significant changes to the fitting package
+------------------------------------------
+
+================ =========================== ==============
+ Module Name      Original Location           New Location
+---------------- --------------------------- --------------
+physics_model.py  /fitting/model/             /fitting/
+physics_peak.py   /fitting/model/             /fitting/
+background.py     /fitting/model/background/  /fitting/
+api.py            N/A                         /fitting/
+================ =========================== ==============
+
+physics_model.py and physics_peak.py were moved to the root of the fitting
+package and an api was created that imports all relevant things from those two
+modules

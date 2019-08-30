@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>skbeam.core.speckle.xsvs &#8212; scikit-beam 0.0.18.post10+g384742b documentation</title>
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="skbeam.core.speckle.normalize_bin_edges" href="skbeam.core.speckle.normalize_bin_edges.html" />
+    <link rel="prev" title="X-ray speckle visibility spectroscopy(XSVS)" href="../speckle.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="skbeam-core-speckle-xsvs">
+<h1>skbeam.core.speckle.xsvs<a class="headerlink" href="#skbeam-core-speckle-xsvs" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="skbeam.core.speckle.xsvs">
+<code class="sig-prename descclassname">skbeam.core.speckle.</code><code class="sig-name descname">xsvs</code><span class="sig-paren">(</span><em class="sig-param">image_sets</em>, <em class="sig-param">label_array</em>, <em class="sig-param">number_of_img</em>, <em class="sig-param">timebin_num=2</em>, <em class="sig-param">max_cts=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.speckle.xsvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will provide the probability density of detecting photons
+for different integration times.</p>
+<p>The experimental probability density P(K) of detecting photons K is
+obtained by histogramming the speckle counts over an ensemble of
+equivalent pixels and over a number of speckle patterns recorded
+with the same integration time T under the same condition.</p>
+<p>Bad images need to be represented as an array filled with np.nan.
+Using bad_to_nan function in mask.py the bad images can be converted
+into np.nan arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>image_sets</strong><span class="classifier">array</span></dt><dd><p>sets of images</p>
+</dd>
+<dt><strong>label_array</strong><span class="classifier">array</span></dt><dd><p>labeled array; 0 is background.
+Each ROI is represented by a distinct label (i.e., integer).</p>
+</dd>
+<dt><strong>number_of_img</strong><span class="classifier">int</span></dt><dd><p>number of images (how far to go with integration times when finding
+the time_bin, using skbeam.utils.geometric function)</p>
+</dd>
+<dt><strong>timebin_num</strong><span class="classifier">int, optional</span></dt><dd><p>integration time; default is 2</p>
+</dd>
+<dt><strong>max_cts</strong><span class="classifier">int, optional</span></dt><dd><p>the brightest pixel in any ROI in any image in the image set.
+defaults to using skbeam.core.roi.roi_max_counts to determine
+the brightest pixel in any of the ROIs</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>prob_k_all</strong><span class="classifier">array</span></dt><dd><p>probability density of detecting photons</p>
+</dd>
+<dt><strong>prob_k_std_dev</strong><span class="classifier">array</span></dt><dd><p>standard deviation of probability density of detecting photons</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>These implementation is based on following references
+References: text <a class="reference internal" href="#rb93c9e1f1bb3-1" id="id1">[1]</a>, text <a class="reference internal" href="#rb93c9e1f1bb3-2" id="id2">[2]</a></p>
+<dl class="citation">
+<dt class="label" id="rb93c9e1f1bb3-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>L. Li, P. Kwasniewski, D. Oris, L Wiegart, L. Cristofolini,
+C. Carona and A. Fluerasu , “Photon statistics and speckle visibility
+spectroscopy with partially coherent x-rays” J. Synchrotron Rad.,
+vol 21, p 1288-1295, 2014.</p>
+</dd>
+<dt class="label" id="rb93c9e1f1bb3-2"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>R. Bandyopadhyay, A. S. Gittings, S. S. Suh, P.K. Dixon and
+D.J. Durian “Speckle-visibilty Spectroscopy: A tool to study
+time-varying dynamics” Rev. Sci. Instrum. vol 76, p  093110, 2005.</p>
+</dd>
+</dl>
+<p>There is an example in <a class="reference external" href="https://github.com/scikit-beam/scikit-beam-examples">https://github.com/scikit-beam/scikit-beam-examples</a>
+It will demonstrate the use of these functions in this module for
+experimental data.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Complete Reference (API)</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html#core">Core</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html">Core API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../io/index.html">IO API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../core.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core</span></code> subpackge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mask.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.mask</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#domain-name-spaces">Domain name spaces</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/workflow/get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/workflow/maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Complete Reference (API)</a><ul>
+  <li><a href="../index.html">Core API</a><ul>
+  <li><a href="../speckle.html">X-ray speckle visibility spectroscopy(XSVS)</a><ul>
+      <li>Previous: <a href="../speckle.html" title="previous chapter">X-ray speckle visibility spectroscopy(XSVS)</a></li>
+      <li>Next: <a href="skbeam.core.speckle.normalize_bin_edges.html" title="next chapter">skbeam.core.speckle.normalize_bin_edges</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../../../_sources/resource/api/core/_as_gen/skbeam.core.speckle.xsvs.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

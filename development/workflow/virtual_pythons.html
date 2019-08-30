@@ -1,0 +1,335 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Python virtual environments &#8212; scikit-beam 0.0.18.post10+g384742b documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="python-virtual-environments">
+<span id="virtual-envs"></span><h1>Python virtual environments<a class="headerlink" href="#python-virtual-environments" title="Permalink to this headline">¶</a></h1>
+<p>If you plan to do regular work on scikit-beam you should do your development in
+a python virtual environment. Conceptually a virtual environment is a
+duplicate of the python environment you normally work in with as many (or as
+few) of the packages from your normal environment included in that virtual
+environment. It is sandboxed from your normal python environment in the sense
+that packages installed in the virtual environment do not affect your normal
+environment in any way.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>“Normal python environment” means whatever python you are using when you
+log in.</p>
+</div>
+<p>There are two options for using virtual environments; the choice of method is
+dictated by the python distribution you use:</p>
+<ul class="simple">
+<li><p>If you use the anaconda python distribution you must use <a class="reference external" href="http://conda.pydata.org/docs/">conda</a> to make
+and manage your virtual environments.</p></li>
+<li><p>If you use any other distribution you use <a class="reference external" href="http://pypi.python.org/pypi/virtualenvwrapper">virtualenvwrapper</a>; you <em>can not</em>
+use <a class="reference external" href="http://conda.pydata.org/docs/">conda</a>. As the name suggests, <a class="reference external" href="http://pypi.python.org/pypi/virtualenvwrapper">virtualenvwrapper</a> is a wrapper around
+<a class="reference external" href="http://pypi.python.org/pypi/virtualenv">virtualenv</a>.</p></li>
+</ul>
+<p>In both cases you will go through the same basic steps; the commands to
+accomplish each step are given for both <a class="reference external" href="http://conda.pydata.org/docs/">conda</a> and <a class="reference external" href="http://pypi.python.org/pypi/virtualenvwrapper">virtualenvwrapper</a>:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#setup-for-env"><span class="std std-ref">Set up for virtual environments</span></a></p></li>
+<li><p><a class="reference internal" href="#list-env"><span class="std std-ref">List virtual environments</span></a></p></li>
+<li><p><a class="reference internal" href="#create-env"><span class="std std-ref">Create a new virtual environment</span></a></p></li>
+<li><p><a class="reference internal" href="#activate-env"><span class="std std-ref">Activate a virtual environment</span></a></p></li>
+<li><p><a class="reference internal" href="#deactivate-env"><span class="std std-ref">Deactivate a virtual environment</span></a></p></li>
+<li><p><a class="reference internal" href="#delete-env"><span class="std std-ref">Delete a virtual environment</span></a></p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>You <strong>cannot</strong> use <a class="reference external" href="http://pypi.python.org/pypi/virtualenvwrapper">virtualenvwrapper</a> or <a class="reference external" href="http://pypi.python.org/pypi/virtualenv">virtualenv</a> within anaconda.</p></li>
+<li><p><a class="reference external" href="http://pypi.python.org/pypi/virtualenvwrapper">virtualenvwrapper</a> works with bash and bash-like shells; see
+<a class="reference internal" href="virtualenv_detail.html#using-virtualenv"><span class="std std-ref">Using virtualenv</span></a> for alternatives.</p></li>
+</ul>
+</div>
+<div class="section" id="set-up-for-virtual-environments">
+<span id="setup-for-env"></span><h2>Set up for virtual environments<a class="headerlink" href="#set-up-for-virtual-environments" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p><a class="reference external" href="http://conda.pydata.org/docs/">conda</a>: No setup is necessary beyond installing the anaconda python
+distribution.</p></li>
+<li><p><a class="reference external" href="http://pypi.python.org/pypi/virtualenvwrapper">virtualenvwrapper</a>:</p>
+<ul>
+<li><p>First, install <a class="reference external" href="http://pypi.python.org/pypi/virtualenvwrapper">virtualenvwrapper</a>, which will also install <a class="reference external" href="http://pypi.python.org/pypi/virtualenv">virtualenv</a>,
+with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">virtualenvwrapper</span></code>.</p></li>
+<li><p>From the <a class="reference external" href="http://virtualenvwrapper.readthedocs.org/en/latest/install.html">documentation for virtualenvwrapper</a>, you also need to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export WORKON_HOME=$HOME/.virtualenvs
+export PROJECT_HOME=$HOME/
+source /usr/local/bin/virtualenvwrapper.sh
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="list-virtual-environments">
+<span id="list-env"></span><h2>List virtual environments<a class="headerlink" href="#list-virtual-environments" title="Permalink to this headline">¶</a></h2>
+<p>You do not need to list the virtual environments you have created before using
+them…but sooner or later you will forget what environments you have defined
+and this is the easy way to find out.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><a class="reference external" href="http://conda.pydata.org/docs/">conda</a>: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">info</span> <span class="pre">-e</span></code></dt><dd><ul>
+<li><p>you will always have at least one environment, called <code class="docutils literal notranslate"><span class="pre">root</span></code></p></li>
+<li><p>your active environment is indicated by a <code class="docutils literal notranslate"><span class="pre">*</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><a class="reference external" href="http://pypi.python.org/pypi/virtualenvwrapper">virtualenvwrapper</a>: <code class="docutils literal notranslate"><span class="pre">workon</span></code></dt><dd><ul>
+<li><p>If this displays nothing you have no virtual environments</p></li>
+<li><p>If this displays <code class="docutils literal notranslate"><span class="pre">workon:</span> <span class="pre">command</span> <span class="pre">not</span> <span class="pre">found</span></code> then you haven’t done
+the <a class="reference internal" href="#setup-for-env"><span class="std std-ref">Set up for virtual environments</span></a>; do that.</p></li>
+<li><p>For more detailed information about installed environments use
+<code class="docutils literal notranslate"><span class="pre">lsvirtualenv</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="create-a-new-virtual-environment">
+<span id="create-env"></span><h2>Create a new virtual environment<a class="headerlink" href="#create-a-new-virtual-environment" title="Permalink to this headline">¶</a></h2>
+<p>This needs to be done once for each virtual environment you want. There is one
+important choice you need to make when you create a virtual environment:
+which, if any, of the packages installed in your normal python environment do
+you want in your virtual environment?</p>
+<p>Including them in your virtual environment doesn’t take much extra space–they
+are linked into the virtual environment instead of being copied. Within the
+virtual environment you can install new versions of packages like Numpy or
+Scikit-beam that override the versions installed in your normal python environment.</p>
+<p>The easiest way to get started is to include in your virtual environment the
+packages installed in your your normal python environment; the instructions
+below do that.</p>
+<p>In everything that follows, <code class="docutils literal notranslate"><span class="pre">ENV</span></code> represents the name you give your virtual
+environment.</p>
+<p><strong>The name you choose cannot have spaces in it.</strong></p>
+<ul>
+<li><dl>
+<dt><a class="reference external" href="http://conda.pydata.org/docs/">conda</a>:</dt><dd><ul>
+<li><p>Make an environment called <code class="docutils literal notranslate"><span class="pre">ENV</span></code> with all of the packages in your main
+anaconda environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>``conda create -n ENV anaconda``
+</pre></div>
+</div>
+</li>
+<li><p>More details, and examples that start with none of the packages from
+your normal python environment, are in the
+<a class="reference external" href="http://docs.continuum.io/conda/examples/create.html">documentation for the conda command</a> and the
+<a class="reference external" href="http://www.continuum.io/blog/conda">blog post announcing anaconda environments</a>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><a class="reference external" href="http://pypi.python.org/pypi/virtualenvwrapper">virtualenvwrapper</a>:</dt><dd><ul>
+<li><p>Make an environment called <code class="docutils literal notranslate"><span class="pre">ENV</span></code> with all of the packages in your normal
+python environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>``mkvirtualenv --system-site-packages ENV``
+</pre></div>
+</div>
+</li>
+<li><p>Omit the option <code class="docutils literal notranslate"><span class="pre">--system-site-packages</span></code> to create an environment
+without the python packages installed in your normal python environment.</p></li>
+<li><p>Environments created with <a class="reference external" href="http://pypi.python.org/pypi/virtualenvwrapper">virtualenvwrapper</a> always include <a class="reference external" href="http://www.pip-installer.org/en/latest/">pip</a>
+and <a class="reference external" href="https://pythonhosted.org/setuptools/">setuptools</a> so that you
+can install packages within the virtual environment.</p></li>
+<li><p>More details and examples are in the
+<a class="reference external" href="http://virtualenvwrapper.readthedocs.org/en/latest/command_ref.html">virtualenvwrapper command documentation</a>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="activate-a-virtual-environment">
+<span id="activate-env"></span><h2>Activate a virtual environment<a class="headerlink" href="#activate-a-virtual-environment" title="Permalink to this headline">¶</a></h2>
+<p>To use a new virtual environment you may need to activate it;
+<a class="reference external" href="http://pypi.python.org/pypi/virtualenvwrapper">virtualenvwrapper</a> will try to automatically activate your new environment
+when you create it. Activation does three things (which you could do
+manually, though it would be inconvenient):</p>
+<ul class="simple">
+<li><p>Put the <code class="docutils literal notranslate"><span class="pre">bin</span></code> directory for the virtual environment at the front of your
+<code class="docutils literal notranslate"><span class="pre">$PATH</span></code>.</p></li>
+<li><p>Add the name of the virtual environment to your command prompt. If you have
+successfully switched to a new environment called <code class="docutils literal notranslate"><span class="pre">ENV</span></code> your prompt should
+look something like this: <code class="docutils literal notranslate"><span class="pre">(ENV)[~]</span> <span class="pre">$</span></code></p></li>
+<li><p>conda provides a mechanism for packages to install scripts or export environmental
+variables on activation.</p></li>
+</ul>
+<p>The commands below allow you to switch between virtual environments in
+addition to activating new ones.</p>
+<ul>
+<li><p>` conda`: Activate the environment <code class="docutils literal notranslate"><span class="pre">ENV</span></code> with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">activate</span> <span class="n">ENV</span>
+</pre></div>
+</div>
+</li>
+<li><p><a class="reference external" href="http://pypi.python.org/pypi/virtualenvwrapper">virtualenvwrapper</a>: Activate the environment <code class="docutils literal notranslate"><span class="pre">ENV</span></code> with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">workon</span> <span class="n">ENV</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="deactivate-a-virtual-environment">
+<span id="deactivate-env"></span><h2>Deactivate a virtual environment<a class="headerlink" href="#deactivate-a-virtual-environment" title="Permalink to this headline">¶</a></h2>
+<p>At some point you may want to go back to your normal python environment. Do
+that with:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://conda.pydata.org/docs/">conda</a>: <code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">deactivate</span></code></p></li>
+<li><dl class="simple">
+<dt><a class="reference external" href="http://pypi.python.org/pypi/virtualenvwrapper">virtualenvwrapper</a>: <code class="docutils literal notranslate"><span class="pre">deactivate</span></code></dt><dd><ul>
+<li><p>Note that in <code class="docutils literal notranslate"><span class="pre">virtualenvwrapper</span> <span class="pre">4.1.1</span></code> the output of
+<code class="docutils literal notranslate"><span class="pre">mkvirtualenv</span></code> says you should use <code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">deactivate</span></code>; that does
+not seem to actually work.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="delete-a-virtual-environment">
+<span id="delete-env"></span><h2>Delete a virtual environment<a class="headerlink" href="#delete-a-virtual-environment" title="Permalink to this headline">¶</a></h2>
+<p>In both <a class="reference external" href="http://pypi.python.org/pypi/virtualenvwrapper">virtualenvwrapper</a> and <a class="reference external" href="http://conda.pydata.org/docs/">conda</a> you can simply delete the directory in
+which the <code class="docutils literal notranslate"><span class="pre">ENV</span></code> is located; both also provide commands to make that a bit easier.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://conda.pydata.org/docs/">conda</a>: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">remove</span> <span class="pre">--all</span> <span class="pre">-n</span> <span class="pre">ENV</span></code></p></li>
+<li><p><a class="reference external" href="http://pypi.python.org/pypi/virtualenvwrapper">virtualenvwrapper</a>: <code class="docutils literal notranslate"><span class="pre">rmvirtualenv</span> <span class="pre">ENV</span></code></p></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../resource/api/index.html">Complete Reference (API)</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../resource/dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/development/workflow/virtual_pythons.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

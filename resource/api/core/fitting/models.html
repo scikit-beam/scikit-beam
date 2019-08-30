@@ -1,0 +1,541 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>lineshapes Module &#8212; scikit-beam 0.0.18.post10+g384742b documentation</title>
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="models Module" href="xrf_model.html" />
+    <link rel="prev" title="background Module" href="lineshapes.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-skbeam.core.fitting.lineshapes">
+<span id="lineshapes-module"></span><h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">lineshapes</span></code> Module<a class="headerlink" href="#module-skbeam.core.fitting.lineshapes" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="skbeam.core.fitting.lineshapes.compton">
+<code class="sig-prename descclassname">skbeam.core.fitting.lineshapes.</code><code class="sig-name descname">compton</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">compton_amplitude</em>, <em class="sig-param">coherent_sct_energy</em>, <em class="sig-param">fwhm_offset</em>, <em class="sig-param">fwhm_fanoprime</em>, <em class="sig-param">e_offset</em>, <em class="sig-param">e_linear</em>, <em class="sig-param">e_quadratic</em>, <em class="sig-param">compton_angle</em>, <em class="sig-param">compton_fwhm_corr</em>, <em class="sig-param">compton_f_step</em>, <em class="sig-param">compton_f_tail</em>, <em class="sig-param">compton_gamma</em>, <em class="sig-param">compton_hi_f_tail</em>, <em class="sig-param">compton_hi_gamma</em>, <em class="sig-param">epsilon=2.96</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.fitting.lineshapes.compton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model compton peak, which is generated as an inelastic peak and always
+stays to the left of elastic peak on the spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>energy value</p>
+</dd>
+<dt><strong>compton_amplitude</strong><span class="classifier">float</span></dt><dd><p>area for gaussian peak, gaussian step and gaussian tail functions</p>
+</dd>
+<dt><strong>coherent_sct_energy</strong><span class="classifier">float</span></dt><dd><p>incident energy</p>
+</dd>
+<dt><strong>fwhm_offset</strong><span class="classifier">float</span></dt><dd><p>global fitting parameter for peak width</p>
+</dd>
+<dt><strong>fwhm_fanoprime</strong><span class="classifier">float</span></dt><dd><p>global fitting parameter for peak width</p>
+</dd>
+<dt><strong>e_offset</strong><span class="classifier">float</span></dt><dd><p>offset of energy calibration</p>
+</dd>
+<dt><strong>e_linear</strong><span class="classifier">float</span></dt><dd><p>linear coefficient in energy calibration</p>
+</dd>
+<dt><strong>e_quadratic</strong><span class="classifier">float</span></dt><dd><p>quadratic coefficient in energy calibration</p>
+</dd>
+<dt><strong>compton_angle</strong><span class="classifier">float</span></dt><dd><p>compton angle in degree</p>
+</dd>
+<dt><strong>compton_fwhm_corr</strong><span class="classifier">float</span></dt><dd><p>correction factor on peak width</p>
+</dd>
+<dt><strong>compton_f_step</strong><span class="classifier">float</span></dt><dd><p>weight factor of the gaussian step function</p>
+</dd>
+<dt><strong>compton_f_tail</strong><span class="classifier">float</span></dt><dd><p>weight factor of gaussian tail on lower side</p>
+</dd>
+<dt><strong>compton_gamma</strong><span class="classifier">float</span></dt><dd><p>normalization factor of gaussian tail on lower side</p>
+</dd>
+<dt><strong>compton_hi_f_tail</strong><span class="classifier">float</span></dt><dd><p>weight factor of gaussian tail on higher side</p>
+</dd>
+<dt><strong>compton_hi_gamma</strong><span class="classifier">float</span></dt><dd><p>normalization factor of gaussian tail on higher side</p>
+</dd>
+<dt><strong>epsilon</strong><span class="classifier">float</span></dt><dd><p>energy to create a hole-electron pair
+for Ge 2.96, for Si 3.61 at 300K
+needs to double check this value</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>counts</strong><span class="classifier">array</span></dt><dd><p>compton peak</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="reeedfd0d2f34-1"><span class="brackets">1</span></dt>
+<dd><p>M. Van Gysel etc, “Description of Compton peaks in energy-dispersive
+x-ray fluorescence spectra”, X-Ray Spectrometry, vol. 32, pp. 139-147,
+2003.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.fitting.lineshapes.elastic">
+<code class="sig-prename descclassname">skbeam.core.fitting.lineshapes.</code><code class="sig-name descname">elastic</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">coherent_sct_amplitude</em>, <em class="sig-param">coherent_sct_energy</em>, <em class="sig-param">fwhm_offset</em>, <em class="sig-param">fwhm_fanoprime</em>, <em class="sig-param">e_offset</em>, <em class="sig-param">e_linear</em>, <em class="sig-param">e_quadratic</em>, <em class="sig-param">epsilon=2.96</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.fitting.lineshapes.elastic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model of elastic peak in X-Ray fluorescence</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>energy value</p>
+</dd>
+<dt><strong>coherent_sct_amplitude</strong><span class="classifier">float</span></dt><dd><p>area of elastic peak</p>
+</dd>
+<dt><strong>coherent_sct_energy</strong><span class="classifier">float</span></dt><dd><p>incident energy</p>
+</dd>
+<dt><strong>fwhm_offset</strong><span class="classifier">float</span></dt><dd><p>global fitting parameter for peak width</p>
+</dd>
+<dt><strong>fwhm_fanoprime</strong><span class="classifier">float</span></dt><dd><p>global fitting parameter for peak width</p>
+</dd>
+<dt><strong>e_offset</strong><span class="classifier">float</span></dt><dd><p>offset of energy calibration</p>
+</dd>
+<dt><strong>e_linear</strong><span class="classifier">float</span></dt><dd><p>linear coefficient in energy calibration</p>
+</dd>
+<dt><strong>e_quadratic</strong><span class="classifier">float</span></dt><dd><p>quadratic coefficient in energy calibration</p>
+</dd>
+<dt><strong>epsilon</strong><span class="classifier">float</span></dt><dd><p>energy to create a hole-electron pair
+for Ge 2.96, for Si 3.61 at 300K
+needs to double check this value</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>value</strong><span class="classifier">array</span></dt><dd><p>elastic peak</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.fitting.lineshapes.gamma_dist">
+<code class="sig-prename descclassname">skbeam.core.fitting.lineshapes.</code><code class="sig-name descname">gamma_dist</code><span class="sig-paren">(</span><em class="sig-param">bin_values</em>, <em class="sig-param">K</em>, <em class="sig-param">M</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.fitting.lineshapes.gamma_dist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gamma distribution function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>bin_values</strong><span class="classifier">array</span></dt><dd><p>bin values for detecting photons
+eg : max photon counts is 8
+bin_values = np.arange(8+2)</p>
+</dd>
+<dt><strong>K</strong><span class="classifier">int</span></dt><dd><p>mean count of photons</p>
+</dd>
+<dt><strong>M</strong><span class="classifier">int</span></dt><dd><p>number of coherent modes</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>gamma_dist</strong><span class="classifier">array</span></dt><dd><p>Gamma distribution</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>These implementations are based on the references under the <code class="docutils literal notranslate"><span class="pre">Notes</span></code>
+section of the <code class="docutils literal notranslate"><span class="pre">nbinom_dist()</span></code> docstring</p>
+<div class="math notranslate nohighlight">
+\[P(K) = \frac{\Gamma(K + M)} {\Gamma(K + 1)\Gamma(M)}
+(\frac {M} {M + &lt;K&gt;})^M (\frac {&lt;K&gt;}{M + &lt;K&gt;})^K\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.fitting.lineshapes.gaussian">
+<code class="sig-prename descclassname">skbeam.core.fitting.lineshapes.</code><code class="sig-name descname">gaussian</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">area</em>, <em class="sig-param">center</em>, <em class="sig-param">sigma</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.fitting.lineshapes.gaussian" title="Permalink to this definition">¶</a></dt>
+<dd><p>1 dimensional gaussian</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>independent variable</p>
+</dd>
+<dt><strong>area</strong><span class="classifier">float</span></dt><dd><p>Area of the normally distributed peak</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>center position</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>standard deviation</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.fitting.lineshapes.gaussian_tail">
+<code class="sig-prename descclassname">skbeam.core.fitting.lineshapes.</code><code class="sig-name descname">gaussian_tail</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">area</em>, <em class="sig-param">center</em>, <em class="sig-param">sigma</em>, <em class="sig-param">gamma</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.fitting.lineshapes.gaussian_tail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use a gaussian tail function to simulate compton peak</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>data in x coordinate</p>
+</dd>
+<dt><strong>area</strong><span class="classifier">float</span></dt><dd><p>area of gauss tail function
+If area is set as 1, the integral is unity.</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>center position</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>control peak width</p>
+</dd>
+<dt><strong>gamma</strong><span class="classifier">float</span></dt><dd><p>normalization factor</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>counts</strong><span class="classifier">array</span></dt><dd><p>gaussian tail peak</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r217e436fbde6-1"><span class="brackets">1</span></dt>
+<dd><p>Rene Van Grieken, “Handbook of X-Ray Spectrometry, Second Edition,
+(Practical Spectroscopy)”, CRC Press, 2 edition, pp. 182, 2007.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.fitting.lineshapes.gausssian_step">
+<code class="sig-prename descclassname">skbeam.core.fitting.lineshapes.</code><code class="sig-name descname">gausssian_step</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">area</em>, <em class="sig-param">center</em>, <em class="sig-param">sigma</em>, <em class="sig-param">peak_e</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.fitting.lineshapes.gausssian_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gauss step function is an important component in modeling compton peak.
+Use scipy erfc function. Please note erfc = 1-erf.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>data in x coordinate</p>
+</dd>
+<dt><strong>area</strong><span class="classifier">float</span></dt><dd><p>area of gauss step function</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>center position</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>standard deviation</p>
+</dd>
+<dt><strong>peak_e</strong><span class="classifier">float</span></dt><dd><p>emission energy</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>counts</strong><span class="classifier">array</span></dt><dd><p>gaussian step peak</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r7a750a865985-1"><span class="brackets">1</span></dt>
+<dd><p>Rene Van Grieken, “Handbook of X-Ray Spectrometry, Second Edition,
+(Practical Spectroscopy)”, CRC Press, 2 edition, pp. 182, 2007.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.fitting.lineshapes.lorentzian">
+<code class="sig-prename descclassname">skbeam.core.fitting.lineshapes.</code><code class="sig-name descname">lorentzian</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">area</em>, <em class="sig-param">center</em>, <em class="sig-param">sigma</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.fitting.lineshapes.lorentzian" title="Permalink to this definition">¶</a></dt>
+<dd><p>1 dimensional lorentzian</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>independent variable</p>
+</dd>
+<dt><strong>area</strong><span class="classifier">float</span></dt><dd><p>area of lorentzian peak,
+If area is set as 1, the integral is unity.</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>center position</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>standard deviation</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.fitting.lineshapes.lorentzian2">
+<code class="sig-prename descclassname">skbeam.core.fitting.lineshapes.</code><code class="sig-name descname">lorentzian2</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">area</em>, <em class="sig-param">center</em>, <em class="sig-param">sigma</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.fitting.lineshapes.lorentzian2" title="Permalink to this definition">¶</a></dt>
+<dd><p>1-d lorentzian squared profile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>independent variable</p>
+</dd>
+<dt><strong>area</strong><span class="classifier">float</span></dt><dd><p>area of lorentzian squared peak,
+If area is set as 1, the integral is unity.</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>center position</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>standard deviation</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.fitting.lineshapes.nbinom_dist">
+<code class="sig-prename descclassname">skbeam.core.fitting.lineshapes.</code><code class="sig-name descname">nbinom_dist</code><span class="sig-paren">(</span><em class="sig-param">bin_values</em>, <em class="sig-param">K</em>, <em class="sig-param">M</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.fitting.lineshapes.nbinom_dist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Negative Binomial (Poisson-Gamma) distribution function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>bin_values</strong><span class="classifier">array</span></dt><dd><p>bin values for detecting photons
+eg : max photon counts is 8
+bin_values = np.arange(8+2)</p>
+</dd>
+<dt><strong>K</strong><span class="classifier">int</span></dt><dd><p>mean count of photons</p>
+</dd>
+<dt><strong>M</strong><span class="classifier">int</span></dt><dd><p>number of coherent modes</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>nbinom</strong><span class="classifier">array</span></dt><dd><p>Negative Binomial (Poisson-Gamma) distribution function</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The negative-binomial distribution function</p>
+<div class="math notranslate nohighlight">
+\[P(K) =(\frac{M}{&lt;K&gt;})^M \frac{K^{M-1}}
+{\Gamma(M)}\exp(-M\frac{K}{&lt;K&gt;})\]</div>
+<p>Implementation reference <a class="reference internal" href="#r9c7107adefa9-1" id="id4">[1]</a></p>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r9c7107adefa9-1"><span class="brackets"><a class="fn-backref" href="#id4">1</a></span></dt>
+<dd><p>L. Li, P. Kwasniewski, D. Oris, L Wiegart, L. Cristofolini,
+C. Carona and A. Fluerasu , “Photon statistics and speckle visibility
+spectroscopy with partially coherent x-rays” J. Synchrotron Rad.,
+vol 21, p 1288-1295, 2014.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.fitting.lineshapes.poisson_dist">
+<code class="sig-prename descclassname">skbeam.core.fitting.lineshapes.</code><code class="sig-name descname">poisson_dist</code><span class="sig-paren">(</span><em class="sig-param">bin_values</em>, <em class="sig-param">K</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.fitting.lineshapes.poisson_dist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Poisson Distribution</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>K</strong><span class="classifier">int</span></dt><dd><p>mean count of photons</p>
+</dd>
+<dt><strong>bin_values</strong><span class="classifier">array</span></dt><dd><p>bin values for detecting photons
+eg : max photon counts is 8
+bin_values = np.arange(8+2)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>poisson_dist</strong><span class="classifier">array</span></dt><dd><p>Poisson Distribution</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>These implementations are based on the references under
+the <code class="docutils literal notranslate"><span class="pre">Notes</span></code> section of the <code class="docutils literal notranslate"><span class="pre">nbinom_dist()</span></code> docstring</p>
+<div class="math notranslate nohighlight">
+\[P(K) = \frac{&lt;K&gt;^K}{K!}\exp(-&lt;K&gt;)\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.fitting.lineshapes.pvoigt">
+<code class="sig-prename descclassname">skbeam.core.fitting.lineshapes.</code><code class="sig-name descname">pvoigt</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">area</em>, <em class="sig-param">center</em>, <em class="sig-param">sigma</em>, <em class="sig-param">fraction</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.fitting.lineshapes.pvoigt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linear combination  of gaussian and lorentzian</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>independent variable</p>
+</dd>
+<dt><strong>area</strong><span class="classifier">float</span></dt><dd><p>area of pvoigt peak</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>center position</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>standard deviation</p>
+</dd>
+<dt><strong>fraction</strong><span class="classifier">float</span></dt><dd><p>weight for lorentzian peak in the linear combination, and (1-fraction)
+is the weight for gaussian peak.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.fitting.lineshapes.voigt">
+<code class="sig-prename descclassname">skbeam.core.fitting.lineshapes.</code><code class="sig-name descname">voigt</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">area</em>, <em class="sig-param">center</em>, <em class="sig-param">sigma</em>, <em class="sig-param">gamma=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.fitting.lineshapes.voigt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convolution of gaussian and lorentzian curve.</p>
+<p>see <a class="reference external" href="http://en.wikipedia.org/wiki/Voigt_profile">http://en.wikipedia.org/wiki/Voigt_profile</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>independent variable</p>
+</dd>
+<dt><strong>area</strong><span class="classifier">float</span></dt><dd><p>area of voigt peak</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>center position</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>standard deviation</p>
+</dd>
+<dt><strong>gamma</strong><span class="classifier">float, optional</span></dt><dd><p>half width at half maximum of lorentzian.
+If optional, <cite>gamma</cite> gets set to <cite>sigma</cite></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Complete Reference (API)</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html#core">Core</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html">Core API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../io/index.html">IO API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../core.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core</span></code> subpackge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mask.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.mask</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#domain-name-spaces">Domain name spaces</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/workflow/get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/workflow/maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development/vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Complete Reference (API)</a><ul>
+  <li><a href="../index.html">Core API</a><ul>
+  <li><a href="index.html">Fitting API</a><ul>
+      <li>Previous: <a href="lineshapes.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">background</span></code> Module</a></li>
+      <li>Next: <a href="xrf_model.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">models</span></code> Module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../../../_sources/resource/api/core/fitting/models.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

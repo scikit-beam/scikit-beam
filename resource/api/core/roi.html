@@ -1,0 +1,621 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>core.roi Module &#8212; scikit-beam 0.0.18.post10+g384742b documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="core.spectroscopy Module" href="spectroscopy.html" />
+    <link rel="prev" title="core.recip Module" href="recip.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-skbeam.core.roi">
+<span id="core-roi-module"></span><h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.roi</span></code> Module<a class="headerlink" href="#module-skbeam.core.roi" title="Permalink to this headline">¶</a></h1>
+<p>This module contain convenience methods to generate ROI labeled arrays for
+simple shapes such as rectangles and concentric circles.</p>
+<dl class="function">
+<dt id="skbeam.core.roi.auto_find_center_rings">
+<code class="sig-prename descclassname">skbeam.core.roi.</code><code class="sig-name descname">auto_find_center_rings</code><span class="sig-paren">(</span><em class="sig-param">avg_img</em>, <em class="sig-param">sigma=1</em>, <em class="sig-param">no_rings=4</em>, <em class="sig-param">min_samples=3</em>, <em class="sig-param">residual_threshold=1</em>, <em class="sig-param">max_trials=1000</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.roi.auto_find_center_rings" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will find the center of the speckle pattern and the radii of the
+most intense rings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>avg_img</strong><span class="classifier">2D array</span></dt><dd><p>shape of the image</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float, optional</span></dt><dd><p>Standard deviation of the Gaussian filter.</p>
+</dd>
+<dt><strong>no_rings</strong><span class="classifier">int, optional</span></dt><dd><p>number of rings</p>
+</dd>
+<dt><strong>min_sample</strong><span class="classifier">int, optional</span></dt><dd><p>The minimum number of data points to fit a model to.</p>
+</dd>
+<dt><strong>residual_threshold</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum distance for a data point to be classified as an inlier.</p>
+</dd>
+<dt><strong>max_trials</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum number of iterations for random sample selection.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>center</strong><span class="classifier">tuple</span></dt><dd><p>center co-ordinates of the speckle pattern</p>
+</dd>
+<dt><strong>image</strong><span class="classifier">2D array</span></dt><dd><p>Indices of pixels that belong to the rings,
+directly index into an array</p>
+</dd>
+<dt><strong>radii</strong><span class="classifier">list</span></dt><dd><p>values of the radii of the rings</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.roi.bar">
+<code class="sig-prename descclassname">skbeam.core.roi.</code><code class="sig-name descname">bar</code><span class="sig-paren">(</span><em class="sig-param">edges</em>, <em class="sig-param">shape</em>, <em class="sig-param">horizontal=True</em>, <em class="sig-param">values=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.roi.bar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw bars defined by <cite>edges</cite> from one edge to the other of <cite>image_shape</cite></p>
+<p>Bars will be horizontal or vertical depending on the value of <cite>horizontal</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>edges</strong><span class="classifier">list</span></dt><dd><p>List of tuples of inner (left or top) and outer (right or bottom)
+edges of each bar.
+e.g., edges=[(1, 2), (11, 12), (21, 22)]</p>
+</dd>
+<dt><strong>shape</strong><span class="classifier">tuple</span></dt><dd><p>Shape of the image in which to create the ROIs
+e.g., shape=(512, 512)</p>
+</dd>
+<dt><strong>horizontal</strong><span class="classifier">bool, optional</span></dt><dd><p>True: Make horizontal bars
+False: Make vertical bars
+Defaults to True</p>
+</dd>
+<dt><strong>values</strong><span class="classifier">array, optional</span></dt><dd><p>image pixels co-ordinates</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>label_array</strong><span class="classifier">array</span></dt><dd><p>Elements not inside any ROI are zero; elements inside each
+ROI are 1, 2, 3, corresponding to the order they are
+specified in <cite>edges</cite>.
+Has shape=`image shape`</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.roi.box">
+<code class="sig-prename descclassname">skbeam.core.roi.</code><code class="sig-name descname">box</code><span class="sig-paren">(</span><em class="sig-param">shape</em>, <em class="sig-param">v_edges</em>, <em class="sig-param">h_edges=None</em>, <em class="sig-param">h_values=None</em>, <em class="sig-param">v_values=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.roi.box" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Draw box shaped rois when the horizontal and vertical edges</dt><dd><p>are provided.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>shape</strong><span class="classifier">tuple</span></dt><dd><p>Shape of the image in which to create the ROIs
+e.g., shape=(512, 512)</p>
+</dd>
+<dt><strong>v_edges</strong><span class="classifier">list</span></dt><dd><p>giving the inner and outer edges of each vertical bar
+e.g., [(1, 2), (11, 12), (21, 22)]</p>
+</dd>
+<dt><strong>h_edges</strong><span class="classifier">list, optional</span></dt><dd><p>giving the inner and outer edges of each horizontal bar
+e.g., [(1, 2), (11, 12), (21, 22)]</p>
+</dd>
+<dt><strong>h_values</strong><span class="classifier">array, optional</span></dt><dd><p>image pixels co-ordinates in horizontal direction
+shape has to be image shape</p>
+</dd>
+<dt><strong>v_values</strong><span class="classifier">array, optional</span></dt><dd><p>image pixels co-ordinates in vertical direction
+shape has to be image shape</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>label_array</strong><span class="classifier">array</span></dt><dd><p>Elements not inside any ROI are zero; elements inside each
+ROI are 1, 2, 3, corresponding to the order they are specified
+in edges.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.roi.circular_average">
+<code class="sig-prename descclassname">skbeam.core.roi.</code><code class="sig-name descname">circular_average</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">calibrated_center</em>, <em class="sig-param">threshold=0</em>, <em class="sig-param">nx=100</em>, <em class="sig-param">pixel_size=(1</em>, <em class="sig-param">1)</em>, <em class="sig-param">min_x=None</em>, <em class="sig-param">max_x=None</em>, <em class="sig-param">mask=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.roi.circular_average" title="Permalink to this definition">¶</a></dt>
+<dd><p>Circular average of the the image data
+The circular average is also known as the radial integration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>image</strong><span class="classifier">array</span></dt><dd><p>Image to compute the average as a function of radius</p>
+</dd>
+<dt><strong>calibrated_center</strong><span class="classifier">tuple</span></dt><dd><p>The center of the image in pixel units
+argument order should be (row, col)</p>
+</dd>
+<dt><strong>threshold</strong><span class="classifier">int, optional</span></dt><dd><p>Ignore counts below <cite>threshold</cite>
+default is zero</p>
+</dd>
+<dt><strong>nx</strong><span class="classifier">int, optional</span></dt><dd><p>number of bins in x
+defaults is 100 bins</p>
+</dd>
+<dt><strong>pixel_size</strong><span class="classifier">tuple, optional</span></dt><dd><p>The size of a pixel (in a real unit, like mm).
+argument order should be (pixel_height, pixel_width)
+default is (1, 1)</p>
+</dd>
+<dt><strong>min_x</strong><span class="classifier">float, optional number of pixels</span></dt><dd><p>Left edge of first bin defaults to minimum value of x</p>
+</dd>
+<dt><strong>max_x</strong><span class="classifier">float, optional number of pixels</span></dt><dd><p>Right edge of last bin defaults to maximum value of x</p>
+</dd>
+<dt><strong>mask</strong><span class="classifier">mask for 2D data. Assumes 1 is non masked and 0 masked.</span></dt><dd><p>None defaults to no mask.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>bin_centers</strong><span class="classifier">array</span></dt><dd><p>The center of each bin in R. shape is (nx, )</p>
+</dd>
+<dt><strong>ring_averages</strong><span class="classifier">array</span></dt><dd><p>Radial average of the image. shape is (nx, ).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">bad_to_nan_gen</span></code></dt><dd><p>Create a mask with np.nan entries</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">bin_grid</span></code></dt><dd><p>Bin and integrate an image, given the radial array of pixels Useful for nonlinear spacing (Ewald curvature)</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.roi.extract_label_indices">
+<code class="sig-prename descclassname">skbeam.core.roi.</code><code class="sig-name descname">extract_label_indices</code><span class="sig-paren">(</span><em class="sig-param">labels</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.roi.extract_label_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will find the label’s required region of interests (roi’s),
+number of roi’s count the number of pixels in each roi’s and pixels
+list for the required roi’s.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>labels</strong><span class="classifier">array</span></dt><dd><p>labeled array; 0 is background.
+Each ROI is represented by a distinct label (i.e., integer).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>label_mask</strong><span class="classifier">array</span></dt><dd><p>1D array labeling each foreground pixel
+e.g., [1, 1, 1, 1, 2, 2, 1, 1]</p>
+</dd>
+<dt><strong>indices</strong><span class="classifier">array</span></dt><dd><p>1D array of indices into the raveled image for all
+foreground pixels (labeled nonzero)
+e.g., [5, 6, 7, 8, 14, 15, 21, 22]</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.roi.kymograph">
+<code class="sig-prename descclassname">skbeam.core.roi.</code><code class="sig-name descname">kymograph</code><span class="sig-paren">(</span><em class="sig-param">images</em>, <em class="sig-param">labels</em>, <em class="sig-param">num</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.roi.kymograph" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will provide data for graphical representation of pixels
+variation over time for required ROI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>images</strong><span class="classifier">array</span></dt><dd><p>Image stack. dimensions are: (num_img, num_rows, num_cols)</p>
+</dd>
+<dt><strong>labels</strong><span class="classifier">array</span></dt><dd><p>labeled array; 0 is background. Each ROI is represented by an integer</p>
+</dd>
+<dt><strong>num</strong><span class="classifier">int</span></dt><dd><p>The ROI to turn into a kymograph</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>kymograph</strong><span class="classifier">array</span></dt><dd><p>data for graphical representation of pixels variation over time
+for required ROI</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.roi.lines">
+<code class="sig-prename descclassname">skbeam.core.roi.</code><code class="sig-name descname">lines</code><span class="sig-paren">(</span><em class="sig-param">end_points</em>, <em class="sig-param">shape</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.roi.lines" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>end_points</strong><span class="classifier">iterable</span></dt><dd><p>coordinates of the starting point and the ending point of each
+line: e.g., [(start_x, start_y, end_x, end_y), (x1, y1, x2, y2)]</p>
+</dd>
+<dt><strong>shape</strong><span class="classifier">tuple</span></dt><dd><p>Image shape which is used to determine the maximum extent of output
+pixel coordinates. Order is (rr, cc).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>label_array</strong><span class="classifier">array</span></dt><dd><p>Elements not inside any ROI are zero; elements inside each
+ROI are 1, 2, 3, corresponding to the order they are specified
+in coords. Order is (rr, cc).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.roi.mean_intensity">
+<code class="sig-prename descclassname">skbeam.core.roi.</code><code class="sig-name descname">mean_intensity</code><span class="sig-paren">(</span><em class="sig-param">images</em>, <em class="sig-param">labeled_array</em>, <em class="sig-param">index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.roi.mean_intensity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the mean intensity for each ROI in the image list</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>images</strong><span class="classifier">list</span></dt><dd><p>List of images</p>
+</dd>
+<dt><strong>labeled_array</strong><span class="classifier">array</span></dt><dd><p>labeled array; 0 is background.
+Each ROI is represented by a nonzero integer. It is not required that
+the ROI labels are contiguous</p>
+</dd>
+<dt><strong>index</strong><span class="classifier">int, list, optional</span></dt><dd><p>The ROI’s to use. If None, this function will extract averages for all
+ROIs</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>mean_intensity</strong><span class="classifier">array</span></dt><dd><p>The mean intensity of each ROI for all <cite>images</cite>
+Dimensions:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>len(mean_intensity) == len(index)</p></li>
+<li><p>len(mean_intensity[0]) == len(images)</p></li>
+</ul>
+</div></blockquote>
+</dd>
+<dt><strong>index</strong><span class="classifier">list</span></dt><dd><p>The labels for each element of the <cite>mean_intensity</cite> list</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.roi.rectangles">
+<code class="sig-prename descclassname">skbeam.core.roi.</code><code class="sig-name descname">rectangles</code><span class="sig-paren">(</span><em class="sig-param">coords</em>, <em class="sig-param">shape</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.roi.rectangles" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function wil provide the indices array for rectangle region of
+interests.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>coords</strong><span class="classifier">iterable</span></dt><dd><p>coordinates of the upper-left corner and width and height of each
+rectangle: e.g., [(x, y, w, h), (x, y, w, h)]</p>
+</dd>
+<dt><strong>shape</strong><span class="classifier">tuple</span></dt><dd><p>Image shape which is used to determine the maximum extent of output
+pixel coordinates. Order is (rr, cc).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>label_array</strong><span class="classifier">array</span></dt><dd><p>Elements not inside any ROI are zero; elements inside each
+ROI are 1, 2, 3, corresponding to the order they are specified
+in coords. Order is (rr, cc).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.roi.ring_edges">
+<code class="sig-prename descclassname">skbeam.core.roi.</code><code class="sig-name descname">ring_edges</code><span class="sig-paren">(</span><em class="sig-param">inner_radius</em>, <em class="sig-param">width</em>, <em class="sig-param">spacing=0</em>, <em class="sig-param">num_rings=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.roi.ring_edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the inner and outer radius of a set of rings.</p>
+<p>The number of rings, their widths, and any spacing between rings can be
+specified. They can be uniform or varied.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>inner_radius</strong><span class="classifier">float</span></dt><dd><p>inner radius of the inner-most ring</p>
+</dd>
+<dt><strong>width</strong><span class="classifier">float or list of floats</span></dt><dd><p>ring thickness
+If a float, all rings will have the same thickness.</p>
+</dd>
+<dt><strong>spacing</strong><span class="classifier">float or list of floats, optional</span></dt><dd><p>margin between rings, 0 by default
+If a float, all rings will have the same spacing. If a list,
+the length of the list must be one less than the number of
+rings.</p>
+</dd>
+<dt><strong>num_rings</strong><span class="classifier">int, optional</span></dt><dd><p>number of rings
+Required if width and spacing are not lists and number
+cannot thereby be inferred. If it is given and can also be
+inferred, input is checked for consistency.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>edges</strong><span class="classifier">array</span></dt><dd><p>inner and outer radius for each ring</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.roi.rings">
+<code class="sig-prename descclassname">skbeam.core.roi.</code><code class="sig-name descname">rings</code><span class="sig-paren">(</span><em class="sig-param">edges</em>, <em class="sig-param">center</em>, <em class="sig-param">shape</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.roi.rings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw annual (ring-shaped) shaped regions of interest.</p>
+<p>Each ring will be labeled with an integer. Regions outside any ring will
+be filled with zeros.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>edges: list</strong></dt><dd><p>giving the inner and outer radius of each ring
+e.g., [(1, 2), (11, 12), (21, 22)]</p>
+</dd>
+<dt><strong>center: tuple</strong></dt><dd><p>point in image where r=0; may be a float giving subpixel precision.
+Order is (rr, cc).</p>
+</dd>
+<dt><strong>shape: tuple</strong></dt><dd><p>Image shape which is used to determine the maximum extent of output
+pixel coordinates. Order is (rr, cc).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>label_array</strong><span class="classifier">array</span></dt><dd><p>Elements not inside any ROI are zero; elements inside each
+ROI are 1, 2, 3, corresponding to the order they are specified
+in edges.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.roi.roi_max_counts">
+<code class="sig-prename descclassname">skbeam.core.roi.</code><code class="sig-name descname">roi_max_counts</code><span class="sig-paren">(</span><em class="sig-param">images_sets</em>, <em class="sig-param">label_array</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.roi.roi_max_counts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the brightest pixel in any ROI in any image in the image set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>images_sets</strong><span class="classifier">array</span></dt><dd><p>iterable of 4D arrays
+shapes is: (len(images_sets), )</p>
+</dd>
+<dt><strong>label_array</strong><span class="classifier">array</span></dt><dd><p>labeled array; 0 is background.
+Each ROI is represented by a distinct label (i.e., integer).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>max_counts</strong><span class="classifier">int</span></dt><dd><p>maximum pixel counts</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.roi.roi_pixel_values">
+<code class="sig-prename descclassname">skbeam.core.roi.</code><code class="sig-name descname">roi_pixel_values</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">labels</em>, <em class="sig-param">index=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.roi.roi_pixel_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will provide intensities of the ROI’s of the labeled array
+according to the pixel list
+eg: intensities of the rings of the labeled array</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>image</strong><span class="classifier">array</span></dt><dd><p>image data dimensions are: (rr, cc)</p>
+</dd>
+<dt><strong>labels</strong><span class="classifier">array</span></dt><dd><p>labeled array; 0 is background.
+Each ROI is represented by a distinct label (i.e., integer).</p>
+</dd>
+<dt><strong>index_list</strong><span class="classifier">list, optional</span></dt><dd><p>labels list
+eg: 5 ROI’s
+index = [1, 2, 3, 4, 5]</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>roi_pix</strong><span class="classifier">list</span></dt><dd><p>intensities of the ROI’s of the labeled array according
+to the pixel list</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.roi.segmented_rings">
+<code class="sig-prename descclassname">skbeam.core.roi.</code><code class="sig-name descname">segmented_rings</code><span class="sig-paren">(</span><em class="sig-param">edges</em>, <em class="sig-param">segments</em>, <em class="sig-param">center</em>, <em class="sig-param">shape</em>, <em class="sig-param">offset_angle=0</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.roi.segmented_rings" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>edges</strong><span class="classifier">array</span></dt><dd><p>inner and outer radius for each ring</p>
+</dd>
+<dt><strong>segments</strong><span class="classifier">int or list</span></dt><dd><p>number of pie slices or list of angles in radians
+That is, 8 produces eight equal-sized angular segments,
+whereas a list can be used to produce segments of unequal size.</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">tuple</span></dt><dd><p>point in image where r=0; may be a float giving subpixel precision.
+Order is (rr, cc).</p>
+</dd>
+<dt><strong>shape: tuple</strong></dt><dd><p>Image shape which is used to determine the maximum extent of output
+pixel coordinates. Order is (rr, cc).</p>
+</dd>
+<dt><strong>angle_offset</strong><span class="classifier">float or array, optional</span></dt><dd><p>offset in radians from offset_angle=0 along the positive X axis</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>label_array</strong><span class="classifier">array</span></dt><dd><p>Elements not inside any ROI are zero; elements inside each
+ROI are 1, 2, 3, corresponding to the order they are specified
+in edges and segments</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#skbeam.core.roi.ring_edges" title="skbeam.core.roi.ring_edges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ring_edges</span></code></a></dt><dd><p>Calculate the inner and outer radius of a set of rings.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Complete Reference (API)</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#core">Core</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Core API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../io/index.html">IO API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../core.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core</span></code> subpackge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mask.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.mask</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#domain-name-spaces">Domain name spaces</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Complete Reference (API)</a><ul>
+  <li><a href="index.html">Core API</a><ul>
+      <li>Previous: <a href="recip.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.recip</span></code> Module</a></li>
+      <li>Next: <a href="spectroscopy.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.spectroscopy</span></code> Module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../../_sources/resource/api/core/roi.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

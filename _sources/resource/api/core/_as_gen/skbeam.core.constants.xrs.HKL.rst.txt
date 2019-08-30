@@ -1,0 +1,33 @@
+skbeam.core.constants.xrs.HKL
+=============================
+
+.. currentmodule:: skbeam.core.constants.xrs
+
+.. autoclass:: HKL
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~HKL.__init__
+      ~HKL.count
+      ~HKL.index
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~HKL.h
+      ~HKL.k
+      ~HKL.l
+      ~HKL.length
+   
+   

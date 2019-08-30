@@ -1,0 +1,19 @@
+Changes to bin_1D function
+--------------------------
+
+Earlier the bin_1D function if the nx(number of bins) is None
+    (if nx is None)
+
+from ::
+
+  nx = core._defaults["bins"]
+
+to::
+
+  nx = int(max_x - min_x)
+
+  Note:
+    min_x : float, optional
+        Left edge of first bin defaults to minimum value of x
+    max_x : float, optional
+        Right edge of last bin defaults to maximum value of x

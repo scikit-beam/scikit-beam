@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Scikit-beam Core &#8212; scikit-beam 0.0.18.post10+g384742b documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="install.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="scikit-beam-core">
+<h1>Scikit-beam Core<a class="headerlink" href="#scikit-beam-core" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="development/vision.html#vision"><span class="std std-ref">vision</span></a> of <code class="docutils literal notranslate"><span class="pre">scikit-beam</span></code> is to provide simple
+functions useful for the X-ray, Neutron and Electron communities.  The
+primary goal of the scikit-beam project is to provide a centralized
+repository for algorithms that are used in these three scientific
+domains.  <code class="docutils literal notranslate"><span class="pre">scikit-beam</span></code> functions accept and return standard Python
+and numpy datatypes, so they integrate well with other packages from
+the scientific Python community.  Further, the modular design of
+scikit-beam allows its components to be easily reused in ways not
+envisioned by the authors.</p>
+<p>Scikit-beam is being developed at the National Synchrotron Light
+Source II at Brookhaven National Lab and also in collaboration with
+scientists at the LCLS-II and APS.</p>
+<div class="section" id="supported-techniques">
+<h2>Supported techniques<a class="headerlink" href="#supported-techniques" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Differential Phase Contrast (<a class="reference internal" href="resource/api/core/dpc.html#module-skbeam.core.dpc" title="skbeam.core.dpc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dpc</span></code></a>)</p></li>
+<li><p>CDI (<a class="reference internal" href="resource/api/core/cdi.html#module-skbeam.core.cdi" title="skbeam.core.cdi"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cdi</span></code></a>)</p></li>
+<li><p>MultiTau correlation (<a class="reference internal" href="resource/api/core/correlation.html#module-skbeam.core.correlation" title="skbeam.core.correlation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">correlation</span></code></a>)</p></li>
+<li><p>X-Ray Speckle Visibility Spectroscopy (XSVS) (<a class="reference internal" href="resource/api/core/speckle.html#module-skbeam.core.speckle" title="skbeam.core.speckle"><code class="xref py py-mod docutils literal notranslate"><span class="pre">speckle</span></code></a>)</p></li>
+<li><p>X-ray Fluorescence  (<a class="reference internal" href="resource/api/fluorescence.html#module-skbeam.fluorescence" title="skbeam.fluorescence"><code class="xref py py-mod docutils literal notranslate"><span class="pre">fluorescence</span></code></a>)</p></li>
+<li><p>Fast histograms</p></li>
+</ul>
+</div>
+<div class="section" id="other-utilities">
+<h2>Other utilities<a class="headerlink" href="#other-utilities" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Basic constants (<a class="reference internal" href="resource/api/core/constants.html#module-skbeam.core.constants" title="skbeam.core.constants"><code class="xref py py-mod docutils literal notranslate"><span class="pre">constants</span></code></a>)</p></li>
+<li><p>Logical convenience functions (<code class="xref py py-mod docutils literal notranslate"><span class="pre">arithmetic</span></code>)</p></li>
+<li><p>Utilities to estimating the center of a ring pattern and the
+sample-to-detector distance of a powder pattern
+(<a class="reference internal" href="resource/api/core/calibration.html#module-skbeam.core.calibration" title="skbeam.core.calibration"><code class="xref py py-mod docutils literal notranslate"><span class="pre">calibration</span></code></a>)</p></li>
+<li><p>Peak extraction (<a class="reference internal" href="resource/api/core/feature.html#module-skbeam.core.feature" title="skbeam.core.feature"><code class="xref py py-mod docutils literal notranslate"><span class="pre">feature</span></code></a>)</p></li>
+<li><p>Mask pixels based on a threshold; as a statistical outlier within a bin; for
+proximity to canvas edge (margin). (<a class="reference internal" href="resource/api/core/mask.html#module-skbeam.core.mask" title="skbeam.core.mask"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mask</span></code></a>)</p></li>
+<li><p>Compute reciprocol space coordinates of pixels. (<a class="reference internal" href="resource/api/core/recip.html#module-skbeam.core.recip" title="skbeam.core.recip"><code class="xref py py-mod docutils literal notranslate"><span class="pre">recip</span></code></a>)</p></li>
+<li><p>Draw and manipulate ROI mask; draw kymograph; compute statistics on ROIs.
+(<a class="reference internal" href="resource/api/core/roi.html#module-skbeam.core.roi" title="skbeam.core.roi"><code class="xref py py-mod docutils literal notranslate"><span class="pre">roi</span></code></a>)</p></li>
+<li><p>Misc. utilities (<a class="reference internal" href="resource/api/core/utils.html#module-skbeam.core.utils" title="skbeam.core.utils"><code class="xref py py-mod docutils literal notranslate"><span class="pre">utils</span></code></a>)</p></li>
+<li><p>A thin wrapper around <code class="docutils literal notranslate"><span class="pre">scipy.stats.binned_statistic</span></code>
+(<code class="xref py py-mod docutils literal notranslate"><span class="pre">stats</span></code>)</p></li>
+</ul>
+</div>
+<div class="section" id="installation">
+<span id="installation-tl"></span><h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="reporting-issues">
+<span id="id1"></span><h2>Reporting Issues<a class="headerlink" href="#reporting-issues" title="Permalink to this headline">¶</a></h2>
+<p>If you have found a bug in scikit-beam please report it. The preferred
+way is to create a new issue on the scikit-beam <a class="reference external" href="http://github.com/scikit-beam/scikit-beam/issues">GitHub issue page</a>; that requires
+<a class="reference external" href="https://github.com">creating a free account</a> on GitHub if you do
+not have one.</p>
+<p>Please include an example that demonstrates the issue that will allow
+the developers to reproduce and fix the problem. You may be asked to
+also provide information about your operating system and a full Python
+stack trace; the Skbeam developers will walk you through obtaining a
+stack trace if it is necessary.</p>
+<div class="section" id="api-docs">
+<h3>API Docs<a class="headerlink" href="#api-docs" title="Permalink to this headline">¶</a></h3>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="resource/api/index.html">Complete Reference (API)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="resource/api/index.html#core">Core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="resource/api/core/index.html">Core API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="resource/api/io/index.html">IO API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="resource/api/core.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core</span></code> subpackge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="resource/api/core/mask.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.mask</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="resource/api/index.html#domain-name-spaces">Domain name spaces</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="resource/api/diffraction.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">diffraction</span></code> Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="resource/api/fluorescence.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">fluorescence</span></code> Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="contributing">
+<span id="id2"></span><h2>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h2>
+<p>The scikit-beam project is made both by and for its users, so we
+highly encourage contributions at all levels.  This spans the gamut
+from sending an email mentioning a typo in the documentation or
+requesting a new feature all the way to developing a major new
+package.</p>
+<p>The full range of ways to be part of the Skbeam project are described
+at <a class="reference external" href="http://scikit-beam.github.io/contribute.html">Contribute to scikit-beam</a>. To get started
+contributing code or documentation (no git or GitHub experience
+necessary):</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development/workflow/get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/workflow/development_workflow.html">How to make a code contribution</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="developer-documentation">
+<span id="developer-docs"></span><h2>Developer Documentation<a class="headerlink" href="#developer-documentation" title="Permalink to this headline">¶</a></h2>
+<p>The developer documentation contains instructions for how to contribute to
+Skbeam or affiliated packages, as well as coding, documentation, and
+testing guidelines. For the guiding vision of this process and the project
+as a whole, see <a class="reference internal" href="development/vision.html"><span class="doc">Vision for a Common Python Package for x-ray, electron and neutrons</span></a>.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/workflow/development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/workflow/maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resource/dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="warnings.html">Python warnings system</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="other">
+<h2>other<a class="headerlink" href="#other" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h2>Indices and Tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="resource/api/index.html">Complete Reference (API)</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development/workflow/get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/workflow/development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/workflow/development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/workflow/maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resource/dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="install.html" title="next chapter">Installation</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

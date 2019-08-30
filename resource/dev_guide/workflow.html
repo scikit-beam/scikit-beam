@@ -1,0 +1,288 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Git workflow &#8212; scikit-beam 0.0.18.post10+g384742b documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Documentation" href="doc_doc.html" />
+    <link rel="prev" title="Introduction to Git" href="git_guide.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="git-workflow">
+<span id="workflow"></span><h1>Git workflow<a class="headerlink" href="#git-workflow" title="Permalink to this headline">¶</a></h1>
+<p>The basic workflow is that you develop new code on feature branches in
+your local repository.  When you want your code merged into the main
+repository you push your work to <code class="docutils literal notranslate"><span class="pre">github</span></code> and create a “Pull
+Request” (PR).  The code is then reviewed and once everyone is happy,
+it will be merged into <code class="docutils literal notranslate"><span class="pre">scikit-beam/master</span></code>.</p>
+<div class="section" id="rules">
+<h2>Rules<a class="headerlink" href="#rules" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Don’t work directly on the main repository, push commits to your
+personal github repository</p></li>
+<li><p>Never work on <code class="docutils literal notranslate"><span class="pre">master</span></code>, always work on a feature branch</p></li>
+<li><p>Don’t merge your own PR.</p></li>
+<li><p>Don’t merge <code class="docutils literal notranslate"><span class="pre">scikit-beam/master</span></code> into your feature branch
+as this can make merging back into master tricky.</p></li>
+<li><p>Commit messages must be at least one sentence and preferably a short
+paragraph.  They should not be longer than 2 paragraphs (if you need to
+write that much the commit should probably be split up).</p></li>
+<li><p>Commit messages should start with a descriptor code (borrowed from numpy
+), see table below.</p></li>
+<li><p>Add a file in <code class="docutils literal notranslate"><span class="pre">changelog</span></code> describing the propose of this branch
+in a sentence.  When we make releases these will be compiled into
+a <code class="docutils literal notranslate"><span class="pre">CHANGELOG</span></code>.  Doing it this way prevents excessive merge conflicts.</p></li>
+<li><p>Add a test for every new function you add</p></li>
+<li><p>When you fix a bug add a test that used to fail and now passes</p></li>
+</ol>
+</div></blockquote>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 93%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Code</p></th>
+<th class="head"><p>description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>API</p></td>
+<td><p>an (incompatible) API change</p></td>
+</tr>
+<tr class="row-odd"><td><p>BLD</p></td>
+<td><p>change related to building</p></td>
+</tr>
+<tr class="row-even"><td><p>BUG</p></td>
+<td><p>bug fix</p></td>
+</tr>
+<tr class="row-odd"><td><p>DEP</p></td>
+<td><p>deprecate something, or remove a deprecated object</p></td>
+</tr>
+<tr class="row-even"><td><p>DEV</p></td>
+<td><p>development tool or utility</p></td>
+</tr>
+<tr class="row-odd"><td><p>DOC</p></td>
+<td><p>documentation</p></td>
+</tr>
+<tr class="row-even"><td><p>ENH</p></td>
+<td><p>enhancement</p></td>
+</tr>
+<tr class="row-odd"><td><p>MNT</p></td>
+<td><p>maintenance commit (refactoring, typos, etc.)</p></td>
+</tr>
+<tr class="row-even"><td><p>REV</p></td>
+<td><p>revert an earlier commit</p></td>
+</tr>
+<tr class="row-odd"><td><p>STY</p></td>
+<td><p>style fix (whitespace, PEP8)</p></td>
+</tr>
+<tr class="row-even"><td><p>TST</p></td>
+<td><p>addition or modification of tests</p></td>
+</tr>
+<tr class="row-odd"><td><p>REL</p></td>
+<td><p>related to releasing numpy</p></td>
+</tr>
+<tr class="row-even"><td><p>WIP</p></td>
+<td><p>Commit that is a work in progress</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="style">
+<h2>Style<a class="headerlink" href="#style" title="Permalink to this headline">¶</a></h2>
+<p>We will conform to the sensible rules in <a class="reference external" href="http://legacy.python.org/dev/peps/pep-0008/">PEP8</a>.</p>
+<p>Some handy tools are :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>the <a class="reference external" href="https://pypi.python.org/pypi/pep8">pep8 checker</a> which will
+report and violations in your code.  Most decent editors will have
+a way to run this on the fly and highlight your code (ex emacs, vi, pycharm,
+pydev, kate, and sublime)</p></li>
+<li><p>flake8</p></li>
+</ul>
+</div></blockquote>
+<div class="section" id="if-statements">
+<h3>if-statements<a class="headerlink" href="#if-statements" title="Permalink to this headline">¶</a></h3>
+<p>Don’t write one-liner if statements as</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">foo</span><span class="p">:</span> <span class="n">bar</span>
+</pre></div>
+</div>
+<p>write them as</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">foo</span><span class="p">:</span>
+    <span class="n">bar</span>
+</pre></div>
+</div>
+<p>Lines are free, but the confusion that can be caused by missing
+logic when scanning code can be expensive.</p>
+</div>
+</div>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>Assuming you already have your repository set up:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">fetch</span> <span class="n">upstream</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="n">master</span>  <span class="c1"># switch to master</span>
+<span class="n">git</span> <span class="n">merge</span> <span class="n">upstream</span><span class="o">/</span><span class="n">master</span>  <span class="c1"># make sure master is up-to-date</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="o">-</span><span class="n">b</span> <span class="n">new_feature</span>
+</pre></div>
+</div>
+<p>You now do a bunch of work:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">add</span> <span class="o">...</span>
+<span class="n">git</span> <span class="n">commit</span>
+<span class="n">git</span> <span class="n">add</span> <span class="o">...</span>
+<span class="n">git</span> <span class="n">commit</span>
+</pre></div>
+</div>
+<p>and when you are happy with it <strong>push</strong> it to github</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">push</span> <span class="o">--</span><span class="nb">set</span><span class="o">-</span><span class="n">upstream</span> <span class="n">github</span> <span class="n">new_feature</span>
+</pre></div>
+</div>
+<p>On the github webpage navigate to your repository and there should be a
+green button that says ‘Compare and Pull request’.  Push this button and
+fill out the form.  This will create the PR and the change can be discussed
+on github.  To make changes to the PR all you need to do is <strong>push</strong> more
+commits to that branch on github</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">add</span> <span class="o">...</span>
+<span class="n">git</span> <span class="n">commit</span>
+<span class="n">git</span> <span class="n">push</span> <span class="n">github</span>
+</pre></div>
+</div>
+<p>Once everyone is happy with the changes, the branch can be merged into
+the main <code class="docutils literal notranslate"><span class="pre">master</span></code> branch via the web interface.  If there are
+conflicts on <code class="docutils literal notranslate"><span class="pre">master</span></code> with your work, it is your responsibility to
+<strong>rebase</strong> your branch on to the current <code class="docutils literal notranslate"><span class="pre">master</span></code>.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">Complete Reference (API)</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development/workflow/get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/workflow/maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Development Guide</a><ul>
+      <li>Previous: <a href="git_guide.html" title="previous chapter">Introduction to Git</a></li>
+      <li>Next: <a href="doc_doc.html" title="next chapter">Documentation</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/resource/dev_guide/workflow.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

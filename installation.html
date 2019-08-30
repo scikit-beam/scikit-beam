@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Installing scikit-beam &#8212; scikit-beam 0.0.18.post10+g384742b documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Complete Reference (API)" href="resource/api/index.html" />
+    <link rel="prev" title="Getting Started with Scikit-beam" href="getting_started.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="installing-scikit-beam">
+<span id="installation"></span><h1>Installing scikit-beam<a class="headerlink" href="#installing-scikit-beam" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="for-python-novices">
+<h2>For Python Novices<a class="headerlink" href="#for-python-novices" title="Permalink to this headline">¶</a></h2>
+<p>Installation is simple on Windows, OSX, and Linux, even for Python novices.</p>
+<div class="section" id="get-scientific-python">
+<h3>1. Get Scientific Python<a class="headerlink" href="#get-scientific-python" title="Permalink to this headline">¶</a></h3>
+<p>To get started with Python on any platform, download and install
+<a class="reference external" href="https://store.continuum.io/cshop/anaconda/">Anaconda</a>. It comes with the
+common scientific Python packages built in.</p>
+</div>
+<div class="section" id="install-scikit-beam">
+<h3>2. Install scikit-beam<a class="headerlink" href="#install-scikit-beam" title="Permalink to this headline">¶</a></h3>
+<p>TODO: make this actually work!</p>
+<p>Open a command prompt. On Windows, you can use the “Anaconda Command Prompt”
+installed by Anaconda or Start &gt; Applications &gt; Command Prompt. On a Mac, look
+for Applications &gt; Utilities &gt; Terminal. Type these commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda update conda
+conda config --add channels scikit-beam
+<span class="c1"># to install the latest stable release</span>
+conda install scikit-beam
+</pre></div>
+</div>
+<p>The above installs scikit-beam and all its requirements. Our tutorials also use
+the IPython notebook. To install that as well, type</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install ipython-notebook
+</pre></div>
+</div>
+</div>
+<div class="section" id="try-it-out">
+<h3>3. Try it out!<a class="headerlink" href="#try-it-out" title="Permalink to this headline">¶</a></h3>
+<p>Finally, to try it out, type</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ipython notebook
+</pre></div>
+</div>
+<p>This will automatically open a browser tab, ready to interpret Python code.
+To get started, check out the links to tutorials at the top of this document.</p>
+</div>
+</div>
+<div class="section" id="more-information-for-experienced-python-users">
+<h2>More Information for Experienced Python Users<a class="headerlink" href="#more-information-for-experienced-python-users" title="Permalink to this headline">¶</a></h2>
+<p>We strongly recommend using conda install scikit-beam, as described above,
+but pip is also supported.</p>
+<p>Essential Dependencies:</p>
+<ul class="simple">
+<li><p>python (both 2 and 3 are supported)</p></li>
+<li><p>setuptools</p></li>
+<li><p>six</p></li>
+<li><p>numpy</p></li>
+</ul>
+<p>Optional Dependencies:</p>
+<ul class="simple">
+<li><p>scipy</p></li>
+<li><p>scikit-image</p></li>
+<li><p>xraylib</p></li>
+<li><p>lmfit</p></li>
+<li><p>netcdf4</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/scikit-beam/scikit-beam
+pip install -e scikit-beam
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="updating-your-installation">
+<h1>Updating Your Installation<a class="headerlink" href="#updating-your-installation" title="Permalink to this headline">¶</a></h1>
+<p>The code is under active development. To update to the latest <strong>stable</strong> release,
+run this in the command prompt:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda update -c scikit-beam scikit-beam
+</pre></div>
+</div>
+<p>The code is under active development. To update to the latest <strong>development</strong>
+release, run this in the command prompt:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda update -c scikit-beam/channels/dev scikit-beam
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="resource/api/index.html">Complete Reference (API)</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development/workflow/get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/workflow/development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/workflow/development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/workflow/maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resource/dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="getting_started.html" title="previous chapter">Getting Started with Scikit-beam</a></li>
+      <li>Next: <a href="resource/api/index.html" title="next chapter">Complete Reference (API)</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/installation.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

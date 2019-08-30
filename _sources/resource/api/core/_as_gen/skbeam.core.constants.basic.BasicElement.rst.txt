@@ -1,0 +1,22 @@
+skbeam.core.constants.basic.BasicElement
+========================================
+
+.. currentmodule:: skbeam.core.constants.basic
+
+.. autoclass:: BasicElement
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~BasicElement.__init__
+   
+   
+
+   
+   
+   

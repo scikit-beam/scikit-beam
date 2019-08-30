@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>core.spectroscopy Module &#8212; scikit-beam 0.0.18.post10+g384742b documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="X-ray speckle visibility spectroscopy(XSVS)" href="speckle.html" />
+    <link rel="prev" title="core.roi Module" href="roi.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-skbeam.core.spectroscopy">
+<span id="core-spectroscopy-module"></span><h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.spectroscopy</span></code> Module<a class="headerlink" href="#module-skbeam.core.spectroscopy" title="Permalink to this headline">¶</a></h1>
+<p>This module is for spectroscopy specific tools (spectrum fitting etc).</p>
+<dl class="function">
+<dt id="skbeam.core.spectroscopy.align_and_scale">
+<code class="sig-prename descclassname">skbeam.core.spectroscopy.</code><code class="sig-name descname">align_and_scale</code><span class="sig-paren">(</span><em class="sig-param">energy_list</em>, <em class="sig-param">counts_list</em>, <em class="sig-param">pk_find_fun=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.spectroscopy.align_and_scale" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>energy_list</strong><span class="classifier">iterable of ndarrays</span></dt><dd><p>list of ndarrays with the energy of each element</p>
+</dd>
+<dt><strong>counts_list</strong><span class="classifier">iterable of ndarrays</span></dt><dd><p>list of ndarrays of counts/element</p>
+</dd>
+<dt><strong>pk_find_fun</strong><span class="classifier">function or None</span></dt><dd><p>A function which takes two ndarrays and returns parameters
+about the largest peak.  If None, defaults to <cite>find_largest_peak</cite>.
+For this demo, the output is (center, height, width), but this sould
+be pinned down better.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>out_e</strong><span class="classifier">list of ndarray</span></dt><dd><p>The aligned/scaled energy arrays</p>
+</dd>
+<dt><strong>out_c</strong><span class="classifier">list of ndarray</span></dt><dd><p>The count arrays (should be the same as the input)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.spectroscopy.find_largest_peak">
+<code class="sig-prename descclassname">skbeam.core.spectroscopy.</code><code class="sig-name descname">find_largest_peak</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">window=None</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.spectroscopy.find_largest_peak" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds and estimates the location, width, and height of
+the largest peak. Assumes the top of the peak can be
+approximated as a Gaussian.  Finds the peak properties
+using least-squares fitting of a parabola to the log of
+the counts.</p>
+<p>The region around the peak can be approximated by
+<span class="math notranslate nohighlight">\(Y = Y0 * exp(- (X - X0)**2 / (2 * sigma **2))\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">ndarray</span></dt><dd><p>The independent variable</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">ndarary</span></dt><dd><p>Dependent variable sampled at positions X</p>
+</dd>
+<dt><strong>window</strong><span class="classifier">int, optional</span></dt><dd><p>The size of the window around the maximum to use
+for the fitting</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>x0</strong><span class="classifier">float</span></dt><dd><p>The location of the peak</p>
+</dd>
+<dt><strong>y0</strong><span class="classifier">float</span></dt><dd><p>The magnitude of the peak</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>Width of the peak</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.spectroscopy.integrate_ROI">
+<code class="sig-prename descclassname">skbeam.core.spectroscopy.</code><code class="sig-name descname">integrate_ROI</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">x_min</em>, <em class="sig-param">x_max</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.spectroscopy.integrate_ROI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrate region(s) of input data.</p>
+<p>If <cite>x_min</cite> and <cite>x_max</cite> are arrays/lists they must be equal in
+length. The values contained in the ‘x’ must be monotonic (up or
+down).  The returned value is the sum of all the regions and a
+single scalar value is returned.  Each region is computed
+independently, if regions overlap the overlapped area will be
+included multiple times in the final sum.</p>
+<p>This function assumes that <cite>y</cite> is a function of
+<cite>x</cite> sampled at <cite>x</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>Independent variable, any unit</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">array</span></dt><dd><p>Dependent variable, any units</p>
+</dd>
+<dt><strong>x_min</strong><span class="classifier">float or array</span></dt><dd><p>The lower edge of the integration region(s)
+in units of x.</p>
+</dd>
+<dt><strong>x_max</strong><span class="classifier">float or array</span></dt><dd><p>The upper edge of the integration region(s)
+in units of x.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The totals integrated value in same units as <cite>y</cite></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="skbeam.core.spectroscopy.integrate_ROI_spectrum">
+<code class="sig-prename descclassname">skbeam.core.spectroscopy.</code><code class="sig-name descname">integrate_ROI_spectrum</code><span class="sig-paren">(</span><em class="sig-param">bin_edges</em>, <em class="sig-param">counts</em>, <em class="sig-param">x_min</em>, <em class="sig-param">x_max</em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.spectroscopy.integrate_ROI_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrate region(s) of histogram.</p>
+<p>If <cite>x_min</cite> and <cite>x_max</cite> are arrays/lists they must be equal in
+length. The values contained in the ‘x_value_array’ must be
+monotonic (up or down).  The returned value is the sum of all the
+regions and a single scalar value is returned.  Each region is
+computed independently, if regions overlap the overlapped area will
+be included multiple times in the final sum.</p>
+<p><cite>bin_edges</cite> is an array of the left edges and the final right
+edges of the bins.  <cite>counts</cite> is the value in each of those bins.</p>
+<p>The bins who’s centers fall with in the integration limits are
+included in the sum.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>bin_edges</strong><span class="classifier">array</span></dt><dd><p>Independent variable, any unit.</p>
+<p>Must be one longer in length than counts</p>
+</dd>
+<dt><strong>counts</strong><span class="classifier">array</span></dt><dd><p>Dependent variable, any units</p>
+</dd>
+<dt><strong>x_min</strong><span class="classifier">float or array</span></dt><dd><p>The lower edge of the integration region(s).</p>
+</dd>
+<dt><strong>x_max</strong><span class="classifier">float or array</span></dt><dd><p>The upper edge of the integration region(s).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The totals integrated value in same units as <cite>counts</cite></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Complete Reference (API)</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#core">Core</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Core API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../io/index.html">IO API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../core.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core</span></code> subpackge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mask.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.mask</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#domain-name-spaces">Domain name spaces</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Complete Reference (API)</a><ul>
+  <li><a href="index.html">Core API</a><ul>
+      <li>Previous: <a href="roi.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.roi</span></code> Module</a></li>
+      <li>Next: <a href="speckle.html" title="next chapter">X-ray speckle visibility spectroscopy(XSVS)</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../../_sources/resource/api/core/spectroscopy.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
