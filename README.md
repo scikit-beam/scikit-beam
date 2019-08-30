@@ -27,8 +27,8 @@
 ### install with conda
 
 ```
-conda config --add channels scikit-beam
-conda install scikit-beam
+conda install scikit-beam -c nsls2forge
+
 ```
 
 ### install development version with setuptools
