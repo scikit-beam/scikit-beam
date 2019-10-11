@@ -21,29 +21,33 @@ matrix:
     - os: osx
       language: generic
       env: TRAVIS_PYTHON_VERSION=3.7 NUMPY=1.17
-  exclude:
-    - env: NUMPY=1.10
-      python: 3.6
 
 python:
   - 3.6
   - 3.7
 
 env:
-  - NUMPY=1.13
-  - NUMPY=1.14
   - NUMPY=1.15
   - NUMPY=1.16
   - NUMPY=1.17
 
-
 before_install:
-  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b -p ~/mc
-  - source ~/mc/etc/profile.d/conda.sh
-  - conda update conda --yes
-  - export CONDARC=ci/condarc
+  - |
+    set -e
+    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+        arch="Linux"
+    elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
+        arch="MacOSX"
+    else
+        echo "Unknown arch $TRAVIS_OS_NAME"
+        exit 1
+    fi
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-${arch}-x86_64.sh -O miniconda.sh
+    chmod +x miniconda.sh
+    ./miniconda.sh -b -p ~/mc
+    source ~/mc/etc/profile.d/conda.sh
+    conda update conda --yes
+    export CONDARC=ci/condarc
 
 install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
