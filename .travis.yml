@@ -68,47 +68,47 @@ install:
 before_script:
   # define a merge size check function that ensures no huge file was committed
   # to the repo by accident
-  - size_check() {
-        GIT_TARGET_EXTRA="+refs/heads/${TRAVIS_BRANCH}";
-        GIT_SOURCE_EXTRA="+refs/pull/${TRAVIS_PULL_REQUEST}/merge";
-        echo TRAVIS_BRANCH=$TRAVIS_BRANCH;
-        echo TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST;
-        echo TRAVIS_REPO_SLUG=$TRAVIS_REPO_SLUG;
-        echo GIT_TARGET_EXTRA=$GIT_TARGET_EXTRA;
-        echo GIT_SOURCE_EXTRA=$GIT_SOURCE_EXTRA;
-        mkdir ~/repo-clone;
-        pushd ~/repo-clone;
-        git init && git remote add -t ${TRAVIS_BRANCH} origin git://github.com/${TRAVIS_REPO_SLUG}.git;
-        git fetch origin ${GIT_TARGET_EXTRA};
-        git checkout -qf FETCH_HEAD;
-        git tag travis-merge-target;
-        git gc --aggressive;
-        TARGET_SIZE=`du -s . | sed -e "s/\t.*//"`;
-        echo TARGET_SIZE=$TARGET_SIZE;
-        git pull origin ${GIT_SOURCE_EXTRA};
-        git gc --aggressive;
-        MERGE_SIZE=`du -s . | sed -e "s/\t.*//"`;
+  - |
+    size_check() {
+        GIT_TARGET_EXTRA="+refs/heads/${TRAVIS_BRANCH}"
+        GIT_SOURCE_EXTRA="+refs/pull/${TRAVIS_PULL_REQUEST}/merge"
+        echo TRAVIS_BRANCH=$TRAVIS_BRANCH
+        echo TRAVIS_PULL_REQUEST=$TRAVIS_PULL_REQUEST
+        echo TRAVIS_REPO_SLUG=$TRAVIS_REPO_SLUG
+        echo GIT_TARGET_EXTRA=$GIT_TARGET_EXTRA
+        echo GIT_SOURCE_EXTRA=$GIT_SOURCE_EXTRA
+        mkdir ~/repo-clone
+        pushd ~/repo-clone
+        git init && git remote add -t ${TRAVIS_BRANCH} origin git://github.com/${TRAVIS_REPO_SLUG}.git
+        git fetch origin ${GIT_TARGET_EXTRA}
+        git checkout -qf FETCH_HEAD
+        git tag travis-merge-target
+        git gc --aggressive
+        TARGET_SIZE=`du -s . | sed -e "s/\t.*//"`
+        echo TARGET_SIZE=$TARGET_SIZE
+        git pull origin ${GIT_SOURCE_EXTRA}
+        git gc --aggressive
+        MERGE_SIZE=`du -s . | sed -e "s/\t.*//"`
         popd
-        echo MERGE_SIZE=$MERGE_SIZE;
+        echo MERGE_SIZE=$MERGE_SIZE
         if [ "${MERGE_SIZE}" != "${TARGET_SIZE}" ]; then
-          SIZE_DIFF=`expr \( ${MERGE_SIZE} - ${TARGET_SIZE} \)`;
+            SIZE_DIFF=`expr \( ${MERGE_SIZE} - ${TARGET_SIZE} \)`
         else
-          SIZE_DIFF=0;
-        fi;
+            SIZE_DIFF=0
+        fi
 
-        echo SIZE_DIFF=$SIZE_DIFF;
+        echo SIZE_DIFF=$SIZE_DIFF
 
-        echo -e "Estimated content size difference = ${SIZE_DIFF} kB";
+        echo -e "Estimated content size difference = ${SIZE_DIFF} kB"
 
         if test ${SIZE_DIFF} -lt $1; then
-          echo "Size check passed";
-          return 0;
+            echo "Size check passed"
+            return 0
         else
-          echo "Size check failed";
-          return 1;
-        fi;
-
-      };
+            echo "Size check failed"
+            return 1
+        fi
+      }
 
 script:
   - coverage run run_tests.py
@@ -126,10 +126,9 @@ script:
         pushd ../
         git clone https://github.com/scikit-beam/scikit-beam-examples.git
         popd
-        pushd doc
-        chmod +x build_docs.sh
-        ./build_docs.sh
-        popd
+        cd doc
+        bash build_docs.sh
+        cd ..
     fi
 
 after_success:
@@ -141,8 +140,7 @@ after_success:
         eval `ssh-agent -s`
         chmod 600 skbeam-docs-deploy
         ssh-add skbeam-docs-deploy
-        pushd doc
-        chmod +x push_docs.sh
-        ./push_docs.sh
-        popd
+        cd doc
+        bash push_docs.sh
+        cd ..
     fi
