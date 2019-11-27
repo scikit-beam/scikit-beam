@@ -37,7 +37,7 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-from collections import Mapping
+from collections.abc import Mapping
 import logging
 
 import numpy as np

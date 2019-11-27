@@ -45,7 +45,8 @@ from six import string_types
 import time
 import sys
 
-from collections import namedtuple, MutableMapping, defaultdict, deque
+from collections import namedtuple, defaultdict, deque
+from collections.abc import MutableMapping
 import numpy as np
 from itertools import tee
 
