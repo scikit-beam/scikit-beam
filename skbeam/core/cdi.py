@@ -206,7 +206,7 @@ def generate_box_support(sup_radius, shape_v):
     """
     slc_list = [slice(s//2 - sup_radius, s//2 + sup_radius) for s in shape_v]
     sup = np.zeros(shape_v)
-    sup[slc_list] = 1
+    sup[tuple(slc_list)] = 1
     return sup
 
 
