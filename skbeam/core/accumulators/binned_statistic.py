@@ -346,7 +346,7 @@ class BinnedStatisticDD(object):
 
         # Remove outliers (indices 0 and -1 for each dimension).
         core = self.D * [slice(1, -1)]
-        self.result = self.result[core]
+        self.result = self.result[tuple(core)]
 
         if (self.result.shape != self.nbin - 2).any():
             raise RuntimeError('Internal Shape Error')
