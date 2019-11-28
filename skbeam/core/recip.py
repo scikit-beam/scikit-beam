@@ -167,7 +167,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
                         ccd_cen=(calibrated_center),
                         dist=dist_sample,
                         wavelength=wavelength,
-                        UBinv=np.matrix(ub).I)
+                        UBinv=np.linalg.inv(ub))
 
     # ending time for the process
     t2 = time.time()
