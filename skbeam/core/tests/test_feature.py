@@ -41,6 +41,7 @@ from numpy.testing import assert_array_almost_equal
 from nose.tools import assert_raises
 from .utils import gauss_gen, parabola_gen
 import skbeam.core.feature as feature
+import pytest
 
 
 def _test_refine_helper(x_data, y_data, center, height,
@@ -53,17 +54,28 @@ def _test_refine_helper(x_data, y_data, center, height,
                               np.array([center, height]))
 
 
-def test_refine_methods():
+def _gen_test_refine_methods():
     refine_methods = [feature.refine_quadratic,
                       feature.refine_log_quadratic]
     test_data_gens = [parabola_gen, gauss_gen]
 
     x = np.arange(128)
+
+    vals = []
     for center in (15, 75, 110):
         for height in (5, 10, 100):
             for rf, dm in zip(refine_methods, test_data_gens):
-                yield (_test_refine_helper,
-                       x, dm(x, center, height, 5), center, height, rf, {})
+                vals.append((x, dm(x, center, height, 5), center, height, rf))
+
+    return vals
+
+
+param_test_refine_methods = _gen_test_refine_methods()
+
+
+@pytest.mark.parametrize("x, dm, center, height, rf", param_test_refine_methods)
+def test_refine_methods(x, dm, center, height, rf):
+    _test_refine_helper(x, dm, center, height, rf, {})
 
 
 def test_filter_n_largest():
