@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 import os
 import importlib
+import pytest
 import logging
 logger = logging.getLogger(__name__)
 filetypes = ['py', 'txt', 'dat']
@@ -38,29 +39,6 @@ def _openess_tester(module):
         yield _everybody_welcome_here, f.__doc__
 
 
-def test_openness():
-    """Testing for sexist language
-
-    Ensure that our library does not contain sexist (intentional or otherwise)
-    language. For tips on writing gender-neutrally,
-    see http://www.lawprose.org/blog/?p=499
-
-    Notes
-    -----
-    Inspired by
-   https://modelviewculture.com/pieces/gendered-language-feature-or-bug-in-software-documentation
-    and
-    https://modelviewculture.com/pieces/the-open-source-identity-crisis
-    """
-    starting_package = 'skbeam'
-    modules, files = get_modules_in_library(starting_package)
-    for m in modules:
-        yield _openess_tester, importlib.import_module(m)
-
-    for afile in files:
-        # logger.debug('testing file %s', afile)
-        with open(afile, 'r') as f:
-            yield _everybody_welcome_here, f.read()
 
 
 _IGNORE_FILE_EXT = ['.pyc', '.so', '.ipynb', '.jpg', '.txt', '.zip', '.c']
@@ -129,6 +107,48 @@ def get_modules_in_library(library, ignorefileext=None, ignoredirs=None):
                     other_files.append(os.path.join(path, f))
 
     return mods, other_files
+
+
+param_test_openness_modules, param_test_openness_files = get_modules_in_library('skbeam')
+
+
+@pytest.mark.parametrize("module", param_test_openness_modules)
+def test_openness_modules(module):
+    """Testing for sexist language
+
+    Ensure that our library does not contain sexist (intentional or otherwise)
+    language. For tips on writing gender-neutrally,
+    see http://www.lawprose.org/blog/?p=499
+
+    Notes
+    -----
+    Inspired by
+    https://modelviewculture.com/pieces/gendered-language-feature-or-bug-in-software-documentation
+    and
+    https://modelviewculture.com/pieces/the-open-source-identity-crisis
+    """
+
+    _openess_tester(importlib.import_module(module))
+
+
+@pytest.mark.parametrize("afile", param_test_openness_files)
+def test_openness_files(afile):
+    """Testing for sexist language
+
+    Ensure that our library does not contain sexist (intentional or otherwise)
+    language. For tips on writing gender-neutrally,
+    see http://www.lawprose.org/blog/?p=499
+
+    Notes
+    -----
+    Inspired by
+    https://modelviewculture.com/pieces/gendered-language-feature-or-bug-in-software-documentation
+    and
+    https://modelviewculture.com/pieces/the-open-source-identity-crisis
+    """
+
+    with open(afile, 'r') as f:
+        _everybody_welcome_here(f.read())
 
 
 if __name__ == '__main__':
