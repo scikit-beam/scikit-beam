@@ -37,6 +37,7 @@ from __future__ import absolute_import, division, print_function
 import six
 import numpy as np
 import sys
+import pytest
 
 import numpy.testing as npt
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
@@ -138,18 +139,19 @@ def _bin_edges_exceptions(param_dict):
     core.bin_edges(**param_dict)
 
 
-def test_bin_edges():
-    test_dicts = [{'range_min': 1.234,
-                   'range_max': 5.678,
-                   'nbins': 42,
-                   'step': np.pi / 10}, ]
-    for param_dict in test_dicts:
-        for drop_key in ['range_min', 'range_max', 'step', 'nbins']:
-            tmp_pdict = dict(param_dict)
-            tmp_pdict.pop(drop_key)
-            yield _bin_edges_helper, tmp_pdict
+param_test_bin_edges = ['range_min', 'range_max', 'step', 'nbins']
 
-    fail_dicts = [
+@pytest.mark.parametrize("drop_key", param_test_bin_edges)
+def test_bin_edges(drop_key):
+    test_dict = {'range_min': 1.234,
+                 'range_max': 5.678,
+                 'nbins': 42,
+                 'step': np.pi / 10}
+    test_dict.pop(drop_key)
+    _bin_edges_helper(test_dict)
+
+
+param_test_bin_edges_exceptions = [
         # no entries
         {},
         # 4 entries
@@ -166,8 +168,10 @@ def test_bin_edges():
         # nbins == 0
         {'range_min': 1.234, 'range_max': 5.678, 'nbins': 0}]
 
-    for param_dict in fail_dicts:
-        yield _bin_edges_exceptions, param_dict
+
+@pytest.mark.parametrize("fail_dict", param_test_bin_edges_exceptions)
+def test_bin_edges_exceptions(fail_dict):
+        _bin_edges_exceptions(fail_dict)
 
 
 def test_grid3d():
@@ -442,28 +446,29 @@ def _fail_img_to_relative_xyi_helper(input_dict):
     core.img_to_relative_xyi(**input_dict)
 
 
-def test_img_to_relative_fails():
-    fail_dicts = [
-        # invalid values of x and y
-        {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_x': -1,
-         'pixel_size_y': -1},
-        # valid value of x, no value for y
-        {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_x': 1},
-        # valid value of y, no value for x
-        {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_y': 1},
-        # valid value of y, invalid value for x
-        {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_x': -1,
-         'pixel_size_y': 1},
-        # valid value of x, invalid value for y
-        {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_x': 1,
-         'pixel_size_y': -1},
-        # invalid value of x, no value for y
-        {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_x': -1},
-        # invalid value of y, no value for x
-        {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_y': -1}
-    ]
-    for failer in fail_dicts:
-        yield _fail_img_to_relative_xyi_helper, failer
+param_test_img_to_relative_fails = [
+    # invalid values of x and y
+    {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_x': -1,
+     'pixel_size_y': -1},
+    # valid value of x, no value for y
+    {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_x': 1},
+    # valid value of y, no value for x
+    {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_y': 1},
+    # valid value of y, invalid value for x
+    {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_x': -1,
+     'pixel_size_y': 1},
+    # valid value of x, invalid value for y
+    {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_x': 1,
+     'pixel_size_y': -1},
+    # invalid value of x, no value for y
+    {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_x': -1},
+    # invalid value of y, no value for x
+    {'img': np.ones((100, 100)), 'cx': 50, 'cy': 50, 'pixel_size_y': -1}]
+
+
+@pytest.mark.parametrize("fail_dict", param_test_img_to_relative_fails)
+def test_img_to_relative_fails(fail_dict):
+    _fail_img_to_relative_xyi_helper(fail_dict)
 
 
 def test_img_to_relative_xyi(random_seed=None):
