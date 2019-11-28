@@ -97,7 +97,7 @@ def get_modules_in_library(library, ignorefileext=None, ignoredirs=None):
         for f in files:
             file_base, file_ext = os.path.splitext(f)
             if file_ext not in ignorefileext:
-                if file_ext == 'py':
+                if file_ext == '.py':
                     mod_path = path[len(top_level)-len(library):].split(os.sep)
                     if not file_base == '__init__':
                         mod_path.append(file_base)
