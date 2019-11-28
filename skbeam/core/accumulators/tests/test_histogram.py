@@ -6,6 +6,7 @@ from nose.tools import raises
 from skbeam.core.accumulators.histogram import Histogram
 from time import time
 import random
+import pytest
 
 
 def _1d_histogram_tester(binlowhighs, x, weights=1):
@@ -22,7 +23,7 @@ def _1d_histogram_tester(binlowhighs, x, weights=1):
     assert_array_almost_equal(ynp, h.values)
 
 
-def test_1d_histogram():
+def _gen_test_1d_histogram():
     binlowhigh = [10, 0, 10.01]
     xf = np.random.random(1000000) * 40
     xi = xf.astype(int)
@@ -33,20 +34,27 @@ def test_1d_histogram():
     onexf = random.random()*binlowhigh[2]
     onexi = int(onexf)
     vals = [
-        [binlowhigh, xf, wf],
-        [binlowhigh, xf, 1],
-        [binlowhigh, xi, wi],
-        [binlowhigh, xi, 1],
-        [binlowhigh, xf, wi],
-        [binlowhigh, xi, wf],
-        [binlowhigh, xl, wl],
-        [binlowhigh, xi, wl],
-        [binlowhigh, xl, wi],
-        [binlowhigh, onexf,  1],
-        [binlowhigh, onexi, 1],
+        (binlowhigh, xf, wf),
+        (binlowhigh, xf, 1),
+        (binlowhigh, xi, wi),
+        (binlowhigh, xi, 1),
+        (binlowhigh, xf, wi),
+        (binlowhigh, xi, wf),
+        (binlowhigh, xl, wl),
+        (binlowhigh, xi, wl),
+        (binlowhigh, xl, wi),
+        (binlowhigh, onexf, 1),
+        (binlowhigh, onexi, 1),
     ]
-    for binlowhigh, x, w in vals:
-        yield _1d_histogram_tester, binlowhigh, x, w
+    return vals
+
+
+par_test_1d_histogram = _gen_test_1d_histogram()
+
+
+@pytest.mark.parametrize("binlowhigh, x, w", par_test_1d_histogram)
+def test_1d_histogram(binlowhigh, x, w):
+    _1d_histogram_tester(binlowhigh, x, weights=1)
 
 
 def _2d_histogram_tester(binlowhighs, x, y, weights=1):
@@ -67,7 +75,7 @@ def _2d_histogram_tester(binlowhighs, x, y, weights=1):
     assert_array_almost_equal(ynp, h.values)
 
 
-def test_2d_histogram():
+def _gen_test_2d_histogram():
     ten = [10, 0, 10.01]
     nine = [9, 0, 9.01]
     onexf = random.random()*ten[2]
@@ -84,22 +92,29 @@ def test_2d_histogram():
     wi = wf.copy()
     wl = wf.tolist()
     vals = [
-        [[ten, ten], xf, yf, wf],
-        [[ten, nine], xf, yf, 1],
-        [[ten, ten], xi, yi, wi],
-        [[ten, ten], xi, yi, 1],
-        [[ten, nine], xf, yf, wi],
-        [[ten, nine], xi, yi, wf],
-        [[ten, nine], xl, yl, wl],
-        [[ten, nine], xi, yi, wl],
-        [[ten, nine], xf, yf, wl],
-        [[ten, nine], xl, yl, wi],
-        [[ten, nine], xl, yl, wf],
-        [[ten, nine], onexf, oneyf, 1],
-        [[ten, nine], onexi, oneyi, 1],
+        ((ten, ten), xf, yf, wf),
+        ((ten, nine), xf, yf, 1),
+        ((ten, ten), xi, yi, wi),
+        ((ten, ten), xi, yi, 1),
+        ((ten, nine), xf, yf, wi),
+        ((ten, nine), xi, yi, wf),
+        ((ten, nine), xl, yl, wl),
+        ((ten, nine), xi, yi, wl),
+        ((ten, nine), xf, yf, wl),
+        ((ten, nine), xl, yl, wi),
+        ((ten, nine), xl, yl, wf),
+        ((ten, nine), onexf, oneyf, 1),
+        ((ten, nine), onexi, oneyi, 1),
     ]
-    for binlowhigh, x, y, w in vals:
-        yield _2d_histogram_tester, binlowhigh, x, y, w
+    return vals
+
+
+par_test_2d_histogram = _gen_test_2d_histogram()
+
+
+@pytest.mark.parametrize("binlowhigh, x, y, w", par_test_2d_histogram)
+def test_2d_histogram(binlowhigh, x, y, w):
+    _2d_histogram_tester(binlowhigh, x, y, weights=1)
 
 
 @raises(AssertionError)
