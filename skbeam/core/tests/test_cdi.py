@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 import numpy as np
+import pytest
 from numpy.testing import (assert_equal, assert_array_equal,
                            assert_array_almost_equal, assert_almost_equal)
 from nose.tools import raises
@@ -128,14 +129,11 @@ def _disk_support_area(sup_radius, shape_v):
     assert(new_sup.size < (2*sup_radius)**len(shape_v))
 
 
-def test_support():
+@pytest.mark.parametrize("v", [(100, 100), (100, 100, 100)])
+def test_support(v):
     sup_radius = 20
-    a, diff_v = make_synthetic_data()
-    shape_list = [[100, 100], [100, 100, 100]]
-    for v in shape_list:
-        yield _box_support_area, sup_radius, v
-    for v in shape_list:
-        yield _disk_support_area, sup_radius, v
+    _box_support_area(sup_radius, v)
+    _disk_support_area(sup_radius, v)
 
 
 def test_recon():
