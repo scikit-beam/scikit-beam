@@ -37,7 +37,6 @@ import logging
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal
-from nose.tools import assert_raises, assert_equal
 import pytest
 
 import skbeam.core.utils as utils
@@ -169,8 +168,8 @@ def test_two_time_corr():
     assert np.all(two_time[0])
 
     # check the number of buffers are even
-    assert_raises(ValueError, two_time_corr, rois, np.asarray(y), 50,
-                  num_bufs=25, num_levels=1)
+    with pytest.raises(ValueError):
+        two_time_corr(rois, np.asarray(y), 50, num_bufs=25, num_levels=1)
 
 
 def test_auto_corr_scat_factor():
@@ -261,7 +260,7 @@ def test_CrossCorrelator1d():
     cc1D_masked_symavg = CrossCorrelator(mask_1D.shape, mask=mask_1D,
                                          normalization='symavg')
 
-    assert_equal(cc1D.nids, 1)
+    assert cc1D.nids == 1
 
     ycorr_1D = cc1D(y)
     ycorr_1D_masked = cc1D_masked(y*mask_1D)
@@ -331,7 +330,7 @@ def testCrossCorrelator2d():
                                       normalization='symavg')
 
     # 10 ids
-    assert_equal(cc2D_ids.nids, 10)
+    assert cc2D_ids.nids == 10
 
     ycorr_ids_2D = cc2D_ids(Z)
     ycorr_ids_2D_symavg = cc2D_ids_symavg(Z)
@@ -371,22 +370,16 @@ def testCrossCorrelator2d():
 
 
 def test_CrossCorrelator_badinputs():
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         CrossCorrelator((1, 1, 1))
 
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         cc = CrossCorrelator((10, 10))
         a = np.ones((10, 11))
         cc(a)
 
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         cc = CrossCorrelator((10, 10))
         a = np.ones((10, 10))
         a2 = np.ones((10, 11))
         cc(a, a2)
-
-
-if __name__ == '__main__':
-    import nose
-
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
