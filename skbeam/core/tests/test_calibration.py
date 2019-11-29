@@ -89,8 +89,3 @@ def test_blind_d():
                                            I, window_size, len(expected_r),
                                            threshold)
     assert np.abs(d - D) < 1e-6
-
-
-if __name__ == '__main__':
-    import nose
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
