@@ -3,7 +3,6 @@ import numpy as np
 import pytest
 from numpy.testing import (assert_equal, assert_array_equal,
                            assert_array_almost_equal, assert_almost_equal)
-from nose.tools import raises
 
 from skbeam.core.cdi import (_dist, gauss, find_support,
                              pi_modulus, cal_diff_error, cdi_recon,
@@ -157,7 +156,6 @@ def test_recon():
     assert_array_equal(outv1.shape, outv2.shape)
 
 
-@raises(TypeError)
 def test_cdi_plotter():
     a, diff_v = make_synthetic_data()
     total_n = 10
@@ -168,5 +166,6 @@ def test_cdi_plotter():
     sup = generate_box_support(sup_radius, diff_v.shape)
 
     # assign wrong plot_function
-    outv, error_d = cdi_recon(diff_v, init_phase, sup, sw_flag=True,
-                              n_iterations=total_n, sw_step=2, cb_function=10)
+    with pytest.raises(TypeError):
+        outv, error_d = cdi_recon(diff_v, init_phase, sup, sw_flag=True,
+                                  n_iterations=total_n, sw_step=2, cb_function=10)
