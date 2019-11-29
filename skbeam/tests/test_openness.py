@@ -44,9 +44,13 @@ def _openess_tester(module):
 _IGNORE_FILE_EXT = ['.pyc', '.so', '.ipynb', '.jpg', '.txt', '.zip', '.c']
 _IGNORE_DIRS = ['__pycache__', '.git', 'cover', 'build', 'dist', 'tests',
                 '.ipynb_checkpoints', 'SOFC']
+# File names are specified as a list of elements. File names may be assembled from
+#   the elements in system intependent way.
+#   File ``fit2d_save.py`` is excluded, because it displays deprecation warning
+#   during testing.
+_IGNORE_FILES = [('skbeam', 'io', 'fit2d_save.py'),]
 
-
-def get_modules_in_library(library, ignorefileext=None, ignoredirs=None):
+def get_modules_in_library(library, ignorefileext=None, ignoredirs=None, ignorefiles=None):
     """
 
     Parameters
@@ -61,6 +65,10 @@ def get_modules_in_library(library, ignorefileext=None, ignoredirs=None):
         List of strings that, if present in the file path, will cause all
         sub-directories to be ignored
         Defaults to the ``ignoredirs`` list in this module
+    ignorefiles : list, optional
+        List of file names (possibly with preceding directories). If full file path ends with this
+        string, then the file (or module) is ignored.
+        Defaults to the ``ignorefiles`` list in this module
 
     Returns
     -------
@@ -74,6 +82,11 @@ def get_modules_in_library(library, ignorefileext=None, ignoredirs=None):
         ignoredirs = _IGNORE_DIRS
     if ignorefileext is None:
         ignorefileext = _IGNORE_FILE_EXT
+    if ignorefiles is None:
+        ignorefiles = []
+        for file_path_elements in _IGNORE_FILES:
+            fln = os.path.join(*file_path_elements)
+            ignorefiles.append(fln)
     module = importlib.import_module(library)
     # if hasattr(module, '__all__'):
     #     functions = module.__all__
@@ -95,6 +108,11 @@ def get_modules_in_library(library, ignorefileext=None, ignoredirs=None):
         if path.split(os.sep)[-1] in ignoredirs:
             continue
         for f in files:
+            # Ignored files (or modules)
+            file_full_path = os.path.join(path, f)
+            if any([file_full_path.endswith(_) for _ in ignorefiles]):
+                continue
+
             file_base, file_ext = os.path.splitext(f)
             if file_ext not in ignorefileext:
                 if file_ext == '.py':
