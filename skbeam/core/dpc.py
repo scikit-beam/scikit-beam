@@ -40,6 +40,7 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 from scipy.optimize import minimize
 from collections import namedtuple
+import warnings
 import logging
 logger = logging.getLogger(__name__)
 
@@ -275,7 +276,11 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
     kappax, kappay = np.meshgrid(ax, ay)
     div_v = kappax ** 2 * (1 - weighting) + kappay ** 2 * weighting
 
-    c = -1j * (kappax * tx * (1 - weighting) + kappay * ty * weighting) / div_v
+    # It appears that having nans in data arrays is normal mode of
+    #   operation for this function. So let's disable warnings.
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        c = -1j * (kappax * tx * (1 - weighting) + kappay * ty * weighting) / div_v
     c = np.fft.ifftshift(np.where(div_v == 0, 0, c))
 
     phase = np.fft.ifft2(c)[roi_slice].real
