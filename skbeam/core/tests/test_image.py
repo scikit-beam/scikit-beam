@@ -7,9 +7,7 @@ from scipy.ndimage.morphology import binary_dilation
 import skbeam.core.image as nimage
 import pytest
 
-from numpy.testing import assert_array_almost_equal
-
-from nose.tools import assert_equal, assert_raises
+from numpy.testing import assert_equal, assert_array_almost_equal, assert_raises
 
 
 def _gen_test_find_ring_center_acorr_1D():
@@ -157,7 +155,3 @@ def test_construct_rphi_avg_image():
                                                              29.491395,
                                                              5.939956,
                                                              np.nan, np.nan]))
-
-if __name__ == '__main__':
-    import nose
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
