@@ -167,10 +167,3 @@ def test_openness_files(afile):
 
     with open(afile, 'r') as f:
         _everybody_welcome_here(f.read())
-
-
-if __name__ == '__main__':
-    import nose
-    import sys
-    nose_args = ['-s'] + sys.argv[1:]
-    nose.runmodule(argv=nose_args, exit=False)
