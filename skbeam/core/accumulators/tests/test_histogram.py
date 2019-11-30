@@ -2,7 +2,6 @@ from __future__ import division
 import numpy as np
 from numpy.testing import assert_array_almost_equal, assert_array_equal
 from numpy.testing import assert_almost_equal
-from nose.tools import raises
 from skbeam.core.accumulators.histogram import Histogram
 from time import time
 import random
@@ -117,16 +116,16 @@ def test_2d_histogram(binlowhigh, x, y, w):
     _2d_histogram_tester(binlowhigh, x, y, weights=1)
 
 
-@raises(AssertionError)
 def test_simple_fail():
     # This test exposes the half-open vs full-open histogram code difference
     # between np.histogram and skbeam's histogram.
-    h = Histogram((5, 0, 3))
-    a = np.arange(1, 6)
-    b = np.asarray([1, 1, 2, 3, 2])
-    h.fill(a, weights=b)
-    np_res = np.histogram(a, h.edges[0], weights=b)[0]
-    assert_array_equal(h.values, np_res)
+    with pytest.raises(AssertionError):
+        h = Histogram((5, 0, 3))
+        a = np.arange(1, 6)
+        b = np.asarray([1, 1, 2, 3, 2])
+        h.fill(a, weights=b)
+        np_res = np.histogram(a, h.edges[0], weights=b)[0]
+        assert_array_equal(h.values, np_res)
 
 
 def test_simple_pass():
