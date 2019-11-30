@@ -353,8 +353,3 @@ def test_dist():
                               np.array([0.04285213, 0.07642648,
                                         0.11521053, 0.15411372,
                                         0.18795214, 0.21260011]))
-
-
-if __name__ == '__main__':
-    import nose
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
