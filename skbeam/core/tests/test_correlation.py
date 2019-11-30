@@ -36,7 +36,7 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 import numpy as np
-from numpy.testing import assert_array_almost_equal
+from numpy.testing import assert_equal, assert_array_almost_equal
 import pytest
 
 import skbeam.core.utils as utils
@@ -260,7 +260,7 @@ def test_CrossCorrelator1d():
     cc1D_masked_symavg = CrossCorrelator(mask_1D.shape, mask=mask_1D,
                                          normalization='symavg')
 
-    assert cc1D.nids == 1
+    assert_equal(cc1D.nids, 1)
 
     ycorr_1D = cc1D(y)
     ycorr_1D_masked = cc1D_masked(y*mask_1D)
@@ -330,7 +330,7 @@ def testCrossCorrelator2d():
                                       normalization='symavg')
 
     # 10 ids
-    assert cc2D_ids.nids == 10
+    assert_equal(cc2D_ids.nids, 10)
 
     ycorr_ids_2D = cc2D_ids(Z)
     ycorr_ids_2D_symavg = cc2D_ids_symavg(Z)
