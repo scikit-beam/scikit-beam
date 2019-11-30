@@ -38,12 +38,13 @@
 from __future__ import absolute_import, division, print_function
 import six
 import numpy as np
-from nose.tools import assert_equal
+from numpy.testing import assert_equal
+import pytest
 
 from skbeam.core.constants.basic import (BasicElement, element, basic)
 
 
-def smoke_test_element_creation():
+def test_element_creation():
     # grab the set of elements represented by 'Z'
     elements = sorted([elm for abbrev, elm in six.iteritems(basic)
                        if isinstance(abbrev, int)])
@@ -96,8 +97,3 @@ def smoke_test_element_creation():
         assert_equal(e2 == e1, False)
         assert_equal(e2 >= e1, True)
         assert_equal(e2 > e1, True)
-
-
-if __name__ == '__main__':
-    import nose
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
