@@ -75,8 +75,3 @@ def test_snip_method():
     bg_cal_part = bg[cutval:-cutval]
 
     assert_allclose(bg_true_part, bg_cal_part, rtol=1e-3, atol=1e-1)
-
-
-if __name__ == '__main__':
-    import nose
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
