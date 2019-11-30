@@ -1,12 +1,12 @@
 from __future__ import absolute_import, division, print_function
 import copy
 import logging
+import pytest
 
 import six
 import numpy as np
 from numpy.testing import (assert_equal, assert_array_almost_equal,
-                           assert_array_equal)
-from nose.tools import assert_true, raises, assert_raises
+                           assert_array_equal, assert_raises)
 
 from skbeam.core.fitting.base.parameter_data import get_para, e_calibration
 from skbeam.core.fitting.xrf_model import (
@@ -91,17 +91,17 @@ def test_fit():
     for k, v in six.iteritems(result.values):
         if 'area' in k:
             # error smaller than 1e-6
-            assert_true(abs(v - default_area)/default_area < 1e-6)
+            assert abs(v - default_area)/default_area < 1e-6
 
     # multiple peak sumed, so value should be larger than one peak area 1e5
     sum_Fe = sum_area('Fe_K', result)
-    assert_true(sum_Fe > default_area)
+    assert sum_Fe > default_area
 
     sum_Ce = sum_area('Ce_L', result)
-    assert_true(sum_Ce > default_area)
+    assert sum_Ce > default_area
 
     sum_Pt = sum_area('Pt_M', result)
-    assert_true(sum_Pt > default_area)
+    assert sum_Pt > default_area
 
     # create full list of parameters
     PC = ParamController(param, elemental_lines)
@@ -142,11 +142,11 @@ def test_register():
     assert_equal(len(_STRATEGY_REGISTRY), 6)
 
 
-@raises(RuntimeError)
 def test_register_error():
-    new_strategy = copy.deepcopy(e_calibration)
-    new_strategy['coherent_sct_amplitude'] = 'fixed'
-    register_strategy('e_calibration', new_strategy, overwrite=False)
+    with pytest.raises(RuntimeError):
+        new_strategy = copy.deepcopy(e_calibration)
+        new_strategy['coherent_sct_amplitude'] = 'fixed'
+        register_strategy('e_calibration', new_strategy, overwrite=False)
 
 
 def test_pre_fit():
@@ -162,22 +162,22 @@ def test_pre_fit():
     # fit without weights
     x, y_total, area_v = linear_spectrum_fitting(x0, y0, param, weights=None)
     for v in item_list:
-        assert_true(v in y_total)
+        assert v in y_total
 
     sum1 = np.sum([v for v in y_total.values()], axis=0)
     # r squares as a measurement
     r1 = 1 - np.sum((sum1-y0)**2)/np.sum((y0-np.mean(y0))**2)
-    assert_true(r1 > 0.85)
+    assert r1 > 0.85
 
     # fit with weights
     w = 1/np.sqrt(y0+1)
     x, y_total, area_v = linear_spectrum_fitting(x0, y0, param, weights=w)
     for v in item_list:
-        assert_true(v in y_total)
+        assert v in y_total
     sum2 = np.sum([v for v in y_total.values()], axis=0)
     # r squares as a measurement
     r2 = 1 - np.sum((sum2-y0)**2)/np.sum((y0-np.mean(y0))**2)
-    assert_true(r2 > 0.85)
+    assert r2 > 0.85
 
 
 def test_escape_peak():
@@ -210,20 +210,20 @@ def test_set_param_hint():
             assert_equal(p['coherent_sct_energy'].vary, True)
 
 
-@raises(ValueError)
 def test_set_param():
-    param = get_para()
-    elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M']
+    with pytest.raises(ValueError):
+        param = get_para()
+        elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M']
 
-    MS = ModelSpectrum(param, elemental_lines)
-    MS.assemble_models()
+        MS = ModelSpectrum(param, elemental_lines)
+        MS.assemble_models()
 
-    # get compton model
-    compton = MS.mod.components[0]
+        # get compton model
+        compton = MS.mod.components[0]
 
-    input_param = {'bound_type': 'other', 'max': 13.0, 'min': 9.0,
-                   'value': 11.0}
-    _set_parameter_hint('coherent_sct_energy', input_param, compton)
+        input_param = {'bound_type': 'other', 'max': 13.0, 'min': 9.0,
+                       'value': 11.0}
+        _set_parameter_hint('coherent_sct_energy', input_param, compton)
 
 
 def test_pixel_fit_multiprocess():
@@ -266,4 +266,4 @@ def test_pixel_fit_multiprocess():
             # Only compare the fitting parameters, such as area of each peak.
             continue
         # compare with default value 1e5, and get difference < 1%
-        assert_true(abs(v[0, 0] * 0.01 - default_area) / default_area < 1e-2)
+        assert abs(v[0, 0] * 0.01 - default_area) / default_area < 1e-2
