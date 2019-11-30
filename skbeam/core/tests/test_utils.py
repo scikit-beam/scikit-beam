@@ -41,8 +41,7 @@ import pytest
 
 import numpy.testing as npt
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
-                           assert_almost_equal)
-from nose.tools import assert_equal, assert_true, raises
+                           assert_equal, assert_almost_equal)
 
 from skbeam.testing.decorators import known_fail_if
 
@@ -124,19 +123,19 @@ def _bin_edges_helper(p_dict):
         assert_almost_equal(step, np.diff(bin_edges))
     if 'range_max' in p_dict:
         range_max = p_dict['range_max']
-        assert_true(np.all(bin_edges <= range_max))
+        assert np.all(bin_edges <= range_max)
     if 'range_min' in p_dict:
         range_min = p_dict['range_min']
-        assert_true(np.all(bin_edges >= range_min))
+        assert np.all(bin_edges >= range_min)
     if 'range_max' in p_dict and 'step' in p_dict:
         step = p_dict['step']
         range_max = p_dict['range_max']
-        assert_true((range_max - bin_edges[-1]) < step)
+        assert (range_max - bin_edges[-1]) < step
 
 
-@raises(ValueError)
 def _bin_edges_exceptions(param_dict):
-    core.bin_edges(**param_dict)
+    with pytest.raises(ValueError):
+        core.bin_edges(**param_dict)
 
 
 param_test_bin_edges = ['range_min', 'range_max', 'step', 'nbins']
@@ -370,10 +369,10 @@ def test_multi_tau_lags():
     assert_array_equal(dict_dly[3], dict_lags[3])
 
 
-@raises(NotImplementedError)
 def test_wedge_integration():
-    core.wedge_integration(src_data=None, center=None, theta_start=None,
-                           delta_theta=None, r_inner=None, delta_r=None)
+    with pytest.raises(NotImplementedError):
+        core.wedge_integration(src_data=None, center=None, theta_start=None,
+                               delta_theta=None, r_inner=None, delta_r=None)
 
 
 def test_subtract_reference_images():
@@ -441,9 +440,9 @@ def test_subtract_reference_images():
         six.reraise(AssertionError, ae, sys.exc_info()[2])
 
 
-@raises(ValueError)
 def _fail_img_to_relative_xyi_helper(input_dict):
-    core.img_to_relative_xyi(**input_dict)
+    with pytest.raises(ValueError):
+        core.img_to_relative_xyi(**input_dict)
 
 
 param_test_img_to_relative_fails = [
@@ -541,7 +540,7 @@ def test_angle_grid():
     assert_almost_equal(a[4, 4], np.pi / 4)  # (1, 1) should be 45 degrees
     # The documented domain is [-pi, pi].
     correct_domain = np.all((a < np.pi + 0.1) & (a > -np.pi - 0.1))
-    assert_true(correct_domain)
+    assert correct_domain
 
 
 def test_radial_grid():
@@ -571,9 +570,3 @@ def test_bin_grid():
     x, y = core.bin_grid(img, r_array, (geo.pixel1, geo.pixel2))
 
     assert_array_almost_equal(y, x, decimal=2)
-
-
-if __name__ == '__main__':
-    import nose
-
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
