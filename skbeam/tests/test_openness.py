@@ -86,7 +86,8 @@ def get_modules_in_library(library, ignorefileext=None, ignoredirs=None, ignoref
         for file_path_elements in _IGNORE_FILES:
             fln = os.path.join(*file_path_elements)
             ignorefiles.append(fln)
-    module = importlib.import_module(library)
+    # module = importlib.import_module(library)
+
     # if hasattr(module, '__all__'):
     #     functions = module.__all__
     # else:
@@ -99,7 +100,7 @@ def get_modules_in_library(library, ignorefileext=None, ignoredirs=None, ignoref
     top_level = os.path.join(dir_path, "..")
     top_level = os.path.abspath(top_level)
 
-    #top_level = os.sep.join(module.__file__.split(os.sep)[:-1])
+    # top_level = os.sep.join(module.__file__.split(os.sep)[:-1])
 
     for path, dirs, files in os.walk(top_level):
         skip = False
@@ -112,6 +113,7 @@ def get_modules_in_library(library, ignorefileext=None, ignoredirs=None, ignoref
         if path.split(os.sep)[-1] in ignoredirs:
             continue
         for f in files:
+            print(f"path={path} fln={f}")
             # Ignored files (or modules)
             file_full_path = os.path.join(path, f)
             if any([file_full_path.endswith(_) for _ in ignorefiles]):
@@ -150,6 +152,9 @@ def test_openness_modules(module):
     https://modelviewculture.com/pieces/the-open-source-identity-crisis
     """
 
+    print("running test!!!")
+    print(f"file={__file__}")
+    assert False,"Testing print"
     _openess_tester(importlib.import_module(module))
 
 
