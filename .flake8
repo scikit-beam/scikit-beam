@@ -6,5 +6,6 @@ exclude =
     dist,
     versioneer.py,
     pyxrf/_version.py,
-    docs/conf.py
+    doc/conf.py,
+    doc/sphinxext/*
 max-line-length = 115

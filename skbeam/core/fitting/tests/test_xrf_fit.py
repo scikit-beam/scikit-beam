@@ -117,19 +117,20 @@ def test_define_range():
     y0 = synthetic_spectrum()
     low = 0
     high = 2000
-    x,y = define_range(y0, low, high, 0, 1)
+    x, y = define_range(y0, low, high, 0, 1)
     assert_equal(y0, y)
 
     low = 1
     high = 1000
-    x,y = define_range(y0, low, high, 0, 1)
-    assert(len(y)==1000)
+    x, y = define_range(y0, low, high, 0, 1)
+    assert(len(y) == 1000)
 
 
 def test_extract_strategy():
     param = get_para()
     d = extract_strategy(param, 'bound_type')
     assert(len(d) == len(param)-1)  # 'non_fitting_values' is not included
+
 
 def test_register():
     new_strategy = e_calibration

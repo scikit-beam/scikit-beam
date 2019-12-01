@@ -198,7 +198,7 @@ def test_grid3d():
     X, Y, Z = np.mgrid[slc]
 
     # make and ravel the image data (which is all ones)
-    I = np.ones_like(X).ravel()  # noqa: E741
+    II = np.ones_like(X).ravel()
 
     # make input data (Nx3
     data = np.array([np.ravel(X),
@@ -206,10 +206,10 @@ def test_grid3d():
                      np.ravel(Z)]).T
 
     (mean, occupancy,
-     std_err, bounds) = core.grid3d(data, I, **param_dict)
+     std_err, bounds) = core.grid3d(data, II, **param_dict)
 
     # check the values are as expected
-    npt.assert_array_equal(mean.ravel(), I)
+    npt.assert_array_equal(mean.ravel(), II)
     npt.assert_array_equal(occupancy, np.ones_like(occupancy))
     npt.assert_array_equal(std_err, 0)
 

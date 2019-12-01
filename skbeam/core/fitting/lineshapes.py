@@ -407,7 +407,7 @@ def gamma_dist(bin_values, K, M):
     section of the ``nbinom_dist()`` docstring
 
     .. math::
-        P(K) = \\frac{\Gamma(K + M)} {\Gamma(K + 1)\Gamma(M)}
+        P(K) = \\frac{\\Gamma(K + M)} {\\Gamma(K + 1)\\Gamma(M)}
         (\\frac {M} {M + <K>})^M (\\frac {<K>}{M + <K>})^K
     """
 
@@ -441,7 +441,7 @@ def nbinom_dist(bin_values, K, M):
 
     .. math::
        P(K) =(\\frac{M}{<K>})^M \\frac{K^{M-1}}
-       {\Gamma(M)}\exp(-M\\frac{K}{<K>})
+       {\\Gamma(M)}\\exp(-M\\frac{K}{<K>})
 
     Implementation reference [1]_
 
@@ -486,7 +486,7 @@ def poisson_dist(bin_values, K):
     the ``Notes`` section of the ``nbinom_dist()`` docstring
 
     .. math::
-        P(K) = \\frac{<K>^K}{K!}\exp(-<K>)
+        P(K) = \\frac{<K>^K}{K!}\\exp(-<K>)
     """
 
     poisson_dist = np.exp(-K) * np.power(K, bin_values)/gamma(bin_values + 1)

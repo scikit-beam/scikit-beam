@@ -65,7 +65,7 @@ class TestRadialBinnedStatistic(object):
 
                 self.image = np.sinc(self.rgrid / self.oscillation_rate)
 
-                if stat is 'sum':
+                if stat == 'sum':
                     # in this case we can compare our masked
                     # result to binned_statistic
                     mask = mask_random
@@ -138,7 +138,7 @@ class TestRadialBinnedStatistic(object):
 
                 self.image = np.sinc(self.rgrid / self.oscillation_rate)
 
-                if stat is 'sum':
+                if stat == 'sum':
                     # in this case we can compare our masked
                     # result to binned_statistic
                     mask = mask_random
