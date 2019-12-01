@@ -51,7 +51,7 @@ before_install:
 
 install:
   - export GIT_FULL_HASH=`git rev-parse HEAD`
-  - conda create -n testenv python=$TRAVIS_PYTHON_VERSION
+  - conda create -n testenv python=$TRAVIS_PYTHON_VERSION numpy=$NUMPY
   - conda activate testenv
   - conda install xraylib  # this is the only package not available on PyPI
   - pip install -r requirements.txt
