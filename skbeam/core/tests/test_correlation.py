@@ -293,7 +293,7 @@ def test_CrossCorrelator1d():
                                         np.nan]))
 
 
-def testCrossCorrelator2d():
+def test_CrossCorrelator2d():
     ''' Test the 2D case of the cross correlator.
         With non-binary labels.
     '''
