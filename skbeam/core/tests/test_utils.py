@@ -43,8 +43,6 @@ import numpy.testing as npt
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
                            assert_equal, assert_almost_equal)
 
-from skbeam.testing.decorators import known_fail_if
-
 import skbeam.core.utils as core
 
 import logging
@@ -54,7 +52,7 @@ try:
     pf = True
 except ImportError:
     pf = False
-    pass
+
 logger = logging.getLogger(__name__)
 
 
@@ -555,8 +553,9 @@ def test_geometric_series():
     assert_array_equal(time_series, [1, 5, 25, 125])
 
 
-@known_fail_if(not pf)
 def test_bin_grid():
+    if not pf:
+        pytest.skip("'Geometry' can not be imported from 'pyFAI.geometry'.")
     geo = Geometry(
         detector='Perkin', pixel1=.0002, pixel2=.0002,
         dist=.23,
