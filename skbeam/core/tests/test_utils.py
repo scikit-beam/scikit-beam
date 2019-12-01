@@ -138,6 +138,7 @@ def _bin_edges_exceptions(param_dict):
 
 param_test_bin_edges = ['range_min', 'range_max', 'step', 'nbins']
 
+
 @pytest.mark.parametrize("drop_key", param_test_bin_edges)
 def test_bin_edges(drop_key):
     test_dict = {'range_min': 1.234,
@@ -168,7 +169,7 @@ param_test_bin_edges_exceptions = [
 
 @pytest.mark.parametrize("fail_dict", param_test_bin_edges_exceptions)
 def test_bin_edges_exceptions(fail_dict):
-        _bin_edges_exceptions(fail_dict)
+    _bin_edges_exceptions(fail_dict)
 
 
 def test_grid3d():
@@ -197,7 +198,7 @@ def test_grid3d():
     X, Y, Z = np.mgrid[slc]
 
     # make and ravel the image data (which is all ones)
-    I = np.ones_like(X).ravel()
+    I = np.ones_like(X).ravel()  # noqa: E741
 
     # make input data (Nx3
     data = np.array([np.ravel(X),
@@ -239,7 +240,7 @@ def test_process_grid_std_err():
     X, Y, Z = np.mgrid[slc]
 
     # make and ravel the image data (which is all ones)
-    I = np.hstack([j * np.ones_like(X).ravel() for j in range(1, 101)])
+    I = np.hstack([j * np.ones_like(X).ravel() for j in range(1, 101)])  # noqa: E741
 
     # make input data (N*5x3)
     data = np.vstack([np.tile(_, 100)

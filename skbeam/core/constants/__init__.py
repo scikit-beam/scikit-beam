@@ -38,9 +38,9 @@
 ########################################################################
 '''Constants
 '''
-from .basic import BasicElement
-from .xrs import calibration_standards
-from .xrf import XrfElement, emission_line_search
+from .basic import BasicElement  # noqa: F401
+from .xrs import calibration_standards  # noqa: F401
+from .xrf import XrfElement, emission_line_search  # noqa: F401
 
 import logging
 logger = logging.getLogger(__name__)

@@ -14,7 +14,7 @@ def _gen_test_find_ring_center_acorr_1D():
     vals = []
     for x in [110, 150, 190]:
         for y in [110, 150, 190]:
-            vals.append((x,y))
+            vals.append((x, y))
     return vals
 
 
@@ -23,7 +23,7 @@ param_test_find_ring_center_acorr_1D = _gen_test_find_ring_center_acorr_1D()
 
 @pytest.mark.parametrize("x, y", param_test_find_ring_center_acorr_1D)
 def test_find_ring_center_acorr_1D(x, y):
-    _helper_find_rings( nimage.find_ring_center_acorr_1D, (x, y), [10, 25, 50])
+    _helper_find_rings(nimage.find_ring_center_acorr_1D, (x, y), [10, 25, 50])
 
 
 def _helper_find_rings(proc_method, center, radii_list):

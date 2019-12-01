@@ -220,7 +220,7 @@ def _create_md_dict(clean_header):
             try:
                 units = str(hl[hl.index('Units') + 2])
                 md_dict['units'] = units
-            except:
+            except Exception:
                 logging.debug('Units value undefined in source data set. '
                               'Reverting to default units value of pixels')
                 md_dict['units'] = 'pixels'

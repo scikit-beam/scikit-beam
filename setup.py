@@ -30,6 +30,7 @@ def c_ext():
 def cython_ext():
     return cythonize("**/*.pyx")
 
+
 here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'requirements.txt')) as requirements_file:
     # Parse requirements.txt, ignoring any commented-out lines.

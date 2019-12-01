@@ -198,6 +198,7 @@ def dpc_fit(rss, ref_reduction, diff_reduction, start_point,
     return minimize(rss, start_point, args=(ref_reduction, diff_reduction),
                     method=solver, tol=tol, options=dict(maxiter=max_iters)).x
 
+
 # attributes
 dpc_fit.solver = ['Nelder-Mead', 'Powell', 'CG', 'BFGS', 'Anneal', 'L-BFGS-B',
                   'TNC', 'COBYLA', 'SLSQP']
@@ -286,6 +287,7 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
     phase = np.fft.ifft2(c)[roi_slice].real
 
     return phase
+
 
 # holy hacks, Batman!  'index' here is a single element list so
 # that I can keep track of how many images have been computed
@@ -503,6 +505,7 @@ def reconstruct_phase_from_partial_info(dpc_state, energy, scan_xstep,
     phase = recon(gx, gy, scan_xstep, scan_ystep, padding, weighting)
 
     return phase, (dpc_state.ax + dpc_state.ay) / 2
+
 
 # attributes
 dpc_runner.solver = ['Nelder-Mead', 'Powell', 'CG', 'BFGS', 'Anneal',

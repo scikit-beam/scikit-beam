@@ -39,8 +39,6 @@ def _openess_tester(module):
         yield _everybody_welcome_here, f.__doc__
 
 
-
-
 _IGNORE_FILE_EXT = ['.pyc', '.so', '.ipynb', '.jpg', '.txt', '.zip', '.c']
 _IGNORE_DIRS = ['__pycache__', '.git', 'cover', 'build', 'dist', 'tests',
                 '.ipynb_checkpoints', 'SOFC']
@@ -48,7 +46,8 @@ _IGNORE_DIRS = ['__pycache__', '.git', 'cover', 'build', 'dist', 'tests',
 #   the elements in system intependent way.
 #   File ``fit2d_save.py`` is excluded, because it displays deprecation warning
 #   during testing.
-_IGNORE_FILES = [('skbeam', 'io', 'fit2d_save.py'),]
+_IGNORE_FILES = [('skbeam', 'io', 'fit2d_save.py'), ]
+
 
 def get_modules_in_library(library, ignorefileext=None, ignoredirs=None, ignorefiles=None):
     """

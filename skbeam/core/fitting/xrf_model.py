@@ -55,8 +55,7 @@ import multiprocessing
 
 from ..constants import XrfElement as Element
 from ..fitting.lineshapes import gaussian
-from ..fitting.models import (ComptonModel, ElasticModel,
-                                        _gen_class_docs)
+from ..fitting.models import (ComptonModel, ElasticModel, _gen_class_docs)
 from .base import parameter_data as sfb_pd
 from .background import snip_method
 
@@ -358,10 +357,10 @@ def register_strategy(key, strategy, overwrite=True):
         bound for every parameter
     """
     if (not overwrite) and (key in _STRATEGY_REGISTRY):
-            if _STRATEGY_REGISTRY[key] is strategy:
-                return
-            raise RuntimeError("You are trying to overwrite an "
-                               "existing strategy: {}".format(key))
+        if _STRATEGY_REGISTRY[key] is strategy:
+            return
+        raise RuntimeError("You are trying to overwrite an "
+                           "existing strategy: {}".format(key))
     _STRATEGY_REGISTRY[key] = strategy
 
 
@@ -547,9 +546,9 @@ class ParamController(object):
         elif element in M_LINE:
             element = element.split('_')[0]
             param_name = str(element)+"_ma1_area"
-        elif 'user' in element.lower():  #user peak
+        elif 'user' in element.lower():  # user peak
             param_name = str(element) + '_area'
-        elif '-' in element:  #pileup peaks
+        elif '-' in element:  # pileup peaks
             param_name = 'pileup_'+element.replace('-', '_')
             param_name += '_area'
         else:
@@ -744,12 +743,12 @@ class ModelSpectrum(object):
                     element_mod.set_param_hint('area', value=default_area, vary=True,
                                                expr=str(element)+'_ka1_'+'area')
                     element_mod.set_param_hint('delta_sigma', value=0, vary=False,
-                                                expr=str(element)+'_ka1_'+'delta_sigma')
+                                               expr=str(element)+'_ka1_'+'delta_sigma')
                     element_mod.set_param_hint('delta_center', value=0, vary=False,
-                                                expr=str(element)+'_ka1_'+'delta_center')
+                                               expr=str(element)+'_ka1_'+'delta_center')
                 else:
                     element_mod.set_param_hint('area', value=default_area, vary=True,
-                                                expr=str(element)+'_ka1_'+'area')
+                                               expr=str(element)+'_ka1_'+'area')
                     element_mod.set_param_hint('delta_center', value=0, vary=False)
                     element_mod.set_param_hint('delta_sigma', value=0, vary=False)
 
@@ -822,7 +821,7 @@ class ModelSpectrum(object):
                     element_mod.set_param_hint('area', value=default_area, vary=True)
                 else:
                     element_mod.set_param_hint('area', value=default_area, vary=True,
-                                             expr=str(element)+'_la1_'+'area')
+                                               expr=str(element)+'_la1_'+'area')
 
                 # area needs to be adjusted
                 if area_name in parameter:
@@ -830,9 +829,9 @@ class ModelSpectrum(object):
 
                 element_mod.set_param_hint('center', value=val, vary=False)
                 element_mod.set_param_hint('sigma', value=1, vary=False)
-                element_mod.set_param_hint('ratio',
-                                         value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1'],
-                                         vary=False)
+                element_mod.set_param_hint(
+                    'ratio', value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['la1'],
+                    vary=False)
 
                 element_mod.set_param_hint('delta_center', value=0, vary=False)
                 element_mod.set_param_hint('delta_sigma', value=0, vary=False)
@@ -894,7 +893,7 @@ class ModelSpectrum(object):
                     element_mod.set_param_hint('area', value=default_area, vary=True)
                 else:
                     element_mod.set_param_hint('area', value=default_area, vary=True,
-                                             expr=str(element)+'_ma1_'+'area')
+                                               expr=str(element)+'_ma1_'+'area')
 
                 # area needs to be adjusted
                 if area_name in parameter:
@@ -902,9 +901,9 @@ class ModelSpectrum(object):
 
                 element_mod.set_param_hint('center', value=val, vary=False)
                 element_mod.set_param_hint('sigma', value=1, vary=False)
-                element_mod.set_param_hint('ratio',
-                                         value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ma1'],
-                                         vary=False)
+                element_mod.set_param_hint(
+                    'ratio', value=e.cs(incident_energy)[line_name]/e.cs(incident_energy)['ma1'],
+                    vary=False)
 
                 element_mod.set_param_hint('delta_center', value=0, vary=False)
                 element_mod.set_param_hint('delta_sigma', value=0, vary=False)
@@ -936,7 +935,7 @@ class ModelSpectrum(object):
                 else:
                     all_element_mod = element_mod
 
-        elif 'user' in elemental_line.lower(): #user peak
+        elif 'user' in elemental_line.lower():  # user peak
             logger.debug('Started setting up user peak: {}'.format(
                 elemental_line))
 
@@ -1555,7 +1554,7 @@ def fit_pixel_multiprocess_nnls(exp_data, matv, param,
     pool = multiprocessing.Pool(num_processors_to_use)
 
     result_pool = [
-        pool.apply_async(_log_and_fit, (n, data, matv,param, use_snip))
+        pool.apply_async(_log_and_fit, (n, data, matv, param, use_snip))
         for n, data in enumerate(exp_data)]
 
     results = [r.get() for r in result_pool]

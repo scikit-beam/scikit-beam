@@ -45,7 +45,7 @@ from skbeam.core.constants.xrf import (XrfElement, emission_line_search,
                                        XrayLibWrap, XrayLibWrap_Energy)
 from skbeam.core.utils import NotInstalledError
 from skbeam.core.constants.basic import basic
-import pytest
+
 
 def test_element_data():
     """

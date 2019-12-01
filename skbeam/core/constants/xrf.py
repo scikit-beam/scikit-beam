@@ -296,6 +296,7 @@ class XrayLibWrap_Energy(XrayLibWrap):
                           self._map[key.lower()],
                           self._incident_energy)
 
+
 # redefine the doc_title for xrf elements
 doc_title = """
     Object to return all the elemental information related to fluorescence

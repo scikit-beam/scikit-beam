@@ -176,6 +176,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
                           detector_size[1], (t2 - t1)))
     return hkl
 
+
 # Assign frame_mode as an attribute to the process_to_q function so that the
 # autowrapping knows what the valid options are
 process_to_q.frame_mode = ['theta', 'phi', 'cart', 'hkl']

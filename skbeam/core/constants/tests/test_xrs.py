@@ -61,7 +61,7 @@ def test_powder_standard():
 def test_hkl():
     a = HKL(1, 1, 1)
     b = HKL('1', '1', '1')
-    c = HKL(h='1', k='1', l='1')
+    c = HKL(h='1', k='1', l='1')  # noqa: E741
     d = HKL(1.5, 1.5, 1.75)
     assert a == b
     assert a == c

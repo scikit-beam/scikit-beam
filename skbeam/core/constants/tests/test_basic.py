@@ -39,7 +39,6 @@ from __future__ import absolute_import, division, print_function
 import six
 import numpy as np
 from numpy.testing import assert_equal
-import pytest
 
 from skbeam.core.constants.basic import (BasicElement, element, basic)
 
