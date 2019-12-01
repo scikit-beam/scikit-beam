@@ -111,9 +111,9 @@ before_script:
       }
 
 script:
+  - flake8
   - coverage run run_tests.py
   - coverage report -m
-  - if [ $RUN_VALIDATION == 'true' ]; then flake8 $TRAVIS_BUILD_DIR/skbeam; fi;
   # Check the merge size to make sure nothing huge was committed, but only do
   # it on one of the branches
   - if [ $BUILD_DOCS == 'true' ]; then
