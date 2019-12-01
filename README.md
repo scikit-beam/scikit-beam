@@ -44,7 +44,7 @@ python setup.py install
 git clone git@github.com:scikit-beam/scikit-beam.git
 cd scikit-beam
 python setup.py develop
-pip install nose coverage setuptools
+pip install pytest coverage setuptools
 ```
 **make sure all the tests pass!**
 ```
