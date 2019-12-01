@@ -94,7 +94,12 @@ def get_modules_in_library(library, ignorefileext=None, ignoredirs=None, ignoref
     # print('functions: %s' % functions)
     mods = []
     other_files = []
-    top_level = os.sep.join(module.__file__.split(os.sep)[:-1])
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    top_level = os.path.join(dir_path, "..")
+    top_level = os.path.abspath(top_level)
+
+    #top_level = os.sep.join(module.__file__.split(os.sep)[:-1])
 
     for path, dirs, files in os.walk(top_level):
         skip = False
