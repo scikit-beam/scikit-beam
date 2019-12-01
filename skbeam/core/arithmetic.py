@@ -45,7 +45,7 @@ __all__ = ["add", "subtract", "multiply", "divide", "logical_and",
            "logical_or", "logical_nor", "logical_xor", "logical_not",
            "logical_sub", "logical_nand"]
 
-
+##abc
 def logical_nand(x1, x2, out=None):
     """Computes the truth value of NOT (x1 AND x2) element wise.
 
