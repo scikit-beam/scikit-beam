@@ -259,10 +259,10 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels,
 
     for j, label in enumerate(u_labels):
         roi_data = buf[level, buf_no][labels == label]
-        # It appears that having nans in ``roi_data`` and ``spe_hist`` is normal mode of
-        #   operation for this function. So let's disable warnings.
         with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+            # It appears that having nans in ``roi_data`` and ``spe_hist`` is normal mode of
+            #   operation for this function. So let's disable warnings.
+            warnings.filterwarnings('ignore', category=RuntimeWarning)
             spe_hist, bin_edges = np.histogram(roi_data, bins=bin_edges,
                                                density=True)
         spe_hist = np.nan_to_num(spe_hist)
