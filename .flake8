@@ -1,0 +1,10 @@
+[flake8]
+exclude =
+    .git,
+    __pycache__,
+    build,
+    dist,
+    versioneer.py,
+    pyxrf/_version.py,
+    docs/conf.py
+max-line-length = 115
