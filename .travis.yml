@@ -56,7 +56,6 @@ install:
   - conda install xraylib  # this is the only package not available on PyPI
   - pip install -r requirements.txt
   - pip install -r requirements-dev.txt
-  - pip install numpy==$NUMPY
   # # need to build_ext -i for the tests so that the .so is local to the source
   # # code.  We could also setup.py develop, but I'm not sure if that is any
   # # better

@@ -36,6 +36,5 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-import six  # noqa: F401
 import logging
 logger = logging.getLogger(__name__)
