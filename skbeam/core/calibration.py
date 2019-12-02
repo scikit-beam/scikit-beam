@@ -131,6 +131,7 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
     d_array = (peaks_x[slc] / tan2theta[slc])
     return np.mean(d_array), np.std(d_array)
 
+
 # Set an attribute for the calibration names that are valid options.  This
 # attribute also aids in autowrapping into VisTrails
 estimate_d_blind.name = list(calibration_standards)
@@ -189,13 +190,13 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
 
     phi = angle_grid(calibrated_center, image.shape, pixel_size).ravel()
     r = radial_grid(calibrated_center, image.shape, pixel_size).ravel()
-    I = image.ravel()
+    II = image.ravel()
 
     phi_steps = np.linspace(-np.pi, np.pi, phi_steps, endpoint=True)
     out = deque()
     for phi_start, phi_end in pairwise(phi_steps):
         mask = (phi <= phi_end) * (phi > phi_start)
-        out.append(bin_1D(r[mask], I[mask],
+        out.append(bin_1D(r[mask], II[mask],
                           nx=nx, min_x=min_x, max_x=max_x))
     out = list(out)
 

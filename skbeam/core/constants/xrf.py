@@ -37,7 +37,7 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-from collections import Mapping
+from collections.abc import Mapping
 import logging
 
 import numpy as np
@@ -295,6 +295,7 @@ class XrayLibWrap_Energy(XrayLibWrap):
         return self._func(self._element,
                           self._map[key.lower()],
                           self._incident_energy)
+
 
 # redefine the doc_title for xrf elements
 doc_title = """

@@ -42,9 +42,7 @@ import itertools
 from skimage import morphology
 
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
-                           assert_almost_equal)
-
-from nose.tools import assert_equal, assert_true, assert_raises
+                           assert_equal, assert_raises, assert_almost_equal)
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +135,7 @@ def test_rings():
     area_comparison = np.diff(ring_areas)
     print(area_comparison)
     areas_monotonically_increasing = np.all(area_comparison > 0)
-    assert_true(areas_monotonically_increasing)
+    assert areas_monotonically_increasing
 
     # Test various illegal inputs
     assert_raises(ValueError,

@@ -230,8 +230,3 @@ def test_dpc_end_to_end():
 
     assert_array_almost_equal(phi_partial, phi)
     assert_array_almost_equal(a_partial, a)
-
-
-if __name__ == "__main__":
-    import nose
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

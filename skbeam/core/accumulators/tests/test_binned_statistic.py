@@ -2,8 +2,7 @@ from skbeam.core.accumulators.binned_statistic import (RadialBinnedStatistic,
                                                        RPhiBinnedStatistic,
                                                        BinnedStatistic1D,
                                                        BinnedStatisticDD)
-from nose.tools import assert_raises
-from numpy.testing import assert_array_equal, assert_array_almost_equal
+from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_raises
 import numpy as np
 import scipy.stats
 from skbeam.core.utils import bin_edges_to_centers
@@ -66,7 +65,7 @@ class TestRadialBinnedStatistic(object):
 
                 self.image = np.sinc(self.rgrid / self.oscillation_rate)
 
-                if stat is 'sum':
+                if stat == 'sum':
                     # in this case we can compare our masked
                     # result to binned_statistic
                     mask = mask_random
@@ -139,7 +138,7 @@ class TestRadialBinnedStatistic(object):
 
                 self.image = np.sinc(self.rgrid / self.oscillation_rate)
 
-                if stat is 'sum':
+                if stat == 'sum':
                     # in this case we can compare our masked
                     # result to binned_statistic
                     mask = mask_random
@@ -190,10 +189,10 @@ class TestRadialBinnedStatistic(object):
             RadialBinnedStatistic(self.image.shape, 10,
                                   mask=np.array([1, 2, 3, 4]))
 
-    def testRadialBinnedStatistic(self):
+    def test_RadialBinnedStatistic(self):
         self._testRadialBinnedStatistic()
 
-    def testRadialBinnedStatistic_rmap(self):
+    def test_RadialBinnedStatistic_rmap(self):
         self._testRadialBinnedStatistic(rfac=1.1)
 
 

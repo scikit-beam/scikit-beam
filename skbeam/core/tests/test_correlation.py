@@ -36,8 +36,7 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 import numpy as np
-from numpy.testing import assert_array_almost_equal
-from nose.tools import assert_raises, assert_equal
+from numpy.testing import assert_equal, assert_array_almost_equal
 import pytest
 
 import skbeam.core.utils as utils
@@ -169,8 +168,8 @@ def test_two_time_corr():
     assert np.all(two_time[0])
 
     # check the number of buffers are even
-    assert_raises(ValueError, two_time_corr, rois, np.asarray(y), 50,
-                  num_bufs=25, num_levels=1)
+    with pytest.raises(ValueError):
+        two_time_corr(rois, np.asarray(y), 50, num_bufs=25, num_levels=1)
 
 
 def test_auto_corr_scat_factor():
@@ -294,7 +293,7 @@ def test_CrossCorrelator1d():
                                         np.nan]))
 
 
-def testCrossCorrelator2d():
+def test_CrossCorrelator2d():
     ''' Test the 2D case of the cross correlator.
         With non-binary labels.
     '''
@@ -371,22 +370,16 @@ def testCrossCorrelator2d():
 
 
 def test_CrossCorrelator_badinputs():
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         CrossCorrelator((1, 1, 1))
 
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         cc = CrossCorrelator((10, 10))
         a = np.ones((10, 11))
         cc(a)
 
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         cc = CrossCorrelator((10, 10))
         a = np.ones((10, 10))
         a2 = np.ones((10, 11))
         cc(a, a2)
-
-
-if __name__ == '__main__':
-    import nose
-
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

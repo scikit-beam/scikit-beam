@@ -36,7 +36,7 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 import numpy.testing as npt
 from numpy.testing import assert_array_almost_equal
-from nose.tools import raises
+import pytest
 
 from skbeam.core import recip
 
@@ -88,12 +88,13 @@ def test_process_to_q():
         recip.process_to_q(frame_mode=passes, **pdict)
 
 
-@raises(KeyError)
 def _process_to_q_exception(param_dict, frame_mode):
-    recip.process_to_q(frame_mode=frame_mode, **param_dict)
+    with pytest.raises(KeyError):
+        recip.process_to_q(frame_mode=frame_mode, **param_dict)
 
 
-def test_frame_mode_fail():
+@pytest.mark.parametrize("fails", [0, 5, 'cat'])
+def test_frame_mode_fail(fails):
     detector_size = (256, 256)
     pixel_size = (0.0135*8, 0.0135*8)
     calibrated_center = (256/2.0, 256/2.0)
@@ -120,8 +121,7 @@ def test_frame_mode_fail():
     pdict['wavelength'] = wavelength
     pdict['ub'] = ub_mat
 
-    for fails in [0, 5, 'cat']:
-        yield _process_to_q_exception, pdict, fails
+    _process_to_q_exception(pdict, fails)
 
 
 def test_hkl_to_q():
@@ -157,8 +157,3 @@ def test_gisaxs():
     assert_array_almost_equal(theta_f_target, g_output.theta_f[1, :],
                               decimal=8)
     assert_array_almost_equal(alpha_f_target, g_output.alpha_f[:, 1])
-
-
-if __name__ == '__main__':
-    import nose
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

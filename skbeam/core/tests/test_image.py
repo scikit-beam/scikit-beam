@@ -5,18 +5,25 @@ import numpy.random
 import skimage.draw as skd
 from scipy.ndimage.morphology import binary_dilation
 import skbeam.core.image as nimage
+import pytest
 
-from numpy.testing import assert_array_almost_equal
-
-from nose.tools import assert_equal, assert_raises
+from numpy.testing import assert_equal, assert_array_almost_equal, assert_raises
 
 
-def test_find_ring_center_acorr_1D():
+def _gen_test_find_ring_center_acorr_1D():
+    vals = []
     for x in [110, 150, 190]:
         for y in [110, 150, 190]:
-            yield (_helper_find_rings,
-                   nimage.find_ring_center_acorr_1D,
-                   (x, y), [10, 25, 50])
+            vals.append((x, y))
+    return vals
+
+
+param_test_find_ring_center_acorr_1D = _gen_test_find_ring_center_acorr_1D()
+
+
+@pytest.mark.parametrize("x, y", param_test_find_ring_center_acorr_1D)
+def test_find_ring_center_acorr_1D(x, y):
+    _helper_find_rings(nimage.find_ring_center_acorr_1D, (x, y), [10, 25, 50])
 
 
 def _helper_find_rings(proc_method, center, radii_list):
@@ -148,7 +155,3 @@ def test_construct_rphi_avg_image():
                                                              29.491395,
                                                              5.939956,
                                                              np.nan, np.nan]))
-
-if __name__ == '__main__':
-    import nose
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

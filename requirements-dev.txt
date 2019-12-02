@@ -2,7 +2,6 @@ Cython
 codecov
 coverage
 flake8
-nose
 numpy
 pytest
 setuptools

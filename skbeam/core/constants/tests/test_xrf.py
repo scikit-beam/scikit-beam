@@ -39,8 +39,7 @@ from __future__ import absolute_import, division, print_function
 import six
 import numpy as np
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
-                           assert_raises)
-from nose.tools import assert_equal, assert_not_equal
+                           assert_raises, assert_equal)
 
 from skbeam.core.constants.xrf import (XrfElement, emission_line_search,
                                        XrayLibWrap, XrayLibWrap_Energy)
@@ -99,9 +98,9 @@ def test_XrayLibWrap():
     for Z in range(1, 101):
         for infotype in XrayLibWrap.opts_info_type:
             xlw = XrayLibWrap(Z, infotype)
-            assert_not_equal(xlw.all, None)
+            assert xlw.all is not None
             for key in xlw:
-                assert_not_equal(xlw[key], None)
+                assert xlw[key] is not None
             assert_equal(xlw.info_type, infotype)
             # make sure len doesn't break
             len(xlw)
@@ -132,7 +131,7 @@ def test_cs_different_units():
         assert_array_almost_equal(cs1, cs2, decimal=10)
 
 
-def smoke_test_element_creation():
+def test_element_creation():
     prev_element = None
     elements = [elm for abbrev, elm in six.iteritems(basic)
                 if isinstance(abbrev, int)]
@@ -169,7 +168,3 @@ def smoke_test_element_creation():
                 assert_equal(element >= prev_element, True)
                 assert_equal(element > prev_element, True)
         prev_element = element
-
-if __name__ == '__main__':
-    import nose
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

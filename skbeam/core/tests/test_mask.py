@@ -137,7 +137,3 @@ def test_ring_blur_mask():
     assert len(a_not_in_b) / len(b) < .1
     # Make certain that we have masked over 90% of the bad pixels
     assert len(b_not_in_a) / len(b) < .1
-
-if __name__ == '__main__':
-    import nose
-    nose.runmodule(argv=['-s', '--with-doctest', '-x'], exit=False)

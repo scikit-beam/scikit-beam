@@ -38,11 +38,7 @@
 
 
 # smoketest the api
-from skbeam.core.constants.basic import BasicElement
-from skbeam.core.constants.xrs import calibration_standards
-from skbeam.core.constants.xrf import XrfElement
-from skbeam.core.constants.xrf import emission_line_search
-
-if __name__ == '__main__':
-    import nose
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)
+from skbeam.core.constants.basic import BasicElement  # noqa: F401
+from skbeam.core.constants.xrs import calibration_standards  # noqa: F401
+from skbeam.core.constants.xrf import XrfElement  # noqa: F401
+from skbeam.core.constants.xrf import emission_line_search  # noqa: F401

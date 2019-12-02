@@ -1,8 +1,8 @@
 from __future__ import absolute_import, division, print_function
 import numpy as np
+import pytest
 from numpy.testing import (assert_equal, assert_array_equal,
                            assert_array_almost_equal, assert_almost_equal)
-from nose.tools import raises
 
 from skbeam.core.cdi import (_dist, gauss, find_support,
                              pi_modulus, cal_diff_error, cdi_recon,
@@ -128,14 +128,11 @@ def _disk_support_area(sup_radius, shape_v):
     assert(new_sup.size < (2*sup_radius)**len(shape_v))
 
 
-def test_support():
+@pytest.mark.parametrize("v", [(100, 100), (100, 100, 100)])
+def test_support(v):
     sup_radius = 20
-    a, diff_v = make_synthetic_data()
-    shape_list = [[100, 100], [100, 100, 100]]
-    for v in shape_list:
-        yield _box_support_area, sup_radius, v
-    for v in shape_list:
-        yield _disk_support_area, sup_radius, v
+    _box_support_area(sup_radius, v)
+    _disk_support_area(sup_radius, v)
 
 
 def test_recon():
@@ -159,7 +156,6 @@ def test_recon():
     assert_array_equal(outv1.shape, outv2.shape)
 
 
-@raises(TypeError)
 def test_cdi_plotter():
     a, diff_v = make_synthetic_data()
     total_n = 10
@@ -170,5 +166,6 @@ def test_cdi_plotter():
     sup = generate_box_support(sup_radius, diff_v.shape)
 
     # assign wrong plot_function
-    outv, error_d = cdi_recon(diff_v, init_phase, sup, sw_flag=True,
-                              n_iterations=total_n, sw_step=2, cb_function=10)
+    with pytest.raises(TypeError):
+        outv, error_d = cdi_recon(diff_v, init_phase, sup, sw_flag=True,
+                                  n_iterations=total_n, sw_step=2, cb_function=10)

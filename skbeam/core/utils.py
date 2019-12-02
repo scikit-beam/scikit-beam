@@ -45,7 +45,8 @@ from six import string_types
 import time
 import sys
 
-from collections import namedtuple, MutableMapping, defaultdict, deque
+from collections import namedtuple, defaultdict, deque
+from collections.abc import MutableMapping
 import numpy as np
 from itertools import tee
 
@@ -114,7 +115,7 @@ class MD_dict(MutableMapping):
         for k in key_split[:-1]:
             try:
                 tmp = tmp[k]._dict
-            except:
+            except Exception:
                 tmp[k] = type(self)()
                 tmp = tmp[k]._dict
             if isinstance(tmp, md_value):
@@ -150,7 +151,7 @@ class MD_dict(MutableMapping):
         for k in key_split[:-1]:
             try:
                 tmp = tmp[k]._dict
-            except:
+            except Exception:
                 tmp[k] = type(self)()
                 tmp = tmp[k]._dict
 
@@ -650,7 +651,7 @@ def angle_grid(center, shape, pixel_size=None):
     ----
     :math:`\\theta`, the counter-clockwise angle from the positive x axis,
     assuming the positive y-axis points upward.
-    :math:`\\theta \\el [-\pi, \pi]`.  In array indexing and the conventional
+    :math:`\\theta \\el [-\\pi, \\pi]`.  In array indexing and the conventional
     axes for images (origin in upper left), positive y is downward.
     """
 
@@ -1008,7 +1009,7 @@ def q_to_d(q):
 
     .. math::
 
-        q = \\frac{2 \pi}{d}
+        q = \\frac{2 \\pi}{d}
 
 
     Parameters
@@ -1034,7 +1035,7 @@ def d_to_q(d):
 
     .. math::
 
-        d = \\frac{2 \pi}{q}
+        d = \\frac{2 \\pi}{q}
 
     Parameters
     ----------

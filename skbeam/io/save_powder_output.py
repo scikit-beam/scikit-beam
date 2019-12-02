@@ -202,7 +202,7 @@ def gsas_writer(tth, intensity, output_name, mode=None,
         l_recs = ["%8.0f%8.0f" % (ii, ee * scale)
                   for ii, ee in zip(intensity, err)]
         for i in range(0, len(l_recs), 5):
-                lines.append("".join(l_recs[i:i + 5]))
+            lines.append("".join(l_recs[i:i + 5]))
     elif mode == 'FXYE':
         n_rec = n_chan
         l_bank = ("BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f FXYE" %

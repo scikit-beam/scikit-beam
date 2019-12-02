@@ -12,6 +12,7 @@ data collected at Argonne National Laboratory, Sector 13, GSECars.
 from __future__ import absolute_import, division, print_function
 import numpy as np
 from numpy.testing import assert_equal
+import pytest
 
 from skbeam.core import arithmetic
 
@@ -21,15 +22,14 @@ def _helper_prealloc_passthrough(op, x1, x2, scratch_space):
     assert_equal(ret, scratch_space)
 
 
-def test_prealloc_passthrough():
+@pytest.mark.parametrize("op", [arithmetic.logical_nand, arithmetic.logical_sub, arithmetic.logical_nor])
+def test_prealloc_passthrough(op):
     """Smoketest the pre-allocation bit of numpy
     """
     x1 = np.arange(10)
     x2 = np.arange(10)
     scratch_space = np.zeros(x1.shape)
-    for op in [arithmetic.logical_nand, arithmetic.logical_sub,
-               arithmetic.logical_nor]:
-        yield _helper_prealloc_passthrough, op, x1, x2, scratch_space
+    _helper_prealloc_passthrough(op, x1, x2, scratch_space)
 
 
 def test_logical_nor():
@@ -98,8 +98,3 @@ def test_logical_sub():
 
     test_result = arithmetic.logical_sub(test_array_1, test_array_3)
     assert_equal(test_result, test_array_1)
-
-
-if __name__ == '__main__':
-    import nose
-    nose.runmodule(argv=['-s', '--with-doctest'], exit=False)

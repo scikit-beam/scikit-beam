@@ -37,15 +37,18 @@
 ########################################################################
 from __future__ import absolute_import, division, print_function
 
-import logging
-logger = logging.getLogger(__name__)
-from .background import snip_method
+from .background import snip_method  # noqa: F401
 from .models import (Lorentzian2Model, ComptonModel, ElasticModel)
 
-from .lineshapes import (gaussian, lorentzian, lorentzian2, voigt, pvoigt,
-                         gaussian_tail, gausssian_step, elastic, compton)
+from .lineshapes import (gaussian, lorentzian, lorentzian2, voigt, pvoigt,  # noqa: F401
+                         gaussian_tail, gausssian_step, elastic, compton,  # noqa: F401
+                         gamma_dist, nbinom_dist, poisson_dist)  # noqa: F401
 
-from .lineshapes import (gamma_dist, nbinom_dist, poisson_dist)
+from .base.parameter_data import get_para  # noqa: F401
+from .funcs import fit_quad_to_peak  # noqa: F401
+
+import logging
+logger = logging.getLogger(__name__)
 
 # construct a list of the models that can be used
 model_list = sorted([Lorentzian2Model, ComptonModel, ElasticModel],
@@ -53,5 +56,3 @@ model_list = sorted([Lorentzian2Model, ComptonModel, ElasticModel],
 lineshapes_list = sorted([gaussian, lorentzian, lorentzian2, voigt, pvoigt,
                           gaussian_tail, gausssian_step, elastic, compton],
                          key=lambda s: str(s))
-from .base.parameter_data import get_para
-from .funcs import fit_quad_to_peak

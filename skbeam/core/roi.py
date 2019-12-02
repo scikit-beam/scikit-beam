@@ -180,8 +180,8 @@ def ring_edges(inner_radius, width, spacing=0, num_rings=None):
     """
     # All of this input validation merely checks that width, spacing, and
     # num_rings are self-consistent and complete.
-    width_is_list = isinstance(width, collections.Iterable)
-    spacing_is_list = isinstance(spacing, collections.Iterable)
+    width_is_list = isinstance(width, collections.abc.Iterable)
+    spacing_is_list = isinstance(spacing, collections.abc.Iterable)
     if (width_is_list and spacing_is_list):
         if len(width) != len(spacing) - 1:
             raise ValueError("List of spacings must be one less than list "
@@ -266,7 +266,7 @@ def segmented_rings(edges, segments, center, shape, offset_angle=0):
 
     agrid[agrid < 0] = 2*np.pi + agrid[agrid < 0]
 
-    segments_is_list = isinstance(segments, collections.Iterable)
+    segments_is_list = isinstance(segments, collections.abc.Iterable)
     if segments_is_list:
         segments = np.asarray(segments) + offset_angle
     else:

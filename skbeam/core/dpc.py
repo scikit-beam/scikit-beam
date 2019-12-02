@@ -40,6 +40,7 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 from scipy.optimize import minimize
 from collections import namedtuple
+import warnings
 import logging
 logger = logging.getLogger(__name__)
 
@@ -197,6 +198,7 @@ def dpc_fit(rss, ref_reduction, diff_reduction, start_point,
     return minimize(rss, start_point, args=(ref_reduction, diff_reduction),
                     method=solver, tol=tol, options=dict(maxiter=max_iters)).x
 
+
 # attributes
 dpc_fit.solver = ['Nelder-Mead', 'Powell', 'CG', 'BFGS', 'Anneal', 'L-BFGS-B',
                   'TNC', 'COBYLA', 'SLSQP']
@@ -275,12 +277,17 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
     kappax, kappay = np.meshgrid(ax, ay)
     div_v = kappax ** 2 * (1 - weighting) + kappay ** 2 * weighting
 
-    c = -1j * (kappax * tx * (1 - weighting) + kappay * ty * weighting) / div_v
+    with warnings.catch_warnings():
+        # It appears that having nans in data arrays is normal mode of
+        #   operation for this function. So let's disable warnings.
+        warnings.filterwarnings('ignore', category=RuntimeWarning)
+        c = -1j * (kappax * tx * (1 - weighting) + kappay * ty * weighting) / div_v
     c = np.fft.ifftshift(np.where(div_v == 0, 0, c))
 
     phase = np.fft.ifft2(c)[roi_slice].real
 
     return phase
+
 
 # holy hacks, Batman!  'index' here is a single element list so
 # that I can keep track of how many images have been computed
@@ -498,6 +505,7 @@ def reconstruct_phase_from_partial_info(dpc_state, energy, scan_xstep,
     phase = recon(gx, gy, scan_xstep, scan_ystep, padding, weighting)
 
     return phase, (dpc_state.ax + dpc_state.ay) / 2
+
 
 # attributes
 dpc_runner.solver = ['Nelder-Mead', 'Powell', 'CG', 'BFGS', 'Anneal',

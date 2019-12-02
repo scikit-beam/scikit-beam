@@ -167,7 +167,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
                         ccd_cen=(calibrated_center),
                         dist=dist_sample,
                         wavelength=wavelength,
-                        UBinv=np.matrix(ub).I)
+                        UBinv=np.linalg.inv(ub))
 
     # ending time for the process
     t2 = time.time()
@@ -175,6 +175,7 @@ def process_to_q(setting_angles, detector_size, pixel_size,
                 "".format(setting_angles.shape[0], detector_size[0],
                           detector_size[1], (t2 - t1)))
     return hkl
+
 
 # Assign frame_mode as an attribute to the process_to_q function so that the
 # autowrapping knows what the valid options are
