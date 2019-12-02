@@ -568,6 +568,14 @@ def test_bin_grid():
     assert_array_almost_equal(y, x, decimal=2)
 
 
+def time_binning():
+    time_diff = np.arrange(5)
+    time_bin, all_lags = core.time_bining(time_diff)
+    assert_array_equal(time_bin[-1], [0.0, 4.0, 7.0, 9.0, 10.0])
+    assert_array_equal(all_lags, array([0., 1., 2., 3., 4., 5.,
+                                        6., 7., 9., 10.]))
+
+
 if __name__ == '__main__':
     import nose
 
