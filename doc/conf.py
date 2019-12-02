@@ -38,7 +38,7 @@ extensions = ['sphinx.ext.autodoc',
               'numpydoc',
               'IPython.sphinxext.ipython_directive',
               'IPython.sphinxext.ipython_console_highlighting',
-              ]
+             ]
 
 extlinks = {'issue': ('https://github.com/scikit-beam/scikit-beam/issues/%s',
                       'GH')}
