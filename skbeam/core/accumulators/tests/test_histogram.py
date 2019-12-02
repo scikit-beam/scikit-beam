@@ -53,7 +53,7 @@ par_test_1d_histogram = _gen_test_1d_histogram()
 
 @pytest.mark.parametrize("binlowhigh, x, w", par_test_1d_histogram)
 def test_1d_histogram(binlowhigh, x, w):
-    _1d_histogram_tester(binlowhigh, x, weights=1)
+    _1d_histogram_tester(binlowhigh, x, w)
 
 
 def _2d_histogram_tester(binlowhighs, x, y, weights=1):
@@ -113,7 +113,7 @@ par_test_2d_histogram = _gen_test_2d_histogram()
 
 @pytest.mark.parametrize("binlowhigh, x, y, w", par_test_2d_histogram)
 def test_2d_histogram(binlowhigh, x, y, w):
-    _2d_histogram_tester(binlowhigh, x, y, weights=1)
+    _2d_histogram_tester(binlowhigh, x, y, w)
 
 
 def test_simple_fail():

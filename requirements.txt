@@ -1,6 +1,6 @@
 fabio
 lmfit
-numpy
+numpy>=1.15
 pyfai
 scikit-image
 scipy
