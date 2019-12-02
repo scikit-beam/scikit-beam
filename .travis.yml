@@ -6,7 +6,7 @@ addons:
       - pandoc
 env:
   global:
-    - RUN_VALIDATION: true
+    - SUBMIT_CODECOV: false
     - BUILD_DOCS: false
     - GH_REF: github.com/scikit-beam/scikit-beam.git
     - secure: "KzntGlmLDUZlAB8ZiSRBtONJypv4atrnFxl+THCW8kg6YbiODcCxG9cez7mfmh63wpJ54+zeGvgGljeVvjb7bjB2p+4hZy+mLoP9xoE1w5qF4XaQ5YTOYaSQqCeWa5cEIi+854gFX7gOfW5qL+EJf7h3HtmndI15zaU5gOPjSDU="
@@ -14,7 +14,7 @@ env:
 matrix:
   include:
     - python: 3.7
-      env: BUILD_DOCS=true RUN_VALIDATION=false NUMPY=1.17
+      env: BUILD_DOCS=true SUBMIT_CODECOV=true NUMPY=1.17
     - os: osx
       language: generic
       env: TRAVIS_PYTHON_VERSION=3.6 NUMPY=1.17
@@ -132,7 +132,7 @@ script:
     fi
 
 after_success:
-  - if [ $RUN_VALIDATION == 'true' ]; then codecov; fi;
+  - if [ $SUBMIT_CODECOV == 'true' ]; then codecov; fi;
   - |
     set -e
     if [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PULL_REQUEST == 'false' ] && [ $BUILD_DOCS ]; then
