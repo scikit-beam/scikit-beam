@@ -229,10 +229,10 @@ def gaussian_tail(x, area, center, sigma, gamma):
     dx_neg[dx_neg > 0] = 0
 
     temp_a = np.exp(dx_neg / (gamma * sigma))
-    counts = (area /
-              (2 * gamma * sigma * np.exp(-0.5 / (gamma**2))) * temp_a *
-              scipy.special.erfc((x - center) / (np.sqrt(2) * sigma) +
-                                 (1 / (gamma * np.sqrt(2)))))
+
+    v1 = scipy.special.erfc((x - center) / (np.sqrt(2) * sigma) + (1 / (gamma * np.sqrt(2))))
+    v2 = 2 * gamma * sigma * np.exp(-0.5 / (gamma ** 2))
+    counts = area * temp_a * (v1 / v2)
 
     return counts
 
