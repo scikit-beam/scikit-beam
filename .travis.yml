@@ -29,6 +29,7 @@ python:
 env:
   - NUMPY=1.16
   - NUMPY=1.17
+  - NUMPY=1.18
 
 before_install:
   - |
