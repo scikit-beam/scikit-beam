@@ -2,7 +2,7 @@ from skbeam.core.accumulators.binned_statistic import (RadialBinnedStatistic,
                                                        RPhiBinnedStatistic,
                                                        BinnedStatistic1D,
                                                        BinnedStatisticDD)
-from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_raises
+from numpy.testing import assert_array_almost_equal, assert_raises
 import numpy as np
 import scipy.stats
 from skbeam.core.utils import bin_edges_to_centers
@@ -108,11 +108,11 @@ class TestRadialBinnedStatistic(object):
                 )
                 centers = bin_edges_to_centers(edges)
 
-                assert_array_equal(ref, binned)
-                assert_array_equal(edges, radbinstat.bin_edges)
-                assert_array_equal(edges, radbinstat_f.bin_edges)
-                assert_array_equal(centers, radbinstat.bin_centers)
-                assert_array_equal(centers, radbinstat_f.bin_centers)
+                assert_array_almost_equal(ref, binned)
+                assert_array_almost_equal(edges, radbinstat.bin_edges)
+                assert_array_almost_equal(edges, radbinstat_f.bin_edges)
+                assert_array_almost_equal(centers, radbinstat.bin_centers)
+                assert_array_almost_equal(centers, radbinstat_f.bin_centers)
 
         bins = (100, 2)
         myrphikwargs = [{'origin': (0, 0),
@@ -174,11 +174,11 @@ class TestRadialBinnedStatistic(object):
                     bins=bins,
                 )
 
-                assert_array_equal(ref, binned)
-                assert_array_equal(redges, rphibinstat.bin_edges[0])
-                assert_array_equal(redges, rphibinstat_f.bin_edges[0])
-                assert_array_equal(phiedges, rphibinstat.bin_edges[1])
-                assert_array_equal(phiedges, rphibinstat_f.bin_edges[1])
+                assert_array_almost_equal(ref, binned)
+                assert_array_almost_equal(redges, rphibinstat.bin_edges[0])
+                assert_array_almost_equal(redges, rphibinstat_f.bin_edges[0])
+                assert_array_almost_equal(phiedges, rphibinstat.bin_edges[1])
+                assert_array_almost_equal(phiedges, rphibinstat_f.bin_edges[1])
 
         # test exception when BinnedStatistic is given array of incorrect shape
         with assert_raises(ValueError):
@@ -207,10 +207,10 @@ def test_BinnedStatistics1D(stat, stat_f):
     ref, edges, _ = scipy.stats.binned_statistic(x, values,
                                                  statistic=stat, bins=10)
 
-    assert_array_equal(bs(values), ref)
+    assert_array_almost_equal(bs(values), ref)
     assert_array_almost_equal(bs_f(values), ref)
-    assert_array_equal(edges, bs.bin_edges)
-    assert_array_equal(edges, bs_f.bin_edges)
+    assert_array_almost_equal(edges, bs.bin_edges)
+    assert_array_almost_equal(edges, bs_f.bin_edges)
 
     rbinstat = BinnedStatistic1D(x)
     # make sure wrong shape is caught
