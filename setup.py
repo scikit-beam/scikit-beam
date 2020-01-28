@@ -28,7 +28,7 @@ def c_ext():
 
 
 def cython_ext():
-    return cythonize("**/*.pyx")
+    return cythonize("skbeam/**/*.pyx", compiler_directives={'language_level': "3"})
 
 
 here = path.abspath(path.dirname(__file__))
@@ -36,7 +36,6 @@ with open(path.join(here, 'requirements.txt')) as requirements_file:
     # Parse requirements.txt, ignoring any commented-out lines.
     requirements = [line for line in requirements_file.read().splitlines()
                     if not line.startswith('#')]
-
 
 setup(
     name='scikit-beam',
@@ -63,4 +62,4 @@ setup(
                  "Intended Audience :: Science/Research",
                  "Intended Audience :: Developers",
                  ],
-    )
+)
