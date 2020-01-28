@@ -2,7 +2,7 @@ from skbeam.core.accumulators.binned_statistic import (RadialBinnedStatistic,
                                                        RPhiBinnedStatistic,
                                                        BinnedStatistic1D,
                                                        BinnedStatisticDD)
-from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_raises
+from numpy.testing import assert_array_almost_equal, assert_raises
 import numpy as np
 import scipy.stats
 from skbeam.core.utils import bin_edges_to_centers
