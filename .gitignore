@@ -21,6 +21,7 @@ parts/
 sdist/
 var/
 venv/
+pip-wheel-metadata/
 *.egg-info/
 .installed.cfg
 *.egg

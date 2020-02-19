@@ -205,8 +205,16 @@ class XrayLibWrap(Mapping):
             Define which physics quantity to calculate.
         """
 
-        return self._func(self._element,
-                          self._map[key.lower()])
+        try:
+            # xraylib functions for xraylib < 4.0 used to return 0 in case of non-existent lines
+            #   This is extensively used in scikit-beam/pyxrf to determine if the lines exist.
+            #   Starting from v4.0, xraylib is raising 'ValueError' exception instead. We are
+            #   imitating behavior of the old xraylib by catching the exception and returning 0.
+            val = self._func(self._element,
+                             self._map[key.lower()])
+        except ValueError:
+            val = 0
+        return val
 
     def __iter__(self):
         return iter(self._keys)
@@ -292,9 +300,18 @@ class XrayLibWrap_Energy(XrayLibWrap):
         key : str
             defines which physics quantity to calculate
         """
-        return self._func(self._element,
-                          self._map[key.lower()],
-                          self._incident_energy)
+        try:
+            # xraylib functions for xraylib < 4.0 used to return 0 in case of non-existent lines
+            #   This is extensively used in scikit-beam/pyxrf to determine if the lines exist.
+            #   Starting from v4.0, xraylib is raising 'ValueError' exception instead. We are
+            #   imitating behavior of the old xraylib by catching the exception and returning 0.
+            val = self._func(self._element,
+                             self._map[key.lower()],
+                             self._incident_energy)
+        except ValueError:
+            val = 0
+
+        return val
 
 
 # redefine the doc_title for xrf elements
