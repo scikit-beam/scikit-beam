@@ -305,9 +305,9 @@ class XrayLibWrap_Energy(XrayLibWrap):
             #   This is extensively used in scikit-beam/pyxrf to determine if the lines exist.
             #   Starting from v4.0, xraylib is raising 'ValueError' exception instead. We are
             #   imitating behavior of the old xraylib by catching the exception and returning 0.
-            val =  self._func(self._element,
-                              self._map[key.lower()],
-                              self._incident_energy)
+            val = self._func(self._element,
+                             self._map[key.lower()],
+                             self._incident_energy)
         except ValueError:
             val = 0
 
