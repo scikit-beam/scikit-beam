@@ -10,28 +10,28 @@ env:
     - GH_REF: github.com/scikit-beam/scikit-beam.git
     - secure: "KzntGlmLDUZlAB8ZiSRBtONJypv4atrnFxl+THCW8kg6YbiODcCxG9cez7mfmh63wpJ54+zeGvgGljeVvjb7bjB2p+4hZy+mLoP9xoE1w5qF4XaQ5YTOYaSQqCeWa5cEIi+854gFX7gOfW5qL+EJf7h3HtmndI15zaU5gOPjSDU="
 
-matrix:
+jobs:
   include:
+    - python: 3.6
+      env: NUMPY=1.16
+    - python: 3.6
+      env: NUMPY=1.17
+    - python: 3.6
+      env: NUMPY=1.18
     - python: 3.7
-      env: BUILD_DOCS=true SUBMIT_CODECOV=true NUMPY=1.17
+      env: NUMPY=1.16
+    - python: 3.7
+      env: NUMPY=1.17
+    - python: 3.7
+      env: NUMPY=1.18 XRAYLIB=3
+    - python: 3.7
+      env: BUILD_DOCS=true NUMPY=1.18 XRAYLIB=4 SUBMIT_CODECOV=true
     - os: osx
       language: generic
       env: TRAVIS_PYTHON_VERSION=3.6 NUMPY=1.17
     - os: osx
       language: generic
       env: TRAVIS_PYTHON_VERSION=3.7 NUMPY=1.17
-
-python:
-  - 3.6
-  - 3.7
-
-env:
-  - NUMPY=1.16
-  - NUMPY=1.17
-  - NUMPY=1.18 XRAYLIB=3
-  - NUMPY=1.18 XRAYLIB=4
-
-
 
 before_install:
   - |
