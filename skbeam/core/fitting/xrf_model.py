@@ -146,7 +146,7 @@ def element_peak_xrf(x, area, center,
     x = e_offset + x * e_linear + x**2 * e_quadratic
 
     return gaussian(x, area, center+delta_center,
-                    delta_sigma+get_sigma(center)) * ratio * ratio_adjust
+                    delta_sigma+get_sigma(center + delta_center)) * ratio * ratio_adjust
 
 
 class ElementModel(Model):
