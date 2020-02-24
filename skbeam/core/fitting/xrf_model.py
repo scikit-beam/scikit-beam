@@ -601,8 +601,7 @@ class ModelSpectrum(object):
     compton and element peaks.
     """
 
-    def __init__(self, params, elemental_lines,
-                 default_userpeak_center=None):
+    def __init__(self, params, elemental_lines):
         """
         Parameters
         ----------
@@ -612,13 +611,7 @@ class ModelSpectrum(object):
             e.g., ['Na_K', Mg_K', 'Pt_M'] refers to the
             K lines of Sodium, the K lines of Magnesium, and the M
             lines of Platinum
-        default_userpeak_center: float
-            location of the center of new user defined peaks that are being added;
-            if None, then built-in default location is used
-
         """
-
-        self._default_userpeak_center = default_userpeak_center
 
         # Names of global(common) model parameters used in full assembled element models
         self._global_param_hints_elements_to_copy = ['e_offset', 'e_linear', 'e_quadratic',
@@ -947,13 +940,6 @@ class ModelSpectrum(object):
                 elemental_line))
 
             e_cen = 5.0  # user peak is set 5 keV every time, this value is not important
-            # 'delta_center' is the default value of the parameter used for new peaks
-            #   the parameter values for already existing peaks are copied from
-            #   the 'parameter' dictionary
-            if self._default_userpeak_center is None:
-                e_delta_cen = 0
-            else:
-                e_delta_cen = self._default_userpeak_center - e_cen
 
             pre_name = elemental_line + '_'
             element_mod = ElementModel(prefix=pre_name)
@@ -969,7 +955,7 @@ class ModelSpectrum(object):
                 default_area = parameter[area_name]['value']
 
             element_mod.set_param_hint('area', value=default_area, vary=True, min=0)
-            element_mod.set_param_hint('delta_center', value=e_delta_cen, vary=False)
+            element_mod.set_param_hint('delta_center', value=0, vary=False)
             element_mod.set_param_hint('delta_sigma', value=0, vary=False)
             element_mod.set_param_hint('center', value=e_cen, vary=False)
             element_mod.set_param_hint('ratio', value=1.0, vary=False)
@@ -1244,8 +1230,7 @@ def compute_escape_peak(spectrum, ratio, params,
 
 def construct_linear_model(channel_number, params,
                            elemental_lines,
-                           default_area=100,
-                           default_userpeak_center=None):
+                           default_area=100):
     """
     Create spectrum with parameters given from params.
 
@@ -1261,9 +1246,6 @@ def construct_linear_model(channel_number, params,
             lines of Platinum
     default_area : float
         value for the initial area of a given element
-    default_userpeak_center: float
-        location of the center of new user defined peaks that are being added;
-        if None, then built-in default location is used
 
     Returns
     -------
@@ -1274,8 +1256,7 @@ def construct_linear_model(channel_number, params,
     element_area : dict
         area of the given elements
     """
-    MS = ModelSpectrum(params, elemental_lines,
-                       default_userpeak_center=default_userpeak_center)
+    MS = ModelSpectrum(params, elemental_lines)
 
     selected_elements = []
     matv = []
