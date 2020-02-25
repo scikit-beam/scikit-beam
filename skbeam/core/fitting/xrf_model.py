@@ -146,7 +146,7 @@ def element_peak_xrf(x, area, center,
     x = e_offset + x * e_linear + x**2 * e_quadratic
 
     return gaussian(x, area, center+delta_center,
-                    delta_sigma+get_sigma(center)) * ratio * ratio_adjust
+                    delta_sigma+get_sigma(center + delta_center)) * ratio * ratio_adjust
 
 
 class ElementModel(Model):
@@ -939,7 +939,7 @@ class ModelSpectrum(object):
             logger.debug('Started setting up user peak: {}'.format(
                 elemental_line))
 
-            e_cen = 5  # user peak is set 5 keV every time, this value is not important
+            e_cen = 5.0  # user peak is set 5 keV every time, this value is not important
 
             pre_name = elemental_line + '_'
             element_mod = ElementModel(prefix=pre_name)
