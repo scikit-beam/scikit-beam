@@ -39,6 +39,7 @@ import numpy as np
 from numpy.testing import assert_array_equal
 
 import skbeam.core.mask as mask
+import pytest
 
 logger = logging.getLogger(__name__)
 
@@ -100,8 +101,8 @@ def test_margin():
 
 
 def test_ring_blur_mask():
-    from skbeam.core import recip
-    g = recip.geo.Geometry(
+    pyfai = pytest.importorskip('pyFAI')
+    g = pyfai.geometry.Geometry(
         detector='Perkin', pixel1=.0002, pixel2=.0002,
         dist=.23,
         poni1=.209, poni2=.207,
