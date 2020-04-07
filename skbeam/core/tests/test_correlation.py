@@ -54,8 +54,9 @@ from skbeam.core.roi import ring_edges, segmented_rings
 logger = logging.getLogger(__name__)
 
 
-def setup():
-    global num_levels, num_bufs, xdim, ydim, stack_size, img_stack, rois
+@pytest.fixture()
+def corr_setup():
+
     num_levels = 6
     num_bufs = 4  # must be even
     xdim = 256
@@ -67,10 +68,11 @@ def setup():
     # They do not have to start at 1 and be continuous
     rois[0:xdim//10, 0:ydim//10] = 5
     rois[xdim//10:xdim//5, ydim//10:ydim//5] = 3
+    return num_levels, num_bufs, xdim, ydim, stack_size, img_stack, rois
 
 
-def test_lazy_vs_original():
-    setup()
+def test_lazy_vs_original(corr_setup):
+    num_levels, num_bufs, xdim, ydim, stack_size, img_stack, rois = corr_setup
     # run the correlation on the full stack
     full_gen_one = lazy_one_time(
         img_stack, num_levels, num_bufs, rois)
@@ -96,8 +98,8 @@ def test_lazy_vs_original():
     assert np.all(two_time[1] == final_gen_result_two.lag_steps)
 
 
-def test_lazy_two_time():
-    setup()
+def test_lazy_two_time(corr_setup):
+    num_levels, num_bufs, xdim, ydim, stack_size, img_stack, rois = corr_setup
     # run the correlation on the full stack
     full_gen = lazy_two_time(rois, img_stack, stack_size,
                              stack_size, 1)
@@ -128,8 +130,8 @@ def test_lazy_two_time():
     assert np.all(full_state.g2 == result.g2)
 
 
-def test_lazy_one_time():
-    setup()
+def test_lazy_one_time(corr_setup):
+    num_levels, num_bufs, xdim, ydim, stack_size, img_stack, rois = corr_setup
     # run the correlation on the full stack
     full_gen = lazy_one_time(img_stack, num_levels, num_bufs, rois)
     for full_result in full_gen:
@@ -158,8 +160,8 @@ def test_lazy_one_time():
                   second_half_result.g2)
 
 
-def test_two_time_corr():
-    setup()
+def test_two_time_corr(corr_setup):
+    num_levels, num_bufs, xdim, ydim, stack_size, img_stack, rois = corr_setup
     y = []
     for i in range(50):
         y.append(img_stack[0])
@@ -185,8 +187,8 @@ def test_auto_corr_scat_factor():
                                             1.0, 1.0, 1.0]), decimal=8)
 
 
-def test_bad_images():
-    setup()
+def test_bad_images(corr_setup):
+    num_levels, num_bufs, xdim, ydim, stack_size, img_stack, rois = corr_setup
     g2, lag_steps = multi_tau_auto_corr(4, num_bufs,
                                         rois, img_stack)
     # introduce bad images
