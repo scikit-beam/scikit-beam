@@ -22,7 +22,9 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
                     filemode='w')
 
 
+@pytest.fixture
 def synthetic_spectrum():
+    pytest.importorskip('xraylib')
     param = get_para()
     x = np.arange(2000)
     pileup_peak = ['Si_Ka1-Si_Ka1', 'Si_Ka1-Ce_La1']
@@ -42,6 +44,7 @@ def test_param_controller_fail():
 
 
 def test_parameter_controller():
+    pytest.importorskip('xraylib')
     param = get_para()
     pileup_peak = ['Si_Ka1-Si_Ka1', 'Si_Ka1-Ce_La1']
     elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak
@@ -72,14 +75,14 @@ def test_parameter_controller():
                 assert_equal(str(v['bound_type']), set_opt['width'])
 
 
-def test_fit():
+def test_fit(synthetic_spectrum):
     param = get_para()
     pileup_peak = ['Si_Ka1-Si_Ka1', 'Si_Ka1-Ce_La1']
     user_peak = ['user_peak1']
     elemental_lines = (['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M'] + pileup_peak +
                        user_peak)
     x0 = np.arange(2000)
-    y0 = synthetic_spectrum()
+    y0 = synthetic_spectrum
     default_area = 1e5
     x, y = trim(x0, y0, 100, 1300)
     MS = ModelSpectrum(param, elemental_lines)
@@ -113,8 +116,8 @@ def test_fit():
             assert_equal(v['value'], result.values[k])
 
 
-def test_define_range():
-    y0 = synthetic_spectrum()
+def test_define_range(synthetic_spectrum):
+    y0 = synthetic_spectrum
     low = 0
     high = 2000
     x, y = define_range(y0, low, high, 0, 1)
@@ -150,10 +153,10 @@ def test_register_error():
         register_strategy('e_calibration', new_strategy, overwrite=False)
 
 
-def test_pre_fit():
+def test_pre_fit(synthetic_spectrum):
     # No pre-defined elements. Use all possible elements activated at
     # given energy
-    y0 = synthetic_spectrum()
+    y0 = synthetic_spectrum
     x0 = np.arange(len(y0))
     # the following items should appear
     item_list = ['Ar_K', 'Fe_K', 'compton', 'elastic']
@@ -181,8 +184,8 @@ def test_pre_fit():
     assert r2 > 0.85
 
 
-def test_escape_peak():
-    y0 = synthetic_spectrum()
+def test_escape_peak(synthetic_spectrum):
+    y0 = synthetic_spectrum
     ratio = 0.01
     param = get_para()
     xnew, ynew = compute_escape_peak(y0, ratio, param)
@@ -191,6 +194,7 @@ def test_escape_peak():
 
 
 def test_set_param_hint():
+    pytest.importorskip('xraylib')
     param = get_para()
     elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M']
     bound_options = ['none', 'lohi', 'fixed', 'lo', 'hi']
@@ -212,6 +216,7 @@ def test_set_param_hint():
 
 
 def test_set_param():
+    pytest.importorskip('xraylib')
     with pytest.raises(ValueError):
         param = get_para()
         elemental_lines = ['Ar_K', 'Fe_K', 'Ce_L', 'Pt_M']
@@ -227,9 +232,9 @@ def test_set_param():
         _set_parameter_hint('coherent_sct_energy', input_param, compton)
 
 
-def test_pixel_fit_multiprocess():
+def test_pixel_fit_multiprocess(synthetic_spectrum):
     param = get_para()
-    y0 = synthetic_spectrum()
+    y0 = synthetic_spectrum
     x = np.arange(len(y0))
     pileup_peak = ['Si_Ka1-Si_Ka1', 'Si_Ka1-Ce_La1']
     user_peak = ['user_peak1']
