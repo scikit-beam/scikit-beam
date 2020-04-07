@@ -204,6 +204,18 @@ def test_bad_images(corr_setup):
     assert_array_almost_equal(g2[:, 1], g2_n[:, 1], decimal=3)
 
 
+def test_one_bad_pixel(corr_setup):
+    num_levels, num_bufs, xdim, ydim, stack_size, img_stack, rois = corr_setup
+    img_stack = img_stack.astype(float)
+    g2_ref, lag_steps_ref = multi_tau_auto_corr(4, num_bufs, rois, img_stack)
+    img_stack[:, 250, 100] = np.nan
+    g2_test, lag_steps_test = multi_tau_auto_corr(4, num_bufs, rois, img_stack)
+
+    assert (g2_ref == g2_test).all()
+    assert (lag_steps_ref == lag_steps_test).all()
+    assert np.isnan(img_stack).any()
+    assert np.isnan(img_stack[:, 250, 100]).all()
+
 def test_one_time_from_two_time():
     num_lev = 1
     num_buf = 10  # must be even
