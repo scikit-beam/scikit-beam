@@ -216,6 +216,7 @@ def test_one_bad_pixel(corr_setup):
     assert np.isnan(img_stack).any()
     assert np.isnan(img_stack[:, 250, 100]).all()
 
+
 def test_one_time_from_two_time():
     num_lev = 1
     num_buf = 10  # must be even
