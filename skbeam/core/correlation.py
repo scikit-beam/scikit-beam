@@ -845,9 +845,9 @@ def one_time_from_two_time(two_time_corr):
     """
 
     one_time_corr = np.zeros((two_time_corr.shape[0], two_time_corr.shape[2]))
-    for g in two_time_corr:
-        for j in range(two_time_corr.shape[2]):
-            one_time_corr[:, j] = np.trace(g, offset=j)/two_time_corr.shape[2]
+    for i,g in enumerate(two_time_corr):
+        for j in range(g.shape[1]):          
+            one_time_corr[i, j] = np.nanmean( np.diag(g, k=j) )
     return one_time_corr
 
 
