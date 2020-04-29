@@ -203,25 +203,31 @@ def test_bad_images():
 
 
 def test_one_time_from_two_time():
+    np.random.seed(333)
     num_lev = 1
     num_buf = 10  # must be even
     x_dim = 10
     y_dim = 10
     stack = 10
     imgs = np.random.randint(1, 3, (stack, x_dim, y_dim))
+    for i in range(imgs.shape[0]):
+        imgs[i,0,0] = np.copy(imgs[i,0,0])+5
     roi = np.zeros_like(imgs[0])
     # make sure that the ROIs can be any integers greater than 1.
     # They do not have to start at 1 and be continuous
-    roi[0:x_dim//10, 0:y_dim//10] = 5
-    roi[x_dim//10:x_dim//5, y_dim//10:y_dim//5] = 3
+    roi[0:x_dim//5, 0:y_dim//10] = 5
+    roi[x_dim//10:x_dim//5+1, y_dim//10:y_dim//5] = 3
 
     g2, lag_steps, _state = two_time_corr(roi, imgs, stack,
                                           num_buf, num_lev)
+    g2_t, _ = multi_tau_auto_corr(num_lev, num_buf, roi, imgs)
 
     one_time = one_time_from_two_time(g2)
-    assert_array_almost_equal(one_time[0, :], np.array([1.0, 0.9, 0.8, 0.7,
-                                                        0.6, 0.5, 0.4, 0.3,
-                                                        0.2, 0.1]))
+    assert_array_almost_equal(one_time, np.array([[1.02222222, 1.        , 1.        , 1.        , 0.98148148,
+                                                  1.        , 1.        , 1.        , 1.        , 1.        ],
+                                                 [1.37103962, 1.3595679 , 1.35260377, 1.34863946, 1.36706349,
+                                                  1.36235828, 1.35813492, 1.37840136, 1.36607143, 1.35714286]]))
+    assert_array_almost_equal(one_time[0].mean()/one_time[1].mean(), g2_t.T[0].mean()/g2_t.T[1].mean(), decimal = 2) 
 
 
 @pytest.mark.skipif(int(np.__version__.split('.')[1]) > 14, reason="Test is numerically unstable")
