@@ -48,21 +48,35 @@ from .roi import extract_label_indices
 from collections import namedtuple
 import numpy as np
 from scipy.signal import fftconvolve
+
 # for a convenient status bar
 try:
     from tqdm import tqdm
 except ImportError:
+
     def tqdm(iterator):
         return iterator
 
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
-def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
-                      label_array, num_bufs, num_pixels, img_per_level,
-                      level, buf_no, norm, lev_len):
+def _one_time_process(
+    buf,
+    G,
+    past_intensity_norm,
+    future_intensity_norm,
+    label_array,
+    num_bufs,
+    num_pixels,
+    img_per_level,
+    level,
+    buf_no,
+    norm,
+    lev_len,
+):
     """Reference implementation of the inner loop of multi-tau one time
     correlation
 
@@ -124,59 +138,61 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
         # find the normalization that can work both for bad_images
         #  and good_images
         ind = int(t_index - lev_len[:level].sum())
-        normalize = img_per_level[level] - i - norm[level+1][ind]
+        normalize = img_per_level[level] - i - norm[level + 1][ind]
 
         # take out the past_ing and future_img created using bad images
         # (bad images are converted to np.nan array)
         if np.isnan(past_img).any() or np.isnan(future_img).any():
             norm[level + 1][ind] += 1
         else:
-            for w, arr in zip([past_img*future_img, past_img, future_img],
-                              [G, past_intensity_norm, future_intensity_norm]):
+            for w, arr in zip(
+                [past_img * future_img, past_img, future_img],
+                [G, past_intensity_norm, future_intensity_norm],
+            ):
                 binned = np.bincount(label_array, weights=w)[1:]
-                arr[t_index] += ((binned / num_pixels -
-                                  arr[t_index]) / normalize)
+                arr[t_index] += (binned / num_pixels - arr[t_index]) / normalize
     return None  # modifies arguments in place!
 
 
-results = namedtuple(
-    'correlation_results',
-    ['g2', 'lag_steps', 'internal_state']
-)
+results = namedtuple("correlation_results", ["g2", "lag_steps", "internal_state"])
 
 _internal_state = namedtuple(
-    'correlation_state',
-    ['buf',
-     'G',
-     'past_intensity',
-     'future_intensity',
-     'img_per_level',
-     'label_array',
-     'track_level',
-     'cur',
-     'pixel_list',
-     'num_pixels',
-     'lag_steps',
-     'norm',
-     'lev_len']
+    "correlation_state",
+    [
+        "buf",
+        "G",
+        "past_intensity",
+        "future_intensity",
+        "img_per_level",
+        "label_array",
+        "track_level",
+        "cur",
+        "pixel_list",
+        "num_pixels",
+        "lag_steps",
+        "norm",
+        "lev_len",
+    ],
 )
 
 _two_time_internal_state = namedtuple(
-    'two_time_correlation_state',
-    ['buf',
-     'img_per_level',
-     'label_array',
-     'track_level',
-     'cur',
-     'pixel_list',
-     'num_pixels',
-     'lag_steps',
-     'g2',
-     'count_level',
-     'current_img_time',
-     'time_ind',
-     'norm',
-     'lev_len']
+    "two_time_correlation_state",
+    [
+        "buf",
+        "img_per_level",
+        "label_array",
+        "track_level",
+        "cur",
+        "pixel_list",
+        "num_pixels",
+        "lag_steps",
+        "g2",
+        "count_level",
+        "current_img_time",
+        "time_ind",
+        "norm",
+        "lev_len",
+    ],
 )
 
 
@@ -198,14 +214,23 @@ def _init_state_one_time(num_levels, num_bufs, labels):
         `lazy_one_time` requires so that it can be used to pick up
          processing after it was interrupted
     """
-    (label_array, pixel_list, num_rois, num_pixels, lag_steps, buf,
-     img_per_level, track_level, cur, norm,
-     lev_len) = _validate_and_transform_inputs(num_bufs, num_levels, labels)
+    (
+        label_array,
+        pixel_list,
+        num_rois,
+        num_pixels,
+        lag_steps,
+        buf,
+        img_per_level,
+        track_level,
+        cur,
+        norm,
+        lev_len,
+    ) = _validate_and_transform_inputs(num_bufs, num_levels, labels)
 
     # G holds the un normalized auto- correlation result. We
     # accumulate computations into G as the algorithm proceeds.
-    G = np.zeros(((num_levels + 1) * num_bufs // 2, num_rois),
-                 dtype=np.float64)
+    G = np.zeros(((num_levels + 1) * num_bufs // 2, num_rois), dtype=np.float64)
     # matrix for normalizing G into g2
     past_intensity = np.zeros_like(G)
     # matrix for normalizing G into g2
@@ -228,8 +253,7 @@ def _init_state_one_time(num_levels, num_bufs, labels):
     )
 
 
-def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
-                  internal_state=None):
+def lazy_one_time(image_iterable, num_levels, num_bufs, labels, internal_state=None):
     """Generator implementation of 1-time multi-tau correlation
 
     If you do not want multi-tau correlation, set num_levels to 1 and
@@ -313,9 +337,20 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
         # (undownsampled) frames. This modifies G,
         # past_intensity, future_intensity,
         # and img_per_level in place!
-        _one_time_process(s.buf, s.G, s.past_intensity, s.future_intensity,
-                          s.label_array, num_bufs, s.num_pixels,
-                          s.img_per_level, level, buf_no, s.norm, s.lev_len)
+        _one_time_process(
+            s.buf,
+            s.G,
+            s.past_intensity,
+            s.future_intensity,
+            s.label_array,
+            num_bufs,
+            s.num_pixels,
+            s.img_per_level,
+            level,
+            buf_no,
+            s.norm,
+            s.lev_len,
+        )
 
         # check whether the number of levels is one, otherwise
         # continue processing the next level
@@ -327,13 +362,12 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
                 s.track_level[level] = True
                 processing = False
             else:
-                prev = (1 + (s.cur[level - 1] - 2) % num_bufs)
-                s.cur[level] = (
-                    1 + s.cur[level] % num_bufs)
+                prev = 1 + (s.cur[level - 1] - 2) % num_bufs
+                s.cur[level] = 1 + s.cur[level] % num_bufs
 
-                s.buf[level, s.cur[level] - 1] = ((
-                        s.buf[level - 1, prev - 1] +
-                        s.buf[level - 1, s.cur[level - 1] - 1]) / 2)
+                s.buf[level, s.cur[level] - 1] = (
+                    s.buf[level - 1, prev - 1] + s.buf[level - 1, s.cur[level - 1] - 1]
+                ) / 2
 
                 # make the track_level zero once that level is processed
                 s.track_level[level] = False
@@ -342,10 +376,20 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
                 # than one. This is modifying things in place. See comment
                 # on previous call above.
                 buf_no = s.cur[level] - 1
-                _one_time_process(s.buf, s.G, s.past_intensity,
-                                  s.future_intensity, s.label_array, num_bufs,
-                                  s.num_pixels, s.img_per_level, level, buf_no,
-                                  s.norm, s.lev_len)
+                _one_time_process(
+                    s.buf,
+                    s.G,
+                    s.past_intensity,
+                    s.future_intensity,
+                    s.label_array,
+                    num_bufs,
+                    s.num_pixels,
+                    s.img_per_level,
+                    level,
+                    buf_no,
+                    s.norm,
+                    s.lev_len,
+                )
                 level += 1
 
                 # Checking whether there is next level for processing
@@ -359,8 +403,7 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels,
         else:
             g_max = s.past_intensity.shape[0]
 
-        g2 = (s.G[:g_max] / (s.past_intensity[:g_max] *
-                             s.future_intensity[:g_max]))
+        g2 = s.G[:g_max] / (s.past_intensity[:g_max] * s.future_intensity[:g_max])
         yield results(g2, s.lag_steps[:g_max], s)
 
 
@@ -452,8 +495,9 @@ def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1):
     return two_time_state_to_results(result)
 
 
-def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
-                  two_time_internal_state=None):
+def lazy_two_time(
+    labels, images, num_frames, num_bufs, num_levels=1, two_time_internal_state=None
+):
     """Generator implementation of two-time correlation
 
     If you do not want multi-tau correlation, set num_levels to 1 and
@@ -525,8 +569,9 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
 
     """
     if two_time_internal_state is None:
-        two_time_internal_state = _init_state_two_time(num_levels, num_bufs,
-                                                       labels, num_frames)
+        two_time_internal_state = _init_state_two_time(
+            num_levels, num_bufs, labels, num_frames
+        )
     # create a shorthand reference to the results and state named tuple
     s = two_time_internal_state
 
@@ -543,10 +588,18 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
 
         # Compute the two time correlations between the first level
         # (undownsampled) frames. two_time and img_per_level in place!
-        _two_time_process(s.buf, s.g2, s.label_array, num_bufs,
-                          s.num_pixels, s.img_per_level, s.lag_steps,
-                          s.current_img_time,
-                          level=0, buf_no=s.cur[0] - 1)
+        _two_time_process(
+            s.buf,
+            s.g2,
+            s.label_array,
+            num_bufs,
+            s.num_pixels,
+            s.img_per_level,
+            s.lag_steps,
+            s.current_img_time,
+            level=0,
+            buf_no=s.cur[0] - 1,
+        )
 
         # time frame for each level
         s.time_ind[0].append(s.current_img_time)
@@ -566,14 +619,16 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
                 s.cur[level] = 1 + s.cur[level] % num_bufs
                 s.count_level[level] = 1 + s.count_level[level]
 
-                s.buf[level, s.cur[level] - 1] = (s.buf[level - 1, prev - 1] +
-                                                  s.buf[level - 1,
-                                                  s.cur[level - 1] - 1])/2
+                s.buf[level, s.cur[level] - 1] = (
+                    s.buf[level - 1, prev - 1] + s.buf[level - 1, s.cur[level - 1] - 1]
+                ) / 2
 
                 t1_idx = (s.count_level[level] - 1) * 2
 
-                current_img_time = ((s.time_ind[level - 1])[t1_idx] +
-                                    (s.time_ind[level - 1])[t1_idx + 1])/2.
+                current_img_time = (
+                    (s.time_ind[level - 1])[t1_idx]
+                    + (s.time_ind[level - 1])[t1_idx + 1]
+                ) / 2.0
 
                 # time frame for each level
                 s.time_ind[level].append(current_img_time)
@@ -585,10 +640,18 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1,
                 # for multi-tau levels greater than one
                 # Again, this is modifying things in place. See comment
                 # on previous call above.
-                _two_time_process(s.buf, s.g2, s.label_array, num_bufs,
-                                  s.num_pixels, s.img_per_level, s.lag_steps,
-                                  current_img_time,
-                                  level=level, buf_no=s.cur[level]-1)
+                _two_time_process(
+                    s.buf,
+                    s.g2,
+                    s.label_array,
+                    num_bufs,
+                    s.num_pixels,
+                    s.img_per_level,
+                    s.lag_steps,
+                    current_img_time,
+                    level=level,
+                    buf_no=s.cur[level] - 1,
+                )
                 level += 1
 
                 # Checking whether there is next level for processing
@@ -612,14 +675,22 @@ def two_time_state_to_results(state):
     """
     for q in range(np.max(state.label_array)):
         x0 = (state.g2)[q, :, :]
-        (state.g2)[q, :, :] = (np.tril(x0) + np.tril(x0).T -
-                               np.diag(np.diag(x0)))
+        (state.g2)[q, :, :] = np.tril(x0) + np.tril(x0).T - np.diag(np.diag(x0))
     return results(state.g2, state.lag_steps, state)
 
 
-def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
-                      img_per_level, lag_steps, current_img_time,
-                      level, buf_no):
+def _two_time_process(
+    buf,
+    g2,
+    label_array,
+    num_bufs,
+    num_pixels,
+    img_per_level,
+    lag_steps,
+    current_img_time,
+    level,
+    buf_no,
+):
     """
     Parameters
     ----------
@@ -656,10 +727,10 @@ def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
     if level == 0:
         i_min = 0
     else:
-        i_min = num_bufs//2
+        i_min = num_bufs // 2
 
     for i in range(i_min, min(img_per_level[level], num_bufs)):
-        t_index = level*num_bufs//2 + i
+        t_index = level * num_bufs // 2 + i
 
         delay_no = (buf_no - i) % num_bufs
 
@@ -667,28 +738,27 @@ def _two_time_process(buf, g2, label_array, num_bufs, num_pixels,
         future_img = buf[level, buf_no]
 
         #  get the matrix of correlation function without normalizations
-        tmp_binned = (np.bincount(label_array,
-                                  weights=past_img*future_img)[1:])
+        tmp_binned = np.bincount(label_array, weights=past_img * future_img)[1:]
         # get the matrix of past intensity normalizations
-        pi_binned = (np.bincount(label_array,
-                                 weights=past_img)[1:])
+        pi_binned = np.bincount(label_array, weights=past_img)[1:]
 
         # get the matrix of future intensity normalizations
-        fi_binned = (np.bincount(label_array,
-                                 weights=future_img)[1:])
+        fi_binned = np.bincount(label_array, weights=future_img)[1:]
 
-        tind1 = (current_img_time - 1)
+        tind1 = current_img_time - 1
 
-        tind2 = (current_img_time - lag_steps[t_index] - 1)
+        tind2 = current_img_time - lag_steps[t_index] - 1
 
         if not isinstance(current_img_time, int):
-            nshift = 2**(level-1)
-            for i in range(-nshift+1, nshift+1):
-                g2[:, int(tind1+i),
-                   int(tind2+i)] = (tmp_binned/(pi_binned *
-                                                fi_binned))*num_pixels
+            nshift = 2 ** (level - 1)
+            for i in range(-nshift + 1, nshift + 1):
+                g2[:, int(tind1 + i), int(tind2 + i)] = (
+                    tmp_binned / (pi_binned * fi_binned)
+                ) * num_pixels
         else:
-            g2[:, int(tind1), int(tind2)] = tmp_binned/(pi_binned * fi_binned)*num_pixels
+            g2[:, int(tind1), int(tind2)] = (
+                tmp_binned / (pi_binned * fi_binned) * num_pixels
+            )
 
 
 def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
@@ -710,9 +780,19 @@ def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
         `lazy_two_time` requires so that it can be used to pick up processing
         after it was interrupted
     """
-    (label_array, pixel_list, num_rois, num_pixels, lag_steps,
-     buf, img_per_level, track_level, cur, norm,
-     lev_len) = _validate_and_transform_inputs(num_bufs, num_levels, labels)
+    (
+        label_array,
+        pixel_list,
+        num_rois,
+        num_pixels,
+        lag_steps,
+        buf,
+        img_per_level,
+        track_level,
+        cur,
+        norm,
+        lev_len,
+    ) = _validate_and_transform_inputs(num_bufs, num_levels, labels)
 
     # to count images in each level
     count_level = np.zeros(num_levels, dtype=np.int64)
@@ -785,13 +865,13 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
         length of each levels
     """
     if num_bufs % 2 != 0:
-        raise ValueError("There must be an even number of `num_bufs`. You "
-                         "provided %s" % num_bufs)
+        raise ValueError(
+            "There must be an even number of `num_bufs`. You " "provided %s" % num_bufs
+        )
     label_array, pixel_list = extract_label_indices(labels)
 
     # map the indices onto a sequential list of integers starting at 1
-    label_mapping = {label: n+1
-                     for n, label in enumerate(np.unique(label_array))}
+    label_mapping = {label: n + 1 for n, label in enumerate(np.unique(label_array))}
     # remap the label array to go from 1 -> max(_labels)
     for label, n in label_mapping.items():
         label_array[label_array == label] = n
@@ -812,8 +892,7 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
 
     # Ring buffer, a buffer with periodic boundary conditions.
     # Images must be keep for up to maximum delay in buf.
-    buf = np.zeros((num_levels, num_bufs, len(pixel_list)),
-                   dtype=np.float64)
+    buf = np.zeros((num_levels, num_bufs, len(pixel_list)), dtype=np.float64)
     # to track how many images processed in each level
     img_per_level = np.zeros(num_levels, dtype=np.int64)
     # to track which levels have already been processed
@@ -821,9 +900,19 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     # to increment buffer
     cur = np.ones(num_levels, dtype=np.int64)
 
-    return (label_array, pixel_list, num_rois, num_pixels,
-            lag_steps, buf, img_per_level, track_level, cur,
-            norm, lev_len)
+    return (
+        label_array,
+        pixel_list,
+        num_rois,
+        num_pixels,
+        lag_steps,
+        buf,
+        img_per_level,
+        track_level,
+        cur,
+        norm,
+        lev_len,
+    )
 
 
 def one_time_from_two_time(two_time_corr):
@@ -845,14 +934,14 @@ def one_time_from_two_time(two_time_corr):
     """
 
     one_time_corr = np.zeros((two_time_corr.shape[0], two_time_corr.shape[2]))
-    for i,g in enumerate(two_time_corr):
-        for j in range(g.shape[1]):          
-            one_time_corr[i, j] = np.nanmean( np.diag(g, k=j) )
+    for i, g in enumerate(two_time_corr):
+        for j in range(g.shape[1]):
+            one_time_corr[i, j] = np.nanmean(np.diag(g, k=j))
     return one_time_corr
 
 
 class CrossCorrelator:
-    '''
+    """
         Compute a 1D or 2D cross-correlation on data.
 
         This uses a mask, which may be binary (array of 0's and 1's),
@@ -885,9 +974,10 @@ class CrossCorrelator:
                711-718.
 
 
-    '''
+    """
+
     def __init__(self, shape, mask=None, normalization=None):
-        '''
+        """
             Prepare the spatial correlator for various regions specified by the
             id's in the image.
 
@@ -908,9 +998,9 @@ class CrossCorrelator:
                     'regular' : divide by pixel number
                     'symavg' : use symmetric averaging
                 Defaults to ['regular'] normalization
-        '''
+        """
         if normalization is None:
-            normalization = ['regular']
+            normalization = ["regular"]
         elif not isinstance(normalization, list):
             normalization = list([normalization])
         self.normalization = normalization
@@ -962,7 +1052,7 @@ class CrossCorrelator:
         # finds the shape of the subregions
         shapes = np.zeros((self.nids, 4), dtype=np.uint32)
         for i in range(self.nids):
-            index_start, index_end = idpos[i], idpos[i+1]
+            index_start, index_end = idpos[i], idpos[i + 1]
             row_min = pi[index_start:index_end].min()
             row_max = pi[index_start:index_end].max()
             col_min = pj[index_start:index_end].min()
@@ -975,7 +1065,7 @@ class CrossCorrelator:
         # subtract the minimum index, this trick
         # will then index into some other array properly
         for i in range(self.nids):
-            index_start, index_stop = idpos[i], idpos[i+1]
+            index_start, index_stop = idpos[i], idpos[i + 1]
             ppii[index_start:index_stop] -= shapes[i, 0]
             ppjj[index_start:index_stop] -= shapes[i, 2]
         # now save to object
@@ -1007,7 +1097,7 @@ class CrossCorrelator:
         # to save some time when actually computing the cross correlations
         for i in range(self.nids):
             submask = np.zeros(self.shapes[i, :])
-            index_start, index_stop = idpos[i], idpos[i+1]
+            index_start, index_stop = idpos[i], idpos[i + 1]
             ppiis = ppii[index_start:index_stop]
             ppjjs = ppjj[index_start:index_stop]
             submask[ppiis, ppjjs] = 1
@@ -1015,29 +1105,31 @@ class CrossCorrelator:
 
             maskcorr = _cross_corr(submask)
             # choose some small value to threshold
-            maskcorr *= maskcorr > .5
+            maskcorr *= maskcorr > 0.5
             # This following line was originally placed two lines below. It was moved here in order
             #   to avoid runtime warnings during the execution of '>' (zeros are replaced by 'nan' values)
             self.pxlst_maskcorrs.append(maskcorr > 0)
             maskcorr[np.where(maskcorr == 0)] = np.nan
             self.maskcorrs.append(maskcorr)
             # centers are shape//2 as performed by fftshift
-            center = np.array(maskcorr.shape)//2
-            self.centers.append(np.array(maskcorr.shape)//2)
+            center = np.array(maskcorr.shape) // 2
+            self.centers.append(np.array(maskcorr.shape) // 2)
             if self.ndim == 1:
                 self.positions.append(np.arange(maskcorr.shape[1]) - center[1])
             elif self.ndim == 2:
-                self.positions.append([np.arange(maskcorr.shape[0]) -
-                                       center[0],
-                                       np.arange(maskcorr.shape[1]) -
-                                       center[1]])
+                self.positions.append(
+                    [
+                        np.arange(maskcorr.shape[0]) - center[0],
+                        np.arange(maskcorr.shape[1]) - center[1],
+                    ]
+                )
 
         if self.nids == 1:
             self.positions = self.positions[0]
             self.centers = self.centers[0]
 
     def __call__(self, img1, img2=None, normalization=None):
-        ''' Run the cross correlation on an image/curve or against two
+        """ Run the cross correlation on an image/curve or against two
                 images/curves
 
             Parameters
@@ -1060,15 +1152,16 @@ class CrossCorrelator:
                 located at shape//2 where shape is the 1 or 2-tuple
                 shape of the array
 
-        '''
+        """
         if normalization is None:
             normalization = self.normalization
 
         if img1.shape != self.shape:
-            raise ValueError("Image not expected shape." +
-                             "Got {}, ".format(img1.shape) +
-                             "expected {}".format(self.shape)
-                             )
+            raise ValueError(
+                "Image not expected shape."
+                + "Got {}, ".format(img1.shape)
+                + "expected {}".format(self.shape)
+            )
         # reshape for 1D case
         if self.ndim == 1:
             img1 = img1.reshape((1, self.shape[0]))
@@ -1078,9 +1171,11 @@ class CrossCorrelator:
         else:
             self_correlation = False
             if img2.shape != self.shape:
-                raise ValueError("Second image not expected shape. " +
-                                 "Got {}".format(img2.shape) +
-                                 " expected {}".format(self.shape))
+                raise ValueError(
+                    "Second image not expected shape. "
+                    + "Got {}".format(img2.shape)
+                    + " expected {}".format(self.shape)
+                )
             if self.ndim == 1:
                 img2 = img2.reshape((1, self.shape[0]))
 
@@ -1089,7 +1184,7 @@ class CrossCorrelator:
 
         idpos = self.idpos
         for i in rngiter:
-            index_start, index_stop = idpos[i], idpos[i+1]
+            index_start, index_stop = idpos[i], idpos[i + 1]
             ppiis = self.ppii[index_start:index_stop]
             ppjjs = self.ppjj[index_start:index_stop]
             pis = self.pi[index_start:index_stop]
@@ -1110,26 +1205,24 @@ class CrossCorrelator:
             # Note, in this code, non-overlapping regions will now get np.nan
             # also, for sym averaging, if Icorr*Icorr2==0, then we also get
             # np.nan
-            if 'symavg' in normalization:
+            if "symavg" in normalization:
                 # do symmetric averaging
-                Icorr = _cross_corr(tmpimg * self.submasks[i],
-                                    self.submasks[i])
+                Icorr = _cross_corr(tmpimg * self.submasks[i], self.submasks[i])
                 if self_correlation:
-                    Icorr2 = _cross_corr(self.submasks[i], tmpimg *
-                                         self.submasks[i])
+                    Icorr2 = _cross_corr(self.submasks[i], tmpimg * self.submasks[i])
                 else:
-                    Icorr2 = _cross_corr(self.submasks[i], tmpimg2 *
-                                         self.submasks[i])
-                ccorr *= self.maskcorrs[i]/Icorr/Icorr2
+                    Icorr2 = _cross_corr(self.submasks[i], tmpimg2 * self.submasks[i])
+                ccorr *= self.maskcorrs[i] / Icorr / Icorr2
 
-            if 'regular' in normalization:
+            if "regular" in normalization:
                 if self_correlation:
-                    ccorr /= self.maskcorrs[i] * \
-                             np.average(tmpimg[ppiis, ppjjs])**2
+                    ccorr /= self.maskcorrs[i] * np.average(tmpimg[ppiis, ppjjs]) ** 2
                 else:
-                    ccorr /= self.maskcorrs[i] *\
-                             np.average(tmpimg[ppiis, ppjjs]) *\
-                             np.average(tmpimg2[ppiis, ppjjs])
+                    ccorr /= (
+                        self.maskcorrs[i]
+                        * np.average(tmpimg[ppiis, ppjjs])
+                        * np.average(tmpimg2[ppiis, ppjjs])
+                    )
             if self.ndim == 1:
                 ccorr = ccorr.reshape(-1)
             ccorrs.append(ccorr)
@@ -1141,7 +1234,7 @@ class CrossCorrelator:
 
 
 def _cross_corr(img1, img2=None):
-    ''' Compute the cross correlation of one (or two) images.
+    """ Compute the cross correlation of one (or two) images.
 
         Parameters
         ----------
@@ -1153,7 +1246,7 @@ def _cross_corr(img1, img2=None):
             to the right of img1 will lead to a shift of the point of
             highest correlation to the right.
             Default is set to None
-    '''
+    """
     ndim = img1.ndim
 
     if img2 is None:
@@ -1161,14 +1254,13 @@ def _cross_corr(img1, img2=None):
 
     if img1.shape != img2.shape:
         errorstr = "Image shapes don't match. "
-        errorstr += "(img1 : {}; img2 : {})"\
-            .format(img1.shape, img2.shape)
+        errorstr += "(img1 : {}; img2 : {})".format(img1.shape, img2.shape)
         raise ValueError(errorstr)
 
     # need to reverse indices for second image
     # fftconvolve(A,B) = FFT^(-1)(FFT(A)*FFT(B))
     # but need FFT^(-1)(FFT(A(x))*conj(FFT(B(x)))) = FFT^(-1)(A(x)*B(-x))
     reverse_index = [slice(None, None, -1) for i in range(ndim)]
-    imgc = fftconvolve(img1, img2[tuple(reverse_index)], mode='full')
+    imgc = fftconvolve(img1, img2[tuple(reverse_index)], mode="full")
 
     return imgc
