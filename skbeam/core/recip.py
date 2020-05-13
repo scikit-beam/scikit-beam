@@ -223,9 +223,12 @@ def calibrated_pixels_to_q(detector_size, pyfai_kwargs):
     q_val : ndarray
         Reciprocal values for each pixel shape is [num_rows * num_columns]
     """
-    if geo is None:
+    try:
+        from pyFAI import geometry as geo
+    except ImportError as ex:
         raise RuntimeError("You must have pyFAI installed to use this "
-                           "function.")
+                           "function.") from ex
+
     a = geo.Geometry(**pyfai_kwargs)
     return a.qArray(detector_size)
 
