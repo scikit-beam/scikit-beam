@@ -128,7 +128,7 @@ def _one_time_process(buf, G, past_intensity_norm, future_intensity_norm,
         ind = int(t_index - lev_len[:level].sum())
         normalize = img_per_level[level] - i - norm[level+1][ind]
 
-        # take out the past_ing and future_img created using bad images
+        # take out the past_img and future_img created using bad images
         # (bad images are converted to np.nan array)
         if (np.isnan(past_img[used_mask]).any() or np.isnan(future_img[used_mask]).any()):
             norm[level + 1][ind] += 1
