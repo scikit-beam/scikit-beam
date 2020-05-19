@@ -317,8 +317,7 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
     elif pi_modulus_flag == 'complex':
         real_operation = False
     else:
-        raise ValueError('py_modulus_flag must be one of {"complex",'
-                         'real"} not' '{!r}'.format(pi_modulus_flag))
+        raise ValueError('py_modulus_flag must be one of {"complex",' 'real"} not' '{!r}'.format(pi_modulus_flag))
 
     gamma_1 = -1/beta
     gamma_2 = 1/beta
