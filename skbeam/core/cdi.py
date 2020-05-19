@@ -43,6 +43,7 @@ import time
 from scipy.ndimage.filters import gaussian_filter
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -90,13 +91,11 @@ def gauss(dims, sigma):
         ND gaussian
     """
     x = _dist(dims)
-    y = np.exp(-(x / sigma)**2 / 2)
+    y = np.exp(-((x / sigma) ** 2) / 2)
     return y / np.sum(y)
 
 
-def pi_modulus(recon_pattern,
-               diffracted_pattern,
-               offset_v=1e-12):
+def pi_modulus(recon_pattern, diffracted_pattern, offset_v=1e-12):
     """
     Transfer sample from real space to q space.
     Use constraint based on diffraction pattern from experiments.
@@ -117,13 +116,15 @@ def pi_modulus(recon_pattern,
     """
     diff_tmp = np.fft.fftn(recon_pattern) / np.sqrt(np.size(recon_pattern))
     index = diffracted_pattern > 0
-    diff_tmp[index] = (diffracted_pattern[index] *
-                       diff_tmp[index] / (np.abs(diff_tmp[index]) + offset_v))
+    diff_tmp[index] = (
+        diffracted_pattern[index]
+        * diff_tmp[index]
+        / (np.abs(diff_tmp[index]) + offset_v)
+    )
     return np.fft.ifftn(diff_tmp) * np.sqrt(np.size(diffracted_pattern))
 
 
-def find_support(sample_obj,
-                 sw_sigma, sw_threshold):
+def find_support(sample_obj, sw_sigma, sw_threshold):
     """
     Update sample area based on thresholds.
 
@@ -144,7 +145,7 @@ def find_support(sample_obj,
     sample_obj = np.abs(sample_obj)
     conv_fun = gaussian_filter(sample_obj, sw_sigma)
     conv_max = np.max(conv_fun)
-    return conv_fun >= (sw_threshold*conv_max)
+    return conv_fun >= (sw_threshold * conv_max)
 
 
 def cal_diff_error(sample_obj, diffracted_pattern):
@@ -164,8 +165,9 @@ def cal_diff_error(sample_obj, diffracted_pattern):
         relative error in q space
     """
     new_diff = np.abs(np.fft.fftn(sample_obj)) / np.sqrt(np.size(sample_obj))
-    return (np.linalg.norm(new_diff - diffracted_pattern) /
-            np.linalg.norm(diffracted_pattern))
+    return np.linalg.norm(new_diff - diffracted_pattern) / np.linalg.norm(
+        diffracted_pattern
+    )
 
 
 def generate_random_phase_field(diffracted_pattern):
@@ -182,9 +184,10 @@ def generate_random_phase_field(diffracted_pattern):
     sample_obj : array
         sample information with phase
     """
-    pha_tmp = np.random.uniform(0, 2*np.pi, diffracted_pattern.shape)
-    sample_obj = (np.fft.ifftn(diffracted_pattern * np.exp(1j*pha_tmp)) *
-                  np.sqrt(np.size(diffracted_pattern)))
+    pha_tmp = np.random.uniform(0, 2 * np.pi, diffracted_pattern.shape)
+    sample_obj = np.fft.ifftn(diffracted_pattern * np.exp(1j * pha_tmp)) * np.sqrt(
+        np.size(diffracted_pattern)
+    )
     return sample_obj
 
 
@@ -204,7 +207,7 @@ def generate_box_support(sup_radius, shape_v):
     sup : array
         support with a box area
     """
-    slc_list = [slice(s//2 - sup_radius, s//2 + sup_radius) for s in shape_v]
+    slc_list = [slice(s // 2 - sup_radius, s // 2 + sup_radius) for s in shape_v]
     sup = np.zeros(shape_v)
     sup[tuple(slc_list)] = 1
     return sup
@@ -232,11 +235,23 @@ def generate_disk_support(sup_radius, shape_v):
     return sup
 
 
-def cdi_recon(diffracted_pattern, sample_obj, sup,
-              beta=1.15, start_avg=0.8, pi_modulus_flag='Complex',
-              sw_flag=True, sw_sigma=0.5, sw_threshold=0.1, sw_start=0.2,
-              sw_end=0.8, sw_step=10, n_iterations=1000,
-              cb_function=None, cb_step=10):
+def cdi_recon(
+    diffracted_pattern,
+    sample_obj,
+    sup,
+    beta=1.15,
+    start_avg=0.8,
+    pi_modulus_flag="Complex",
+    sw_flag=True,
+    sw_sigma=0.5,
+    sw_threshold=0.1,
+    sw_start=0.2,
+    sw_end=0.8,
+    sw_step=10,
+    n_iterations=1000,
+    cb_function=None,
+    cb_step=10,
+):
     """
     Run reconstruction with difference map algorithm.
 
@@ -307,20 +322,24 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
         J. Opt. Soc. Am. A, vol. 20, No. 1, 2003
     """
 
-    diffracted_pattern = np.array(diffracted_pattern)     # diffraction data
+    diffracted_pattern = np.array(diffracted_pattern)  # diffraction data
     diffracted_pattern = np.fft.fftshift(diffracted_pattern)
 
     pi_modulus_flag = pi_modulus_flag.lower()
     real_operation = False
-    if pi_modulus_flag == 'real':
+    if pi_modulus_flag == "real":
         real_operation = True
-    elif pi_modulus_flag == 'complex':
+    elif pi_modulus_flag == "complex":
         real_operation = False
     else:
-        raise ValueError('py_modulus_flag must be one of {"complex",' 'real"} not' '{!r}'.format(pi_modulus_flag))
+        raise ValueError(
+            'py_modulus_flag must be one of {"complex",'
+            'real"} not'
+            "{!r}".format(pi_modulus_flag)
+        )
 
-    gamma_1 = -1/beta
-    gamma_2 = 1/beta
+    gamma_1 = -1 / beta
+    gamma_2 = 1 / beta
 
     # get support index
     outside_sup_index = sup != 1
@@ -356,17 +375,14 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
         sample_obj += beta * (obj_a - obj_b)
 
         # calculate errors
-        obj_error[n] = (np.linalg.norm(sample_obj - obj_old) /
-                        np.linalg.norm(obj_old))
+        obj_error[n] = np.linalg.norm(sample_obj - obj_old) / np.linalg.norm(obj_old)
         diff_error[n] = cal_diff_error(sample_obj, diffracted_pattern)
 
         if sw_flag:
-            if((n >= (sw_start * n_iterations)) and
-               (n <= (sw_end * n_iterations))):
+            if (n >= (sw_start * n_iterations)) and (n <= (sw_end * n_iterations)):
                 if np.mod(n, sw_step) == 0:
-                    logger.info('Refine support with shrinkwrap')
-                    sup_index = find_support(sample_obj, sw_sigma,
-                                             sw_threshold)
+                    logger.info("Refine support with shrinkwrap")
+                    sup_index = find_support(sample_obj, sw_sigma, sw_threshold)
                     sup = np.zeros_like(diffracted_pattern)
                     sup[sup_index] = 1
                     outside_sup_index = sup != 1
@@ -376,21 +392,19 @@ def cdi_recon(diffracted_pattern, sample_obj, sup,
         if cb_function and n_iterations % cb_step == 0:
             cb_function(sample_obj, obj_error, diff_error, sup_error)
 
-        if n > start_avg*n_iterations:
+        if n > start_avg * n_iterations:
             obj_avg += sample_obj
             avg_i += 1
 
-        logger.info('%d object_chi= %f, diff_chi=%f' % (n, obj_error[n],
-                                                        diff_error[n]))
+        logger.info("%d object_chi= %f, diff_chi=%f" % (n, obj_error[n], diff_error[n]))
 
     obj_avg = obj_avg / avg_i
     time_end = time.time()
 
-    logger.info('%d iterations takes %f sec' % (n_iterations,
-                                                time_end - time_start))
+    logger.info("%d iterations takes %f sec" % (n_iterations, time_end - time_start))
 
-    error_dict['obj_error'] = obj_error
-    error_dict['diff_error'] = diff_error
-    error_dict['sup_error'] = sup_error
+    error_dict["obj_error"] = obj_error
+    error_dict["diff_error"] = diff_error
+    error_dict["sup_error"] = sup_error
 
     return obj_avg, error_dict
