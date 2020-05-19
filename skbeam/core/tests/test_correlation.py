@@ -218,8 +218,7 @@ def test_one_time_from_two_time():
     y_dim = 10
     stack = 10
     imgs = np.random.randint(1, 3, (stack, x_dim, y_dim))
-    for i in range(imgs.shape[0]):
-        imgs[i, 0, 0] = np.copy(imgs[i, 0, 0]) + 5
+    imgs[:, 0, 0] += 5
     roi = np.zeros_like(imgs[0])
     # make sure that the ROIs can be any integers greater than 1.
     # They do not have to start at 1 and be continuous
