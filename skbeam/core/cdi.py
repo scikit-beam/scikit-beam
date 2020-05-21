@@ -333,8 +333,7 @@ def cdi_recon(
         real_operation = False
     else:
         raise ValueError(
-            'py_modulus_flag must be one of {"complex",'
-            'real"} not'
+            'py_modulus_flag must be one of ("complex","real") not '
             "{!r}".format(pi_modulus_flag)
         )
 
