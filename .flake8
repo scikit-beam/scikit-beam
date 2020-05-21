@@ -9,3 +9,5 @@ exclude =
     doc/conf.py,
     doc/sphinxext/*
 max-line-length = 115
+# ignore constants/__init__ because it is an API file
+exclude = *__init__.py, *test_api.py, *test_diffraction.py, *test_fluorescence.py
