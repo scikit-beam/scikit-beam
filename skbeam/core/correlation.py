@@ -198,7 +198,7 @@ _two_time_internal_state = namedtuple(
 
 def _init_state_one_time(num_levels, num_bufs, labels):
     """Initialize a stateful namedtuple for the generator-based multi-tau
-     for one time correlation
+      for one time correlation
 
     Parameters
     ----------
@@ -212,7 +212,7 @@ def _init_state_one_time(num_levels, num_bufs, labels):
     internal_state : namedtuple
         The namedtuple that contains all the state information that
         `lazy_one_time` requires so that it can be used to pick up
-         processing after it was interrupted
+          processing after it was interrupted
     """
     (
         label_array,
@@ -468,9 +468,9 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
     References
     ----------
     .. [1] L. Li, P. Kwasniewski, D. Orsi, L. Wiegart, L. Cristofolini,
-       C. Caronna and A. Fluerasu, " Photon statistics and speckle
-       visibility spectroscopy with partially coherent X-rays,"
-       J. Synchrotron Rad. vol 21, p 1288-1295, 2014
+        C. Caronna and A. Fluerasu, " Photon statistics and speckle
+        visibility spectroscopy with partially coherent X-rays,"
+        J. Synchrotron Rad. vol 21, p 1288-1295, 2014
 
     """
     return beta * np.exp(-2 * relaxation_rate * lags) + baseline
@@ -1265,57 +1265,59 @@ def _cross_corr(img1, img2=None):
 
     return imgc
 
-
-def get_four_time_from_two_time(  g12,g2=None, rois=None  ):
+def get_four_time_from_two_time( g12, g2 , frames = None ):
     ''' 
-    Dec 16, 2015, Y.G.@CHX
     Get four-time correlation function from two correlation function
     namely, calculate the deviation of each diag line of g12 to get four-time correlation fucntion
     TOBEDONE: deal with bad frames
     
-    Parameters:
-        g12: a 3-D array, two correlation function, shape as ( imgs_length, imgs_length, q)  
-    
-    Options:
-        g2: if not None, a 2-D array, shape as ( imgs_length,  q), or (tau, q)
-            one-time correlation fucntion, for normalization of the four-time
-        rois: if not None, a list, [x-slice-start, x-slice-end, y-slice-start, y-slice-end]
+    Parameters
+    ----------
+    g12: 3-D array
+        two correlation function, shape as ( num_rois, imgs_length, imgs_length)  
+    g2: a 2-D array, shape as ( num_rois, imgs_length), or (num_rois, tau)
+        one-time correlation fucntion, for normalization of the four-time
+    frames: if not None, a tulpe (start, finish)
    
-    Return:
-        g4f12: a 2-D array, shape as ( imgs_length,  q), 
-                   a four-time correlation function  
+    Returns
+    -------
+    g4f12: 2-D array, shape as (num_rois, imgs_length), 
+        a four-time correlation function  
      
-    One example:        
-        s1,s2 = 0,2000
-        g4 = get_four_time_from_two_time( g12bm, g2b, roi=[s1,s2,s1,s2] )
+    Examples
+    --------        
+    >>> s1, s2 = 0, 2000
+    >>> g4 = get_four_time_from_two_time( g12bm, g2b, roi=[s1,s2,s1,s2] )
          
     '''      
-    
-    
-    m,n,noqs = g12.shape
-    g4f12 = []       
-    for q in  range(noqs):   
-        temp=[]    
-        if rois is None:
-            y=g12[:,:,q]  
-        else:
-            x1,x2,y1,y2 = rois
-            y=g12[x1:x2,y1:y2, q]
-            m,n = y.shape
-        norm =  ( g2[:,q][0] -1)**2  
-        for tau in range(m): 
-            d_ = np.diag(y,k=int(tau))
-            d = d_[   np.where( d_ !=1)            ]
-            g4 = ( d.std() )**2 /norm
-            temp.append( g4 )                
-                
-        temp = np.array( temp).reshape( len(temp),1)
-        if q==0:
-            g4f12 =  temp
-        else:
-            g4f12=np.hstack( [g4f12,  temp] ) 
+    # preallocate the array
+    if frames == None:
+        g4f12 = np.empty([g12.shape[0], g12.shape[1]])
+    else:
+        g4f12 = np.empty([g12.shape[0], frames[1]-frames[0]])
+       
+    for ind, q in enumerate(g12):
+        temp = []
+        
+        #consider only time-slice of frames
+        if frames != None: 
+            start, end = frames
+            q = q[start:end,start:end]
+        
+        norm = (g2[ind,:][0] -1)**2
+        
+        for tau in range(q.shape[0]):
+            d = np.diag(q, k = tau)
+            g4 = (d.std())**2 / norm
+            temp.append(g4)
             
+        temp = np.array(temp)       
+        g4f12[ind, :] = temp[:]
+        
     return g4f12
+        
+    
+
 
 
 
