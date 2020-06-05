@@ -450,16 +450,18 @@ def test_CrossCorrelator2d():
 
 def test_get_four_time_from_two_time():
     np.random.seed(0)
-    l = 5
-    g12 = np.random.rand(2, l, l)
+    ll = 5
+    g12 = np.random.rand(2, ll, ll)
     for k in range(g12.shape[0]):
         q = g12[k]
-        g12[k] = np.tril(q) + np.tril(q).T - 2*np.diag(np.diag(q)) + np.diag(np.ones(len(q)))    
-    g2 = np.random.rand(2,l)+10*np.exp(-0.05*np.array(range(l)))        
-    res = get_four_time_from_two_time(g12, g2, (1,l))    
-    
+        g12[k] = np.tril(q) + np.tril(q).T - 2 * np.diag(np.diag(q)) + \
+            np.diag(np.ones(len(q)))
+    g2 = np.random.rand(2, ll) + 10 * np.exp(-0.05 * np.array(range(ll)))
+    res = get_four_time_from_two_time(g12, g2, (1, ll))
+
     assert_array_almost_equal(res, [[0., 0.00019202, 0.00053148, 0.],
-                                    [0., 0.00031959, 0.00028276, 0.]] , decimal = 8)
+                                    [0., 0.00031959, 0.00028276, 0.]],
+                              decimal=8)
 
 
 def test_CrossCorrelator_badinputs():

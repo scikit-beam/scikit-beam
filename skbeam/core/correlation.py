@@ -1265,70 +1265,54 @@ def _cross_corr(img1, img2=None):
 
     return imgc
 
-def get_four_time_from_two_time( g12, g2 , frames = None ):
-    ''' 
+
+def get_four_time_from_two_time(g12, g2, frames=None):
+    """
     Get four-time correlation function from two correlation function
     namely, calculate the deviation of each diag line of g12 to get four-time correlation fucntion
     TOBEDONE: deal with bad frames
-    
+
     Parameters
     ----------
     g12: 3-D array
-        two correlation function, shape as ( num_rois, imgs_length, imgs_length)  
+        two correlation function, shape as ( num_rois, imgs_length, imgs_length)
     g2: a 2-D array, shape as ( num_rois, imgs_length), or (num_rois, tau)
         one-time correlation fucntion, for normalization of the four-time
     frames: if not None, a tulpe (start, finish)
-   
+
     Returns
     -------
-    g4f12: 2-D array, shape as (num_rois, imgs_length), 
-        a four-time correlation function  
-     
+    g4f12: 2-D array, shape as (num_rois, imgs_length),
+        a four-time correlation function
+
     Examples
-    --------        
+    --------
     >>> s1, s2 = 0, 2000
     >>> g4 = get_four_time_from_two_time( g12bm, g2b, roi=[s1,s2,s1,s2] )
-         
-    '''      
+
+    """
     # preallocate the array
-    if frames == None:
+    if frames is None:
         g4f12 = np.empty([g12.shape[0], g12.shape[1]])
     else:
         g4f12 = np.empty([g12.shape[0], frames[1]-frames[0]])
-       
+
     for ind, q in enumerate(g12):
         temp = []
-        
-        #consider only time-slice of frames
-        if frames != None: 
+
+        # consider only time-slice of frames
+        if frames is not None:
             start, end = frames
-            q = q[start:end,start:end]
-        
-        norm = (g2[ind,:][0] -1)**2
-        
+            q = q[start:end, start:end]
+
+        norm = (g2[ind, :][0] - 1)**2
+
         for tau in range(q.shape[0]):
-            d = np.diag(q, k = tau)
+            d = np.diag(q, k=tau)
             g4 = (d.std())**2 / norm
             temp.append(g4)
-            
-        temp = np.array(temp)       
+
+        temp = np.array(temp)
         g4f12[ind, :] = temp[:]
-        
+
     return g4f12
-        
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
