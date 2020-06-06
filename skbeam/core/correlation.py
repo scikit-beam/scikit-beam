@@ -1288,7 +1288,7 @@ def get_four_time_from_two_time(g12, g2, frames=None):
     Examples
     --------
     >>> t1, t2 = 0, 2000
-    >>> g4 = get_four_time_from_two_time( g12bm, g2b, frames=(t1,t2) )
+    >>> g4 = get_four_time_from_two_time(g12bm, g2b, frames=(t1,t2) )
 
     """
     # preallocate the array
