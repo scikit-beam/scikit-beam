@@ -1268,16 +1268,16 @@ def _cross_corr(img1, img2=None):
 
 def get_four_time_from_two_time(g12, g2, frames=None):
     """
-    Get four-time correlation function from two correlation function
-    namely, calculate the deviation of each diag line of g12 to get four-time correlation fucntion
-    TOBEDONE: deal with bad frames
+    Get four-time correlation function from two correlation function.
+    Namely, calculate the deviation of each diag line of g12 to get four-time correlation function
+    TODO: deal with bad frames
 
     Parameters
     ----------
     g12: 3-D array
-        two correlation function, shape as ( num_rois, imgs_length, imgs_length)
-    g2: a 2-D array, shape as ( num_rois, imgs_length), or (num_rois, tau)
-        one-time correlation fucntion, for normalization of the four-time
+        two correlation function, shape as (num_rois, imgs_length, imgs_length)
+    g2: a 2-D array, shape as (num_rois, imgs_length), or (num_rois, tau)
+        one-time correlation function, for normalization of the four-time
     frames: if not None, a tulpe (start, finish)
 
     Returns
@@ -1287,8 +1287,8 @@ def get_four_time_from_two_time(g12, g2, frames=None):
 
     Examples
     --------
-    >>> s1, s2 = 0, 2000
-    >>> g4 = get_four_time_from_two_time( g12bm, g2b, roi=[s1,s2,s1,s2] )
+    >>> t1, t2 = 0, 2000
+    >>> g4 = get_four_time_from_two_time( g12bm, g2b, frames=(t1,t2) )
 
     """
     # preallocate the array
