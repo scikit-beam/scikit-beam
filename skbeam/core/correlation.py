@@ -934,7 +934,7 @@ def one_time_from_two_time(two_time_corr, calc_errors = False):
     one_time_corr : array
         matrix of one time correlation
         shape (number of labels(ROI's), number of frames)
-    err_one_time_corr: arry
+    err_one_time_corr: array
         matrix of errors for one time correlation
         shape (number of labels(ROI's), number of frames)
     """
