@@ -1087,15 +1087,18 @@ class ModelSpectrum(object):
 
 
 def get_line_energy(elemental_line):
-    """Return the energy of the first line in K, L or M series.
+    """Return the energy of the emission line.
 
     Parameters
     ----------
     elemental_line : str
-        For instance, Eu_L is the format for L lines and Pt_M for M lines.
-        And for K lines, user needs to define lines like ka1, kb1,
-        because for K lines, we consider contributions from either ka1
-        or kb1, while for L or M lines, we only consider the primary peak.
+        For instance, Ca_K will return energy of the peak for Ca_ka1 line,
+        Ca_Kb will return energy for Ca_Kb1 line and Ca_Kb2 line will return
+        energy for Ca_Kb2 line. The letters in the element name (e.g. Ca) should
+        be capitalized properly. Letters in the line name may be arbitrarily
+        capitalized, e.g. Ca_kb1 is equivalent to Ca_Kb1 or Ca_KB1.
+        The function is primarily used for finding center of a pileup peak,
+        so typical format for the emission line is Ca_Ka1.
 
     Returns
     -------
@@ -1104,15 +1107,15 @@ def get_line_energy(elemental_line):
     """
     name, line = elemental_line.split('_')
     line = line.lower()
+
+    # Complete the emission line name
+    if len(line) == 1:  # elemental line format 'Ca_K'
+        line += 'a1'
+    elif len(line) == 2:  # elemental line format 'Ca_Ka'
+        line += "1"
+
     e = Element(name)
-    if 'k' in line:
-        e_cen = e.emission_line[line]
-    elif 'l' in line:
-        # only the first line for L
-        e_cen = e.emission_line['la1']
-    else:
-        # only the first line for M
-        e_cen = e.emission_line['ma1']
+    e_cen = e.emission_line[line]
     return e_cen
 
 
