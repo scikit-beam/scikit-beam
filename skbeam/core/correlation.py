@@ -915,7 +915,7 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     )
 
 
-def one_time_from_two_time(two_time_corr, calc_errors = False):
+def one_time_from_two_time(two_time_corr, calc_errors=False):
     """
     This will provide the one-time correlation data from two-time
     correlation data. An estimator for errors can be calculated 
@@ -945,7 +945,9 @@ def one_time_from_two_time(two_time_corr, calc_errors = False):
         for j in range(g.shape[1]):
             one_time_corr[i, j] = np.nanmean(np.diag(g, k=j))
             if calc_errors:
-                err_one_time_corr[i, j] = np.nanstd(np.diag(g, k=j))/np.sqrt(len(np.diag(g, k=j)))
+                err_one_time_corr[i, j] = np.nanstd(np.diag(g, k=j)) / np.sqrt(
+                    len(np.diag(g, k=j))
+                )
     if calc_errors:
         return one_time_corr, err_one_time_corr
     else:
