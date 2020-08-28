@@ -68,8 +68,8 @@ def setup():
     rois = np.zeros_like(img_stack[0])
     # make sure that the ROIs can be any integers greater than 1.
     # They do not have to start at 1 and be continuous
-    rois[0: xdim // 10, 0: ydim // 10] = 5
-    rois[xdim // 10: xdim // 5, ydim // 10: ydim // 5] = 3
+    rois[0 : xdim // 10, 0 : ydim // 10] = 5
+    rois[xdim // 10 : xdim // 5, ydim // 10 : ydim // 5] = 3
 
 
 def test_lazy_vs_original():
@@ -121,7 +121,7 @@ def test_lazy_two_time():
     # first half
     gen_second_half = lazy_two_time(
         rois,
-        img_stack[stack_size // 2:],
+        img_stack[stack_size // 2 :],
         stack_size,
         num_bufs=stack_size,
         num_levels=1,
@@ -155,7 +155,7 @@ def test_lazy_one_time():
     # run the correlation on the second half by passing in the state from the
     # first half
     gen_second_half = lazy_one_time(
-        img_stack[stack_size // 2:],
+        img_stack[stack_size // 2 :],
         num_levels,
         num_bufs,
         rois,
@@ -222,8 +222,8 @@ def test_one_time_from_two_time():
     roi = np.zeros_like(imgs[0])
     # make sure that the ROIs can be any integers greater than 1.
     # They do not have to start at 1 and be continuous
-    roi[0: x_dim // 5, 0: y_dim // 10] = 5
-    roi[x_dim // 10: x_dim // 5 + 1, y_dim // 10: y_dim // 5] = 3
+    roi[0 : x_dim // 5, 0 : y_dim // 10] = 5
+    roi[x_dim // 10 : x_dim // 5 + 1, y_dim // 10 : y_dim // 5] = 3
 
     g2, lag_steps, _state = two_time_corr(roi, imgs, stack, num_buf, num_lev)
     g2_t, _ = multi_tau_auto_corr(num_lev, num_buf, roi, imgs)
@@ -254,13 +254,17 @@ def test_one_time_from_two_time():
         g2_t.T[0].mean() / g2_t.T[1].mean(),
         decimal=2,
     )
-    
+
     assert_array_almost_equal(
         error_one_time[0][1:],
-        np.array([np.std(np.diagonal(g2[0], offset=x))/np.sqrt(x) for x in range(1, g2[0].shape[0])]),
-        decimal = 2
+        np.array(
+            [
+                np.std(np.diagonal(g2[0], offset=x)) / np.sqrt(x)
+                for x in range(1, g2[0].shape[0])
+            ]
+        ),
+        decimal=2,
     )
-    
 
 
 @pytest.mark.skipif(
