@@ -918,7 +918,7 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
 def one_time_from_two_time(two_time_corr, calc_errors=False):
     """
     This will provide the one-time correlation data from two-time
-    correlation data. An estimator for errors can be calculated 
+    correlation data. An estimator for errors can be calculated
     according to the central limit theorem.
 
     Parameters
