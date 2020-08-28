@@ -934,7 +934,7 @@ def one_time_from_two_time(two_time_corr, calc_errors=False):
     one_time_corr : array
         matrix of one time correlation
         shape (number of labels(ROI's), number of frames)
-    err_one_time_corr: array
+    (optional, if calc_errors=True) err_one_time_corr: array
         matrix of errors for one time correlation
         shape (number of labels(ROI's), number of frames)
     """
@@ -943,10 +943,11 @@ def one_time_from_two_time(two_time_corr, calc_errors=False):
     err_one_time_corr = np.zeros((two_time_corr.shape[0], two_time_corr.shape[2]))
     for i, g in enumerate(two_time_corr):
         for j in range(g.shape[1]):
-            one_time_corr[i, j] = np.nanmean(np.diag(g, k=j))
+            diag_array = np.diag(g, k=j)
+            one_time_corr[i, j] = np.nanmean(diag_array)
             if calc_errors:
-                err_one_time_corr[i, j] = np.nanstd(np.diag(g, k=j)) / np.sqrt(
-                    len(np.diag(g, k=j))
+                err_one_time_corr[i, j] = np.nanstd(diag_array) / np.sqrt(
+                    len(diag_array)
                 )
     if calc_errors:
         return one_time_corr, err_one_time_corr
