@@ -940,7 +940,8 @@ def one_time_from_two_time(two_time_corr, calc_errors=False):
     """
 
     one_time_corr = np.zeros((two_time_corr.shape[0], two_time_corr.shape[2]))
-    err_one_time_corr = np.zeros((two_time_corr.shape[0], two_time_corr.shape[2]))
+    if calc_errors:
+        err_one_time_corr = np.zeros((two_time_corr.shape[0], two_time_corr.shape[2]))
     for i, g in enumerate(two_time_corr):
         for j in range(g.shape[1]):
             diag_array = np.diag(g, k=j)
