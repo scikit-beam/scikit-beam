@@ -228,7 +228,7 @@ def test_one_time_from_two_time():
     g2, lag_steps, _state = two_time_corr(roi, imgs, stack, num_buf, num_lev)
     g2_t, _ = multi_tau_auto_corr(num_lev, num_buf, roi, imgs)
 
-    one_time = one_time_from_two_time(g2)
+    one_time, error_one_time = one_time_from_two_time(g2, calc_errors=True)
     assert_array_almost_equal(
         one_time,
         np.array(
@@ -252,6 +252,17 @@ def test_one_time_from_two_time():
     assert_array_almost_equal(
         one_time[0].mean() / one_time[1].mean(),
         g2_t.T[0].mean() / g2_t.T[1].mean(),
+        decimal=2,
+    )
+
+    assert_array_almost_equal(
+        error_one_time[0][1:],
+        np.array(
+            [
+                np.std(np.diagonal(g2[0], offset=x)) / np.sqrt(x)
+                for x in range(1, g2[0].shape[0])
+            ]
+        ),
         decimal=2,
     )
 

@@ -915,29 +915,45 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     )
 
 
-def one_time_from_two_time(two_time_corr):
+def one_time_from_two_time(two_time_corr, calc_errors=False):
     """
     This will provide the one-time correlation data from two-time
-    correlation data.
+    correlation data. An estimator for errors can be calculated
+    according to the central limit theorem.
 
     Parameters
     ----------
     two_time_corr : array
         matrix of two time correlation
         shape (number of labels(ROI's), number of frames, number of frames)
+    calc_errors: boolean
+        True to calculate error bars, False to not calculate error bars
 
     Returns
     -------
     one_time_corr : array
         matrix of one time correlation
         shape (number of labels(ROI's), number of frames)
+    (optional, if calc_errors=True) err_one_time_corr: array
+        matrix of errors for one time correlation
+        shape (number of labels(ROI's), number of frames)
     """
 
     one_time_corr = np.zeros((two_time_corr.shape[0], two_time_corr.shape[2]))
+    if calc_errors:
+        err_one_time_corr = np.zeros((two_time_corr.shape[0], two_time_corr.shape[2]))
     for i, g in enumerate(two_time_corr):
         for j in range(g.shape[1]):
-            one_time_corr[i, j] = np.nanmean(np.diag(g, k=j))
-    return one_time_corr
+            diag_array = np.diag(g, k=j)
+            one_time_corr[i, j] = np.nanmean(diag_array)
+            if calc_errors:
+                err_one_time_corr[i, j] = np.nanstd(diag_array) / np.sqrt(
+                    len(diag_array)
+                )
+    if calc_errors:
+        return one_time_corr, err_one_time_corr
+    else:
+        return one_time_corr
 
 
 class CrossCorrelator:
