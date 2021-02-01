@@ -5,6 +5,7 @@ from xraylib import SymbolToAtomicNumber
 from skbeam.core.fitting.xrf_model import get_line_energy
 from skbeam.core.fitting.xrf_model import K_LINE, L_LINE, M_LINE
 
+
 @pytest.mark.parametrize("elemental_line, energy_expected", [
     ("Ca_K", 3.6917),
     ("Ca_Ka", 3.6917),
