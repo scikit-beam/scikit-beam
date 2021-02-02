@@ -1,7 +1,9 @@
 import pytest
 import numpy.testing as npt
+from xraylib import SymbolToAtomicNumber
 
 from skbeam.core.fitting.xrf_model import get_line_energy
+from skbeam.core.fitting.xrf_model import K_LINE, L_LINE, M_LINE
 
 
 @pytest.mark.parametrize("elemental_line, energy_expected", [
@@ -28,3 +30,25 @@ def test_get_line_energy(elemental_line, energy_expected):
     energy = get_line_energy(elemental_line)
     npt.assert_almost_equal(energy, energy_expected,
                             err_msg="Energy doesn't match expected")
+
+
+def test_K_L_M_lines():
+    """
+    Test the lists of supported emission lines.
+    """
+    lines = K_LINE + L_LINE + M_LINE
+
+    # Check that all lines are unique
+    assert len(lines) == len(set(lines))
+
+    for line in lines:
+        element, type = line.split('_')
+        # Check emission line name
+        assert type in ('K', 'L', 'M')
+        # Check that the element is supported
+        try:
+            # Returns the number > 0 if successful. May return 0 (xraylib 3) or
+            # raise an exception (xraylib 4) if element is not recognized.
+            assert SymbolToAtomicNumber(element) > 0
+        except ValueError as ex:
+            assert False, f"{ex}: '{element}' (emission line: '{line}')"
