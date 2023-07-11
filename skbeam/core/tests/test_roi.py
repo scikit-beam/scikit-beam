@@ -36,6 +36,7 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 import numpy as np
+import pytest
 from skbeam.core import roi
 from skbeam.core import utils
 import itertools
@@ -397,14 +398,18 @@ def test_lines():
                   ([10, 12, 30], [30, 45, 50, 256]), shape)
 
 
-def test_auto_find_center_rings():
-
+@pytest.mark.parametrize("rgb_image", [True, False])
+def test_auto_find_center_rings(rgb_image):
     x = np.linspace(-5, 5, 200)
     X, Y = np.meshgrid(x, x)
     image = 100 * np.cos(np.sqrt(x**2 + Y**2))**2 + 50
 
-    center, image, radii = roi.auto_find_center_rings(image, sigma=20,
-                                                      no_rings=2)
+    if rgb_image:
+        image_shape = image.shape
+        image = np.reshape(image, newshape=[*image_shape, 1])
+        image = np.broadcast_to(image, shape=[*image_shape, 3])
+
+    center, image, radii = roi.auto_find_center_rings(image, sigma=20, no_rings=2)
 
     assert_equal((99, 99), center)
     assert_array_equal(41., np.round(radii[0]))

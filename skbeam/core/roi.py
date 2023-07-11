@@ -707,7 +707,7 @@ def auto_find_center_rings(avg_img, sigma=1, no_rings=4, min_samples=3,
     Parameters
     ----------
     avg_img : 2D array
-        shape of the image
+        2D (grayscale) or 3D (RGB) array. The last dimension of RGB image must be 3.
     sigma : float, optional
         Standard deviation of the Gaussian filter.
     no_rings : int, optional
@@ -736,7 +736,12 @@ def auto_find_center_rings(avg_img, sigma=1, no_rings=4, min_samples=3,
     automatically find the center and the most intense rings.
     """
 
-    image = img_as_float(color.rgb2gray(avg_img))
+    if avg_img.ndim == 3:
+        image_tmp = color.rgb2gray(avg_img)
+    else:
+        image_tmp = avg_img
+    image = img_as_float(image_tmp, force_copy=True)
+
     edges = feature.canny(image, sigma)
     coords = np.column_stack(np.nonzero(edges))
     edge_pts_xy = coords[:, ::-1]
