@@ -172,8 +172,8 @@ def snip_method(spectrum,
                            np.max([xmin, 0]),
                            np.min([xmax, n_background - 1]))
 
-        temp = (background[lo_index.astype(np.int)] +
-                background[hi_index.astype(np.int)]) / 2.
+        temp = (background[lo_index.astype(np.int64)] +
+                background[hi_index.astype(np.int64)]) / 2.
 
         bg_index = background > temp
         background[bg_index] = temp[bg_index]
@@ -189,8 +189,8 @@ def snip_method(spectrum,
                            np.max([xmin, 0]),
                            np.min([xmax, n_background - 1]))
 
-        temp = (background[lo_index.astype(np.int)] +
-                background[hi_index.astype(np.int)]) / 2.
+        temp = (background[lo_index.astype(np.int64)] +
+                background[hi_index.astype(np.int64)]) / 2.
 
         bg_index = background > temp
         background[bg_index] = temp[bg_index]

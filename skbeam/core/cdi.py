@@ -63,7 +63,7 @@ def _dist(dims):
         of the array of shape `dims`
     """
     dist_sum = []
-    shape = np.ones(len(dims), dtype=np.int)
+    shape = np.ones(len(dims), dtype=np.int64)
     for idx, d in enumerate(dims):
         vec = (np.arange(d) - d // 2) ** 2
         shape[idx] = -1

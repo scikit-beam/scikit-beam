@@ -366,8 +366,8 @@ def test_bars_boxes():
     v_label_array = roi.bar(edges, shape, horizontal=False)
     w_edges = [[5, 7], [1, 2]]
 
-    assert_array_equal(h_label_array[3, :], np.ones((10,), dtype=np.int))
-    assert_array_equal(v_label_array[:, 3], np.ones((10,), dtype=np.int))
+    assert_array_equal(h_label_array[3, :], np.ones((10,), dtype=np.int64))
+    assert_array_equal(v_label_array[:, 3], np.ones((10,), dtype=np.int64))
     assert_array_equal(np.unique(h_label_array)[1:], np.array([1, 2]))
     assert_array_equal(np.unique(v_label_array)[1:], np.array([1, 2]))
     assert_raises(ValueError, roi.bar, w_edges, shape)
