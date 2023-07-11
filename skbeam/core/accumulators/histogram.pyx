@@ -224,7 +224,7 @@ class Histogram:
         # distribute coordinates in each dimension according to their
         # numerical type.  follow the same order as in numtypes.
         for x in coords:
-            if x.dtype == np.int:
+            if x.dtype in (int, np.int32, np.int64):
                 aint_ptr[aint_count] = <np.int_t*> _getarrayptr(x)
                 aint_count += 1
             elif x.dtype == np.float64:
