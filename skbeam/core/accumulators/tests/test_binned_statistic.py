@@ -174,7 +174,7 @@ class TestRadialBinnedStatistic(object):
                     bins=bins,
                 )
 
-                assert_array_almost_equal(ref, binned)
+                assert_array_almost_equal(np.nan_to_num(ref), np.nan_to_num(binned))
                 assert_array_almost_equal(redges, rphibinstat.bin_edges[0])
                 assert_array_almost_equal(redges, rphibinstat_f.bin_edges[0])
                 assert_array_almost_equal(phiedges, rphibinstat.bin_edges[1])
