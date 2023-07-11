@@ -132,7 +132,7 @@ def snip_method(spectrum,
     background = np.array(spectrum)
     n_background = background.size
 
-    energy = np.arange(n_background, dtype=np.float)
+    energy = np.arange(n_background, dtype=np.float64)
 
     if spectral_binning is not None:
         energy = energy * spectral_binning
