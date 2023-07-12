@@ -3,7 +3,7 @@ import numpy as np
 from skbeam.core import roi
 import numpy.random
 import skimage.draw as skd
-from scipy.ndimage.morphology import binary_dilation
+from scipy.ndimage import binary_dilation
 import skbeam.core.image as nimage
 import pytest
 

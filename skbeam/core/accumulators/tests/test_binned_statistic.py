@@ -16,7 +16,7 @@ stats_list = [('mean', np.mean), ('median', np.median), ('count', len),
 class TestRadialBinnedStatistic(object):
     oscillation_rate = 10.0
 
-    def setup(self):
+    def setup_method(self):
 
         # Create test image - a sinc function.
         # Integrating in phi will produce sin(x)
