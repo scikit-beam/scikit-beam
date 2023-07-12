@@ -41,7 +41,7 @@ simple shapes such as rectangles and concentric circles.
 from __future__ import absolute_import, division, print_function
 
 import collections
-import scipy.ndimage.measurements as ndim
+from scipy import ndimage
 from skimage.draw import line
 from skimage import img_as_float, feature, color, draw
 from skimage.measure import ransac, CircleModel
@@ -315,7 +315,7 @@ def roi_max_counts(images_sets, label_array):
     max_cts = 0
     for img_set in images_sets:
         for img in img_set:
-            max_cts = max(max_cts, ndim.maximum(img, label_array))
+            max_cts = max(max_cts, ndimage.maximum(img, label_array))
     return max_cts
 
 
@@ -401,7 +401,7 @@ def mean_intensity(images, labeled_array, index=None):
     mean_intensity = np.zeros((images.shape[0], len(index)))
     for n, img in enumerate(images):
         # use a mean that is mask-aware
-        mean_intensity[n] = ndim.mean(img, labeled_array, index=index)
+        mean_intensity[n] = ndimage.mean(img, labeled_array, index=index)
     return mean_intensity, index
 
 
