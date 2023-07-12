@@ -9,14 +9,13 @@ jobs:
   build:
     env:
       DISPLAY: ":99.0"  # arbitrary
-      # GSETTINGS_SCHEMA_DIR_CONDA_BACKUP is somehow related to the following issue https://github.com/conda/conda/issues/9966
       GSETTINGS_SCHEMA_DIR_CONDA_BACKUP: "/usr/share/miniconda/envs/testenv/share/glib-2.0/schemas"
 
     strategy:
       matrix:
         host-os: ["ubuntu-latest", "macos-latest", "windows-latest"]
         python-version: ["3.9", "3.10", "3.11"]
-        numpy-version: ["1.21", "1.24"]
+        numpy-version: ["1.21", "1.24", "1.25"]
         include:
           - host-os: "ubuntu-latest"
             conda-mamba: "mamba"
@@ -24,17 +23,14 @@ jobs:
             conda-mamba: "mamba"
           - host-os: "windows-latest"
             conda-mamba: "conda"
+        exclude:
+          - python-version: "3.11"
+            numpy-version: "1.21"
+          - host-os: "windows-latest"
+            numpy-version: "1.21"
       fail-fast: false
 
     runs-on: ${{ matrix.host-os }}
-
-    # Note: Services are based on docker containers and would run only on Linux
-    #    Leave the item here for reference.
-    # services:
-    #   mongodb:
-    #     image: mongo
-    #     ports:
-    #     - 27017:27017
 
     defaults:
       run:
@@ -47,7 +43,7 @@ jobs:
       uses: actions/setup-python@v2
       with:
         # This step is not expected to influence the test, since the test is run in Conda environment
-        python-version: 3.9
+        python-version: "3.10"
 
     - uses: conda-incubator/setup-miniconda@v2
       with:
@@ -66,18 +62,6 @@ jobs:
         sudo apt-get update
         # sudo apt-get install -y xvfb herbstluftwm
 
-    # - name: Start 'xvfb'
-    #   if: runner.os == 'Linux'
-    #   run: |
-    #     sudo /sbin/start-stop-daemon --start --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX +render -noreset
-    #     sleep 3
-
-    # - name:  Start 'herbstluftwm'
-    #   if: runner.os == 'Linux'
-    #   run: |
-    #     herbstluftwm &
-    #     sleep 1
-
     - name: Install Conda packages
       run: |
         set -vxeo pipefail
@@ -87,7 +71,6 @@ jobs:
         ${{ matrix.conda-mamba }} install -y \
           python=${{ matrix.python-version }} \
           numpy=${{ matrix.numpy-version }} \
-          numba \
           xraylib \
           pip \
           -c conda-forge
@@ -95,28 +78,18 @@ jobs:
         conda list
         pip list
 
-    # - name: Install Conda packages (Windows and OSX)
-    #   if: runner.os != 'Linux'
-    #   run: |
-    #     set -vxeo pipefail
-
-    #     # There are issues in building wheels for pystackreg>0.2.2 on OSX, so install pystackreg from CF
-    #     ${{ matrix.conda-mamba }} install -y pystackreg -c conda-forge
-
-    #     conda list
-    #     pip list
-
     - name: Install PyPI packages
       run: |
         set -vxeuo pipefail
-
-        # ${{ matrix.conda-mamba }} install -y pystackreg -c conda-forge  # Some issue with pystackreg from PyPI
 
         # pip install --upgrade pip setuptools
         pip install codecov
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
-        pip install .
+
+        # python setup.py install build_ext -i
+        python setup.py build_ext -i
+        python setup.py install --single-version-externally-managed --record=record.txt
 
         conda list
         pip list
