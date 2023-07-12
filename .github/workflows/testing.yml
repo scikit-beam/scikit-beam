@@ -1,0 +1,129 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+
+  build:
+    env:
+      DISPLAY: ":99.0"  # arbitrary
+      # GSETTINGS_SCHEMA_DIR_CONDA_BACKUP is somehow related to the following issue https://github.com/conda/conda/issues/9966
+      GSETTINGS_SCHEMA_DIR_CONDA_BACKUP: "/usr/share/miniconda/envs/testenv/share/glib-2.0/schemas"
+
+    strategy:
+      matrix:
+        host-os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+        python-version: ["3.9", "3.10", "3.11"]
+        numpy-version: ["1.21", "1.24"]
+        include:
+          - host-os: "ubuntu-latest"
+            conda-mamba: "mamba"
+          - host-os: "macos-latest"
+            conda-mamba: "mamba"
+          - host-os: "windows-latest"
+            conda-mamba: "conda"
+      fail-fast: false
+
+    runs-on: ${{ matrix.host-os }}
+
+    # Note: Services are based on docker containers and would run only on Linux
+    #    Leave the item here for reference.
+    # services:
+    #   mongodb:
+    #     image: mongo
+    #     ports:
+    #     - 27017:27017
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        # This step is not expected to influence the test, since the test is run in Conda environment
+        python-version: 3.9
+
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        channels: conda-forge
+        channel-priority: flexible
+        auto-update-conda: true
+        show-channel-urls: true
+        allow-softlinks: true
+        auto-activate-base: false
+        activate-environment: testenv
+        use-only-tar-bz2: false
+
+    - name: Install Linux libraries
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        # sudo apt-get install -y xvfb herbstluftwm
+
+    # - name: Start 'xvfb'
+    #   if: runner.os == 'Linux'
+    #   run: |
+    #     sudo /sbin/start-stop-daemon --start --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX +render -noreset
+    #     sleep 3
+
+    # - name:  Start 'herbstluftwm'
+    #   if: runner.os == 'Linux'
+    #   run: |
+    #     herbstluftwm &
+    #     sleep 1
+
+    - name: Install Conda packages
+      run: |
+        set -vxeo pipefail
+
+        conda install mamba -n base -c conda-forge
+
+        ${{ matrix.conda-mamba }} install -y \
+          python=${{ matrix.python-version }} \
+          numpy=${{ matrix.numpy-version }} \
+          numba \
+          xraylib \
+          pip \
+          -c conda-forge
+
+        conda list
+        pip list
+
+    # - name: Install Conda packages (Windows and OSX)
+    #   if: runner.os != 'Linux'
+    #   run: |
+    #     set -vxeo pipefail
+
+    #     # There are issues in building wheels for pystackreg>0.2.2 on OSX, so install pystackreg from CF
+    #     ${{ matrix.conda-mamba }} install -y pystackreg -c conda-forge
+
+    #     conda list
+    #     pip list
+
+    - name: Install PyPI packages
+      run: |
+        set -vxeuo pipefail
+
+        # ${{ matrix.conda-mamba }} install -y pystackreg -c conda-forge  # Some issue with pystackreg from PyPI
+
+        # pip install --upgrade pip setuptools
+        pip install codecov
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+        pip install .
+
+        conda list
+        pip list
+        python --version
+
+    - name: Test with pytest
+      run: |
+        set -vxeuo pipefail
+        coverage run -m pytest -vvv
+        coverage report
