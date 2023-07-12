@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.10]
+        python-version: ["3.10"]
       fail-fast: false
 
     steps:
@@ -24,10 +24,21 @@ jobs:
         # installation problems if out of date.
         python -m pip install --upgrade pip setuptools numpy
 
-        pip install .
         pip install -r requirements-dev.txt
-        pip install -r requirements-docs.txt
+        pip install -r requirements-doc.txt
+        pip install .
+
+        # # python setup.py install build_ext -i
+        # python setup.py build_ext -i
+        # python setup.py install --single-version-externally-managed --record=record.txt
+
         pip list
     - name: Build Docs
       run: |
-        make -C docs/ html
+        pip install -r requirements-doc.txt
+        pushd ../
+        git clone https://github.com/scikit-beam/scikit-beam-examples.git
+        popd
+        pushd doc
+        bash build_docs.sh
+        popd
