@@ -40,7 +40,7 @@ from __future__ import absolute_import, division, print_function
 from collections.abc import Mapping
 import logging
 
-from distutils.version import LooseVersion
+from packaging import version
 import numpy as np
 import six
 
@@ -84,7 +84,7 @@ if xraylib is None:
     pass
 else:
     xraylib.XRayInit()
-    if LooseVersion(xraylib.__version__) < LooseVersion("4.0.0"):
+    if version.parse(xraylib.__version__) < version.parse("4.0.0"):
         xraylib.SetErrorMessages(0)
 
     line_list = [xraylib.KA1_LINE, xraylib.KA2_LINE, xraylib.KA3_LINE,
