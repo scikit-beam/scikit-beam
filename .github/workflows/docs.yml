@@ -39,6 +39,6 @@ jobs:
         pushd ../
         git clone https://github.com/scikit-beam/scikit-beam-examples.git
         popd
-        pushd doc
+        pushd docs
         bash build_docs.sh
         popd

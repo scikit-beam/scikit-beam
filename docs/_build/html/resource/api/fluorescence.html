@@ -1,0 +1,570 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>fluorescence Module &#8212; scikit-beam 0.0.24.post14.dev0+g182b92e documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Try the development version" href="../../development/workflow/get_devel_version.html" />
+    <link rel="prev" title="diffraction Module" href="diffraction.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-skbeam.fluorescence">
+<span id="fluorescence-module"></span><h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">fluorescence</span></code> Module<a class="headerlink" href="#module-skbeam.fluorescence" title="Permalink to this heading">¶</a></h1>
+<p>This module creates a namespace for X-Ray Fluorescence</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="skbeam.fluorescence.ComptonModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skbeam.fluorescence.</span></span><span class="sig-name descname"><span class="pre">ComptonModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.fluorescence.ComptonModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Wrap the compton function for fitting within lmfit framework</p>
+<p>Model compton peak, which is generated as an inelastic peak and always
+stays to the left of elastic peak on the spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>energy value</p>
+</dd>
+<dt><strong>compton_amplitude</strong><span class="classifier">float</span></dt><dd><p>area for gaussian peak, gaussian step and gaussian tail functions</p>
+</dd>
+<dt><strong>coherent_sct_energy</strong><span class="classifier">float</span></dt><dd><p>incident energy</p>
+</dd>
+<dt><strong>fwhm_offset</strong><span class="classifier">float</span></dt><dd><p>global fitting parameter for peak width</p>
+</dd>
+<dt><strong>fwhm_fanoprime</strong><span class="classifier">float</span></dt><dd><p>global fitting parameter for peak width</p>
+</dd>
+<dt><strong>e_offset</strong><span class="classifier">float</span></dt><dd><p>offset of energy calibration</p>
+</dd>
+<dt><strong>e_linear</strong><span class="classifier">float</span></dt><dd><p>linear coefficient in energy calibration</p>
+</dd>
+<dt><strong>e_quadratic</strong><span class="classifier">float</span></dt><dd><p>quadratic coefficient in energy calibration</p>
+</dd>
+<dt><strong>compton_angle</strong><span class="classifier">float</span></dt><dd><p>compton angle in degree</p>
+</dd>
+<dt><strong>compton_fwhm_corr</strong><span class="classifier">float</span></dt><dd><p>correction factor on peak width</p>
+</dd>
+<dt><strong>compton_f_step</strong><span class="classifier">float</span></dt><dd><p>weight factor of the gaussian step function</p>
+</dd>
+<dt><strong>compton_f_tail</strong><span class="classifier">float</span></dt><dd><p>weight factor of gaussian tail on lower side</p>
+</dd>
+<dt><strong>compton_gamma</strong><span class="classifier">float</span></dt><dd><p>normalization factor of gaussian tail on lower side</p>
+</dd>
+<dt><strong>compton_hi_f_tail</strong><span class="classifier">float</span></dt><dd><p>weight factor of gaussian tail on higher side</p>
+</dd>
+<dt><strong>compton_hi_gamma</strong><span class="classifier">float</span></dt><dd><p>normalization factor of gaussian tail on higher side</p>
+</dd>
+<dt><strong>epsilon</strong><span class="classifier">float</span></dt><dd><p>energy to create a hole-electron pair
+for Ge 2.96, for Si 3.61 at 300K
+needs to double check this value</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>counts</strong><span class="classifier">array</span></dt><dd><p>compton peak</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<div role="list" class="citation-list">
+<div class="citation" id="r3696c6acfa74-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>M. Van Gysel etc, “Description of Compton peaks in energy-dispersive
+x-ray fluorescence spectra”, X-Ray Spectrometry, vol. 32, pp. 139-147,
+2003.</p>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="skbeam.fluorescence.ElasticModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skbeam.fluorescence.</span></span><span class="sig-name descname"><span class="pre">ElasticModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.fluorescence.ElasticModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Wrap the elastic function for fitting within lmfit framework
+Model of elastic peak in X-Ray fluorescence</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>energy value</p>
+</dd>
+<dt><strong>coherent_sct_amplitude</strong><span class="classifier">float</span></dt><dd><p>area of elastic peak</p>
+</dd>
+<dt><strong>coherent_sct_energy</strong><span class="classifier">float</span></dt><dd><p>incident energy</p>
+</dd>
+<dt><strong>fwhm_offset</strong><span class="classifier">float</span></dt><dd><p>global fitting parameter for peak width</p>
+</dd>
+<dt><strong>fwhm_fanoprime</strong><span class="classifier">float</span></dt><dd><p>global fitting parameter for peak width</p>
+</dd>
+<dt><strong>e_offset</strong><span class="classifier">float</span></dt><dd><p>offset of energy calibration</p>
+</dd>
+<dt><strong>e_linear</strong><span class="classifier">float</span></dt><dd><p>linear coefficient in energy calibration</p>
+</dd>
+<dt><strong>e_quadratic</strong><span class="classifier">float</span></dt><dd><p>quadratic coefficient in energy calibration</p>
+</dd>
+<dt><strong>epsilon</strong><span class="classifier">float</span></dt><dd><p>energy to create a hole-electron pair
+for Ge 2.96, for Si 3.61 at 300K
+needs to double check this value</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>value</strong><span class="classifier">array</span></dt><dd><p>elastic peak</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="skbeam.fluorescence.Lorentzian2Model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skbeam.fluorescence.</span></span><span class="sig-name descname"><span class="pre">Lorentzian2Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.fluorescence.Lorentzian2Model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Wrap the lorentzian2 function for fitting within lmfit framework
+1-d lorentzian squared profile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>independent variable</p>
+</dd>
+<dt><strong>area</strong><span class="classifier">float</span></dt><dd><p>area of lorentzian squared peak,
+If area is set as 1, the integral is unity.</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>center position</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>standard deviation</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="skbeam.fluorescence.XrfElement">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skbeam.fluorescence.</span></span><span class="sig-name descname"><span class="pre">XrfElement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.fluorescence.XrfElement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="core/_as_gen/skbeam.core.constants.basic.BasicElement.html#skbeam.core.constants.basic.BasicElement" title="skbeam.core.constants.basic.BasicElement"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasicElement</span></code></a></p>
+<p>Object to return all the elemental information related to fluorescence</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>element</strong><span class="classifier">str or int</span></dt><dd><p>Element symbol, name or atomic number (‘Zinc’, ‘Zn’ or 30)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create an `Element` object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="s1">&#39;Zn&#39;</span><span class="p">)</span> <span class="c1"># or e = Element(30)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># get the atomic mass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">mass</span>
+<span class="go">65.37</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># get the density in grams / cm^3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">density</span>
+<span class="go">7.14</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skbeam.core.constants.xrf</span> <span class="kn">import</span> <span class="n">XrfElement</span> <span class="k">as</span> <span class="n">Element</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="s1">&#39;Zn&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get the emission energy for the Kα1 line.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">emission_line</span><span class="p">[</span><span class="s1">&#39;Ka1&#39;</span><span class="p">]</span>
+<span class="go">8.638900756835938</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Cross section [barns/atom] for Kα1 line at 10 keV incident energy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">csb</span><span class="p">(</span><span class="mi">10</span><span class="p">)[</span><span class="s1">&#39;Ka1&#39;</span><span class="p">]</span>
+<span class="go">5987.081587605121</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Cross section [cm2/g] for Kα1 line at 10 keV incident energy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">cs</span><span class="p">(</span><span class="mi">10</span><span class="p">)[</span><span class="s1">&#39;Ka1&#39;</span><span class="p">]</span>
+<span class="go">55.146912259583296</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># fluorescence yield for K shell</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">fluor_yield</span><span class="p">[</span><span class="s1">&#39;K&#39;</span><span class="p">]</span>
+<span class="go">0.46936899423599243</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Find all emission lines within with in the range [9.5, 10.5]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># keV with an incident energy of 12 KeV.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+<span class="go">{&#39;kb1&#39;: 9.571999549865723}</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># List all of the known emission lines</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">emission_line</span><span class="o">.</span><span class="n">all</span> <span class="c1"># list all the emission lines</span>
+<span class="go">[(&#39;ka1&#39;, 8.638900756835938),</span>
+<span class="go"> (&#39;ka2&#39;, 8.615799903869629),</span>
+<span class="go"> (&#39;kb1&#39;, 9.571999549865723),</span>
+<span class="go"> (&#39;kb2&#39;, 0.0),</span>
+<span class="go"> (&#39;la1&#39;, 1.0116000175476074),</span>
+<span class="go"> (&#39;la2&#39;, 1.0116000175476074),</span>
+<span class="go"> (&#39;lb1&#39;, 1.0346999168395996),</span>
+<span class="go"> (&#39;lb2&#39;, 0.0),</span>
+<span class="go"> (&#39;lb3&#39;, 1.1069999933242798),</span>
+<span class="go"> (&#39;lb4&#39;, 1.1069999933242798),</span>
+<span class="go"> (&#39;lb5&#39;, 0.0),</span>
+<span class="go"> (&#39;lg1&#39;, 0.0),</span>
+<span class="go"> (&#39;lg2&#39;, 0.0),</span>
+<span class="go"> (&#39;lg3&#39;, 0.0),</span>
+<span class="go"> (&#39;lg4&#39;, 0.0),</span>
+<span class="go"> (&#39;ll&#39;, 0.8837999701499939),</span>
+<span class="go"> (&#39;ln&#39;, 0.9069000482559204),</span>
+<span class="go"> (&#39;ma1&#39;, 0.0),</span>
+<span class="go"> (&#39;ma2&#39;, 0.0),</span>
+<span class="go"> (&#39;mb&#39;, 0.0),</span>
+<span class="go"> (&#39;mg&#39;, 0.0)]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># List all of the known cross sections [barns/atom]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">csb</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">all</span>
+<span class="go">[(&#39;ka1&#39;, 5987.081587605121),</span>
+<span class="go"> (&#39;ka2&#39;, 3076.4914784265347),</span>
+<span class="go"> (&#39;kb1&#39;, 821.0572112842519),</span>
+<span class="go"> (&#39;kb2&#39;, 0.0),</span>
+<span class="go"> (&#39;la1&#39;, 188.06856034970164),</span>
+<span class="go"> (&#39;la2&#39;, 21.213083101234524),</span>
+<span class="go"> (&#39;lb1&#39;, 94.10717616654374),</span>
+<span class="go"> (&#39;lb2&#39;, 0.0),</span>
+<span class="go"> (&#39;lb3&#39;, 6.2207984090565),</span>
+<span class="go"> (&#39;lb4&#39;, 3.3964315566384187),</span>
+<span class="go"> (&#39;lb5&#39;, 0.0),</span>
+<span class="go"> (&#39;lg1&#39;, 0.0),</span>
+<span class="go"> (&#39;lg2&#39;, 0.0),</span>
+<span class="go"> (&#39;lg3&#39;, 0.0),</span>
+<span class="go"> (&#39;lg4&#39;, 0.0),</span>
+<span class="go"> (&#39;ll&#39;, 11.809765990232954),</span>
+<span class="go"> (&#39;ln&#39;, 4.8441078404731766),</span>
+<span class="go"> (&#39;ma1&#39;, 0.0),</span>
+<span class="go"> (&#39;ma2&#39;, 0.0),</span>
+<span class="go"> (&#39;mb&#39;, 0.0),</span>
+<span class="go"> (&#39;mg&#39;, 0.0)]</span>
+</pre></div>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="skbeam.fluorescence.XrfElement.bind_energy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bind_energy</span></span><a class="headerlink" href="#skbeam.fluorescence.XrfElement.bind_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Binding energy, <cite>XrayLibWrap</cite></p>
+<p>Binding energy is a measure of the energy required
+to free electrons from their atomic orbits.
+shell is string type and defined as “K”, “L1”.
+unit in KeV</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skbeam.fluorescence.XrfElement.cs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cs</span></span><a class="headerlink" href="#skbeam.fluorescence.XrfElement.cs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fluorescence cross section function, <cite>function</cite></p>
+<p>Returns a function of energy which returns the
+elemental cross section in cm2/g</p>
+<p>The signature of the function is</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x_section</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">enery</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <cite>energy</cite> in in keV and <cite>x_section</cite> is in
+cm2/g</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skbeam.fluorescence.XrfElement.csb">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">csb</span></span><a class="headerlink" href="#skbeam.fluorescence.XrfElement.csb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fluorescence cross section function, <cite>function</cite></p>
+<p>Returns a function of energy which returns the
+elemental cross section in barns/atom</p>
+<p>The signature of the function is</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x_section</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">enery</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <cite>energy</cite> in in keV and <cite>x_section</cite> is in
+barns/atom</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skbeam.fluorescence.XrfElement.emission_line">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">emission_line</span></span><a class="headerlink" href="#skbeam.fluorescence.XrfElement.emission_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emission line information, <cite>XrayLibWrap</cite></p>
+<p>Emission line can be used as a unique characteristic
+for qualitative identification of the element.
+line is string type and defined as ‘Ka1’, ‘Kb1’.
+unit in KeV</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skbeam.fluorescence.XrfElement.fluor_yield">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fluor_yield</span></span><a class="headerlink" href="#skbeam.fluorescence.XrfElement.fluor_yield" title="Permalink to this definition">¶</a></dt>
+<dd><p>fluorescence quantum yield, <cite>XrayLibWrap</cite></p>
+<p>The fluorescence quantum yield gives the efficiency
+of the fluorescence process, and is defined as the ratio of the
+number of photons emitted to the number of photons absorbed.
+shell is string type and defined as “K”, “L1”.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skbeam.fluorescence.XrfElement.jump_factor">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">jump_factor</span></span><a class="headerlink" href="#skbeam.fluorescence.XrfElement.jump_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jump Factor, <cite>XrayLibWrap</cite></p>
+<p>Absorption jump factor is defined as the fraction
+of the total absorption that is associated with
+a given shell rather than for any other shell.
+shell is string type and defined as “K”, “L1”.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skbeam.fluorescence.XrfElement.line_near">
+<span class="sig-name descname"><span class="pre">line_near</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_e</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">incident_energy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.fluorescence.XrfElement.line_near" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find possible emission lines given the element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>energy</strong><span class="classifier">float</span></dt><dd><p>Energy value to search for</p>
+</dd>
+<dt><strong>delta_e</strong><span class="classifier">float</span></dt><dd><p>Define search range (energy - delta_e, energy + delta_e)</p>
+</dd>
+<dt><strong>incident_energy</strong><span class="classifier">float</span></dt><dd><p>incident energy of x-ray in KeV</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>dict</dt><dd><p>all possible emission lines</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.fluorescence.emission_line_search">
+<span class="sig-prename descclassname"><span class="pre">skbeam.fluorescence.</span></span><span class="sig-name descname"><span class="pre">emission_line_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line_e</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_e</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">incident_energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.fluorescence.emission_line_search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find elements which have an emission line near an energy</p>
+<p>This function returns a dict keyed on element type of all
+elements that have an emission line with in <cite>delta_e</cite> of
+<cite>line_e</cite> at the given x-ray energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>line_e</strong><span class="classifier">float</span></dt><dd><p>energy value to search for in KeV</p>
+</dd>
+<dt><strong>delta_e</strong><span class="classifier">float</span></dt><dd><p>difference compared to energy in KeV</p>
+</dd>
+<dt><strong>incident_energy</strong><span class="classifier">float</span></dt><dd><p>incident x-ray energy in KeV</p>
+</dd>
+<dt><strong>element_list</strong><span class="classifier">list, optional</span></dt><dd><p>List of elements to restrict search to. If no list is present,
+search on all elements.
+Element abbreviations can be any mix of upper and
+lower case, e.g., Hg, hG, hg, HG</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>lines_dict</strong><span class="classifier">dict</span></dt><dd><p>element and associate emission lines</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.fluorescence.snip_method">
+<span class="sig-prename descclassname"><span class="pre">skbeam.fluorescence.</span></span><span class="sig-name descname"><span class="pre">snip_method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectrum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_off</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_lin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_quad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4096</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.96</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decrease_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.4142135623730951</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectral_binning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">con_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter_num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.fluorescence.snip_method" title="Permalink to this definition">¶</a></dt>
+<dd><p>use snip algorithm to obtain background</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>spectrum</strong><span class="classifier">array</span></dt><dd><p>intensity spectrum</p>
+</dd>
+<dt><strong>e_off</strong><span class="classifier">float</span></dt><dd><p>energy calibration, such as e_off + e_lin * energy + e_quad * energy^2</p>
+</dd>
+<dt><strong>e_lin</strong><span class="classifier">float</span></dt><dd><p>energy calibration, such as e_off + e_lin * energy + e_quad * energy^2</p>
+</dd>
+<dt><strong>e_quad</strong><span class="classifier">float</span></dt><dd><p>energy calibration, such as e_off + e_lin * energy + e_quad * energy^2</p>
+</dd>
+<dt><strong>xmin</strong><span class="classifier">float, optional</span></dt><dd><p>smallest index to define the range</p>
+</dd>
+<dt><strong>xmax</strong><span class="classifier">float, optional</span></dt><dd><p>largest index to define the range</p>
+</dd>
+<dt><strong>epsilon</strong><span class="classifier">float, optional</span></dt><dd><p>energy to create a hole-electron pair
+for Ge 2.96, for Si 3.61 at 300K
+needs to double check this value</p>
+</dd>
+<dt><strong>width</strong><span class="classifier">int, optional</span></dt><dd><p>window size to adjust how much to shift background</p>
+</dd>
+<dt><strong>decrease_factor</strong><span class="classifier">float, optional</span></dt><dd><p>gradually decrease of window size, default as sqrt(2)</p>
+</dd>
+<dt><strong>spectral_binning</strong><span class="classifier">float, optional</span></dt><dd><p>bin the data into different size</p>
+</dd>
+<dt><strong>con_val</strong><span class="classifier">int, optional</span></dt><dd><p>size of scipy.signal.windows.boxcar to convolve the spectrum.</p>
+<p>Default value is controlled by the keys <cite>con_val_no_bin</cite>
+and <cite>con_val_bin</cite> in the defaults dictionary, depending
+on if spectral_binning is used or not</p>
+</dd>
+<dt><strong>iter_num</strong><span class="classifier">int, optional</span></dt><dd><p>Number of iterations.</p>
+<p>Default value is controlled by the keys <cite>iter_num_no_bin</cite>
+and <cite>iter_num_bin</cite> in the defaults dictionary, depending
+on if spectral_binning is used or not</p>
+</dd>
+<dt><strong>width_threshold</strong><span class="classifier">float, optional</span></dt><dd><p>stop point of the algorithm</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>background</strong><span class="classifier">array</span></dt><dd><p>output results with peak removed</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<div role="list" class="citation-list">
+<div class="citation" id="r60725a83ebb4-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>C.G. Ryan etc, “SNIP, a statistics-sensitive background
+treatment for the quantitative analysis of PIXE spectra in
+geoscience applications”, Nuclear Instruments and Methods in
+Physics Research Section B, vol. 34, 1998.</p>
+</div>
+</div>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Complete Reference (API)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#core">Core</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#domain-name-spaces">Domain name spaces</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="diffraction.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">diffraction</span></code> Module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">fluorescence</span></code> Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development/workflow/get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/workflow/maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Complete Reference (API)</a><ul>
+      <li>Previous: <a href="diffraction.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">diffraction</span></code> Module</a></li>
+      <li>Next: <a href="../../development/workflow/get_devel_version.html" title="next chapter">Try the development version</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../../_sources/resource/api/fluorescence.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -209,7 +209,7 @@ def calibrated_pixels_to_q(detector_size, pyfai_kwargs):
     for each pixel in the detector.
 
     Parameters
-    -----------
+    ----------
     detector_size : tuple
         2 element tuple defining the number of pixels in the detector. Order is
         (num_columns, num_rows)

@@ -1,0 +1,935 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>diffraction Module &#8212; scikit-beam 0.0.24.post14.dev0+g182b92e documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="fluorescence Module" href="fluorescence.html" />
+    <link rel="prev" title="core.mask Module" href="core/mask.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-skbeam.diffraction">
+<span id="diffraction-module"></span><h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">diffraction</span></code> Module<a class="headerlink" href="#module-skbeam.diffraction" title="Permalink to this heading">¶</a></h1>
+<p>This module creates a namespace for X-Ray Diffraction</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="skbeam.diffraction.BasicElement">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">BasicElement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Z</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.BasicElement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.5/library/functions.html#object" title="(in Python v3.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Object to return basic elemental information</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>element</strong><span class="classifier">str or int</span></dt><dd><p>Element symbol, name or atomic number (‘Zinc’, ‘Zn’ or 30)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create an `Element` object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="s1">&#39;Zn&#39;</span><span class="p">)</span> <span class="c1"># or e = Element(30)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># get the atomic mass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">mass</span>
+<span class="go">65.37</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># get the density in grams / cm^3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span><span class="o">.</span><span class="n">density</span>
+<span class="go">7.14</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>Z</strong><span class="classifier">int</span></dt><dd><p>Atomic number</p>
+</dd>
+<dt><strong>sym</strong><span class="classifier">str</span></dt><dd><p>Element symbol (Fe, Cr, etc.)</p>
+</dd>
+<dt><strong>name</strong><span class="classifier">str</span></dt><dd><p>Full element name (Iron, Chromium, etc.</p>
+</dd>
+<dt><strong>atomic_radius</strong><span class="classifier">float</span></dt><dd><p>AtomicRadius[A]</p>
+</dd>
+<dt><strong>covalent_radius</strong><span class="classifier">float</span></dt><dd><p>CovalentRadius[A]</p>
+</dd>
+<dt><strong>mass</strong><span class="classifier">float</span></dt><dd><p>AtomicMass</p>
+</dd>
+<dt><strong>bp</strong><span class="classifier">float</span></dt><dd><p>BoilingPoint[K]</p>
+</dd>
+<dt><strong>mp</strong><span class="classifier">float</span></dt><dd><p>MeltingPoint[K]</p>
+</dd>
+<dt><strong>density</strong><span class="classifier">float</span></dt><dd><p>Density[g/ccm]</p>
+</dd>
+<dt><strong>atomic_volume</strong><span class="classifier">float</span></dt><dd><p>AtomicVolume</p>
+</dd>
+<dt><strong>coherent_scattering_length</strong><span class="classifier">float</span></dt><dd><p>CoherentScatteringLength[1E-12cm]</p>
+</dd>
+<dt><strong>incoherent_crosssection</strong><span class="classifier">float</span></dt><dd><p>IncoherentX-section[barn]</p>
+</dd>
+<dt><strong>absorption</strong><span class="classifier">float</span></dt><dd><p>Absorption&#64;1.8A[barn]</p>
+</dd>
+<dt><strong>debye_temp</strong><span class="classifier">float</span></dt><dd><p>DebyeTemperature[K]</p>
+</dd>
+<dt><strong>thermal_conductivity</strong><span class="classifier">float</span></dt><dd><p>ThermalConductivity[W/cmK]</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="skbeam.diffraction.Lorentzian2Model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">Lorentzian2Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.Lorentzian2Model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></p>
+<p>Wrap the lorentzian2 function for fitting within lmfit framework
+1-d lorentzian squared profile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>independent variable</p>
+</dd>
+<dt><strong>area</strong><span class="classifier">float</span></dt><dd><p>area of lorentzian squared peak,
+If area is set as 1, the integral is unity.</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>center position</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>standard deviation</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.angle_grid">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">angle_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.angle_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a grid of angular positions.</p>
+<p>Read note for our conventions here – there be dragons!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>center</strong><span class="classifier">tuple</span></dt><dd><p>point in image where r=0; may be a float giving subpixel precision.
+Order is (rr, cc).</p>
+</dd>
+<dt><strong>shape: tuple</strong></dt><dd><p>Image shape which is used to determine the maximum extent of output
+pixel coordinates. Order is (rr, cc).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>agrid</strong><span class="classifier">array</span></dt><dd><p>angular position (in radians) of each array element in range [-pi, pi]</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p><span class="math notranslate nohighlight">\(\theta\)</span>, the counter-clockwise angle from the positive x axis,
+assuming the positive y-axis points upward.
+<span class="math notranslate nohighlight">\(\theta \el [-\pi, \pi]\)</span>.  In array indexing and the conventional
+axes for images (origin in upper left), positive y is downward.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.bin_1D">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">bin_1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.bin_1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bin the values in y based on their x-coordinates</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>position</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">array</span></dt><dd><p>intensity</p>
+</dd>
+<dt><strong>nx</strong><span class="classifier">integer, optional</span></dt><dd><p>number of bins to use defaults to default bin value</p>
+</dd>
+<dt><strong>min_x</strong><span class="classifier">float, optional</span></dt><dd><p>Left edge of first bin defaults to minimum value of x</p>
+</dd>
+<dt><strong>max_x</strong><span class="classifier">float, optional</span></dt><dd><p>Right edge of last bin defaults to maximum value of x</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>edges</strong><span class="classifier">array</span></dt><dd><p>edges of bins, length nx + 1</p>
+</dd>
+<dt><strong>val</strong><span class="classifier">array</span></dt><dd><p>sum of values in each bin, length nx</p>
+</dd>
+<dt><strong>count</strong><span class="classifier">array</span></dt><dd><p>The number of counts in each bin, length nx</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.bin_edges">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">bin_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">range_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.bin_edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate bin edges.  The last value in the returned array is
+the right edge of the last bin, the rest of the values are the
+left edges of each bin.</p>
+<p>If <cite>range_max</cite> is specified all bin edges will be less than or
+equal to it’s value.</p>
+<p>If <cite>range_min</cite> is specified all bin edges will be greater than
+or equal to it’s value</p>
+<p>If <cite>nbins</cite> is specified then there will be than number of bins and
+the returned array will have length <cite>nbins + 1</cite> (as the right most
+edge is included)</p>
+<p>If <cite>step</cite> is specified then bin width is approximately <cite>step</cite> (It is
+not exact due to the nature of floats). The arrays generated by
+<cite>np.cumsum(np.ones(nbins) * step)</cite> and <cite>np.arange(nbins) * step</cite> are
+not identical.  This function uses the second method in all cases
+where <cite>step</cite> is specified.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If the set <code class="code docutils literal notranslate"><span class="pre">(range_min,</span> <span class="pre">range_max,</span> <span class="pre">step)</span></code> is
+given there is no guarantee that <code class="code docutils literal notranslate"><span class="pre">range_max</span> <span class="pre">-</span> <span class="pre">range_min</span></code>
+is an integer multiple of <code class="code docutils literal notranslate"><span class="pre">step</span></code>.  In this case the left
+most bin edge is <code class="code docutils literal notranslate"><span class="pre">range_min</span></code> and the right most bin edge
+is less than <code class="code docutils literal notranslate"><span class="pre">range_max</span></code> and the distance between the
+right most edge and <code class="code docutils literal notranslate"><span class="pre">range_max</span></code> is not greater than
+<code class="code docutils literal notranslate"><span class="pre">step</span></code> (this is the same behavior as the built-in
+<code class="code docutils literal notranslate"><span class="pre">range()</span></code>).  It is not recommended to specify bins in this
+manner.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>range_min</strong><span class="classifier">float, optional</span></dt><dd><p>The minimum value that may be included as a bin edge</p>
+</dd>
+<dt><strong>range_max</strong><span class="classifier">float, optional</span></dt><dd><p>The maximum value that may be included as a bin edge</p>
+</dd>
+<dt><strong>nbins</strong><span class="classifier">int, optional</span></dt><dd><p>The number of bins, if specified the length of the returned
+value will be nbins + 1</p>
+</dd>
+<dt><strong>step</strong><span class="classifier">float, optional</span></dt><dd><p>The step between the bins</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>edges</strong><span class="classifier">np.array</span></dt><dd><p>An array of floats for the bin edges.  The last value is the
+right edge of the last bin.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.bin_edges_to_centers">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">bin_edges_to_centers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_edges</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.bin_edges_to_centers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function for turning a array of bin edges into
+an array of bin centers</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_edges</strong><span class="classifier">array-like</span></dt><dd><p>N + 1 values which are the left edges of N bins
+and the right edge of the last bin</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>centers</strong><span class="classifier">ndarray</span></dt><dd><p>A length N array giving the centers of the bins</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.d_to_q">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">d_to_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.d_to_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to convert <span class="math notranslate nohighlight">\(d\)</span> to <span class="math notranslate nohighlight">\(q\)</span>.
+The point of this function is to prevent fat-fingered typos.</p>
+<p>By definition the relationship is:</p>
+<div class="math notranslate nohighlight">
+\[d = \frac{2 \pi}{q}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>d</strong><span class="classifier">array</span></dt><dd><p>An array of d (plane) spacing</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>q</strong><span class="classifier">array</span></dt><dd><p>An array of q values in the inverse of the units of <code class="docutils literal notranslate"><span class="pre">d</span></code></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.estimate_d_blind">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">estimate_d_blind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_centers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ring_average</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_peak_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresh</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.estimate_d_blind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the sample-detector distance</p>
+<p>Given a radially integrated calibration image return an estimate for
+the sample-detector distance.  This function does not require a
+rough estimate of what d should be.</p>
+<p>For the peaks found the detector-sample distance is estimated via</p>
+<div class="math notranslate nohighlight">
+\[D = \frac{r}{\tan 2\theta}\]</div>
+<p>where <span class="math notranslate nohighlight">\(r\)</span> is the distance in mm from the calibrated center
+to the ring on the detector and <span class="math notranslate nohighlight">\(D\)</span> is the distance from
+the sample to the detector.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>name</strong><span class="classifier">str</span></dt><dd><p>The name of the calibration standard.  Used to look up the
+expected peak location</p>
+<p>Valid options: [‘Al2O3’, ‘CeO2’, ‘LaB6’, ‘Ni’, ‘Si’]</p>
+</dd>
+<dt><strong>wavelength</strong><span class="classifier">float</span></dt><dd><p>The wavelength of scattered x-ray in nm</p>
+</dd>
+<dt><strong>bin_centers</strong><span class="classifier">array</span></dt><dd><p>The distance from the calibrated center to the center of
+the ring’s annulus in mm</p>
+</dd>
+<dt><strong>ring_average</strong><span class="classifier">array</span></dt><dd><p>The average intensity in the given ring of a azimuthally integrated
+powder pattern.  In counts [arb]</p>
+</dd>
+<dt><strong>window_size</strong><span class="classifier">int</span></dt><dd><p>The number of elements on either side of a local maximum to
+use for locating and refining peaks.  Candidates are identified
+as a relative maximum in a window sized (2*window_size + 1) and
+the same window is used for fitting the peaks to refine the location.</p>
+</dd>
+<dt><strong>max_peak_count</strong><span class="classifier">int</span></dt><dd><p>Use at most this many peaks</p>
+</dd>
+<dt><strong>thresh</strong><span class="classifier">float</span></dt><dd><p>Fraction of maximum peak height</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>dist_sample</strong><span class="classifier">float</span></dt><dd><p>The detector-sample distance in mm.  This is the mean of the estimate
+from all of the peaks used.</p>
+</dd>
+<dt><strong>std_dist_sample</strong><span class="classifier">float</span></dt><dd><p>The standard deviation of d computed from the peaks used.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.gaussian">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.gaussian" title="Permalink to this definition">¶</a></dt>
+<dd><p>1 dimensional gaussian</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>independent variable</p>
+</dd>
+<dt><strong>area</strong><span class="classifier">float</span></dt><dd><p>Area of the normally distributed peak</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>center position</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>standard deviation</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.gaussian_tail">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">gaussian_tail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.gaussian_tail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use a gaussian tail function to simulate compton peak</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>data in x coordinate</p>
+</dd>
+<dt><strong>area</strong><span class="classifier">float</span></dt><dd><p>area of gauss tail function
+If area is set as 1, the integral is unity.</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>center position</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>control peak width</p>
+</dd>
+<dt><strong>gamma</strong><span class="classifier">float</span></dt><dd><p>normalization factor</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>counts</strong><span class="classifier">array</span></dt><dd><p>gaussian tail peak</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<div role="list" class="citation-list">
+<div class="citation" id="rdb934e211b42-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>Rene Van Grieken, “Handbook of X-Ray Spectrometry, Second Edition,
+(Practical Spectroscopy)”, CRC Press, 2 edition, pp. 182, 2007.</p>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.gausssian_step">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">gausssian_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peak_e</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.gausssian_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gauss step function is an important component in modeling compton peak.
+Use scipy erfc function. Please note erfc = 1-erf.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>data in x coordinate</p>
+</dd>
+<dt><strong>area</strong><span class="classifier">float</span></dt><dd><p>area of gauss step function</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>center position</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>standard deviation</p>
+</dd>
+<dt><strong>peak_e</strong><span class="classifier">float</span></dt><dd><p>emission energy</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>counts</strong><span class="classifier">array</span></dt><dd><p>gaussian step peak</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<div role="list" class="citation-list">
+<div class="citation" id="r3e62d7f2e8c8-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>Rene Van Grieken, “Handbook of X-Ray Spectrometry, Second Edition,
+(Practical Spectroscopy)”, CRC Press, 2 edition, pp. 182, 2007.</p>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.grid3d">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">grid3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_stack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.grid3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Grid irregularly spaced data points onto a regular grid via histogramming</p>
+<p>This function will process the set of reciprocal space values (q), the
+image stack (img_stack) and grid the image data based on the bounds
+provided, using defaults if none are provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>q</strong><span class="classifier">ndarray</span></dt><dd><p>(Qx, Qy, Qz) - HKL values - Nx3 array</p>
+</dd>
+<dt><strong>img_stack</strong><span class="classifier">ndarray</span></dt><dd><p>Intensity array of the images
+dimensions are: [num_img][num_rows][num_cols]</p>
+</dd>
+<dt><strong>nx</strong><span class="classifier">int, optional</span></dt><dd><p>Number of voxels along x</p>
+</dd>
+<dt><strong>ny</strong><span class="classifier">int, optional</span></dt><dd><p>Number of voxels along y</p>
+</dd>
+<dt><strong>nz</strong><span class="classifier">int, optional</span></dt><dd><p>Number of voxels along z</p>
+</dd>
+<dt><strong>xmin</strong><span class="classifier">float, optional</span></dt><dd><p>Minimum value along x. Defaults to smallest x value in q</p>
+</dd>
+<dt><strong>ymin</strong><span class="classifier">float, optional</span></dt><dd><p>Minimum value along y. Defaults to smallest y value in q</p>
+</dd>
+<dt><strong>zmin</strong><span class="classifier">float, optional</span></dt><dd><p>Minimum value along z. Defaults to smallest z value in q</p>
+</dd>
+<dt><strong>xmax</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum value along x. Defaults to largest x value in q</p>
+</dd>
+<dt><strong>ymax</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum value along y. Defaults to largest y value in q</p>
+</dd>
+<dt><strong>zmax</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum value along z. Defaults to largest z value in q</p>
+</dd>
+<dt><strong>binary_mask</strong><span class="classifier">ndarray, optional</span></dt><dd><p>The binary mask provides a mechanism to remove unwanted pixels
+from the images.
+Binary mask can be two different shapes.
+- 1: 2-D with binary_mask.shape == np.asarray(img_stack[0]).shape
+- 2: 3-D with binary_mask.shape == np.asarray(img_stack).shape</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>mean</strong><span class="classifier">ndarray</span></dt><dd><p>intensity grid.  The values in this grid are the
+mean of the values that fill with in the grid.</p>
+</dd>
+<dt><strong>occupancy</strong><span class="classifier">ndarray</span></dt><dd><p>The number of data points that fell in the grid.</p>
+</dd>
+<dt><strong>std_err</strong><span class="classifier">ndarray</span></dt><dd><p>This is the standard error of the value in the
+grid box.</p>
+</dd>
+<dt><strong>bounds</strong><span class="classifier">list</span></dt><dd><p>tuple of (min, max, step) for x, y, z in order: [x_bounds,
+y_bounds, z_bounds]</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.hkl_to_q">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">hkl_to_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hkl_arr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.hkl_to_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>This module compute the reciprocal space (q) values from known HKL array
+for each pixel of the detector for all the images</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>hkl_arr</strong><span class="classifier">ndarray</span></dt><dd><p>(Qx, Qy, Qz) - HKL array
+shape is [num_images * num_rows * num_columns][3]</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>q_val</strong><span class="classifier">ndarray</span></dt><dd><p>Reciprocal values for each pixel for all images
+shape is [num_images * num_rows * num_columns]</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.lorentzian">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">lorentzian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.lorentzian" title="Permalink to this definition">¶</a></dt>
+<dd><p>1 dimensional lorentzian</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>independent variable</p>
+</dd>
+<dt><strong>area</strong><span class="classifier">float</span></dt><dd><p>area of lorentzian peak,
+If area is set as 1, the integral is unity.</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>center position</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>standard deviation</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.lorentzian2">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">lorentzian2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.lorentzian2" title="Permalink to this definition">¶</a></dt>
+<dd><p>1-d lorentzian squared profile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>independent variable</p>
+</dd>
+<dt><strong>area</strong><span class="classifier">float</span></dt><dd><p>area of lorentzian squared peak,
+If area is set as 1, the integral is unity.</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>center position</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>standard deviation</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.process_to_q">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">process_to_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">setting_angles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrated_center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ub</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.process_to_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will compute the hkl values for all pixels in a shape specified by
+detector_size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>setting_angles</strong><span class="classifier">ndarray</span></dt><dd><p>six angles of all the images - Required shape is [num_images][6] and
+required type is something that can be cast to a 2D numpy array
+Angle order: delta, theta, chi, phi, mu, gamma (degrees)</p>
+</dd>
+<dt><strong>detector_size</strong><span class="classifier">tuple</span></dt><dd><p>2 element tuple defining the number of pixels in the detector. Order is
+(num_columns, num_rows)</p>
+</dd>
+<dt><strong>pixel_size</strong><span class="classifier">tuple</span></dt><dd><p>2 element tuple defining the size of each pixel in mm. Order is
+(column_pixel_size, row_pixel_size).  If not in mm, must be in the same
+units as <cite>dist_sample</cite></p>
+</dd>
+<dt><strong>calibrated_center</strong><span class="classifier">tuple</span></dt><dd><p>2 element tuple defining the center of the detector in pixels. Order
+is (column_center, row_center)(x y)</p>
+</dd>
+<dt><strong>dist_sample</strong><span class="classifier">float</span></dt><dd><p>distance from the sample to the detector (mm). If not in mm, must be
+in the same units as <cite>pixel_size</cite></p>
+</dd>
+<dt><strong>wavelength</strong><span class="classifier">float</span></dt><dd><p>wavelength of incident radiation (Angstroms)</p>
+</dd>
+<dt><strong>ub</strong><span class="classifier">ndarray</span></dt><dd><p>UB matrix (orientation matrix) 3x3 matrix</p>
+</dd>
+<dt><strong>frame_mode</strong><span class="classifier">str, optional</span></dt><dd><p>Frame mode defines the data collection mode and thus the desired
+output from this function. Defaults to hkl mode (frame_mode=4)
+‘theta’    : Theta axis frame.
+‘phi’      : Phi axis frame.
+‘cart’     : Crystal cartesian frame.
+‘hkl’      : Reciprocal lattice units frame.
+See the <cite>process_to_q.frame_mode</cite> attribute for an exact list of
+valid options.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>hkl</strong><span class="classifier">ndarray</span></dt><dd><p>(Qx, Qy, Qz) - HKL values
+shape is [num_images * num_rows * num_columns][3]</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Six angles of an image: (delta, theta, chi, phi, mu, gamma )
+These axes are defined according to the following references.</p>
+<p>References: text <a class="reference internal" href="#r3e1c4da2c11d-1" id="id3">[1]</a>, text <a class="reference internal" href="#r3e1c4da2c11d-2" id="id4">[2]</a></p>
+<div role="list" class="citation-list">
+<div class="citation" id="r3e1c4da2c11d-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">1</a><span class="fn-bracket">]</span></span>
+<p>M. Lohmeier and E.Vlieg, “Angle calculations for a six-circle
+surface x-ray diffractometer,” J. Appl. Cryst., vol 26, pp 706-716,
+1993.</p>
+</div>
+<div class="citation" id="r3e1c4da2c11d-2" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">2</a><span class="fn-bracket">]</span></span>
+<p>E. Vlieg, “A (2+3)-Type surface diffractometer: Mergence of the
+z-axis and (2+2)-Type geometries,” J. Appl. Cryst., vol 31, pp 198-203,
+1998.</p>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.pvoigt">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">pvoigt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.pvoigt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linear combination  of gaussian and lorentzian</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>independent variable</p>
+</dd>
+<dt><strong>area</strong><span class="classifier">float</span></dt><dd><p>area of pvoigt peak</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>center position</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>standard deviation</p>
+</dd>
+<dt><strong>fraction</strong><span class="classifier">float</span></dt><dd><p>weight for lorentzian peak in the linear combination, and (1-fraction)
+is the weight for gaussian peak.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.q_to_d">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">q_to_d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.q_to_d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to convert <span class="math notranslate nohighlight">\(d\)</span> to <span class="math notranslate nohighlight">\(q\)</span>.  The point
+of this function is to prevent fat-fingered typos.</p>
+<p>By definition the relationship is:</p>
+<div class="math notranslate nohighlight">
+\[q = \frac{2 \pi}{d}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>q</strong><span class="classifier">array</span></dt><dd><p>An array of q values</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>d</strong><span class="classifier">array</span></dt><dd><p>An array of d (plane) spacing in the inverse of the units of <code class="docutils literal notranslate"><span class="pre">q</span></code></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.q_to_twotheta">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">q_to_twotheta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.q_to_twotheta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to convert q to two-theta.</p>
+<p>By definition the relationship is:</p>
+<div class="math notranslate nohighlight">
+\[\sin\left(\frac{2\theta}{2}\right) = \frac{\lambda q}{4 \pi}\]</div>
+<p>thus</p>
+<div class="math notranslate nohighlight">
+\[2\theta_n = 2 \arcsin\left(\frac{\lambda q}{4 \pi}\right)\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>q</strong><span class="classifier">array</span></dt><dd><p>An array of <span class="math notranslate nohighlight">\(q\)</span> values</p>
+</dd>
+<dt><strong>wavelength</strong><span class="classifier">float</span></dt><dd><p>Wavelength of the incoming x-rays</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>two_theta</strong><span class="classifier">array</span></dt><dd><p>An array of <span class="math notranslate nohighlight">\(2\theta\)</span> values in radians</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.radial_grid">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">radial_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.radial_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a cartesian grid (x,y) to the radius relative to some center</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>center</strong><span class="classifier">tuple</span></dt><dd><p>point in image where r=0; may be a float giving subpixel precision.
+Order is (rr, cc).</p>
+</dd>
+<dt><strong>shape</strong><span class="classifier">tuple</span></dt><dd><p>Image shape which is used to determine the maximum extent of output
+pixel coordinates.
+Order is (rr, cc).</p>
+</dd>
+<dt><strong>pixel_size</strong><span class="classifier">sequence, optional</span></dt><dd><p>The physical size of the pixels.
+len(pixel_size) should be the same as len(shape)
+defaults to (1,1)</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>r</strong><span class="classifier">array</span></dt><dd><p>The distance of each pixel from <cite>center</cite>
+Shape of the return value is equal to the <cite>shape</cite> input parameter</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.refine_center">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">refine_center</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrated_center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_peaks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.refine_center" title="Permalink to this definition">¶</a></dt>
+<dd><p>Refines the location of the center of the beam.</p>
+<p>This relies on being able to see the whole powder pattern.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>image</strong><span class="classifier">ndarray</span></dt><dd><p>The image</p>
+</dd>
+<dt><strong>calibrated_center</strong><span class="classifier">tuple</span></dt><dd><p>(row, column) the estimated center</p>
+</dd>
+<dt><strong>pixel_size</strong><span class="classifier">tuple</span></dt><dd><p>(pixel_height, pixel_width)</p>
+</dd>
+<dt><strong>phi_steps</strong><span class="classifier">int</span></dt><dd><p>How many regions to split the ring into, should be &gt;10</p>
+</dd>
+<dt><strong>max_peaks</strong><span class="classifier">int</span></dt><dd><p>Number of rings to look it</p>
+</dd>
+<dt><strong>thresh</strong><span class="classifier">float</span></dt><dd><p>Fraction of maximum peak height</p>
+</dd>
+<dt><strong>window_size</strong><span class="classifier">int, optional</span></dt><dd><p>The window size to use (in bins) to use when refining peaks</p>
+</dd>
+<dt><strong>nx</strong><span class="classifier">int, optional</span></dt><dd><p>Number of bins to use for radial binning</p>
+</dd>
+<dt><strong>min_x</strong><span class="classifier">float, optional</span></dt><dd><p>The minimum radius to use for radial binning</p>
+</dd>
+<dt><strong>max_x</strong><span class="classifier">float, optional</span></dt><dd><p>The maximum radius to use for radial binning</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>calibrated_center</strong><span class="classifier">tuple</span></dt><dd><p>The refined calibrated center.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.twotheta_to_q">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">twotheta_to_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">two_theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.twotheta_to_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to convert two-theta to q</p>
+<p>By definition the relationship is</p>
+<div class="math notranslate nohighlight">
+\[\sin\left(\frac{2\theta}{2}\right) = \frac{\lambda q}{4 \pi}\]</div>
+<p>thus</p>
+<div class="math notranslate nohighlight">
+\[q = \frac{4 \pi \sin\left(\frac{2\theta}{2}\right)}{\lambda}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>two_theta</strong><span class="classifier">array</span></dt><dd><p>An array of <span class="math notranslate nohighlight">\(2\theta\)</span> values</p>
+</dd>
+<dt><strong>wavelength</strong><span class="classifier">float</span></dt><dd><p>Wavelength of the incoming x-rays</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>q</strong><span class="classifier">array</span></dt><dd><p>An array of <span class="math notranslate nohighlight">\(q\)</span> values in the inverse of the units
+of <code class="docutils literal notranslate"><span class="pre">wavelength</span></code></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.diffraction.voigt">
+<span class="sig-prename descclassname"><span class="pre">skbeam.diffraction.</span></span><span class="sig-name descname"><span class="pre">voigt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.diffraction.voigt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convolution of gaussian and lorentzian curve.</p>
+<p>see <a class="reference external" href="http://en.wikipedia.org/wiki/Voigt_profile">http://en.wikipedia.org/wiki/Voigt_profile</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong><span class="classifier">array</span></dt><dd><p>independent variable</p>
+</dd>
+<dt><strong>area</strong><span class="classifier">float</span></dt><dd><p>area of voigt peak</p>
+</dd>
+<dt><strong>center</strong><span class="classifier">float</span></dt><dd><p>center position</p>
+</dd>
+<dt><strong>sigma</strong><span class="classifier">float</span></dt><dd><p>standard deviation</p>
+</dd>
+<dt><strong>gamma</strong><span class="classifier">float, optional</span></dt><dd><p>half width at half maximum of lorentzian.
+If optional, <cite>gamma</cite> gets set to <cite>sigma</cite></p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Complete Reference (API)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#core">Core</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#domain-name-spaces">Domain name spaces</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">diffraction</span></code> Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fluorescence.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">fluorescence</span></code> Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development/workflow/get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/workflow/maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Complete Reference (API)</a><ul>
+      <li>Previous: <a href="core/mask.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.mask</span></code> Module</a></li>
+      <li>Next: <a href="fluorescence.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">fluorescence</span></code> Module</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../../_sources/resource/api/diffraction.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

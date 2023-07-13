@@ -32,7 +32,7 @@ def load_netCDF(file_name):
 
     netCDF-4 C library
         Install from:
-            ftp://ftp.unidata.ucar.edu/pub/netcdf. Version 4.1.1 or higher
+        ftp://ftp.unidata.ucar.edu/pub/netcdf. Version 4.1.1 or higher
         Be sure to build with '--enable-netcdf-4 --enable-shared', and set
         CPPFLAGS="-I $HDF5_DIR/include" and LDFLAGS="-L $HDF5_DIR/lib", where
         $HDF5_DIR is the directory where HDF5 was installed.
@@ -43,18 +43,18 @@ def load_netCDF(file_name):
 
     Parameters
     ----------
-    file_name : string
+    file_name: string
         Complete path to the file to be loaded into memory
 
 
     Returns
     -------
-    md_dict : dict
+    md_dict: dict
         Dictionary containing all metadata contained in the netCDF file.
         This metadata contains data collection, and experiment information
         as well as values and variables pertinent to the image data.
 
-    data : ndarray
+    data: ndarray
         ndarray containing the image data contained in the netCDF file.
         The image data is scaled using the scale factor defined in the
         netCDF metadata, if a scale factor was recorded during data

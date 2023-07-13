@@ -1,0 +1,400 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>core.recip Module &#8212; scikit-beam 0.0.24.post14.dev0+g182b92e documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="core.roi Module" href="roi.html" />
+    <link rel="prev" title="core.image Module" href="image.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-skbeam.core.recip">
+<span id="core-recip-module"></span><h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.recip</span></code> Module<a class="headerlink" href="#module-skbeam.core.recip" title="Permalink to this heading">¶</a></h1>
+<p>This module is for functions and classes specific to reciprocal space
+calculations.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.core.recip.calibrated_pixels_to_q">
+<span class="sig-prename descclassname"><span class="pre">skbeam.core.recip.</span></span><span class="sig-name descname"><span class="pre">calibrated_pixels_to_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detector_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pyfai_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.recip.calibrated_pixels_to_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a given detector and pyfai calibrated geometry give back the q value
+for each pixel in the detector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>detector_size</strong><span class="classifier">tuple</span></dt><dd><p>2 element tuple defining the number of pixels in the detector. Order is
+(num_columns, num_rows)</p>
+</dd>
+<dt><strong>pyfai_kwargs: dict</strong></dt><dd><p>The dictionary of pyfai geometry kwargs, given by pyFAI’s calibration
+Ex: dist, poni1, poni2, rot1, rot2, rot3, splineFile, wavelength,
+detector, pixel1, pixel2</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>q_val</strong><span class="classifier">ndarray</span></dt><dd><p>Reciprocal values for each pixel shape is [num_rows * num_columns]</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.core.recip.gisaxs">
+<span class="sig-prename descclassname"><span class="pre">skbeam.core.recip.</span></span><span class="sig-name descname"><span class="pre">gisaxs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_beam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reflected_beam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_i</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.recip.gisaxs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will provide scattering wave vector(q) components(x, y, z),
+q parallel and incident and reflected angles for grazing-incidence small
+angle X-ray scattering (GISAXS) geometry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>incident_beam</strong><span class="classifier">tuple</span></dt><dd><p>x and y co-ordinates of the incident beam in pixels</p>
+</dd>
+<dt><strong>reflected_beam</strong><span class="classifier">tuple</span></dt><dd><p>x and y co-ordinates of the reflected beam in pixels</p>
+</dd>
+<dt><strong>pixel_size</strong><span class="classifier">tuple</span></dt><dd><p>pixel_size in um</p>
+</dd>
+<dt><strong>detector_size: tuple</strong></dt><dd><p>2 element tuple defining no. of pixels(size) in the
+detector X and Y direction</p>
+</dd>
+<dt><strong>dist_sample</strong><span class="classifier">float</span></dt><dd><p>sample to detector distance, in meters</p>
+</dd>
+<dt><strong>wavelength</strong><span class="classifier">float</span></dt><dd><p>wavelength of the x-ray beam in Angstroms</p>
+</dd>
+<dt><strong>theta_i</strong><span class="classifier">float, optional</span></dt><dd><p>out of plane angle, default 0.0</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>namedtuple</dt><dd><p><cite>gisaxs_output</cite> object is returned
+This <cite>gisaxs_output</cite> object contains, in this order:</p>
+<ul class="simple">
+<li><p>alpha_i : float
+incident angle</p></li>
+<li><p>theta_f : array
+out of plane angle
+shape (detector_size[0], detector_size[1])</p></li>
+<li><p>alpha_f : array
+exit angle
+shape (detector_size[0], detector_size[1])</p></li>
+<li><p>tilt_angle : float
+tilt angle</p></li>
+<li><p>qx : array
+x component of the scattering wave vector
+shape (detector_size[0], detector_size[1])</p></li>
+<li><p>qy : array
+y component of the scattering wave vector
+shape (detector_size[0], detector_size[1])</p></li>
+<li><p>qz : array
+z component of the scattering wave vector
+shape (detector_size[0], detector_size[1])</p></li>
+<li><p>qr : array
+q parallel component
+shape (detector_size[0], detector_size[1])</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This implementation is based on published work. <a class="reference internal" href="#ra40a7e15646d-1" id="id1">[1]</a></p>
+<p class="rubric">References</p>
+<div role="list" class="citation-list">
+<div class="citation" id="ra40a7e15646d-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>R. Lazzari, “IsGISAXS: a program for grazing-incidence small-
+angle X-ray scattering analysis of supported islands,” J. Appl.
+Cryst., vol 35, p 406-421, 2002.</p>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="skbeam.core.recip.gisaxs_output">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skbeam.core.recip.</span></span><span class="sig-name descname"><span class="pre">gisaxs_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tilt_angle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.recip.gisaxs_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#tuple" title="(in Python v3.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="skbeam.core.recip.gisaxs_output.alpha_f">
+<span class="sig-name descname"><span class="pre">alpha_f</span></span><a class="headerlink" href="#skbeam.core.recip.gisaxs_output.alpha_f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="skbeam.core.recip.gisaxs_output.alpha_i">
+<span class="sig-name descname"><span class="pre">alpha_i</span></span><a class="headerlink" href="#skbeam.core.recip.gisaxs_output.alpha_i" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="skbeam.core.recip.gisaxs_output.qr">
+<span class="sig-name descname"><span class="pre">qr</span></span><a class="headerlink" href="#skbeam.core.recip.gisaxs_output.qr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 7</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="skbeam.core.recip.gisaxs_output.qx">
+<span class="sig-name descname"><span class="pre">qx</span></span><a class="headerlink" href="#skbeam.core.recip.gisaxs_output.qx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="skbeam.core.recip.gisaxs_output.qy">
+<span class="sig-name descname"><span class="pre">qy</span></span><a class="headerlink" href="#skbeam.core.recip.gisaxs_output.qy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 5</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="skbeam.core.recip.gisaxs_output.qz">
+<span class="sig-name descname"><span class="pre">qz</span></span><a class="headerlink" href="#skbeam.core.recip.gisaxs_output.qz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 6</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="skbeam.core.recip.gisaxs_output.theta_f">
+<span class="sig-name descname"><span class="pre">theta_f</span></span><a class="headerlink" href="#skbeam.core.recip.gisaxs_output.theta_f" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="skbeam.core.recip.gisaxs_output.tilt_angle">
+<span class="sig-name descname"><span class="pre">tilt_angle</span></span><a class="headerlink" href="#skbeam.core.recip.gisaxs_output.tilt_angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.core.recip.hkl_to_q">
+<span class="sig-prename descclassname"><span class="pre">skbeam.core.recip.</span></span><span class="sig-name descname"><span class="pre">hkl_to_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hkl_arr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.recip.hkl_to_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>This module compute the reciprocal space (q) values from known HKL array
+for each pixel of the detector for all the images</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>hkl_arr</strong><span class="classifier">ndarray</span></dt><dd><p>(Qx, Qy, Qz) - HKL array
+shape is [num_images * num_rows * num_columns][3]</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>q_val</strong><span class="classifier">ndarray</span></dt><dd><p>Reciprocal values for each pixel for all images
+shape is [num_images * num_rows * num_columns]</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.core.recip.process_to_q">
+<span class="sig-prename descclassname"><span class="pre">skbeam.core.recip.</span></span><span class="sig-name descname"><span class="pre">process_to_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">setting_angles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibrated_center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ub</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.recip.process_to_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will compute the hkl values for all pixels in a shape specified by
+detector_size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>setting_angles</strong><span class="classifier">ndarray</span></dt><dd><p>six angles of all the images - Required shape is [num_images][6] and
+required type is something that can be cast to a 2D numpy array
+Angle order: delta, theta, chi, phi, mu, gamma (degrees)</p>
+</dd>
+<dt><strong>detector_size</strong><span class="classifier">tuple</span></dt><dd><p>2 element tuple defining the number of pixels in the detector. Order is
+(num_columns, num_rows)</p>
+</dd>
+<dt><strong>pixel_size</strong><span class="classifier">tuple</span></dt><dd><p>2 element tuple defining the size of each pixel in mm. Order is
+(column_pixel_size, row_pixel_size).  If not in mm, must be in the same
+units as <cite>dist_sample</cite></p>
+</dd>
+<dt><strong>calibrated_center</strong><span class="classifier">tuple</span></dt><dd><p>2 element tuple defining the center of the detector in pixels. Order
+is (column_center, row_center)(x y)</p>
+</dd>
+<dt><strong>dist_sample</strong><span class="classifier">float</span></dt><dd><p>distance from the sample to the detector (mm). If not in mm, must be
+in the same units as <cite>pixel_size</cite></p>
+</dd>
+<dt><strong>wavelength</strong><span class="classifier">float</span></dt><dd><p>wavelength of incident radiation (Angstroms)</p>
+</dd>
+<dt><strong>ub</strong><span class="classifier">ndarray</span></dt><dd><p>UB matrix (orientation matrix) 3x3 matrix</p>
+</dd>
+<dt><strong>frame_mode</strong><span class="classifier">str, optional</span></dt><dd><p>Frame mode defines the data collection mode and thus the desired
+output from this function. Defaults to hkl mode (frame_mode=4)
+‘theta’    : Theta axis frame.
+‘phi’      : Phi axis frame.
+‘cart’     : Crystal cartesian frame.
+‘hkl’      : Reciprocal lattice units frame.
+See the <cite>process_to_q.frame_mode</cite> attribute for an exact list of
+valid options.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>hkl</strong><span class="classifier">ndarray</span></dt><dd><p>(Qx, Qy, Qz) - HKL values
+shape is [num_images * num_rows * num_columns][3]</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Six angles of an image: (delta, theta, chi, phi, mu, gamma )
+These axes are defined according to the following references.</p>
+<p>References: text <a class="reference internal" href="#refec1cc36a4c-1" id="id3">[1]</a>, text <a class="reference internal" href="#refec1cc36a4c-2" id="id4">[2]</a></p>
+<div role="list" class="citation-list">
+<div class="citation" id="refec1cc36a4c-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">1</a><span class="fn-bracket">]</span></span>
+<p>M. Lohmeier and E.Vlieg, “Angle calculations for a six-circle
+surface x-ray diffractometer,” J. Appl. Cryst., vol 26, pp 706-716,
+1993.</p>
+</div>
+<div class="citation" id="refec1cc36a4c-2" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">2</a><span class="fn-bracket">]</span></span>
+<p>E. Vlieg, “A (2+3)-Type surface diffractometer: Mergence of the
+z-axis and (2+2)-Type geometries,” J. Appl. Cryst., vol 31, pp 198-203,
+1998.</p>
+</div>
+</div>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Complete Reference (API)</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#core">Core</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Core API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../io/index.html">IO API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../core.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core</span></code> subpackge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mask.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.mask</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#domain-name-spaces">Domain name spaces</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Complete Reference (API)</a><ul>
+  <li><a href="index.html">Core API</a><ul>
+      <li>Previous: <a href="image.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.image</span></code> Module</a></li>
+      <li>Next: <a href="roi.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.roi</span></code> Module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../../../_sources/resource/api/core/recip.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

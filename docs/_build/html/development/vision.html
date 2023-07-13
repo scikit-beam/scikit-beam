@@ -1,0 +1,238 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Vision for a Common Python Package for x-ray, electron and neutrons &#8212; scikit-beam 0.0.24.post14.dev0+g182b92e documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Development Guide" href="../resource/dev_guide/index.html" />
+    <link rel="prev" title="How to create and maintain an Skbeam affiliated package" href="affiliated-packages.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="vision-for-a-common-python-package-for-x-ray-electron-and-neutrons">
+<span id="vision"></span><h1>Vision for a Common Python Package for x-ray, electron and neutrons<a class="headerlink" href="#vision-for-a-common-python-package-for-x-ray-electron-and-neutrons" title="Permalink to this heading">¶</a></h1>
+<p>The following document summarizes a vision for a common Python package
+used across the whole community, and how we can best all work together
+to achieve this.  In the following document, this common package will
+be referred to as the core package. This vision is not set in stone,
+and we are committed to adapting it to whatever process and guidelines
+work in practice.</p>
+<p>The ultimate goal that we seek is a package that would contain much of
+the core functionality and some common tools required across the
+community, but not <em>everything</em> a domain scientist will ever need. The
+aim is primarily to avoid duplication for common core tasks, and to
+provide a robust framework upon which to build more complex tools.</p>
+<p>Such a common package should not preclude any other package from
+existing, because there will always be more complex and/or specialized
+tools required. These tools will be able to rely on a single core
+library for many tasks, and thus reduce the number of dependencies,
+reduce duplication of functionality, and increase consistency of their
+interfaces.</p>
+<section id="procedure">
+<h2>Procedure<a class="headerlink" href="#procedure" title="Permalink to this heading">¶</a></h2>
+<p>With the help of the community, the coordination committee will start by
+identifying a few of key areas where initial development/consolidation
+will be needed (such as conversion to reciprocal space, non-linear
+fitting, detector corrections, time correlations, etc.) and will
+encourage teams to be formed to build standalone packages implementing
+this functionality. These packages will be referred to as affiliated
+packages (meaning that they are intended for future integration in the
+core package).</p>
+<p>A set of requirements will be set out concerning the interfaces and
+classes/methods that affiliated packages will need to make available in
+order to ensure consistency between the different components. As the
+core package grows, new potential areas/components for the core package
+will be identified. Competition cannot be avoided, and will not be
+actively discouraged, but whenever possible, developers should strive to
+work as a team to provide a single and robust affiliated package, for
+the benefit of the community.</p>
+<p>The affiliated packages will be developed outside the core package in
+independent repositories, which will allow the teams the choice of tool
+and organization. Once an affiliated package has implemented the desired
+functionality, and satisfies quality criteria for coding style,
+documentation, and testing, it will be considered for inclusion in the
+core package, and further development will be done directly in the core
+package either via direct access to the repository, or via patches/pull
+requests.</p>
+<p>To ensure uniformity across affiliated packages, and to facilitate
+integration with the core package, developers who wish to submit their
+affiliated packages for inclusion in the core will need to follow the
+layout of a ‘template’ package that will be provided before development
+starts.</p>
+</section>
+<section id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading">¶</a></h2>
+<p>Affiliated packages should be able to be imported with only the
+following dependencies:</p>
+<ul class="simple">
+<li><p>The Python Standard Library, NumPy, SciPy, pandas, and Matplotlib</p></li>
+<li><p>Components already in the core package</p></li>
+</ul>
+<p>Other packages may be used, but must be imported as needed rather than
+during the initial import of the package.</p>
+<p>If a dependency is needed, but is an affiliated package, the dependent
+package will need to wait until the dependency is integrated into the
+core package before being itself considered for inclusion. In the mean
+time, it can make use of the other affiliated package in its current
+form, or other packages, so as not to stall development. Thus, the first
+packages to be included in the core will be those only requiring the
+standard library, NumPy, SciPy, pandas, and Matplotlib.</p>
+<p>If the required dependency will never be part of a main package, then by
+default the dependency can be included but should be imported as needed
+(meaning that it only prevents the importing of that component, not the
+entire core package), unless a strong case is made and a general
+consensus is reached by the community that this dependency is important
+enough to be required at a higher level.</p>
+<p>This system means that packages will be integrated into the core package
+in an order depending on the dependency tree, and also ensures that the
+interfaces of packages being integrated into the core package are
+consistent with those already in the core package.</p>
+<p>Initially, no dependency on GUI toolkits will be allowed in the core
+package. If the community reaches agrees on a single toolkit that could
+be used, then this toolkit will be allowed (but will only be imported as
+needed).</p>
+</section>
+<section id="keeping-track-of-affiliated-packages">
+<h2>Keeping track of affiliated packages<a class="headerlink" href="#keeping-track-of-affiliated-packages" title="Permalink to this heading">¶</a></h2>
+<p>Affiliated packages will be listed in a central location (in addition to
+PyPI/conda-forge).</p>
+</section>
+<section id="existing-packages">
+<h2>Existing Packages<a class="headerlink" href="#existing-packages" title="Permalink to this heading">¶</a></h2>
+<p>Developers who already have existing packages will be encouraged to
+continue supporting them for the benefit of users until the core library
+is considered stable, contains this functionality, and is released to
+the community. Thereafter, developers should encourage users to
+transition to using the functionality in the core package, and
+eventually phase out their own packages, unless they provide added value
+over the core package.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../resource/api/index.html">Complete Reference (API)</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="workflow/get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflow/development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflow/development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflow/maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resource/dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="affiliated-packages.html" title="previous chapter">How to create and maintain an Skbeam affiliated package</a></li>
+      <li>Next: <a href="../resource/dev_guide/index.html" title="next chapter">Development Guide</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/development/vision.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

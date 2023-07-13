@@ -647,8 +647,8 @@ def angle_grid(center, shape, pixel_size=None):
     agrid : array
         angular position (in radians) of each array element in range [-pi, pi]
 
-    Note
-    ----
+    Notes
+    -----
     :math:`\\theta`, the counter-clockwise angle from the positive x axis,
     assuming the positive y-axis points upward.
     :math:`\\theta \\el [-\\pi, \\pi]`.  In array indexing and the conventional
@@ -1203,8 +1203,8 @@ def geometric_series(common_ratio, number_of_images, first_term=1):
     first_term : float, optional
         first term in the series
 
-    Return
-    ------
+    Returns
+    -------
     geometric_series : list
         time series
 

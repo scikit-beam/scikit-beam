@@ -1,0 +1,506 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Some other things you might want to do &#8212; scikit-beam 0.0.24.post14.dev0+g182b92e documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="some-other-things-you-might-want-to-do">
+<span id="additional-git"></span><h1>Some other things you might want to do<a class="headerlink" href="#some-other-things-you-might-want-to-do" title="Permalink to this heading">¶</a></h1>
+<section id="delete-a-branch-on-github">
+<h2>Delete a branch on GitHub<a class="headerlink" href="#delete-a-branch-on-github" title="Permalink to this heading">¶</a></h2>
+<p><a class="reference external" href="http://git-scm.com/">git</a> strongly encourages making a new branch each time you make a change in the
+code. At some point you will need to clean up the branches you no longer need–
+that point is <em>after</em> your changes have been accepted if you made a pull request
+for those changes.</p>
+<p>There are two places to delete the branch: in your local repo and on GitHub.</p>
+<p>You can do these independent of each other.</p>
+<p>To delete both your local copy AND the GitHub copy from the command line follow
+these instructions:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># change to the master branch (if you still have one, otherwise change to</span>
+<span class="c1"># another branch)</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="n">master</span>
+
+<span class="c1"># delete branch locally</span>
+<span class="c1"># Note: -d tells git to check whether your branch has been merged somewhere</span>
+<span class="c1"># if it hasn&#39;t, and you delete it, it is gone forever.</span>
+<span class="c1">#</span>
+<span class="c1"># Use -D instead to force deletion regardless of merge status</span>
+<span class="n">git</span> <span class="n">branch</span> <span class="o">-</span><span class="n">d</span> <span class="n">my</span><span class="o">-</span><span class="n">unwanted</span><span class="o">-</span><span class="n">branch</span>
+
+<span class="c1"># delete branch on GitHub</span>
+<span class="n">git</span> <span class="n">push</span> <span class="n">origin</span> <span class="p">:</span><span class="n">my</span><span class="o">-</span><span class="n">unwanted</span><span class="o">-</span><span class="n">branch</span>
+</pre></div>
+</div>
+<p>(Note the colon <code class="docutils literal notranslate"><span class="pre">:</span></code> before <code class="docutils literal notranslate"><span class="pre">test-branch</span></code>.) See <a class="reference external" href="https://help.github.com/articles/creating-and-deleting-branches-within-your-repository">Github’s instructions for
+deleting a branch</a>
+if you want to delete the GitHub copy through GitHub.</p>
+</section>
+<section id="several-people-sharing-a-single-repository">
+<h2>Several people sharing a single repository<a class="headerlink" href="#several-people-sharing-a-single-repository" title="Permalink to this heading">¶</a></h2>
+<p>If you want to work on some stuff with other people, where you are all
+committing into the same repository, or even the same branch, then just
+share it via GitHub.</p>
+<p>First fork Scikit-beam into your account, as from <a class="reference internal" href="get_devel_version.html#fork-a-copy"><span class="std std-ref">Make your own copy of Scikit-beam on GitHub</span></a>.</p>
+<p>Then, go to your forked repository GitHub page, e.g.,
+<code class="docutils literal notranslate"><span class="pre">http://github.com/your-user-name/scikit-beam</span></code></p>
+<p>Click on the ‘Admin’ button, and add anyone else to the repo as a
+collaborator:</p>
+<blockquote>
+<div><img alt="../../_images/pull_button.png" src="../../_images/pull_button.png" />
+</div></blockquote>
+<p>Now all those people can do:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@githhub</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">your</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">name</span><span class="o">/</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+<p>Remember that links starting with <code class="docutils literal notranslate"><span class="pre">git&#64;</span></code> use the ssh protocol and are
+read-write; links starting with <code class="docutils literal notranslate"><span class="pre">git://</span></code> are read-only.</p>
+<p>Your collaborators can then commit directly into that repo with the
+usual:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">commit</span> <span class="o">-</span><span class="n">am</span> <span class="s1">&#39;ENH - much better code&#39;</span>
+<span class="n">git</span> <span class="n">push</span> <span class="n">origin</span> <span class="n">master</span> <span class="c1"># pushes directly into your repo</span>
+</pre></div>
+</div>
+</section>
+<section id="explore-your-repository">
+<h2>Explore your repository<a class="headerlink" href="#explore-your-repository" title="Permalink to this heading">¶</a></h2>
+<p>To see a graphical representation of the repository branches and
+commits:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gitk</span> <span class="o">--</span><span class="nb">all</span>
+</pre></div>
+</div>
+<p>To see a linear list of commits for this branch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">log</span>
+</pre></div>
+</div>
+<p>You can also look at the <a class="reference external" href="http://github.com/blog/39-say-hello-to-the-network-graph-visualizer">network graph visualizer</a> for your GitHub
+repo.</p>
+</section>
+<section id="rebasing-on-trunk">
+<span id="rebase-on-trunk"></span><h2>Rebasing on trunk<a class="headerlink" href="#rebasing-on-trunk" title="Permalink to this heading">¶</a></h2>
+<p>Let’s say you thought of some work you’d like to do. You
+<a class="reference internal" href="development_workflow.html#fetch-latest"><span class="std std-ref">Fetch the latest Scikit-beam</span></a> and <a class="reference internal" href="development_workflow.html#make-feature-branch"><span class="std std-ref">Make a new feature branch</span></a> called
+<code class="docutils literal notranslate"><span class="pre">cool-feature</span></code>. At this stage trunk is at some commit, let’s call it E. Now
+you make some new commits on your <code class="docutils literal notranslate"><span class="pre">cool-feature</span></code> branch, let’s call them A,
+B, C. Maybe your changes take a while, or you come back to them after a while.
+In the meantime, trunk has progressed from commit E to commit (say) G:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>      <span class="n">A</span><span class="o">---</span><span class="n">B</span><span class="o">---</span><span class="n">C</span> <span class="n">cool</span><span class="o">-</span><span class="n">feature</span>
+     <span class="o">/</span>
+<span class="n">D</span><span class="o">---</span><span class="n">E</span><span class="o">---</span><span class="n">F</span><span class="o">---</span><span class="n">G</span> <span class="n">trunk</span>
+</pre></div>
+</div>
+<p>At this stage you consider merging trunk into your feature branch, and you
+remember that this here page sternly advises you not to do that, because the
+history will get messy. Most of the time you can just ask for a review, and
+not worry that trunk has got a little ahead. But sometimes, the changes in
+trunk might affect your changes, and you need to harmonize them. In this
+situation you may prefer to do a rebase.</p>
+<p>Rebase takes your changes (A, B, C) and replays them as if they had been made
+to the current state of <code class="docutils literal notranslate"><span class="pre">trunk</span></code>. In other words, in this case, it takes the
+changes represented by A, B, C and replays them on top of G. After the rebase,
+your history will look like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>              <span class="n">A</span><span class="s1">&#39;--B&#39;</span><span class="o">--</span><span class="n">C</span><span class="s1">&#39; cool-feature</span>
+             <span class="o">/</span>
+<span class="n">D</span><span class="o">---</span><span class="n">E</span><span class="o">---</span><span class="n">F</span><span class="o">---</span><span class="n">G</span> <span class="n">trunk</span>
+</pre></div>
+</div>
+<p>See <a class="reference external" href="http://matthew-brett.github.com/pydagogue/rebase_without_tears.html">rebase without tears</a> for more detail.</p>
+<p>To do a rebase on trunk:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Update the mirror of trunk</span>
+<span class="n">git</span> <span class="n">fetch</span> <span class="n">upstream</span>
+
+<span class="c1"># Go to the feature branch</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="n">cool</span><span class="o">-</span><span class="n">feature</span>
+
+<span class="c1"># Make a backup in case you mess up</span>
+<span class="n">git</span> <span class="n">branch</span> <span class="n">tmp</span> <span class="n">cool</span><span class="o">-</span><span class="n">feature</span>
+
+<span class="c1"># Rebase cool-feature onto trunk</span>
+<span class="n">git</span> <span class="n">rebase</span> <span class="o">--</span><span class="n">onto</span> <span class="n">upstream</span><span class="o">/</span><span class="n">master</span> <span class="n">upstream</span><span class="o">/</span><span class="n">master</span> <span class="n">cool</span><span class="o">-</span><span class="n">feature</span>
+</pre></div>
+</div>
+<p>In this situation, where you are already on branch <code class="docutils literal notranslate"><span class="pre">cool-feature</span></code>, the last
+command can be written more succinctly as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">rebase</span> <span class="n">upstream</span><span class="o">/</span><span class="n">master</span>
+</pre></div>
+</div>
+<p>When all looks good you can delete your backup branch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">branch</span> <span class="o">-</span><span class="n">D</span> <span class="n">tmp</span>
+</pre></div>
+</div>
+<p>If it doesn’t look good you may need to have a look at
+<a class="reference internal" href="#recovering-from-mess-up"><span class="std std-ref">Recovering from mess-ups</span></a>.</p>
+<p>If you have made changes to files that have also changed in trunk, this may
+generate merge conflicts that you need to resolve - see the <a class="reference external" href="http://schacon.github.com/git/git-rebase.html">git rebase</a> man
+page for some instructions at the end of the “Description” section. There is
+some related help on merging in the git user manual - see <a class="reference external" href="http://schacon.github.com/git/user-manual.html#resolving-a-merge">resolving a
+merge</a>.</p>
+<p>If your feature branch is already on GitHub and you rebase, you will have to
+force push the branch; a normal push would give an error. If the branch you
+rebased is called <code class="docutils literal notranslate"><span class="pre">cool-feature</span></code> and your GitHub fork is available as the
+remote called <code class="docutils literal notranslate"><span class="pre">origin</span></code>, you use this command to force-push:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">push</span> <span class="o">-</span><span class="n">f</span> <span class="n">origin</span> <span class="n">cool</span><span class="o">-</span><span class="n">feature</span>
+</pre></div>
+</div>
+<p>Note that this will overwrite the branch on GitHub, i.e. this is one of the few
+ways you can actually lose commits with git. Also note that it is never allowed
+to force push to the main scikit-beam repo (typically called <code class="docutils literal notranslate"><span class="pre">upstream</span></code>), because
+this would re-write commit history and thus cause problems for all others.</p>
+</section>
+<section id="recovering-from-mess-ups">
+<span id="recovering-from-mess-up"></span><h2>Recovering from mess-ups<a class="headerlink" href="#recovering-from-mess-ups" title="Permalink to this heading">¶</a></h2>
+<p>Sometimes, you mess up merges or rebases. Luckily, in git it is relatively
+straightforward to recover from such mistakes.</p>
+<p>If you mess up during a rebase:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">rebase</span> <span class="o">--</span><span class="n">abort</span>
+</pre></div>
+</div>
+<p>If you notice you messed up after the rebase:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Reset branch back to the saved point</span>
+<span class="n">git</span> <span class="n">reset</span> <span class="o">--</span><span class="n">hard</span> <span class="n">tmp</span>
+</pre></div>
+</div>
+<p>If you forgot to make a backup branch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Look at the reflog of the branch</span>
+<span class="n">git</span> <span class="n">reflog</span> <span class="n">show</span> <span class="n">cool</span><span class="o">-</span><span class="n">feature</span>
+
+<span class="mi">8630830</span> <span class="n">cool</span><span class="o">-</span><span class="n">feature</span><span class="o">@</span><span class="p">{</span><span class="mi">0</span><span class="p">}:</span> <span class="n">commit</span><span class="p">:</span> <span class="n">BUG</span><span class="p">:</span> <span class="n">io</span><span class="p">:</span> <span class="n">close</span> <span class="n">file</span> <span class="n">handles</span> <span class="n">immediately</span>
+<span class="mi">278</span><span class="n">dd2a</span> <span class="n">cool</span><span class="o">-</span><span class="n">feature</span><span class="o">@</span><span class="p">{</span><span class="mi">1</span><span class="p">}:</span> <span class="n">rebase</span> <span class="n">finished</span><span class="p">:</span> <span class="n">refs</span><span class="o">/</span><span class="n">heads</span><span class="o">/</span><span class="n">my</span><span class="o">-</span><span class="n">feature</span><span class="o">-</span><span class="n">branch</span> <span class="n">onto</span> <span class="mi">11</span><span class="n">ee694744f2552d</span>
+<span class="mi">26</span><span class="n">aa21a</span> <span class="n">cool</span><span class="o">-</span><span class="n">feature</span><span class="o">@</span><span class="p">{</span><span class="mi">2</span><span class="p">}:</span> <span class="n">commit</span><span class="p">:</span> <span class="n">BUG</span><span class="p">:</span> <span class="n">lib</span><span class="p">:</span> <span class="n">make</span> <span class="n">seek_gzip_factory</span> <span class="ow">not</span> <span class="n">leak</span> <span class="n">gzip</span> <span class="n">obj</span>
+<span class="o">...</span>
+
+<span class="c1"># Reset the branch to where it was before the botched rebase</span>
+<span class="n">git</span> <span class="n">reset</span> <span class="o">--</span><span class="n">hard</span> <span class="n">cool</span><span class="o">-</span><span class="n">feature</span><span class="o">@</span><span class="p">{</span><span class="mi">2</span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="rewriting-commit-history">
+<span id="id1"></span><h2>Rewriting commit history<a class="headerlink" href="#rewriting-commit-history" title="Permalink to this heading">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Do this only for your own feature branches.</p>
+</div>
+<p>There’s an embarrassing typo in a commit you made? Or perhaps the you
+made several false starts you would like the posterity not to see.</p>
+<p>This can be done via <em>interactive rebasing</em>.</p>
+<p>Suppose that the commit history looks like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">log</span> <span class="o">--</span><span class="n">oneline</span>
+<span class="n">eadc391</span> <span class="n">Fix</span> <span class="n">some</span> <span class="n">remaining</span> <span class="n">bugs</span>
+<span class="n">a815645</span> <span class="n">Modify</span> <span class="n">it</span> <span class="n">so</span> <span class="n">that</span> <span class="n">it</span> <span class="n">works</span>
+<span class="mi">2</span><span class="n">dec1ac</span> <span class="n">Fix</span> <span class="n">a</span> <span class="n">few</span> <span class="n">bugs</span> <span class="o">+</span> <span class="n">disable</span>
+<span class="mi">13</span><span class="n">d7934</span> <span class="n">First</span> <span class="n">implementation</span>
+<span class="mi">6</span><span class="n">ad92e5</span> <span class="o">*</span> <span class="n">masked</span> <span class="ow">is</span> <span class="n">now</span> <span class="n">an</span> <span class="n">instance</span> <span class="n">of</span> <span class="n">a</span> <span class="n">new</span> <span class="nb">object</span><span class="p">,</span> <span class="n">MaskedConstant</span>
+<span class="mi">29001</span><span class="n">ed</span> <span class="n">Add</span> <span class="n">pre</span><span class="o">-</span><span class="n">nep</span> <span class="k">for</span> <span class="n">a</span> <span class="n">couple</span> <span class="n">of</span> <span class="n">structured_array_extensions</span><span class="o">.</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>and <code class="docutils literal notranslate"><span class="pre">6ad92e5</span></code> is the last commit in the <code class="docutils literal notranslate"><span class="pre">cool-feature</span></code> branch. Suppose we
+want to make the following changes:</p>
+<ul class="simple">
+<li><p>Rewrite the commit message for <code class="docutils literal notranslate"><span class="pre">13d7934</span></code> to something more sensible.</p></li>
+<li><p>Combine the commits <code class="docutils literal notranslate"><span class="pre">2dec1ac</span></code>, <code class="docutils literal notranslate"><span class="pre">a815645</span></code>, <code class="docutils literal notranslate"><span class="pre">eadc391</span></code> into a single one.</p></li>
+</ul>
+<p>We do as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># make a backup of the current state</span>
+<span class="n">git</span> <span class="n">branch</span> <span class="n">tmp</span> <span class="n">HEAD</span>
+<span class="c1"># interactive rebase</span>
+<span class="n">git</span> <span class="n">rebase</span> <span class="o">-</span><span class="n">i</span> <span class="mi">6</span><span class="n">ad92e5</span>
+</pre></div>
+</div>
+<p>This will open an editor with the following text in it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pick</span> <span class="mi">13</span><span class="n">d7934</span> <span class="n">First</span> <span class="n">implementation</span>
+<span class="n">pick</span> <span class="mi">2</span><span class="n">dec1ac</span> <span class="n">Fix</span> <span class="n">a</span> <span class="n">few</span> <span class="n">bugs</span> <span class="o">+</span> <span class="n">disable</span>
+<span class="n">pick</span> <span class="n">a815645</span> <span class="n">Modify</span> <span class="n">it</span> <span class="n">so</span> <span class="n">that</span> <span class="n">it</span> <span class="n">works</span>
+<span class="n">pick</span> <span class="n">eadc391</span> <span class="n">Fix</span> <span class="n">some</span> <span class="n">remaining</span> <span class="n">bugs</span>
+
+<span class="c1"># Rebase 6ad92e5..eadc391 onto 6ad92e5</span>
+<span class="c1">#</span>
+<span class="c1"># Commands:</span>
+<span class="c1">#  p, pick = use commit</span>
+<span class="c1">#  r, reword = use commit, but edit the commit message</span>
+<span class="c1">#  e, edit = use commit, but stop for amending</span>
+<span class="c1">#  s, squash = use commit, but meld into previous commit</span>
+<span class="c1">#  f, fixup = like &quot;squash&quot;, but discard this commit&#39;s log message</span>
+<span class="c1">#</span>
+<span class="c1"># If you remove a line here THAT COMMIT WILL BE LOST.</span>
+<span class="c1"># However, if you remove everything, the rebase will be aborted.</span>
+<span class="c1">#</span>
+</pre></div>
+</div>
+<p>To achieve what we want, we will make the following changes to it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">r</span> <span class="mi">13</span><span class="n">d7934</span> <span class="n">First</span> <span class="n">implementation</span>
+<span class="n">pick</span> <span class="mi">2</span><span class="n">dec1ac</span> <span class="n">Fix</span> <span class="n">a</span> <span class="n">few</span> <span class="n">bugs</span> <span class="o">+</span> <span class="n">disable</span>
+<span class="n">f</span> <span class="n">a815645</span> <span class="n">Modify</span> <span class="n">it</span> <span class="n">so</span> <span class="n">that</span> <span class="n">it</span> <span class="n">works</span>
+<span class="n">f</span> <span class="n">eadc391</span> <span class="n">Fix</span> <span class="n">some</span> <span class="n">remaining</span> <span class="n">bugs</span>
+</pre></div>
+</div>
+<p>This means that (i) we want to edit the commit message for <code class="docutils literal notranslate"><span class="pre">13d7934</span></code>, and
+(ii) collapse the last three commits into one. Now we save and quit the
+editor.</p>
+<p>Git will then immediately bring up an editor for editing the commit message.
+After revising it, we get the output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">detached</span> <span class="n">HEAD</span> <span class="mi">721</span><span class="n">fc64</span><span class="p">]</span> <span class="n">FOO</span><span class="p">:</span> <span class="n">First</span> <span class="n">implementation</span>
+ <span class="mi">2</span> <span class="n">files</span> <span class="n">changed</span><span class="p">,</span> <span class="mi">199</span> <span class="n">insertions</span><span class="p">(</span><span class="o">+</span><span class="p">),</span> <span class="mi">66</span> <span class="n">deletions</span><span class="p">(</span><span class="o">-</span><span class="p">)</span>
+<span class="p">[</span><span class="n">detached</span> <span class="n">HEAD</span> <span class="mi">0</span><span class="n">f22701</span><span class="p">]</span> <span class="n">Fix</span> <span class="n">a</span> <span class="n">few</span> <span class="n">bugs</span> <span class="o">+</span> <span class="n">disable</span>
+ <span class="mi">1</span> <span class="n">files</span> <span class="n">changed</span><span class="p">,</span> <span class="mi">79</span> <span class="n">insertions</span><span class="p">(</span><span class="o">+</span><span class="p">),</span> <span class="mi">61</span> <span class="n">deletions</span><span class="p">(</span><span class="o">-</span><span class="p">)</span>
+<span class="n">Successfully</span> <span class="n">rebased</span> <span class="ow">and</span> <span class="n">updated</span> <span class="n">refs</span><span class="o">/</span><span class="n">heads</span><span class="o">/</span><span class="n">my</span><span class="o">-</span><span class="n">feature</span><span class="o">-</span><span class="n">branch</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>and the history looks now like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">0</span><span class="n">f22701</span> <span class="n">Fix</span> <span class="n">a</span> <span class="n">few</span> <span class="n">bugs</span> <span class="o">+</span> <span class="n">disable</span>
+<span class="mi">721</span><span class="n">fc64</span> <span class="n">ENH</span><span class="p">:</span> <span class="n">Sophisticated</span> <span class="n">feature</span>
+<span class="mi">6</span><span class="n">ad92e5</span> <span class="o">*</span> <span class="n">masked</span> <span class="ow">is</span> <span class="n">now</span> <span class="n">an</span> <span class="n">instance</span> <span class="n">of</span> <span class="n">a</span> <span class="n">new</span> <span class="nb">object</span><span class="p">,</span> <span class="n">MaskedConstant</span>
+</pre></div>
+</div>
+<p>If it went wrong, recovery is again possible as explained <a class="reference internal" href="#recovering-from-mess-up"><span class="std std-ref">above</span></a>.</p>
+</section>
+<section id="converting-a-github-issue-to-a-pull-request">
+<h2>Converting a GitHub issue to a pull request<a class="headerlink" href="#converting-a-github-issue-to-a-pull-request" title="Permalink to this heading">¶</a></h2>
+<p>Sometimes you have a branch in your own GitHub repository designed to
+fix one particular issue.  If that issue is listed on GitHub, a natural
+way to address it is to convert the issue to a pull request by
+attaching code containing the fix for the issue. This can currently only be
+done using the GitHub API (there’s no button or anything on the web
+site that does it, at least as of 2/6/2012). There are two options to do this,
+both of which only work if you own the repository or have the ability to commit
+directly to it (for Scikit-beam, that means being an Scikit-beam maintainer):</p>
+<ul>
+<li><p>You can use the script at <a class="reference external" href="https://gist.github.com/1750715">https://gist.github.com/1750715</a>, which will
+do this for you automatically — just download the script and run it as
+a python command-line script, using the <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">issue2pr.py</span> <span class="pre">--help</span></code>
+option to determine the precise usage.</p></li>
+<li><p>You can use the <code class="docutils literal notranslate"><span class="pre">hub</span></code> command-line utility provided <a class="reference external" href="https://github.com/defunkt/hub">here</a> by GitHub. Once installed, you can
+attach a branch to a pull request by doing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hub</span> <span class="n">pull</span><span class="o">-</span><span class="n">request</span> <span class="o">-</span><span class="n">i</span> <span class="o">&lt;</span><span class="n">ID</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">b</span> <span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="p">:</span><span class="n">master</span> <span class="o">-</span><span class="n">h</span> <span class="o">&lt;</span><span class="n">USER</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;</span><span class="n">BRANCH</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">&lt;ID&gt;</span></code> is the ID of the issue, <code class="docutils literal notranslate"><span class="pre">&lt;USER&gt;</span></code> is the username, and
+<code class="docutils literal notranslate"><span class="pre">&lt;BRANCH&gt;</span></code> is the name of the branch you want to attach to the
+issue. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hub</span> <span class="n">pull</span><span class="o">-</span><span class="n">request</span> <span class="o">-</span><span class="n">i</span> <span class="mi">42</span> <span class="o">-</span><span class="n">b</span> <span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="p">:</span><span class="n">master</span> <span class="o">-</span><span class="n">h</span> <span class="n">galahad</span><span class="p">:</span><span class="n">feature</span>
+</pre></div>
+</div>
+<p>will attach the <code class="docutils literal notranslate"><span class="pre">feature</span></code> branch from <code class="docutils literal notranslate"><span class="pre">galahad</span></code>’s Scikit-beam
+repository to issue 42.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">hub</span></code> command can do a lot more to interact with GitHub, so be
+sure to read their documentation. For example, you can fetch all
+branches of a repository for a given user by doing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hub</span> <span class="n">fetch</span> <span class="o">&lt;</span><span class="n">USER</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="merge-commits-and-cherry-picks">
+<span id="id2"></span><h2>Merge commits and cherry picks<a class="headerlink" href="#merge-commits-and-cherry-picks" title="Permalink to this heading">¶</a></h2>
+<p>Let’s say that you have a fork (origin) on GitHub of the main Scikit-beam
+repository (upstream).  Your fork is up to date with upstream’s master branch
+and you’ve made some commits branching off from it on your own branch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">upstream</span><span class="p">:</span>
+
+   <span class="n">master</span>
+      <span class="o">|</span>
+<span class="n">A</span><span class="o">--</span><span class="n">B</span><span class="o">--</span><span class="n">C</span>
+
+<span class="n">origin</span><span class="p">:</span>
+
+ <span class="n">upstream</span><span class="o">/</span><span class="n">master</span>
+      <span class="o">|</span>
+<span class="n">A</span><span class="o">--</span><span class="n">B</span><span class="o">--</span><span class="n">C</span>
+       \
+        <span class="n">D</span><span class="o">--</span><span class="n">E</span>
+           <span class="o">|</span>
+       <span class="n">issue</span><span class="o">-</span><span class="n">branch</span>
+</pre></div>
+</div>
+<p>Then say you make a pull request of issue-branch against Astroy’s master, and
+the pull request is accepted and merged.  When GitHub merges the pull request
+it’s basically doing the following in the upstream repository:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git checkout master
+$ git remote add yourfork file:///path/to/your/fork/scikit-beam
+$ git fetch yourfork
+$ git merge --no-ff yourfork/issue-branch
+</pre></div>
+</div>
+<p>Because it always uses <code class="docutils literal notranslate"><span class="pre">--no-ff</span></code> we always get a merge commit (it is possible
+to manually do a fast-forward merge of a pull request, but we rarely ever do
+that).  Now the main Scikit-beam repository looks like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">upstream</span><span class="p">:</span>
+
+          <span class="n">master</span>
+             <span class="o">|</span>
+<span class="n">A</span><span class="o">--</span><span class="n">B</span><span class="o">--</span><span class="n">C</span><span class="o">------</span><span class="n">F</span>
+       \    <span class="o">/</span>
+        <span class="n">D</span><span class="o">--</span><span class="n">E</span>
+           <span class="o">|</span>
+    <span class="n">yourfork</span><span class="o">/</span><span class="n">issue</span><span class="o">-</span><span class="n">branch</span>
+</pre></div>
+</div>
+<p>where “F” is the merge commit GitHub just made in upstream.</p>
+<p>When you do cherry-pick of a non-merge commit, say you want to just cherry-pick
+“D” from the branch, what happens is it does a diff of “D” with its parent (in
+this case “C”) and applies that diff as a patch to whatever your HEAD is.</p>
+<p>The problem with a merge commit, such as “F”, is that “F” has two parents: “C”
+and “E”.  It doesn’t know whether to apply the diff of “F” with “C” or the diff
+of “F” with “E”.  Clearly in this case of backporting a pull request to a bug
+fix branch we want to apply everything that changed on master from the merge,
+so we want the diff of “F” with “C”.</p>
+<p>Since GitHub was on <code class="docutils literal notranslate"><span class="pre">master</span></code> when it did <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">merge</span> <span class="pre">yourfork/issue-branch</span></code>, the
+last commit in <code class="docutils literal notranslate"><span class="pre">master</span></code> is the first parent.  Basically whatever HEAD you’re on
+when you do the merge is the first parent, and the tip you’re merging from is
+the second parent (octopus merge gets more complicated but only a little, and
+that doesn’t apply to pull requests).  Since parents are numbered starting from
+“1” then we will always cherry-pick merge commits with <code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">1</span></code> in this case.</p>
+<p>That’s not to say that the cherry-pick will always apply cleanly.  Say in
+upstream we also have a backport branch that we want to cherry pick “F” onto:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">upstream</span><span class="p">:</span>
+
+  <span class="n">backport</span>
+     <span class="o">|</span>
+     <span class="n">G</span>       <span class="n">master</span>
+    <span class="o">/</span>          <span class="o">|</span>
+<span class="n">A</span><span class="o">--</span><span class="n">B</span><span class="o">----</span><span class="n">C</span><span class="o">------</span><span class="n">F</span>
+         \    <span class="o">/</span>
+          <span class="n">D</span><span class="o">--</span><span class="n">E</span>
+</pre></div>
+</div>
+<p>We would do:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git checkout backport
+$ git cherry-pick -m 1 F
+</pre></div>
+</div>
+<p>But this applies the diff of “F” with “C”, not of “F” with “G”.  So clearly
+there’s potential for conflicts and incongruity here.  But this will work like
+any merge that has conflicts–you can resolve any conflicts manually and then
+commit.  As long as the fix being merged is reasonably self-contained this
+usually requires little effort.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../resource/api/index.html">Complete Reference (API)</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../resource/dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../../_sources/development/workflow/additional_git_topics.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

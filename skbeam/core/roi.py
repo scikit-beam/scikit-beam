@@ -167,8 +167,8 @@ def ring_edges(inner_radius, width, spacing=0, num_rings=None):
     edges : array
         inner and outer radius for each ring
 
-    Example
-    -------
+    Examples
+    --------
     # Make two rings starting at r=1px, each 5px wide
     >>> ring_edges(inner_radius=1, width=5, num_rings=2)
     [(1, 6), (6, 11)]
@@ -588,8 +588,8 @@ def bar(edges, shape, horizontal=True, values=None):
         specified in `edges`.
         Has shape=`image shape`
 
-    Note
-    ----
+    Notes
+    -----
     The primary use case is in GISAXS.
     """
     edges = np.atleast_2d(np.asarray(edges)).ravel()
@@ -637,8 +637,8 @@ def box(shape, v_edges, h_edges=None, h_values=None, v_values=None):
         ROI are 1, 2, 3, corresponding to the order they are specified
         in edges.
 
-    Note
-    ----
+    Notes
+    -----
     To draw boxes according to the image pixels co-ordinates has to provide
     both h_values and v_values. The primary use case is in GISAXS.
     e.g., v_values=gisaxs_qy, h_values=gisaxs_qx
@@ -729,8 +729,8 @@ def auto_find_center_rings(avg_img, sigma=1, no_rings=4, min_samples=3,
     radii : list
         values of the radii of the rings
 
-    Note
-    ----
+    Notes
+    -----
     scikit-image ransac
     method(http://www.imagexd.org/tutorial/lessons/1_ransac.html) is used to
     automatically find the center and the most intense rings.

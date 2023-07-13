@@ -1,0 +1,4 @@
+Changes
+-------
+
+Moved RCPParamsDict to core and removed rcparams.py

@@ -102,41 +102,43 @@ def _corr_ax1(input_image):
 
 def construct_circ_avg_image(radii, intensities, dims=None, center=None,
                              pixel_size=(1, 1), left=0, right=0):
-    """ Constructs a 2D image from circular averaged data
-        where radii are given in units of pixels.
-        Normally, data will be taken from circular_average and used to
-        re-interpolate into an image.
+    """ 
+    Constructs a 2D image from circular averaged data
+    where radii are given in units of pixels.
+    Normally, data will be taken from circular_average and used to
+    re-interpolate into an image.
 
     Parameters
     ----------
-    radii : 1D array of floats
+    radii: 1D array of floats
         the radii (must be in pixels)
-    intensities : 1D array of floats
+    intensities: 1D array of floats
         the intensities for the radii
-    dims : 2 tuple of floats, optional
-        [dy, dx] (row, col)
+    dims: 2 tuple of floats, optional
+        ``[dy, dx] (row, col)``: 
         dy, dx are the dimensions in row,col format If the dims are not set, it
         will assume the dimensions to be (2*maxr+1) where maxr is the maximum
         radius. Note in the case of rectangular pixels (pixel_size not 1:1)
-        that the `maxr' value will be different in each dimension
+        that the ``maxr`` value will be different in each dimension
     center: 2 tuple of floats, optional
         [y0, x0] (row, col)
         y0, x0 is the center (in row,col format)
-        if not centered, assumes center is (dims[0]-1)/2., (dims[1]-1)/2.
-    pixel_size : tuple, optional
+        if not centered, assumes center is ``(dims[0]-1)/2., (dims[1]-1)/2``.
+    pixel_size: tuple, optional
         The size of a pixel (in a real unit, like mm).
         argument order should be (pixel_height, pixel_width)
-        default is (1, 1)
-    left : float, optional
+        default is ``(1, 1)``
+    left: float, optional
         pixels smaller than the minimum radius are set to this value
         (set to None for the value at the minimum radius)
-    right : float, optional
+    right: float, optional
         pixels larger than the maximum radius are set to this value
         (set to None for the value at the maximum radius)
 
     Returns
     -------
-    IMG : the interpolated circular averaged image
+    IMG 
+        the interpolated circular averaged image
 
     See Also
     --------
@@ -150,8 +152,8 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None,
     Notes
     -----
     Some pixels may not be filled if the dimensions chosen are too large.
-        Run this code again on a list of values equal to 1 to obtain a mask
-        (and set left=0 and right=0).
+    Run this code again on a list of values equal to 1 to obtain a mask
+    (and set left=0 and right=0).
     """
     if dims is None:
         if center is not None:
@@ -174,53 +176,53 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None,
 
 def construct_rphi_avg_image(radii, angles, image, mask=None,
                              center=None, shape=None, pixel_size=(1, 1)):
-    ''' Construct a 2D Cartesian (x,y) image from a polar coordinate image.
+    ''' 
+    Construct a 2D Cartesian (x,y) image from a polar coordinate image.
 
-        Assumes a 2D array of data. If data is missing, use mask.
+    Assumes a 2D array of data. If data is missing, use mask.
 
-        Parameters
-        ----------
-        radii : 1d array of coordinates, ascending order.
-            The radii values (in units of pixels)
-            These may be non-uniformly spaced.
+    Parameters
+    ----------
+    radii: 1d array of coordinates, ascending order.
+        The radii values (in units of pixels)
+        These may be non-uniformly spaced.
 
-        angles : 1d array of coordinates, ascending order
-            The angle values (in units of radians)
-            Domain *must* be monotonically increasing (or a subset) if
-            we plot the reconstructed image in a typical x-y plane,
-            where x are the columns of the image and y are the rows
-            (img[y,x]), then 0 degrees is the -x direction, and
-            ascending angle goes clockwise in this plane.
-            These may be non-uniformly spaced.
-            Note that if the domain interval exceeds 2*pi, values
-            outside this range are ignored for interpolation.
-            Ex : angles = [0, ..., 6.25, 2*np.pi]
-                The last point modulo 2*pi is 0 which is the same as first
-                point so it is ignored
+    angles: 1d array of coordinates, ascending order
+        The angle values (in units of radians)
+        Domain *must* be monotonically increasing (or a subset) if
+        we plot the reconstructed image in a typical x-y plane,
+        where x are the columns of the image and y are the rows
+        (img[y,x]), then 0 degrees is the -x direction, and
+        ascending angle goes clockwise in this plane.
+        These may be non-uniformly spaced.
+        Note that if the domain interval exceeds 2*pi, values
+        outside this range are ignored for interpolation.
+        Example: ``angles = [0, ..., 6.25, 2*np.pi]``
+        The last point modulo 2*pi is 0 which is the same as first
+        point so it is ignored
 
-        image : 2d array the image to interpolate from
-            rows are radii, columns are angles, ex: img[radii, angles]
+    image: 2d array the image to interpolate from
+        rows are radii, columns are angles, ex: img[radii, angles]
 
-        mask : 2d array, optional
-            the masked data (0 masked, 1 not masked). Defaults to None,
-            which means assume all points are valid.
+    mask: 2d array, optional
+        the masked data (0 masked, 1 not masked). Defaults to None,
+        which means assume all points are valid.
 
-        center : 2 tuple of floats, optional
+    center: 2 tuple of floats, optional
 
-        shape : the new image shape, in terms of pixel values
+    shape: 
+        the new image shape, in terms of pixel values
 
-        Note
-        ----
-        This function uses a simple linear interpolation from scipy:
-            `scipy.interpolate.RegularGridInterpolator`
-            More complex interpolation techniques (i.e. splines) cannot be used
-            with this algorithm.
+    Notes
+    -----
+    This function uses a simple linear interpolation from scipy:
+    `scipy.interpolate.RegularGridInterpolator`. More complex interpolation techniques 
+    (i.e. splines) cannot be used with this algorithm.
 
-        Returns
-        -------
-        new_img : 2d np.ndarray
-            The reconstructed image. Masked regions are filled with np.nan
-
+    Returns
+    -------
+    new_img: 2d np.ndarray
+        The reconstructed image. Masked regions are filled with `np.nan`.
     '''
     if mask is not None:
         if mask.shape != image.shape:

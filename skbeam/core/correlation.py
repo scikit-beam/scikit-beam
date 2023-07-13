@@ -433,24 +433,24 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
 
     Parameters
     ----------
-    lags : array
+    lags: array
         delay time
-    beta : float
+    beta: float
         optical contrast (speckle contrast), a sample-independent
         beamline parameter
-    relaxation_rate : float
+    relaxation_rate: float
         relaxation time associated with the samples dynamics.
-    baseline : float, optional
+    baseline: float, optional
         baseline of one time correlation
         equal to one for ergodic samples
 
     Returns
     -------
-    g2 : array
+    g2: array
         normalized intensity-intensity time autocorreltion
 
-    Notes :
-    -------
+    Notes
+    -----
     The intensity-intensity autocorrelation g2 is connected to the intermediate
     scattering factor(ISF) g1
 
@@ -458,8 +458,10 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
         g_2(q, \\tau) = \\beta_1[g_1(q, \\tau)]^{2} + g_\\infty
 
     For a system undergoing  diffusive dynamics,
+
     .. math::
         g_1(q, \\tau) = e^{-\\gamma(q) \\tau}
+    
     .. math::
        g_2(q, \\tau) = \\beta_1 e^{-2\\gamma(q) \\tau} + g_\\infty
 
@@ -468,10 +470,9 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
     References
     ----------
     .. [1] L. Li, P. Kwasniewski, D. Orsi, L. Wiegart, L. Cristofolini,
-       C. Caronna and A. Fluerasu, " Photon statistics and speckle
+       C. Caronna and A. Fluerasu, "Photon statistics and speckle
        visibility spectroscopy with partially coherent X-rays,"
        J. Synchrotron Rad. vol 21, p 1288-1295, 2014
-
     """
     return beta * np.exp(-2 * relaxation_rate * lags) + baseline
 

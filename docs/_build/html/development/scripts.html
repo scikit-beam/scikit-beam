@@ -1,0 +1,195 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Writing Command-Line Scripts &#8212; scikit-beam 0.0.24.post14.dev0+g182b92e documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Building Scikit-beam and its Subpackages" href="building.html" />
+    <link rel="prev" title="Testing Guidelines" href="testguide.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="writing-command-line-scripts">
+<h1>Writing Command-Line Scripts<a class="headerlink" href="#writing-command-line-scripts" title="Permalink to this heading">¶</a></h1>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>We currently have no CL scripts.  If we want to pick any up is an open question.
+Leaving this text mostly un-edited from astropy.</p>
+</div>
+<p>Command-line scripts in Scikit-beam should follow a consistent scheme to promote
+readability and compatibility.</p>
+<p>Setuptools’ <a class="reference external" href="https://pythonhosted.org/setuptools/setuptools.html#automatic-script-creation">“entry points”</a> are used to automatically generate wrappers with
+the correct extension. The scripts can live in their own module, or be part of
+a larger module that implements a class or function for scikit-beam library use.
+They should have a <code class="docutils literal notranslate"><span class="pre">main</span></code> function to parse the arguments and pass those
+arguments on to some library function so that the library function can be used
+programmatically when needed. The <code class="docutils literal notranslate"><span class="pre">main</span></code> function should accept an optional
+single argument that holds the <code class="docutils literal notranslate"><span class="pre">sys.argv</span></code> list, except for the script name
+(e.g., <code class="docutils literal notranslate"><span class="pre">argv[1:]</span></code>). It must then be added to the list of entry points in the
+<code class="docutils literal notranslate"><span class="pre">setup.py</span></code> file (see the example below).</p>
+<p>Command-line options can be parsed however desired, but the <a class="reference external" href="https://docs.python.org/3.5/library/argparse.html#module-argparse" title="(in Python v3.5)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse</span></code></a>
+module is recommended when possible, due to its simpler and more flexible
+interface relative to the older <a class="reference external" href="https://docs.python.org/3.5/library/optparse.html#module-optparse" title="(in Python v3.5)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">optparse</span></code></a>.  <a class="reference external" href="https://docs.python.org/3.5/library/argparse.html#module-argparse" title="(in Python v3.5)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse</span></code></a> is only
+available in python &gt;=2.7 and &gt;=3.2, however, so it should be imported as <code class="docutils literal notranslate"><span class="pre">from</span>
+<span class="pre">scikit-beam.utils.compat</span> <span class="pre">import</span> <span class="pre">argparse</span></code> .</p>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">¶</a></h2>
+<p>Contents of <code class="docutils literal notranslate"><span class="pre">/scikit-beam/somepackage/somemod.py</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">do_something</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">option</span><span class="p">:</span>
+            <span class="o">...</span><span class="n">do</span> <span class="n">something</span><span class="o">...</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="o">...</span><span class="n">do</span> <span class="n">something</span> <span class="k">else</span><span class="o">...</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">compat</span> <span class="kn">import</span> <span class="nn">argparse</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Process some integers.&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="s1">&#39;--option&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;op&#39;</span><span class="p">,</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Some option that turns something on.&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;stuff&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Some input I should be able to get lots of.&#39;</span><span class="p">)</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="n">do_something</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">stuff</span><span class="p">,</span><span class="n">res</span><span class="o">.</span><span class="n">op</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then add the script to the <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">entry_points</span><span class="p">[</span><span class="s1">&#39;console_scripts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;somescript = scikit-beam.somepackage.somemod:main&#39;</span><span class="p">,</span>
+    <span class="o">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../resource/api/index.html">Complete Reference (API)</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="workflow/get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflow/development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflow/development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflow/maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resource/dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="testguide.html" title="previous chapter">Testing Guidelines</a></li>
+      <li>Next: <a href="building.html" title="next chapter">Building Scikit-beam and its Subpackages</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/development/scripts.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

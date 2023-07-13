@@ -1,0 +1,641 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Contributing code to Scikit-beam, a worked example &#8212; scikit-beam 0.0.24.post14.dev0+g182b92e documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="contributing-code-to-scikit-beam-a-worked-example">
+<span id="scikit-beam-fix-example"></span><h1>Contributing code to Scikit-beam, a worked example<a class="headerlink" href="#contributing-code-to-scikit-beam-a-worked-example" title="Permalink to this heading">¶</a></h1>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This still needs to be adapted for skbeam</p>
+</div>
+<p>This example is based on fixing <a class="reference external" href="https://github.com/scikit-beam/scikit-beam/issues/1917">Issue 1761</a> from the list
+of <a class="reference external" href="https://github.com/scikit-beam/scikit-beam/issues">Scikit-beam issues on GitHub</a>.
+It resulted in <a class="reference external" href="https://github.com/scikit-beam/scikit-beam/issues/1917">pull request 1917</a>.</p>
+<p>The issue title was “len() does not work for coordinates” with description
+“It would be nice to be able to use <code class="docutils literal notranslate"><span class="pre">len</span></code> on coordinate arrays to know how
+many coordinates are present.”</p>
+<p>This particular example was chosen because it was tagged as easy in GitHub;
+seemed like the best place to start out!</p>
+<section id="short-on-time-don-t-want-to-read-a-long-tutorial">
+<h2>Short on time? Don’t want to read a long tutorial?<a class="headerlink" href="#short-on-time-don-t-want-to-read-a-long-tutorial" title="Permalink to this heading">¶</a></h2>
+<p>There is a minimalist, command-only version of this at <a class="reference internal" href="command_history.html#command-history"><span class="std std-ref">Condensed example of contributing code to Scikit-beam</span></a>.
+You should  have <a class="reference external" href="https://github.com/scikit-beam/scikit-beam/issues/1917">pull request 1917</a> open as you read the commands so you can
+see the edits made to the code.</p>
+<p>There is also a very exciting terminal-cast at <a class="reference internal" href="terminal_cast.html#terminal-cast"><span class="std std-ref">Terminal-cast of worked example</span></a>.</p>
+</section>
+<section id="before-you-begin">
+<h2>Before you begin<a class="headerlink" href="#before-you-begin" title="Permalink to this heading">¶</a></h2>
+<p>Make sure you have a local copy of scikit-beam set up as described in
+<a class="reference internal" href="get_devel_version.html#get-devel"><span class="std std-ref">Try the development version</span></a>. In a nutshell, the output of <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">remote</span> <span class="pre">-v</span></code>, run in the
+directory where your local of Scikit-beam resides, should be something like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span>   <span class="n">git</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">/</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">.</span><span class="n">git</span> <span class="p">(</span><span class="n">fetch</span><span class="p">)</span>
+<span class="n">scikit</span><span class="o">-</span><span class="n">beam</span>   <span class="n">git</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">/</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">.</span><span class="n">git</span> <span class="p">(</span><span class="n">push</span><span class="p">)</span>
+<span class="n">your</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">name</span>     <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">your</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">name</span><span class="o">/</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">.</span><span class="n">git</span> <span class="p">(</span><span class="n">fetch</span><span class="p">)</span>
+<span class="n">your</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">name</span>     <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">your</span><span class="o">-</span><span class="n">user</span><span class="o">-</span><span class="n">name</span><span class="o">/</span><span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">.</span><span class="n">git</span> <span class="p">(</span><span class="n">push</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The precise form of the URLs for <code class="docutils literal notranslate"><span class="pre">your-user-name</span></code> depends on the
+authentication method you set up with GitHub.</p>
+<p>The important point is that <code class="docutils literal notranslate"><span class="pre">scikit-beam</span></code> should point to the official Scikit-beam
+repo and <code class="docutils literal notranslate"><span class="pre">your-user-name</span></code> should point to <em>your</em> copy of Scikit-beam on GitHub.</p>
+</section>
+<section id="grab-the-latest-updates-to-scikit-beam">
+<h2>Grab the latest updates to scikit-beam<a class="headerlink" href="#grab-the-latest-updates-to-scikit-beam" title="Permalink to this heading">¶</a></h2>
+<p>A few steps in this tutorial take only a single command. They are broken out
+separately to outline the process in words as well as code.</p>
+<p>Inform your local copy of Scikit-beam about the latest changes in the development
+version with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">fetch</span> <span class="n">scikit</span><span class="o">-</span><span class="n">beam</span>
+</pre></div>
+</div>
+</section>
+<section id="set-up-an-isolated-workspace">
+<h2>Set up an isolated workspace<a class="headerlink" href="#set-up-an-isolated-workspace" title="Permalink to this heading">¶</a></h2>
+<ul>
+<li><p>Make a new <a class="reference external" href="http://git-scm.com/">git</a> branch for fixing this issue, check it out, and let my
+GitHub account know about this branch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">branch</span> <span class="n">fix</span><span class="o">-</span><span class="mi">1761</span> <span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">/</span><span class="n">master</span>   <span class="c1"># branch based on latest from GitHub</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="n">fix</span><span class="o">-</span><span class="mi">1761</span>                   <span class="c1"># switch to this branch</span>
+<span class="n">git</span> <span class="n">push</span> <span class="o">--</span><span class="nb">set</span><span class="o">-</span><span class="n">upstream</span> <span class="n">origin</span> <span class="n">fix</span><span class="o">-</span><span class="mi">1761</span> <span class="c1"># tell my github acct about it</span>
+</pre></div>
+</div>
+</li>
+<li><p>Make a python environment just for this fix and switch to that environment.
+The example below shows the necessary steps in the Anaconda python
+distribution:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">apy</span><span class="o">-</span><span class="mi">1761</span> <span class="o">--</span><span class="n">clone</span> <span class="n">root</span>  <span class="c1"># Anaconda distribution only</span>
+<span class="n">source</span> <span class="n">activate</span> <span class="n">apy</span><span class="o">-</span><span class="mi">1761</span>
+</pre></div>
+</div>
+<p>If you are using a different distribution, see <a class="reference internal" href="virtual_pythons.html#virtual-envs"><span class="std std-ref">Python virtual environments</span></a> for
+instructions for creating and activating a new environment.</p>
+</li>
+<li><p>Install our branch in this environment (will not work in python 3) with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">develop</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>Do you really have to set up a separate python environment for each fix? No,
+but you definitely want to have a python environment for your work on code
+contributions. Making new environments is fast, doesn’t take much space and
+provide a way to keep your work organized.</p>
+</section>
+<section id="tests-first-please">
+<h2>Tests first, please<a class="headerlink" href="#tests-first-please" title="Permalink to this heading">¶</a></h2>
+<p>It would be hard to overstate the importance of testing to Scikit-beam. Tests are
+what gives you confidence that new code does what it should and that it
+doesn’t break old code.</p>
+<p>You should at least run the relevant tests before you make any changes to make
+sure that your python environment is set up properly.</p>
+<p>The first challenge is figuring out where to look for relevant tests. <a class="reference external" href="https://github.com/scikit-beam/scikit-beam/issues/1917">Issue
+1761</a> is a problem in the <code class="xref py py-obj docutils literal notranslate"><span class="pre">coordinates</span></code> package, so the tests for
+it are in <code class="docutils literal notranslate"><span class="pre">scikit-beam/coordinates/tests</span></code>. The rest of Scikit-beam has a similar
+layout, described at <a class="reference internal" href="../testguide.html#testing-guidelines"><span class="std std-ref">Testing Guidelines</span></a>.</p>
+<p>Change to that directory and run the current tests with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">/</span><span class="n">coordinates</span><span class="o">/</span><span class="n">test</span>
+<span class="n">py</span><span class="o">.</span><span class="n">test</span>
+</pre></div>
+</div>
+<p>The tests all pass, so I need to write a new test to expose this bug.</p>
+<p>There are several files with tests in them, though:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ls
+test_angles.py
+test_angular_separation.py
+test_api.py
+test_arrays.py
+test_distance.py
+test_formatting.py
+test_matching.py
+test_name_resolve.py
+test_transformations.py
+</pre></div>
+</div>
+<p><a class="reference external" href="https://github.com/scikit-beam/scikit-beam/issues/1917">Issue 1761</a> affects arrays of coordinates, so it seems sensible to put the
+new test in <code class="docutils literal notranslate"><span class="pre">test_arrays.py</span></code>. As with all of the steps, if you are not
+sure, ask on the scikit-beam-dev mailing list.</p>
+<p>The goal at this point may be a little counter-intuitive: write a test that we
+know will fail with the current code. This test allows Scikit-beam to check,
+in an automated way, whether our fix actually works and to make sure future
+changes to code do not break our fix.</p>
+<p>Looking over the existing code in <code class="docutils literal notranslate"><span class="pre">test_arrays.py</span></code>, each test is a function
+whose name starts with <code class="docutils literal notranslate"><span class="pre">test_</span></code>; the last test in the file is
+<code class="docutils literal notranslate"><span class="pre">test_array_indexing</span></code> so an appropriate place to add the test is right after
+that.</p>
+<p>Give the test a reasonably clear name; I chose: <code class="docutils literal notranslate"><span class="pre">test_array_len</span></code>. The
+easiest way to figure out what you need to import and how to set up the test
+is to look at other tests. The full test is in the traceback below and in
+<a class="reference external" href="https://github.com/scikit-beam/scikit-beam/issues/1917">pull request 1917</a></p>
+<p>Write the test, then see if it works as expected–remember, in this case we
+expect to <em>fail</em>. Running <code class="docutils literal notranslate"><span class="pre">py.test</span> <span class="pre">test_arrays.py</span></code> gives the expected
+result; an excerpt from the output is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">=================</span> <span class="n">FAILURES</span> <span class="o">=============================</span>
+<span class="n">______________</span> <span class="n">test_array_len</span> <span class="n">__________________________</span>
+
+    <span class="k">def</span> <span class="nf">test_array_len</span><span class="p">():</span>
+        <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">ICRS</span>
+
+        <span class="n">input_length</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="n">ra</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="n">input_length</span><span class="p">)</span>
+        <span class="n">dec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="n">input_length</span><span class="p">)</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="n">ICRS</span><span class="p">(</span><span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">))</span>
+
+<span class="o">&gt;</span>       <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">==</span> <span class="n">input_length</span>
+<span class="n">E</span>       <span class="ne">TypeError</span><span class="p">:</span> <span class="nb">object</span> <span class="n">of</span> <span class="nb">type</span> <span class="s1">&#39;ICRS&#39;</span> <span class="n">has</span> <span class="n">no</span> <span class="nb">len</span><span class="p">()</span>
+
+<span class="n">test_arrays</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">291</span><span class="p">:</span> <span class="ne">TypeError</span>
+</pre></div>
+</div>
+<p>Success!</p>
+</section>
+<section id="add-this-test-to-your-local-git-repo">
+<h2>Add this test to your local <a class="reference external" href="http://git-scm.com/">git</a> repo<a class="headerlink" href="#add-this-test-to-your-local-git-repo" title="Permalink to this heading">¶</a></h2>
+<p>Keep <a class="reference external" href="http://git-scm.com/">git</a> commits small and focused on one logical piece at a time. The test
+we just wrote is one logical change, so we will commit it. You could, if you
+prefer, wait and commit this test along with your fix.</p>
+<p>For this tutorial I’ll commit the test separately. If you aren’t sure what to
+do, ask on scikit-beam-dev mailing list.</p>
+<section id="check-what-was-changed">
+<h3>Check what was changed<a class="headerlink" href="#check-what-was-changed" title="Permalink to this heading">¶</a></h3>
+<p>We can see what has changed with <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">status</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git status
+On branch fix-1761
+Your branch is up-to-date with &#39;origin/fix-1761&#39;.
+
+Changes not staged for commit:
+  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)
+  (use &quot;git checkout -- &lt;file&gt;...&quot; to discard changes in working directory)
+
+    modified:   test_arrays.py
+
+no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)
+</pre></div>
+</div>
+<p>There are two bits of information here:</p>
+<ul class="simple">
+<li><p>one file changed, <code class="docutils literal notranslate"><span class="pre">test_arrays.py</span></code></p></li>
+<li><p>We have not added our changes to git yet, so it is listed under <code class="docutils literal notranslate"><span class="pre">Changes</span>
+<span class="pre">not</span> <span class="pre">staged</span> <span class="pre">for</span> <span class="pre">commit</span></code>.</p></li>
+</ul>
+<p>For more extensive changes it can be useful to use <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">diff</span></code> to see what
+changes have been made:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git diff
+diff --git a/scikit-beam/coordinates/tests/test_arrays.py b/scikit-beam/coordinates/test
+index 2785b59..7eecfbb 100644
+--- a/scikit-beam/coordinates/tests/test_arrays.py
++++ b/scikit-beam/coordinates/tests/test_arrays.py
+@@ -278,3 +278,14 @@ def test_array_indexing():
+     assert c2.equinox == c1.equinox
+     assert c3.equinox == c1.equinox
+     assert c4.equinox == c1.equinox
++
++def test_array_len():
++    from .. import ICRS
++
++    input_length = 5
++    ra = np.linspace(0, 360, input_length)
++    dec = np.linspace(0, 90, input_length)
++
++    c = ICRS(ra, dec, unit=(u.degree, u.degree))
++
++    assert len(c) == input_length
+</pre></div>
+</div>
+<p>A graphical interface to git makes keeping track of these sorts of changes
+even easier; see <a class="reference internal" href="git_install.html#git-gui-options"><span class="std std-ref">Get a git GUI (optional)</span></a> if you are interested.</p>
+</section>
+<section id="stage-the-change">
+<h3>Stage the change<a class="headerlink" href="#stage-the-change" title="Permalink to this heading">¶</a></h3>
+<p><a class="reference external" href="http://git-scm.com/">git</a> requires you to add changes in two steps:</p>
+<ul class="simple">
+<li><p>stage the change with <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">add</span> <span class="pre">test_arrays.py</span></code>; this adds the file to
+the list of items that will be added to the repo when you are ready to
+commit.</p></li>
+<li><p>commit the change with <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span></code>; this actually adds the changes to
+your repo.</p></li>
+</ul>
+<p>These can be combined into one step; the advantage of doing it in two steps
+is that it is easier to undo staging than committing. As we will see later,
+<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">status</span></code> even tells you how to do it.</p>
+<p>Staging can be very handy if you are making changes in a couple of different
+places that you want to commit at the same time. Make your first changes,
+stage it, then make your second change and stage that. Once everything is
+staged, commit the changes as one commit.</p>
+<p>In this case, first stage the change:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">add</span> <span class="n">test_arrays</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>You get no notice at the command line that anything has changed, but
+<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">status</span></code> will let you know:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git status
+On branch fix-1761
+Your branch is up-to-date with &#39;origin/fix-1761&#39;.
+
+Changes to be committed:
+  (use &quot;git reset HEAD &lt;file&gt;...&quot; to unstage)
+
+    modified:   test_arrays.py
+</pre></div>
+</div>
+<p>Note that <a class="reference external" href="http://git-scm.com/">git</a> helpfully includes the command necessary to unstage the
+change if you want to.</p>
+</section>
+<section id="commit-your-change">
+<h3>Commit your change<a class="headerlink" href="#commit-your-change" title="Permalink to this heading">¶</a></h3>
+<p>I prefer to make commits frequently, so I’ll commit the test without the fix:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git commit -m&#39;Add test for array coordinate length (issue #1761)&#39;
+[fix-1761 dd4ef8c] Add test for array coordinate length (issue #1761)
+ 1 file changed, 11 insertions(+)
+</pre></div>
+</div>
+<p>Commit messages should be short and descriptive. Including the GitHub issue
+number allows GitHub to automatically create links to the relevant issue.</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">status</span></code> to get a recap of where we are so far:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git status
+On branch fix-1761
+Your branch is ahead of &#39;origin/fix-1761&#39; by 1 commit.
+  (use &quot;git push&quot; to publish your local commits)
+
+nothing to commit, working directory clean
+</pre></div>
+</div>
+<p>In other words, we have made a change to our local copy of scikit-beam but we
+have not pushed (transferred) that change to our GitHub account.</p>
+</section>
+</section>
+<section id="fix-the-issue">
+<h2>Fix the issue<a class="headerlink" href="#fix-the-issue" title="Permalink to this heading">¶</a></h2>
+<section id="write-the-code">
+<h3>Write the code<a class="headerlink" href="#write-the-code" title="Permalink to this heading">¶</a></h3>
+<p>Now that we have a test written, we’ll fix the issue. A full discussion of
+the fix is beyond the scope of this tutorial, but the fix is to add a
+<code class="docutils literal notranslate"><span class="pre">__len__</span></code> method to <code class="docutils literal notranslate"><span class="pre">scikit-beam.coordinates.SphericalCoordinatesBase</span></code> in
+<code class="docutils literal notranslate"><span class="pre">coordsystems.py</span></code>. All of the spherical coordinate systems inherit from
+this base class and it is this base class that implements the
+<code class="docutils literal notranslate"><span class="pre">__getitem__</span></code> method that allows indexing of coordinate arrays.</p>
+<p>See <a class="reference external" href="https://github.com/scikit-beam/scikit-beam/issues/1917">pull request 1917</a> to view the changes to the code.</p>
+</section>
+<section id="test-your-change">
+<span id="test-changes"></span><h3>Test your change<a class="headerlink" href="#test-your-change" title="Permalink to this heading">¶</a></h3>
+<p>There are a few levels at which you want to test:</p>
+<ul class="simple">
+<li><p>Does this code change make the test we wrote succeed now? Check
+by running <code class="docutils literal notranslate"><span class="pre">py.test</span> <span class="pre">tests/test_arrays.py</span></code> in the <code class="docutils literal notranslate"><span class="pre">coordinates</span></code>
+directory. In this case, yes!</p></li>
+<li><p>Do the rest of the coordinate tests still pass? Check by running <code class="docutils literal notranslate"><span class="pre">py.test</span></code>
+in the <code class="docutils literal notranslate"><span class="pre">coordinates</span></code> directory. In this case, yes–we have not broken
+anything!</p></li>
+<li><p>Do all of the scikit-beam tests still succeed? Check by moving to the top level
+directory (the one that contains <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>) and run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span>
+<span class="pre">test</span></code>. This may take several minutes depending on the speed of your system.
+Success again!</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Tests that are skipped or xfailed are fine. A fail or an error is not
+fine. If you get stuck, ask on scikit-beam-dev mailing list for help!</p>
+</div>
+</section>
+<section id="stage-and-commit-your-change">
+<h3>Stage and commit your change<a class="headerlink" href="#stage-and-commit-your-change" title="Permalink to this heading">¶</a></h3>
+<p>Add the file to your git repo in two steps: stage, then commit.</p>
+<p>To make this a little different than the commit we did above, make sure you
+are still in the top level directory and check the <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">status</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git status
+On branch fix-1761
+Your branch is ahead of &#39;origin/fix-1761&#39; by 1 commit.
+  (use &quot;git push&quot; to publish your local commits)
+
+Changes not staged for commit:
+  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)
+  (use &quot;git checkout -- &lt;file&gt;...&quot; to discard changes in working directory)
+
+    modified:   scikit-beam/coordinates/coordsystems.py
+
+no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)
+</pre></div>
+</div>
+<p>Note that git knows what has changed no matter what directory you are in (as
+long as you are in one of the directories in the repo, that is).</p>
+<p>Stage the change with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">add</span> <span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">/</span><span class="n">coordinates</span><span class="o">/</span><span class="n">coordsystems</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>For this commit it is helpful to use a multi-line commit message that will
+automatically close the issue on GitHub when this change is accepted. The
+snippet below accomplishes that in bash (and similar shells):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git commit -m&quot;
+&gt; Add len() to coordinates
+&gt;
+&gt; Closes #1761&quot;
+[fix-1761 f196771] Add len() to coordinates
+ 1 file changed, 4 insertions(+)
+</pre></div>
+</div>
+<p>If this was not a tutorial I would write the commit message in a git gui or
+run <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span></code> without a message and git would put me in an editor.</p>
+<p>However you do it, the message after committing should look like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Add</span> <span class="nb">len</span><span class="p">()</span> <span class="n">to</span> <span class="n">coordinates</span>
+
+<span class="n">Closes</span> <span class="c1">#1761</span>
+</pre></div>
+</div>
+<p>You can check the commit messages by running <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">log</span></code>. If the commit
+message doesn’t look right, ask about fixing it at scikit-beam-dev mailing list.</p>
+</section>
+</section>
+<section id="push-your-changes-to-your-github-fork-of-scikit-beam">
+<h2>Push your changes to your GitHub fork of scikit-beam<a class="headerlink" href="#push-your-changes-to-your-github-fork-of-scikit-beam" title="Permalink to this heading">¶</a></h2>
+<p>This one is easy: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">push</span></code></p>
+<p>This copies the changes made on your computer to your copy of Scikit-beam on
+GitHub. At this point none of the Scikit-beam maintainers know anything about
+your change.</p>
+<p>We’ll take care of that in a moment with a “pull request”, but first…</p>
+</section>
+<section id="stop-and-think-any-more-tests-or-other-changes">
+<h2>Stop and think: any more tests or other changes?<a class="headerlink" href="#stop-and-think-any-more-tests-or-other-changes" title="Permalink to this heading">¶</a></h2>
+<p>It never hurts to pause at this point and review whether your proposed
+changes are complete. In this case I realized there were some tests I could
+have included but didn’t:</p>
+<ul class="simple">
+<li><p>What happens when <code class="docutils literal notranslate"><span class="pre">len()</span></code> is called on a coordinate that is <em>not</em> an
+array?</p></li>
+<li><p>Does <code class="docutils literal notranslate"><span class="pre">len()</span></code> work when the coordinate is an array with one entry?</p></li>
+</ul>
+<p>Both of these are mentioned in the pull request so it doesn’t hurt to check
+them. In this case they also provide an opportunity to illustrate a feature
+of the <a class="reference external" href="http://pytest.org/latest/">py.test</a> framework.</p>
+<p>I’ll move back to the directory containing the tests with
+<code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">scikit-beam/coordinates/tests</span></code> to make it a bit easier to run just the test
+I want.</p>
+<p>The second case is easier, so I’ll handle that one first following the cycle
+we used above:</p>
+<ul class="simple">
+<li><p>Make the change in <code class="docutils literal notranslate"><span class="pre">test_arrays.py</span></code></p></li>
+<li><p>Test the change</p></li>
+</ul>
+<p>The test passed; rather than committing this one change I’ll also implement
+the check for the scalar case.</p>
+<p>One could imagine two different desirable outcomes here:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">len(scalar_coordinate)</span></code> behaves just like <code class="docutils literal notranslate"><span class="pre">len(scalar_angle)</span></code>, raising
+a <cite>TypeError</cite> for a scalar coordinate.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">len(scalar_coordinate)</span></code> returns 1 since there is one coordinate.</p></li>
+</ul>
+<p>If you encounter a case like this and are not sure what to do, ask. The best
+place to ask is in GitHub on the page for the issue you are fixing.</p>
+<p>Alternatively, make a choice and be clear in your pull request on GitHub what
+you chose and why; instructions for that are below.</p>
+<section id="testing-for-an-expected-error">
+<h3>Testing for an expected error<a class="headerlink" href="#testing-for-an-expected-error" title="Permalink to this heading">¶</a></h3>
+<p>In this case I opted for raising a <cite>TypeError</cite>, because
+the user needs to know that the coordinate they created is not going to
+behave like an array of one coordinate if they try to index it later on. It
+also provides an opportunity to demonstrate a test when the desired result
+is an error.</p>
+<p>The <a class="reference external" href="http://pytest.org/latest/">py.test</a> framework makes testing for an exception relatively
+easy; you put the code you expect to fail in a <code class="docutils literal notranslate"><span class="pre">with</span></code> block:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">ICRS</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">degree</span><span class="p">))</span>
+    <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>I added this to <code class="docutils literal notranslate"><span class="pre">test_array_len</span></code> in <code class="docutils literal notranslate"><span class="pre">test_arrays.py</span></code> and re-ran the test
+to make sure it works as desired.</p>
+</section>
+<section id="aside-python-lesson-let-others-do-your-work">
+<h3>Aside: Python lesson–let others do your work<a class="headerlink" href="#aside-python-lesson-let-others-do-your-work" title="Permalink to this heading">¶</a></h3>
+<p>The actual fix to this issue was very, very short. In <code class="docutils literal notranslate"><span class="pre">coordsystems.py</span></code> two
+lines were added:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lonangle</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">lonangle</span></code> contains the <code class="docutils literal notranslate"><span class="pre">Angle``s</span> <span class="pre">that</span> <span class="pre">represent</span> <span class="pre">longitude</span> <span class="pre">(sometimes</span> <span class="pre">this</span>
+<span class="pre">is</span> <span class="pre">an</span> <span class="pre">RA,</span> <span class="pre">sometimes</span> <span class="pre">a</span> <span class="pre">longitude).</span> <span class="pre">By</span> <span class="pre">simply</span> <span class="pre">calling</span> <span class="pre">``len()</span></code> on one of the
+angles in the array you get, for free, whatever behavior has been defined in
+the <code class="docutils literal notranslate"><span class="pre">Angle</span></code> class for handling the case of a scalar.</p>
+<p>Adding an explicit check for the case of a scalar here would have the very
+big downside of having two things that need to be kept in sync: handling of
+scalars in <code class="docutils literal notranslate"><span class="pre">Angle</span></code> and in coordinates.</p>
+</section>
+</section>
+<section id="commit-any-additional-changes">
+<h2>Commit any additional changes<a class="headerlink" href="#commit-any-additional-changes" title="Permalink to this heading">¶</a></h2>
+<p>Follow the cycle you saw above:</p>
+<ul class="simple">
+<li><p>Check that <strong>all</strong> Scikit-beam tests still pass; see <a class="reference internal" href="#test-changes"><span class="std std-ref">Test your change</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">status</span></code> to see what needs to be staged and committed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">add</span></code> to stage the changes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span></code> to commit the changes</p></li>
+</ul>
+<p>The <a class="reference external" href="http://git-scm.com/">git</a> commands, without their output, are:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">status</span>
+<span class="n">git</span> <span class="n">add</span> <span class="n">scikit</span><span class="o">-</span><span class="n">beam</span><span class="o">/</span><span class="n">coordinates</span><span class="o">/</span><span class="n">tests</span><span class="o">/</span><span class="n">test_arrays</span><span class="o">.</span><span class="n">py</span>
+<span class="n">git</span> <span class="n">commit</span> <span class="o">-</span><span class="n">m</span><span class="s2">&quot;Add tests of len() for scalar coordinate and length 1 coordinate&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="edit-the-changelog">
+<h2>Edit the changelog<a class="headerlink" href="#edit-the-changelog" title="Permalink to this heading">¶</a></h2>
+<p>Keeping the list of changes up to date is nearly impossible unless each
+contributor makes the appropriate updates as they propose changes.</p>
+<p>Changes are in the file <code class="docutils literal notranslate"><span class="pre">CHANGES.rst</span></code> in the top-level directory (the
+directory where <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> is). Put the change under the list that matches
+the milestone (aka release) that is set for the issue in GitHub. If you are
+proposing a new feature in a pull request you may need to wait on this change
+until the pull request is discussed.</p>
+<p>This issue was tagged for 0.3.1, as shown in the image below, so the changelog
+entry went there.</p>
+<blockquote>
+<div><img alt="../../_images/milestone.png" src="../../_images/milestone.png" />
+</div></blockquote>
+<p>The entry in <code class="docutils literal notranslate"><span class="pre">CHANGES.rst</span></code> should summarize was you did and include the
+issue number. For writing changelog entries you don’t need to know much about
+the markup language being used (though you can read as much as you want about
+it at the <a class="reference external" href="http://sphinx-doc.org/rest.html">Sphinx primer</a>); look at other entries and imitate.</p>
+<p>For this issue the entry was the line that starts <code class="docutils literal notranslate"><span class="pre">-</span> <span class="pre">Implemented</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>- ``scikit-beam.coordinates``
+
+  - Implemented `len()` for coordinate objects. [#1761]
+</pre></div>
+</div>
+<p>Starting the line with a <code class="docutils literal notranslate"><span class="pre">-</span></code> makes a bulleted list item, indenting it makes
+it a sublist of <code class="docutils literal notranslate"><span class="pre">scikit-beam.coordinates</span></code> and putting <code class="docutils literal notranslate"><span class="pre">len()</span></code> in single
+backticks makes that text render in a typewriter font.</p>
+<section id="commit-your-changes-to-the-changes-rst">
+<h3>Commit your changes to the CHANGES.rst<a class="headerlink" href="#commit-your-changes-to-the-changes-rst" title="Permalink to this heading">¶</a></h3>
+<p>You can use <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">status</span></code> as above or jump right to staging and committing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">add</span> <span class="n">CHANGES</span><span class="o">.</span><span class="n">rst</span>
+<span class="n">git</span> <span class="n">commit</span> <span class="o">-</span><span class="n">m</span><span class="s2">&quot;Add changelog entry for 1761&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="push-your-changes-to-github">
+<h2>Push your changes to GitHub<a class="headerlink" href="#push-your-changes-to-github" title="Permalink to this heading">¶</a></h2>
+<p>One last push to GitHub with these changes before asking for the changes to
+be reviewed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">push</span>
+</pre></div>
+</div>
+</section>
+<section id="ask-for-your-changes-to-be-merged-with-a-pull-request">
+<h2>Ask for your changes to be merged with a pull request<a class="headerlink" href="#ask-for-your-changes-to-be-merged-with-a-pull-request" title="Permalink to this heading">¶</a></h2>
+<p>This stage requires to go to your GitHub account and navigate to <em>your</em> copy
+of scikit-beam; the url will be something like
+<code class="docutils literal notranslate"><span class="pre">https://github.com/your-user-name/scikit-beam</span></code>.</p>
+<p>Once there, select the branch that contains your fix from the branches
+dropdown:</p>
+<blockquote>
+<div><img alt="../../_images/worked_example_switch_branch.png" src="../../_images/worked_example_switch_branch.png" />
+</div></blockquote>
+<p>After selecting the correct branch click on the “Pull Request” button, like
+that in the image below:</p>
+<blockquote>
+<div><img alt="../../_images/pull_button.png" src="../../_images/pull_button.png" />
+</div></blockquote>
+<p>Name your pull request something sensible. Include the issue number with a
+leading <code class="docutils literal notranslate"><span class="pre">#</span></code> in the description of the pull request so that a link is
+created to the original issue.</p>
+<p>Please see <a class="reference external" href="https://github.com/scikit-beam/scikit-beam/issues/1917">pull request 1917</a> for the pull request from this example.</p>
+</section>
+<section id="revise-and-push-as-necessary">
+<h2>Revise and push as necessary<a class="headerlink" href="#revise-and-push-as-necessary" title="Permalink to this heading">¶</a></h2>
+<p>You may be asked to make changes in the discussion of the pull request. Make
+those changes in your local copy, commit them to your local repo and push them
+to GitHub. GitHub will automatically update your pull request.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../resource/api/index.html">Complete Reference (API)</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../resource/dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../../_sources/development/workflow/git_edit_workflow_examples.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

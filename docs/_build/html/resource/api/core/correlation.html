@@ -1,0 +1,462 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>correlation Module &#8212; scikit-beam 0.0.24.post14.dev0+g182b92e documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="core.dpc Module" href="dpc.html" />
+    <link rel="prev" title="skbeam.core.constants.xrs.HKL" href="_as_gen/skbeam.core.constants.xrs.HKL.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-skbeam.core.correlation">
+<span id="correlation-module"></span><h1><a class="reference internal" href="#module-skbeam.core.correlation" title="skbeam.core.correlation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">correlation</span></code></a> Module<a class="headerlink" href="#module-skbeam.core.correlation" title="Permalink to this heading">¶</a></h1>
+<p>This module is for functions specific to time correlation</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="skbeam.core.correlation.CrossCorrelator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skbeam.core.correlation.</span></span><span class="sig-name descname"><span class="pre">CrossCorrelator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.correlation.CrossCorrelator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute a 1D or 2D cross-correlation on data.</p>
+<p>This uses a mask, which may be binary (array of 0’s and 1’s),
+or a list of non-negative integer id’s to compute cross-correlations
+separately on.</p>
+<p>The symmetric averaging scheme introduced here is inspired by a paper
+from Schätzel, although the implementation is novel in that it
+allows for the usage of arbitrary masks. <a class="reference internal" href="#r52c36177bc47-1" id="id1">[1]</a></p>
+<p class="rubric">References</p>
+<div role="list" class="citation-list">
+<div class="citation" id="r52c36177bc47-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Schätzel, Klaus, Martin Drewel, and Sven Stimac. “Photon
+correlation measurements at large lag times: improving
+statistical accuracy.” Journal of Modern Optics 35.4 (1988):
+711-718.</p>
+</div>
+</div>
+<p class="rubric">Examples</p>
+<p>&gt;&gt; ccorr = CrossCorrelator(mask.shape, mask=mask)
+&gt;&gt; # correlated image
+&gt;&gt; cimg = cc(img1)
+or, mask may may be ids
+&gt;&gt; cc = CrossCorrelator(ids)
+#(where ids is same shape as img1)
+&gt;&gt; cc1 = cc(img1)
+&gt;&gt; cc12 = cc(img1, img2)
+# if img2 shifts right of img1, point of maximum correlation is shifted
+# right from correlation center</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.core.correlation.auto_corr_scat_factor">
+<span class="sig-prename descclassname"><span class="pre">skbeam.core.correlation.</span></span><span class="sig-name descname"><span class="pre">auto_corr_scat_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lags</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relaxation_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.correlation.auto_corr_scat_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>This model will provide normalized intensity-intensity time
+correlation data to be minimized.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>lags: array</strong></dt><dd><p>delay time</p>
+</dd>
+<dt><strong>beta: float</strong></dt><dd><p>optical contrast (speckle contrast), a sample-independent
+beamline parameter</p>
+</dd>
+<dt><strong>relaxation_rate: float</strong></dt><dd><p>relaxation time associated with the samples dynamics.</p>
+</dd>
+<dt><strong>baseline: float, optional</strong></dt><dd><p>baseline of one time correlation
+equal to one for ergodic samples</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>g2: array</dt><dd><p>normalized intensity-intensity time autocorreltion</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The intensity-intensity autocorrelation g2 is connected to the intermediate
+scattering factor(ISF) g1</p>
+<div class="math notranslate nohighlight">
+\[g_2(q, \tau) = \beta_1[g_1(q, \tau)]^{2} + g_\infty\]</div>
+<p>For a system undergoing  diffusive dynamics,</p>
+<div class="math notranslate nohighlight">
+\[g_1(q, \tau) = e^{-\gamma(q) \tau}\]</div>
+<div class="math notranslate nohighlight">
+\[g_2(q, \tau) = \beta_1 e^{-2\gamma(q) \tau} + g_\infty\]</div>
+<p>These implementation are based on published work. <a class="reference internal" href="#r85f3bfea008f-1" id="id3">[1]</a></p>
+<p class="rubric">References</p>
+<div role="list" class="citation-list">
+<div class="citation" id="r85f3bfea008f-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">1</a><span class="fn-bracket">]</span></span>
+<p>L. Li, P. Kwasniewski, D. Orsi, L. Wiegart, L. Cristofolini,
+C. Caronna and A. Fluerasu, “Photon statistics and speckle
+visibility spectroscopy with partially coherent X-rays,”
+J. Synchrotron Rad. vol 21, p 1288-1295, 2014</p>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.core.correlation.lazy_one_time">
+<span class="sig-prename descclassname"><span class="pre">skbeam.core.correlation.</span></span><span class="sig-name descname"><span class="pre">lazy_one_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_iterable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bufs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">internal_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.correlation.lazy_one_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator implementation of 1-time multi-tau correlation</p>
+<p>If you do not want multi-tau correlation, set num_levels to 1 and
+num_bufs to the number of images you wish to correlate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>image_iterable</strong><span class="classifier">iterable of 2D arrays</span></dt><dd></dd>
+<dt><strong>num_levels</strong><span class="classifier">int</span></dt><dd><p>how many generations of downsampling to perform, i.e., the depth of
+the binomial tree of averaged frames</p>
+</dd>
+<dt><strong>num_bufs</strong><span class="classifier">int, must be even</span></dt><dd><p>maximum lag step to compute in each generation of downsampling</p>
+</dd>
+<dt><strong>labels</strong><span class="classifier">array</span></dt><dd><p>Labeled array of the same shape as the image stack.
+Each ROI is represented by sequential integers starting at one.  For
+example, if you have four ROIs, they must be labeled 1, 2, 3,
+4. Background is labeled as 0</p>
+</dd>
+<dt><strong>internal_state</strong><span class="classifier">namedtuple, optional</span></dt><dd><p>internal_state is a bucket for all of the internal state of the
+generator. It is part of the <cite>results</cite> object that is yielded from
+this generator</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>namedtuple</dt><dd><p>A <cite>results</cite> object is yielded after every image has been processed.
+This <cite>reults</cite> object contains, in this order:</p>
+<ul class="simple">
+<li><p><cite>g2</cite>: the normalized correlation
+shape is (len(lag_steps), num_rois)</p></li>
+<li><p><cite>lag_steps</cite>: the times at which the correlation was computed</p></li>
+<li><p><cite>_internal_state</cite>: all of the internal state. Can be passed back in
+to <cite>lazy_one_time</cite> as the <cite>internal_state</cite> parameter</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The normalized intensity-intensity time-autocorrelation function
+is defined as</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}g_2(q, t') = \frac{&lt;I(q, t)I(q, t + t')&gt; }{&lt;I(q, t)&gt;^2}\\t' &gt; 0\end{aligned}\end{align} \]</div>
+<p>Here, <code class="docutils literal notranslate"><span class="pre">I(q,</span> <span class="pre">t)</span></code> refers to the scattering strength at the momentum
+transfer vector <code class="docutils literal notranslate"><span class="pre">q</span></code> in reciprocal space at time <code class="docutils literal notranslate"><span class="pre">t</span></code>, and the brackets
+<code class="docutils literal notranslate"><span class="pre">&lt;...&gt;</span></code> refer to averages over time <code class="docutils literal notranslate"><span class="pre">t</span></code>. The quantity <code class="docutils literal notranslate"><span class="pre">t'</span></code> denotes
+the delay time</p>
+<p>This implementation is based on published work. <a class="reference internal" href="#r70b5804f1e78-1" id="id5">[1]</a></p>
+<p class="rubric">References</p>
+<div role="list" class="citation-list">
+<div class="citation" id="r70b5804f1e78-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">1</a><span class="fn-bracket">]</span></span>
+<p>D. Lumma, L. B. Lurio, S. G. J. Mochrie and M. Sutton,
+“Area detector based photon correlation in the regime of
+short data batches: Data reduction for dynamic x-ray
+scattering,” Rev. Sci. Instrum., vol 71, p 3274-3289, 2000.</p>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.core.correlation.lazy_two_time">
+<span class="sig-prename descclassname"><span class="pre">skbeam.core.correlation.</span></span><span class="sig-name descname"><span class="pre">lazy_two_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_frames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bufs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">two_time_internal_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.correlation.lazy_two_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator implementation of two-time correlation</p>
+<p>If you do not want multi-tau correlation, set num_levels to 1 and
+num_bufs to the number of images you wish to correlate</p>
+<p>Multi-tau correlation uses a scheme to achieve long-time correlations
+inexpensively by downsampling the data, iteratively combining successive
+frames.</p>
+<p>The longest lag time computed is <code class="docutils literal notranslate"><span class="pre">num_levels</span> <span class="pre">*</span> <span class="pre">num_bufs</span></code>.</p>
+<p>See Also: <code class="docutils literal notranslate"><span class="pre">multi_tau_auto_corr</span></code> for a non-generator implementation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>labels</strong><span class="classifier">array</span></dt><dd><p>labeled array of the same shape as the image stack;
+each ROI is represented by a distinct label (i.e., integer)</p>
+</dd>
+<dt><strong>images</strong><span class="classifier">iterable of 2D arrays</span></dt><dd><p>dimensions are: (rr, cc), iterable of 2D arrays</p>
+</dd>
+<dt><strong>num_frames</strong><span class="classifier">int</span></dt><dd><p>number of images to use
+default is number of images</p>
+</dd>
+<dt><strong>num_bufs</strong><span class="classifier">int, must be even</span></dt><dd><p>maximum lag step to compute in each generation of
+downsampling</p>
+</dd>
+<dt><strong>num_levels</strong><span class="classifier">int, optional</span></dt><dd><p>how many generations of downsampling to perform, i.e.,
+the depth of the binomial tree of averaged frames
+default is one</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Yields<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>namedtuple</dt><dd><p>A <code class="docutils literal notranslate"><span class="pre">results</span></code> object is yielded after every image has been processed.
+This <cite>reults</cite> object contains, in this order:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">g2</span></code>: the normalized correlation
+shape is (num_rois, len(lag_steps), len(lag_steps))</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lag_steps</span></code>: the times at which the correlation was computed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">_internal_state</span></code>: all of the internal state. Can be passed back in
+to <code class="docutils literal notranslate"><span class="pre">lazy_one_time</span></code> as the <code class="docutils literal notranslate"><span class="pre">internal_state</span></code> parameter</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The two-time correlation function is defined as</p>
+<div class="math notranslate nohighlight">
+\[C(q,t_1,t_2) = \frac{&lt;I(q,t_1)I(q,t_2)&gt;}{&lt;I(q, t_1)&gt;&lt;I(q,t_2)&gt;}\]</div>
+<p>Here, the ensemble averages are performed over many pixels of detector,
+all having the same <code class="docutils literal notranslate"><span class="pre">q</span></code> value. The average time or age is equal to
+<code class="docutils literal notranslate"><span class="pre">(t1+t2)/2</span></code>, measured by the distance along the <code class="docutils literal notranslate"><span class="pre">t1</span> <span class="pre">=</span> <span class="pre">t2</span></code> diagonal.
+The time difference <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">|t1</span> <span class="pre">-</span> <span class="pre">t2|</span></code>, with is distance from the
+<code class="docutils literal notranslate"><span class="pre">t1</span> <span class="pre">=</span> <span class="pre">t2</span></code> diagonal in the perpendicular direction.
+In the equilibrium system, the two-time correlation functions depend only
+on the time difference <code class="docutils literal notranslate"><span class="pre">t</span></code>, and hence the two-time correlation contour
+lines are parallel.</p>
+<p><a class="reference internal" href="#rb2728ca327c0-1" id="id7">[1]</a></p>
+<p class="rubric">References</p>
+<div role="list" class="citation-list">
+<div class="citation" id="rb2728ca327c0-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">1</a><span class="fn-bracket">]</span></span>
+<p>A. Fluerasu, A. Moussaid, A. Mandsen and A. Schofield,
+“Slow dynamics and aging in collodial gels studied by x-ray
+photon correlation spectroscopy,” Phys. Rev. E., vol 76, p
+010401(1-4), 2007.</p>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.core.correlation.multi_tau_auto_corr">
+<span class="sig-prename descclassname"><span class="pre">skbeam.core.correlation.</span></span><span class="sig-name descname"><span class="pre">multi_tau_auto_corr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_levels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bufs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.correlation.multi_tau_auto_corr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wraps generator implementation of multi-tau</p>
+<p>Original code(in Yorick) for multi tau auto correlation
+author: Mark Sutton</p>
+<p>For parameter description, please reference the docstring for
+lazy_one_time. Note that there is an API difference between this function
+and <cite>lazy_one_time</cite>. The <cite>images</cite> argument is at the end of this function
+signature here for backwards compatibility, but is the first argument in
+the <cite>lazy_one_time()</cite> function. The semantics of the variables remain
+unchanged.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.core.correlation.one_time_from_two_time">
+<span class="sig-prename descclassname"><span class="pre">skbeam.core.correlation.</span></span><span class="sig-name descname"><span class="pre">one_time_from_two_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">two_time_corr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.correlation.one_time_from_two_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will provide the one-time correlation data from two-time
+correlation data. An estimator for errors can be calculated
+according to the central limit theorem.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>two_time_corr</strong><span class="classifier">array</span></dt><dd><p>matrix of two time correlation
+shape (number of labels(ROI’s), number of frames, number of frames)</p>
+</dd>
+<dt><strong>calc_errors: boolean</strong></dt><dd><p>True to calculate error bars, False to not calculate error bars</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>one_time_corr</strong><span class="classifier">array</span></dt><dd><p>matrix of one time correlation
+shape (number of labels(ROI’s), number of frames)</p>
+</dd>
+<dt>(optional, if calc_errors=True) err_one_time_corr: array</dt><dd><p>matrix of errors for one time correlation
+shape (number of labels(ROI’s), number of frames)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="skbeam.core.correlation.results">
+<span class="sig-prename descclassname"><span class="pre">skbeam.core.correlation.</span></span><span class="sig-name descname"><span class="pre">results</span></span><a class="headerlink" href="#skbeam.core.correlation.results" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">correlation_results</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.core.correlation.two_time_corr">
+<span class="sig-prename descclassname"><span class="pre">skbeam.core.correlation.</span></span><span class="sig-name descname"><span class="pre">two_time_corr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_frames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bufs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.correlation.two_time_corr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wraps generator implementation of multi-tau two time correlation</p>
+<p>This function computes two-time correlation
+Original code : author: Yugang Zhang</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>results</strong><span class="classifier">namedtuple</span></dt><dd></dd>
+<dt>For parameter definition, see the docstring for the <cite>lazy_two_time()</cite></dt><dd></dd>
+<dt>function in this module</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="skbeam.core.correlation.two_time_state_to_results">
+<span class="sig-prename descclassname"><span class="pre">skbeam.core.correlation.</span></span><span class="sig-name descname"><span class="pre">two_time_state_to_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skbeam.core.correlation.two_time_state_to_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the internal state of the two time generator into usable results</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>state</strong><span class="classifier">namedtuple</span></dt><dd><p>The internal state that is yielded from <cite>lazy_two_time</cite></p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>results</strong><span class="classifier">namedtuple</span></dt><dd><p>A results object that contains the two time correlation results
+and the lag steps</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">scikit-beam</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started with Scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installing scikit-beam</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#updating-your-installation">Updating Your Installation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Complete Reference (API)</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#core">Core</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Core API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../io/index.html">IO API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../core.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core</span></code> subpackge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mask.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.mask</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#domain-name-spaces">Domain name spaces</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/get_devel_version.html">Try the development version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Project organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/development_workflow.html">How to make a code contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/codeguide.html">Coding Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/docguide.html">Writing Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/testguide.html">Testing Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/scripts.html">Writing Command-Line Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/building.html">Building Scikit-beam and its Subpackages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/ccython.html">C or Cython Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/releasing.html">Release Procedures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/workflow/maintainer_workflow.html">Workflow for Maintainers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/affiliated-packages.html">How to create and maintain an Skbeam affiliated package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/vision.html">Vision for a Common Python Package for x-ray, electron and neutrons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev_guide/index.html">Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_changes.html">API Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python_versions.html">Supported versions of Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../warnings.html">Python warnings system</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew/index.html">Major Release History</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whats_new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Example gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction to scikit-beam</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Complete Reference (API)</a><ul>
+  <li><a href="index.html">Core API</a><ul>
+      <li>Previous: <a href="_as_gen/skbeam.core.constants.xrs.HKL.html" title="previous chapter">skbeam.core.constants.xrs.HKL</a></li>
+      <li>Next: <a href="dpc.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">core.dpc</span></code> Module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014-2015 Brookhaven National Lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../../../_sources/resource/api/core/correlation.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
