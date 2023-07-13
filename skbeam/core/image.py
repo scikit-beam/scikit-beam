@@ -102,7 +102,7 @@ def _corr_ax1(input_image):
 
 def construct_circ_avg_image(radii, intensities, dims=None, center=None,
                              pixel_size=(1, 1), left=0, right=0):
-    """ 
+    """
     Constructs a 2D image from circular averaged data
     where radii are given in units of pixels.
     Normally, data will be taken from circular_average and used to
@@ -115,7 +115,7 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None,
     intensities: 1D array of floats
         the intensities for the radii
     dims: 2 tuple of floats, optional
-        ``[dy, dx] (row, col)``: 
+        ``[dy, dx] (row, col)``:
         dy, dx are the dimensions in row,col format If the dims are not set, it
         will assume the dimensions to be (2*maxr+1) where maxr is the maximum
         radius. Note in the case of rectangular pixels (pixel_size not 1:1)
@@ -137,7 +137,7 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None,
 
     Returns
     -------
-    IMG 
+    IMG
         the interpolated circular averaged image
 
     See Also
@@ -176,7 +176,7 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None,
 
 def construct_rphi_avg_image(radii, angles, image, mask=None,
                              center=None, shape=None, pixel_size=(1, 1)):
-    ''' 
+    '''
     Construct a 2D Cartesian (x,y) image from a polar coordinate image.
 
     Assumes a 2D array of data. If data is missing, use mask.
@@ -210,13 +210,13 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
 
     center: 2 tuple of floats, optional
 
-    shape: 
+    shape:
         the new image shape, in terms of pixel values
 
     Notes
     -----
     This function uses a simple linear interpolation from scipy:
-    `scipy.interpolate.RegularGridInterpolator`. More complex interpolation techniques 
+    `scipy.interpolate.RegularGridInterpolator`. More complex interpolation techniques
     (i.e. splines) cannot be used with this algorithm.
 
     Returns

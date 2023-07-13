@@ -461,7 +461,7 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
 
     .. math::
         g_1(q, \\tau) = e^{-\\gamma(q) \\tau}
-    
+
     .. math::
        g_2(q, \\tau) = \\beta_1 e^{-2\\gamma(q) \\tau} + g_\\infty
 
