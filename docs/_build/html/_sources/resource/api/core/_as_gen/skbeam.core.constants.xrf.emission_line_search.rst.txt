@@ -1,6 +1,0 @@
-﻿skbeam.core.constants.xrf.emission\_line\_search
-================================================
-
-.. currentmodule:: skbeam.core.constants.xrf
-
-.. autofunction:: emission_line_search
