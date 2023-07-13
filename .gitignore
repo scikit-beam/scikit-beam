@@ -54,8 +54,8 @@ coverage.xml
 *.log
 
 # Sphinx documentation
-doc/_build/
-doc/resource/api/core/_as_gen/
+docs/_build/
+docs/resource/api/core/_as_gen/
 
 # pytest
 .pytest_cache/
