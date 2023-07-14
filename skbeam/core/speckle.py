@@ -44,7 +44,7 @@ and calculating the speckle contrast in single scattering patterns.
 This module will provide XSVS analysis tools
 """
 
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
 import numpy as np
 import time
 import warnings
@@ -53,11 +53,11 @@ from . import roi
 from .utils import bin_edges_to_centers, geometric_series
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
-def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
-         max_cts=None):
+def xsvs(image_sets, label_array, number_of_img, timebin_num=2, max_cts=None):
     """
     This function will provide the probability density of detecting photons
     for different integration times.
@@ -142,15 +142,14 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
     # get the bin edges for each time bin for each ROI
     bin_edges = np.zeros(prob_k_all.shape[0], dtype=prob_k_all.dtype)
     for i in range(num_times):
-        bin_edges[i] = np.arange(max_cts*2**i)
+        bin_edges[i] = np.arange(max_cts * 2**i)
 
     start_time = time.time()  # used to log the computation time (optionally)
 
     for i, images in enumerate(image_sets):
         # Ring buffer, a buffer with periodic boundary conditions.
         # Images must be keep for up to maximum delay in buf.
-        buf = np.zeros([num_times, timebin_num],
-                       dtype=np.object_)  # matrix of buffers
+        buf = np.zeros([num_times, timebin_num], dtype=np.object_)  # matrix of buffers
 
         # to track processing each time level
         track_level = np.zeros(num_times)
@@ -176,8 +175,19 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
             # Put the image into the ring buffer.
             buf[0, cur[0] - 1] = (np.ravel(img))[indices]
 
-            _process(num_roi, 0, cur[0] - 1, buf, img_per_level, labels,
-                     max_cts, bin_edges[0], prob_k, prob_k_pow, track_bad)
+            _process(
+                num_roi,
+                0,
+                cur[0] - 1,
+                buf,
+                img_per_level,
+                labels,
+                max_cts,
+                bin_edges[0],
+                prob_k,
+                prob_k_pow,
+                track_bad,
+            )
 
             # check whether the number of levels is one, otherwise
             # continue processing the next level
@@ -190,30 +200,36 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
                     prev = 1 + (cur[level - 1] - 2) % timebin_num
                     cur[level] = 1 + cur[level] % timebin_num
 
-                    buf[level, cur[level]-1] = (buf[level-1,
-                                                    prev-1] +
-                                                buf[level-1,
-                                                    cur[level - 1] - 1])
+                    buf[level, cur[level] - 1] = buf[level - 1, prev - 1] + buf[level - 1, cur[level - 1] - 1]
                     track_level[level] = 0
 
-                    _process(num_roi, level, cur[level]-1, buf, img_per_level,
-                             labels, max_cts, bin_edges[level], prob_k,
-                             prob_k_pow, track_bad)
+                    _process(
+                        num_roi,
+                        level,
+                        cur[level] - 1,
+                        buf,
+                        img_per_level,
+                        labels,
+                        max_cts,
+                        bin_edges[level],
+                        prob_k,
+                        prob_k_pow,
+                        track_bad,
+                    )
                     level += 1
 
-            prob_k_all += (prob_k - prob_k_all)/(i + 1)
-            prob_k_pow_all += (prob_k_pow - prob_k_pow_all)/(i + 1)
+            prob_k_all += (prob_k - prob_k_all) / (i + 1)
+            prob_k_pow_all += (prob_k_pow - prob_k_pow_all) / (i + 1)
 
-    prob_k_std_dev = np.power((prob_k_pow_all -
-                               np.power(prob_k_all, 2)), .5)
+    prob_k_std_dev = np.power((prob_k_pow_all - np.power(prob_k_all, 2)), 0.5)
 
-    logger.info("Processing time for XSVS took %s seconds."
-                "", (time.time() - start_time))
+    logger.info("Processing time for XSVS took %s seconds." "", (time.time() - start_time))
     return prob_k_all, prob_k_std_dev
 
 
-def _process(num_roi, level, buf_no, buf, img_per_level, labels,
-             max_cts, bin_edges, prob_k, prob_k_pow, track_bad):
+def _process(
+    num_roi, level, buf_no, buf, img_per_level, labels, max_cts, bin_edges, prob_k, prob_k_pow, track_bad
+):
     """
     Internal helper function. This modifies inputs in place.
 
@@ -262,16 +278,13 @@ def _process(num_roi, level, buf_no, buf, img_per_level, labels,
         with warnings.catch_warnings():
             # It appears that having nans in ``roi_data`` and ``spe_hist`` is normal mode of
             #   operation for this function. So let's disable warnings.
-            warnings.filterwarnings('ignore', category=RuntimeWarning)
-            spe_hist, bin_edges = np.histogram(roi_data, bins=bin_edges,
-                                               density=True)
+            warnings.filterwarnings("ignore", category=RuntimeWarning)
+            spe_hist, bin_edges = np.histogram(roi_data, bins=bin_edges, density=True)
         spe_hist = np.nan_to_num(spe_hist)
-        prob_k[level, j] += ((spe_hist - prob_k[level, j]) /
-                             (img_per_level[level] - track_bad[level]))
-        prob_k_pow[level, j] += ((np.power(spe_hist, 2) -
-                                  prob_k_pow[level, j]) /
-                                 (img_per_level[level] -
-                                  track_bad[level]))
+        prob_k[level, j] += (spe_hist - prob_k[level, j]) / (img_per_level[level] - track_bad[level])
+        prob_k_pow[level, j] += (np.power(spe_hist, 2) - prob_k_pow[level, j]) / (
+            img_per_level[level] - track_bad[level]
+        )
 
 
 def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts):
@@ -304,7 +317,7 @@ def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts):
     norm_bin_centers = np.zeros_like(norm_bin_edges)
     for i in range(num_times):
         for j in range(num_rois):
-            norm_bin_edges[i, j] = np.arange(max_cts*2**i)/(mean_roi[j]*2**i)
+            norm_bin_edges[i, j] = np.arange(max_cts * 2**i) / (mean_roi[j] * 2**i)
             norm_bin_centers[i, j] = bin_edges_to_centers(norm_bin_edges[i, j])
 
     return norm_bin_edges, norm_bin_centers

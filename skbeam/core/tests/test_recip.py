@@ -42,11 +42,11 @@ import os
 from skbeam.core import recip
 
 
-@pytest.mark.skipif(os.name == 'nt', reason="Test is not supported on Windows")
+@pytest.mark.skipif(os.name == "nt", reason="Test is not supported on Windows")
 def test_process_to_q():
     detector_size = (256, 256)
-    pixel_size = (0.0135*8, 0.0135*8)
-    calibrated_center = (256/2.0, 256/2.0)
+    pixel_size = (0.0135 * 8, 0.0135 * 8)
+    calibrated_center = (256 / 2.0, 256 / 2.0)
     dist_sample = 355.0
 
     energy = 640  # (  in eV)
@@ -54,21 +54,24 @@ def test_process_to_q():
     hc_over_e = 12398.4
     wavelength = hc_over_e / energy  # (Angstrom )
 
-    ub_mat = np.array([[-0.01231028454, 0.7405370482, 0.06323870032],
-                       [0.4450897473, 0.04166852402, -0.9509449389],
-                       [-0.7449130975, 0.01265920962, -0.5692399963]])
+    ub_mat = np.array(
+        [
+            [-0.01231028454, 0.7405370482, 0.06323870032],
+            [0.4450897473, 0.04166852402, -0.9509449389],
+            [-0.7449130975, 0.01265920962, -0.5692399963],
+        ]
+    )
 
-    setting_angles = np.array([[40., 15., 30., 25., 10., 5.],
-                              [90., 60., 0., 30., 10., 5.]])
+    setting_angles = np.array([[40.0, 15.0, 30.0, 25.0, 10.0, 5.0], [90.0, 60.0, 0.0, 30.0, 10.0, 5.0]])
     # delta=40, theta=15, chi = 90, phi = 30, mu = 10.0, gamma=5.0
     pdict = {}
-    pdict['setting_angles'] = setting_angles
-    pdict['detector_size'] = detector_size
-    pdict['pixel_size'] = pixel_size
-    pdict['calibrated_center'] = calibrated_center
-    pdict['dist_sample'] = dist_sample
-    pdict['wavelength'] = wavelength
-    pdict['ub'] = ub_mat
+    pdict["setting_angles"] = setting_angles
+    pdict["detector_size"] = detector_size
+    pdict["pixel_size"] = pixel_size
+    pdict["calibrated_center"] = calibrated_center
+    pdict["dist_sample"] = dist_sample
+    pdict["wavelength"] = wavelength
+    pdict["ub"] = ub_mat
     # ensure invalid entries for frame_mode actually fail
 
     # todo test frame_modes 1, 2, and 3
@@ -77,8 +80,10 @@ def test_process_to_q():
 
     # Known HKL values for the given six angles)
     # each entry in list is (pixel_number, known hkl value)
-    known_hkl = [(32896, np.array([-0.15471196, 0.19673939, -0.11440936])),
-                 (98432, np.array([0.10205953,  0.45624416, -0.27200778]))]
+    known_hkl = [
+        (32896, np.array([-0.15471196, 0.19673939, -0.11440936])),
+        (98432, np.array([0.10205953, 0.45624416, -0.27200778])),
+    ]
 
     for pixel, kn_hkl in known_hkl:
         npt.assert_array_almost_equal(hkl[pixel], kn_hkl, decimal=8)
@@ -95,12 +100,12 @@ def _process_to_q_exception(param_dict, frame_mode):
         recip.process_to_q(frame_mode=frame_mode, **param_dict)
 
 
-@pytest.mark.parametrize("fails", [0, 5, 'cat'])
-@pytest.mark.skipif(os.name == 'nt', reason="Test is not supported on Windows")
+@pytest.mark.parametrize("fails", [0, 5, "cat"])
+@pytest.mark.skipif(os.name == "nt", reason="Test is not supported on Windows")
 def test_frame_mode_fail(fails):
     detector_size = (256, 256)
-    pixel_size = (0.0135*8, 0.0135*8)
-    calibrated_center = (256/2.0, 256/2.0)
+    pixel_size = (0.0135 * 8, 0.0135 * 8)
+    calibrated_center = (256 / 2.0, 256 / 2.0)
     dist_sample = 355.0
 
     energy = 640  # (  in eV)
@@ -108,33 +113,32 @@ def test_frame_mode_fail(fails):
     hc_over_e = 12398.4
     wavelength = hc_over_e / energy  # (Angstrom )
 
-    ub_mat = np.array([[-0.01231028454, 0.7405370482, 0.06323870032],
-                       [0.4450897473, 0.04166852402, -0.9509449389],
-                       [-0.7449130975, 0.01265920962, -0.5692399963]])
+    ub_mat = np.array(
+        [
+            [-0.01231028454, 0.7405370482, 0.06323870032],
+            [0.4450897473, 0.04166852402, -0.9509449389],
+            [-0.7449130975, 0.01265920962, -0.5692399963],
+        ]
+    )
 
-    setting_angles = np.array([[40., 15., 30., 25., 10., 5.],
-                              [90., 60., 0., 30., 10., 5.]])
+    setting_angles = np.array([[40.0, 15.0, 30.0, 25.0, 10.0, 5.0], [90.0, 60.0, 0.0, 30.0, 10.0, 5.0]])
     # delta=40, theta=15, chi = 90, phi = 30, mu = 10.0, gamma=5.0
     pdict = {}
-    pdict['setting_angles'] = setting_angles
-    pdict['detector_size'] = detector_size
-    pdict['pixel_size'] = pixel_size
-    pdict['calibrated_center'] = calibrated_center
-    pdict['dist_sample'] = dist_sample
-    pdict['wavelength'] = wavelength
-    pdict['ub'] = ub_mat
+    pdict["setting_angles"] = setting_angles
+    pdict["detector_size"] = detector_size
+    pdict["pixel_size"] = pixel_size
+    pdict["calibrated_center"] = calibrated_center
+    pdict["dist_sample"] = dist_sample
+    pdict["wavelength"] = wavelength
+    pdict["ub"] = ub_mat
 
     _process_to_q_exception(pdict, fails)
 
 
 def test_hkl_to_q():
-    b = np.array([[-4, -3, -2],
-                  [-1, 0, 1],
-                  [2, 3, 4],
-                  [6, 9, 10]])
+    b = np.array([[-4, -3, -2], [-1, 0, 1], [2, 3, 4], [6, 9, 10]])
 
-    b_norm = np.array([5.38516481, 1.41421356, 5.38516481,
-                       14.73091986])
+    b_norm = np.array([5.38516481, 1.41421356, 5.38516481, 14.73091986])
 
     npt.assert_array_almost_equal(b_norm, recip.hkl_to_q(b))
 
@@ -145,18 +149,17 @@ def test_gisaxs():
     pixel_size = (1.0, 1.0)
     detector_size = (5, 4)
     dist_sample = 5.0
-    wavelength = 2*np.pi*0.01
+    wavelength = 2 * np.pi * 0.01
     theta_i = 0.0
 
-    g_output = recip.gisaxs(incident_beam, reflected_beam, pixel_size,
-                            detector_size, dist_sample, wavelength,
-                            theta_i=theta_i)
+    g_output = recip.gisaxs(
+        incident_beam, reflected_beam, pixel_size, detector_size, dist_sample, wavelength, theta_i=theta_i
+    )
 
-    theta_f_target = 10**(-7)*np.array([-1.0, 0.0, 1.0, 2.0])
-    alpha_f_target = 10**(-7)*np.array([-4.0, -2.0, 7.99387344e-14, 2.0, 4.0])
+    theta_f_target = 10 ** (-7) * np.array([-1.0, 0.0, 1.0, 2.0])
+    alpha_f_target = 10 ** (-7) * np.array([-4.0, -2.0, 7.99387344e-14, 2.0, 4.0])
 
     assert_array_almost_equal(0.78539816, g_output.tilt_angle, decimal=8)
-    assert_array_almost_equal(2*10**(-7), g_output.alpha_i, decimal=8)
-    assert_array_almost_equal(theta_f_target, g_output.theta_f[1, :],
-                              decimal=8)
+    assert_array_almost_equal(2 * 10 ** (-7), g_output.alpha_i, decimal=8)
+    assert_array_almost_equal(theta_f_target, g_output.theta_f[1, :], decimal=8)
     assert_array_almost_equal(alpha_f_target, g_output.alpha_f[:, 1])

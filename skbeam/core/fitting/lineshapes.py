@@ -55,7 +55,7 @@ logger = logging.getLogger(__name__)
 
 
 log2 = np.log(2)
-s2pi = np.sqrt(2*np.pi)
+s2pi = np.sqrt(2 * np.pi)
 spi = np.sqrt(np.pi)
 s2 = np.sqrt(2.0)
 
@@ -74,8 +74,7 @@ def gaussian(x, area, center, sigma):
     sigma : float
         standard deviation
     """
-    return ((area / (s2pi * sigma)) *
-            np.exp(-1 * (1.0 * x - center) ** 2 / (2 * sigma ** 2)))
+    return (area / (s2pi * sigma)) * np.exp(-1 * (1.0 * x - center) ** 2 / (2 * sigma**2))
 
 
 def lorentzian(x, area, center, sigma):
@@ -112,7 +111,7 @@ def lorentzian2(x, area, center, sigma):
         standard deviation
     """
 
-    return (area/(1 + ((x - center) / sigma)**2)**2) / (np.pi * sigma)
+    return (area / (1 + ((x - center) / sigma) ** 2) ** 2) / (np.pi * sigma)
 
 
 def voigt(x, area, center, sigma, gamma=None):
@@ -136,8 +135,8 @@ def voigt(x, area, center, sigma, gamma=None):
     """
     if gamma is None:
         gamma = sigma
-    z = (x - center + 1j*gamma) / (sigma * s2)
-    return area*scipy.special.wofz(z).real / (sigma*s2pi)
+    z = (x - center + 1j * gamma) / (sigma * s2)
+    return area * scipy.special.wofz(z).real / (sigma * s2pi)
 
 
 def pvoigt(x, area, center, sigma, fraction):
@@ -157,8 +156,7 @@ def pvoigt(x, area, center, sigma, fraction):
         weight for lorentzian peak in the linear combination, and (1-fraction)
         is the weight for gaussian peak.
     """
-    return ((1-fraction) * gaussian(x, area, center, sigma) +
-            fraction * lorentzian(x, area, center, sigma))
+    return (1 - fraction) * gaussian(x, area, center, sigma) + fraction * lorentzian(x, area, center, sigma)
 
 
 def gausssian_step(x, area, center, sigma, peak_e):
@@ -191,8 +189,7 @@ def gausssian_step(x, area, center, sigma, peak_e):
         (Practical Spectroscopy)", CRC Press, 2 edition, pp. 182, 2007.
     """
 
-    return (area * scipy.special.erfc((x - center) / (np.sqrt(2) * sigma)) /
-            (2. * peak_e))
+    return area * scipy.special.erfc((x - center) / (np.sqrt(2) * sigma)) / (2.0 * peak_e)
 
 
 def gaussian_tail(x, area, center, sigma, gamma):
@@ -231,14 +228,23 @@ def gaussian_tail(x, area, center, sigma, gamma):
     temp_a = np.exp(dx_neg / (gamma * sigma))
 
     v1 = scipy.special.erfc((x - center) / (np.sqrt(2) * sigma) + (1 / (gamma * np.sqrt(2))))
-    v2 = 2 * gamma * sigma * np.exp(-0.5 / (gamma ** 2))
+    v2 = 2 * gamma * sigma * np.exp(-0.5 / (gamma**2))
     counts = area * temp_a * (v1 / v2)
 
     return counts
 
 
-def elastic(x, coherent_sct_amplitude, coherent_sct_energy, fwhm_offset,
-            fwhm_fanoprime, e_offset, e_linear, e_quadratic, epsilon=2.96):
+def elastic(
+    x,
+    coherent_sct_amplitude,
+    coherent_sct_energy,
+    fwhm_offset,
+    fwhm_fanoprime,
+    e_offset,
+    e_linear,
+    e_quadratic,
+    epsilon=2.96,
+):
     """Model of elastic peak in X-Ray fluorescence
 
     Parameters
@@ -273,19 +279,29 @@ def elastic(x, coherent_sct_amplitude, coherent_sct_energy, fwhm_offset,
     x = e_offset + x * e_linear + x**2 * e_quadratic
 
     temp_val = 2 * np.sqrt(2 * np.log(2))
-    sigma = np.sqrt((fwhm_offset / temp_val)**2 +
-                    coherent_sct_energy * epsilon * fwhm_fanoprime)
+    sigma = np.sqrt((fwhm_offset / temp_val) ** 2 + coherent_sct_energy * epsilon * fwhm_fanoprime)
 
     return gaussian(x, coherent_sct_amplitude, coherent_sct_energy, sigma)
 
 
-def compton(x, compton_amplitude, coherent_sct_energy,
-            fwhm_offset, fwhm_fanoprime,
-            e_offset, e_linear, e_quadratic,
-            compton_angle, compton_fwhm_corr,
-            compton_f_step, compton_f_tail, compton_gamma,
-            compton_hi_f_tail, compton_hi_gamma,
-            epsilon=2.96):
+def compton(
+    x,
+    compton_amplitude,
+    coherent_sct_energy,
+    fwhm_offset,
+    fwhm_fanoprime,
+    e_offset,
+    e_linear,
+    e_quadratic,
+    compton_angle,
+    compton_fwhm_corr,
+    compton_f_step,
+    compton_f_tail,
+    compton_gamma,
+    compton_hi_f_tail,
+    compton_hi_gamma,
+    epsilon=2.96,
+):
     """
     Model compton peak, which is generated as an inelastic peak and always
     stays to the left of elastic peak on the spectrum.
@@ -344,39 +360,33 @@ def compton(x, compton_amplitude, coherent_sct_energy,
 
     # the rest-mass energy of an electron (511 keV)
     mc2 = 511
-    comp_denom = (1 + coherent_sct_energy / mc2 *
-                  (1 - np.cos(np.deg2rad(compton_angle))))
+    comp_denom = 1 + coherent_sct_energy / mc2 * (1 - np.cos(np.deg2rad(compton_angle)))
     compton_e = coherent_sct_energy / comp_denom
 
     temp_val = 2 * np.sqrt(2 * np.log(2))
-    sigma = np.sqrt((fwhm_offset / temp_val)**2 +
-                    compton_e * epsilon * fwhm_fanoprime)
+    sigma = np.sqrt((fwhm_offset / temp_val) ** 2 + compton_e * epsilon * fwhm_fanoprime)
 
     counts = np.zeros_like(x)
 
     factor = 1 / (1 + compton_f_step + compton_f_tail + compton_hi_f_tail)
 
-    value = factor * gaussian(x, compton_amplitude, compton_e,
-                              sigma*compton_fwhm_corr)
+    value = factor * gaussian(x, compton_amplitude, compton_e, sigma * compton_fwhm_corr)
     counts += value
 
     # compton peak, step
-    if compton_f_step > 0.:
+    if compton_f_step > 0.0:
         value = factor * compton_f_step
-        value *= gausssian_step(x, compton_amplitude, compton_e, sigma,
-                                compton_e)
+        value *= gausssian_step(x, compton_amplitude, compton_e, sigma, compton_e)
         counts += value
 
     # compton peak, tail on the low side
     value = factor * compton_f_tail
-    value *= gaussian_tail(x, compton_amplitude, compton_e, sigma,
-                           compton_gamma)
+    value *= gaussian_tail(x, compton_amplitude, compton_e, sigma, compton_gamma)
     counts += value
 
     # compton peak, tail on the high side
     value = factor * compton_hi_f_tail
-    value *= gaussian_tail(-1 * x, compton_amplitude, -1 * compton_e, sigma,
-                           compton_hi_gamma)
+    value *= gaussian_tail(-1 * x, compton_amplitude, -1 * compton_e, sigma, compton_hi_gamma)
     counts += value
 
     return counts
@@ -411,7 +421,7 @@ def gamma_dist(bin_values, K, M):
         (\\frac {M} {M + <K>})^M (\\frac {<K>}{M + <K>})^K
     """
 
-    gamma_dist = (stats.gamma(M, 0., K/M)).pdf(bin_values)
+    gamma_dist = (stats.gamma(M, 0.0, K / M)).pdf(bin_values)
     return gamma_dist
 
 
@@ -454,11 +464,9 @@ def nbinom_dist(bin_values, K, M):
         vol 21, p 1288-1295, 2014.
 
     """
-    co_eff = np.exp(gammaln(bin_values + M) -
-                    gammaln(bin_values + 1) - gammaln(M))
+    co_eff = np.exp(gammaln(bin_values + M) - gammaln(bin_values + 1) - gammaln(M))
 
-    nbinom = co_eff * np.power(M / (K + M), M) * np.power(K / (M + K),
-                                                          bin_values)
+    nbinom = co_eff * np.power(M / (K + M), M) * np.power(K / (M + K), bin_values)
     return nbinom
 
 
@@ -489,5 +497,5 @@ def poisson_dist(bin_values, K):
         P(K) = \\frac{<K>^K}{K!}\\exp(-<K>)
     """
 
-    poisson_dist = np.exp(-K) * np.power(K, bin_values)/gamma(bin_values + 1)
+    poisson_dist = np.exp(-K) * np.power(K, bin_values) / gamma(bin_values + 1)
     return poisson_dist

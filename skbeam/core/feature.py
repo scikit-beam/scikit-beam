@@ -41,6 +41,7 @@ import numpy as np
 from collections import deque
 from .fitting import fit_quad_to_peak
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -51,6 +52,7 @@ class PeakRejection(Exception):
     This uses the exception handling framework in a method akin to
     `StopIteration` to indicate that there will be no return value.
     """
+
     pass
 
 
@@ -121,8 +123,7 @@ def peak_refinement(x, y, cands, window, refine_function, refine_args=None):
     max_ind = len(x)
 
     for ind in cands:
-        slc = slice(np.max([0, ind-window]),
-                    np.min([max_ind, ind + window + 1]))
+        slc = slice(np.max([0, ind - window]), np.min([max_ind, ind + window + 1]))
         try:
             ret = refine_function(x[slc], y[slc], **refine_args)
         except PeakRejection:
@@ -240,8 +241,7 @@ def filter_n_largest(y, cands, N):
     cands = np.asarray(cands)
     N = int(N)
     if N <= 0:
-        raise ValueError("The maximum number of peaks to return must "
-                         "be positive not {}".format(N))
+        raise ValueError("The maximum number of peaks to return must " "be positive not {}".format(N))
 
     sorted_args = np.argsort(y[cands])
     # cut out if asking for more peaks than exist
@@ -282,8 +282,7 @@ def filter_peak_height(y, cands, thresh, window=5):
     out_tmp = deque()
     max_ind = len(y)
     for ind in cands:
-        slc = slice(np.max([0, ind-window]),
-                    np.min([max_ind, ind + window + 1]))
+        slc = slice(np.max([0, ind - window]), np.min([max_ind, ind + window + 1]))
         pk_hght = np.ptp(y[slc])
         if pk_hght > thresh:
             out_tmp.append(ind)

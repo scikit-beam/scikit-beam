@@ -45,14 +45,11 @@ import numpy as np
 import scipy.signal
 
 from .constants import calibration_standards
-from .feature import (filter_peak_height, peak_refinement,
-                      refine_log_quadratic)
-from .utils import (angle_grid, radial_grid,
-                    pairwise, bin_edges_to_centers, bin_1D)
+from .feature import filter_peak_height, peak_refinement, refine_log_quadratic
+from .utils import angle_grid, radial_grid, pairwise, bin_edges_to_centers, bin_1D
 
 
-def estimate_d_blind(name, wavelength, bin_centers, ring_average,
-                     window_size, max_peak_count, thresh):
+def estimate_d_blind(name, wavelength, bin_centers, ring_average, window_size, max_peak_count, thresh):
     """
     Estimate the sample-detector distance
 
@@ -116,19 +113,17 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
     # find the local maximums
     cands = scipy.signal.argrelmax(ring_average, order=window_size)[0]
     # filter local maximums by size
-    cands = filter_peak_height(ring_average, cands,
-                               thresh*np.max(ring_average), window=window_size)
+    cands = filter_peak_height(ring_average, cands, thresh * np.max(ring_average), window=window_size)
     # TODO insert peak identification validation.  This might be better than
     # improving the threshold value.
     # refine the locations of the peaks
-    peaks_x, peaks_y = peak_refinement(bin_centers, ring_average, cands,
-                                       window_size, refine_log_quadratic)
+    peaks_x, peaks_y = peak_refinement(bin_centers, ring_average, cands, window_size, refine_log_quadratic)
     # compute tan(2theta) for the expected peaks
     tan2theta = np.tan(cal.convert_2theta(wavelength))
     # figure out how many peaks we can look at
     slc = slice(0, np.min([len(tan2theta), len(peaks_x), max_peak_count]))
     # estimate the sample-detector distance for each of the peaks
-    d_array = (peaks_x[slc] / tan2theta[slc])
+    d_array = peaks_x[slc] / tan2theta[slc]
     return np.mean(d_array), np.std(d_array)
 
 
@@ -137,12 +132,22 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average,
 estimate_d_blind.name = list(calibration_standards)
 if estimate_d_blind.__doc__ is not None:
     estimate_d_blind.__doc__ = Template(estimate_d_blind.__doc__).substitute(
-        name_ops=repr(sorted(estimate_d_blind.name)))
+        name_ops=repr(sorted(estimate_d_blind.name))
+    )
 
 
-def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
-                  thresh, window_size,
-                  nx=None, min_x=None, max_x=None):
+def refine_center(
+    image,
+    calibrated_center,
+    pixel_size,
+    phi_steps,
+    max_peaks,
+    thresh,
+    window_size,
+    nx=None,
+    min_x=None,
+    max_x=None,
+):
     """
     Refines the location of the center of the beam.
 
@@ -196,8 +201,7 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
     out = deque()
     for phi_start, phi_end in pairwise(phi_steps):
         mask = (phi <= phi_end) * (phi > phi_start)
-        out.append(bin_1D(r[mask], II[mask],
-                          nx=nx, min_x=min_x, max_x=max_x))
+        out.append(bin_1D(r[mask], II[mask], nx=nx, min_x=min_x, max_x=max_x))
     out = list(out)
 
     ring_trace = []
@@ -208,16 +212,14 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
 
         cands = scipy.signal.argrelmax(avg, order=window_size)[0]
         # filter local maximums by size
-        cands = filter_peak_height(avg, cands, thresh*np.max(avg),
-                                   window=window_size)
+        cands = filter_peak_height(avg, cands, thresh * np.max(avg), window=window_size)
         ring_trace.append(bin_centers[cands[:max_peaks]])
 
     tr_len = [len(rt) for rt in ring_trace]
     mm = np.min(tr_len)
     ring_trace = np.vstack([rt[:mm] for rt in ring_trace]).T
 
-    mean_dr = np.mean(ring_trace - np.mean(ring_trace, axis=1, keepdims=True),
-                      axis=0)
+    mean_dr = np.mean(ring_trace - np.mean(ring_trace, axis=1, keepdims=True), axis=0)
 
     phi_centers = bin_edges_to_centers(phi_steps)
 
@@ -225,10 +227,7 @@ def refine_center(image, calibrated_center, pixel_size, phi_steps, max_peaks,
     # this is doing just one term of a Fourier series
     # note that we have to convert _back_ to pixels from real units
     # TODO do this with better integration/handle repeat better
-    col_shift = (np.sum(np.sin(phi_centers) * mean_dr) *
-                 delta / (np.pi * pixel_size[1]))
-    row_shift = (np.sum(np.cos(phi_centers) * mean_dr) *
-                 delta / (np.pi * pixel_size[0]))
+    col_shift = np.sum(np.sin(phi_centers) * mean_dr) * delta / (np.pi * pixel_size[1])
+    row_shift = np.sum(np.cos(phi_centers) * mean_dr) * delta / (np.pi * pixel_size[0])
 
-    return tuple(np.array(calibrated_center) +
-                 np.array([row_shift, col_shift]))
+    return tuple(np.array(calibrated_center) + np.array([row_shift, col_shift]))

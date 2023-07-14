@@ -57,52 +57,106 @@ def test_construct_circ_avg_image():
     bin_cen, ring_avg = roi.circular_average(image, calib_center, nx=6)
 
     # check that the beam center and dims yield the circavg in the right place
-    cimg = nimage.construct_circ_avg_image(bin_cen, ring_avg, dims=image.shape,
-                                           center=calib_center)
+    cimg = nimage.construct_circ_avg_image(bin_cen, ring_avg, dims=image.shape, center=calib_center)
 
-    assert_array_almost_equal(cimg[2], np.array([5.0103283, 6.15384615,
-                              6.15384615, 6.15384615, 5.0103283, 3.79296498,
-                              2.19422113, 0.51063356, 0., 0., 0., 0.]))
+    assert_array_almost_equal(
+        cimg[2],
+        np.array(
+            [
+                5.0103283,
+                6.15384615,
+                6.15384615,
+                6.15384615,
+                5.0103283,
+                3.79296498,
+                2.19422113,
+                0.51063356,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+            ]
+        ),
+    )
 
     # check that the default values center in the same place
     cimg2 = nimage.construct_circ_avg_image(bin_cen, ring_avg)
 
-    assert_array_almost_equal(cimg2[12], np.array([0., 0., 0., 0., 0.,
-                              0., 0., 0.51063356, 2.19422113, 3.79296498,
-                              5.0103283, 6.15384615, 6.15384615, 6.15384615,
-                              5.0103283, 3.79296498, 2.19422113, 0.51063356,
-                              0., 0., 0., 0., 0., 0., 0.]))
+    assert_array_almost_equal(
+        cimg2[12],
+        np.array(
+            [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.51063356,
+                2.19422113,
+                3.79296498,
+                5.0103283,
+                6.15384615,
+                6.15384615,
+                6.15384615,
+                5.0103283,
+                3.79296498,
+                2.19422113,
+                0.51063356,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+            ]
+        ),
+    )
 
     # check that anisotropic pixels are treated properly
-    cimg3 = nimage.construct_circ_avg_image(bin_cen, ring_avg,
-                                            dims=image.shape,
-                                            pixel_size=(2, 1))
+    cimg3 = nimage.construct_circ_avg_image(bin_cen, ring_avg, dims=image.shape, pixel_size=(2, 1))
 
-    assert_array_almost_equal(cimg3[5], np.array([0., 1.16761618, 2.80022015,
-                              4.16720388, 5.250422, 6.08400137, 6.08400137,
-                              5.250422,  4.16720388, 2.80022015,
-                              1.16761618,  0.]))
+    assert_array_almost_equal(
+        cimg3[5],
+        np.array(
+            [
+                0.0,
+                1.16761618,
+                2.80022015,
+                4.16720388,
+                5.250422,
+                6.08400137,
+                6.08400137,
+                5.250422,
+                4.16720388,
+                2.80022015,
+                1.16761618,
+                0.0,
+            ]
+        ),
+    )
 
     with assert_raises(ValueError):
-        nimage.construct_circ_avg_image(bin_cen, ring_avg, center=calib_center,
-                                        pixel_size=(2, 1))
+        nimage.construct_circ_avg_image(bin_cen, ring_avg, center=calib_center, pixel_size=(2, 1))
 
 
 def test_construct_rphi_avg_image():
     Nr, Na = 40, 40
     Nx, Ny = 44, 44
 
-    angles1 = np.linspace(0, 2*np.pi-.1, Na)
-    angles2 = np.linspace(0, 2*np.pi, Na, endpoint=False)
-    angles3 = np.linspace(0, 2*np.pi+.1, Na)
+    angles1 = np.linspace(0, 2 * np.pi - 0.1, Na)
+    angles2 = np.linspace(0, 2 * np.pi, Na, endpoint=False)
+    angles3 = np.linspace(0, 2 * np.pi + 0.1, Na)
     radii = np.linspace(0, 10, Nr)
 
     ANGLES1, RADII = np.meshgrid(angles1, radii)
     ANGLES2, RADII = np.meshgrid(angles2, radii)
     ANGLES3, RADII = np.meshgrid(angles3, radii)
-    Z1 = np.cos(ANGLES1*2)**2*RADII**2
-    Z2 = np.cos(ANGLES2*2)**2*RADII**2
-    Z3 = np.cos(ANGLES3*2)**2*RADII**2
+    Z1 = np.cos(ANGLES1 * 2) ** 2 * RADII**2
+    Z2 = np.cos(ANGLES2 * 2) ** 2 * RADII**2
+    Z3 = np.cos(ANGLES3 * 2) ** 2 * RADII**2
 
     mask = np.ones_like(RADII)
     mask[1:8] = 0
@@ -111,7 +165,7 @@ def test_construct_rphi_avg_image():
     mask[7:18] = 0
 
     # only try mask on one, rest is redundant
-    Z_masked = Z2*mask
+    Z_masked = Z2 * mask
     angles_masked = angles2
 
     # ony try one version for anisotropy
@@ -127,31 +181,15 @@ def test_construct_rphi_avg_image():
         nimage.construct_rphi_avg_image(radii, angles3, Z3, shape=shape)
 
     # try masked versions
-    Zproj_masked = nimage.construct_rphi_avg_image(radii, angles_masked,
-                                                   Z_masked, shape=shape,
-                                                   mask=mask)
+    Zproj_masked = nimage.construct_rphi_avg_image(radii, angles_masked, Z_masked, shape=shape, mask=mask)
 
     # anisotropy version
-    Zproj_anis = nimage.construct_rphi_avg_image(radii, angles_anis, Z_anis,
-                                                 shape=shape,
-                                                 pixel_size=(1, .5))
+    Zproj_anis = nimage.construct_rphi_avg_image(radii, angles_anis, Z_anis, shape=shape, pixel_size=(1, 0.5))
 
-    assert_array_almost_equal(Zproj1[::8, 22], np.array([np.nan, np.nan,
-                                                         28.9543923,
-                                                         5.44672546,
-                                                         np.nan, np.nan]))
+    assert_array_almost_equal(Zproj1[::8, 22], np.array([np.nan, np.nan, 28.9543923, 5.44672546, np.nan, np.nan]))
 
-    assert_array_almost_equal(Zproj2[::8, 22], np.array([np.nan, np.nan,
-                                                         28.834469,
-                                                         5.465199,
-                                                         np.nan, np.nan]))
+    assert_array_almost_equal(Zproj2[::8, 22], np.array([np.nan, np.nan, 28.834469, 5.465199, np.nan, np.nan]))
 
-    assert_array_almost_equal(Zproj_masked[::8, 22], np.array([np.nan, np.nan,
-                                                               28.834469,
-                                                               np.nan, np.nan,
-                                                               np.nan]))
+    assert_array_almost_equal(Zproj_masked[::8, 22], np.array([np.nan, np.nan, 28.834469, np.nan, np.nan, np.nan]))
 
-    assert_array_almost_equal(Zproj_anis[::8, 22], np.array([np.nan, np.nan,
-                                                             29.491395,
-                                                             5.939956,
-                                                             np.nan, np.nan]))
+    assert_array_almost_equal(Zproj_anis[::8, 22], np.array([np.nan, np.nan, 29.491395, 5.939956, np.nan, np.nan]))

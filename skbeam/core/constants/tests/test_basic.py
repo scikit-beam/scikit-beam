@@ -40,21 +40,19 @@ import six
 import numpy as np
 from numpy.testing import assert_equal
 
-from skbeam.core.constants.basic import (BasicElement, element, basic)
+from skbeam.core.constants.basic import BasicElement, element, basic
 
 
 def test_element_creation():
     # grab the set of elements represented by 'Z'
-    elements = sorted([elm for abbrev, elm in six.iteritems(basic)
-                       if isinstance(abbrev, int)])
+    elements = sorted([elm for abbrev, elm in six.iteritems(basic) if isinstance(abbrev, int)])
 
     for e in elements:
         sym = e.sym
         name = e.name
         # make sure that the elements can be initialized with Z or any
         # combination of element symbols or the element name
-        inits = [sym, sym.upper(), sym.lower(), sym.swapcase(), name,
-                 name.upper(), name.lower(), name.swapcase()]
+        inits = [sym, sym.upper(), sym.lower(), sym.swapcase(), name, name.upper(), name.lower(), name.swapcase()]
         # loop over the initialization routines to smoketest element creation
         for init in inits:
             elem = BasicElement(init)

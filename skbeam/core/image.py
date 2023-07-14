@@ -42,6 +42,7 @@ import numpy as np
 from . import utils
 import logging
 from scipy.interpolate import RegularGridInterpolator
+
 logger = logging.getLogger(__name__)
 
 
@@ -66,8 +67,7 @@ def find_ring_center_acorr_1D(input_image):
         Returns the index (row, col) of the pixel that rings
         are centered on.  Accurate to pixel resolution.
     """
-    return tuple(bins[np.argmax(vals)] for vals, bins in
-                 (_corr_ax1(_im) for _im in (input_image.T, input_image)))
+    return tuple(bins[np.argmax(vals)] for vals, bins in (_corr_ax1(_im) for _im in (input_image.T, input_image)))
 
 
 def _corr_ax1(input_image):
@@ -92,16 +92,13 @@ def _corr_ax1(input_image):
     """
     dim = input_image.shape[1]
     m_ones = np.ones(dim)
-    norm_mask = np.correlate(m_ones, m_ones, mode='full')
+    norm_mask = np.correlate(m_ones, m_ones, mode="full")
     # not sure that the /2 is the correct correction
-    est_by_row = [
-        np.argmax(np.correlate(v, v[::-1], mode='full')/norm_mask) / 2
-        for v in input_image]
+    est_by_row = [np.argmax(np.correlate(v, v[::-1], mode="full") / norm_mask) / 2 for v in input_image]
     return np.histogram(est_by_row, bins=np.arange(0, dim + 1))
 
 
-def construct_circ_avg_image(radii, intensities, dims=None, center=None,
-                             pixel_size=(1, 1), left=0, right=0):
+def construct_circ_avg_image(radii, intensities, dims=None, center=None, pixel_size=(1, 1), left=0, right=0):
     """
     Constructs a 2D image from circular averaged data
     where radii are given in units of pixels.
@@ -157,16 +154,16 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None,
     """
     if dims is None:
         if center is not None:
-            raise ValueError("Specifying a dims but not a center does not "
-                             "make sense and may lead to unexpected results.")
+            raise ValueError(
+                "Specifying a dims but not a center does not " "make sense and may lead to unexpected results."
+            )
 
         # round up, also take into account pixel size change
-        maxr_y, maxr_x = (int(np.max(radii/pixel_size[0])+.5),
-                          int(np.max(radii/pixel_size[1])+.5))
-        dims = 2*maxr_y+1, 2*maxr_x+1
+        maxr_y, maxr_x = (int(np.max(radii / pixel_size[0]) + 0.5), int(np.max(radii / pixel_size[1]) + 0.5))
+        dims = 2 * maxr_y + 1, 2 * maxr_x + 1
 
     if center is None:
-        center = (dims[0]-1)/2., (dims[1] - 1)/2.
+        center = (dims[0] - 1) / 2.0, (dims[1] - 1) / 2.0
 
     radial_val = utils.radial_grid(center, dims, pixel_size)
     CIMG = np.interp(radial_val, radii, intensities, right=0)
@@ -174,9 +171,8 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None,
     return CIMG
 
 
-def construct_rphi_avg_image(radii, angles, image, mask=None,
-                             center=None, shape=None, pixel_size=(1, 1)):
-    '''
+def construct_rphi_avg_image(radii, angles, image, mask=None, center=None, shape=None, pixel_size=(1, 1)):
+    """
     Construct a 2D Cartesian (x,y) image from a polar coordinate image.
 
     Assumes a 2D array of data. If data is missing, use mask.
@@ -223,28 +219,29 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
     -------
     new_img: 2d np.ndarray
         The reconstructed image. Masked regions are filled with `np.nan`.
-    '''
+    """
     if mask is not None:
         if mask.shape != image.shape:
             if mask.ndim == 2:
-                raise ValueError("Mask shape ({}, {}) ".format(*mask.shape) +
-                                 "does not match expected" +
-                                 " shape of ({},{})".format(*shape))
+                raise ValueError(
+                    "Mask shape ({}, {}) ".format(*mask.shape)
+                    + "does not match expected"
+                    + " shape of ({},{})".format(*shape)
+                )
             else:
-                raise ValueError("Mask not right dimensions."
-                                 "Expected 2 got {}".format(mask.ndim))
+                raise ValueError("Mask not right dimensions." "Expected 2 got {}".format(mask.ndim))
         image[np.where(mask == 0)] = np.nan
     if shape is None:
         if center is not None:
-            raise ValueError("Specifying a shape but not a center does not "
-                             "make sense and may lead to unexpected results.")
+            raise ValueError(
+                "Specifying a shape but not a center does not " "make sense and may lead to unexpected results."
+            )
         # round up, also take into account pixel size change
-        maxr_y, maxr_x = (int(np.max(radii/pixel_size[0])+.5),
-                          int(np.max(radii/pixel_size[1])+.5))
-        shape = 2*maxr_y+1, 2*maxr_x+1
+        maxr_y, maxr_x = (int(np.max(radii / pixel_size[0]) + 0.5), int(np.max(radii / pixel_size[1]) + 0.5))
+        shape = 2 * maxr_y + 1, 2 * maxr_x + 1
 
     if center is None:
-        center = (shape[0]-1)/2., (shape[1] - 1)/2.
+        center = (shape[0] - 1) / 2.0, (shape[1] - 1) / 2.0
 
     # 1 . There are a few cases to consider here for the angles:
     #   i. [0,..., 2*pi] -> [0,..,0]
@@ -256,7 +253,7 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
     anglemin = angles[0]
     angles -= anglemin
     # 1.b : modulo 2*pi
-    angles = angles % (2*np.pi)
+    angles = angles % (2 * np.pi)
     # 1.c : find any extra cross-overs and ignore them
     adiff = np.where(np.diff(angles) < 0)[0]
     if len(adiff) > 0:
@@ -271,23 +268,20 @@ def construct_rphi_avg_image(radii, angles, image, mask=None,
     # 2 : since the interpolation will be linear, and the angles wrap, we
     # need to add the first angle position to the end and vice versa
     # 2.a : add bounds to angle
-    anglesp = np.concatenate(([angles[-1]-2*np.pi], angles,
-                              [angles[0]+2*np.pi]))
+    anglesp = np.concatenate(([angles[-1] - 2 * np.pi], angles, [angles[0] + 2 * np.pi]))
     # 2.b : add bounds to image
-    imagep = np.zeros((image.shape[0], image.shape[1]+2))
+    imagep = np.zeros((image.shape[0], image.shape[1] + 2))
     imagep[:, 0] = image[:, -1]
-    imagep[:, 1:image.shape[1]+1] = image
+    imagep[:, 1 : image.shape[1] + 1] = image
     imagep[:, -1] = image[:, 0]
 
     radial_val = utils.radial_grid(center, shape, pixel_size).ravel()
     angle_val = utils.angle_grid(center, shape, pixel_size).ravel()
     # 1.d : subtract minimum for interpolated values as well
     angle_val -= anglemin
-    angle_val = angle_val % (2*np.pi)
+    angle_val = angle_val % (2 * np.pi)
 
-    interpolator = RegularGridInterpolator((radii, anglesp), imagep,
-                                           bounds_error=False,
-                                           fill_value=np.nan)
+    interpolator = RegularGridInterpolator((radii, anglesp), imagep, bounds_error=False, fill_value=np.nan)
 
     new_img = interpolator((radial_val, angle_val))
     new_img = new_img.reshape(shape)

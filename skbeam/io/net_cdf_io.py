@@ -63,8 +63,8 @@ def load_netCDF(file_name):
     """
     from netCDF4 import Dataset
 
-    with Dataset(os.path.normpath(file_name), 'r') as src_file:
-        data = src_file.variables['VOLUME']
+    with Dataset(os.path.normpath(file_name), "r") as src_file:
+        data = src_file.variables["VOLUME"]
         md_dict = src_file.__dict__
         # Check for voxel intensity scale factor and apply if value is present
         data /= data.scale_factor if data.scale_factor != 1.0 else 1.0
@@ -73,8 +73,6 @@ def load_netCDF(file_name):
     # even though dimensions are actuall isotropic. This occurs when
     # reconstruction is completed using tomo_recon on data collected at
     # APS-13BMD.
-    if (md_dict['x_pixel_size'] == md_dict['y_pixel_size'] and
-            md_dict['z_pixel_size'] == 0.0 and data.shape[0] > 1):
-        md_dict['voxel_size'] = {'value': md_dict['x_pixel_size'],
-                                 'type': float, 'units': ''}
+    if md_dict["x_pixel_size"] == md_dict["y_pixel_size"] and md_dict["z_pixel_size"] == 0.0 and data.shape[0] > 1:
+        md_dict["voxel_size"] = {"value": md_dict["x_pixel_size"], "type": float, "units": ""}
     return md_dict, data

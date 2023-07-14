@@ -8,4 +8,6 @@ exclude =
     pyxrf/_version.py,
     docs/conf.py,
     docs/sphinxext/*
+# There are some errors produced by 'black', therefore unavoidable
+ignore = E203, W503
 max-line-length = 115

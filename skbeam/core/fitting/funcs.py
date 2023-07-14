@@ -29,17 +29,15 @@ def fit_quad_to_peak(x, y):
 
     # some sanity checks
     if lenx < 3:
-        raise Exception('insufficient points handed in ')
+        raise Exception("insufficient points handed in ")
     # set up fitting array
-    X = np.vstack((x ** 2, x, np.ones(lenx))).T
+    X = np.vstack((x**2, x, np.ones(lenx))).T
     # use linear least squares fitting
     beta, _, _, _ = np.linalg.lstsq(X, y, rcond=None)
 
-    SSerr = np.sum((np.polyval(beta, x) - y)**2)
-    SStot = np.sum((y - np.mean(y))**2)
+    SSerr = np.sum((np.polyval(beta, x) - y) ** 2)
+    SStot = np.sum((y - np.mean(y)) ** 2)
     # re-map the returned value to match the form we want
-    ret_beta = (beta[0],
-                -beta[1] / (2 * beta[0]),
-                beta[2] - beta[0] * (beta[1] / (2 * beta[0])) ** 2)
+    ret_beta = (beta[0], -beta[1] / (2 * beta[0]), beta[2] - beta[0] * (beta[1] / (2 * beta[0])) ** 2)
 
     return ret_beta, 1 - SSerr / SStot

@@ -18,7 +18,7 @@ def fit2d_save(mask, filename, dir_path=None):
         Path to the destination file
     """
     saver = Fit2dMaskImage(data=~mask)
-    saver.write(_create_file_path(dir_path, filename, '.msk'))
+    saver.write(_create_file_path(dir_path, filename, ".msk"))
 
 
 def read_fit2d_msk(filename):

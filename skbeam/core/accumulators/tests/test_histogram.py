@@ -30,7 +30,7 @@ def _gen_test_1d_histogram():
     wf = np.linspace(1, 10, len(xf))
     wi = wf.copy()
     wl = wf.tolist()
-    onexf = random.random()*binlowhigh[2]
+    onexf = random.random() * binlowhigh[2]
     onexi = int(onexf)
     vals = [
         (binlowhigh, xf, wf),
@@ -61,7 +61,7 @@ def _2d_histogram_tester(binlowhighs, x, y, weights=1):
     h.fill(x, y, weights=weights)
     if np.isscalar(weights):
         if np.isscalar(x):
-            assert np.isscalar(y), 'If x is a scalar, y must be also'
+            assert np.isscalar(y), "If x is a scalar, y must be also"
             ynp = np.histogram2d([x], [y], bins=h.edges)[0]
         else:
             ynp = np.histogram2d(x, y, bins=h.edges)[0]
@@ -77,12 +77,12 @@ def _2d_histogram_tester(binlowhighs, x, y, weights=1):
 def _gen_test_2d_histogram():
     ten = [10, 0, 10.01]
     nine = [9, 0, 9.01]
-    onexf = random.random()*ten[2]
+    onexf = random.random() * ten[2]
     onexi = int(onexf)
-    oneyf = random.random()*ten[2]
+    oneyf = random.random() * ten[2]
     oneyi = int(oneyf)
-    xf = np.random.random(1000000)*40
-    yf = np.random.random(1000000)*40
+    xf = np.random.random(1000000) * 40
+    yf = np.random.random(1000000) * 40
     xi = xf.astype(int)
     yi = yf.astype(int)
     xl = xf.tolist()
@@ -139,7 +139,7 @@ def test_simple_pass():
     assert_array_equal(h.values, np_res)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import itertools
 
     x = [1000, 0, 10.01]
@@ -152,8 +152,7 @@ if __name__ == '__main__':
     wi = wf.copy()
     times = []
     print("Testing 2D histogram timings")
-    for xvals, yvals, weights in itertools.product([xf, xi], [yf, yi],
-                                                   [wf, wi]):
+    for xvals, yvals, weights in itertools.product([xf, xi], [yf, yi], [wf, wi]):
         t0 = time()
         h = Histogram(x, y)
         h.fill(xvals, yvals, weights=weights)
@@ -165,8 +164,7 @@ if __name__ == '__main__':
         numpy_time = time() - t0
         times.append(numpy_time / skbeam_time)
         assert_almost_equal(np.sum(h.values), np.sum(ynp))
-    print('skbeam is %s times faster than numpy, on average' %
-          np.average(times))
+    print("skbeam is %s times faster than numpy, on average" % np.average(times))
     # test_1d_histogram()
     # test_2d_histogram()
 

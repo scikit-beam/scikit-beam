@@ -24,8 +24,7 @@ def _helper_prealloc_passthrough(op, x1, x2, scratch_space):
 
 @pytest.mark.parametrize("op", [arithmetic.logical_nand, arithmetic.logical_sub, arithmetic.logical_nor])
 def test_prealloc_passthrough(op):
-    """Smoketest the pre-allocation bit of numpy
-    """
+    """Smoketest the pre-allocation bit of numpy"""
     x1 = np.arange(10)
     x2 = np.arange(10)
     scratch_space = np.zeros(x1.shape)
@@ -47,11 +46,11 @@ def test_logical_nor():
     test_1D_array_2 = np.zeros(50, dtype=int)
     test_1D_array_2[20:49] = 10
 
-    assert_equal(arithmetic.logical_nor(test_array_1, test_array_1),
-                 np.logical_not(test_array_1))
-    assert_equal(arithmetic.logical_nor(test_array_1, test_array_2).sum(),
-                 (np.ones((30, 30, 30), dtype=int).sum() -
-                  (np.logical_or(test_array_1, test_array_2).sum())))
+    assert_equal(arithmetic.logical_nor(test_array_1, test_array_1), np.logical_not(test_array_1))
+    assert_equal(
+        arithmetic.logical_nor(test_array_1, test_array_2).sum(),
+        (np.ones((30, 30, 30), dtype=int).sum() - (np.logical_or(test_array_1, test_array_2).sum())),
+    )
 
 
 def test_logical_nand():
@@ -73,8 +72,7 @@ def test_logical_nand():
     test_array_8 = np.zeros((90, 90, 90), dtype=int)
     test_array_8[80:89, 80:89, 80:89] = 8
 
-    assert_equal(arithmetic.logical_nand(test_array_1, test_array_1),
-                 np.logical_not(test_array_1))
+    assert_equal(arithmetic.logical_nand(test_array_1, test_array_1), np.logical_not(test_array_1))
     test_result = arithmetic.logical_nand(test_array_1, test_array_2)
     assert_equal(test_result[20:39, 20:39, 20:39], True)
 
@@ -88,13 +86,10 @@ def test_logical_sub():
     test_array_3 = np.zeros((90, 90, 90), dtype=int)
     test_array_3[40:89, 40:89, 40:89] = 3
 
-    assert_equal(arithmetic.logical_sub(test_array_1, test_array_1),
-                 False)
+    assert_equal(arithmetic.logical_sub(test_array_1, test_array_1), False)
     test_result = arithmetic.logical_sub(test_array_1, test_array_2)
     assert_equal(test_result[20:39, 20:39, 20:39], False)
-    assert_equal(test_result.sum(),
-                 (test_array_1.sum() -
-                  np.logical_and(test_array_1, test_array_2).sum()))
+    assert_equal(test_result.sum(), (test_array_1.sum() - np.logical_and(test_array_1, test_array_2).sum()))
 
     test_result = arithmetic.logical_sub(test_array_1, test_array_3)
     assert_equal(test_result, test_array_1)

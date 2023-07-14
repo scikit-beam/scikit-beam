@@ -40,7 +40,7 @@ from skbeam.core.smoothing import sgolay2d
 
 def test_SG():
     x = np.array([2, 2, 2, 5, 2, 1, 0, 1, 4, 9, 2, 2, 2])
-    x2d = np.vstack([x]*2)
+    x2d = np.vstack([x] * 2)
     smooth_sp = savgol_filter(x, 3, 1)
     smooth_sk = sgolay2d(x2d, 3, 1)[0, :]
 

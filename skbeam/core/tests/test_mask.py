@@ -101,12 +101,16 @@ def test_margin():
 
 def test_ring_blur_mask():
     from skbeam.core import recip
+
     g = recip.geo.Geometry(
-        detector='Perkin', pixel1=.0002, pixel2=.0002,
-        dist=.23,
-        poni1=.209, poni2=.207,
+        detector="Perkin",
+        pixel1=0.0002,
+        pixel2=0.0002,
+        dist=0.23,
+        poni1=0.209,
+        poni2=0.207,
         # rot1=.0128, rot2=-.015, rot3=-5.2e-8,
-        wavelength=1.43e-11
+        wavelength=1.43e-11,
     )
     r = g.rArray((2048, 2048))
     # make some sample data
@@ -115,25 +119,24 @@ def test_ring_blur_mask():
     np.random.seed(10)
     pixels = []
     for i in range(0, 100):
-        a, b = np.random.randint(low=0, high=2048), \
-               np.random.randint(low=0, high=2048)
-        if np.random.random() > .5:
+        a, b = np.random.randint(low=0, high=2048), np.random.randint(low=0, high=2048)
+        if np.random.random() > 0.5:
             # Add some hot pixels
             Z[a, b] = np.random.randint(low=200, high=255)
         else:
             # and dead pixels
             Z[a, b] = np.random.randint(low=0, high=10)
         pixels.append((a, b))
-    pixel_size = [getattr(g, k) for k in ['pixel1', 'pixel2']]
+    pixel_size = [getattr(g, k) for k in ["pixel1", "pixel2"]]
     rres = np.hypot(*pixel_size)
-    bins = np.arange(np.min(r) - rres/2., np.max(r) + rres / 2., rres)
-    msk = mask.binned_outlier(Z, r, (3., 3), bins, mask=None)
+    bins = np.arange(np.min(r) - rres / 2.0, np.max(r) + rres / 2.0, rres)
+    msk = mask.binned_outlier(Z, r, (3.0, 3), bins, mask=None)
     a = set(zip(*np.nonzero(~msk)))
     b = set(pixels)
     a_not_in_b = a - b
     b_not_in_a = b - a
 
     # We have not over masked 10% of the number of bad pixels
-    assert len(a_not_in_b) / len(b) < .1
+    assert len(a_not_in_b) / len(b) < 0.1
     # Make certain that we have masked over 90% of the bad pixels
-    assert len(b_not_in_a) / len(b) < .1
+    assert len(b_not_in_a) / len(b) < 0.1

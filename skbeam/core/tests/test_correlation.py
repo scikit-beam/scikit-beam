@@ -68,8 +68,8 @@ def setup():
     rois = np.zeros_like(img_stack[0])
     # make sure that the ROIs can be any integers greater than 1.
     # They do not have to start at 1 and be continuous
-    rois[0: xdim // 10, 0: ydim // 10] = 5
-    rois[xdim // 10: xdim // 5, ydim // 10: ydim // 5] = 3
+    rois[0 : xdim // 10, 0 : ydim // 10] = 5
+    rois[xdim // 10 : xdim // 5, ydim // 10 : ydim // 5] = 3
 
 
 def test_lazy_vs_original():
@@ -121,7 +121,7 @@ def test_lazy_two_time():
     # first half
     gen_second_half = lazy_two_time(
         rois,
-        img_stack[stack_size // 2:],
+        img_stack[stack_size // 2 :],
         stack_size,
         num_bufs=stack_size,
         num_levels=1,
@@ -147,15 +147,13 @@ def test_lazy_one_time():
     assert np.average(full_result.g2 - 1) < 0.01
 
     # run the correlation on the first half
-    gen_first_half = lazy_one_time(
-        img_stack[: stack_size // 2], num_levels, num_bufs, rois
-    )
+    gen_first_half = lazy_one_time(img_stack[: stack_size // 2], num_levels, num_bufs, rois)
     for first_half_result in gen_first_half:
         pass
     # run the correlation on the second half by passing in the state from the
     # first half
     gen_second_half = lazy_one_time(
-        img_stack[stack_size // 2:],
+        img_stack[stack_size // 2 :],
         num_levels,
         num_bufs,
         rois,
@@ -190,9 +188,7 @@ def test_auto_corr_scat_factor():
 
     g2 = auto_corr_scat_factor(lags, beta, relaxation_rate, baseline)
 
-    assert_array_almost_equal(
-        g2, np.array([1.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]), decimal=8
-    )
+    assert_array_almost_equal(g2, np.array([1.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]), decimal=8)
 
 
 def test_bad_images():
@@ -222,8 +218,8 @@ def test_one_time_from_two_time():
     roi = np.zeros_like(imgs[0])
     # make sure that the ROIs can be any integers greater than 1.
     # They do not have to start at 1 and be continuous
-    roi[0: x_dim // 5, 0: y_dim // 10] = 5
-    roi[x_dim // 10: x_dim // 5 + 1, y_dim // 10: y_dim // 5] = 3
+    roi[0 : x_dim // 5, 0 : y_dim // 10] = 5
+    roi[x_dim // 10 : x_dim // 5 + 1, y_dim // 10 : y_dim // 5] = 3
 
     g2, lag_steps, _state = two_time_corr(roi, imgs, stack, num_buf, num_lev)
     g2_t, _ = multi_tau_auto_corr(num_lev, num_buf, roi, imgs)
@@ -257,26 +253,19 @@ def test_one_time_from_two_time():
 
     assert_array_almost_equal(
         error_one_time[0][1:],
-        np.array(
-            [
-                np.std(np.diagonal(g2[0], offset=x)) / np.sqrt(x)
-                for x in range(1, g2[0].shape[0])
-            ]
-        ),
+        np.array([np.std(np.diagonal(g2[0], offset=x)) / np.sqrt(x) for x in range(1, g2[0].shape[0])]),
         decimal=2,
     )
 
 
-@pytest.mark.skipif(
-    int(np.__version__.split(".")[1]) > 14, reason="Test is numerically unstable"
-)
+@pytest.mark.skipif(int(np.__version__.split(".")[1]) > 14, reason="Test is numerically unstable")
 def test_CrossCorrelator1d():
-    """ Test the 1d version of the cross correlator with these methods:
-        -method='regular', no mask
-        -method='regular', masked
-        -method='symavg', no mask
-        -method='symavg', masked
-     """
+    """Test the 1d version of the cross correlator with these methods:
+    -method='regular', no mask
+    -method='regular', masked
+    -method='symavg', no mask
+    -method='symavg', masked
+    """
     np.random.seed(123)
     # test 1D data
     sigma = 0.1
@@ -288,7 +277,7 @@ def test_CrossCorrelator1d():
     peak_positions = (np.random.random(10) - 0.5) * 20
     y = np.zeros_like(x)
     for peak_position in peak_positions:
-        y += np.exp(-((x - peak_position) ** 2) / 2.0 / sigma ** 2)
+        y += np.exp(-((x - peak_position) ** 2) / 2.0 / sigma**2)
 
     mask_1D = np.ones_like(y)
     mask_1D[10:20] = 0
@@ -302,9 +291,7 @@ def test_CrossCorrelator1d():
     cc1D = CrossCorrelator(mask_1D.shape)
     cc1D_symavg = CrossCorrelator(mask_1D.shape, normalization="symavg")
     cc1D_masked = CrossCorrelator(mask_1D.shape, mask=mask_1D)
-    cc1D_masked_symavg = CrossCorrelator(
-        mask_1D.shape, mask=mask_1D, normalization="symavg"
-    )
+    cc1D_masked_symavg = CrossCorrelator(mask_1D.shape, mask=mask_1D, normalization="symavg")
 
     assert_equal(cc1D.nids, 1)
 
@@ -385,8 +372,8 @@ def test_CrossCorrelator1d():
 
 
 def test_CrossCorrelator2d():
-    """ Test the 2D case of the cross correlator.
-        With non-binary labels.
+    """Test the 2D case of the cross correlator.
+    With non-binary labels.
     """
     np.random.seed(123)
     # test 2D data
@@ -401,11 +388,7 @@ def test_CrossCorrelator2d():
     # place peaks in random positions
     peak_positions = (np.random.random((2, 10)) - 0.5) * 20
     for peak_position in peak_positions:
-        Z += np.exp(
-            -((X - peak_position[0]) ** 2 + (Y - peak_position[1]) ** 2)
-            / 2.0
-            / sigma ** 2
-        )
+        Z += np.exp(-((X - peak_position[0]) ** 2 + (Y - peak_position[1]) ** 2) / 2.0 / sigma**2)
 
     mask_2D = np.ones_like(Z)
     mask_2D[1:2, 1:2] = 0
@@ -420,9 +403,7 @@ def test_CrossCorrelator2d():
     maskids = segmented_rings(edges, segments, (y0, x0), mask_2D.shape)
 
     cc2D_ids = CrossCorrelator(mask_2D.shape, mask=maskids)
-    cc2D_ids_symavg = CrossCorrelator(
-        mask_2D.shape, mask=maskids, normalization="symavg"
-    )
+    cc2D_ids_symavg = CrossCorrelator(mask_2D.shape, mask=maskids, normalization="symavg")
 
     # 10 ids
     assert_equal(cc2D_ids.nids, 10)

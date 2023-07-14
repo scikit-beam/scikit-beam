@@ -496,9 +496,7 @@ def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1):
     return two_time_state_to_results(result)
 
 
-def lazy_two_time(
-    labels, images, num_frames, num_bufs, num_levels=1, two_time_internal_state=None
-):
+def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1, two_time_internal_state=None):
     """Generator implementation of two-time correlation
 
     If you do not want multi-tau correlation, set num_levels to 1 and
@@ -570,9 +568,7 @@ def lazy_two_time(
 
     """
     if two_time_internal_state is None:
-        two_time_internal_state = _init_state_two_time(
-            num_levels, num_bufs, labels, num_frames
-        )
+        two_time_internal_state = _init_state_two_time(num_levels, num_bufs, labels, num_frames)
     # create a shorthand reference to the results and state named tuple
     s = two_time_internal_state
 
@@ -626,10 +622,7 @@ def lazy_two_time(
 
                 t1_idx = (s.count_level[level] - 1) * 2
 
-                current_img_time = (
-                    (s.time_ind[level - 1])[t1_idx]
-                    + (s.time_ind[level - 1])[t1_idx + 1]
-                ) / 2.0
+                current_img_time = ((s.time_ind[level - 1])[t1_idx] + (s.time_ind[level - 1])[t1_idx + 1]) / 2.0
 
                 # time frame for each level
                 s.time_ind[level].append(current_img_time)
@@ -753,13 +746,9 @@ def _two_time_process(
         if not isinstance(current_img_time, int):
             nshift = 2 ** (level - 1)
             for i in range(-nshift + 1, nshift + 1):
-                g2[:, int(tind1 + i), int(tind2 + i)] = (
-                    tmp_binned / (pi_binned * fi_binned)
-                ) * num_pixels
+                g2[:, int(tind1 + i), int(tind2 + i)] = (tmp_binned / (pi_binned * fi_binned)) * num_pixels
         else:
-            g2[:, int(tind1), int(tind2)] = (
-                tmp_binned / (pi_binned * fi_binned) * num_pixels
-            )
+            g2[:, int(tind1), int(tind2)] = tmp_binned / (pi_binned * fi_binned) * num_pixels
 
 
 def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
@@ -866,9 +855,7 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
         length of each levels
     """
     if num_bufs % 2 != 0:
-        raise ValueError(
-            "There must be an even number of `num_bufs`. You " "provided %s" % num_bufs
-        )
+        raise ValueError("There must be an even number of `num_bufs`. You " "provided %s" % num_bufs)
     label_array, pixel_list = extract_label_indices(labels)
 
     # map the indices onto a sequential list of integers starting at 1
@@ -948,9 +935,7 @@ def one_time_from_two_time(two_time_corr, calc_errors=False):
             diag_array = np.diag(g, k=j)
             one_time_corr[i, j] = np.nanmean(diag_array)
             if calc_errors:
-                err_one_time_corr[i, j] = np.nanstd(diag_array) / np.sqrt(
-                    len(diag_array)
-                )
+                err_one_time_corr[i, j] = np.nanstd(diag_array) / np.sqrt(len(diag_array))
     if calc_errors:
         return one_time_corr, err_one_time_corr
     else:
@@ -959,62 +944,62 @@ def one_time_from_two_time(two_time_corr, calc_errors=False):
 
 class CrossCorrelator:
     """
-        Compute a 1D or 2D cross-correlation on data.
+    Compute a 1D or 2D cross-correlation on data.
 
-        This uses a mask, which may be binary (array of 0's and 1's),
-        or a list of non-negative integer id's to compute cross-correlations
-        separately on.
+    This uses a mask, which may be binary (array of 0's and 1's),
+    or a list of non-negative integer id's to compute cross-correlations
+    separately on.
 
-        The symmetric averaging scheme introduced here is inspired by a paper
-        from Schätzel, although the implementation is novel in that it
-        allows for the usage of arbitrary masks. [1]_
+    The symmetric averaging scheme introduced here is inspired by a paper
+    from Schätzel, although the implementation is novel in that it
+    allows for the usage of arbitrary masks. [1]_
 
-        Examples
-        --------
+    Examples
+    --------
 
-        >> ccorr = CrossCorrelator(mask.shape, mask=mask)
-        >> # correlated image
-        >> cimg = cc(img1)
-        or, mask may may be ids
-        >> cc = CrossCorrelator(ids)
-        #(where ids is same shape as img1)
-        >> cc1 = cc(img1)
-        >> cc12 = cc(img1, img2)
-        # if img2 shifts right of img1, point of maximum correlation is shifted
-        # right from correlation center
+    >> ccorr = CrossCorrelator(mask.shape, mask=mask)
+    >> # correlated image
+    >> cimg = cc(img1)
+    or, mask may may be ids
+    >> cc = CrossCorrelator(ids)
+    #(where ids is same shape as img1)
+    >> cc1 = cc(img1)
+    >> cc12 = cc(img1, img2)
+    # if img2 shifts right of img1, point of maximum correlation is shifted
+    # right from correlation center
 
-        References
-        ----------
-        .. [1] Schätzel, Klaus, Martin Drewel, and Sven Stimac. “Photon
-               correlation measurements at large lag times: improving
-               statistical accuracy.” Journal of Modern Optics 35.4 (1988):
-               711-718.
+    References
+    ----------
+    .. [1] Schätzel, Klaus, Martin Drewel, and Sven Stimac. “Photon
+           correlation measurements at large lag times: improving
+           statistical accuracy.” Journal of Modern Optics 35.4 (1988):
+           711-718.
 
 
     """
 
     def __init__(self, shape, mask=None, normalization=None):
         """
-            Prepare the spatial correlator for various regions specified by the
-            id's in the image.
+        Prepare the spatial correlator for various regions specified by the
+        id's in the image.
 
-            Parameters
-            ----------
-            shape : 1 or 2-tuple
-                The shape of the incoming images or curves. May specify 1D or
-                2D shapes by inputting a 1 or 2-tuple
+        Parameters
+        ----------
+        shape : 1 or 2-tuple
+            The shape of the incoming images or curves. May specify 1D or
+            2D shapes by inputting a 1 or 2-tuple
 
-            mask : 1D or 2D np.ndarray of int, optional
-                Each non-zero integer represents unique bin. Zero integers are
-                assumed to be ignored regions. If None, creates a mask with
-                all points set to 1
+        mask : 1D or 2D np.ndarray of int, optional
+            Each non-zero integer represents unique bin. Zero integers are
+            assumed to be ignored regions. If None, creates a mask with
+            all points set to 1
 
-            normalization: string or list of strings, optional
-                These specify the normalization and may be any of the
-                following:
-                    'regular' : divide by pixel number
-                    'symavg' : use symmetric averaging
-                Defaults to ['regular'] normalization
+        normalization: string or list of strings, optional
+            These specify the normalization and may be any of the
+            following:
+                'regular' : divide by pixel number
+                'symavg' : use symmetric averaging
+            Defaults to ['regular'] normalization
         """
         if normalization is None:
             normalization = ["regular"]
@@ -1146,28 +1131,28 @@ class CrossCorrelator:
             self.centers = self.centers[0]
 
     def __call__(self, img1, img2=None, normalization=None):
-        """ Run the cross correlation on an image/curve or against two
-                images/curves
+        """Run the cross correlation on an image/curve or against two
+            images/curves
 
-            Parameters
-            ----------
-            img1 : 1D or 2D np.ndarray
-                The image (or curve) to run the cross correlation on
+        Parameters
+        ----------
+        img1 : 1D or 2D np.ndarray
+            The image (or curve) to run the cross correlation on
 
-            img2 : 1D or 2D np.ndarray
-                If not set to None, run cross correlation of this image (or
-                curve) against img1. Default is None.
+        img2 : 1D or 2D np.ndarray
+            If not set to None, run cross correlation of this image (or
+            curve) against img1. Default is None.
 
-            normalization : string or list of strings
-                normalization types. If not set, use internally saved
-                normalization parameters
+        normalization : string or list of strings
+            normalization types. If not set, use internally saved
+            normalization parameters
 
-            Returns
-            -------
-            ccorrs : 1d or 2d np.ndarray
-                An image of the correlation. The zero correlation is
-                located at shape//2 where shape is the 1 or 2-tuple
-                shape of the array
+        Returns
+        -------
+        ccorrs : 1d or 2d np.ndarray
+            An image of the correlation. The zero correlation is
+            located at shape//2 where shape is the 1 or 2-tuple
+            shape of the array
 
         """
         if normalization is None:
@@ -1175,9 +1160,7 @@ class CrossCorrelator:
 
         if img1.shape != self.shape:
             raise ValueError(
-                "Image not expected shape."
-                + "Got {}, ".format(img1.shape)
-                + "expected {}".format(self.shape)
+                "Image not expected shape." + "Got {}, ".format(img1.shape) + "expected {}".format(self.shape)
             )
         # reshape for 1D case
         if self.ndim == 1:
@@ -1236,9 +1219,7 @@ class CrossCorrelator:
                     ccorr /= self.maskcorrs[i] * np.average(tmpimg[ppiis, ppjjs]) ** 2
                 else:
                     ccorr /= (
-                        self.maskcorrs[i]
-                        * np.average(tmpimg[ppiis, ppjjs])
-                        * np.average(tmpimg2[ppiis, ppjjs])
+                        self.maskcorrs[i] * np.average(tmpimg[ppiis, ppjjs]) * np.average(tmpimg2[ppiis, ppjjs])
                     )
             if self.ndim == 1:
                 ccorr = ccorr.reshape(-1)
@@ -1251,18 +1232,18 @@ class CrossCorrelator:
 
 
 def _cross_corr(img1, img2=None):
-    """ Compute the cross correlation of one (or two) images.
+    """Compute the cross correlation of one (or two) images.
 
-        Parameters
-        ----------
-        img1 : np.ndarray
-            the image or curve to cross correlate
+    Parameters
+    ----------
+    img1 : np.ndarray
+        the image or curve to cross correlate
 
-        img2 : 1d or 2d np.ndarray, optional
-            If set, cross correlate img1 against img2.  A shift of img2
-            to the right of img1 will lead to a shift of the point of
-            highest correlation to the right.
-            Default is set to None
+    img2 : 1d or 2d np.ndarray, optional
+        If set, cross correlate img1 against img2.  A shift of img2
+        to the right of img1 will lead to a shift of the point of
+        highest correlation to the right.
+        Default is set to None
     """
     ndim = img1.ndim
 

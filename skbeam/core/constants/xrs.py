@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 # ######################################################################
 # Copyright (c) 2014, Brookhaven Science Associates, Brookhaven        #
@@ -54,8 +53,8 @@ logger = logging.getLogger(__name__)
 
 
 # http://stackoverflow.com/questions/3624753/how-to-provide-additional-initialization-for-a-subclass-of-namedtuple
-class HKL(namedtuple('HKL', 'h k l')):
-    '''
+class HKL(namedtuple("HKL", "h k l")):
+    """
     Namedtuple sub-class miller indicies (HKL)
 
     This class enforces that the values are integers.
@@ -66,7 +65,8 @@ class HKL(namedtuple('HKL', 'h k l')):
     k : int
     l : int
 
-    '''
+    """
+
     __slots__ = ()
 
     def __new__(cls, *args, **kwargs):
@@ -84,7 +84,7 @@ class HKL(namedtuple('HKL', 'h k l')):
         return np.linalg.norm(self)
 
 
-class Reflection(namedtuple('Reflection', ('d', 'hkl', 'q'))):
+class Reflection(namedtuple("Reflection", ("d", "hkl", "q"))):
     """
     Namedtuple sub-class for scattering reflection information
 
@@ -100,6 +100,7 @@ class Reflection(namedtuple('Reflection', ('d', 'hkl', 'q'))):
         q-value of the reflection
 
     """
+
     __slots__ = ()
 
 
@@ -116,9 +117,9 @@ class PowderStandard(object):
     reflections : list
         A list of (d, (h, k, l), q) values.
     """
+
     def __init__(self, name, reflections):
-        self._reflections = [Reflection(d, HKL(*hkl), q)
-                             for d, hkl, q in reflections]
+        self._reflections = [Reflection(d, HKL(*hkl), q) for d, hkl, q in reflections]
         self._reflections.sort(key=lambda x: x[-1])
         self._name = name
 
@@ -243,49 +244,156 @@ A dictionary holding known powder-pattern calibration standards
 # https://www-s.nist.gov/srmors/certificates/676a.pdf?CFID=3259108&CFTOKEN=fa5bb0075f99948c-FA6ABBDA-9691-7A6B-FBE24BE35748DC08&jsessionid=f030e1751fc5365cac74417053f2c344f675
 #: Mapping of known calibration standards and their reflections
 calibration_standards = {
-    'Si': PowderStandard.from_lambda_2theta_hkl(
-        name='Si',
+    "Si": PowderStandard.from_lambda_2theta_hkl(
+        name="Si",
         wavelength=1.5405929,
-        two_theta=np.deg2rad([28.441, 47.3, 56.119, 69.126, 76.371, 88.024,
-                              94.946, 106.7, 114.082, 127.532, 136.877]),
-        hkl=((1, 1, 1), (2, 2, 0), (3, 1, 1), (4, 0, 0), (3, 3, 1), (4, 2, 2),
-             (5, 1, 1), (4, 4, 0), (5, 3, 1), (6, 2, 0), (5, 3, 3))
+        two_theta=np.deg2rad(
+            [28.441, 47.3, 56.119, 69.126, 76.371, 88.024, 94.946, 106.7, 114.082, 127.532, 136.877]
+        ),
+        hkl=(
+            (1, 1, 1),
+            (2, 2, 0),
+            (3, 1, 1),
+            (4, 0, 0),
+            (3, 3, 1),
+            (4, 2, 2),
+            (5, 1, 1),
+            (4, 4, 0),
+            (5, 3, 1),
+            (6, 2, 0),
+            (5, 3, 3),
+        ),
     ),
-    'CeO2': PowderStandard.from_lambda_2theta_hkl(
-        name='CeO2',
+    "CeO2": PowderStandard.from_lambda_2theta_hkl(
+        name="CeO2",
         wavelength=1.5405929,
         two_theta=np.deg2rad([28.61, 33.14, 47.54, 56.39, 59.14, 69.46]),
-        hkl=((1, 1, 1), (2, 0, 0), (2, 2, 0), (3, 1, 1), (2, 2, 2), (4, 0, 0))
+        hkl=((1, 1, 1), (2, 0, 0), (2, 2, 0), (3, 1, 1), (2, 2, 2), (4, 0, 0)),
     ),
-    'Al2O3': PowderStandard.from_lambda_2theta_hkl(
-        name='Al2O3',
+    "Al2O3": PowderStandard.from_lambda_2theta_hkl(
+        name="Al2O3",
         wavelength=1.5405929,
-        two_theta=np.deg2rad([25.574, 35.149, 37.773, 43.351, 52.548, 57.497,
-                              66.513, 68.203, 76.873, 77.233, 84.348, 88.994,
-                              91.179, 95.240, 101.070, 116.085, 116.602,
-                              117.835, 122.019, 127.671, 129.870, 131.098,
-                              136.056, 142.314, 145.153, 149.185, 150.102,
-                              150.413, 152.380]),
-        hkl=((0, 1, 2),  (1, 0, 4),  (1, 1, 0),  (1, 1, 3),  (0, 2, 4),
-             (1, 1, 6),  (2, 1, 4),  (3, 0, 0),  (1, 0, 10), (1, 1, 9),
-             (2, 2, 3),  (0, 2, 10), (1, 3, 4),  (2, 2, 6),  (2, 1, 10),
-             (3, 2, 4),  (0, 1, 14), (4, 1, 0),  (4, 1, 3),  (1, 3, 10),
-             (3, 0, 12), (2, 0, 14), (1, 4, 6),  (1, 1, 15), (4, 0, 10),
-             (0, 5, 4),  (1, 2, 14), (1, 0, 16), (3, 3, 0))
+        two_theta=np.deg2rad(
+            [
+                25.574,
+                35.149,
+                37.773,
+                43.351,
+                52.548,
+                57.497,
+                66.513,
+                68.203,
+                76.873,
+                77.233,
+                84.348,
+                88.994,
+                91.179,
+                95.240,
+                101.070,
+                116.085,
+                116.602,
+                117.835,
+                122.019,
+                127.671,
+                129.870,
+                131.098,
+                136.056,
+                142.314,
+                145.153,
+                149.185,
+                150.102,
+                150.413,
+                152.380,
+            ]
+        ),
+        hkl=(
+            (0, 1, 2),
+            (1, 0, 4),
+            (1, 1, 0),
+            (1, 1, 3),
+            (0, 2, 4),
+            (1, 1, 6),
+            (2, 1, 4),
+            (3, 0, 0),
+            (1, 0, 10),
+            (1, 1, 9),
+            (2, 2, 3),
+            (0, 2, 10),
+            (1, 3, 4),
+            (2, 2, 6),
+            (2, 1, 10),
+            (3, 2, 4),
+            (0, 1, 14),
+            (4, 1, 0),
+            (4, 1, 3),
+            (1, 3, 10),
+            (3, 0, 12),
+            (2, 0, 14),
+            (1, 4, 6),
+            (1, 1, 15),
+            (4, 0, 10),
+            (0, 5, 4),
+            (1, 2, 14),
+            (1, 0, 16),
+            (3, 3, 0),
+        ),
     ),
-    'LaB6': PowderStandard.from_d(
-        name='LaB6',
-        d=[4.156, 2.939, 2.399, 2.078, 1.859, 1.697, 1.469, 1.385, 1.314,
-           1.253, 1.200, 1.153, 1.111, 1.039, 1.008, 0.980, 0.953, 0.929,
-           0.907, 0.886, 0.848, 0.831, 0.815, 0.800]
+    "LaB6": PowderStandard.from_d(
+        name="LaB6",
+        d=[
+            4.156,
+            2.939,
+            2.399,
+            2.078,
+            1.859,
+            1.697,
+            1.469,
+            1.385,
+            1.314,
+            1.253,
+            1.200,
+            1.153,
+            1.111,
+            1.039,
+            1.008,
+            0.980,
+            0.953,
+            0.929,
+            0.907,
+            0.886,
+            0.848,
+            0.831,
+            0.815,
+            0.800,
+        ],
     ),
-    'Ni': PowderStandard.from_d(
-        name='Ni',
-        d=[2.03458234862, 1.762, 1.24592214845, 1.06252597829, 1.01729117431,
-           0.881, 0.80846104616, 0.787990355271, 0.719333487797,
-           0.678194116208, 0.622961074225, 0.595664718733, 0.587333333333,
-           0.557193323722, 0.537404961852, 0.531262989146, 0.508645587156,
-           0.493458701611, 0.488690872874, 0.47091430825, 0.458785722296,
-           0.4405, 0.430525121912, 0.427347771314]
-    )
+    "Ni": PowderStandard.from_d(
+        name="Ni",
+        d=[
+            2.03458234862,
+            1.762,
+            1.24592214845,
+            1.06252597829,
+            1.01729117431,
+            0.881,
+            0.80846104616,
+            0.787990355271,
+            0.719333487797,
+            0.678194116208,
+            0.622961074225,
+            0.595664718733,
+            0.587333333333,
+            0.557193323722,
+            0.537404961852,
+            0.531262989146,
+            0.508645587156,
+            0.493458701611,
+            0.488690872874,
+            0.47091430825,
+            0.458785722296,
+            0.4405,
+            0.430525121912,
+            0.427347771314,
+        ],
+    ),
 }

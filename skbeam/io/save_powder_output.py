@@ -49,8 +49,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-def save_output(tth, intensity, output_name, q_or_2theta, ext='.chi',
-                err=None, dir_path=None):
+def save_output(tth, intensity, output_name, q_or_2theta, ext=".chi", err=None, dir_path=None):
     """
     Save output diffraction intensities into .chi, .dat or .xye file formats.
     If the extension(ext) of the output file is not selected it will be
@@ -84,37 +83,37 @@ def save_output(tth, intensity, output_name, q_or_2theta, ext='.chi',
         eg: /Volumes/Data/experiments/data/
     """
 
-    if q_or_2theta not in set(['Q', '2theta']):
-        raise ValueError("It is expected to provide whether the data is"
-                         " Q values(enter Q) or two theta values"
-                         " (enter 2theta)")
+    if q_or_2theta not in set(["Q", "2theta"]):
+        raise ValueError(
+            "It is expected to provide whether the data is"
+            " Q values(enter Q) or two theta values"
+            " (enter 2theta)"
+        )
 
     if q_or_2theta == "Q":
-        des = ("""First column represents Q values (Angstroms) and second
+        des = """First column represents Q values (Angstroms) and second
         column represents intensities and if there is a third
-        column it represents the error values of intensities.""")
+        column it represents the error values of intensities."""
     else:
-        des = ("""First column represents two theta values (degrees) and
+        des = """First column represents two theta values (degrees) and
         second column represents intensities and if there is
-        a third column it represents the error values of intensities.""")
+        a third column it represents the error values of intensities."""
 
     _validate_input(tth, intensity, err, ext)
 
     file_path = _create_file_path(dir_path, output_name, ext)
 
-    with open(file_path, 'wb') as f:
+    with open(file_path, "wb") as f:
         _HEADER = """{out_name}
         This file contains integrated powder x-ray diffraction
         intensities.
         {des}
         Number of data points in the file : {n_pts}
         ######################################################"""
-        _encoding_writer(f, _HEADER.format(n_pts=len(tth),
-                                           out_name=output_name,
-                                           des=des))
+        _encoding_writer(f, _HEADER.format(n_pts=len(tth), out_name=output_name, des=des))
         new_line = "\n"
         _encoding_writer(f, new_line)
-        if (err is None):
+        if err is None:
             np.savetxt(f, np.c_[tth, intensity])
         else:
             np.savetxt(f, np.c_[tth, intensity, err])
@@ -132,11 +131,10 @@ def _encoding_writer(f, _HEADER):
     _HEADER : str
         string need to be written in the file
     """
-    f.write(_HEADER.encode('utf-8'))
+    f.write(_HEADER.encode("utf-8"))
 
 
-def gsas_writer(tth, intensity, output_name, mode=None,
-                err=None, dir_path=None):
+def gsas_writer(tth, intensity, output_name, mode=None, err=None, dir_path=None):
     """
     Save diffraction intensities into .gsas file format
 
@@ -158,7 +156,7 @@ def gsas_writer(tth, intensity, output_name, mode=None,
         eg: /Data/experiments/data/
     """
     # save output diffraction intensities into .gsas file extension.
-    ext = '.gsas'
+    ext = ".gsas"
 
     _validate_input(tth, intensity, err, ext)
 
@@ -170,9 +168,9 @@ def gsas_writer(tth, intensity, output_name, mode=None,
     scale = 10 ** int(log_scale)
     lines = []
 
-    title = 'Angular Profile'
-    title += ': %s' % output_name
-    title += ' scale=%g' % scale
+    title = "Angular Profile"
+    title += ": %s" % output_name
+    title += " scale=%g" % scale
 
     title = title[:80]
     lines.append("%-80s" % title)
@@ -184,33 +182,54 @@ def gsas_writer(tth, intensity, output_name, mode=None,
     dtth_cdg = (tth[-1] - tth[0]) / (len(tth) - 1) * 100
 
     if err is None:
-        mode = 'STD'
+        mode = "STD"
 
-    if mode == 'STD':
+    if mode == "STD":
         n_rec = int(np.ceil(n_chan / 10.0))
-        l_bank = ("BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f STD" %
-                  (i_bank, n_chan, n_rec, tth0_cdg, dtth_cdg, 0, 0))
+        l_bank = "BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f STD" % (
+            i_bank,
+            n_chan,
+            n_rec,
+            tth0_cdg,
+            dtth_cdg,
+            0,
+            0,
+        )
         lines.append("%-80s" % l_bank)
         lrecs = ["%2i%6.0f" % (1, ii * scale) for ii in intensity]
         for i in range(0, len(lrecs), 10):
-            lines.append("".join(lrecs[i:i + 10]))
-    elif mode == 'ESD':
+            lines.append("".join(lrecs[i : i + 10]))
+    elif mode == "ESD":
         n_rec = int(np.ceil(n_chan / 5.0))
-        l_bank = ("BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f ESD"
-                  % (i_bank, n_chan, n_rec, tth0_cdg, dtth_cdg, 0, 0))
+        l_bank = "BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f ESD" % (
+            i_bank,
+            n_chan,
+            n_rec,
+            tth0_cdg,
+            dtth_cdg,
+            0,
+            0,
+        )
         lines.append("%-80s" % l_bank)
-        l_recs = ["%8.0f%8.0f" % (ii, ee * scale)
-                  for ii, ee in zip(intensity, err)]
+        l_recs = ["%8.0f%8.0f" % (ii, ee * scale) for ii, ee in zip(intensity, err)]
         for i in range(0, len(l_recs), 5):
-            lines.append("".join(l_recs[i:i + 5]))
-    elif mode == 'FXYE':
+            lines.append("".join(l_recs[i : i + 5]))
+    elif mode == "FXYE":
         n_rec = n_chan
-        l_bank = ("BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f FXYE" %
-                  (i_bank, n_chan, n_rec, tth0_cdg, dtth_cdg, 0, 0))
+        l_bank = "BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f FXYE" % (
+            i_bank,
+            n_chan,
+            n_rec,
+            tth0_cdg,
+            dtth_cdg,
+            0,
+            0,
+        )
         lines.append("%-80s" % l_bank)
         l_recs = [
             "%22.10f%22.10f%24.10f" % (xx * scale, yy * scale, ee * scale)
-            for xx, yy, ee in zip(tth, intensity, err)]
+            for xx, yy, ee in zip(tth, intensity, err)
+        ]
         for i in range(len(l_recs)):
             lines.append("%-80s" % l_recs[i])
     else:
@@ -219,7 +238,7 @@ def gsas_writer(tth, intensity, output_name, mode=None,
     lines[-1] = "%-80s" % lines[-1]
     rv = "\r\n".join(lines) + "\r\n"
 
-    with open(file_path, 'wt') as f:
+    with open(file_path, "wt") as f:
         f.write(rv)
 
 
@@ -244,16 +263,13 @@ def _validate_input(tth, intensity, err, ext):
     """
 
     if len(tth) != len(intensity):
-        raise ValueError("Number of intensities and the number of Q or"
-                         " two theta values are different ")
+        raise ValueError("Number of intensities and the number of Q or" " two theta values are different ")
     if err is not None:
         if len(intensity) != len(err):
-            raise ValueError("Number of intensities and the number of"
-                             " err values are different")
+            raise ValueError("Number of intensities and the number of" " err values are different")
 
-    if ext == '.xye' and err is None:
-        raise ValueError("Provide the Error value of intensity"
-                         " (for .xye file format err != None)")
+    if ext == ".xye" and err is None:
+        raise ValueError("Provide the Error value of intensity" " (for .xye file format err != None)")
 
 
 def _create_file_path(dir_path, output_name, ext):
@@ -285,11 +301,10 @@ def _create_file_path(dir_path, output_name, ext):
     elif os.path.exists(dir_path):
         file_path = os.path.join(dir_path, output_name) + ext
     else:
-        raise ValueError('The given path does not exist.')
+        raise ValueError("The given path does not exist.")
 
     if os.path.isfile(file_path):
-        logger.info("Output file of diffraction intensities"
-                    " already exists")
+        logger.info("Output file of diffraction intensities" " already exists")
         os.remove(file_path)
 
     return file_path

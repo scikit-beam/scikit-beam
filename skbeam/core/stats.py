@@ -42,10 +42,11 @@ import scipy.stats
 from skbeam.core.utils import _defaults  # Dan is dubious about this.
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
-def statistics_1D(x, y, stat='mean', nx=None, min_x=None, max_x=None):
+def statistics_1D(x, y, stat="mean", nx=None, min_x=None, max_x=None):
     """
     Bin the values in y based on their x-coordinates
 
@@ -83,7 +84,7 @@ def statistics_1D(x, y, stat='mean', nx=None, min_x=None, max_x=None):
         nx = _defaults["bins"]
 
     # use a weighted histogram to get the bin sum
-    bins = np.linspace(start=min_x, stop=max_x, num=nx+1, endpoint=True)
+    bins = np.linspace(start=min_x, stop=max_x, num=nx + 1, endpoint=True)
 
     val, _, _ = scipy.stats.binned_statistic(x, y, statistic=stat, bins=bins)
     # return the two arrays

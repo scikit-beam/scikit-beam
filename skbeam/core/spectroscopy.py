@@ -41,6 +41,7 @@ from six.moves import zip
 from scipy.integrate import simps
 from .fitting import fit_quad_to_peak
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -132,7 +133,7 @@ def find_largest_peak(x, y, window=None):
         roi = slice(0, -1)
 
     (w, x0, y0), r2 = fit_quad_to_peak(x[roi], np.log(y[roi]))
-    return x0, np.exp(y0), 1/np.sqrt(-2*w)
+    return x0, np.exp(y0), 1 / np.sqrt(-2 * w)
 
 
 def integrate_ROI_spectrum(bin_edges, counts, x_min, x_max):
@@ -174,8 +175,7 @@ def integrate_ROI_spectrum(bin_edges, counts, x_min, x_max):
 
     """
     bin_edges = np.asarray(bin_edges)
-    return integrate_ROI(bin_edges[:-1] + np.diff(bin_edges),
-                         counts, x_min, x_max)
+    return integrate_ROI(bin_edges[:-1] + np.diff(bin_edges), counts, x_min, x_max)
 
 
 def _formatter_array_regions(x, centers, window=1, tab_count=0):
@@ -211,12 +211,14 @@ def _formatter_array_regions(x, centers, window=1, tab_count=0):
     """
     xl = len(x)
     x = np.asarray(x)
-    header = ("\t"*tab_count + 'center\tarray values\n' +
-              "\t"*tab_count + '------\t------------\n')
-    return header + '\n'.join(
-        ["\t"*tab_count + "{c}: \t {vals}".format(
-            c=c, vals=x[np.max([0, c-window]):np.min([xl, c + window + 1])])
-         for c in centers])
+    header = "\t" * tab_count + "center\tarray values\n" + "\t" * tab_count + "------\t------------\n"
+    return header + "\n".join(
+        [
+            "\t" * tab_count
+            + "{c}: \t {vals}".format(c=c, vals=x[np.max([0, c - window]) : np.min([xl, c + window + 1])])
+            for c in centers
+        ]
+    )
 
 
 def integrate_ROI(x, y, x_min, x_max):
@@ -258,9 +260,11 @@ def integrate_ROI(x, y, x_min, x_max):
     y = np.asarray(y)
 
     if x.shape != y.shape:
-        raise ValueError("Inputs (x and y) must be the same "
-                         "size. x.shape = {0} and y.shape = "
-                         "{1}".format(x.shape, y.shape))
+        raise ValueError(
+            "Inputs (x and y) must be the same "
+            "size. x.shape = {0} and y.shape = "
+            "{1}".format(x.shape, y.shape)
+        )
 
     # use np.sign() to obtain array which has evaluated sign changes in all
     # diff in input x_value array. Checks and tests are then run on the
@@ -272,10 +276,11 @@ def integrate_ROI(x, y, x_min, x_max):
     # location within the source array where the exception occurs.
     if not np.all(eval_x_arr_sign == eval_x_arr_sign[0]):
         error_locations = np.where(eval_x_arr_sign != eval_x_arr_sign[0])[0]
-        raise ValueError("Independent variable must be monotonically "
-                         "increasing. Erroneous values found at x-value "
-                         "array index locations:\n" +
-                         _formatter_array_regions(x, error_locations))
+        raise ValueError(
+            "Independent variable must be monotonically "
+            "increasing. Erroneous values found at x-value "
+            "array index locations:\n" + _formatter_array_regions(x, error_locations)
+        )
 
     # check whether the sign of all diff measures are negative in the
     # x. If so, then the input array for both x_values and
@@ -284,10 +289,12 @@ def integrate_ROI(x, y, x_min, x_max):
     if eval_x_arr_sign[0] == -1:
         x = x[::-1]
         y = y[::-1]
-        logging.debug("Input values for 'x' were found to be "
-                      "monotonically decreasing. The 'x' and "
-                      "'y' arrays have been reversed prior to "
-                      "integration.")
+        logging.debug(
+            "Input values for 'x' were found to be "
+            "monotonically decreasing. The 'x' and "
+            "'y' arrays have been reversed prior to "
+            "integration."
+        )
 
     # up-cast to 1d and make sure it is flat
     x_min = np.atleast_1d(x_min).ravel()
@@ -301,31 +308,30 @@ def integrate_ROI(x, y, x_min, x_max):
     # sister maximum value, and raise error if any minimum value is actually
     # greater than the sister maximum value.
     if np.any(x_min >= x_max):
-        raise ValueError("All lower integration bounds must be less than "
-                         "upper integration bounds.")
+        raise ValueError("All lower integration bounds must be less than " "upper integration bounds.")
 
     # check to make sure that all specified minimum and maximum values are
     # actually contained within the extents of the independent variable array
     if np.any(x_min < x[0]):
         error_locations = np.where(x_min < x[0])[0]
-        raise ValueError("Specified lower integration boundary values are "
-                         "outside the spectrum range. All minimum integration "
-                         "boundaries must be greater than, or equal to the "
-                         "lowest value in spectrum range. The erroneous x_min_"
-                         "array indices are:\n" +
-                         _formatter_array_regions(x_min,
-                                                  error_locations, window=0))
+        raise ValueError(
+            "Specified lower integration boundary values are "
+            "outside the spectrum range. All minimum integration "
+            "boundaries must be greater than, or equal to the "
+            "lowest value in spectrum range. The erroneous x_min_"
+            "array indices are:\n" + _formatter_array_regions(x_min, error_locations, window=0)
+        )
 
     if np.any(x_max > x[-1]):
         error_locations = np.where(x_max > x[-1])[0]
-        raise ValueError("Specified upper integration boundary values "
-                         "are outside the spectrum range. All maximum "
-                         "integration boundary values must be less "
-                         "than, or equal to the highest value in the spectrum "
-                         "range. The erroneous x_max array indices are: "
-                         "\n" +
-                         _formatter_array_regions(x_max,
-                                                  error_locations, window=0))
+        raise ValueError(
+            "Specified upper integration boundary values "
+            "are outside the spectrum range. All maximum "
+            "integration boundary values must be less "
+            "than, or equal to the highest value in the spectrum "
+            "range. The erroneous x_max array indices are: "
+            "\n" + _formatter_array_regions(x_max, error_locations, window=0)
+        )
 
     # find the bottom index of each integration bound
     bottom_indx = x.searchsorted(x_min)
@@ -343,6 +349,6 @@ def integrate_ROI(x, y, x_min, x_max):
         # If calculation speed become an issue, then consider changing
         # setting to 'first', or 'last' in which case trap rule is only
         # applied to either first or last N-2 intervals.
-        accum += simps(y[bot:top], x[bot:top], even='avg')
+        accum += simps(y[bot:top], x[bot:top], even="avg")
 
     return accum

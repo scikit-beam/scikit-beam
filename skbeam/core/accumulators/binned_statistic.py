@@ -43,10 +43,9 @@ from ..utils import radial_grid, angle_grid, bin_edges_to_centers
 
 
 class BinnedStatisticDD(object):
-    std_ = ('mean', 'median', 'count', 'sum', 'std')
+    std_ = ("mean", "median", "count", "sum", "std")
 
-    def __init__(self, sample, statistic='mean',
-                 bins=10, range=None, mask=None):
+    def __init__(self, sample, statistic="mean", bins=10, range=None, mask=None):
         """
         Compute a multidimensional binned statistic for a set of data.
 
@@ -116,8 +115,7 @@ class BinnedStatisticDD(object):
         try:
             M = len(bins)
             if M != self.D:
-                raise AttributeError('The dimension of bins must be equal '
-                                     'to the dimension of the sample x.')
+                raise AttributeError("The dimension of bins must be equal " "to the dimension of the sample x.")
         except TypeError:
             bins = self.D * [bins]
 
@@ -135,8 +133,8 @@ class BinnedStatisticDD(object):
         # Make sure the bins have a finite width.
         for i in np.arange(len(smin)):
             if smin[i] == smax[i]:
-                smin[i] = smin[i] - .5
-                smax[i] = smax[i] + .5
+                smin[i] = smin[i] - 0.5
+                smax[i] = smax[i] + 0.5
 
         # Create edge arrays
         for i in np.arange(self.D):
@@ -158,9 +156,7 @@ class BinnedStatisticDD(object):
             # Would be better to do this using bincount "weights", perhaps.
             thissample = sample[:, i]
             if mask is not None:
-                thissample[mask == 0] = (self.edges[i][0] -
-                                         0.01 * (
-                                             1 + np.fabs(self.edges[i][0])))
+                thissample[mask == 0] = self.edges[i][0] - 0.01 * (1 + np.fabs(self.edges[i][0]))
             Ncount[i] = np.digitize(thissample, self.edges[i])
 
         # Using digitize, values that fall on an edge are put in the
@@ -172,8 +168,7 @@ class BinnedStatisticDD(object):
             # Rounding precision
             decimal = int(-np.log10(dedges[i].min())) + 6
             # Find which points are on the rightmost edge.
-            on_edge = np.where(np.around(sample[:, i], decimal) ==
-                               np.around(self.edges[i][-1], decimal))[0]
+            on_edge = np.where(np.around(sample[:, i], decimal) == np.around(self.edges[i][-1], decimal))[0]
             # Shift these points one bin to the left.
             Ncount[i][on_edge] -= 1
 
@@ -181,7 +176,7 @@ class BinnedStatisticDD(object):
         self.ni = self.nbin.argsort()
         self.xy = np.zeros(N, int)
         for i in np.arange(0, self.D - 1):
-            self.xy += Ncount[self.ni[i]] * self.nbin[self.ni[i + 1:]].prod()
+            self.xy += Ncount[self.ni[i]] * self.nbin[self.ni[i + 1 :]].prod()
         self.xy += Ncount[self.ni[-1]]
         self._flatcount = None  # will be computed if needed
         self._argsort_index = None
@@ -189,24 +184,24 @@ class BinnedStatisticDD(object):
 
     @property
     def binmap(self):
-        ''' Return the map of the bins per dimension.
-                i.e. reverse transformation of flattened to unflattened bins
+        """Return the map of the bins per dimension.
+            i.e. reverse transformation of flattened to unflattened bins
 
-            Returns
-            -------
-            D np.ndarrays of length N where D is the number of dimensions
-                and N is the number of data points.
-                For each dimension, the min bin id is 0 and max n+1 where n is
-                the number of bins in that dimension. The ids 0 and n+1 mark
-                the outliers of the bins.
-        '''
-        N, = self.xy.shape
+        Returns
+        -------
+        D np.ndarrays of length N where D is the number of dimensions
+            and N is the number of data points.
+            For each dimension, the min bin id is 0 and max n+1 where n is
+            the number of bins in that dimension. The ids 0 and n+1 mark
+            the outliers of the bins.
+        """
+        (N,) = self.xy.shape
         binmap = np.zeros((self.D, N), dtype=int)
         denominator = 1
 
         for i in range(self.D):
             ind = self.D - i - 1
-            subbinmap = (self.xy // denominator)
+            subbinmap = self.xy // denominator
             if i < self.D - 1:
                 subbinmap = subbinmap % self.nbin[self.ni[ind - 1]]
             binmap[ind] = subbinmap
@@ -253,7 +248,7 @@ class BinnedStatisticDD(object):
     @statistic.setter
     def statistic(self, new_statistic):
         if not callable(new_statistic) and new_statistic not in self.std_:
-            raise ValueError('invalid statistic %r' % (new_statistic,))
+            raise ValueError("invalid statistic %r" % (new_statistic,))
         else:
             self._statistic = new_statistic
 
@@ -292,36 +287,35 @@ class BinnedStatisticDD(object):
             statistic = self.statistic
 
         self.result = np.empty(self.nbin.prod(), float)
-        if statistic == 'mean':
+        if statistic == "mean":
             self.result.fill(np.nan)
             flatsum = np.bincount(self.xy, values)
             a = self.flatcount.nonzero()
             self.result[a] = flatsum[a] / self.flatcount[a]
-        elif statistic == 'std':
+        elif statistic == "std":
             self.result.fill(0)
             flatsum = np.bincount(self.xy, values)
-            flatsum2 = np.bincount(self.xy, values ** 2)
+            flatsum2 = np.bincount(self.xy, values**2)
             a = self.flatcount.nonzero()
-            self.result[a] = np.sqrt(flatsum2[a] / self.flatcount[a] -
-                                     (flatsum[a] / self.flatcount[a]) ** 2)
-        elif statistic == 'count':
+            self.result[a] = np.sqrt(flatsum2[a] / self.flatcount[a] - (flatsum[a] / self.flatcount[a]) ** 2)
+        elif statistic == "count":
             self.result.fill(0)
             a = np.arange(len(self.flatcount))
             self.result[a] = self.flatcount
-        elif statistic == 'sum':
+        elif statistic == "sum":
             self.result.fill(0)
             flatsum = np.bincount(self.xy, values)
             a = np.arange(len(flatsum))
             self.result[a] = flatsum
-        elif callable(statistic) or statistic == 'median':
-            if statistic == 'median':
+        elif callable(statistic) or statistic == "median":
+            if statistic == "median":
                 internal_statistic = np.median
             else:
                 internal_statistic = statistic
             with warnings.catch_warnings():
                 # Numpy generates a warnings for mean/std/... with empty list
-                warnings.filterwarnings('ignore', category=RuntimeWarning)
-                old = np.seterr(invalid='ignore')
+                warnings.filterwarnings("ignore", category=RuntimeWarning)
+                old = np.seterr(invalid="ignore")
                 try:
                     null = internal_statistic([])
                 except Exception:
@@ -333,7 +327,7 @@ class BinnedStatisticDD(object):
             i = 0
             for j, k in enumerate(self.flatcount):
                 if k > 0:
-                    self.result[j] = internal_statistic(vfs[i: i + k])
+                    self.result[j] = internal_statistic(vfs[i : i + k])
                 i += k
 
         # Shape into a proper matrix
@@ -349,14 +343,13 @@ class BinnedStatisticDD(object):
         self.result = self.result[tuple(core)]
 
         if (self.result.shape != self.nbin - 2).any():
-            raise RuntimeError('Internal Shape Error')
+            raise RuntimeError("Internal Shape Error")
 
         return self.result
 
 
 class BinnedStatistic1D(BinnedStatisticDD):
-    def __init__(self, x, statistic='mean',
-                 bins=10, range=None, mask=None):
+    def __init__(self, x, statistic="mean", bins=10, range=None, mask=None):
         """
         A refactored version of scipy.stats.binned_statistic to improve
         performance for the case where binning doesn't need to be
@@ -428,9 +421,7 @@ class BinnedStatistic1D(BinnedStatisticDD):
             if len(range) == 2:
                 range = [range]
 
-        super(BinnedStatistic1D, self).__init__([x], statistic=statistic,
-                                                bins=bins, range=range,
-                                                mask=mask)
+        super(BinnedStatistic1D, self).__init__([x], statistic=statistic, bins=bins, range=range, mask=mask)
 
     @property
     def bin_edges(self):
@@ -505,8 +496,7 @@ class BinnedStatistic2D(BinnedStatisticDD):
 
     """
 
-    def __init__(self, x, y, statistic='mean',
-                 bins=10, range=None, mask=None):
+    def __init__(self, x, y, statistic="mean", bins=10, range=None, mask=None):
         # This code is based on np.histogram2d
         try:
             N = len(bins)
@@ -517,9 +507,7 @@ class BinnedStatistic2D(BinnedStatisticDD):
             xedges = yedges = np.asarray(bins, float)
             bins = [xedges, yedges]
 
-        super(BinnedStatistic2D, self).__init__([x, y], statistic=statistic,
-                                                bins=bins, range=range,
-                                                mask=mask)
+        super(BinnedStatistic2D, self).__init__([x, y], statistic=statistic, bins=bins, range=range, mask=mask)
 
     def __call__(self, values, statistic=None):
         """
@@ -562,8 +550,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
     image in both radius and phi.
     """
 
-    def __init__(self, shape, bins=10, range=None,
-                 origin=None, mask=None, r_map=None, statistic='mean'):
+    def __init__(self, shape, bins=10, range=None, origin=None, mask=None, r_map=None, statistic="mean"):
         """
         Parameters:
         -----------
@@ -612,7 +599,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
                 represented by function([]), or NaN if this returns an error.
         """
         if origin is None:
-            origin = (shape[0] - 1) / 2., (shape[1] - 1) / 2.
+            origin = (shape[0] - 1) / 2.0, (shape[1] - 1) / 2.0
 
         if r_map is None:
             r_map = radial_grid(origin, shape)
@@ -622,17 +609,15 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
         self.expected_shape = tuple(shape)
         if mask is not None:
             if mask.shape != self.expected_shape:
-                raise ValueError('"mask" has incorrect shape. '
-                                 ' Expected: ' + str(self.expected_shape) +
-                                 ' Received: ' + str(mask.shape))
+                raise ValueError(
+                    '"mask" has incorrect shape. '
+                    " Expected: " + str(self.expected_shape) + " Received: " + str(mask.shape)
+                )
             mask = mask.reshape(-1)
 
-        super(RPhiBinnedStatistic, self).__init__(r_map.reshape(-1),
-                                                  phi_map.reshape(-1),
-                                                  statistic,
-                                                  bins=bins,
-                                                  mask=mask,
-                                                  range=range)
+        super(RPhiBinnedStatistic, self).__init__(
+            r_map.reshape(-1), phi_map.reshape(-1), statistic, bins=bins, mask=mask, range=range
+        )
 
     def __call__(self, values, statistic=None):
         """
@@ -668,11 +653,11 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
         """
         # check for what I believe could be a common error
         if values.shape != self.expected_shape:
-            raise ValueError('"values" has incorrect shape.'
-                             ' Expected: ' + str(self.expected_shape) +
-                             ' Received: ' + str(values.shape))
-        return super(RPhiBinnedStatistic, self).__call__(values.reshape(-1),
-                                                         statistic)
+            raise ValueError(
+                '"values" has incorrect shape.'
+                " Expected: " + str(self.expected_shape) + " Received: " + str(values.shape)
+            )
+        return super(RPhiBinnedStatistic, self).__call__(values.reshape(-1), statistic)
 
 
 class RadialBinnedStatistic(BinnedStatistic1D):
@@ -681,8 +666,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
     image in radius.
     """
 
-    def __init__(self, shape, bins=10, range=None, origin=None, mask=None,
-                 r_map=None, statistic='mean'):
+    def __init__(self, shape, bins=10, range=None, origin=None, mask=None, r_map=None, statistic="mean"):
         """
         Parameters:
         -----------
@@ -738,16 +722,15 @@ class RadialBinnedStatistic(BinnedStatistic1D):
         self.expected_shape = tuple(shape)
         if mask is not None:
             if mask.shape != self.expected_shape:
-                raise ValueError('"mask" has incorrect shape. '
-                                 ' Expected: ' + str(self.expected_shape) +
-                                 ' Received: ' + str(mask.shape))
+                raise ValueError(
+                    '"mask" has incorrect shape. '
+                    " Expected: " + str(self.expected_shape) + " Received: " + str(mask.shape)
+                )
             mask = mask.reshape(-1)
 
-        super(RadialBinnedStatistic, self).__init__(r_map.reshape(-1),
-                                                    statistic,
-                                                    bins=bins,
-                                                    mask=mask,
-                                                    range=range)
+        super(RadialBinnedStatistic, self).__init__(
+            r_map.reshape(-1), statistic, bins=bins, mask=mask, range=range
+        )
 
     def __call__(self, values, statistic=None):
         """
@@ -783,8 +766,8 @@ class RadialBinnedStatistic(BinnedStatistic1D):
         """
         # check for what I believe could be a common error
         if values.shape != self.expected_shape:
-            raise ValueError('"values" has incorrect shape.'
-                             ' Expected: ' + str(self.expected_shape) +
-                             ' Received: ' + str(values.shape))
-        return super(RadialBinnedStatistic, self).__call__(values.reshape(-1),
-                                                           statistic)
+            raise ValueError(
+                '"values" has incorrect shape.'
+                " Expected: " + str(self.expected_shape) + " Received: " + str(values.shape)
+            )
+        return super(RadialBinnedStatistic, self).__call__(values.reshape(-1), statistic)

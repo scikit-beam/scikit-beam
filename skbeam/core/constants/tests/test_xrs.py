@@ -45,7 +45,7 @@ from skbeam.core.utils import q_to_d, d_to_q
 
 
 def test_powder_standard():
-    name = 'Si'
+    name = "Si"
     cal = calibration_standards[name]
     assert name == cal.name
 
@@ -60,8 +60,8 @@ def test_powder_standard():
 
 def test_hkl():
     a = HKL(1, 1, 1)
-    b = HKL('1', '1', '1')
-    c = HKL(h='1', k='1', l='1')  # noqa: E741
+    b = HKL("1", "1", "1")
+    c = HKL(h="1", k="1", l="1")  # noqa: E741
     d = HKL(1.5, 1.5, 1.75)
     assert a == b
     assert a == c

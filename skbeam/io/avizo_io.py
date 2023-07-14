@@ -25,11 +25,11 @@ def _read_amira(src_file):
     """
     am_header = []
     am_data = []
-    with open(os.path.normpath(src_file), 'r') as input_file:
+    with open(os.path.normpath(src_file), "r") as input_file:
         while True:
             line = input_file.readline()
             am_header.append(line)
-            if (line == '# Data section follows\n'):
+            if line == "# Data section follows\n":
                 input_file.readline()
                 break
         am_data = input_file.read()
@@ -76,34 +76,28 @@ def _amira_data_to_numpy(am_data, header_dict, flip_z=True):
         file. This data array is ready for further processing using the NSLS-II
         function library, or other operations able to operate on numpy arrays.
     """
-    Zdim = header_dict['array_dimensions']['z_dimension']
-    Ydim = header_dict['array_dimensions']['y_dimension']
-    Xdim = header_dict['array_dimensions']['x_dimension']
+    Zdim = header_dict["array_dimensions"]["z_dimension"]
+    Ydim = header_dict["array_dimensions"]["y_dimension"]
+    Xdim = header_dict["array_dimensions"]["x_dimension"]
     # Strip out null characters from the string of binary values
     # Dictionary of the encoding types for AmiraMesh files
-    am_format_dict = {'BINARY-LITTLE-ENDIAN': '<',
-                      'BINARY': '>',
-                      'ASCII': 'unknown'}
+    am_format_dict = {"BINARY-LITTLE-ENDIAN": "<", "BINARY": ">", "ASCII": "unknown"}
     # Dictionary of the data types encountered so far in AmiraMesh files
-    am_dtype_dict = {'float': 'f4',
-                     'short': 'h4',
-                     'ushort': 'H4',
-                     'byte': 'b'}
+    am_dtype_dict = {"float": "f4", "short": "h4", "ushort": "H4", "byte": "b"}
     # Had to split out the stripping of new line characters and conversion
     # of the original string data based on whether source data is BINARY
     # format or ASCII format. These format types require different stripping
     # tools and different string conversion tools.
-    if header_dict['data_format'] == 'BINARY-LITTLE-ENDIAN':
-        data_strip = am_data.strip('\n')
+    if header_dict["data_format"] == "BINARY-LITTLE-ENDIAN":
+        data_strip = am_data.strip("\n")
         flt_values = np.fromstring(
-            data_strip, (am_format_dict[header_dict['data_format']] +
-                         am_dtype_dict[header_dict['data_type']]))
-    if header_dict['data_format'] == 'ASCII':
-        data_strip = am_data.translate(None, '\n')
+            data_strip, (am_format_dict[header_dict["data_format"]] + am_dtype_dict[header_dict["data_type"]])
+        )
+    if header_dict["data_format"] == "ASCII":
+        data_strip = am_data.translate(None, "\n")
         string_list = data_strip.split(" ")
-        string_list = string_list[0:(len(string_list)-2)]
-        flt_values = np.array(
-            string_list).astype(am_dtype_dict[header_dict['data_type']])
+        string_list = string_list[0 : (len(string_list) - 2)]
+        flt_values = np.array(string_list).astype(am_dtype_dict[header_dict["data_type"]])
     # Resize the 1D array to the correct ndarray dimensions
     # Note that resize is in-place whereas reshape is not
     flt_values.resize(Zdim, Ydim, Xdim)
@@ -135,8 +129,7 @@ def _clean_amira_header(header_list):
     """
     clean_header = []
     for row in header_list:
-        split_header = filter(None, [word.translate(None, ',"')
-                                     for word in row.strip('\n').split()])
+        split_header = filter(None, [word.translate(None, ',"') for word in row.strip("\n").split()])
         clean_header.append(split_header)
     return clean_header
 
@@ -153,80 +146,87 @@ def _create_md_dict(clean_header):
 
     """
     # Avizo specific metadata
-    md_dict = {'software_src': clean_header[0][1],
-               'data_format': clean_header[0][2],
-               'data_format_version': clean_header[0][3]}
-    if md_dict['data_format'] == '3D':
-        md_dict['data_format'] = clean_header[0][3]
-        md_dict['data_format_version'] = clean_header[0][4]
+    md_dict = {
+        "software_src": clean_header[0][1],
+        "data_format": clean_header[0][2],
+        "data_format_version": clean_header[0][3],
+    }
+    if md_dict["data_format"] == "3D":
+        md_dict["data_format"] = clean_header[0][3]
+        md_dict["data_format_version"] = clean_header[0][4]
 
     for header_line in clean_header:
         hl = header_line
-        if 'define' in hl:
+        if "define" in hl:
             hl = hl
-            md_dict['array_dimensions'] = {
-                'x_dimension': int(hl[hl.index('define') + 2]),
-                'y_dimension': int(hl[hl.index('define') + 3]),
-                'z_dimension': int(hl[hl.index('define') + 4])}
-        elif 'Content' in hl:
-            md_dict['data_type'] = hl[hl.index('Content') + 2]
-        elif 'CoordType' in hl:
-            md_dict['coord_type'] = hl[hl.index('CoordType') + 1]
-        elif 'BoundingBox' in hl:
+            md_dict["array_dimensions"] = {
+                "x_dimension": int(hl[hl.index("define") + 2]),
+                "y_dimension": int(hl[hl.index("define") + 3]),
+                "z_dimension": int(hl[hl.index("define") + 4]),
+            }
+        elif "Content" in hl:
+            md_dict["data_type"] = hl[hl.index("Content") + 2]
+        elif "CoordType" in hl:
+            md_dict["coord_type"] = hl[hl.index("CoordType") + 1]
+        elif "BoundingBox" in hl:
             hl = hl
-            md_dict['bounding_box'] = {
-                'x_min': float(hl[hl.index('BoundingBox') + 1]),
-                'x_max': float(hl[hl.index('BoundingBox') + 2]),
-                'y_min': float(hl[hl.index('BoundingBox') + 3]),
-                'y_max': float(hl[hl.index('BoundingBox') + 4]),
-                'z_min': float(hl[hl.index('BoundingBox') + 5]),
-                'z_max': float(hl[hl.index('BoundingBox') + 6])}
+            md_dict["bounding_box"] = {
+                "x_min": float(hl[hl.index("BoundingBox") + 1]),
+                "x_max": float(hl[hl.index("BoundingBox") + 2]),
+                "y_min": float(hl[hl.index("BoundingBox") + 3]),
+                "y_max": float(hl[hl.index("BoundingBox") + 4]),
+                "z_min": float(hl[hl.index("BoundingBox") + 5]),
+                "z_max": float(hl[hl.index("BoundingBox") + 6]),
+            }
 
             # Parameter definition for voxel resolution calculations
-            bbox = [md_dict['bounding_box']['x_min'],
-                    md_dict['bounding_box']['x_max'],
-                    md_dict['bounding_box']['y_min'],
-                    md_dict['bounding_box']['y_max'],
-                    md_dict['bounding_box']['z_min'],
-                    md_dict['bounding_box']['z_max']]
-            dims = [md_dict['array_dimensions']['x_dimension'],
-                    md_dict['array_dimensions']['y_dimension'],
-                    md_dict['array_dimensions']['z_dimension']]
+            bbox = [
+                md_dict["bounding_box"]["x_min"],
+                md_dict["bounding_box"]["x_max"],
+                md_dict["bounding_box"]["y_min"],
+                md_dict["bounding_box"]["y_max"],
+                md_dict["bounding_box"]["z_min"],
+                md_dict["bounding_box"]["z_max"],
+            ]
+            dims = [
+                md_dict["array_dimensions"]["x_dimension"],
+                md_dict["array_dimensions"]["y_dimension"],
+                md_dict["array_dimensions"]["z_dimension"],
+            ]
 
             # Voxel resolution calculation
             resolution_list = []
             for index in np.arange(len(dims)):
                 if dims[index] > 1:
-                    resolution_list.append(
-                        (bbox[(2*index+1)] - bbox[(2*index)]) /
-                        (dims[index] - 1))
+                    resolution_list.append((bbox[(2 * index + 1)] - bbox[(2 * index)]) / (dims[index] - 1))
                 else:
                     resolution_list.append(0)
             # isotropy determination (isotropic res, or anisotropic res)
-            if (resolution_list[1]/resolution_list[0] > 0.99 and
-                    resolution_list[2]/resolution_list[0] > 0.99 and
-                    resolution_list[1]/resolution_list[0] < 1.01 and
-                    resolution_list[2]/resolution_list[0] < 1.01):
-                md_dict['resolution'] = {'zyx_value': resolution_list[0],
-                                         'type': 'isotropic'}
+            if (
+                resolution_list[1] / resolution_list[0] > 0.99
+                and resolution_list[2] / resolution_list[0] > 0.99
+                and resolution_list[1] / resolution_list[0] < 1.01
+                and resolution_list[2] / resolution_list[0] < 1.01
+            ):
+                md_dict["resolution"] = {"zyx_value": resolution_list[0], "type": "isotropic"}
             else:
-                md_dict['resolution'] = {
-                    'zyx_value': (resolution_list[2],
-                                  resolution_list[1],
-                                  resolution_list[0]),
-                    'type': 'anisotropic'}
+                md_dict["resolution"] = {
+                    "zyx_value": (resolution_list[2], resolution_list[1], resolution_list[0]),
+                    "type": "anisotropic",
+                }
 
-        elif 'Units' in hl:
+        elif "Units" in hl:
             try:
-                units = str(hl[hl.index('Units') + 2])
-                md_dict['units'] = units
+                units = str(hl[hl.index("Units") + 2])
+                md_dict["units"] = units
             except Exception:
-                logging.debug('Units value undefined in source data set. '
-                              'Reverting to default units value of pixels')
-                md_dict['units'] = 'pixels'
-        elif 'Coordinates' in hl:
-            coords = str(hl[hl.index('Coordinates') + 1])
-            md_dict['coordinates'] = coords
+                logging.debug(
+                    "Units value undefined in source data set. " "Reverting to default units value of pixels"
+                )
+                md_dict["units"] = "pixels"
+        elif "Coordinates" in hl:
+            coords = str(hl[hl.index("Coordinates") + 1])
+            md_dict["coordinates"] = coords
     return md_dict
 
 
