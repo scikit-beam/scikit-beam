@@ -1,0 +1,102 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+
+  build:
+    env:
+      DISPLAY: ":99.0"  # arbitrary
+      GSETTINGS_SCHEMA_DIR_CONDA_BACKUP: "/usr/share/miniconda/envs/testenv/share/glib-2.0/schemas"
+
+    strategy:
+      matrix:
+        host-os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+        python-version: ["3.9", "3.10", "3.11"]
+        numpy-version: ["1.21", "1.24", "1.25"]
+        include:
+          - host-os: "ubuntu-latest"
+            conda-mamba: "mamba"
+          - host-os: "macos-latest"
+            conda-mamba: "mamba"
+          - host-os: "windows-latest"
+            conda-mamba: "conda"
+        exclude:
+          - python-version: "3.11"
+            numpy-version: "1.21"
+          - host-os: "windows-latest"
+            numpy-version: "1.21"
+      fail-fast: false
+
+    runs-on: ${{ matrix.host-os }}
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        # This step is not expected to influence the test, since the test is run in Conda environment
+        python-version: "3.10"
+
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        channels: conda-forge
+        channel-priority: flexible
+        auto-update-conda: true
+        show-channel-urls: true
+        allow-softlinks: true
+        auto-activate-base: false
+        activate-environment: testenv
+        use-only-tar-bz2: false
+
+    - name: Install Linux libraries
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        # sudo apt-get install -y xvfb herbstluftwm
+
+    - name: Install Conda packages
+      run: |
+        set -vxeo pipefail
+
+        conda install mamba -n base -c conda-forge
+
+        ${{ matrix.conda-mamba }} install -y \
+          python=${{ matrix.python-version }} \
+          numpy=${{ matrix.numpy-version }} \
+          xraylib \
+          pip \
+          -c conda-forge
+
+        conda list
+        pip list
+
+    - name: Install PyPI packages
+      run: |
+        set -vxeuo pipefail
+
+        # pip install --upgrade pip setuptools
+        pip install codecov
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+
+        # python setup.py install build_ext -i
+        python setup.py build_ext -i
+        python setup.py install --single-version-externally-managed --record=record.txt
+
+        conda list
+        pip list
+        python --version
+
+    - name: Test with pytest
+      run: |
+        set -vxeuo pipefail
+        coverage run -m pytest -vvv
+        coverage report

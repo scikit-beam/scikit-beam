@@ -37,10 +37,12 @@ import numpy as np
 import numpy.testing as npt
 from numpy.testing import assert_array_almost_equal
 import pytest
+import os
 
 from skbeam.core import recip
 
 
+@pytest.mark.skipif(os.name == 'nt', reason="Test is not supported on Windows")
 def test_process_to_q():
     detector_size = (256, 256)
     pixel_size = (0.0135*8, 0.0135*8)
@@ -94,6 +96,7 @@ def _process_to_q_exception(param_dict, frame_mode):
 
 
 @pytest.mark.parametrize("fails", [0, 5, 'cat'])
+@pytest.mark.skipif(os.name == 'nt', reason="Test is not supported on Windows")
 def test_frame_mode_fail(fails):
     detector_size = (256, 256)
     pixel_size = (0.0135*8, 0.0135*8)

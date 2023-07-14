@@ -131,7 +131,7 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
     num_times = len(time_bin)
 
     # probability density of detecting photons
-    prob_k_all = np.zeros([num_times, num_roi], dtype=np.object)
+    prob_k_all = np.zeros([num_times, num_roi], dtype=np.object_)
 
     # square of probability density of detecting photons
     prob_k_pow_all = np.zeros_like(prob_k_all)
@@ -150,7 +150,7 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2,
         # Ring buffer, a buffer with periodic boundary conditions.
         # Images must be keep for up to maximum delay in buf.
         buf = np.zeros([num_times, timebin_num],
-                       dtype=np.object)  # matrix of buffers
+                       dtype=np.object_)  # matrix of buffers
 
         # to track processing each time level
         track_level = np.zeros(num_times)

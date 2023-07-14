@@ -76,7 +76,7 @@ def test_find_support():
     new_sup = np.zeros_like(a)
     new_sup[new_sup_index] = 1
     # the area of new support becomes larger
-    assert(np.sum(new_sup) == 1760)
+    assert np.sum(new_sup) == 1760
 
 
 def make_synthetic_data():
@@ -125,7 +125,7 @@ def _box_support_area(sup_radius, shape_v):
 def _disk_support_area(sup_radius, shape_v):
     sup = generate_disk_support(sup_radius, shape_v)
     new_sup = sup[sup != 0]
-    assert(new_sup.size < (2*sup_radius)**len(shape_v))
+    assert new_sup.size < (2*sup_radius)**len(shape_v)
 
 
 @pytest.mark.parametrize("v", [(100, 100), (100, 100, 100)])

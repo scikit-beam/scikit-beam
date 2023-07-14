@@ -44,6 +44,7 @@ import os
 import math
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
+import pytest
 import skbeam.io.save_powder_output as output
 from skbeam.io.save_powder_output import gsas_writer
 from skbeam.io.gsas_file_reader import gsas_reader
@@ -81,8 +82,9 @@ def test_save_output():
     os.remove("function_values.xye")
 
 
-def test_gsas_output():
-    filename = "function_values"
+@pytest.mark.skipif(os.name == 'nt', reason="The tested functions are not working on Windows.")
+def test_gsas_output(tmpdir):
+    filename = os.path.join(tmpdir, "function_values")
     x = np.arange(0, 100, 5)
     y = np.arange(0, 200, 10)
     err = y*math.erf(0.2)
@@ -115,7 +117,3 @@ def test_gsas_output():
 
     assert_array_equal(esd_vi, err2)
     assert_array_almost_equal(vi, err3, decimal=12)
-
-    os.remove(filename+"_std.gsas")
-    os.remove(filename+"_esd.gsas")
-    os.remove(filename+"_fxye.gsas")

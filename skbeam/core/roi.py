@@ -41,7 +41,7 @@ simple shapes such as rectangles and concentric circles.
 from __future__ import absolute_import, division, print_function
 
 import collections
-import scipy.ndimage.measurements as ndim
+from scipy import ndimage
 from skimage.draw import line
 from skimage import img_as_float, feature, color, draw
 from skimage.measure import ransac, CircleModel
@@ -167,8 +167,8 @@ def ring_edges(inner_radius, width, spacing=0, num_rings=None):
     edges : array
         inner and outer radius for each ring
 
-    Example
-    -------
+    Examples
+    --------
     # Make two rings starting at r=1px, each 5px wide
     >>> ring_edges(inner_radius=1, width=5, num_rings=2)
     [(1, 6), (6, 11)]
@@ -315,7 +315,7 @@ def roi_max_counts(images_sets, label_array):
     max_cts = 0
     for img_set in images_sets:
         for img in img_set:
-            max_cts = max(max_cts, ndim.maximum(img, label_array))
+            max_cts = max(max_cts, ndimage.maximum(img, label_array))
     return max_cts
 
 
@@ -401,7 +401,7 @@ def mean_intensity(images, labeled_array, index=None):
     mean_intensity = np.zeros((images.shape[0], len(index)))
     for n, img in enumerate(images):
         # use a mean that is mask-aware
-        mean_intensity[n] = ndim.mean(img, labeled_array, index=index)
+        mean_intensity[n] = ndimage.mean(img, labeled_array, index=index)
     return mean_intensity, index
 
 
@@ -588,8 +588,8 @@ def bar(edges, shape, horizontal=True, values=None):
         specified in `edges`.
         Has shape=`image shape`
 
-    Note
-    ----
+    Notes
+    -----
     The primary use case is in GISAXS.
     """
     edges = np.atleast_2d(np.asarray(edges)).ravel()
@@ -637,8 +637,8 @@ def box(shape, v_edges, h_edges=None, h_values=None, v_values=None):
         ROI are 1, 2, 3, corresponding to the order they are specified
         in edges.
 
-    Note
-    ----
+    Notes
+    -----
     To draw boxes according to the image pixels co-ordinates has to provide
     both h_values and v_values. The primary use case is in GISAXS.
     e.g., v_values=gisaxs_qy, h_values=gisaxs_qx
@@ -707,7 +707,7 @@ def auto_find_center_rings(avg_img, sigma=1, no_rings=4, min_samples=3,
     Parameters
     ----------
     avg_img : 2D array
-        shape of the image
+        2D (grayscale) or 3D (RGB) array. The last dimension of RGB image must be 3.
     sigma : float, optional
         Standard deviation of the Gaussian filter.
     no_rings : int, optional
@@ -729,14 +729,19 @@ def auto_find_center_rings(avg_img, sigma=1, no_rings=4, min_samples=3,
     radii : list
         values of the radii of the rings
 
-    Note
-    ----
+    Notes
+    -----
     scikit-image ransac
     method(http://www.imagexd.org/tutorial/lessons/1_ransac.html) is used to
     automatically find the center and the most intense rings.
     """
 
-    image = img_as_float(color.rgb2gray(avg_img))
+    if avg_img.ndim == 3:
+        image_tmp = color.rgb2gray(avg_img)
+    else:
+        image_tmp = avg_img
+    image = img_as_float(image_tmp, force_copy=True)
+
     edges = feature.canny(image, sigma)
     coords = np.column_stack(np.nonzero(edges))
     edge_pts_xy = coords[:, ::-1]

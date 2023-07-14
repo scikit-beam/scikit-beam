@@ -57,7 +57,7 @@ def gsas_reader(file):
         GSAS powder data file
 
     Returns
-    --------
+    -------
      tth : ndarray
         twotheta values (degrees) shape (N, ) array
 
@@ -93,8 +93,8 @@ def _get_fxye_data(file):
     file: str
         GSAS powder data file
 
-    Return
-    ------
+    Returns
+    -------
     tth : ndarray
         twotheta values (degrees) shape (N, ) array
 
@@ -138,8 +138,8 @@ def _get_esd_data(file):
     file: str
         GSAS powder data file
 
-    Return
-    ------
+    Returns
+    -------
     tth : ndarray
         twotheta values (degrees) shape (N, ) array
 
@@ -189,8 +189,8 @@ def _get_std_data(file):
     file: str
         GSAS powder data file
 
-    Return
-    ------
+    Returns
+    -------
     tth : ndarray
         twotheta values (degrees) shape (N, ) array
 

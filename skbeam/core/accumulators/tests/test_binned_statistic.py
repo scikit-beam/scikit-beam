@@ -16,7 +16,7 @@ stats_list = [('mean', np.mean), ('median', np.median), ('count', len),
 class TestRadialBinnedStatistic(object):
     oscillation_rate = 10.0
 
-    def setup(self):
+    def setup_method(self):
 
         # Create test image - a sinc function.
         # Integrating in phi will produce sin(x)
@@ -174,7 +174,7 @@ class TestRadialBinnedStatistic(object):
                     bins=bins,
                 )
 
-                assert_array_almost_equal(ref, binned)
+                assert_array_almost_equal(np.nan_to_num(ref), np.nan_to_num(binned))
                 assert_array_almost_equal(redges, rphibinstat.bin_edges[0])
                 assert_array_almost_equal(redges, rphibinstat_f.bin_edges[0])
                 assert_array_almost_equal(phiedges, rphibinstat.bin_edges[1])

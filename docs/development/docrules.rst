@@ -353,7 +353,7 @@ The sections of the docstring are:
 11. **References**
 
     References cited in the **notes** section may be listed here,
-    e.g. if you cited the article below using the text ``[1]_``,
+    e.g. if you cited the article below ([1]_) using the text ``[1]_``,
     include it as in the list as follows::
 
       .. [1] O. McNoleg, "The integration of GIS, remote sensing,

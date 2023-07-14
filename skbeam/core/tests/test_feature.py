@@ -87,7 +87,7 @@ def test_filter_n_largest():
 
     for j in range(1, len(cands) + 2):
         out = feature.filter_n_largest(y, cands, j)
-        assert(len(out) == np.min([len(cands), j]))
+        assert len(out) == np.min([len(cands), j])
 
     assert_raises(ValueError, feature.filter_n_largest, y, cands, 0)
     assert_raises(ValueError, feature.filter_n_largest, y, cands, -1)
@@ -104,9 +104,9 @@ def test_filter_peak_height():
 
     for j, h in enumerate(heights):
         out = feature.filter_peak_height(y, cands, h - 5, window=5)
-        assert(len(out) == len(heights) - j)
+        assert len(out) == len(heights) - j
         out = feature.filter_peak_height(y, cands, h + 5, window=5)
-        assert(len(out) == len(heights) - j - 1)
+        assert len(out) == len(heights) - j - 1
 
 
 def test_peak_refinement():

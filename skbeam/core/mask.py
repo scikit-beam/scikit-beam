@@ -96,7 +96,7 @@ def threshold(images, threshold, mask=None):
         shape is (num_columns, num_rows) of the image, optional None
 
     Yields
-    -------
+    ------
     mask : array
         array with values above the threshold marked as 0 and values
         below marked as 1.
@@ -116,14 +116,14 @@ def margin(img_shape, edge_size):
     Mask the edge of an image
 
     Parameters
-    -----------
+    ----------
     img_shape: tuple
         The shape of the image
     edge_size: int
         Number of pixels to mask from the edge
 
     Returns
-    --------
+    -------
     2darray:
         The mask array, bad pixels are 0
     """
@@ -154,7 +154,7 @@ def binned_outlier(img, r, alpha, bins, mask=None):
         A starting flattened mask
 
     Returns
-    --------
+    -------
     2darray:
         The mask
     """

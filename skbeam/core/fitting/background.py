@@ -87,7 +87,7 @@ def snip_method(spectrum,
     spectral_binning : float, optional
         bin the data into different size
     con_val : int, optional
-        size of scipy.signal.boxcar to convolve the spectrum.
+        size of scipy.signal.windows.boxcar to convolve the spectrum.
 
         Default value is controlled by the keys `con_val_no_bin`
         and `con_val_bin` in the defaults dictionary, depending
@@ -132,7 +132,7 @@ def snip_method(spectrum,
     background = np.array(spectrum)
     n_background = background.size
 
-    energy = np.arange(n_background, dtype=np.float)
+    energy = np.arange(n_background, dtype=np.float64)
 
     if spectral_binning is not None:
         energy = energy * spectral_binning
@@ -146,7 +146,7 @@ def snip_method(spectrum,
     fwhm = std_fwhm * np.sqrt(tmp)
 
     # smooth the background
-    s = scipy.signal.boxcar(con_val)
+    s = scipy.signal.windows.boxcar(con_val)
 
     # For background remove, we only care about the central parts
     # where there are peaks. On the boundary part, we don't care
@@ -172,8 +172,8 @@ def snip_method(spectrum,
                            np.max([xmin, 0]),
                            np.min([xmax, n_background - 1]))
 
-        temp = (background[lo_index.astype(np.int)] +
-                background[hi_index.astype(np.int)]) / 2.
+        temp = (background[lo_index.astype(np.int64)] +
+                background[hi_index.astype(np.int64)]) / 2.
 
         bg_index = background > temp
         background[bg_index] = temp[bg_index]
@@ -189,8 +189,8 @@ def snip_method(spectrum,
                            np.max([xmin, 0]),
                            np.min([xmax, n_background - 1]))
 
-        temp = (background[lo_index.astype(np.int)] +
-                background[hi_index.astype(np.int)]) / 2.
+        temp = (background[lo_index.astype(np.int64)] +
+                background[hi_index.astype(np.int64)]) / 2.
 
         bg_index = background > temp
         background[bg_index] = temp[bg_index]

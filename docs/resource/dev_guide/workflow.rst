@@ -77,8 +77,8 @@ write them as ::
 Lines are free, but the confusion that can be caused by missing
 logic when scanning code can be expensive.
 
-Example
--------
+Examples
+--------
 
 Assuming you already have your repository set up::
 

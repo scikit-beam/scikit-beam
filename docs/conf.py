@@ -273,7 +273,6 @@ texinfo_documents = [
 intersphinx_mapping = {'python': ('http://docs.python.org/3.5', None),
                        'numpy': ('http://docs.scipy.org/doc/numpy', None),
                        'matplotlib': ('http://matplotlib.org', None),
-                       'numpy': ('http://numpy.org', None),
                        }
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False

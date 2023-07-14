@@ -40,7 +40,7 @@
 from __future__ import absolute_import, division, print_function
 import numpy as np
 import time
-from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage import gaussian_filter
 
 import logging
 
@@ -63,15 +63,16 @@ def _dist(dims):
         of the array of shape `dims`
     """
     dist_sum = []
-    shape = np.ones(len(dims), dtype=np.int)
-    for idx, d in enumerate(dims):
-        vec = (np.arange(d) - d // 2) ** 2
-        shape[idx] = -1
-        vec = vec.reshape(*shape)
-        shape[idx] = 1
-        dist_sum.append(vec)
 
-    return np.sqrt(np.sum(dist_sum, axis=0))
+    dist_sum = np.zeros(dims, dtype=np.float64)
+    for idx, d in enumerate(dims):
+        shape = np.ones(len(dims), dtype=np.int64)
+        shape[idx] = d
+        vec = (np.arange(d) - d // 2) ** 2
+        vec = np.broadcast_to(np.reshape(vec, newshape=shape), dims)
+        dist_sum += vec
+
+    return np.sqrt(dist_sum)
 
 
 def gauss(dims, sigma):

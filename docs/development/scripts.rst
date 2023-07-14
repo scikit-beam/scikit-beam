@@ -28,8 +28,8 @@ scikit-beam.utils.compat import argparse`` .
 
 .. _"entry points": https://pythonhosted.org/setuptools/setuptools.html#automatic-script-creation
 
-Example
--------
+Examples
+--------
 
 Contents of ``/scikit-beam/somepackage/somemod.py`` ::
 

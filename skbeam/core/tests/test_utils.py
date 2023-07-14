@@ -38,6 +38,7 @@ import six
 import numpy as np
 import sys
 import pytest
+import os
 
 import numpy.testing as npt
 from numpy.testing import (assert_array_equal, assert_array_almost_equal,
@@ -172,6 +173,7 @@ def test_bin_edges_exceptions(fail_dict):
     _bin_edges_exceptions(fail_dict)
 
 
+@pytest.mark.skipif(os.name == 'nt', reason="Test is not supported on Windows")
 def test_grid3d():
     size = 10
     q_max = np.array([1.0, 1.0, 1.0])
@@ -214,6 +216,7 @@ def test_grid3d():
     npt.assert_array_equal(std_err, 0)
 
 
+@pytest.mark.skipif(os.name == 'nt', reason="Test is not supported on Windows")
 def test_process_grid_std_err():
     size = 10
     q_max = np.array([1.0, 1.0, 1.0])
