@@ -40,14 +40,17 @@
     Added a test to check the GSAS file reader and file writer
 """
 from __future__ import absolute_import, division, print_function
-import os
+
 import math
+import os
+
 import numpy as np
-from numpy.testing import assert_array_equal, assert_array_almost_equal
 import pytest
+from numpy.testing import assert_array_almost_equal, assert_array_equal
+
 import skbeam.io.save_powder_output as output
-from skbeam.io.save_powder_output import gsas_writer
 from skbeam.io.gsas_file_reader import gsas_reader
+from skbeam.io.save_powder_output import gsas_writer
 
 
 def test_save_output():

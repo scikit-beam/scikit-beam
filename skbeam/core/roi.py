@@ -41,13 +41,15 @@ simple shapes such as rectangles and concentric circles.
 from __future__ import absolute_import, division, print_function
 
 import collections
-from scipy import ndimage
-from skimage.draw import line
-from skimage import img_as_float, feature, color, draw
-from skimage.measure import ransac, CircleModel
-import numpy as np
-from . import utils
 import logging
+
+import numpy as np
+from scipy import ndimage
+from skimage import color, draw, feature, img_as_float
+from skimage.draw import line
+from skimage.measure import CircleModel, ransac
+
+from . import utils
 
 logger = logging.getLogger(__name__)
 

@@ -42,22 +42,22 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
+
 import copy
-from collections import OrderedDict
 import logging
+import multiprocessing
+from collections import OrderedDict
 
 import numpy as np
-
-from scipy.optimize import nnls
 import six
 from lmfit import Model
-import multiprocessing
+from scipy.optimize import nnls
 
 from ..constants import XrfElement as Element
 from ..fitting.lineshapes import gaussian
 from ..fitting.models import ComptonModel, ElasticModel, _gen_class_docs
-from .base import parameter_data as sfb_pd
 from .background import snip_method
+from .base import parameter_data as sfb_pd
 
 logger = logging.getLogger(__name__)
 

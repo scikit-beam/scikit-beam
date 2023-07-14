@@ -1,6 +1,7 @@
-from skbeam.core.stats import statistics_1D
 import numpy as np
 from numpy.testing import assert_array_almost_equal
+
+from skbeam.core.stats import statistics_1D
 
 
 def test_statistics_1D():

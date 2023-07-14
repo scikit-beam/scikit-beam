@@ -5,12 +5,13 @@
 
 from docutils.nodes import Body, Element
 from docutils.writers.html4css1 import HTMLTranslator
+
 try:
     from sphinx.latexwriter import LaTeXTranslator
 except ImportError:
-    from sphinx.writers.latex import LaTeXTranslator
-
     import warnings
+
+    from sphinx.writers.latex import LaTeXTranslator
     warnings.warn("The numpydoc.only_directives module is deprecated;"
                   "please use the only:: directive available in Sphinx >= 0.6",
                   DeprecationWarning, stacklevel=2)

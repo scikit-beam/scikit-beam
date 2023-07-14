@@ -43,7 +43,6 @@
 ########################################################################
 from __future__ import absolute_import, division, print_function
 
-
 """
 Parameter dictionary are included for xrf fitting.
 Element data not included.

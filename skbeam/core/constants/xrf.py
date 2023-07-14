@@ -37,16 +37,16 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-from collections.abc import Mapping
-import logging
 
-from packaging import version
+import logging
+from collections.abc import Mapping
+
 import numpy as np
 import six
+from packaging import version
 
-from ..utils import NotInstalledError
-from ..constants.basic import BasicElement, doc_params, doc_attrs, doc_ex
-from ..utils import verbosedict
+from ..constants.basic import BasicElement, doc_attrs, doc_ex, doc_params
+from ..utils import NotInstalledError, verbosedict
 
 logger = logging.getLogger(__name__)
 

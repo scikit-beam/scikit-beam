@@ -36,11 +36,14 @@
 This module is for spectroscopy specific tools (spectrum fitting etc).
 """
 from __future__ import absolute_import, division, print_function
-import numpy as np
-from six.moves import zip
-from scipy.integrate import simps
-from .fitting import fit_quad_to_peak
+
 import logging
+
+import numpy as np
+from scipy.integrate import simps
+from six.moves import zip
+
+from .fitting import fit_quad_to_peak
 
 logger = logging.getLogger(__name__)
 

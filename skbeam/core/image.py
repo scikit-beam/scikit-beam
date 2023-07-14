@@ -38,10 +38,13 @@ processing tools.  These should be interesting compositions of existing
 tools, not just straight wrapping of np/scipy/scikit images.
 """
 from __future__ import absolute_import, division, print_function
-import numpy as np
-from . import utils
+
 import logging
+
+import numpy as np
 from scipy.interpolate import RegularGridInterpolator
+
+from . import utils
 
 logger = logging.getLogger(__name__)
 

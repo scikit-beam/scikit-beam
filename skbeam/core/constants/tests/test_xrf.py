@@ -36,13 +36,14 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-import six
-import numpy as np
-from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_raises, assert_equal
 
-from skbeam.core.constants.xrf import XrfElement, emission_line_search, XrayLibWrap, XrayLibWrap_Energy
-from skbeam.core.utils import NotInstalledError
+import numpy as np
+import six
+from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_equal, assert_raises
+
 from skbeam.core.constants.basic import basic
+from skbeam.core.constants.xrf import XrayLibWrap, XrayLibWrap_Energy, XrfElement, emission_line_search
+from skbeam.core.utils import NotInstalledError
 
 
 def test_element_data():

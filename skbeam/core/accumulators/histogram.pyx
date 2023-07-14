@@ -1,15 +1,20 @@
 from __future__ import division
+
 """
 Histogram
 
 General purpose histogram classes.
 """
 cimport cython
+
 import numpy as np
+
 cimport numpy as np
-from ..utils import bin_edges_to_centers
 
 import logging
+
+from ..utils import bin_edges_to_centers
+
 logger = logging.getLogger(__name__)
 
 DEF MAX_DIMENSIONS = 10

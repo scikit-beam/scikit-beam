@@ -33,22 +33,22 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
+
+import itertools
 import logging
 
 import numpy as np
 import pytest
-from skbeam.core import roi
-from skbeam.core import utils
-import itertools
-from skimage import morphology
-
 from numpy.testing import (
-    assert_array_equal,
+    assert_almost_equal,
     assert_array_almost_equal,
+    assert_array_equal,
     assert_equal,
     assert_raises,
-    assert_almost_equal,
 )
+from skimage import morphology
+
+from skbeam.core import roi, utils
 
 logger = logging.getLogger(__name__)
 

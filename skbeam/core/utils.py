@@ -37,21 +37,19 @@
 This module is for the 'core' data types.
 """
 from __future__ import absolute_import, division, print_function
-import six
-
-from six.moves import zip
-from six import string_types
-
-import time
-import sys
-
-from collections import namedtuple, defaultdict, deque
-from collections.abc import MutableMapping
-import numpy as np
-from itertools import tee
 
 import logging
+import sys
+import time
+from collections import defaultdict, deque, namedtuple
+from collections.abc import MutableMapping
+from itertools import tee
+
+import numpy as np
 import scipy.stats as sts
+import six
+from six import string_types
+from six.moves import zip
 
 logger = logging.getLogger(__name__)
 

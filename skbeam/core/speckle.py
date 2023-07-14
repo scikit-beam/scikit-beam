@@ -45,14 +45,15 @@ This module will provide XSVS analysis tools
 """
 
 from __future__ import absolute_import, division, print_function
-import numpy as np
+
+import logging
 import time
 import warnings
 
+import numpy as np
+
 from . import roi
 from .utils import bin_edges_to_centers, geometric_series
-
-import logging
 
 logger = logging.getLogger(__name__)
 

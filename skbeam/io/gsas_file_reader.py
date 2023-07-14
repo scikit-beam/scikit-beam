@@ -45,7 +45,9 @@ This is the module for reading files created in GSAS file formats
 https://subversion.xor.aps.anl.gov/trac/pyGSAS
 """
 from __future__ import absolute_import, division, print_function
+
 import os
+
 import numpy as np
 
 

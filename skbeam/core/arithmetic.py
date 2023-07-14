@@ -37,8 +37,8 @@ The included functions supplement the logical operations currently provided
 in numpy in order to provide a complete set of logical operations.
 """
 from __future__ import absolute_import, division, print_function
-from numpy import logical_and, logical_or, logical_not, logical_xor, add, subtract, multiply, divide
 
+from numpy import add, divide, logical_and, logical_not, logical_or, logical_xor, multiply, subtract
 
 __all__ = [
     "add",

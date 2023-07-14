@@ -4,11 +4,11 @@ import os
 import sys
 from os import path
 
+import numpy as np
+from Cython.Build import cythonize
 from setuptools import Extension, find_packages, setup
 
-import numpy as np
 import versioneer
-from Cython.Build import cythonize
 
 
 def c_ext():

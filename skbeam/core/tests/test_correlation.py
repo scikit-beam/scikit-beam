@@ -33,26 +33,26 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
+
 import logging
 
 import numpy as np
-from numpy.testing import assert_equal, assert_array_almost_equal
 import pytest
+from numpy.testing import assert_array_almost_equal, assert_equal
 
 import skbeam.core.utils as utils
 from skbeam.core.correlation import (
-    multi_tau_auto_corr,
+    CrossCorrelator,
     auto_corr_scat_factor,
     lazy_one_time,
     lazy_two_time,
+    multi_tau_auto_corr,
+    one_time_from_two_time,
     two_time_corr,
     two_time_state_to_results,
-    one_time_from_two_time,
-    CrossCorrelator,
 )
 from skbeam.core.mask import bad_to_nan_gen
 from skbeam.core.roi import ring_edges, segmented_rings
-
 
 logger = logging.getLogger(__name__)
 

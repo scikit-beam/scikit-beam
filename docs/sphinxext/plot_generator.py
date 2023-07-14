@@ -6,21 +6,21 @@ modified from the mpld3 project.
 
 """
 from __future__ import division
+
+import glob
+import json
 import os
 import os.path as op
 import re
-import glob
+import shutil
 import token
 import tokenize
-import shutil
-import json
 
 import matplotlib
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-
 from matplotlib import image
-
 
 RST_TEMPLATE = """
 .. _{sphinx_tag}:

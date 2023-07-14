@@ -43,11 +43,14 @@ This module is for functions specific to time correlation
 
 """
 from __future__ import absolute_import, division, print_function
-from .utils import multi_tau_lags
-from .roi import extract_label_indices
+
 from collections import namedtuple
+
 import numpy as np
 from scipy.signal import fftconvolve
+
+from .roi import extract_label_indices
+from .utils import multi_tau_lags
 
 # for a convenient status bar
 try:

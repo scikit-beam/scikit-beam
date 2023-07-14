@@ -37,16 +37,16 @@
 This module creates a namespace for X-Ray Fluorescence
 """
 
-# import fitting models
-from skbeam.core.fitting import Lorentzian2Model, ComptonModel, ElasticModel
+import logging
 
 # import Element objects
 from skbeam.core.constants import XrfElement, emission_line_search
 
+# import fitting models
+from skbeam.core.fitting import ComptonModel, ElasticModel, Lorentzian2Model
+
 # import background subtraction
 from skbeam.core.fitting.background import snip_method
-
-import logging
 
 logger = logging.getLogger(__name__)
 

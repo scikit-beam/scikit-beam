@@ -42,9 +42,10 @@ basically to clean images
 """
 
 from __future__ import absolute_import, division, print_function
-import numpy as np
 
 import logging
+
+import numpy as np
 import scipy.stats as sts
 
 logger = logging.getLogger(__name__)

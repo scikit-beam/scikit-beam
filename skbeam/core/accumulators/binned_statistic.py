@@ -34,12 +34,13 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from __future__ import division, print_function, absolute_import
+from __future__ import absolute_import, division, print_function
 
 import warnings
 
 import numpy as np
-from ..utils import radial_grid, angle_grid, bin_edges_to_centers
+
+from ..utils import angle_grid, bin_edges_to_centers, radial_grid
 
 
 class BinnedStatisticDD(object):

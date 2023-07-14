@@ -37,11 +37,13 @@ This module is for Differential Phase Contrast (DPC) imaging based on
 Fourier shift fitting
 """
 from __future__ import absolute_import, division, print_function
+
+import logging
+import warnings
+from collections import namedtuple
+
 import numpy as np
 from scipy.optimize import minimize
-from collections import namedtuple
-import warnings
-import logging
 
 logger = logging.getLogger(__name__)
 

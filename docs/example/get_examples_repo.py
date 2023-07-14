@@ -1,6 +1,7 @@
+import os
 import subprocess
 import tempfile
-import os
+
 clone_dir = os.path.join(tempfile.gettempdir(), 'scikit-beam-examples')
 try:
     ret = subprocess.check_output(

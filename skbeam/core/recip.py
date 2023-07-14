@@ -40,10 +40,13 @@ calculations.
 
 """
 from __future__ import absolute_import, division, print_function
-import numpy as np
-from .utils import verbosedict
-from collections import namedtuple
+
 import time
+from collections import namedtuple
+
+import numpy as np
+
+from .utils import verbosedict
 
 try:
     from pyFAI import geometry as geo

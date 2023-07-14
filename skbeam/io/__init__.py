@@ -34,15 +34,10 @@
 ########################################################################
 from __future__ import absolute_import, division, print_function
 
-from .binary import read_binary
-
 from .avizo_io import load_amiramesh
-
-from .save_powder_output import save_output
-
+from .binary import read_binary
 from .gsas_file_reader import gsas_reader
-
-from .save_powder_output import gsas_writer
+from .save_powder_output import gsas_writer, save_output
 
 try:
     from .net_cdf_io import load_netCDF

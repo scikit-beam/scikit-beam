@@ -33,13 +33,14 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
+
 import logging
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 
-import skbeam.core.speckle as xsvs
 import skbeam.core.mask as mask
+import skbeam.core.speckle as xsvs
 from skbeam.core import roi
 
 logger = logging.getLogger(__name__)

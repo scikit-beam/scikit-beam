@@ -1,8 +1,9 @@
-from __future__ import print_function, division
+from __future__ import division, print_function
+
+import fabio
+from fabio.fit2dmaskimage import Fit2dMaskImage
 
 from skbeam.io.save_powder_output import _create_file_path
-from fabio.fit2dmaskimage import Fit2dMaskImage
-import fabio
 
 
 def fit2d_save(mask, filename, dir_path=None):

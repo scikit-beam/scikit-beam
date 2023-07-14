@@ -36,11 +36,14 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
+
 import numpy as np
-from numpy.testing import assert_array_almost_equal, assert_raises
-from .utils import gauss_gen, parabola_gen
-import skbeam.core.feature as feature
 import pytest
+from numpy.testing import assert_array_almost_equal, assert_raises
+
+import skbeam.core.feature as feature
+
+from .utils import gauss_gen, parabola_gen
 
 
 def _test_refine_helper(x_data, y_data, center, height, refine_method, refine_args):

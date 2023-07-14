@@ -1,15 +1,15 @@
+import numpy as np
+import pytest
+import scipy.stats
+from numpy.testing import assert_array_almost_equal, assert_raises
+
 from skbeam.core.accumulators.binned_statistic import (
-    RadialBinnedStatistic,
-    RPhiBinnedStatistic,
     BinnedStatistic1D,
     BinnedStatisticDD,
+    RadialBinnedStatistic,
+    RPhiBinnedStatistic,
 )
-from numpy.testing import assert_array_almost_equal, assert_raises
-import numpy as np
-import scipy.stats
-from skbeam.core.utils import bin_edges_to_centers
-from skbeam.core.utils import radial_grid, angle_grid
-import pytest
+from skbeam.core.utils import angle_grid, bin_edges_to_centers, radial_grid
 
 stats_list = [("mean", np.mean), ("median", np.median), ("count", len), ("sum", np.sum), ("std", np.std)]
 

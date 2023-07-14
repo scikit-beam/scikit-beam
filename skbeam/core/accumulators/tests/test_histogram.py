@@ -1,11 +1,13 @@
 from __future__ import division
-import numpy as np
-from numpy.testing import assert_array_almost_equal, assert_array_equal
-from numpy.testing import assert_almost_equal
-from skbeam.core.accumulators.histogram import Histogram
-from time import time
+
 import random
+from time import time
+
+import numpy as np
 import pytest
+from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_equal
+
+from skbeam.core.accumulators.histogram import Histogram
 
 
 def _1d_histogram_tester(binlowhighs, x, weights=1):

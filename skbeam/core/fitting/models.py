@@ -42,12 +42,14 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
+
 import inspect
 import logging
 
 from lmfit import Model
-from .lineshapes import elastic, compton, lorentzian2
+
 from .base.parameter_data import get_para
+from .lineshapes import compton, elastic, lorentzian2
 
 logger = logging.getLogger(__name__)
 

@@ -1,29 +1,30 @@
 from __future__ import absolute_import, division, print_function
+
 import copy
 import logging
-import pytest
 
-import six
 import numpy as np
-from numpy.testing import assert_equal, assert_array_almost_equal, assert_array_equal, assert_raises
+import pytest
+import six
+from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_equal, assert_raises
 
-from skbeam.core.fitting.base.parameter_data import get_para, e_calibration
+from skbeam.core.fitting.base.parameter_data import e_calibration, get_para
 from skbeam.core.fitting.xrf_model import (
+    _STRATEGY_REGISTRY,
     ModelSpectrum,
     ParamController,
-    linear_spectrum_fitting,
+    _set_parameter_hint,
+    calculate_area,
+    compute_escape_peak,
     construct_linear_model,
-    trim,
     define_range,
     extract_strategy,
-    sum_area,
-    compute_escape_peak,
-    register_strategy,
-    update_parameter_dict,
-    _set_parameter_hint,
     fit_pixel_multiprocess_nnls,
-    _STRATEGY_REGISTRY,
-    calculate_area,
+    linear_spectrum_fitting,
+    register_strategy,
+    sum_area,
+    trim,
+    update_parameter_dict,
 )
 
 logging.basicConfig(format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO, filemode="w")

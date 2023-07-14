@@ -38,11 +38,12 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-import numpy as np
-import time
-from scipy.ndimage import gaussian_filter
 
 import logging
+import time
+
+import numpy as np
+from scipy.ndimage import gaussian_filter
 
 logger = logging.getLogger(__name__)
 

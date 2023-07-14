@@ -1,7 +1,9 @@
 from __future__ import absolute_import, division, print_function
-import numpy as np
-import os
+
 import logging
+import os
+
+import numpy as np
 
 
 def _read_amira(src_file):

@@ -36,22 +36,26 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
+
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 
 from skbeam.core.fitting import (
-    gaussian,
-    gausssian_step,
-    gaussian_tail,
-    elastic,
+    ComptonModel,
+    ElasticModel,
     compton,
+    elastic,
+    gamma_dist,
+    gaussian,
+    gaussian_tail,
+    gausssian_step,
     lorentzian,
     lorentzian2,
-    voigt,
+    nbinom_dist,
+    poisson_dist,
     pvoigt,
+    voigt,
 )
-from skbeam.core.fitting import ComptonModel, ElasticModel
-from skbeam.core.fitting import gamma_dist, nbinom_dist, poisson_dist
 
 
 def test_gauss_peak():

@@ -44,12 +44,12 @@
 
 from __future__ import absolute_import, division, print_function
 
+import logging
+
 import numpy as np
 import scipy.special
-
 from scipy import stats
 from scipy.special import gamma, gammaln
-import logging
 
 logger = logging.getLogger(__name__)
 

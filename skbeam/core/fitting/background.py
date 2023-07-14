@@ -42,8 +42,9 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-import scipy.signal
+
 import numpy as np
+import scipy.signal
 
 _defaults = {"con_val_no_bin": 3, "con_val_bin": 5, "iter_num_no_bin": 3, "iter_num_bin": 5}
 

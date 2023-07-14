@@ -41,13 +41,14 @@
 Module for xray scattering
 """
 from __future__ import absolute_import, division, print_function
+
+import logging
 from collections import namedtuple
 from itertools import repeat
-import logging
 
 import numpy as np
 
-from ..utils import q_to_d, d_to_q, twotheta_to_q, q_to_twotheta
+from ..utils import d_to_q, q_to_d, q_to_twotheta, twotheta_to_q
 
 logger = logging.getLogger(__name__)
 

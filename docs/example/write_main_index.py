@@ -1,9 +1,11 @@
-import os
-import tempfile
 import glob
+import os
 import shutil
-import jinja2
+import tempfile
 from collections import defaultdict
+
+import jinja2
+
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader('../'))
 # make the index page
 # I originally wanted to use jinja2 to do this, but the CSS has double curly

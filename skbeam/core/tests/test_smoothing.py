@@ -35,6 +35,7 @@
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 from scipy.signal import savgol_filter
+
 from skbeam.core.smoothing import sgolay2d
 
 

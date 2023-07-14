@@ -1,6 +1,8 @@
 if __name__ == "__main__":
     import timeit
+
     import numpy as np
+
     from skbeam.core.accumulators.histogram import Histogram
 
     h = Histogram((10, 0, 10.1), (7, 0, 7.1))

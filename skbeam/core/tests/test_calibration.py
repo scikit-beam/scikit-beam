@@ -36,10 +36,12 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
+
 import numpy as np
 
 import skbeam.core.calibration as calibration
 import skbeam.core.calibration as core
+
 from .utils import gauss_gen
 
 

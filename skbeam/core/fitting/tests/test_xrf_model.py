@@ -1,9 +1,8 @@
-import pytest
 import numpy.testing as npt
+import pytest
 from xraylib import SymbolToAtomicNumber
 
-from skbeam.core.fitting.xrf_model import get_line_energy
-from skbeam.core.fitting.xrf_model import K_LINE, L_LINE, M_LINE
+from skbeam.core.fitting.xrf_model import K_LINE, L_LINE, M_LINE, get_line_energy
 
 
 @pytest.mark.parametrize(

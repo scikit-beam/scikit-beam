@@ -1,13 +1,14 @@
 from __future__ import absolute_import, division, print_function
-import numpy as np
-from skbeam.core import roi
-import numpy.random
-import skimage.draw as skd
-from scipy.ndimage import binary_dilation
-import skbeam.core.image as nimage
-import pytest
 
-from numpy.testing import assert_equal, assert_array_almost_equal, assert_raises
+import numpy as np
+import numpy.random
+import pytest
+import skimage.draw as skd
+from numpy.testing import assert_array_almost_equal, assert_equal, assert_raises
+from scipy.ndimage import binary_dilation
+
+import skbeam.core.image as nimage
+from skbeam.core import roi
 
 
 def _gen_test_find_ring_center_acorr_1D():

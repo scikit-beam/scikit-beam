@@ -37,11 +37,13 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-import six
-from collections import namedtuple
+
 import functools
-import os
 import logging
+import os
+from collections import namedtuple
+
+import six
 
 logger = logging.getLogger(__name__)
 

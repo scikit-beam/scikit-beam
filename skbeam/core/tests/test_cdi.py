@@ -1,18 +1,19 @@
 from __future__ import absolute_import, division, print_function
+
 import numpy as np
 import pytest
-from numpy.testing import assert_equal, assert_array_equal, assert_array_almost_equal, assert_almost_equal
+from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_equal, assert_equal
 
 from skbeam.core.cdi import (
     _dist,
-    gauss,
-    find_support,
-    pi_modulus,
     cal_diff_error,
     cdi_recon,
-    generate_random_phase_field,
+    find_support,
+    gauss,
     generate_box_support,
     generate_disk_support,
+    generate_random_phase_field,
+    pi_modulus,
 )
 
 

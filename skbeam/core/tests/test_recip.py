@@ -33,11 +33,13 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
+
+import os
+
 import numpy as np
 import numpy.testing as npt
-from numpy.testing import assert_array_almost_equal
 import pytest
-import os
+from numpy.testing import assert_array_almost_equal
 
 from skbeam.core import recip
 

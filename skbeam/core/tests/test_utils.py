@@ -34,18 +34,17 @@
 ########################################################################
 from __future__ import absolute_import, division, print_function
 
-import six
-import numpy as np
-import sys
-import pytest
+import logging
 import os
+import sys
 
+import numpy as np
 import numpy.testing as npt
-from numpy.testing import assert_array_equal, assert_array_almost_equal, assert_equal, assert_almost_equal
+import pytest
+import six
+from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_equal, assert_equal
 
 import skbeam.core.utils as core
-
-import logging
 
 try:
     from pyFAI.geometry import Geometry

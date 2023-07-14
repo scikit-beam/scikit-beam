@@ -37,28 +37,26 @@
 ########################################################################
 from __future__ import absolute_import, division, print_function
 
+import logging
+
 from .background import snip_method  # noqa: F401
-from .models import Lorentzian2Model, ComptonModel, ElasticModel
-
-from .lineshapes import (  # noqa: F401
-    gaussian,
-    lorentzian,
-    lorentzian2,
-    voigt,
-    pvoigt,
-    gaussian_tail,
-    gausssian_step,
-    elastic,
-    compton,
-    gamma_dist,
-    nbinom_dist,
-    poisson_dist,
-)
-
 from .base.parameter_data import get_para  # noqa: F401
 from .funcs import fit_quad_to_peak  # noqa: F401
-
-import logging
+from .lineshapes import (  # noqa: F401
+    compton,
+    elastic,
+    gamma_dist,
+    gaussian,
+    gaussian_tail,
+    gausssian_step,
+    lorentzian,
+    lorentzian2,
+    nbinom_dist,
+    poisson_dist,
+    pvoigt,
+    voigt,
+)
+from .models import ComptonModel, ElasticModel, Lorentzian2Model
 
 logger = logging.getLogger(__name__)
 

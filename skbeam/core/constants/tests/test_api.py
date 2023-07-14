@@ -39,6 +39,6 @@
 
 # smoketest the api
 from skbeam.core.constants.basic import BasicElement  # noqa: F401
-from skbeam.core.constants.xrs import calibration_standards  # noqa: F401
 from skbeam.core.constants.xrf import XrfElement  # noqa: F401
 from skbeam.core.constants.xrf import emission_line_search  # noqa: F401
+from skbeam.core.constants.xrs import calibration_standards  # noqa: F401
