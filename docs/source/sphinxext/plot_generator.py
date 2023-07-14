@@ -306,11 +306,11 @@ class ExampleGenerator(object):
 
 def main(app):
     static_dir = op.join(app.builder.srcdir, '_static')
-    target_dir = op.join(app.builder.srcdir, 'examples')
-    image_dir = op.join(app.builder.srcdir, 'examples/_images')
-    thumb_dir = op.join(app.builder.srcdir, "example_thumbs")
+    target_dir = op.join(app.builder.srcdir, op.join('generated', 'examples'))
+    image_dir = op.join(app.builder.srcdir, op.join('generated', 'examples', '_images'))
+    thumb_dir = op.join(app.builder.srcdir, op.join('generated', 'examples_thumbs'))
     source_dir = op.abspath(op.join(app.builder.srcdir,
-                                              '..', 'examples'))
+                                              'examples'))
     if not op.exists(static_dir):
         os.makedirs(static_dir)
 

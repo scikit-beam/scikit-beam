@@ -9,7 +9,7 @@
 
 
 .. autosummary::
-   :toctree: _as_gen
+   :toctree: ../../../generated/api
    :nosignatures:
 
    xsvs

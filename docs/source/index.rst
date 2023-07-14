@@ -157,7 +157,7 @@ other
    whatsnew/index
    whats_new
    known_issues
-   examples/index
+   generated/examples/index
    introduction
 
 Indices and Tables

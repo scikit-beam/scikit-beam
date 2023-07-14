@@ -13,7 +13,7 @@ API
 .. automodule:: skbeam.core.calibration
 
 .. autosummary::
-   :toctree: _as_gen
+   :toctree: ../../../generated/api
    :nosignatures:
 
    estimate_d_blind

@@ -13,7 +13,7 @@ Elemental data
 Tools for working with elemental constants.
 
 .. autosummary::
-   :toctree: _as_gen
+   :toctree: ../../../generated/api
    :nosignatures:
 
    BasicElement
@@ -33,7 +33,7 @@ data.  For the most part users should access this data through the
 `Element` object which manages the creation and access to these objects.
 
 .. autosummary::
-   :toctree: _as_gen
+   :toctree: ../../../generated/api
    :nosignatures:
 
    XrayLibWrap
@@ -49,7 +49,7 @@ Powder Diffraction Standards
 .. automodule:: skbeam.core.constants.xrs
 
 .. autosummary::
-   :toctree: _as_gen
+   :toctree: ../../../generated/api
    :nosignatures:
 
    calibration_standards
