@@ -9,7 +9,7 @@ API
 ---
 
 .. autosummary::
-   :toctree:
+   :toctree: _as_gen
    :nosignatures:
 
    cdi_recon
@@ -18,7 +18,7 @@ Helper methods
 ~~~~~~~~~~~~~~
 
 .. autosummary::
-   :toctree:
+   :toctree: _as_gen
    :nosignatures:
 
    pi_modulus
