@@ -61,7 +61,7 @@ from .background import snip_method
 
 logger = logging.getLogger(__name__)
 
-
+# fmt: off
 # emission line energy between (0, 30) keV
 K_LINE = ['Li_K', 'Be_K', 'B_K',  'C_K',  'N_K', 'O_K', 'F_K', 'Ne_K',
           'Na_K', 'Mg_K', 'Al_K', 'Si_K', 'P_K', 'S_K', 'Cl_K', 'Ar_K', 'K_K',
@@ -92,6 +92,7 @@ M_TRANSITIONS = ['ma1', 'ma2', 'mb', 'mg']
 
 TRANSITIONS_LOOKUP = {'K': K_TRANSITIONS, 'L': L_TRANSITIONS,
                       'M': M_TRANSITIONS}
+# fmt: on
 
 
 def element_peak_xrf(x, area, center,
