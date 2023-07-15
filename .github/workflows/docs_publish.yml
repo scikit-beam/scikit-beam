@@ -56,6 +56,6 @@ jobs:
       with:
         deploy_key: ${{ secrets.GITHUB_TOKEN }}
         publish_branch: master
-        publish_dir: ./docs/_build/html
+        publish_dir: ./docs/build/html
         keep_files: true  # Keep old files.
         force_orphan: false  # Keep git history.
