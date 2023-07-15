@@ -39,7 +39,6 @@ jobs:
         pip list
     - name: Build Docs
       run: |
-        pip install -r requirements-doc.txt
         pushd ../
         git clone https://github.com/scikit-beam/scikit-beam-examples.git
         popd
