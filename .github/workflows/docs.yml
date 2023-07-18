@@ -45,11 +45,11 @@ jobs:
         pushd docs
         bash build_docs.sh
         popd
-    - name: Deploy documentation to nsls-ii.github.io
+    - name: Deploy Documentation
       if: github.repository_owner == 'scikit-beam' && github.ref_name == 'master'
       # We pin to the SHA, not the tag, for security reasons.
       # https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/security-hardening-for-github-actions#using-third-party-actions
-      uses: peaceiris/actions-gh-pages@bbdfb200618d235585ad98e965f4aafc39b4c501  # v3.7.3
+      uses: peaceiris/actions-gh-pages@373f7f263a76c20808c831209c920827a82a2847  # v3.9.3
       with:
         deploy_key: ${{ secrets.GITHUB_TOKEN }}
         publish_branch: master
