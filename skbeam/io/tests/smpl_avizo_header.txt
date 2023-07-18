@@ -6,10 +6,10 @@
     #------      --------
     #0           # Avizo BINARY-LITTLE-ENDIAN 2.1
     #1           '\n',
-    #2           '\n', 
-    #3            'define Lattice 426 426 121\n', 
-    #4           '\n', 
-    #5           'Parameters {\n',    
+    #2           '\n',
+    #3            'define Lattice 426 426 121\n',
+    #4           '\n',
+    #5           'Parameters {\n',
     #6                        'Units {\n',
     #7                               'Coordinates "m"\n',
     #8                               '}\n',
@@ -18,10 +18,9 @@
     #11                       'BoundingBox 1417.5 5880 1407 5869.5 5649 6909,\n',
     #12                       'CoordType "uniform"\n',
     #13                       '}\n',
-    #14          '\n', 
+    #14          '\n',
     #15          'Lattice { ushort Labels } @1(HxByteRLE,44262998)\n',
-    #16          '\n', 
+    #16          '\n',
     #17          '# Data section follows\n'
     #"""
 ##    pass
-

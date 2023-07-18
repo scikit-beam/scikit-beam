@@ -312,14 +312,14 @@ static PyObject* gridder_3D(PyObject *self, PyObject *args, PyObject *kwargs){
   double grid_stop[3];
   unsigned long grid_nsteps[3];
 
-  int ignore_nan = 0; 
+  int ignore_nan = 0;
 
   int retval;
 
-  static char *kwlist[] = { "data", "xrange", "yrange", "zrange", "ignore_nan", 
-                            "gridout", "grid2out", "nout", NULL }; 
+  static char *kwlist[] = { "data", "xrange", "yrange", "zrange", "ignore_nan",
+                            "gridout", "grid2out", "nout", NULL };
 
-  if(!PyArg_ParseTupleAndKeywords(args, kwargs, "O(ddd)(ddd)(lll)|dOOO", kwlist, 
+  if(!PyArg_ParseTupleAndKeywords(args, kwargs, "O(ddd)(ddd)(lll)|dOOO", kwlist,
 				  &_I,
 				  &grid_start[0], &grid_start[1], &grid_start[2],
 				  &grid_stop[0], &grid_stop[1], &grid_stop[2],
@@ -405,7 +405,7 @@ error:
   return NULL;
 }
 
-int c_grid3d(double *dout, double *d2out, unsigned long *nout, double *stderror, double *data, 
+int c_grid3d(double *dout, double *d2out, unsigned long *nout, double *stderror, double *data,
              double *grid_start, double *grid_stop, unsigned long max_data,
              unsigned long *n_grid, int ignore_nan){
 
@@ -466,11 +466,11 @@ int c_grid3d(double *dout, double *d2out, unsigned long *nout, double *stderror,
         double *data_ptr = data + (i * 4);
 
         // Check if we have a NaN
-        
-        if((ignore_nan == 1) || !isnan(data_ptr[3])){   
+
+        if((ignore_nan == 1) || !isnan(data_ptr[3])){
 
           // Calculate the relative position in the grid.
-          
+
           pos_double[0] = (data_ptr[0] - grid_start[0]) / grid_len[0];
           pos_double[1] = (data_ptr[1] - grid_start[1]) / grid_len[1];
           pos_double[2] = (data_ptr[2] - grid_start[2]) / grid_len[2];
@@ -478,12 +478,12 @@ int c_grid3d(double *dout, double *d2out, unsigned long *nout, double *stderror,
           if((pos_double[0] >= 0) && (pos_double[0] < 1) &&
             (pos_double[1] >= 0) && (pos_double[1] < 1) &&
             (pos_double[2] >= 0) && (pos_double[2] < 1)){
-            
+
             // Calculate the position in the grid
             grid_pos[0] = (int)(pos_double[0] * n_grid[0]);
             grid_pos[1] = (int)(pos_double[1] * n_grid[1]);
             grid_pos[2] = (int)(pos_double[2] * n_grid[2]);
-            
+
             unsigned long pos =  grid_pos[0] * (n_grid[1] * n_grid[2]);
             pos += grid_pos[1] * n_grid[2];
             pos += grid_pos[2];
@@ -493,7 +493,7 @@ int c_grid3d(double *dout, double *d2out, unsigned long *nout, double *stderror,
             _d2out[pos] += (data_ptr[3] * data_ptr[3]);
             _nout[pos]++;
           }
-        } 
+        }
       }
 
       threadData[thread_num].dout = _dout;
@@ -518,7 +518,7 @@ int c_grid3d(double *dout, double *d2out, unsigned long *nout, double *stderror,
       threadData[0].d2out[j] += threadData[n].d2out[j];
     }
   }
-  
+
   // Now copy the outputs to the arrays
 
   for(j=0;j<grid_size;j++){

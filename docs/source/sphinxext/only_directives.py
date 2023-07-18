@@ -12,9 +12,13 @@ except ImportError:
     import warnings
 
     from sphinx.writers.latex import LaTeXTranslator
-    warnings.warn("The numpydoc.only_directives module is deprecated;"
-                  "please use the only:: directive available in Sphinx >= 0.6",
-                  DeprecationWarning, stacklevel=2)
+
+    warnings.warn(
+        "The numpydoc.only_directives module is deprecated;"
+        "please use the only:: directive available in Sphinx >= 0.6",
+        DeprecationWarning,
+        stacklevel=2,
+    )
 
 from docutils.parsers.rst import directives
 
@@ -28,22 +32,25 @@ class latex_only(Body, Element):
 
 
 def run(content, node_class, state, content_offset):
-    text = '\n'.join(content)
+    text = "\n".join(content)
     node = node_class(text)
     state.nested_parse(content, content_offset, node)
     return [node]
+
 
 try:
     from docutils.parsers.rst import Directive
 except ImportError:
     from docutils.parsers.rst.directives import _directives
 
-    def html_only_directive(name, arguments, options, content, lineno,
-                            content_offset, block_text, state, state_machine):
+    def html_only_directive(
+        name, arguments, options, content, lineno, content_offset, block_text, state, state_machine
+    ):
         return run(content, html_only, state, content_offset)
 
-    def latex_only_directive(name, arguments, options, content, lineno,
-                             content_offset, block_text, state, state_machine):
+    def latex_only_directive(
+        name, arguments, options, content, lineno, content_offset, block_text, state, state_machine
+    ):
         return run(content, latex_only, state, content_offset)
 
     for func in (html_only_directive, latex_only_directive):
@@ -51,9 +58,10 @@ except ImportError:
         func.options = {}
         func.arguments = None
 
-    _directives['htmlonly'] = html_only_directive
-    _directives['latexonly'] = latex_only_directive
+    _directives["htmlonly"] = html_only_directive
+    _directives["latexonly"] = latex_only_directive
 else:
+
     class OnlyDirective(Directive):
         has_content = True
         required_arguments = 0
@@ -63,8 +71,7 @@ else:
 
         def run(self):
             self.assert_has_content()
-            return run(self.content, self.node_class,
-                       self.state, self.content_offset)
+            return run(self.content, self.node_class, self.state, self.content_offset)
 
     class HtmlOnlyDirective(OnlyDirective):
         node_class = html_only
@@ -72,8 +79,8 @@ else:
     class LatexOnlyDirective(OnlyDirective):
         node_class = latex_only
 
-    directives.register_directive('htmlonly', HtmlOnlyDirective)
-    directives.register_directive('latexonly', LatexOnlyDirective)
+    directives.register_directive("htmlonly", HtmlOnlyDirective)
+    directives.register_directive("latexonly", LatexOnlyDirective)
 
 
 def setup(app):

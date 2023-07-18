@@ -5,7 +5,7 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-  
+
    background
    funcs
    lineshapes

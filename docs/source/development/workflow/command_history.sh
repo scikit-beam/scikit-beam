@@ -32,7 +32,7 @@ py.test                         # test
 ls                              # what is here?
 #
 # Write a test in test_arrays.py to expose this bug
-# 
+#
 # After edit, re-test
 #
 py.test test_arrays.py          # Hopefully this succeeds
@@ -107,6 +107,6 @@ git commit -m"Add changelog entry for 1761"
 #
 git push   # make sure all of our changes are in our github account
 #
-# Go to GitHub to make pull request. Remember to switch to this branch before 
+# Go to GitHub to make pull request. Remember to switch to this branch before
 # pushing the pull request button.
 #
