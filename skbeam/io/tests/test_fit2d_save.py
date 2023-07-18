@@ -40,19 +40,19 @@
     Added a test to check the GSAS file reader and file writer
 """
 from __future__ import absolute_import, division, print_function
+
 import numpy as np
-from skbeam.io.fit2d import fit2d_save, read_fit2d_msk
 from numpy.testing import assert_array_equal
+
+from skbeam.io.fit2d import fit2d_save, read_fit2d_msk
 
 
 def test_save_output_fit2d(tmpdir):
-    t = tmpdir.join('function_values')
+    t = tmpdir.join("function_values")
     dir_path = t.dirname
     filename = t.strpath
-    msk = np.random.randint(
-        0, 2, (np.random.randint(0, 201),
-               np.random.randint(0, 201))).astype(bool)
+    msk = np.random.randint(0, 2, (np.random.randint(0, 201), np.random.randint(0, 201))).astype(bool)
 
     fit2d_save(msk, filename, dir_path=dir_path)
-    msk2 = read_fit2d_msk('%s.msk' % filename)
+    msk2 = read_fit2d_msk("%s.msk" % filename)
     assert_array_equal(msk2, msk)

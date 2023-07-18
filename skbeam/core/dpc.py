@@ -37,11 +37,14 @@ This module is for Differential Phase Contrast (DPC) imaging based on
 Fourier shift fitting
 """
 from __future__ import absolute_import, division, print_function
+
+import logging
+import warnings
+from collections import namedtuple
+
 import numpy as np
 from scipy.optimize import minimize
-from collections import namedtuple
-import warnings
-import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -80,7 +83,7 @@ def image_reduction(im, roi=None, bad_pixels=None):
 
     if roi:
         r, c, row, col = roi
-        im = im[r:(r + row), c:(c + col)]
+        im = im[r : (r + row), c : (c + col)]
 
     xline = np.sum(im, axis=0)
     yline = np.sum(im, axis=1)
@@ -107,7 +110,7 @@ def _rss_factory(length):
 
     """
 
-    beta = 1j * (np.linspace(-(length-1)//2, (length-1)//2, length))
+    beta = 1j * (np.linspace(-(length - 1) // 2, (length - 1) // 2, length))
 
     def _rss(v, ref_reduction, diff_reduction):
         """
@@ -145,8 +148,7 @@ def _rss_factory(length):
     return _rss
 
 
-def dpc_fit(rss, ref_reduction, diff_reduction, start_point,
-            solver='Nelder-Mead', tol=1e-6, max_iters=2000):
+def dpc_fit(rss, ref_reduction, diff_reduction, start_point, solver="Nelder-Mead", tol=1e-6, max_iters=2000):
     """
     Nonlinear fitting for 2 points.
 
@@ -195,13 +197,18 @@ def dpc_fit(rss, ref_reduction, diff_reduction, start_point,
 
     """
 
-    return minimize(rss, start_point, args=(ref_reduction, diff_reduction),
-                    method=solver, tol=tol, options=dict(maxiter=max_iters)).x
+    return minimize(
+        rss,
+        start_point,
+        args=(ref_reduction, diff_reduction),
+        method=solver,
+        tol=tol,
+        options=dict(maxiter=max_iters),
+    ).x
 
 
 # attributes
-dpc_fit.solver = ['Nelder-Mead', 'Powell', 'CG', 'BFGS', 'Anneal', 'L-BFGS-B',
-                  'TNC', 'COBYLA', 'SLSQP']
+dpc_fit.solver = ["Nelder-Mead", "Powell", "CG", "BFGS", "Anneal", "L-BFGS-B", "TNC", "COBYLA", "SLSQP"]
 
 
 def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
@@ -248,7 +255,7 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
     """
 
     if weighting < 0 or weighting > 1:
-        raise ValueError('weighting should be within the range of [0, 1]!')
+        raise ValueError("weighting should be within the range of [0, 1]!")
 
     pad = 2 * padding + 1
     gx = np.asarray(gx)
@@ -256,11 +263,10 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
     pad_row = rows * pad
     pad_col = cols * pad
 
-    gx_padding = np.zeros((pad_row, pad_col), dtype='d')
-    gy_padding = np.zeros((pad_row, pad_col), dtype='d')
+    gx_padding = np.zeros((pad_row, pad_col), dtype="d")
+    gy_padding = np.zeros((pad_row, pad_col), dtype="d")
 
-    roi_slice = (slice(padding * rows, (padding + 1) * rows),
-                 slice(padding * cols, (padding + 1) * cols))
+    roi_slice = (slice(padding * rows, (padding + 1) * rows), slice(padding * cols, (padding + 1) * cols))
     gx_padding[roi_slice] = gx
     gy_padding[roi_slice] = gy
 
@@ -269,18 +275,16 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
 
     mid_col = pad_col // 2 + 1
     mid_row = pad_row // 2 + 1
-    ax = (2 * np.pi * np.arange(1 - mid_col, pad_col - mid_col + 1) /
-          (pad_col * scan_xstep))
-    ay = (2 * np.pi * np.arange(1 - mid_row, pad_row - mid_row + 1) /
-          (pad_row * scan_ystep))
+    ax = 2 * np.pi * np.arange(1 - mid_col, pad_col - mid_col + 1) / (pad_col * scan_xstep)
+    ay = 2 * np.pi * np.arange(1 - mid_row, pad_row - mid_row + 1) / (pad_row * scan_ystep)
 
     kappax, kappay = np.meshgrid(ax, ay)
-    div_v = kappax ** 2 * (1 - weighting) + kappay ** 2 * weighting
+    div_v = kappax**2 * (1 - weighting) + kappay**2 * weighting
 
     with warnings.catch_warnings():
         # It appears that having nans in data arrays is normal mode of
         #   operation for this function. So let's disable warnings.
-        warnings.filterwarnings('ignore', category=RuntimeWarning)
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
         c = -1j * (kappax * tx * (1 - weighting) + kappay * ty * weighting) / div_v
     c = np.fft.ifftshift(np.where(div_v == 0, 0, c))
 
@@ -291,15 +295,28 @@ def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
 
 # holy hacks, Batman!  'index' here is a single element list so
 # that I can keep track of how many images have been computed
-dpc_internal_state = namedtuple('dpc_internal_state',
-                                ['ax', 'ay', 'gx', 'gy', 'ref_fx', 'ref_fy',
-                                 'index'])
+dpc_internal_state = namedtuple("dpc_internal_state", ["ax", "ay", "gx", "gy", "ref_fx", "ref_fy", "index"])
 
 
-def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
-               scan_rows, scan_cols, scan_xstep, scan_ystep, energy, padding=0,
-               weighting=0.5, solver='Nelder-Mead', roi=None, bad_pixels=None,
-               negate=True, scale=True):
+def dpc_runner(
+    ref,
+    image_sequence,
+    start_point,
+    pixel_size,
+    focus_to_det,
+    scan_rows,
+    scan_cols,
+    scan_xstep,
+    scan_ystep,
+    energy,
+    padding=0,
+    weighting=0.5,
+    solver="Nelder-Mead",
+    roi=None,
+    bad_pixels=None,
+    negate=True,
+    scale=True,
+):
     """Wraps `lazy_dpc`
 
     See docstring for `lazy_dpc` and `reconstruct_phase_from_partial_info`
@@ -308,24 +325,31 @@ def dpc_runner(ref, image_sequence, start_point, pixel_size, focus_to_det,
     if len(pixel_size) == 2:
         # make sure the pixels are the same size
         if pixel_size[0] != pixel_size[1]:
-            raise ValueError("In DPC, pixels must be square. You provided"
-                             "pixel values of {}".format(pixel_size))
-    dpc_gen = lazy_dpc(ref, image_sequence, start_point, scan_rows, scan_cols,
-                       solver, roi, bad_pixels)
+            raise ValueError("In DPC, pixels must be square. You provided" "pixel values of {}".format(pixel_size))
+    dpc_gen = lazy_dpc(ref, image_sequence, start_point, scan_rows, scan_cols, solver, roi, bad_pixels)
     # exhaust the generator, keeping only the last result
     for dpc_state in dpc_gen:
         pass
 
     # compute the final results
     phase, amplitude = reconstruct_phase_from_partial_info(
-        dpc_state, energy, scan_xstep, scan_ystep, pixel_size[0],
-        focus_to_det, negate, scale, padding, weighting)
+        dpc_state, energy, scan_xstep, scan_ystep, pixel_size[0], focus_to_det, negate, scale, padding, weighting
+    )
 
     return phase, amplitude
 
 
-def lazy_dpc(ref, image_sequence, start_point, scan_rows, scan_cols,
-             solver='Nelder-Mead', roi=None, bad_pixels=None, dpc_state=None):
+def lazy_dpc(
+    ref,
+    image_sequence,
+    start_point,
+    scan_rows,
+    scan_cols,
+    solver="Nelder-Mead",
+    roi=None,
+    bad_pixels=None,
+    dpc_state=None,
+):
     """
     Controller function to run the whole Differential Phase Contrast (DPC)
     imaging calculation.
@@ -384,12 +408,13 @@ def lazy_dpc(ref, image_sequence, start_point, scan_rows, scan_cols,
     multilayer Laue lenses. Sci. Rep. 3, 1307; DOI:10.1038/srep01307 (2013).
 
     """
+
     def initialize_state(scan_rows, scan_cols, ref, roi, bad_pixels):
         # Initialize ax, ay, gx, and gy
-        ax = np.zeros((scan_rows, scan_cols), dtype='d')
-        ay = np.zeros((scan_rows, scan_cols), dtype='d')
-        gx = np.zeros((scan_rows, scan_cols), dtype='d')
-        gy = np.zeros((scan_rows, scan_cols), dtype='d')
+        ax = np.zeros((scan_rows, scan_cols), dtype="d")
+        ay = np.zeros((scan_rows, scan_cols), dtype="d")
+        gx = np.zeros((scan_rows, scan_cols), dtype="d")
+        gy = np.zeros((scan_rows, scan_cols), dtype="d")
         # Dimension reduction along x and y direction
         refx, refy = image_reduction(ref, roi, bad_pixels)
         ref_fx = np.fft.fftshift(np.fft.ifft(refx))
@@ -398,8 +423,7 @@ def lazy_dpc(ref, image_sequence, start_point, scan_rows, scan_cols,
         return dpc_internal_state(ax, ay, gx, gy, ref_fx, ref_fy, [0])
 
     if dpc_state is None:
-        dpc_state = initialize_state(scan_rows, scan_cols, ref, roi,
-                                     bad_pixels)
+        dpc_state = initialize_state(scan_rows, scan_cols, ref, roi, bad_pixels)
 
     # 1-D IFFT
     ffx = _rss_factory(len(dpc_state.ref_fx))
@@ -429,10 +453,18 @@ def lazy_dpc(ref, image_sequence, start_point, scan_rows, scan_cols,
         yield dpc_state
 
 
-def reconstruct_phase_from_partial_info(dpc_state, energy, scan_xstep,
-                                        scan_ystep, pixel_size=None,
-                                        focus_to_det=None, negate=True,
-                                        scale=True, padding=0, weighting=0.5):
+def reconstruct_phase_from_partial_info(
+    dpc_state,
+    energy,
+    scan_xstep,
+    scan_ystep,
+    pixel_size=None,
+    focus_to_det=None,
+    negate=True,
+    scale=True,
+    padding=0,
+    weighting=0.5,
+):
     """Using the partial results from dpc_runner, reconstruct the phase image
 
     Parameters
@@ -486,7 +518,7 @@ def reconstruct_phase_from_partial_info(dpc_state, energy, scan_xstep,
 
     """
     if weighting < 0 or weighting > 1:
-        raise ValueError('weighting should be within the range of [0, 1]!')
+        raise ValueError("weighting should be within the range of [0, 1]!")
     gx = None
     gy = dpc_state.gy
     if pixel_size and focus_to_det:
@@ -508,5 +540,4 @@ def reconstruct_phase_from_partial_info(dpc_state, energy, scan_xstep,
 
 
 # attributes
-dpc_runner.solver = ['Nelder-Mead', 'Powell', 'CG', 'BFGS', 'Anneal',
-                     'L-BFGS-B', 'TNC', 'COBYLA', 'SLSQP']
+dpc_runner.solver = ["Nelder-Mead", "Powell", "CG", "BFGS", "Anneal", "L-BFGS-B", "TNC", "COBYLA", "SLSQP"]

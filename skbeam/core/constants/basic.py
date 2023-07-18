@@ -37,23 +37,40 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-import six
-from collections import namedtuple
+
 import functools
-import os
 import logging
+import os
+from collections import namedtuple
+
+import six
+
 logger = logging.getLogger(__name__)
 
 
-data_dir = os.path.join(os.path.dirname(__file__), 'data')
+data_dir = os.path.join(os.path.dirname(__file__), "data")
 
 
-element = namedtuple('element',
-                     ['Z', 'sym', 'name', 'atomic_radius',
-                      'covalent_radius', 'mass', 'bp', 'mp', 'density',
-                      'atomic_volume', 'coherent_scattering_length',
-                      'incoherent_crosssection', 'absorption', 'debye_temp',
-                      'thermal_conductivity'])
+element = namedtuple(
+    "element",
+    [
+        "Z",
+        "sym",
+        "name",
+        "atomic_radius",
+        "covalent_radius",
+        "mass",
+        "bp",
+        "mp",
+        "density",
+        "atomic_volume",
+        "coherent_scattering_length",
+        "incoherent_crosssection",
+        "absorption",
+        "debye_temp",
+        "thermal_conductivity",
+    ],
+)
 
 
 def read_atomic_constants():
@@ -69,22 +86,24 @@ def read_atomic_constants():
     """
     basic = {}
     field_desc = []
-    with open(os.path.join(data_dir, 'AtomicConstants.dat'), 'r') as infile:
+    with open(os.path.join(data_dir, "AtomicConstants.dat"), "r") as infile:
         for line in infile:
-            if line.split()[0] == '#S':
+            if line.split()[0] == "#S":
                 s = line.split()
                 abbrev = s[2]
                 Z = int(s[1])
                 if Z == 1000:
                     break
-            elif not field_desc and line.split()[0] == '#L':
-                field_desc = ['Atomic number',
-                              'Element symbol (Fe, Cr, etc.)',
-                              'Full element name (Iron, Chromium, etc.']
+            elif not field_desc and line.split()[0] == "#L":
+                field_desc = [
+                    "Atomic number",
+                    "Element symbol (Fe, Cr, etc.)",
+                    "Full element name (Iron, Chromium, etc.",
+                ]
                 field_desc += line.split()[1:]
-            elif line.startswith('#UNAME'):
+            elif line.startswith("#UNAME"):
                 elem_name = line.split()[1]
-            elif line[0] == '#':
+            elif line[0] == "#":
                 continue
             else:
                 data = [float(item) for item in line.split()]
@@ -106,13 +125,11 @@ doc_params = """
     element : str or int
         Element symbol, name or atomic number ('Zinc', 'Zn' or 30)
     """
-fields = (['Z : int', 'sym : str', 'name : str'] +
-          ['{} : float'.format(field) for field in element._fields[3:]])
+fields = ["Z : int", "sym : str", "name : str"] + ["{} : float".format(field) for field in element._fields[3:]]
 
-fields = ['{}\n        {}'.format(field, field_desc)
-          for field, field_desc in zip(fields, field_descriptors)]
+fields = ["{}\n        {}".format(field, field_desc) for field, field_desc in zip(fields, field_descriptors)]
 
-doc_attrs = '\n    ' + "\n    ".join(fields)
+doc_attrs = "\n    " + "\n    ".join(fields)
 
 doc_ex = """
     >>> # Create an `Element` object
@@ -128,7 +145,6 @@ doc_ex = """
 
 @functools.total_ordering
 class BasicElement(object):
-
     # define the docs
     __doc__ = """{}
     Parameters
@@ -138,10 +154,9 @@ class BasicElement(object):
 
     Examples
     --------{}
-    """.format(doc_title,
-               doc_params,
-               doc_attrs,
-               doc_ex)
+    """.format(
+        doc_title, doc_params, doc_attrs, doc_ex
+    )
 
     def __init__(self, Z, *args, **kwargs):
         # init the parent object
@@ -160,15 +175,15 @@ class BasicElement(object):
         return getattr(self, item)
 
     def __repr__(self):
-        return six.text_type('BasicElement({})'.format(self.Z))
+        return six.text_type("BasicElement({})".format(self.Z))
 
     # pretty print the element
     def __str__(self):
-        desc = self.name + '\n' + '=' * len(self.name)
+        desc = self.name + "\n" + "=" * len(self.name)
         for d in dir(self):
-            if d.startswith('_'):
+            if d.startswith("_"):
                 continue
-            desc += '\n{}: {}'.format(d, getattr(self, d))
+            desc += "\n{}: {}".format(d, getattr(self, d))
 
         return desc
 

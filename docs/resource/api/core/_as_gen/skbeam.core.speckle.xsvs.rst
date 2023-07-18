@@ -1,6 +1,0 @@
-﻿skbeam.core.speckle.xsvs
-========================
-
-.. currentmodule:: skbeam.core.speckle
-
-.. autofunction:: xsvs

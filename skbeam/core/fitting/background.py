@@ -42,23 +42,28 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-import scipy.signal
+
 import numpy as np
+import scipy.signal
 
-_defaults = {'con_val_no_bin': 3,
-             'con_val_bin': 5,
-             'iter_num_no_bin': 3,
-             'iter_num_bin': 5}
+_defaults = {"con_val_no_bin": 3, "con_val_bin": 5, "iter_num_no_bin": 3, "iter_num_bin": 5}
 
 
-def snip_method(spectrum,
-                e_off, e_lin, e_quad,
-                xmin=0, xmax=4096, epsilon=2.96,
-                width=0.5, decrease_factor=np.sqrt(2),
-                spectral_binning=None,
-                con_val=None,
-                iter_num=None,
-                width_threshold=0.5):
+def snip_method(
+    spectrum,
+    e_off,
+    e_lin,
+    e_quad,
+    xmin=0,
+    xmax=4096,
+    epsilon=2.96,
+    width=0.5,
+    decrease_factor=np.sqrt(2),
+    spectral_binning=None,
+    con_val=None,
+    iter_num=None,
+    width_threshold=0.5,
+):
     """
     use snip algorithm to obtain background
 
@@ -119,15 +124,15 @@ def snip_method(spectrum,
     # clean input a bit
     if con_val is None:
         if spectral_binning is None:
-            con_val = _defaults['con_val_no_bin']
+            con_val = _defaults["con_val_no_bin"]
         else:
-            con_val = _defaults['con_val_bin']
+            con_val = _defaults["con_val_bin"]
 
     if iter_num is None:
         if spectral_binning is None:
-            iter_num = _defaults['iter_num_no_bin']
+            iter_num = _defaults["iter_num_no_bin"]
         else:
-            iter_num = _defaults['iter_num_bin']
+            iter_num = _defaults["iter_num_bin"]
 
     background = np.array(spectrum)
     n_background = background.size
@@ -141,7 +146,7 @@ def snip_method(spectrum,
 
     # transfer from std to fwhm
     std_fwhm = 2 * np.sqrt(2 * np.log(2))
-    tmp = (e_off / std_fwhm)**2 + energy * epsilon * e_lin
+    tmp = (e_off / std_fwhm) ** 2 + energy * epsilon * e_lin
     tmp[tmp < 0] = 0
     fwhm = std_fwhm * np.sqrt(tmp)
 
@@ -153,11 +158,11 @@ def snip_method(spectrum,
     # the accuracy so much. But we need to pay attention to edge
     # effects in general convolution.
     A = s.sum()
-    background = scipy.signal.convolve(background, s, mode='same')/A
+    background = scipy.signal.convolve(background, s, mode="same") / A
 
     window_p = width * fwhm / e_lin
     if spectral_binning is not None and spectral_binning > 0:
-        window_p = window_p/2.
+        window_p = window_p / 2.0
 
     background = np.log(np.log(background + 1) + 1)
 
@@ -165,15 +170,10 @@ def snip_method(spectrum,
 
     # FIRST SNIPPING
     for j in range(iter_num):
-        lo_index = np.clip(index - window_p,
-                           np.max([xmin, 0]),
-                           np.min([xmax, n_background - 1]))
-        hi_index = np.clip(index + window_p,
-                           np.max([xmin, 0]),
-                           np.min([xmax, n_background - 1]))
+        lo_index = np.clip(index - window_p, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
+        hi_index = np.clip(index + window_p, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
 
-        temp = (background[lo_index.astype(np.int64)] +
-                background[hi_index.astype(np.int64)]) / 2.
+        temp = (background[lo_index.astype(np.int64)] + background[hi_index.astype(np.int64)]) / 2.0
 
         bg_index = background > temp
         background[bg_index] = temp[bg_index]
@@ -182,15 +182,10 @@ def snip_method(spectrum,
     max_current_width = np.amax(current_width)
 
     while max_current_width >= width_threshold:
-        lo_index = np.clip(index - current_width,
-                           np.max([xmin, 0]),
-                           np.min([xmax, n_background - 1]))
-        hi_index = np.clip(index + current_width,
-                           np.max([xmin, 0]),
-                           np.min([xmax, n_background - 1]))
+        lo_index = np.clip(index - current_width, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
+        hi_index = np.clip(index + current_width, np.max([xmin, 0]), np.min([xmax, n_background - 1]))
 
-        temp = (background[lo_index.astype(np.int64)] +
-                background[hi_index.astype(np.int64)]) / 2.
+        temp = (background[lo_index.astype(np.int64)] + background[hi_index.astype(np.int64)]) / 2.0
 
         bg_index = background > temp
         background[bg_index] = temp[bg_index]

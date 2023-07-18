@@ -41,13 +41,15 @@ simple shapes such as rectangles and concentric circles.
 from __future__ import absolute_import, division, print_function
 
 import collections
-from scipy import ndimage
-from skimage.draw import line
-from skimage import img_as_float, feature, color, draw
-from skimage.measure import ransac, CircleModel
-import numpy as np
-from . import utils
 import logging
+
+import numpy as np
+from scipy import ndimage
+from skimage import color, draw, feature, img_as_float
+from skimage.draw import line
+from skimage.measure import CircleModel, ransac
+
+from . import utils
 
 logger = logging.getLogger(__name__)
 
@@ -79,11 +81,8 @@ def rectangles(coords, shape):
     labels_grid = np.zeros(shape, dtype=np.int64)
 
     for i, (col_coor, row_coor, col_val, row_val) in enumerate(coords):
-
-        left, right = np.max([col_coor, 0]), np.min([col_coor + col_val,
-                                                     shape[0]])
-        top, bottom = np.max([row_coor, 0]), np.min([row_coor + row_val,
-                                                     shape[1]])
+        left, right = np.max([col_coor, 0]), np.min([col_coor + col_val, shape[0]])
+        top, bottom = np.max([row_coor, 0]), np.min([row_coor + row_val, shape[1]])
 
         slc1 = slice(left, right)
         slc2 = slice(top, bottom)
@@ -92,7 +91,7 @@ def rectangles(coords, shape):
             raise ValueError("overlapping ROIs")
 
         # assign a different scalar for each roi
-        labels_grid[slc1, slc2] = (i + 1)
+        labels_grid[slc1, slc2] = i + 1
 
     return labels_grid
 
@@ -125,18 +124,21 @@ def rings(edges, center, shape):
     """
     edges = np.atleast_2d(np.asarray(edges)).ravel()
     if not 0 == len(edges) % 2:
-        raise ValueError("edges should have an even number of elements, "
-                         "giving inner, outer radii for each ring")
+        raise ValueError(
+            "edges should have an even number of elements, " "giving inner, outer radii for each ring"
+        )
     if not np.all(np.diff(edges) >= 0):
-        raise ValueError("edges are expected to be monotonically increasing, "
-                         "giving inner and outer radii of each ring from "
-                         "r=0 outward")
+        raise ValueError(
+            "edges are expected to be monotonically increasing, "
+            "giving inner and outer radii of each ring from "
+            "r=0 outward"
+        )
     r_coord = utils.radial_grid(center, shape).ravel()
     return _make_roi(r_coord, edges, shape)
 
 
 def ring_edges(inner_radius, width, spacing=0, num_rings=None):
-    """ Calculate the inner and outer radius of a set of rings.
+    """Calculate the inner and outer radius of a set of rings.
 
     The number of rings, their widths, and any spacing between rings can be
     specified. They can be uniform or varied.
@@ -182,10 +184,9 @@ def ring_edges(inner_radius, width, spacing=0, num_rings=None):
     # num_rings are self-consistent and complete.
     width_is_list = isinstance(width, collections.abc.Iterable)
     spacing_is_list = isinstance(spacing, collections.abc.Iterable)
-    if (width_is_list and spacing_is_list):
+    if width_is_list and spacing_is_list:
         if len(width) != len(spacing) - 1:
-            raise ValueError("List of spacings must be one less than list "
-                             "of widths.")
+            raise ValueError("List of spacings must be one less than list " "of widths.")
     if num_rings is None:
         try:
             num_rings = len(width)
@@ -193,15 +194,17 @@ def ring_edges(inner_radius, width, spacing=0, num_rings=None):
             try:
                 num_rings = len(spacing) + 1
             except TypeError:
-                raise ValueError("Since width and spacing are constant, "
-                                 "num_rings cannot be inferred and must be "
-                                 "specified.")
+                raise ValueError(
+                    "Since width and spacing are constant, "
+                    "num_rings cannot be inferred and must be "
+                    "specified."
+                )
     else:
         if width_is_list:
             if num_rings != len(width):
                 raise ValueError("num_rings does not match width list")
         if spacing_is_list:
-            if num_rings-1 != len(spacing):
+            if num_rings - 1 != len(spacing):
                 raise ValueError("num_rings does not match spacing list")
 
     # Now regularlize the input.
@@ -255,29 +258,31 @@ def segmented_rings(edges, segments, center, shape, offset_angle=0):
     """
     edges = np.asarray(edges).ravel()
     if not 0 == len(edges) % 2:
-        raise ValueError("edges should have an even number of elements, "
-                         "giving inner, outer radii for each ring")
+        raise ValueError(
+            "edges should have an even number of elements, " "giving inner, outer radii for each ring"
+        )
     if not np.all(np.diff(edges) >= 0):
-        raise ValueError("edges are expected to be monotonically increasing, "
-                         "giving inner and outer radii of each ring from "
-                         "r=0 outward")
+        raise ValueError(
+            "edges are expected to be monotonically increasing, "
+            "giving inner and outer radii of each ring from "
+            "r=0 outward"
+        )
 
     agrid = utils.angle_grid(center, shape)
 
-    agrid[agrid < 0] = 2*np.pi + agrid[agrid < 0]
+    agrid[agrid < 0] = 2 * np.pi + agrid[agrid < 0]
 
     segments_is_list = isinstance(segments, collections.abc.Iterable)
     if segments_is_list:
         segments = np.asarray(segments) + offset_angle
     else:
         # N equal segments requires N+1 bin edges spanning 0 to 2pi.
-        segments = np.linspace(0, 2*np.pi, num=1+segments, endpoint=True)
+        segments = np.linspace(0, 2 * np.pi, num=1 + segments, endpoint=True)
         segments += offset_angle
 
     # the indices of the bins(angles) to which each value in input
     #  array(angle_grid) belongs.
-    ind_grid = (np.digitize(np.ravel(agrid), segments,
-                            right=False)).reshape(shape)
+    ind_grid = (np.digitize(np.ravel(agrid), segments, right=False)).reshape(shape)
 
     label_array = np.zeros(shape, dtype=np.int64)
     # radius grid for the image_shape
@@ -286,7 +291,7 @@ def segmented_rings(edges, segments, center, shape, offset_angle=0):
     # assign indices value according to angles then rings
     len_segments = len(segments)
     for i in range(len(edges) // 2):
-        indices = (edges[2*i] <= rgrid) & (rgrid < edges[2*i + 1])
+        indices = (edges[2 * i] <= rgrid) & (rgrid < edges[2 * i + 1])
         # Combine "segment #" and "ring #" to get unique label for each.
         label_array[indices] = ind_grid[indices] + (len_segments - 1) * i
 
@@ -347,8 +352,7 @@ def roi_pixel_values(image, labels, index=None):
 
     """
     if labels.shape != image.shape:
-        raise ValueError("Shape of the image data should be equal to"
-                         " shape of the labeled array")
+        raise ValueError("Shape of the image data should be equal to" " shape of the labeled array")
     if index is None:
         index = np.arange(1, np.max(labels) + 1)
 
@@ -387,7 +391,8 @@ def mean_intensity(images, labeled_array, index=None):
     if labeled_array.shape != images[0].shape[0:]:
         raise ValueError(
             "`images` shape (%s) needs to be equal to the labeled_array shape"
-            "(%s)" % (images[0].shape, labeled_array.shape))
+            "(%s)" % (images[0].shape, labeled_array.shape)
+        )
     # handle various input for `index`
     if index is None:
         index = list(np.unique(labeled_array))
@@ -405,8 +410,9 @@ def mean_intensity(images, labeled_array, index=None):
     return mean_intensity, index
 
 
-def circular_average(image, calibrated_center, threshold=0, nx=100,
-                     pixel_size=(1, 1), min_x=None, max_x=None, mask=None):
+def circular_average(
+    image, calibrated_center, threshold=0, nx=100, pixel_size=(1, 1), min_x=None, max_x=None, mask=None
+):
     """Circular average of the the image data
     The circular average is also known as the radial integration
 
@@ -454,10 +460,7 @@ def circular_average(image, calibrated_center, threshold=0, nx=100,
         radial_val = radial_val[w]
         image = image[w]
 
-    bin_edges, sums, counts = utils.bin_1D(np.ravel(radial_val),
-                                           np.ravel(image), nx,
-                                           min_x=min_x,
-                                           max_x=max_x)
+    bin_edges, sums, counts = utils.bin_1D(np.ravel(radial_val), np.ravel(image), nx, min_x=min_x, max_x=max_x)
     th_mask = counts > threshold
     ring_averages = sums[th_mask] / counts[th_mask]
 
@@ -531,7 +534,7 @@ def extract_label_indices(labels):
 
 
 def _make_roi(coords, edges, shape):
-    """ Helper function to create ring rois and bar rois
+    """Helper function to create ring rois and bar rois
 
     Parameters
     ----------
@@ -594,12 +597,15 @@ def bar(edges, shape, horizontal=True, values=None):
     """
     edges = np.atleast_2d(np.asarray(edges)).ravel()
     if not 0 == len(edges) % 2:
-        raise ValueError("edges should have an even number of elements, "
-                         "giving inner, outer edge value for each bar")
+        raise ValueError(
+            "edges should have an even number of elements, " "giving inner, outer edge value for each bar"
+        )
     if not np.all(np.diff(edges) >= 0):
-        raise ValueError("edges are expected to be monotonically increasing, "
-                         "giving inner and outer radii of each bar from "
-                         "r=0 outward")
+        raise ValueError(
+            "edges are expected to be monotonically increasing, "
+            "giving inner and outer radii of each bar from "
+            "r=0 outward"
+        )
     if values is None:
         values = np.repeat(range(shape[0]), shape[1])
     if not horizontal:
@@ -648,19 +654,19 @@ def box(shape, v_edges, h_edges=None, h_values=None, v_values=None):
         h_edges = v_edges
 
     if h_values is None and v_values is None:
-        v_values, h_values = np.mgrid[:shape[0], :shape[1]]
+        v_values, h_values = np.mgrid[: shape[0], : shape[1]]
     elif h_values.shape != v_values.shape:
-        raise ValueError("Shape of the h_values array should be equal to"
-                         " shape of the v_values array")
+        raise ValueError("Shape of the h_values array should be equal to" " shape of the v_values array")
     for edges in (h_edges, v_edges):
         edges = np.atleast_2d(np.asarray(edges)).ravel()
         if not 0 == len(edges) % 2:
-            raise ValueError("edges should have an even number of elements, "
-                             "giving inner, outer edges for each roi")
+            raise ValueError(
+                "edges should have an even number of elements, " "giving inner, outer edges for each roi"
+            )
     coords = []
     for h in h_edges:
         for v in v_edges:
-            coords.append((h[0], v[0], h[1]-h[0], v[1] - v[0]))
+            coords.append((h[0], v[0], h[1] - h[0], v[1] - v[0]))
 
     return rectangles(coords, v_values.shape)
 
@@ -688,19 +694,23 @@ def lines(end_points, shape):
     label = 0
     for points in end_points:
         if len(points) != 4:
-            raise ValueError("end points should have four number of"
-                             " elements, giving starting co-ordinates,"
-                             " ending co-ordinates for each line")
-        rr, cc = line(np.max([points[0], 0]), np.max([points[1], 0]),
-                      np.min([points[2], shape[0]-1]),
-                      np.min([points[3], shape[1]-1]))
+            raise ValueError(
+                "end points should have four number of"
+                " elements, giving starting co-ordinates,"
+                " ending co-ordinates for each line"
+            )
+        rr, cc = line(
+            np.max([points[0], 0]),
+            np.max([points[1], 0]),
+            np.min([points[2], shape[0] - 1]),
+            np.min([points[3], shape[1] - 1]),
+        )
         label += 1
         label_array[rr, cc] = label
     return label_array
 
 
-def auto_find_center_rings(avg_img, sigma=1, no_rings=4, min_samples=3,
-                           residual_threshold=1, max_trials=1000):
+def auto_find_center_rings(avg_img, sigma=1, no_rings=4, min_samples=3, residual_threshold=1, max_trials=1000):
     """This will find the center of the speckle pattern and the radii of the
     most intense rings.
 
@@ -748,16 +758,14 @@ def auto_find_center_rings(avg_img, sigma=1, no_rings=4, min_samples=3,
     radii = []
 
     for i in range(no_rings):
-        model_robust, inliers = ransac(edge_pts_xy, CircleModel, min_samples,
-                                       residual_threshold,
-                                       max_trials=max_trials)
+        model_robust, inliers = ransac(
+            edge_pts_xy, CircleModel, min_samples, residual_threshold, max_trials=max_trials
+        )
         if i == 0:
             center = int(model_robust.params[0]), int(model_robust.params[1])
         radii.append(model_robust.params[2])
 
-        rr, cc = draw.circle_perimeter(center[1], center[0],
-                                       int(model_robust.params[2]),
-                                       shape=image.shape)
+        rr, cc = draw.circle_perimeter(center[1], center[0], int(model_robust.params[2]), shape=image.shape)
         image[rr, cc] = i + 1
         edge_pts_xy = edge_pts_xy[~inliers]
 

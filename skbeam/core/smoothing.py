@@ -62,10 +62,10 @@ def sgolay2d(image, window_size, order, derivative=None):
     n_terms = (order + 1) * (order + 2) / 2.0
 
     if window_size % 2 == 0:
-        raise ValueError('window_size must be odd')
+        raise ValueError("window_size must be odd")
 
     if window_size**2 < n_terms:
-        raise ValueError('order is too high for the window size')
+        raise ValueError("order is too high for the window size")
 
     half_size = window_size // 2
 
@@ -75,65 +75,75 @@ def sgolay2d(image, window_size, order, derivative=None):
     # the exponents of the k-th term. First element of tuple is for x
     # second element for y.
     # Ex. exps = [(0,0), (1,0), (0,1), (2,0), (1,1), (0,2), ...]
-    exps = [(k-n, n) for k in range(order+1) for n in range(k+1)]
+    exps = [(k - n, n) for k in range(order + 1) for n in range(k + 1)]
 
     # coordinates of points
-    ind = np.arange(-half_size, half_size+1, dtype=np.float64)
+    ind = np.arange(-half_size, half_size + 1, dtype=np.float64)
     dx = np.repeat(ind, window_size)
-    dy = np.tile(ind, [window_size, 1]).reshape(window_size**2, )
+    dy = np.tile(ind, [window_size, 1]).reshape(
+        window_size**2,
+    )
 
     # build matrix of system of equation
     A = np.empty((window_size**2, len(exps)))
     for i, exp in enumerate(exps):
-        A[:, i] = (dx**exp[0]) * (dy**exp[1])
+        A[:, i] = (dx ** exp[0]) * (dy ** exp[1])
 
     # pad input array with appropriate values at the four borders
-    new_shape = image.shape[0] + 2*half_size, image.shape[1] + 2*half_size
+    new_shape = image.shape[0] + 2 * half_size, image.shape[1] + 2 * half_size
     smooth_image = np.zeros((new_shape))
     # top band
     band = image[0, :]
-    smooth_image[:half_size, half_size:-half_size] = band - np.abs(np.flipud(image[1:half_size+1, :]) - band)
+    smooth_image[:half_size, half_size:-half_size] = band - np.abs(np.flipud(image[1 : half_size + 1, :]) - band)
     # bottom band
     band = image[-1, :]
-    smooth_image[-half_size:, half_size: -half_size] = band + np.abs(np.flipud(image[-half_size-1: -1, :]) - band)
+    smooth_image[-half_size:, half_size:-half_size] = band + np.abs(
+        np.flipud(image[-half_size - 1 : -1, :]) - band
+    )
     # left band
     band = np.tile(image[:, 0].reshape(-1, 1), [1, half_size])
-    smooth_image[half_size: -half_size, :half_size] = band - np.abs(np.fliplr(image[:, 1: half_size + 1]) - band)
+    smooth_image[half_size:-half_size, :half_size] = band - np.abs(np.fliplr(image[:, 1 : half_size + 1]) - band)
     # right band
     band = np.tile(image[:, -1].reshape(-1, 1), [1, half_size])
-    smooth_image[half_size: -half_size, -half_size:] = band + np.abs(np.fliplr(image[:, -half_size-1: -1]) - band)
+    smooth_image[half_size:-half_size, -half_size:] = band + np.abs(
+        np.fliplr(image[:, -half_size - 1 : -1]) - band
+    )
     # central band
     smooth_image[half_size:-half_size, half_size:-half_size] = image
 
     # top left corner
     band = image[0, 0]
     smooth_image[:half_size, :half_size] = band - np.abs(
-        np.flipud(np.fliplr(image[1: half_size + 1, 1: half_size + 1])) - band)
+        np.flipud(np.fliplr(image[1 : half_size + 1, 1 : half_size + 1])) - band
+    )
     # bottom right corner
     band = image[-1, -1]
     smooth_image[-half_size:, -half_size:] = band + np.abs(
-        np.flipud(np.fliplr(image[-half_size - 1: -1, -half_size - 1: -1])) - band)
+        np.flipud(np.fliplr(image[-half_size - 1 : -1, -half_size - 1 : -1])) - band
+    )
 
     # top right corner
     band = smooth_image[half_size, -half_size:]
     smooth_image[:half_size, -half_size:] = band - np.abs(
-        np.flipud(smooth_image[half_size + 1: 2 * half_size + 1, -half_size:]) - band)
+        np.flipud(smooth_image[half_size + 1 : 2 * half_size + 1, -half_size:]) - band
+    )
     # bottom left corner
     band = smooth_image[-half_size:, half_size].reshape(-1, 1)
     smooth_image[-half_size:, :half_size] = band - np.abs(
-        np.fliplr(smooth_image[-half_size:, half_size+1: 2 * half_size + 1]) - band)
+        np.fliplr(smooth_image[-half_size:, half_size + 1 : 2 * half_size + 1]) - band
+    )
 
     # solve system and convolve
     if derivative is None:
         m = np.linalg.pinv(A)[0].reshape((window_size, -1))
-        return fftconvolve(smooth_image, m, mode='valid')
-    elif derivative == 'col':
+        return fftconvolve(smooth_image, m, mode="valid")
+    elif derivative == "col":
         c = np.linalg.pinv(A)[1].reshape((window_size, -1))
-        return fftconvolve(smooth_image, -c, mode='valid')
-    elif derivative == 'row':
+        return fftconvolve(smooth_image, -c, mode="valid")
+    elif derivative == "row":
         r = np.linalg.pinv(A)[2].reshape((window_size, -1))
-        return fftconvolve(smooth_image, -r, mode='valid')
-    elif derivative == 'both':
+        return fftconvolve(smooth_image, -r, mode="valid")
+    elif derivative == "both":
         c = np.linalg.pinv(A)[1].reshape((window_size, -1))
         r = np.linalg.pinv(A)[2].reshape((window_size, -1))
-        return fftconvolve(smooth_image, -r, mode='valid'), fftconvolve(smooth_image, -c, mode='valid')
+        return fftconvolve(smooth_image, -r, mode="valid"), fftconvolve(smooth_image, -c, mode="valid")

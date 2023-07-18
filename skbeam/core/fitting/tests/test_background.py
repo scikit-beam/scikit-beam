@@ -36,6 +36,7 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
+
 import numpy as np
 from numpy.testing import assert_allclose
 
@@ -52,9 +53,9 @@ def test_snip_method():
     # three gaussian peak
     xval = np.arange(-20, 20, 0.1)
     std = 0.01
-    yval1 = np.exp(-xval**2 / 2 / std**2)
-    yval2 = np.exp(-(xval - 10)**2 / 2 / std**2)
-    yval3 = np.exp(-(xval + 10)**2 / 2 / std**2)
+    yval1 = np.exp(-(xval**2) / 2 / std**2)
+    yval2 = np.exp(-((xval - 10) ** 2) / 2 / std**2)
+    yval3 = np.exp(-((xval + 10) ** 2) / 2 / std**2)
 
     # background as exponential
     a0 = 1.0
@@ -64,10 +65,7 @@ def test_snip_method():
 
     yval = yval1 + yval2 + yval3 + bg_true
 
-    bg = snip_method(yval,
-                     0.0, 1.0, 0.0,
-                     xmin=xmin, xmax=3000,
-                     spectral_binning=None, width=0.1)
+    bg = snip_method(yval, 0.0, 1.0, 0.0, xmin=xmin, xmax=3000, spectral_binning=None, width=0.1)
 
     # ignore the boundary part
     cutval = 15

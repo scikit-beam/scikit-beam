@@ -37,40 +37,34 @@
 This module is for the 'core' data types.
 """
 from __future__ import absolute_import, division, print_function
-import six
-
-from six.moves import zip
-from six import string_types
-
-import time
-import sys
-
-from collections import namedtuple, defaultdict, deque
-from collections.abc import MutableMapping
-import numpy as np
-from itertools import tee
 
 import logging
+import sys
+import time
+from collections import defaultdict, deque, namedtuple
+from collections.abc import MutableMapping
+from itertools import tee
+
+import numpy as np
 import scipy.stats as sts
+import six
+from six import string_types
+from six.moves import zip
 
 logger = logging.getLogger(__name__)
 
-md_value = namedtuple("md_value", ['value', 'units'])
+md_value = namedtuple("md_value", ["value", "units"])
 
-_defaults = {
-    "bins": 100,
-    'nx': 100,
-    'ny': 100,
-    'nz': 100
-}
+_defaults = {"bins": 100, "nx": 100, "ny": 100, "nz": 100}
 
 
 class NotInstalledError(ImportError):
-    '''
+    """
     Custom exception that should be subclassed to handle
     specific missing libraries
 
-    '''
+    """
+
     pass
 
 
@@ -102,14 +96,13 @@ class MD_dict(MutableMapping):
             md_dict = dict()
 
         self._dict = md_dict
-        self._split = '.'
+        self._split = "."
 
     def __repr__(self):
         return self._dict.__repr__()
 
     # overload __setitem__ so dotted paths work
     def __setitem__(self, key, val):
-
         key_split = key.split(self._split)
         tmp = self._dict
         for k in key_split[:-1]:
@@ -129,13 +122,13 @@ class MD_dict(MutableMapping):
         # catch the case of a bare string
         elif isinstance(val, string_types):
             # a value with out units
-            tmp[key_split[-1]] = md_value(val, 'text')
+            tmp[key_split[-1]] = md_value(val, "text")
             return
         # not something easy, try to guess what to do instead
         try:
             # if the second element is a string or None, cast to named tuple
             if isinstance(val[1], string_types) or val[1] is None:
-                print('here')
+                print("here")
                 tmp[key_split[-1]] = md_value(*val)
             # else, assume whole thing is the value with no units
             else:
@@ -202,16 +195,18 @@ class verbosedict(dict):
             v = dict.__getitem__(self, key)
         except KeyError:
             if len(self) < 25:
-                new_msg = ("You tried to access the key '{key}' "
-                           "which does not exist.  The "
-                           "extant keys are: {valid_keys}").format(
-                    key=key, valid_keys=list(self))
+                new_msg = (
+                    "You tried to access the key '{key}' "
+                    "which does not exist.  The "
+                    "extant keys are: {valid_keys}"
+                ).format(key=key, valid_keys=list(self))
             else:
-                new_msg = ("You tried to access the key '{key}' "
-                           "which does not exist.  There "
-                           "are {num} extant keys, which is too many to "
-                           "show you").format(
-                    key=key, num=len(self))
+                new_msg = (
+                    "You tried to access the key '{key}' "
+                    "which does not exist.  There "
+                    "are {num} extant keys, which is too many to "
+                    "show you"
+                ).format(key=key, num=len(self))
             six.reraise(KeyError, KeyError(new_msg), sys.exc_info()[2])
         return v
 
@@ -231,7 +226,8 @@ class RCParamDict(MutableMapping):
     >>> tt['name'] = 'test'
     >>> tt['nested.a'] = 2
     """
-    _delim = '.'
+
+    _delim = "."
 
     def __init__(self):
         # the dict to hold the keys at this level
@@ -289,16 +285,26 @@ class RCParamDict(MutableMapping):
         """
         for key, val in six.iteritems(self._dict):
             if isinstance(val, RCParamDict):
-                for k in val._iter_helper(path_list + [key, ]):
+                for k in val._iter_helper(
+                    path_list
+                    + [
+                        key,
+                    ]
+                ):
                     yield k
             else:
-                yield self._delim.join(path_list + [key, ])
+                yield self._delim.join(
+                    path_list
+                    + [
+                        key,
+                    ]
+                )
 
     def __repr__(self):
         # recursively get the formatted list of strings
         str_list = self._repr_helper(0)
         # return as a single string
-        return '\n'.join(str_list)
+        return "\n".join(str_list)
 
     def _repr_helper(self, tab_level):
         # to accumulate the strings into
@@ -321,42 +327,34 @@ class RCParamDict(MutableMapping):
 
         # loop over and format the keys/vals at this level
         for elm in elm_list:
-            str_list.append("    " * tab_level +
-                            "{key}: {val}".format(
-                                key=elm, val=self._dict[elm]))
+            str_list.append("    " * tab_level + "{key}: {val}".format(key=elm, val=self._dict[elm]))
         # deal with the nested groups
         for nested in nested_list:
             # add the label for the group name
-            str_list.append("    " * tab_level +
-                            "{key}:".format(key=nested))
+            str_list.append("    " * tab_level + "{key}:".format(key=nested))
             # add the strings from _all_ the nested groups
-            str_list.extend(
-                self._dict[nested]._repr_helper(tab_level + 1))
+            str_list.extend(self._dict[nested]._repr_helper(tab_level + 1))
         return str_list
 
 
 keys_core = {
     "pixel_size": {
-        "description": ("2 element tuple defining the (x y) dimensions of the "
-                        "pixel"),
+        "description": ("2 element tuple defining the (x y) dimensions of the " "pixel"),
         "type": tuple,
         "units": "um",
     },
     "voxel_size": {
-        "description": ("3 element tuple defining the (x y z) dimensions "
-                        "of the voxel"),
+        "description": ("3 element tuple defining the (x y z) dimensions " "of the voxel"),
         "type": tuple,
-        "units": "um"
+        "units": "um",
     },
     "calibrated_center": {
-        "description": ("2 element tuple defining the (x y) center of the "
-                        "detector in pixels"),
+        "description": ("2 element tuple defining the (x y) center of the " "detector in pixels"),
         "type": tuple,
         "units": "pixel",
     },
     "detector_size": {
-        "description": ("2 element tuple defining no. of pixels(size) in the "
-                        "detector X and Y direction"),
+        "description": ("2 element tuple defining no. of pixels(size) in the " "detector X and Y direction"),
         "type": tuple,
         "units": "pixel",
     },
@@ -386,56 +384,22 @@ keys_core = {
     },
     "array_dimensions": {
         "description": "axial lengths of the array (Pixels)",
-        "x_dimension": {
-            "description": "x-axis array length as int",
-            "type": int,
-            "units": "pixels"
-        },
-        "y_dimension": {
-            "description": "y-axis array length as int",
-            "type": int,
-            "units": "pixels"
-        },
-        "z_dimension": {
-            "description": "z-axis array length as int",
-            "type": int,
-            "units": "pixels"
-        }
+        "x_dimension": {"description": "x-axis array length as int", "type": int, "units": "pixels"},
+        "y_dimension": {"description": "y-axis array length as int", "type": int, "units": "pixels"},
+        "z_dimension": {"description": "z-axis array length as int", "type": int, "units": "pixels"},
     },
     "bounding_box": {
-        "description": ("physical extents of the array: useful for ",
-                        "volume alignment, transformation, merge and ",
-                        "spatial comparison of multiple volumes"),
-        "x_min": {
-            "description": "minimum spatial coordinate along the x-axis",
-            "type": float,
-            "units": "um"
-        },
-        "x_max": {
-            "description": "maximum spatial coordinate along the x-axis",
-            "type": float,
-            "units": "um"
-        },
-        "y_min": {
-            "description": "minimum spatial coordinate along the y-axis",
-            "type": float,
-            "units": "um"
-        },
-        "y_max": {
-            "description": "maximum spatial coordinate along the y-axis",
-            "type": float,
-            "units": "um"
-        },
-        "z_min": {
-            "description": "minimum spatial coordinate along the z-axis",
-            "type": float,
-            "units": "um"
-        },
-        "z_max": {
-            "description": "maximum spatial coordinate along the z-axis",
-            "type": float,
-            "units": "um"
-        },
+        "description": (
+            "physical extents of the array: useful for ",
+            "volume alignment, transformation, merge and ",
+            "spatial comparison of multiple volumes",
+        ),
+        "x_min": {"description": "minimum spatial coordinate along the x-axis", "type": float, "units": "um"},
+        "x_max": {"description": "maximum spatial coordinate along the x-axis", "type": float, "units": "um"},
+        "y_min": {"description": "minimum spatial coordinate along the y-axis", "type": float, "units": "um"},
+        "y_max": {"description": "maximum spatial coordinate along the y-axis", "type": float, "units": "um"},
+        "z_min": {"description": "minimum spatial coordinate along the z-axis", "type": float, "units": "um"},
+        "z_max": {"description": "maximum spatial coordinate along the z-axis", "type": float, "units": "um"},
     },
 }
 
@@ -524,25 +488,30 @@ def img_to_relative_xyi(img, cx, cy, pixel_size_x=None, pixel_size_y=None):
     """
     if pixel_size_x is not None and pixel_size_y is not None:
         if pixel_size_x <= 0:
-            raise ValueError('Input parameter pixel_size_x must be greater '
-                             'than 0. Your value was ' +
-                             six.text_type(pixel_size_x))
+            raise ValueError(
+                "Input parameter pixel_size_x must be greater "
+                "than 0. Your value was " + six.text_type(pixel_size_x)
+            )
         if pixel_size_y <= 0:
-            raise ValueError('Input parameter pixel_size_y must be greater '
-                             'than 0. Your value was ' +
-                             six.text_type(pixel_size_y))
+            raise ValueError(
+                "Input parameter pixel_size_y must be greater "
+                "than 0. Your value was " + six.text_type(pixel_size_y)
+            )
     elif pixel_size_x is None and pixel_size_y is None:
         pixel_size_x = 1
         pixel_size_y = 1
     else:
-        raise ValueError('pixel_size_x and pixel_size_y must both be None or '
-                         'greater than zero. You passed in values for '
-                         'pixel_size_x of {0} and pixel_size_y of {1}'
-                         ''.format(pixel_size_x, pixel_size_y))
+        raise ValueError(
+            "pixel_size_x and pixel_size_y must both be None or "
+            "greater than zero. You passed in values for "
+            "pixel_size_x of {0} and pixel_size_y of {1}"
+            "".format(pixel_size_x, pixel_size_y)
+        )
 
     # Caswell's incredible terse rewrite
-    x, y = np.meshgrid(pixel_size_x * (np.arange(img.shape[0]) - cx),
-                       pixel_size_y * (np.arange(img.shape[1]) - cy))
+    x, y = np.meshgrid(
+        pixel_size_x * (np.arange(img.shape[0]) - cx), pixel_size_y * (np.arange(img.shape[1]) - cy)
+    )
 
     # return x, y and intensity as 1D arrays
     return x.ravel(), y.ravel(), img.ravel()
@@ -621,8 +590,9 @@ def radial_grid(center, shape, pixel_size=None):
     if pixel_size is None:
         pixel_size = (1, 1)
 
-    X, Y = np.meshgrid(pixel_size[1] * (np.arange(shape[1]) - center[1]),
-                       pixel_size[0] * (np.arange(shape[0]) - center[0]))
+    X, Y = np.meshgrid(
+        pixel_size[1] * (np.arange(shape[1]) - center[1]), pixel_size[0] * (np.arange(shape[0]) - center[0])
+    )
     return np.sqrt(X * X + Y * Y)
 
 
@@ -659,10 +629,9 @@ def angle_grid(center, shape, pixel_size=None):
         pixel_size = (1, 1)
 
     # row is y, column is x. "so say we all. amen."
-    x, y = np.meshgrid(pixel_size[1] * (np.arange(shape[1]) -
-                                        center[1]),
-                       pixel_size[0] * (np.arange(shape[0]) -
-                                        center[0]))
+    x, y = np.meshgrid(
+        pixel_size[1] * (np.arange(shape[1]) - center[1]), pixel_size[0] * (np.arange(shape[0]) - center[0])
+    )
     return np.arctan2(y, x)
 
 
@@ -687,8 +656,7 @@ def radius_to_twotheta(dist_sample, radius):
     return np.arctan(radius / dist_sample)
 
 
-def wedge_integration(src_data, center, theta_start,
-                      delta_theta, r_inner, delta_r):
+def wedge_integration(src_data, center, theta_start, delta_theta, r_inner, delta_r):
     """
     Implementation of caking.
 
@@ -776,11 +744,9 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
         An array of floats for the bin edges.  The last value is the
         right edge of the last bin.
     """
-    num_valid_args = sum((range_min is not None, range_max is not None,
-                          step is not None, nbins is not None))
+    num_valid_args = sum((range_min is not None, range_max is not None, step is not None, nbins is not None))
     if num_valid_args != 3:
-        raise ValueError("Exactly three of the arguments must be non-None "
-                         "not {}.".format(num_valid_args))
+        raise ValueError("Exactly three of the arguments must be non-None " "not {}.".format(num_valid_args))
 
     if range_min is not None and range_max is not None:
         if range_max <= range_min:
@@ -797,22 +763,25 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
     # in this case, the user gave use min, max, and step
     if nbins is None:
         if step > (range_max - range_min):
-            raise ValueError("The step can not be greater than the difference "
-                             "between min and max")
+            raise ValueError("The step can not be greater than the difference " "between min and max")
         nbins = int((range_max - range_min) // step)
         ret = range_min + np.arange(nbins + 1) * step
         # if the last value is greater than the max (should never happen)
         if ret[-1] > range_max:
             return ret[:-1]
         if range_max - ret[-1] > 1e-10 * step:
-            logger.debug("Inconsistent "
-                         "(range_min, range_max, step) "
-                         "and step does not evenly divide "
-                         "(range_min - range_max). "
-                         "The bins has been truncated.\n"
-                         "min: %f max: %f step: %f gap: %f",
-                         range_min, range_max,
-                         step, range_max - ret[-1])
+            logger.debug(
+                "Inconsistent "
+                "(range_min, range_max, step) "
+                "and step does not evenly divide "
+                "(range_min - range_max). "
+                "The bins has been truncated.\n"
+                "min: %f max: %f step: %f gap: %f",
+                range_min,
+                range_max,
+                step,
+                range_max - ret[-1],
+            )
         return ret
 
     # in this case we got range_min, nbins, step
@@ -824,11 +793,20 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
         return range_max - np.arange(nbins + 1)[::-1] * step
 
 
-def grid3d(q, img_stack,
-           nx=None, ny=None, nz=None,
-           xmin=None, xmax=None, ymin=None,
-           ymax=None, zmin=None, zmax=None,
-           binary_mask=None):
+def grid3d(
+    q,
+    img_stack,
+    nx=None,
+    ny=None,
+    nz=None,
+    xmin=None,
+    xmax=None,
+    ymin=None,
+    ymax=None,
+    zmin=None,
+    zmax=None,
+    binary_mask=None,
+):
     """Grid irregularly spaced data points onto a regular grid via histogramming
 
     This function will process the set of reciprocal space values (q), the
@@ -888,7 +866,8 @@ def grid3d(q, img_stack,
         raise NotImplementedError(
             "ctrans is not available on your platform. See "
             "https://github.com/scikit-beam/scikit-beam/issues/418 "
-            "to follow updates to this problem.")
+            "to follow updates to this problem."
+        )
 
     # validate input
     img_stack = np.asarray(img_stack)
@@ -907,34 +886,36 @@ def grid3d(q, img_stack,
         binary_mask = np.tile(np.ravel(binary_mask), img_stack.shape[0])
 
     else:
-        raise ValueError("The binary mask must be the same shape as the"
-                         "img_stack ({0}) or a single image in the image "
-                         "stack ({1}).  The input binary mask is shaped ({2})"
-                         "".format(img_stack.shape, img_stack[0].shape,
-                                   binary_mask.shape))
+        raise ValueError(
+            "The binary mask must be the same shape as the"
+            "img_stack ({0}) or a single image in the image "
+            "stack ({1}).  The input binary mask is shaped ({2})"
+            "".format(img_stack.shape, img_stack[0].shape, binary_mask.shape)
+        )
 
     q = np.atleast_2d(q)
     if q.ndim != 2:
-        raise ValueError("q.ndim must be a 2-D array of shape Nx3 array. "
-                         "You provided an array with {0} dimensions."
-                         "".format(q.ndim))
+        raise ValueError(
+            "q.ndim must be a 2-D array of shape Nx3 array. "
+            "You provided an array with {0} dimensions."
+            "".format(q.ndim)
+        )
     if q.shape[1] != 3:
-        raise ValueError("The shape of q must be an Nx3 array, not {0}X{1}"
-                         " which you provided.".format(*q.shape))
+        raise ValueError(
+            "The shape of q must be an Nx3 array, not {0}X{1}" " which you provided.".format(*q.shape)
+        )
 
     # set defaults for qmin, qmax, dq
     qmin = np.min(q, axis=0)
     qmax = np.max(q, axis=0)
-    dqn = [_defaults['nx'], _defaults['ny'], _defaults['nz']]
+    dqn = [_defaults["nx"], _defaults["ny"], _defaults["nz"]]
 
     # pad the upper edge by just enough to ensure that all of the
     # points are in-bounds with the binning rules: lo <= val < hi
     qmax += np.spacing(qmax)
 
     # check for non-default input
-    for target, input_vals in ((dqn, (nx, ny, nz)),
-                               (qmin, (xmin, ymin, zmin)),
-                               (qmax, (xmax, ymax, zmax))):
+    for target, input_vals in ((dqn, (nx, ny, nz)), (qmin, (xmin, ymin, zmin)), (qmax, (xmax, ymax, zmax))):
         for j, in_val in enumerate(input_vals):
             if in_val is not None:
                 target[j] = in_val
@@ -1121,7 +1102,7 @@ def twotheta_to_q(two_theta, wavelength):
     """
     two_theta = np.asarray(two_theta)
     wavelength = float(wavelength)
-    pre_factor = ((4 * np.pi) / wavelength)
+    pre_factor = (4 * np.pi) / wavelength
     return pre_factor * np.sin(two_theta / 2)
 
 
@@ -1159,10 +1140,11 @@ def multi_tau_lags(multitau_levels, multitau_channels):
        J. Mod. Opt., vol 35, p 711–718, 1988.
     """
 
-    if (multitau_channels % 2 != 0):
-        raise ValueError("Number of  multiple tau channels(buffers)"
-                         " must be even. You provided {0} "
-                         .format(multitau_channels))
+    if multitau_channels % 2 != 0:
+        raise ValueError(
+            "Number of  multiple tau channels(buffers)"
+            " must be even. You provided {0} ".format(multitau_channels)
+        )
 
     # total number of channels ( or total number of delay times)
     tot_channels = (multitau_levels + 1) * multitau_channels // 2
@@ -1225,8 +1207,7 @@ def geometric_series(common_ratio, number_of_images, first_term=1):
     return geometric_series
 
 
-def bin_grid(image, r_array, pixel_sizes, statistic='mean', mask=None,
-             bins=None):
+def bin_grid(image, r_array, pixel_sizes, statistic="mean", mask=None, bins=None):
     """
     Bin and integrate an image, given the radial array of pixels
 
@@ -1263,13 +1244,9 @@ def bin_grid(image, r_array, pixel_sizes, statistic='mean', mask=None,
         mask = np.ones(image.shape, dtype=int).astype(bool)
     if bins is None:
         res = np.hypot(*pixel_sizes)
-        bins = np.arange(np.min(r_array) - res * .5,
-                         np.max(r_array) + res * .5, res)
+        bins = np.arange(np.min(r_array) - res * 0.5, np.max(r_array) + res * 0.5, res)
 
-    int_stat, bin_edge, bin_num = sts.binned_statistic(r_array[mask],
-                                                       image[mask],
-                                                       statistic=statistic,
-                                                       bins=bins)
+    int_stat, bin_edge, bin_num = sts.binned_statistic(r_array[mask], image[mask], statistic=statistic, bins=bins)
 
     bin_centers = bin_edges_to_centers(bin_edge)
 

@@ -38,14 +38,14 @@
 from __future__ import absolute_import, division, print_function
 
 import numpy as np
-from numpy.testing import assert_array_equal, assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal, assert_array_equal
 
 from skbeam.core.constants.xrs import HKL, calibration_standards
-from skbeam.core.utils import q_to_d, d_to_q
+from skbeam.core.utils import d_to_q, q_to_d
 
 
 def test_powder_standard():
-    name = 'Si'
+    name = "Si"
     cal = calibration_standards[name]
     assert name == cal.name
 
@@ -60,8 +60,8 @@ def test_powder_standard():
 
 def test_hkl():
     a = HKL(1, 1, 1)
-    b = HKL('1', '1', '1')
-    c = HKL(h='1', k='1', l='1')  # noqa: E741
+    b = HKL("1", "1", "1")
+    c = HKL(h="1", k="1", l="1")  # noqa: E741
     d = HKL(1.5, 1.5, 1.75)
     assert a == b
     assert a == c

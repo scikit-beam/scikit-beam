@@ -36,10 +36,12 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
+
 import numpy as np
 
 import skbeam.core.calibration as calibration
 import skbeam.core.calibration as core
+
 from .utils import gauss_gen
 
 
@@ -48,7 +50,7 @@ def _draw_gaussian_rings(shape, calibrated_center, r_list, r_width):
     II = np.zeros_like(R)
 
     for r in r_list:
-        tmp = 100 * np.exp(-((R - r)/r_width)**2)
+        tmp = 100 * np.exp(-(((R - r) / r_width) ** 2))
         II += tmp
 
     return II
@@ -60,19 +62,18 @@ def test_refine_center():
 
     nx_opts = [None, 300]
     for nx in nx_opts:
-        out = calibration.refine_center(II, center+1, (1, 1),
-                                        phi_steps=20, nx=nx, min_x=10,
-                                        max_x=300, window_size=5,
-                                        thresh=0, max_peaks=4)
+        out = calibration.refine_center(
+            II, center + 1, (1, 1), phi_steps=20, nx=nx, min_x=10, max_x=300, window_size=5, thresh=0, max_peaks=4
+        )
 
-        assert np.all(np.abs(center - out) < .1)
+        assert np.all(np.abs(center - out) < 0.1)
 
 
 def test_blind_d():
-    name = 'Si'
-    wavelength = .18
+    name = "Si"
+    wavelength = 0.18
     window_size = 5
-    threshold = .1
+    threshold = 0.1
     cal = calibration.calibration_standards[name]
 
     tan2theta = np.tan(cal.convert_2theta(wavelength))
@@ -83,8 +84,8 @@ def test_blind_d():
     bin_centers = np.linspace(0, 50, 2000)
     II = np.zeros_like(bin_centers)
     for r in expected_r:
-        II += gauss_gen(bin_centers, r, 100, .2)
-    d, dstd = calibration.estimate_d_blind(name, wavelength, bin_centers,
-                                           II, window_size, len(expected_r),
-                                           threshold)
+        II += gauss_gen(bin_centers, r, 100, 0.2)
+    d, dstd = calibration.estimate_d_blind(
+        name, wavelength, bin_centers, II, window_size, len(expected_r), threshold
+    )
     assert np.abs(d - D) < 1e-6

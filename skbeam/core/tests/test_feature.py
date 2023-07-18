@@ -36,26 +36,26 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
+
 import numpy as np
-from numpy.testing import assert_array_almost_equal, assert_raises
-from .utils import gauss_gen, parabola_gen
-import skbeam.core.feature as feature
 import pytest
+from numpy.testing import assert_array_almost_equal, assert_raises
+
+import skbeam.core.feature as feature
+
+from .utils import gauss_gen, parabola_gen
 
 
-def _test_refine_helper(x_data, y_data, center, height,
-                        refine_method, refine_args):
+def _test_refine_helper(x_data, y_data, center, height, refine_method, refine_args):
     """
     helper function for testing
     """
     test_center, test_height = refine_method(x_data, y_data, **refine_args)
-    assert_array_almost_equal(np.array([test_center, test_height]),
-                              np.array([center, height]))
+    assert_array_almost_equal(np.array([test_center, test_height]), np.array([center, height]))
 
 
 def _gen_test_refine_methods():
-    refine_methods = [feature.refine_quadratic,
-                      feature.refine_log_quadratic]
+    refine_methods = [feature.refine_quadratic, feature.refine_log_quadratic]
     test_data_gens = [parabola_gen, gauss_gen]
 
     x = np.arange(128)
@@ -81,8 +81,7 @@ def test_filter_n_largest():
     cands = np.array((10, 25, 50, 75, 100))
     x = np.arange(128, dtype=float)
     y = np.zeros_like(x)
-    for c, h in zip(cands,
-                    (10, 15, 25, 30, 35)):
+    for c, h in zip(cands, (10, 15, 25, 30, 35)):
         y += gauss_gen(x, c, h, 3)
 
     for j in range(1, len(cands) + 2):
@@ -98,8 +97,7 @@ def test_filter_peak_height():
     heights = (10, 20, 30, 40, 50)
     x = np.arange(128, dtype=float)
     y = np.zeros_like(x)
-    for c, h in zip(cands,
-                    heights):
+    for c, h in zip(cands, heights):
         y += gauss_gen(x, c, h, 3)
 
     for j, h in enumerate(heights):
@@ -110,15 +108,13 @@ def test_filter_peak_height():
 
 
 def test_peak_refinement():
-
     cands = np.array((10, 25, 50, 75, 100))
     heights = (10, 20, 30, 40, 50)
     x = np.arange(128, dtype=float)
     y = np.zeros_like(x)
     for c, h in zip(cands, heights):
-        y += gauss_gen(x, c+.5, h, 3)
+        y += gauss_gen(x, c + 0.5, h, 3)
 
-    loc, ht = feature.peak_refinement(x, y, cands, 5,
-                                      feature.refine_log_quadratic)
-    assert_array_almost_equal(loc, cands + .5, decimal=3)
+    loc, ht = feature.peak_refinement(x, y, cands, 5, feature.refine_log_quadratic)
+    assert_array_almost_equal(loc, cands + 0.5, decimal=3)
     assert_array_almost_equal(ht, heights, decimal=3)

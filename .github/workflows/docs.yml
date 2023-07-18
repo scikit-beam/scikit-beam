@@ -12,9 +12,9 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -29,7 +29,7 @@ jobs:
         python -m pip install --upgrade pip setuptools numpy
 
         pip install -r requirements-dev.txt
-        pip install -r requirements-doc.txt
+        pip install -r requirements-docs.txt
         pip install .
 
         # # python setup.py install build_ext -i
@@ -39,10 +39,20 @@ jobs:
         pip list
     - name: Build Docs
       run: |
-        pip install -r requirements-doc.txt
         pushd ../
         git clone https://github.com/scikit-beam/scikit-beam-examples.git
         popd
         pushd docs
         bash build_docs.sh
         popd
+    - name: Deploy documentation to nsls-ii.github.io
+      if: github.repository_owner == 'scikit-beam' && github.ref_name == 'master'
+      # We pin to the SHA, not the tag, for security reasons.
+      # https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/security-hardening-for-github-actions#using-third-party-actions
+      uses: peaceiris/actions-gh-pages@bbdfb200618d235585ad98e965f4aafc39b4c501  # v3.7.3
+      with:
+        deploy_key: ${{ secrets.GITHUB_TOKEN }}
+        publish_branch: master
+        publish_dir: ./docs/build/html
+        keep_files: true  # Keep old files.
+        force_orphan: false  # Keep git history.

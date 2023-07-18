@@ -36,11 +36,12 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-'''Constants
-'''
-from .basic import BasicElement  # noqa: F401
-from .xrs import calibration_standards  # noqa: F401
-from .xrf import XrfElement, emission_line_search  # noqa: F401
-
+"""Constants
+"""
 import logging
+
+from .basic import BasicElement  # noqa: F401
+from .xrf import XrfElement, emission_line_search  # noqa: F401
+from .xrs import calibration_standards  # noqa: F401
+
 logger = logging.getLogger(__name__)

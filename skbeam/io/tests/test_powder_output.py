@@ -40,28 +40,28 @@
     Added a test to check the GSAS file reader and file writer
 """
 from __future__ import absolute_import, division, print_function
-import os
+
 import math
+import os
+
 import numpy as np
-from numpy.testing import assert_array_equal, assert_array_almost_equal
 import pytest
+from numpy.testing import assert_array_almost_equal, assert_array_equal
+
 import skbeam.io.save_powder_output as output
-from skbeam.io.save_powder_output import gsas_writer
 from skbeam.io.gsas_file_reader import gsas_reader
+from skbeam.io.save_powder_output import gsas_writer
 
 
 def test_save_output():
     filename = "function_values"
     x = np.arange(0, 100, 1)
     y = np.exp(x)
-    y1 = y*math.erf(0.5)
+    y1 = y * math.erf(0.5)
 
-    output.save_output(x, y, filename, q_or_2theta="Q", err=None,
-                       dir_path=None)
-    output.save_output(x, y, filename, q_or_2theta="2theta", ext=".dat",
-                       err=None, dir_path=None)
-    output.save_output(x, y, filename, q_or_2theta="2theta", ext=".xye",
-                       err=y1, dir_path=None)
+    output.save_output(x, y, filename, q_or_2theta="Q", err=None, dir_path=None)
+    output.save_output(x, y, filename, q_or_2theta="2theta", ext=".dat", err=None, dir_path=None)
+    output.save_output(x, y, filename, q_or_2theta="2theta", ext=".xye", err=y1, dir_path=None)
 
     Data_chi = np.loadtxt("function_values.chi", skiprows=7)
     Data_dat = np.loadtxt("function_values.dat", skiprows=7)
@@ -82,30 +82,30 @@ def test_save_output():
     os.remove("function_values.xye")
 
 
-@pytest.mark.skipif(os.name == 'nt', reason="The tested functions are not working on Windows.")
+@pytest.mark.skipif(os.name == "nt", reason="The tested functions are not working on Windows.")
 def test_gsas_output(tmpdir):
     filename = os.path.join(tmpdir, "function_values")
     x = np.arange(0, 100, 5)
     y = np.arange(0, 200, 10)
-    err = y*math.erf(0.2)
+    err = y * math.erf(0.2)
 
     vi = []
     esd_vi = []
     for ei in err:
         if ei > 0.0:
-            vi.append(1.0/ei**2)
-            esd_vi.append(1.0/round(ei)**2)
+            vi.append(1.0 / ei**2)
+            esd_vi.append(1.0 / round(ei) ** 2)
         else:
             vi.append(0.0)
             esd_vi.append(0.0)
 
-    gsas_writer(x, y, filename+"_std", mode=None, err=None, dir_path=None)
-    gsas_writer(x, y, filename+"_esd", mode="ESD", err=err, dir_path=None)
-    gsas_writer(x, y, filename+"_fxye", mode="FXYE", err=err, dir_path=None)
+    gsas_writer(x, y, filename + "_std", mode=None, err=None, dir_path=None)
+    gsas_writer(x, y, filename + "_esd", mode="ESD", err=err, dir_path=None)
+    gsas_writer(x, y, filename + "_fxye", mode="FXYE", err=err, dir_path=None)
 
-    tth1, intensity1, err1 = gsas_reader(filename+"_std.gsas")
-    tth2, intensity2, err2 = gsas_reader(filename+"_esd.gsas")
-    tth3, intensity3, err3 = gsas_reader(filename+"_fxye.gsas")
+    tth1, intensity1, err1 = gsas_reader(filename + "_std.gsas")
+    tth2, intensity2, err2 = gsas_reader(filename + "_esd.gsas")
+    tth3, intensity3, err3 = gsas_reader(filename + "_fxye.gsas")
 
     assert_array_equal(x, tth1)
     assert_array_equal(x, tth2)

@@ -38,11 +38,12 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-import numpy as np
-import time
-from scipy.ndimage import gaussian_filter
 
 import logging
+import time
+
+import numpy as np
+from scipy.ndimage import gaussian_filter
 
 logger = logging.getLogger(__name__)
 
@@ -117,11 +118,7 @@ def pi_modulus(recon_pattern, diffracted_pattern, offset_v=1e-12):
     """
     diff_tmp = np.fft.fftn(recon_pattern) / np.sqrt(np.size(recon_pattern))
     index = diffracted_pattern > 0
-    diff_tmp[index] = (
-        diffracted_pattern[index]
-        * diff_tmp[index]
-        / (np.abs(diff_tmp[index]) + offset_v)
-    )
+    diff_tmp[index] = diffracted_pattern[index] * diff_tmp[index] / (np.abs(diff_tmp[index]) + offset_v)
     return np.fft.ifftn(diff_tmp) * np.sqrt(np.size(diffracted_pattern))
 
 
@@ -166,9 +163,7 @@ def cal_diff_error(sample_obj, diffracted_pattern):
         relative error in q space
     """
     new_diff = np.abs(np.fft.fftn(sample_obj)) / np.sqrt(np.size(sample_obj))
-    return np.linalg.norm(new_diff - diffracted_pattern) / np.linalg.norm(
-        diffracted_pattern
-    )
+    return np.linalg.norm(new_diff - diffracted_pattern) / np.linalg.norm(diffracted_pattern)
 
 
 def generate_random_phase_field(diffracted_pattern):
@@ -186,9 +181,7 @@ def generate_random_phase_field(diffracted_pattern):
         sample information with phase
     """
     pha_tmp = np.random.uniform(0, 2 * np.pi, diffracted_pattern.shape)
-    sample_obj = np.fft.ifftn(diffracted_pattern * np.exp(1j * pha_tmp)) * np.sqrt(
-        np.size(diffracted_pattern)
-    )
+    sample_obj = np.fft.ifftn(diffracted_pattern * np.exp(1j * pha_tmp)) * np.sqrt(np.size(diffracted_pattern))
     return sample_obj
 
 
@@ -333,10 +326,7 @@ def cdi_recon(
     elif pi_modulus_flag == "complex":
         real_operation = False
     else:
-        raise ValueError(
-            'py_modulus_flag must be one of ("complex","real") not '
-            "{!r}".format(pi_modulus_flag)
-        )
+        raise ValueError('py_modulus_flag must be one of ("complex","real") not ' "{!r}".format(pi_modulus_flag))
 
     gamma_1 = -1 / beta
     gamma_2 = 1 / beta

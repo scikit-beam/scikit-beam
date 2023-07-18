@@ -36,15 +36,14 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-import six
-import numpy as np
-from numpy.testing import (assert_array_equal, assert_array_almost_equal,
-                           assert_raises, assert_equal)
 
-from skbeam.core.constants.xrf import (XrfElement, emission_line_search,
-                                       XrayLibWrap, XrayLibWrap_Energy)
-from skbeam.core.utils import NotInstalledError
+import numpy as np
+import six
+from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_equal, assert_raises
+
 from skbeam.core.constants.basic import basic
+from skbeam.core.constants.xrf import XrayLibWrap, XrayLibWrap_Energy, XrfElement, emission_line_search
+from skbeam.core.utils import NotInstalledError
 
 
 def test_element_data():
@@ -57,13 +56,13 @@ def test_element_data():
 
     name_list = []
     for i in range(100):
-        e = XrfElement(i+1)
-        data1.append(e.cs(10)['Ka1'])
+        e = XrfElement(i + 1)
+        data1.append(e.cs(10)["Ka1"])
         name_list.append(e.name)
 
     for item in name_list:
         e = XrfElement(item)
-        data2.append(e.cs(10)['Ka1'])
+        data2.append(e.cs(10)["Ka1"])
 
     assert_array_equal(data1, data2)
 
@@ -71,7 +70,7 @@ def test_element_data():
 
 
 def test_element_finder():
-    true_name = sorted(['Eu', 'Cu'])
+    true_name = sorted(["Eu", "Cu"])
     out = emission_line_search(8, 0.05, 10)
     found_name = sorted(list(six.iterkeys(out)))
     assert_equal(true_name, found_name)
@@ -80,16 +79,15 @@ def test_element_finder():
 
 def test_XrayLibWrap_notpresent():
     from skbeam.core.constants import xrf
+
     # stash the original xraylib object
     xraylib = xrf.xraylib
     # force the not present exception to be raised by setting xraylib to None
     xrf.xraylib = None
     assert_raises(NotInstalledError, xrf.XrfElement, None)
-    assert_raises(NotInstalledError, xrf.emission_line_search,
-                  None, None, None)
+    assert_raises(NotInstalledError, xrf.emission_line_search, None, None, None)
     assert_raises(NotInstalledError, xrf.XrayLibWrap, None, None)
-    assert_raises(NotInstalledError, xrf.XrayLibWrap_Energy,
-                  None, None, None)
+    assert_raises(NotInstalledError, xrf.XrayLibWrap_Energy, None, None, None)
     # reset xraylib so nothing else breaks
     xrf.xraylib = xraylib
 
@@ -110,9 +108,7 @@ def test_XrayLibWrap_Energy():
     for Z in range(1, 101):
         for infotype in XrayLibWrap_Energy.opts_info_type:
             incident_energy = 10
-            xlwe = XrayLibWrap_Energy(element=Z,
-                                      info_type=infotype,
-                                      incident_energy=incident_energy)
+            xlwe = XrayLibWrap_Energy(element=Z, info_type=infotype, incident_energy=incident_energy)
             incident_energy *= 2
             xlwe.incident_energy = incident_energy
             assert_equal(xlwe.incident_energy, incident_energy)
@@ -120,10 +116,10 @@ def test_XrayLibWrap_Energy():
 
 
 def test_cs_different_units():
-    e = XrfElement('Fe')
+    e = XrfElement("Fe")
     # test at different energies
     for eng in range(10, 20):
-        cs1 = np.array([v for k, v in e.cs(eng).all])   # unit in cm2/g
+        cs1 = np.array([v for k, v in e.cs(eng).all])  # unit in cm2/g
         cs2 = np.array([v for k, v in e.csb(eng).all])  # unit in barns/atom
         cs1 /= cs1[0]
         cs2 /= cs2[0]
@@ -133,8 +129,7 @@ def test_cs_different_units():
 
 def test_element_creation():
     prev_element = None
-    elements = [elm for abbrev, elm in six.iteritems(basic)
-                if isinstance(abbrev, int)]
+    elements = [elm for abbrev, elm in six.iteritems(basic) if isinstance(abbrev, int)]
     elements.sort()
     for element in elements:
         Z = element.Z

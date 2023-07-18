@@ -37,46 +37,92 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-from collections.abc import Mapping
-import logging
 
-from packaging import version
+import logging
+from collections.abc import Mapping
+
 import numpy as np
 import six
+from packaging import version
 
-from ..utils import NotInstalledError
-from ..constants.basic import (BasicElement, doc_params, doc_attrs, doc_ex)
-from ..utils import verbosedict
+from ..constants.basic import BasicElement, doc_attrs, doc_ex, doc_params
+from ..utils import NotInstalledError, verbosedict
 
 logger = logging.getLogger(__name__)
 
-line_name = ['Ka1', 'Ka2', 'Ka3', 'Kb1', 'Kb2', 'Kb3', 'Kb4', 'kb5', 'La1', 'La2', 'Lb1', 'Lb2',
-             'Lb3', 'Lb4', 'Lb5', 'Lg1', 'Lg2', 'Lg3', 'Lg4', 'Ll',
-             'Ln', 'Ma1', 'Ma2', 'Mb', 'Mg']
+line_name = [
+    "Ka1",
+    "Ka2",
+    "Ka3",
+    "Kb1",
+    "Kb2",
+    "Kb3",
+    "Kb4",
+    "kb5",
+    "La1",
+    "La2",
+    "Lb1",
+    "Lb2",
+    "Lb3",
+    "Lb4",
+    "Lb5",
+    "Lg1",
+    "Lg2",
+    "Lg3",
+    "Lg4",
+    "Ll",
+    "Ln",
+    "Ma1",
+    "Ma2",
+    "Mb",
+    "Mg",
+]
 
-bindingE = ['K', 'L1', 'L2', 'L3', 'M1', 'M2', 'M3', 'M4', 'M5', 'N1',
-            'N2', 'N3', 'N4', 'N5', 'N6', 'N7', 'O1', 'O2', 'O3',
-            'O4', 'O5', 'P1', 'P2', 'P3']
+bindingE = [
+    "K",
+    "L1",
+    "L2",
+    "L3",
+    "M1",
+    "M2",
+    "M3",
+    "M4",
+    "M5",
+    "N1",
+    "N2",
+    "N3",
+    "N4",
+    "N5",
+    "N6",
+    "N7",
+    "O1",
+    "O2",
+    "O3",
+    "O4",
+    "O5",
+    "P1",
+    "P2",
+    "P3",
+]
 
 
 class XraylibNotInstalledError(NotInstalledError):
-    message_post = ('xraylib is not installed. Please see '
-                    'https://github.com/tschoonj/xraylib '
-                    'or https://binstar.org/tacaswell/xraylib '
-                    'for help on installing xraylib')
+    message_post = (
+        "xraylib is not installed. Please see "
+        "https://github.com/tschoonj/xraylib "
+        "or https://binstar.org/tacaswell/xraylib "
+        "for help on installing xraylib"
+    )
 
     def __init__(self, caller, *args, **kwargs):
-        message = ('The call to {} cannot be completed because {}'
-                   ''.format(caller, self.message_post))
-        super(XraylibNotInstalledError, self).__init__(message, *args,
-                                                       **kwargs)
+        message = "The call to {} cannot be completed because {}" "".format(caller, self.message_post)
+        super(XraylibNotInstalledError, self).__init__(message, *args, **kwargs)
 
 
 try:
     import xraylib
 except ImportError:
-    logger.warning('Xraylib is not installed on your machine. ' +
-                   XraylibNotInstalledError.message_post)
+    logger.warning("Xraylib is not installed on your machine. " + XraylibNotInstalledError.message_post)
     xraylib = None
 
 if xraylib is None:
@@ -87,38 +133,75 @@ else:
     if version.parse(xraylib.__version__) < version.parse("4.0.0"):
         xraylib.SetErrorMessages(0)
 
-    line_list = [xraylib.KA1_LINE, xraylib.KA2_LINE, xraylib.KA3_LINE,
-                 xraylib.KB1_LINE, xraylib.KB2_LINE, xraylib.KB3_LINE, xraylib.KB4_LINE, xraylib.KB5_LINE,
-                 xraylib.LA1_LINE, xraylib.LA2_LINE,
-                 xraylib.LB1_LINE, xraylib.LB2_LINE, xraylib.LB3_LINE,
-                 xraylib.LB4_LINE, xraylib.LB5_LINE, xraylib.LG1_LINE,
-                 xraylib.LG2_LINE, xraylib.LG3_LINE, xraylib.LG4_LINE,
-                 xraylib.LL_LINE, xraylib.LE_LINE, xraylib.MA1_LINE,
-                 xraylib.MA2_LINE, xraylib.MB_LINE, xraylib.MG_LINE]
+    line_list = [
+        xraylib.KA1_LINE,
+        xraylib.KA2_LINE,
+        xraylib.KA3_LINE,
+        xraylib.KB1_LINE,
+        xraylib.KB2_LINE,
+        xraylib.KB3_LINE,
+        xraylib.KB4_LINE,
+        xraylib.KB5_LINE,
+        xraylib.LA1_LINE,
+        xraylib.LA2_LINE,
+        xraylib.LB1_LINE,
+        xraylib.LB2_LINE,
+        xraylib.LB3_LINE,
+        xraylib.LB4_LINE,
+        xraylib.LB5_LINE,
+        xraylib.LG1_LINE,
+        xraylib.LG2_LINE,
+        xraylib.LG3_LINE,
+        xraylib.LG4_LINE,
+        xraylib.LL_LINE,
+        xraylib.LE_LINE,
+        xraylib.MA1_LINE,
+        xraylib.MA2_LINE,
+        xraylib.MB_LINE,
+        xraylib.MG_LINE,
+    ]
 
-    shell_list = [xraylib.K_SHELL,  xraylib.L1_SHELL, xraylib.L2_SHELL,
-                  xraylib.L3_SHELL, xraylib.M1_SHELL, xraylib.M2_SHELL,
-                  xraylib.M3_SHELL, xraylib.M4_SHELL, xraylib.M5_SHELL,
-                  xraylib.N1_SHELL, xraylib.N2_SHELL, xraylib.N3_SHELL,
-                  xraylib.N4_SHELL, xraylib.N5_SHELL, xraylib.N6_SHELL,
-                  xraylib.N7_SHELL, xraylib.O1_SHELL, xraylib.O2_SHELL,
-                  xraylib.O3_SHELL, xraylib.O4_SHELL, xraylib.O5_SHELL,
-                  xraylib.P1_SHELL, xraylib.P2_SHELL, xraylib.P3_SHELL]
+    shell_list = [
+        xraylib.K_SHELL,
+        xraylib.L1_SHELL,
+        xraylib.L2_SHELL,
+        xraylib.L3_SHELL,
+        xraylib.M1_SHELL,
+        xraylib.M2_SHELL,
+        xraylib.M3_SHELL,
+        xraylib.M4_SHELL,
+        xraylib.M5_SHELL,
+        xraylib.N1_SHELL,
+        xraylib.N2_SHELL,
+        xraylib.N3_SHELL,
+        xraylib.N4_SHELL,
+        xraylib.N5_SHELL,
+        xraylib.N6_SHELL,
+        xraylib.N7_SHELL,
+        xraylib.O1_SHELL,
+        xraylib.O2_SHELL,
+        xraylib.O3_SHELL,
+        xraylib.O4_SHELL,
+        xraylib.O5_SHELL,
+        xraylib.P1_SHELL,
+        xraylib.P2_SHELL,
+        xraylib.P3_SHELL,
+    ]
 
-    line_dict = verbosedict((k.lower(), v) for k, v in zip(line_name,
-                                                           line_list))
+    line_dict = verbosedict((k.lower(), v) for k, v in zip(line_name, line_list))
 
-    shell_dict = verbosedict((k.lower(), v) for k, v in zip(bindingE,
-                                                            shell_list))
+    shell_dict = verbosedict((k.lower(), v) for k, v in zip(bindingE, shell_list))
 
-    XRAYLIB_MAP = verbosedict({
-        'lines': (line_dict, xraylib.LineEnergy),
-        'cs': (line_dict, xraylib.CS_FluorLine_Kissel),
-        'csb': (line_dict, xraylib.CSb_FluorLine_Kissel),
-        'binding_e': (shell_dict, xraylib.EdgeEnergy),
-        'jump': (shell_dict, xraylib.JumpFactor),
-        'yield': (shell_dict, xraylib.FluorYield),
-        })
+    XRAYLIB_MAP = verbosedict(
+        {
+            "lines": (line_dict, xraylib.LineEnergy),
+            "cs": (line_dict, xraylib.CS_FluorLine_Kissel),
+            "csb": (line_dict, xraylib.CSb_FluorLine_Kissel),
+            "binding_e": (shell_dict, xraylib.EdgeEnergy),
+            "jump": (shell_dict, xraylib.JumpFactor),
+            "yield": (shell_dict, xraylib.FluorYield),
+        }
+    )
 
 
 class XrayLibWrap(Mapping):
@@ -179,8 +262,9 @@ class XrayLibWrap(Mapping):
      (u'mb', 0.0),
      (u'mg', 0.0)]
     """
+
     # valid options for the info_type input parameter for the init method
-    opts_info_type = ['lines', 'binding_e', 'jump', 'yield']
+    opts_info_type = ["lines", "binding_e", "jump", "yield"]
 
     def __init__(self, element, info_type, energy=None):
         if xraylib is None:
@@ -192,8 +276,7 @@ class XrayLibWrap(Mapping):
 
     @property
     def all(self):
-        """List the physics quantity for all the lines or shells.
-        """
+        """List the physics quantity for all the lines or shells."""
         return list(six.iteritems(self))
 
     def __getitem__(self, key):
@@ -212,8 +295,7 @@ class XrayLibWrap(Mapping):
             #   This is extensively used in scikit-beam/pyxrf to determine if the lines exist.
             #   Starting from v4.0, xraylib is raising 'ValueError' exception instead. We are
             #   imitating behavior of the old xraylib by catching the exception and returning 0.
-            val = self._func(self._element,
-                             self._map[key.lower()])
+            val = self._func(self._element, self._map[key.lower()])
         except ValueError:
             val = 0
         return val
@@ -267,7 +349,8 @@ class XrayLibWrap_Energy(XrayLibWrap):
     >>> xb['Ka1'] # cross section for Ka1, unit in barns/atom
     3765.3415913117224
     """
-    opts_info_type = ['cs', 'csb']
+
+    opts_info_type = ["cs", "csb"]
 
     def __init__(self, element, info_type, incident_energy):
         if xraylib is None:
@@ -307,9 +390,7 @@ class XrayLibWrap_Energy(XrayLibWrap):
             #   This is extensively used in scikit-beam/pyxrf to determine if the lines exist.
             #   Starting from v4.0, xraylib is raising 'ValueError' exception instead. We are
             #   imitating behavior of the old xraylib by catching the exception and returning 0.
-            val = self._func(self._element,
-                             self._map[key.lower()],
-                             self._incident_energy)
+            val = self._func(self._element, self._map[key.lower()], self._incident_energy)
         except ValueError:
             val = 0
 
@@ -330,7 +411,8 @@ doc_attrs += """    emission_line : `XrayLibWrap`
     jump_factor : `XrayLibWrap`
     fluor_yield : `XrayLibWrap`
     """
-doc_ex += """
+doc_ex += (
+    """
     >>> from skbeam.core.constants.xrf import XrfElement as Element
     >>> e = Element('Zn')
     >>> # Get the emission energy for the Kα1 line.
@@ -401,7 +483,9 @@ doc_ex += """
      ('ma2', 0.0),
      ('mb', 0.0),
      ('mg', 0.0)]
-    """""
+    """
+    ""
+)
 
 
 class XrfElement(BasicElement):
@@ -412,9 +496,9 @@ class XrfElement(BasicElement):
 
     Examples
     --------{}
-    """.format(doc_title,
-               doc_params,
-               doc_ex)
+    """.format(
+        doc_title, doc_params, doc_ex
+    )
 
     def __init__(self, element):
         if xraylib is None:
@@ -422,10 +506,10 @@ class XrfElement(BasicElement):
 
         super(XrfElement, self).__init__(element)
 
-        self._emission_line = XrayLibWrap(self.Z, 'lines')
-        self._bind_energy = XrayLibWrap(self.Z, 'binding_e')
-        self._jump_factor = XrayLibWrap(self.Z, 'jump')
-        self._fluor_yield = XrayLibWrap(self.Z, 'yield')
+        self._emission_line = XrayLibWrap(self.Z, "lines")
+        self._bind_energy = XrayLibWrap(self.Z, "binding_e")
+        self._jump_factor = XrayLibWrap(self.Z, "jump")
+        self._fluor_yield = XrayLibWrap(self.Z, "yield")
 
     @property
     def emission_line(self):
@@ -452,9 +536,10 @@ class XrfElement(BasicElement):
         where `energy` in in keV and `x_section` is in
         cm2/g
         """
+
         def myfunc(incident_energy):
-            return XrayLibWrap_Energy(self.Z, 'cs',
-                                      incident_energy)
+            return XrayLibWrap_Energy(self.Z, "cs", incident_energy)
+
         return myfunc
 
     @property
@@ -471,9 +556,10 @@ class XrfElement(BasicElement):
         where `energy` in in keV and `x_section` is in
         barns/atom
         """
+
         def myfunc(incident_energy):
-            return XrayLibWrap_Energy(self.Z, 'csb',
-                                      incident_energy)
+            return XrayLibWrap_Energy(self.Z, "csb", incident_energy)
+
         return myfunc
 
     @property
@@ -509,8 +595,7 @@ class XrfElement(BasicElement):
         """
         return self._fluor_yield
 
-    def line_near(self, energy, delta_e,
-                  incident_energy):
+    def line_near(self, energy, delta_e, incident_energy):
         """
         Find possible emission lines given the element.
 
@@ -537,8 +622,7 @@ class XrfElement(BasicElement):
         return out_dict
 
 
-def emission_line_search(line_e, delta_e, incident_energy,
-                         element_list=None):
+def emission_line_search(line_e, delta_e, incident_energy, element_list=None):
     """Find elements which have an emission line near an energy
 
     This function returns a dict keyed on element type of all
@@ -573,8 +657,7 @@ def emission_line_search(line_e, delta_e, incident_energy,
 
     search_list = [XrfElement(item) for item in element_list]
 
-    cand_lines = [e.line_near(line_e, delta_e, incident_energy)
-                  for e in search_list]
+    cand_lines = [e.line_near(line_e, delta_e, incident_energy) for e in search_list]
 
     out_dict = dict()
     for e, lines in zip(search_list, cand_lines):

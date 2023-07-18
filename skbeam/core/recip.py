@@ -40,10 +40,13 @@ calculations.
 
 """
 from __future__ import absolute_import, division, print_function
-import numpy as np
-from .utils import verbosedict
-from collections import namedtuple
+
 import time
+from collections import namedtuple
+
+import numpy as np
+
+from .utils import verbosedict
 
 try:
     from pyFAI import geometry as geo
@@ -52,12 +55,13 @@ except ImportError:
 
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
-def process_to_q(setting_angles, detector_size, pixel_size,
-                 calibrated_center, dist_sample, wavelength, ub,
-                 frame_mode=None):
+def process_to_q(
+    setting_angles, detector_size, pixel_size, calibrated_center, dist_sample, wavelength, ub, frame_mode=None
+):
     """
     This will compute the hkl values for all pixels in a shape specified by
     detector_size.
@@ -130,7 +134,8 @@ def process_to_q(setting_angles, detector_size, pixel_size,
         raise NotImplementedError(
             "ctrans is not available on your platform. See"
             "https://github.com/scikit-beam/scikit-beam/issues/418"
-            "to follow updates to this problem.")
+            "to follow updates to this problem."
+        )
 
     # Set default threads
 
@@ -138,48 +143,54 @@ def process_to_q(setting_angles, detector_size, pixel_size,
     if frame_mode is None:
         frame_mode = 4
     else:
-        str_to_int = verbosedict((k, j + 1) for j, k
-                                 in enumerate(process_to_q.frame_mode))
+        str_to_int = verbosedict((k, j + 1) for j, k in enumerate(process_to_q.frame_mode))
         frame_mode = str_to_int[frame_mode]
     # ensure the ub matrix is an array
     ub = np.asarray(ub)
     # ensure setting angles is a 2-D
     setting_angles = np.atleast_2d(setting_angles)
     if setting_angles.ndim != 2:
-        raise ValueError('setting_angles is expected to be a 2-D array with'
-                         ' dimensions [num_images][num_angles]. You provided '
-                         'an array with dimensions {0}'
-                         ''.format(setting_angles.shape))
+        raise ValueError(
+            "setting_angles is expected to be a 2-D array with"
+            " dimensions [num_images][num_angles]. You provided "
+            "an array with dimensions {0}"
+            "".format(setting_angles.shape)
+        )
     if setting_angles.shape[1] != 6:
-        raise ValueError('It is expected that there should be six angles in '
-                         'the setting_angles parameter. You provided {0}'
-                         ' angles.'.format(setting_angles.shape[1]))
+        raise ValueError(
+            "It is expected that there should be six angles in "
+            "the setting_angles parameter. You provided {0}"
+            " angles.".format(setting_angles.shape[1])
+        )
     # *********** Converting to Q   **************
 
     # starting time for the process
     t1 = time.time()
 
     # ctrans - c routines for fast data analysis
-    hkl = ctrans.ccdToQ(angles=setting_angles * np.pi / 180.0,
-                        mode=frame_mode,
-                        ccd_size=(detector_size),
-                        ccd_pixsize=(pixel_size),
-                        ccd_cen=(calibrated_center),
-                        dist=dist_sample,
-                        wavelength=wavelength,
-                        UBinv=np.linalg.inv(ub))
+    hkl = ctrans.ccdToQ(
+        angles=setting_angles * np.pi / 180.0,
+        mode=frame_mode,
+        ccd_size=(detector_size),
+        ccd_pixsize=(pixel_size),
+        ccd_cen=(calibrated_center),
+        dist=dist_sample,
+        wavelength=wavelength,
+        UBinv=np.linalg.inv(ub),
+    )
 
     # ending time for the process
     t2 = time.time()
-    logger.info("Processing time for {0} {1} x {2} images took {3} seconds."
-                "".format(setting_angles.shape[0], detector_size[0],
-                          detector_size[1], (t2 - t1)))
+    logger.info(
+        "Processing time for {0} {1} x {2} images took {3} seconds."
+        "".format(setting_angles.shape[0], detector_size[0], detector_size[1], (t2 - t1))
+    )
     return hkl
 
 
 # Assign frame_mode as an attribute to the process_to_q function so that the
 # autowrapping knows what the valid options are
-process_to_q.frame_mode = ['theta', 'phi', 'cart', 'hkl']
+process_to_q.frame_mode = ["theta", "phi", "cart", "hkl"]
 
 
 def hkl_to_q(hkl_arr):
@@ -224,22 +235,17 @@ def calibrated_pixels_to_q(detector_size, pyfai_kwargs):
         Reciprocal values for each pixel shape is [num_rows * num_columns]
     """
     if geo is None:
-        raise RuntimeError("You must have pyFAI installed to use this "
-                           "function.")
+        raise RuntimeError("You must have pyFAI installed to use this " "function.")
     a = geo.Geometry(**pyfai_kwargs)
     return a.qArray(detector_size)
 
 
 gisaxs_output = namedtuple(
-    'gisaxs_output',
-    ['alpha_i', 'theta_f',
-     'alpha_f', 'tilt_angle',
-     'qx', 'qy', 'qz', 'qr']
+    "gisaxs_output", ["alpha_i", "theta_f", "alpha_f", "tilt_angle", "qx", "qy", "qz", "qr"]
 )
 
 
-def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
-           dist_sample, wavelength, theta_i=0.0):
+def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size, dist_sample, wavelength, theta_i=0.0):
     """
     This function will provide scattering wave vector(q) components(x, y, z),
     q parallel and incident and reflected angles for grazing-incidence small
@@ -309,31 +315,25 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size,
     pixel_size = np.asarray(pixel_size) * 10 ** (-6)
 
     # tilt angle
-    tilt_angle = np.arctan2((refl_x - inc_x) * pixel_size[0],
-                            (refl_y - inc_y) * pixel_size[1])
+    tilt_angle = np.arctan2((refl_x - inc_x) * pixel_size[0], (refl_y - inc_y) * pixel_size[1])
     # incident angle
-    alpha_i = np.arctan2((refl_y - inc_y) * pixel_size[1],
-                         dist_sample) / 2.
+    alpha_i = np.arctan2((refl_y - inc_y) * pixel_size[1], dist_sample) / 2.0
 
     y, x = np.indices(detector_size)
     # exit angle
-    alpha_f = np.arctan2((y - inc_y) * pixel_size[1],
-                         dist_sample) - alpha_i
+    alpha_f = np.arctan2((y - inc_y) * pixel_size[1], dist_sample) - alpha_i
     # out of plane angle
-    two_theta = np.arctan2((x - inc_x) * pixel_size[0],
-                           dist_sample)
+    two_theta = np.arctan2((x - inc_x) * pixel_size[0], dist_sample)
     theta_f = two_theta / 2 - theta_i
     # wave number
-    wave_number = 2*np.pi/wavelength
+    wave_number = 2 * np.pi / wavelength
 
     # x component
-    qx = (np.cos(alpha_f) * np.cos(2*theta_f) -
-          np.cos(alpha_i) * np.cos(2*theta_i)) * wave_number
+    qx = (np.cos(alpha_f) * np.cos(2 * theta_f) - np.cos(alpha_i) * np.cos(2 * theta_i)) * wave_number
 
     # y component
     # the variables post-fixed with an underscore are intermediate steps
-    qy_ = (np.cos(alpha_f) * np.sin(2*theta_f) -
-           np.cos(alpha_i) * np.sin(2*theta_i))
+    qy_ = np.cos(alpha_f) * np.sin(2 * theta_f) - np.cos(alpha_i) * np.sin(2 * theta_i)
     qz_ = np.sin(alpha_f) + np.sin(alpha_i)
     qy = (qz_ * np.sin(tilt_angle) + qy_ * np.cos(tilt_angle)) * wave_number
 

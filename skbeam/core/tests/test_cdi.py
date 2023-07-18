@@ -1,13 +1,20 @@
 from __future__ import absolute_import, division, print_function
+
 import numpy as np
 import pytest
-from numpy.testing import (assert_equal, assert_array_equal,
-                           assert_array_almost_equal, assert_almost_equal)
+from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_equal, assert_equal
 
-from skbeam.core.cdi import (_dist, gauss, find_support,
-                             pi_modulus, cal_diff_error, cdi_recon,
-                             generate_random_phase_field,
-                             generate_box_support, generate_disk_support)
+from skbeam.core.cdi import (
+    _dist,
+    cal_diff_error,
+    cdi_recon,
+    find_support,
+    gauss,
+    generate_box_support,
+    generate_disk_support,
+    generate_random_phase_field,
+    pi_modulus,
+)
 
 
 def dist_temp(dims):
@@ -22,15 +29,15 @@ def dist_temp(dims):
     new_array = np.zeros(dims)
 
     if np.size(dims) == 2:
-        x_sq = (np.arange(dims[0]) - dims[0]//2)**2
-        y_sq = (np.arange(dims[1]) - dims[1]//2)**2
+        x_sq = (np.arange(dims[0]) - dims[0] // 2) ** 2
+        y_sq = (np.arange(dims[1]) - dims[1] // 2) ** 2
         for j in range(dims[1]):
             new_array[:, j] = np.sqrt(x_sq + y_sq[j])
 
     if np.size(dims) == 3:
-        x_sq = (np.arange(dims[0]) - dims[0]//2)**2
-        y_sq = (np.arange(dims[1]) - dims[1]//2)**2
-        z_sq = (np.arange(dims[2]) - dims[2]//2)**2
+        x_sq = (np.arange(dims[0]) - dims[0] // 2) ** 2
+        y_sq = (np.arange(dims[1]) - dims[1] // 2) ** 2
+        z_sq = (np.arange(dims[2]) - dims[2] // 2) ** 2
         for j in range(dims[1]):
             for k in range(dims[2]):
                 new_array[:, j, k] = np.sqrt(x_sq + y_sq[j] + z_sq[k])
@@ -68,7 +75,7 @@ def test_find_support():
     cenv = shape_v[0] // 2
     r = 20
     a = np.zeros(shape_v)
-    a[cenv-r:cenv+r, cenv-r:cenv+r] = 1.0
+    a[cenv - r : cenv + r, cenv - r : cenv + r] = 1.0
     sw_sigma = 0.50
     sw_threshold = 0.05
 
@@ -93,7 +100,7 @@ def make_synthetic_data():
     shapev = [100, 100]
     r = 20
     a = np.zeros(shapev)
-    a[shapev[0]//2-r:shapev[0]//2+r, shapev[1]//2-r:shapev[1]//2+r] = 1
+    a[shapev[0] // 2 - r : shapev[0] // 2 + r, shapev[1] // 2 - r : shapev[1] // 2 + r] = 1
     diff_v = np.abs(np.fft.fftn(a)) / np.sqrt(np.size(a))
     return a, diff_v
 
@@ -113,19 +120,20 @@ def test_cal_diff_error():
 def cal_support(func):
     def inner(*args):
         return func(*args)
+
     return inner
 
 
 def _box_support_area(sup_radius, shape_v):
     sup = generate_box_support(sup_radius, shape_v)
     new_sup = sup[sup != 0]
-    assert_array_equal(new_sup.shape, (2*sup_radius)**len(shape_v))
+    assert_array_equal(new_sup.shape, (2 * sup_radius) ** len(shape_v))
 
 
 def _disk_support_area(sup_radius, shape_v):
     sup = generate_disk_support(sup_radius, shape_v)
     new_sup = sup[sup != 0]
-    assert new_sup.size < (2*sup_radius)**len(shape_v)
+    assert new_sup.size < (2 * sup_radius) ** len(shape_v)
 
 
 @pytest.mark.parametrize("v", [(100, 100), (100, 100, 100)])
@@ -144,13 +152,12 @@ def test_recon():
     init_phase = generate_random_phase_field(diff_v)
     sup = generate_box_support(sup_radius, diff_v.shape)
     # run reconstruction
-    outv1, error_dict = cdi_recon(diff_v, init_phase, sup, sw_flag=False,
-                                  n_iterations=total_n, sw_step=2)
+    outv1, error_dict = cdi_recon(diff_v, init_phase, sup, sw_flag=False, n_iterations=total_n, sw_step=2)
     outv1 = np.abs(outv1)
 
-    outv2, error_dict = cdi_recon(diff_v, init_phase, sup,
-                                  pi_modulus_flag='Real', sw_flag=True,
-                                  n_iterations=total_n, sw_step=2)
+    outv2, error_dict = cdi_recon(
+        diff_v, init_phase, sup, pi_modulus_flag="Real", sw_flag=True, n_iterations=total_n, sw_step=2
+    )
     outv2 = np.abs(outv2)
     # compare the area of supports
     assert_array_equal(outv1.shape, outv2.shape)
@@ -167,5 +174,6 @@ def test_cdi_plotter():
 
     # assign wrong plot_function
     with pytest.raises(TypeError):
-        outv, error_d = cdi_recon(diff_v, init_phase, sup, sw_flag=True,
-                                  n_iterations=total_n, sw_step=2, cb_function=10)
+        outv, error_d = cdi_recon(
+            diff_v, init_phase, sup, sw_flag=True, n_iterations=total_n, sw_step=2, cb_function=10
+        )

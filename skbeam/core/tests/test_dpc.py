@@ -38,9 +38,9 @@ Differential Phase Contrast (DPC) imaging based on Fourier-shift fitting.
 
 """
 from __future__ import absolute_import, division, print_function
+
 import numpy as np
-from numpy.testing import (assert_array_equal, assert_array_almost_equal,
-                           assert_almost_equal)
+from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_equal
 
 import skbeam.core.dpc as dpc
 
@@ -113,7 +113,7 @@ def test_rss_factory():
     length = 10
     v = [2, 3]
     xdata = np.arange(length)
-    beta = 1j * (np.arange(length) - length//2)
+    beta = 1j * (np.arange(length) - length // 2)
     ydata = xdata * v[0] * np.exp(v[1] * beta)
 
     rss = dpc._rss_factory(length)
@@ -130,9 +130,9 @@ def test_dpc_fit():
 
     start_point = [1, 0]
     length = 100
-    solver = 'Nelder-Mead'
+    solver = "Nelder-Mead"
     xdata = np.arange(length)
-    beta = 1j * (np.arange(length) - length//2)
+    beta = 1j * (np.arange(length) - length // 2)
     rss = dpc._rss_factory(length)
 
     # Test 1
@@ -178,7 +178,7 @@ def test_dpc_end_to_end():
     padding = 0
     weighting = 1
     bad_pixels = None
-    solver = 'Nelder-Mead'
+    solver = "Nelder-Mead"
     img_size = (40, 40)
     scale = True
     negate = True
@@ -189,18 +189,40 @@ def test_dpc_end_to_end():
 
     # test the one-shot API
     phase, amplitude = dpc.dpc_runner(
-        ref_image, image_sequence, start_point, pixel_size, focus_to_det,
-        scan_rows, scan_cols, scan_xstep, scan_ystep, energy, padding,
-        weighting, solver, roi, bad_pixels, negate, scale)
+        ref_image,
+        image_sequence,
+        start_point,
+        pixel_size,
+        focus_to_det,
+        scan_rows,
+        scan_cols,
+        scan_xstep,
+        scan_ystep,
+        energy,
+        padding,
+        weighting,
+        solver,
+        roi,
+        bad_pixels,
+        negate,
+        scale,
+    )
 
     # get the generator
-    gen = dpc.lazy_dpc(ref_image, image_sequence, start_point, scan_rows,
-                       scan_cols, solver, roi, bad_pixels)
+    gen = dpc.lazy_dpc(ref_image, image_sequence, start_point, scan_rows, scan_cols, solver, roi, bad_pixels)
     for partial_results in gen:
         pass
     phi, a = dpc.reconstruct_phase_from_partial_info(
-        partial_results, energy, scan_xstep, scan_ystep, pixel_size[0],
-        focus_to_det, negate, scale, padding, weighting
+        partial_results,
+        energy,
+        scan_xstep,
+        scan_ystep,
+        pixel_size[0],
+        focus_to_det,
+        negate,
+        scale,
+        padding,
+        weighting,
     )
     assert_array_almost_equal(phi, np.zeros((scan_rows, scan_cols)))
     assert_array_almost_equal(a, np.ones((scan_rows, scan_cols)))
@@ -211,21 +233,36 @@ def test_dpc_end_to_end():
     assert_array_almost_equal(amplitude, a)
 
     # test to make sure I can do half of the image sequence
-    first_half_gen = dpc.lazy_dpc(ref_image, image_sequence[:num_imgs//2],
-                                  start_point, scan_rows, scan_cols, solver,
-                                  roi, bad_pixels)
+    first_half_gen = dpc.lazy_dpc(
+        ref_image, image_sequence[: num_imgs // 2], start_point, scan_rows, scan_cols, solver, roi, bad_pixels
+    )
     for first_half_partial_results in first_half_gen:
         pass
-    second_half_gen = dpc.lazy_dpc(ref_image, image_sequence[num_imgs//2:],
-                                   start_point, scan_rows, scan_cols, solver,
-                                   roi, bad_pixels,
-                                   dpc_state=first_half_partial_results)
+    second_half_gen = dpc.lazy_dpc(
+        ref_image,
+        image_sequence[num_imgs // 2 :],
+        start_point,
+        scan_rows,
+        scan_cols,
+        solver,
+        roi,
+        bad_pixels,
+        dpc_state=first_half_partial_results,
+    )
     for second_half_partial_results in second_half_gen:
         pass
 
     phi_partial, a_partial = dpc.reconstruct_phase_from_partial_info(
-        second_half_partial_results, energy, scan_xstep, scan_ystep,
-        pixel_size[0], focus_to_det, negate, scale, padding, weighting
+        second_half_partial_results,
+        energy,
+        scan_xstep,
+        scan_ystep,
+        pixel_size[0],
+        focus_to_det,
+        negate,
+        scale,
+        padding,
+        weighting,
     )
 
     assert_array_almost_equal(phi_partial, phi)

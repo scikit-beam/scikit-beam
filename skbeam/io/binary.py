@@ -33,9 +33,11 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
-import numpy as np
 
 import logging
+
+import numpy as np
+
 logger = logging.getLogger(__name__)
 
 
@@ -75,8 +77,7 @@ def read_binary(filename, nx, ny, nz, dtype_str, headersize):
         header = opened_file.read(headersize)
 
         # read the entire file in as 1D list
-        data = np.fromfile(file=opened_file, dtype=np.dtype(dtype_str),
-                           count=-1)
+        data = np.fromfile(file=opened_file, dtype=np.dtype(dtype_str), count=-1)
 
     # reshape the array to 3D
     if nz != 1:

@@ -42,12 +42,15 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
+
 import inspect
 import logging
 
 from lmfit import Model
-from .lineshapes import (elastic, compton, lorentzian2)
+
 from .base.parameter_data import get_para
+from .lineshapes import compton, elastic, lorentzian2
+
 logger = logging.getLogger(__name__)
 
 
@@ -70,27 +73,24 @@ def set_default(model_name, func_name):
     para_dict = get_para()
 
     for name in my_args:
-
         if name not in para_dict.keys():
             continue
 
         my_dict = para_dict[name]
-        if my_dict['bound_type'] == 'none':
+        if my_dict["bound_type"] == "none":
             model_name.set_param_hint(name, vary=True)
-        elif my_dict['bound_type'] == 'fixed':
-            model_name.set_param_hint(name, vary=False, value=my_dict['value'])
-        elif my_dict['bound_type'] == 'lo':
-            model_name.set_param_hint(name, value=my_dict['value'], vary=True,
-                                      min=my_dict['min'])
-        elif my_dict['bound_type'] == 'hi':
-            model_name.set_param_hint(name, value=my_dict['value'], vary=True,
-                                      max=my_dict['max'])
-        elif my_dict['bound_type'] == 'lohi':
-            model_name.set_param_hint(name, value=my_dict['value'], vary=True,
-                                      min=my_dict['min'], max=my_dict['max'])
+        elif my_dict["bound_type"] == "fixed":
+            model_name.set_param_hint(name, vary=False, value=my_dict["value"])
+        elif my_dict["bound_type"] == "lo":
+            model_name.set_param_hint(name, value=my_dict["value"], vary=True, min=my_dict["min"])
+        elif my_dict["bound_type"] == "hi":
+            model_name.set_param_hint(name, value=my_dict["value"], vary=True, max=my_dict["max"])
+        elif my_dict["bound_type"] == "lohi":
+            model_name.set_param_hint(
+                name, value=my_dict["value"], vary=True, min=my_dict["min"], max=my_dict["max"]
+            )
         else:
-            raise TypeError("Boundary type {0} can't be "
-                            "used".format(my_dict['bound_type']))
+            raise TypeError("Boundary type {0} can't be " "used".format(my_dict["bound_type"]))
 
 
 def _gen_class_docs(func):
@@ -105,32 +105,29 @@ def _gen_class_docs(func):
     str :
         documentation of the function
     """
-    return ("    Wrap the {} function for fitting within lmfit "
-            "framework\n    ".format(func.__name__) + func.__doc__)
+    return (
+        "    Wrap the {} function for fitting within lmfit " "framework\n    ".format(func.__name__) + func.__doc__
+    )
 
 
 # DEFINE NEW MODELS
 class ElasticModel(Model):
-
     __doc__ = _gen_class_docs(elastic)
 
     def __init__(self, *args, **kwargs):
         super(ElasticModel, self).__init__(elastic, *args, **kwargs)
-        self.set_param_hint('epsilon', value=2.96, vary=False)
+        self.set_param_hint("epsilon", value=2.96, vary=False)
 
 
 class ComptonModel(Model):
-
     __doc__ = _gen_class_docs(compton)
 
     def __init__(self, *args, **kwargs):
-
         super(ComptonModel, self).__init__(compton, *args, **kwargs)
-        self.set_param_hint('epsilon', value=2.96, vary=False)
+        self.set_param_hint("epsilon", value=2.96, vary=False)
 
 
 class Lorentzian2Model(Model):
-
     __doc__ = _gen_class_docs(lorentzian2)
 
     def __init__(self, *args, **kwargs):

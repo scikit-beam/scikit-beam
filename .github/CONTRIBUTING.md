@@ -38,10 +38,10 @@ characters.  If the commit is related to a ticket, indicate that with
 "See #3456", "See ticket 3456", "Closes #3456" or similar.
 ```
 
-Describing the motivation for a change, the nature of a bug for bug fixes 
-or some details on what an enhancement does are also good to include in a 
-commit message. Messages should be understandable without looking at the code 
-changes. 
+Describing the motivation for a change, the nature of a bug for bug fixes
+or some details on what an enhancement does are also good to include in a
+commit message. Messages should be understandable without looking at the code
+changes.
 
 Standard acronyms to start the commit message with are:
 ```
@@ -64,7 +64,7 @@ REL: related to releases
 * Now push to your fork
 * Submit a [pull request](https://help.github.com/articles/using-pull-requests) to this branch. This is a start to the conversation.
 
-At this point you're waiting on us. We like to at least comment on pull requests within three business days 
+At this point you're waiting on us. We like to at least comment on pull requests within three business days
 (and, typically, one business day). We may suggest some changes or improvements or alternatives.
 
 Hints to make the integration of your changes easy (and happen faster):

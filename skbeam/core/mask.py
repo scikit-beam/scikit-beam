@@ -42,10 +42,12 @@ basically to clean images
 """
 
 from __future__ import absolute_import, division, print_function
-import numpy as np
 
 import logging
+
+import numpy as np
 import scipy.stats as sts
+
 logger = logging.getLogger(__name__)
 
 
@@ -128,7 +130,7 @@ def margin(img_shape, edge_size):
         The mask array, bad pixels are 0
     """
     mask = np.ones(img_shape, dtype=bool)
-    mask[edge_size:-edge_size, edge_size:-edge_size] = 0.
+    mask[edge_size:-edge_size, edge_size:-edge_size] = 0.0
     return ~mask
 
 
@@ -170,10 +172,8 @@ def binned_outlier(img, r, alpha, bins, mask=None):
 
     int_r = np.digitize(r, bins[:-1], True) - 1
     # integration
-    mean = sts.binned_statistic(msk_r, msk_img, bins=bins,
-                                statistic='mean')[0]
-    std = sts.binned_statistic(msk_r, msk_img, bins=bins,
-                               statistic=np.std)[0]
+    mean = sts.binned_statistic(msk_r, msk_img, bins=bins, statistic="mean")[0]
+    std = sts.binned_statistic(msk_r, msk_img, bins=bins, statistic=np.std)[0]
     if type(alpha) is tuple:
         alpha = np.linspace(alpha[0], alpha[1], len(std))
     threshold = alpha * std
