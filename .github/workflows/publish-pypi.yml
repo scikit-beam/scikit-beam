@@ -36,7 +36,7 @@ jobs:
           pip install .
 
           pip install wheel setuptools
-          python setup.py sdist bdist_wheel
+          python setup.py sdist
 
       - name: Publish wheels to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
