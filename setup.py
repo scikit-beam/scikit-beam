@@ -6,7 +6,6 @@
 
 import os
 import sys
-from os import path
 
 import numpy as np
 
@@ -14,6 +13,11 @@ from setuptools import Extension, find_packages, setup
 from Cython.Build import cythonize
 
 import versioneer
+
+# read the contents of your README file
+from pathlib import Path
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
 
 
 def c_ext():
@@ -38,10 +42,10 @@ def cython_ext():
     return cythonize("skbeam/**/*.pyx", compiler_directives={"language_level": "3"})
 
 
-here = path.abspath(path.dirname(__file__))
-with open(path.join(here, "requirements.txt")) as requirements_file:
+with open(this_directory / "requirements.txt") as requirements_file:
     # Parse requirements.txt, ignoring any commented-out lines.
     requirements = [line for line in requirements_file.read().splitlines() if not line.startswith("#")]
+
 
 setup(
     name="scikit-beam",
@@ -49,6 +53,8 @@ setup(
     cmdclass=versioneer.get_cmdclass(),
     author="Brookhaven National Lab",
     description="Data analysis tools for X-ray science",
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     packages=find_packages(exclude=["doc"]),
     include_dirs=[np.get_include()],
     package_data={"skbeam.core.constants": ["data/*.dat"]},
