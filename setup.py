@@ -5,8 +5,9 @@ import sys
 from os import path
 
 import numpy as np
-from Cython.Build import cythonize
+
 from setuptools import Extension, find_packages, setup
+from Cython.Build import cythonize
 
 import versioneer
 
