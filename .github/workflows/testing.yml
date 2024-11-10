@@ -14,8 +14,8 @@ jobs:
     strategy:
       matrix:
         host-os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        python-version: ["3.9", "3.10", "3.11"]
-        numpy-version: ["1.21", "1.24", "1.25"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        numpy-version: ["=1.25", ""]
         include:
           - host-os: "ubuntu-latest"
             conda-mamba: "mamba"
@@ -23,11 +23,6 @@ jobs:
             conda-mamba: "mamba"
           - host-os: "windows-latest"
             conda-mamba: "conda"
-        exclude:
-          - python-version: "3.11"
-            numpy-version: "1.21"
-          - host-os: "windows-latest"
-            numpy-version: "1.21"
       fail-fast: false
 
     runs-on: ${{ matrix.host-os }}
@@ -70,7 +65,7 @@ jobs:
 
         ${{ matrix.conda-mamba }} install -y \
           python=${{ matrix.python-version }} \
-          numpy=${{ matrix.numpy-version }} \
+          numpy${{ matrix.numpy-version }} \
           xraylib \
           pip \
           -c conda-forge
