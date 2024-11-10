@@ -9,7 +9,7 @@ cimport cython
 
 import numpy as np
 
-cimport numpy as np
+cimport numpy as cnp
 
 import logging
 
@@ -20,30 +20,30 @@ logger = logging.getLogger(__name__)
 DEF MAX_DIMENSIONS = 10
 
 ctypedef fused coordnumtype:
-    np.int8_t
-    np.int16_t
-    np.int32_t
-    np.int64_t
-    np.uint8_t
-    np.uint16_t
-    np.uint32_t
-    np.uint64_t
-    np.float32_t
-    np.float64_t
+    cnp.int8_t
+    cnp.int16_t
+    cnp.int32_t
+    cnp.int64_t
+    cnp.uint8_t
+    cnp.uint16_t
+    cnp.uint32_t
+    cnp.uint64_t
+    cnp.float32_t
+    cnp.float64_t
 
 ctypedef fused wnumtype:
-    np.int8_t
-    np.int16_t
-    np.int32_t
-    np.int64_t
-    np.uint8_t
-    np.uint16_t
-    np.uint32_t
-    np.uint64_t
-    np.float32_t
-    np.float64_t
+    cnp.int8_t
+    cnp.int16_t
+    cnp.int32_t
+    cnp.int64_t
+    cnp.uint8_t
+    cnp.uint16_t
+    cnp.uint32_t
+    cnp.uint64_t
+    cnp.float32_t
+    cnp.float64_t
 
-cdef void* _getarrayptr(np.ndarray a):
+cdef void* _getarrayptr(cnp.ndarray a):
     return <void*> a.data
 
 
@@ -162,12 +162,12 @@ class Histogram:
         return
 
 
-    def _fill1d(self, np.ndarray[coordnumtype, ndim=1] xval,
-                np.ndarray[wnumtype, ndim=1] weight):
-        cdef np.ndarray[np.float_t, ndim=1] data = self.values
-        cdef np.float_t low = self._lows[0]
-        cdef np.float_t high = self._highs[0]
-        cdef np.float_t binsize = self._binsizes[0]
+    def _fill1d(self, cnp.ndarray[coordnumtype, ndim=1] xval,
+                cnp.ndarray[wnumtype, ndim=1] weight):
+        cdef cnp.ndarray[cnp.float_t, ndim=1] data = self.values
+        cdef cnp.float_t low = self._lows[0]
+        cdef cnp.float_t high = self._highs[0]
+        cdef cnp.float_t binsize = self._binsizes[0]
         cdef int i
         cdef int wstride = 0 if weight.size == 1 else 1
         cdef int xlen = len(xval)
@@ -179,13 +179,13 @@ class Histogram:
         return
 
 
-    def _fill2d(self, np.ndarray[coordnumtype, ndim=1] xval,
-                np.ndarray[coordnumtype, ndim=1] yval,
-                np.ndarray[wnumtype, ndim=1] weight):
-        cdef np.float_t [:,:] data = self.values
-        cdef np.float_t [:] low = self._lows
-        cdef np.float_t [:] high = self._highs
-        cdef np.float_t [:] binsize = self._binsizes
+    def _fill2d(self, cnp.ndarray[coordnumtype, ndim=1] xval,
+                cnp.ndarray[coordnumtype, ndim=1] yval,
+                cnp.ndarray[wnumtype, ndim=1] weight):
+        cdef cnp.float_t [:,:] data = self.values
+        cdef cnp.float_t [:] low = self._lows
+        cdef cnp.float_t [:] high = self._highs
+        cdef cnp.float_t [:] binsize = self._binsizes
         cdef int i
         cdef int xlen = len(xval)
         cdef int ylen = len(yval)
@@ -201,7 +201,7 @@ class Histogram:
         return
 
 
-    def _fillnd(self, coords, np.ndarray[wnumtype, ndim=1] weight):
+    def _fillnd(self, coords, cnp.ndarray[wnumtype, ndim=1] weight):
         # allocate pointer arrays per each supported numerical types
         cdef np.int_t* aint_ptr[MAX_DIMENSIONS]
         cdef int aint_count = 0
@@ -222,10 +222,10 @@ class Histogram:
         mylows = self._lows[coordsorder]
         myhighs = self._highs[coordsorder]
         mybinsizes = self._binsizes[coordsorder]
-        cdef np.float_t [:] low = mylows
-        cdef np.float_t [:] high = myhighs
-        cdef np.float_t [:] binsize = mybinsizes
-        cdef np.float_t* data = <np.float_t*> _getarrayptr(self._values)
+        cdef cnp.float_t [:] low = mylows
+        cdef cnp.float_t [:] high = myhighs
+        cdef cnp.float_t [:] binsize = mybinsizes
+        cdef cnp.float_t* data = <cnp.float_t*> _getarrayptr(self._values)
         # distribute coordinates in each dimension according to their
         # numerical type.  follow the same order as in numtypes.
         for x in coords:
@@ -290,7 +290,7 @@ cdef long find_indices(coordnumtype pos, double low, double high, double binsize
 
 
 cdef void fillonecy(coordnumtype xval, wnumtype weight,
-                    np.float_t* pdata,
+                    cnp.float_t* pdata,
                     double low, double high, double binsize):
     iidx = find_indices(xval, low, high, binsize)
     if iidx == -1:
