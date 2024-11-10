@@ -203,9 +203,9 @@ class Histogram:
 
     def _fillnd(self, coords, cnp.ndarray[wnumtype, ndim=1] weight):
         # allocate pointer arrays per each supported numerical types
-        cdef np.int_t* aint_ptr[MAX_DIMENSIONS]
+        cdef cnp.int64_t* aint_ptr[MAX_DIMENSIONS]
         cdef int aint_count = 0
-        cdef np.float_t* afloat_ptr[MAX_DIMENSIONS + 1]
+        cdef cnp.float64_t* afloat_ptr[MAX_DIMENSIONS + 1]
         cdef int afloat_count = 0
         # determine order of coordinate arrays according to their
         # numerical data type
@@ -229,11 +229,11 @@ class Histogram:
         # distribute coordinates in each dimension according to their
         # numerical type.  follow the same order as in numtypes.
         for x in coords:
-            if x.dtype in (int, np.int32, np.int64):
-                aint_ptr[aint_count] = <np.int_t*> _getarrayptr(x)
+            if x.dtype in (np.int64,):
+                aint_ptr[aint_count] = <cnp.int64_t*> _getarrayptr(x)
                 aint_count += 1
             elif x.dtype == np.float64:
-                afloat_ptr[afloat_count] = <np.float_t*> _getarrayptr(x)
+                afloat_ptr[afloat_count] = <cnp.float64_t*> _getarrayptr(x)
                 afloat_count += 1
             else:
                 emsg = "Numpy arrays of type {} are not supported."
