@@ -40,7 +40,7 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 import numpy as np
-from scipy.integrate import simps
+from scipy.integrate import simpson as simps
 from six.moves import zip
 
 from .fitting import fit_quad_to_peak
