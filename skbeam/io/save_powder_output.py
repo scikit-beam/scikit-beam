@@ -34,9 +34,9 @@
 ########################################################################
 
 """
-    This module is for saving integrated powder x-ray diffraction
-    intensities into  different file formats.
-    (Output into different file formats, .chi, .dat and .xye)
+This module is for saving integrated powder x-ray diffraction
+intensities into  different file formats.
+(Output into different file formats, .chi, .dat and .xye)
 
 """
 from __future__ import absolute_import, division, print_function

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-   isort:skip_file
+isort:skip_file
 """
 
 
