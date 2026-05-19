@@ -38,6 +38,7 @@ This module is for spectroscopy specific tools (spectrum fitting etc).
 from __future__ import absolute_import, division, print_function
 
 import logging
+from typing import Callable, List, Optional, Tuple, Union
 
 import numpy as np
 from scipy.integrate import simpson as simps
@@ -48,7 +49,11 @@ from .fitting import fit_quad_to_peak
 logger = logging.getLogger(__name__)
 
 
-def align_and_scale(energy_list, counts_list, pk_find_fun=None):
+def align_and_scale(
+    energy_list: List[np.ndarray],
+    counts_list: List[np.ndarray],
+    pk_find_fun: Optional[Callable[[np.ndarray, np.ndarray], Tuple[float, float, float]]] = None,
+) -> Tuple[List[np.ndarray], List[np.ndarray]]:
     """
 
     Parameters
@@ -62,7 +67,7 @@ def align_and_scale(energy_list, counts_list, pk_find_fun=None):
     pk_find_fun : function or None
        A function which takes two ndarrays and returns parameters
        about the largest peak.  If None, defaults to `find_largest_peak`.
-       For this demo, the output is (center, height, width), but this sould
+       For this demo, the output is (center, height, width), but this should
        be pinned down better.
 
     Returns
@@ -79,7 +84,7 @@ def align_and_scale(energy_list, counts_list, pk_find_fun=None):
     base_sigma = None
     out_e, out_c = [], []
     for e, c in zip(energy_list, counts_list):
-        E0, max_val, sigma = pk_find_fun(e, c)
+        E0, _, sigma = pk_find_fun(e, c)
         if base_sigma is None:
             base_sigma = sigma
         out_e.append((e - E0) * base_sigma / sigma)
@@ -88,7 +93,9 @@ def align_and_scale(energy_list, counts_list, pk_find_fun=None):
     return out_e, out_c
 
 
-def find_largest_peak(x, y, window=None):
+def find_largest_peak(
+    x: np.ndarray, y: np.ndarray, window: Optional[int] = None
+) -> Tuple[float, float, float]:
     """
     Finds and estimates the location, width, and height of
     the largest peak. Assumes the top of the peak can be
@@ -131,7 +138,7 @@ def find_largest_peak(x, y, window=None):
     # get the bin with the largest number of counts
     j = np.argmax(y)
     if window is not None:
-        roi = slice(np.max(j - window, 0), j + window + 1)
+        roi = slice(np.max(j - window, 0), int(j) + window + 1)
     else:
         roi = slice(0, -1)
 
@@ -139,7 +146,12 @@ def find_largest_peak(x, y, window=None):
     return x0, np.exp(y0), 1 / np.sqrt(-2 * w)
 
 
-def integrate_ROI_spectrum(bin_edges, counts, x_min, x_max):
+def integrate_ROI_spectrum(
+    bin_edges: np.ndarray,
+    counts: np.ndarray,
+    x_min: Union[float, np.ndarray],
+    x_max: Union[float, np.ndarray],
+) -> float:
     """Integrate region(s) of histogram.
 
     If `x_min` and `x_max` are arrays/lists they must be equal in
@@ -181,7 +193,7 @@ def integrate_ROI_spectrum(bin_edges, counts, x_min, x_max):
     return integrate_ROI(bin_edges[:-1] + np.diff(bin_edges), counts, x_min, x_max)
 
 
-def _formatter_array_regions(x, centers, window=1, tab_count=0):
+def _formatter_array_regions(x: np.ndarray, centers: np.ndarray, window: int = 1, tab_count: int = 0) -> str:
     """Returns a formatted string of sub-sections of an array
 
     Each value in center generates a section of the string like:
@@ -224,7 +236,12 @@ def _formatter_array_regions(x, centers, window=1, tab_count=0):
     )
 
 
-def integrate_ROI(x, y, x_min, x_max):
+def integrate_ROI(
+    x: np.ndarray,
+    y: np.ndarray,
+    x_min: Union[float, np.ndarray],
+    x_max: Union[float, np.ndarray],
+) -> float:
     """Integrate region(s) of input data.
 
     If `x_min` and `x_max` are arrays/lists they must be equal in
