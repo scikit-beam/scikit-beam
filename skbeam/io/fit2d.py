@@ -1,17 +1,19 @@
 from __future__ import division, print_function
+from typing import Optional
 
 import fabio
 from fabio.fit2dmaskimage import Fit2dMaskImage
+import numpy as np
 
 from skbeam.io.save_powder_output import _create_file_path
 
 
-def fit2d_save(mask, filename, dir_path=None):
+def fit2d_save(mask: np.ndarray, filename: str, dir_path: Optional[str] = None) -> None:
     """
     Compresses and wraps the mask for Fit2D use
     Parameters
     ----------
-    mask: ndarray
+    mask: np.ndarray
         The mask
     filename: str
         The filename
@@ -22,7 +24,7 @@ def fit2d_save(mask, filename, dir_path=None):
     saver.write(_create_file_path(dir_path, filename, ".msk"))
 
 
-def read_fit2d_msk(filename):
+def read_fit2d_msk(filename: str) -> np.ndarray:
     """
     Reads mask from file
 
@@ -33,8 +35,8 @@ def read_fit2d_msk(filename):
 
     Returns
     -------
-    ndarray:
-        The mask as boolian array
+    np.ndarray:
+        The mask as boolean array
     """
     a = fabio.open(filename)
     return ~a.data.astype(bool)

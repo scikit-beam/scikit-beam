@@ -1,12 +1,13 @@
 from __future__ import absolute_import, division, print_function
 
+from typing import Any, Dict, Tuple, List
 import logging
 import os
 
 import numpy as np
 
 
-def _read_amira(src_file):
+def _read_amira(src_file: str) -> Tuple[List[str], str]:
     """
     Reads all information contained within standard AmiraMesh data sets.
     Separate the header information from the image/volume, data.
@@ -25,8 +26,7 @@ def _read_amira(src_file):
         A compiled string containing all of the image array data, that was
         stored in the source AmiraMesh data file. Contains the raw image data
     """
-    am_header = []
-    am_data = []
+    am_header: List[str] = []
     with open(os.path.normpath(src_file), "r") as input_file:
         while True:
             line = input_file.readline()
@@ -38,7 +38,7 @@ def _read_amira(src_file):
     return am_header, am_data
 
 
-def _amira_data_to_numpy(am_data, header_dict, flip_z=True):
+def _amira_data_to_numpy(am_data: str, header_dict: dict, flip_z: bool = True) -> np.ndarray:
     """
     Transform output of `_read_amira` to a numpy array of the dtype listed in
     the AmiraMesh header dictionary.  The standard format for Avizo Binary
@@ -93,10 +93,10 @@ def _amira_data_to_numpy(am_data, header_dict, flip_z=True):
     if header_dict["data_format"] == "BINARY-LITTLE-ENDIAN":
         data_strip = am_data.strip("\n")
         flt_values = np.fromstring(
-            data_strip, (am_format_dict[header_dict["data_format"]] + am_dtype_dict[header_dict["data_type"]])
+            data_strip, dtype=np.dtype(am_format_dict[header_dict["data_format"]] + am_dtype_dict[header_dict["data_type"]]), sep=""
         )
     if header_dict["data_format"] == "ASCII":
-        data_strip = am_data.translate(None, "\n")
+        data_strip = am_data.replace("\n", "")
         string_list = data_strip.split(" ")
         string_list = string_list[0 : (len(string_list) - 2)]
         flt_values = np.array(string_list).astype(am_dtype_dict[header_dict["data_type"]])
@@ -109,7 +109,7 @@ def _amira_data_to_numpy(am_data, header_dict, flip_z=True):
     return output
 
 
-def _clean_amira_header(header_list):
+def _clean_amira_header(header_list: List[str]) -> List[List[str]]:
     """
     Strip the string list of all "empty" characters,including new line
     characters ('\n') and empty lines. Splits each header line (which
@@ -125,30 +125,30 @@ def _clean_amira_header(header_list):
 
     Returns
     -------
-    clean_header : list of strings
+    clean_header : list of list of strings
         This header list has been stripped and sorted and is now ready for
         populating the metadata dictionary for the image data set.
     """
     clean_header = []
     for row in header_list:
-        split_header = filter(None, [word.translate(None, ',"') for word in row.strip("\n").split()])
+        split_header = list(filter(None, [word.replace(',"', "") for word in row.strip("\n").split()]))
         clean_header.append(split_header)
     return clean_header
 
 
-def _create_md_dict(clean_header):
+def _create_md_dict(clean_header: List[List[str]]) -> dict:
     """
     Populates the a dictionary with all information pertinent to the image
     data set that was originally stored in the AmiraMesh file.
 
     Parameters
     ----------
-    clean_header : list of strings
+    clean_header : list of list of strings
         This is the output from the _sort_amira_header function.
 
     """
     # Avizo specific metadata
-    md_dict = {
+    md_dict: Dict[str, Any] = {
         "software_src": clean_header[0][1],
         "data_format": clean_header[0][2],
         "data_format_version": clean_header[0][3],
@@ -232,7 +232,7 @@ def _create_md_dict(clean_header):
     return md_dict
 
 
-def load_amiramesh(file_path):
+def load_amiramesh(file_path: str) -> Tuple[dict, np.ndarray]:
     """
     Load and convert an AmiraMesh binary file to a numpy array.
 

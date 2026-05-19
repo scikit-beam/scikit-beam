@@ -43,7 +43,7 @@ try:
     from .net_cdf_io import load_netCDF
 except ImportError:
 
-    def load_netCDF(*args, **kwargs):
+    def load_netCDF(*args, **kwargs):  # type: ignore[misc]
         # Die at call time so as not to ruin entire io package.
         raise ImportError("This function requires netCDF4.")
 

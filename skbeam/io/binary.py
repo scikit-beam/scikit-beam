@@ -35,30 +35,31 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
+from typing import Tuple
 
 import numpy as np
 
 logger = logging.getLogger(__name__)
 
 
-def read_binary(filename, nx, ny, nz, dtype_str, headersize):
+def read_binary(filename: str, nx: int, ny: int, nz: int, dtype_str: str, headersize: int) -> Tuple[np.ndarray, bytes]:
     """
     docstring, woo!
 
     Parameters
     ----------
-    filename : String
+    filename : str
         The name of the file to open
-    nx : integer
+    nx : int
         The number of data elements in the x-direction
-    ny : integer
+    ny : int
         The number of data elements in the y-direction
-    nz : integer
+    nz : int
         The number of data elements in the z-direction
     dtype_str : str
         A valid argument for np.dtype(some_str). See read_binary.dsize
         attribute
-    headersize : integer
+    headersize : int
         The size of the file header in bytes
 
     Returns
@@ -67,7 +68,7 @@ def read_binary(filename, nx, ny, nz, dtype_str, headersize):
             data.shape = (x, y, z) if z > 1
             data.shape = (x, y) if z == 1
             data.shape = (x,) if y == 1 && z == 1
-    header : String
+    header : bytes
             header = file.read(headersize)
     """
 
@@ -92,4 +93,4 @@ def read_binary(filename, nx, ny, nz, dtype_str, headersize):
 
 
 # set an attribute for the dsize params that are valid options
-read_binary.dtype_str = sorted(np.sctypeDict, key=str)
+read_binary.dtype_str = sorted(np.sctypeDict, key=str)  # type: ignore[attr-defined]  # type: ignore[attr-defined]

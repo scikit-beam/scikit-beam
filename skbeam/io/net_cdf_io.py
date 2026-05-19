@@ -12,7 +12,7 @@ from __future__ import absolute_import, division, print_function
 import os
 
 
-def load_netCDF(file_name):
+def load_netCDF(file_name: str):
     """
     This function loads the specified netCDF file format data set (e.g.*.volume
     APS-Sector 13 GSECARS extension) file into a numpy array for further
@@ -45,7 +45,7 @@ def load_netCDF(file_name):
 
     Parameters
     ----------
-    file_name: string
+    file_name: str
         Complete path to the file to be loaded into memory
 
 

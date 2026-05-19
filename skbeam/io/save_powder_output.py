@@ -43,13 +43,14 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 import os
+from typing import Optional
 
 import numpy as np
 
 logger = logging.getLogger(__name__)
 
 
-def save_output(tth, intensity, output_name, q_or_2theta, ext=".chi", err=None, dir_path=None):
+def save_output(tth: np.ndarray, intensity: np.ndarray, output_name: str, q_or_2theta: str, ext: str = ".chi", err: Optional[np.ndarray] = None, dir_path: Optional[str] = None):
     """
     Save output diffraction intensities into .chi, .dat or .xye file formats.
     If the extension(ext) of the output file is not selected it will be
@@ -119,7 +120,7 @@ def save_output(tth, intensity, output_name, q_or_2theta, ext=".chi", err=None, 
             np.savetxt(f, np.c_[tth, intensity, err])
 
 
-def _encoding_writer(f, _HEADER):
+def _encoding_writer(f, _HEADER: str):
     """
     Encode the writer for python 3
 
@@ -134,7 +135,7 @@ def _encoding_writer(f, _HEADER):
     f.write(_HEADER.encode("utf-8"))
 
 
-def gsas_writer(tth, intensity, output_name, mode=None, err=None, dir_path=None):
+def gsas_writer(tth: np.ndarray, intensity: np.ndarray, output_name: str, mode: Optional[str] = None, err: Optional[np.ndarray] = None, dir_path: Optional[str] = None):
     """
     Save diffraction intensities into .gsas file format
 
@@ -181,10 +182,7 @@ def gsas_writer(tth, intensity, output_name, mode=None, err=None, dir_path=None)
     tth0_cdg = tth[0] * 100
     dtth_cdg = (tth[-1] - tth[0]) / (len(tth) - 1) * 100
 
-    if err is None:
-        mode = "STD"
-
-    if mode == "STD":
+    if mode == "STD" or err is None:
         n_rec = int(np.ceil(n_chan / 10.0))
         l_bank = "BANK %5i %8i %8i CONST %9.5f %9.5f %9.5f %9.5f STD" % (
             i_bank,
@@ -242,7 +240,7 @@ def gsas_writer(tth, intensity, output_name, mode=None, err=None, dir_path=None)
         f.write(rv)
 
 
-def _validate_input(tth, intensity, err, ext):
+def _validate_input(tth: np.ndarray, intensity: np.ndarray, err: Optional[np.ndarray], ext: str):
     """
     This function validate all the inputs
 
@@ -272,14 +270,14 @@ def _validate_input(tth, intensity, err, ext):
         raise ValueError("Provide the Error value of intensity" " (for .xye file format err != None)")
 
 
-def _create_file_path(dir_path, output_name, ext):
+def _create_file_path(dir_path: Optional[str], output_name: str, ext: str) -> str:
     """
     This function create a output file path to save
     diffraction intensities.
 
     Parameters
     ----------
-    dir_path : str
+    dir_path : Optional[str]
         new directory path to save the output data files
         eg: /Data/experiments/data/
 
