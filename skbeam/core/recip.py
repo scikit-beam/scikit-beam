@@ -69,7 +69,7 @@ class FrameMode(str, Enum):
 
     @property
     def int_value(self) -> int:
-        return list(FrameMode).index(self)
+        return list(FrameMode).index(self) + 1
 
 def process_to_q(
     setting_angles: np.ndarray[Tuple[int, Literal[6]]],
@@ -79,7 +79,7 @@ def process_to_q(
     dist_sample: float,
     wavelength: float,
     ub: np.ndarray[Tuple[Literal[3], Literal[3]], np.dtype[np.float64]],
-    frame_mode: Optional[Union[str, FrameMode]] = None,
+    frame_mode: Optional[Union[int, str, FrameMode]] = None,
 ) -> np.ndarray:
     """
     This will compute the hkl values for all pixels in a shape specified by
@@ -115,7 +115,7 @@ def process_to_q(
     ub : ndarray
         UB matrix (orientation matrix) 3x3 matrix
 
-    frame_mode : str or FrameMode, optional
+    frame_mode : int, str or FrameMode, optional
         Frame mode defines the data collection mode and thus the desired
         output from this function. Defaults to hkl mode (frame_mode=4)
         'theta'    : Theta axis frame.
@@ -160,7 +160,18 @@ def process_to_q(
     if frame_mode is None:
         frame_mode = FrameMode.HKL
     elif isinstance(frame_mode, str):
+        if frame_mode not in FrameMode._value2member_map_:
+            raise ValueError(
+                "Invalid frame_mode provided. Valid options are: {0}"
+                "".format(list(FrameMode._value2member_map_.keys()))
+            )
         frame_mode = FrameMode(frame_mode)
+    elif isinstance(frame_mode, int):
+        if frame_mode < 1 or frame_mode > len(FrameMode):
+            raise ValueError(
+                "Invalid frame_mode provided. Valid options are integers from 1 to {0}".format(len(FrameMode))
+            )
+        frame_mode = FrameMode(list(FrameMode)[frame_mode - 1])
 
     # ensure the ub matrix is an array
     ub = np.asarray(ub)
@@ -203,6 +214,9 @@ def process_to_q(
         "".format(setting_angles.shape[0], detector_size[0], detector_size[1], (t2 - t1))
     )
     return hkl
+
+
+process_to_q.frame_mode = [1, 2, 3, 4]  # type: ignore[attr-defined]
 
 
 def hkl_to_q(hkl_arr: np.ndarray) -> np.ndarray:

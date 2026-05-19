@@ -98,7 +98,7 @@ def test_process_to_q():
 
 
 def _process_to_q_exception(param_dict, frame_mode):
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         recip.process_to_q(frame_mode=frame_mode, **param_dict)
 
 
