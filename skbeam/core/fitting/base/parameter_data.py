@@ -42,6 +42,7 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
+from typing import Any, Dict, Union
 
 """
 Parameter dictionary are included for xrf fitting.
@@ -63,7 +64,7 @@ e_calibration. They are empirical experience from authors of the original code.
 
 
 # old param dict, keep it here for now.
-para_dict = {
+para_dict: Dict[str, Dict[str, Union[str, float]]] = {
     "coherent_sct_amplitude": {"bound_type": "none", "min": 7.0, "max": 8.0, "value": 6.0},
     "coherent_sct_energy": {"bound_type": "none", "min": 10.4, "max": 12.4, "value": 11.8},
     "compton_amplitude": {"bound_type": "none", "min": 0.0, "max": 10.0, "value": 5.0},
@@ -108,7 +109,7 @@ para_dict = {
 
 
 # fitting strategies
-adjust_element = {
+adjust_element: Dict[str, str] = {
     "coherent_sct_amplitude": "none",
     "coherent_sct_energy": "fixed",
     "compton_amplitude": "none",
@@ -127,7 +128,7 @@ adjust_element = {
     "non_fitting_values": "fixed",
 }
 
-e_calibration = {
+e_calibration: Dict[str, str] = {
     "coherent_sct_amplitude": "none",
     "coherent_sct_energy": "fixed",
     "compton_amplitude": "none",
@@ -146,7 +147,7 @@ e_calibration = {
     "non_fitting_values": "fixed",
 }
 
-linear = {
+linear: Dict[str, str] = {
     "coherent_sct_amplitude": "none",
     "coherent_sct_energy": "fixed",
     "compton_amplitude": "none",
@@ -165,7 +166,7 @@ linear = {
     "non_fitting_values": "fixed",
 }
 
-free_more = {
+free_more: Dict[str, str] = {
     "coherent_sct_amplitude": "none",
     "coherent_sct_energy": "lohi",
     "compton_amplitude": "none",
@@ -184,7 +185,7 @@ free_more = {
     "non_fitting_values": "fixed",
 }
 
-fit_with_tail = {
+fit_with_tail: Dict[str, str] = {
     "coherent_sct_amplitude": "none",
     "coherent_sct_energy": "lohi",
     "compton_amplitude": "none",
@@ -204,7 +205,7 @@ fit_with_tail = {
 }
 
 
-default_param = {
+default_param: Dict[str, Any] = {
     "coherent_sct_amplitude": {"bound_type": "none", "max": 10000000.0, "min": 0.10, "value": 100000},
     "coherent_sct_energy": {
         "bound_type": "lohi",
@@ -276,7 +277,7 @@ default_param = {
 }
 
 
-def get_para():
+def get_para() -> Dict[str, Any]:
     """More to be added here.
     The para_dict will be updated
     based on different algorithms.

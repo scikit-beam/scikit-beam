@@ -45,6 +45,7 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
+from typing import Optional
 
 import numpy as np
 import scipy.special
@@ -54,13 +55,13 @@ from scipy.special import gamma, gammaln
 logger = logging.getLogger(__name__)
 
 
-log2 = np.log(2)
-s2pi = np.sqrt(2 * np.pi)
-spi = np.sqrt(np.pi)
-s2 = np.sqrt(2.0)
+log2: float = np.log(2)
+s2pi: float = np.sqrt(2 * np.pi)
+spi: float = np.sqrt(np.pi)
+s2: float = np.sqrt(2.0)
 
 
-def gaussian(x, area, center, sigma):
+def gaussian(x: np.ndarray, area: float, center: float, sigma: float) -> np.ndarray:
     """1 dimensional gaussian
 
     Parameters
@@ -77,7 +78,7 @@ def gaussian(x, area, center, sigma):
     return (area / (s2pi * sigma)) * np.exp(-1 * (1.0 * x - center) ** 2 / (2 * sigma**2))
 
 
-def lorentzian(x, area, center, sigma):
+def lorentzian(x: np.ndarray, area: float, center: float, sigma: float) -> np.ndarray:
     """1 dimensional lorentzian
 
     Parameters
@@ -95,7 +96,7 @@ def lorentzian(x, area, center, sigma):
     return (area / (1 + ((1.0 * x - center) / sigma) ** 2)) / (np.pi * sigma)
 
 
-def lorentzian2(x, area, center, sigma):
+def lorentzian2(x: np.ndarray, area: float, center: float, sigma: float) -> np.ndarray:
     """1-d lorentzian squared profile
 
     Parameters
@@ -114,7 +115,7 @@ def lorentzian2(x, area, center, sigma):
     return (area / (1 + ((x - center) / sigma) ** 2) ** 2) / (np.pi * sigma)
 
 
-def voigt(x, area, center, sigma, gamma=None):
+def voigt(x: np.ndarray, area: float, center: float, sigma: float, gamma: Optional[float] = None) -> np.ndarray:
     """Convolution of gaussian and lorentzian curve.
 
     see http://en.wikipedia.org/wiki/Voigt_profile
@@ -139,7 +140,7 @@ def voigt(x, area, center, sigma, gamma=None):
     return area * scipy.special.wofz(z).real / (sigma * s2pi)
 
 
-def pvoigt(x, area, center, sigma, fraction):
+def pvoigt(x: np.ndarray, area: float, center: float, sigma: float, fraction: float) -> np.ndarray:
     """Linear combination  of gaussian and lorentzian
 
     Parameters
@@ -159,7 +160,7 @@ def pvoigt(x, area, center, sigma, fraction):
     return (1 - fraction) * gaussian(x, area, center, sigma) + fraction * lorentzian(x, area, center, sigma)
 
 
-def gausssian_step(x, area, center, sigma, peak_e):
+def gausssian_step(x: np.ndarray, area: float, center: float, sigma: float, peak_e: float) -> np.ndarray:
     """
     Gauss step function is an important component in modeling compton peak.
     Use scipy erfc function. Please note erfc = 1-erf.
@@ -192,7 +193,7 @@ def gausssian_step(x, area, center, sigma, peak_e):
     return area * scipy.special.erfc((x - center) / (np.sqrt(2) * sigma)) / (2.0 * peak_e)
 
 
-def gaussian_tail(x, area, center, sigma, gamma):
+def gaussian_tail(x: np.ndarray, area: float, center: float, sigma: float, gamma: float) -> np.ndarray:
     """
     Use a gaussian tail function to simulate compton peak
 
@@ -235,16 +236,16 @@ def gaussian_tail(x, area, center, sigma, gamma):
 
 
 def elastic(
-    x,
-    coherent_sct_amplitude,
-    coherent_sct_energy,
-    fwhm_offset,
-    fwhm_fanoprime,
-    e_offset,
-    e_linear,
-    e_quadratic,
-    epsilon=2.96,
-):
+    x: np.ndarray,
+    coherent_sct_amplitude: float,
+    coherent_sct_energy: float,
+    fwhm_offset: float,
+    fwhm_fanoprime: float,
+    e_offset: float,
+    e_linear: float,
+    e_quadratic: float,
+    epsilon: float = 2.96,
+) -> np.ndarray:
     """Model of elastic peak in X-Ray fluorescence
 
     Parameters
@@ -285,23 +286,23 @@ def elastic(
 
 
 def compton(
-    x,
-    compton_amplitude,
-    coherent_sct_energy,
-    fwhm_offset,
-    fwhm_fanoprime,
-    e_offset,
-    e_linear,
-    e_quadratic,
-    compton_angle,
-    compton_fwhm_corr,
-    compton_f_step,
-    compton_f_tail,
-    compton_gamma,
-    compton_hi_f_tail,
-    compton_hi_gamma,
-    epsilon=2.96,
-):
+    x: np.ndarray,
+    compton_amplitude: float,
+    coherent_sct_energy: float,
+    fwhm_offset: float,
+    fwhm_fanoprime: float,
+    e_offset: float,
+    e_linear: float,
+    e_quadratic: float,
+    compton_angle: float,
+    compton_fwhm_corr: float,
+    compton_f_step: float,
+    compton_f_tail: float,
+    compton_gamma: float,
+    compton_hi_f_tail: float,
+    compton_hi_gamma: float,
+    epsilon: float = 2.96,
+) -> np.ndarray:
     """
     Model compton peak, which is generated as an inelastic peak and always
     stays to the left of elastic peak on the spectrum.
@@ -375,24 +376,21 @@ def compton(
 
     # compton peak, step
     if compton_f_step > 0.0:
-        value = factor * compton_f_step
-        value *= gausssian_step(x, compton_amplitude, compton_e, sigma, compton_e)
-        counts += value
+        step_value = factor * compton_f_step * gausssian_step(x, compton_amplitude, compton_e, sigma, compton_e)
+        counts += step_value
 
     # compton peak, tail on the low side
-    value = factor * compton_f_tail
-    value *= gaussian_tail(x, compton_amplitude, compton_e, sigma, compton_gamma)
-    counts += value
+    tail_value = factor * compton_f_tail * gaussian_tail(x, compton_amplitude, compton_e, sigma, compton_gamma)
+    counts += tail_value
 
     # compton peak, tail on the high side
-    value = factor * compton_hi_f_tail
-    value *= gaussian_tail(-1 * x, compton_amplitude, -1 * compton_e, sigma, compton_hi_gamma)
-    counts += value
+    hi_tail_value = factor * compton_hi_f_tail * gaussian_tail(-1 * x, compton_amplitude, -1 * compton_e, sigma, compton_hi_gamma)
+    counts += hi_tail_value
 
     return counts
 
 
-def gamma_dist(bin_values, K, M):
+def gamma_dist(bin_values: np.ndarray, K: int, M: int) -> np.ndarray:
     """Gamma distribution function
 
     Parameters
@@ -425,7 +423,7 @@ def gamma_dist(bin_values, K, M):
     return gamma_dist
 
 
-def nbinom_dist(bin_values, K, M):
+def nbinom_dist(bin_values: np.ndarray, K: int, M: int) -> np.ndarray:
     """
     Negative Binomial (Poisson-Gamma) distribution function
 
@@ -470,7 +468,7 @@ def nbinom_dist(bin_values, K, M):
     return nbinom
 
 
-def poisson_dist(bin_values, K):
+def poisson_dist(bin_values: np.ndarray, K: int) -> np.ndarray:
     """
     Poisson Distribution
 

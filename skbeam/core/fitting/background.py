@@ -42,27 +42,28 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 from __future__ import absolute_import, division, print_function
+from typing import Dict, Optional
 
 import numpy as np
 import scipy.signal
 
-_defaults = {"con_val_no_bin": 3, "con_val_bin": 5, "iter_num_no_bin": 3, "iter_num_bin": 5}
+_defaults: Dict[str, int] = {"con_val_no_bin": 3, "con_val_bin": 5, "iter_num_no_bin": 3, "iter_num_bin": 5}
 
 
 def snip_method(
-    spectrum,
-    e_off,
-    e_lin,
-    e_quad,
-    xmin=0,
-    xmax=4096,
-    epsilon=2.96,
-    width=0.5,
-    decrease_factor=np.sqrt(2),
-    spectral_binning=None,
-    con_val=None,
-    iter_num=None,
-    width_threshold=0.5,
+    spectrum: np.ndarray,
+    e_off: float,
+    e_lin: float,
+    e_quad: float,
+    xmin: int = 0,
+    xmax: int = 4096,
+    epsilon: float = 2.96,
+    width: float = 0.5,
+    decrease_factor: float = np.sqrt(2),
+    spectral_binning: Optional[float] = None,
+    con_val: Optional[int] = None,
+    iter_num: Optional[int] = None,
+    width_threshold: float = 0.5,
 ):
     """
     use snip algorithm to obtain background
@@ -77,28 +78,28 @@ def snip_method(
         energy calibration, such as e_off + e_lin * energy + e_quad * energy^2
     e_quad : float
         energy calibration, such as e_off + e_lin * energy + e_quad * energy^2
-    xmin : float, optional
+    xmin : int, optional
         smallest index to define the range
-    xmax : float, optional
+    xmax : int, optional
         largest index to define the range
     epsilon : float, optional
         energy to create a hole-electron pair
         for Ge 2.96, for Si 3.61 at 300K
         needs to double check this value
-    width : int, optional
+    width : float, optional
         window size to adjust how much to shift background
     decrease_factor : float, optional
         gradually decrease of window size, default as sqrt(2)
-    spectral_binning : float, optional
+    spectral_binning : Optional[float], optional
         bin the data into different size
-    con_val : int, optional
+    con_val : Optional[int], optional
         size of scipy.signal.windows.boxcar to convolve the spectrum.
 
         Default value is controlled by the keys `con_val_no_bin`
         and `con_val_bin` in the defaults dictionary, depending
         on if spectral_binning is used or not
 
-    iter_num : int, optional
+    iter_num : Optional[int], optional
         Number of iterations.
 
         Default value is controlled by the keys `iter_num_no_bin`

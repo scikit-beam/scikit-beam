@@ -45,6 +45,7 @@ from __future__ import absolute_import, division, print_function
 
 import inspect
 import logging
+from typing import Callable
 
 from lmfit import Model
 
@@ -54,7 +55,7 @@ from .lineshapes import compton, elastic, lorentzian2
 logger = logging.getLogger(__name__)
 
 
-def set_default(model_name, func_name):
+def set_default(model_name: type[Model], func_name: Callable) -> None:
     """
     Set values and bounds to Model parameters in lmfit.
 
@@ -65,7 +66,7 @@ def set_default(model_name, func_name):
     func_name : function
         function name of physics peak
     """
-    paras = inspect.getargspec(func_name)
+    paras = inspect.getfullargspec(func_name)
 
     # the first argument is independent variable, also ignored
     # default values are not considered for fitting in this function
@@ -93,7 +94,7 @@ def set_default(model_name, func_name):
             raise TypeError("Boundary type {0} can't be " "used".format(my_dict["bound_type"]))
 
 
-def _gen_class_docs(func):
+def _gen_class_docs(func: Callable) -> str:
     """
     Parameters
     ----------
@@ -106,7 +107,7 @@ def _gen_class_docs(func):
         documentation of the function
     """
     return (
-        "    Wrap the {} function for fitting within lmfit " "framework\n    ".format(func.__name__) + func.__doc__
+        "    Wrap the {} function for fitting within lmfit " "framework\n    ".format(func.__name__) + (func.__doc__ or "")
     )
 
 
