@@ -40,6 +40,7 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 from collections.abc import Mapping
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
 
 import numpy as np
 import six
@@ -266,7 +267,7 @@ class XrayLibWrap(Mapping):
     # valid options for the info_type input parameter for the init method
     opts_info_type = ["lines", "binding_e", "jump", "yield"]
 
-    def __init__(self, element, info_type, energy=None):
+    def __init__(self, element: int, info_type: str, energy: Optional[float] = None) -> None:
         if xraylib is None:
             raise XraylibNotInstalledError(self.__class__)
         self._element = element
@@ -275,11 +276,11 @@ class XrayLibWrap(Mapping):
         self._info_type = info_type
 
     @property
-    def all(self):
+    def all(self) -> List[Tuple[str, float]]:
         """List the physics quantity for all the lines or shells."""
         return list(six.iteritems(self))
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> float:
         """
         Call xraylib function to calculate physics quantity.  A return
         value of 0 means that the quantity not valid.
@@ -352,7 +353,7 @@ class XrayLibWrap_Energy(XrayLibWrap):
 
     opts_info_type = ["cs", "csb"]
 
-    def __init__(self, element, info_type, incident_energy):
+    def __init__(self, element: int, info_type: str, incident_energy: float) -> None:
         if xraylib is None:
             raise XraylibNotInstalledError(self.__class__)
 
@@ -360,14 +361,14 @@ class XrayLibWrap_Energy(XrayLibWrap):
         self._incident_energy = incident_energy
 
     @property
-    def incident_energy(self):
+    def incident_energy(self) -> float:
         """
         Incident x-ray energy in keV, float
         """
         return self._incident_energy
 
     @incident_energy.setter
-    def incident_energy(self, val):
+    def incident_energy(self, val: float) -> None:
         """
         Parameters
         ----------
@@ -376,7 +377,7 @@ class XrayLibWrap_Energy(XrayLibWrap):
         """
         self._incident_energy = float(val)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> float:
         """
         Call xraylib function to calculate physics quantity.
 
@@ -500,7 +501,7 @@ class XrfElement(BasicElement):
         doc_title, doc_params, doc_ex
     )
 
-    def __init__(self, element):
+    def __init__(self, element: Union[str, int]) -> None:
         if xraylib is None:
             raise XraylibNotInstalledError(self.__class__)
 
@@ -512,7 +513,7 @@ class XrfElement(BasicElement):
         self._fluor_yield = XrayLibWrap(self.Z, "yield")
 
     @property
-    def emission_line(self):
+    def emission_line(self) -> XrayLibWrap:
         """Emission line information, `XrayLibWrap`
 
         Emission line can be used as a unique characteristic
@@ -523,7 +524,7 @@ class XrfElement(BasicElement):
         return self._emission_line
 
     @property
-    def cs(self):
+    def cs(self) -> Callable[[float], XrayLibWrap_Energy]:
         """Fluorescence cross section function, `function`
 
         Returns a function of energy which returns the
@@ -537,13 +538,13 @@ class XrfElement(BasicElement):
         cm2/g
         """
 
-        def myfunc(incident_energy):
+        def myfunc(incident_energy: float) -> XrayLibWrap_Energy:
             return XrayLibWrap_Energy(self.Z, "cs", incident_energy)
 
         return myfunc
 
     @property
-    def csb(self):
+    def csb(self) -> Callable[[float], XrayLibWrap_Energy]:
         """Fluorescence cross section function, `function`
 
         Returns a function of energy which returns the
@@ -557,13 +558,13 @@ class XrfElement(BasicElement):
         barns/atom
         """
 
-        def myfunc(incident_energy):
+        def myfunc(incident_energy: float) -> XrayLibWrap_Energy:
             return XrayLibWrap_Energy(self.Z, "csb", incident_energy)
 
         return myfunc
 
     @property
-    def bind_energy(self):
+    def bind_energy(self) -> XrayLibWrap:
         """Binding energy, `XrayLibWrap`
 
         Binding energy is a measure of the energy required
@@ -574,7 +575,7 @@ class XrfElement(BasicElement):
         return self._bind_energy
 
     @property
-    def jump_factor(self):
+    def jump_factor(self) -> XrayLibWrap:
         """Jump Factor, `XrayLibWrap`
 
         Absorption jump factor is defined as the fraction
@@ -585,7 +586,7 @@ class XrfElement(BasicElement):
         return self._jump_factor
 
     @property
-    def fluor_yield(self):
+    def fluor_yield(self) -> XrayLibWrap:
         """fluorescence quantum yield, `XrayLibWrap`
 
         The fluorescence quantum yield gives the efficiency
@@ -595,7 +596,7 @@ class XrfElement(BasicElement):
         """
         return self._fluor_yield
 
-    def line_near(self, energy, delta_e, incident_energy):
+    def line_near(self, energy: float, delta_e: float, incident_energy: float) -> Dict[str, float]:
         """
         Find possible emission lines given the element.
 
@@ -622,7 +623,7 @@ class XrfElement(BasicElement):
         return out_dict
 
 
-def emission_line_search(line_e, delta_e, incident_energy, element_list=None):
+def emission_line_search(line_e: float, delta_e: float, incident_energy: float, element_list: Optional[List[Union[str, int]]] = None) -> Dict[str, Dict[str, float]]:
     """Find elements which have an emission line near an energy
 
     This function returns a dict keyed on element type of all
@@ -652,14 +653,15 @@ def emission_line_search(line_e, delta_e, incident_energy, element_list=None):
     if xraylib is None:
         raise XraylibNotInstalledError(__name__)
 
+    search_list: List[XrfElement]
     if element_list is None:
-        element_list = range(1, 101)
-
-    search_list = [XrfElement(item) for item in element_list]
+        search_list = [XrfElement(item) for item in range(1, 101)]
+    else:
+        search_list = [XrfElement(item) for item in element_list]
 
     cand_lines = [e.line_near(line_e, delta_e, incident_energy) for e in search_list]
 
-    out_dict = dict()
+    out_dict: Dict[str, Dict[str, float]] = dict()
     for e, lines in zip(search_list, cand_lines):
         if lines:
             out_dict[e.sym] = lines
