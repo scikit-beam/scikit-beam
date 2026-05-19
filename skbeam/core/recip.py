@@ -72,13 +72,13 @@ class FrameMode(str, Enum):
         return list(FrameMode).index(self)
 
 def process_to_q(
-    setting_angles: np.ndarray[int, Literal[6]],
+    setting_angles: np.ndarray[Tuple[int, Literal[6]]],
     detector_size: Tuple[int, int],
     pixel_size: Tuple[float, float],
     calibrated_center: Tuple[float, float],
     dist_sample: float,
     wavelength: float,
-    ub: np.ndarray[Literal[3], Literal[3], np.dtype[np.float64]],
+    ub: np.ndarray[Tuple[Literal[3], Literal[3]], np.dtype[np.float64]],
     frame_mode: Optional[Union[str, FrameMode]] = None,
 ) -> np.ndarray:
     """
