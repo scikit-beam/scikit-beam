@@ -44,14 +44,16 @@ basically to clean images
 from __future__ import absolute_import, division, print_function
 
 import logging
+from typing import Generator, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import scipy.stats as sts
+from numpy.typing import ArrayLike, NDArray
 
 logger = logging.getLogger(__name__)
 
 
-def bad_to_nan_gen(images, bad):
+def bad_to_nan_gen(images: Iterable[np.ndarray], bad: List[int]) -> Generator[np.ndarray, None, None]:
     """
     Convert the images marked as "bad" in `bad` by their index in
     images into a np.nan array
@@ -81,7 +83,7 @@ def bad_to_nan_gen(images, bad):
             yield im
 
 
-def threshold(images, threshold, mask=None):
+def threshold(images: Iterable[np.ndarray], threshold: float, mask: Optional[np.ndarray] = None) -> Generator[np.ndarray, None, None]:
     """
     This generator sets all pixels whose value is greater than `threshold`
     to 0 and yields the thresholded images out
@@ -113,7 +115,7 @@ def threshold(images, threshold, mask=None):
         yield mask
 
 
-def margin(img_shape, edge_size):
+def margin(img_shape: Tuple[int, ...], edge_size: int) -> np.ndarray:
     """
     Mask the edge of an image
 
@@ -134,7 +136,13 @@ def margin(img_shape, edge_size):
     return ~mask
 
 
-def binned_outlier(img, r, alpha, bins, mask=None):
+def binned_outlier(
+    img: np.ndarray,
+    r: np.ndarray,
+    alpha: Union[float, Tuple[float, float], np.ndarray[Tuple[int]]],
+    bins: List[float],
+    mask: Optional[np.ndarray] = None,
+) -> np.ndarray:
     """
     Generates a mask by identifying outlier pixels in bins and masks any
     pixels which have a value greater or less than alpha * std away from the
