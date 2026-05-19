@@ -39,6 +39,7 @@ This module is for statistics.
 from __future__ import absolute_import, division, print_function
 
 import logging
+from typing import Callable, Optional, Tuple, Union
 
 import numpy as np
 import scipy.stats
@@ -48,7 +49,14 @@ from skbeam.core.utils import _defaults  # Dan is dubious about this.
 logger = logging.getLogger(__name__)
 
 
-def statistics_1D(x, y, stat="mean", nx=None, min_x=None, max_x=None):
+def statistics_1D(
+    x: np.ndarray,
+    y: np.ndarray,
+    stat: Union[str, Callable] = "mean",
+    nx: Optional[int] = None,
+    min_x: Optional[float] = None,
+    max_x: Optional[float] = None,
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Bin the values in y based on their x-coordinates
 
