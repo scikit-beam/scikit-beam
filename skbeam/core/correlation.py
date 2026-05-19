@@ -45,6 +45,7 @@ This module is for functions specific to time correlation
 from __future__ import absolute_import, division, print_function
 
 from collections import namedtuple
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 from scipy.signal import fftconvolve
@@ -67,19 +68,19 @@ logger = logging.getLogger(__name__)
 
 
 def _one_time_process(
-    buf,
-    G,
-    past_intensity_norm,
-    future_intensity_norm,
-    label_array,
-    num_bufs,
-    num_pixels,
-    img_per_level,
-    level,
-    buf_no,
-    norm,
-    lev_len,
-):
+    buf: np.ndarray,
+    G: np.ndarray,
+    past_intensity_norm: np.ndarray,
+    future_intensity_norm: np.ndarray,
+    label_array: np.ndarray,
+    num_bufs: int,
+    num_pixels: np.ndarray,
+    img_per_level: np.ndarray,
+    level: int,
+    buf_no: int,
+    norm: Dict,
+    lev_len: np.ndarray,
+) -> None:
     """Reference implementation of the inner loop of multi-tau one time
     correlation
 
@@ -157,10 +158,10 @@ def _one_time_process(
     return None  # modifies arguments in place!
 
 
-results = namedtuple("correlation_results", ["g2", "lag_steps", "internal_state"])
+results = namedtuple("results", ["g2", "lag_steps", "internal_state"])
 
 _internal_state = namedtuple(
-    "correlation_state",
+    "_internal_state",
     [
         "buf",
         "G",
@@ -179,7 +180,7 @@ _internal_state = namedtuple(
 )
 
 _two_time_internal_state = namedtuple(
-    "two_time_correlation_state",
+    "_two_time_internal_state",
     [
         "buf",
         "img_per_level",
@@ -199,7 +200,7 @@ _two_time_internal_state = namedtuple(
 )
 
 
-def _init_state_one_time(num_levels, num_bufs, labels):
+def _init_state_one_time(num_levels: int, num_bufs: int, labels: np.ndarray[Tuple[int, int]]) -> _internal_state:
     """Initialize a stateful namedtuple for the generator-based multi-tau
      for one time correlation
 
@@ -256,7 +257,13 @@ def _init_state_one_time(num_levels, num_bufs, labels):
     )
 
 
-def lazy_one_time(image_iterable, num_levels, num_bufs, labels, internal_state=None):
+def lazy_one_time(
+    image_iterable: Iterable[np.ndarray[Tuple[int, int]]],
+    num_levels: int,
+    num_bufs: int,
+    labels: np.ndarray[Tuple[int, int]],
+    internal_state: Optional["_internal_state"] = None,
+) -> Generator[results, None, None]:
     """Generator implementation of 1-time multi-tau correlation
 
     If you do not want multi-tau correlation, set num_levels to 1 and
@@ -410,7 +417,9 @@ def lazy_one_time(image_iterable, num_levels, num_bufs, labels, internal_state=N
         yield results(g2, s.lag_steps[:g_max], s)
 
 
-def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
+def multi_tau_auto_corr(
+    num_levels: int, num_bufs: int, labels: np.ndarray, images: Iterable[np.ndarray]
+) -> Tuple[np.ndarray, np.ndarray]:
     """Wraps generator implementation of multi-tau
 
     Original code(in Yorick) for multi tau auto correlation
@@ -429,7 +438,9 @@ def multi_tau_auto_corr(num_levels, num_bufs, labels, images):
     return result.g2, result.lag_steps
 
 
-def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
+def auto_corr_scat_factor(
+    lags: np.ndarray, beta: float, relaxation_rate: float, baseline: float = 1
+) -> np.ndarray:
     """
     This model will provide normalized intensity-intensity time
     correlation data to be minimized.
@@ -480,7 +491,9 @@ def auto_corr_scat_factor(lags, beta, relaxation_rate, baseline=1):
     return beta * np.exp(-2 * relaxation_rate * lags) + baseline
 
 
-def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1):
+def two_time_corr(
+    labels: np.ndarray, images: Iterable[np.ndarray], num_frames: int, num_bufs: int, num_levels: int = 1
+) -> results:
     """Wraps generator implementation of multi-tau two time correlation
 
     This function computes two-time correlation
@@ -499,7 +512,14 @@ def two_time_corr(labels, images, num_frames, num_bufs, num_levels=1):
     return two_time_state_to_results(result)
 
 
-def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1, two_time_internal_state=None):
+def lazy_two_time(
+    labels: np.ndarray,
+    images: Iterable[np.ndarray],
+    num_frames: int,
+    num_bufs: int,
+    num_levels: int = 1,
+    two_time_internal_state: Optional[_two_time_internal_state] = None,
+) -> Generator[_two_time_internal_state, None, None]:
     """Generator implementation of two-time correlation
 
     If you do not want multi-tau correlation, set num_levels to 1 and
@@ -535,7 +555,7 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1, two_time_i
     ------
     namedtuple
         A ``results`` object is yielded after every image has been processed.
-        This `reults` object contains, in this order:
+        This ``results`` object contains, in this order:
 
         - ``g2``: the normalized correlation
           shape is (num_rois, len(lag_steps), len(lag_steps))
@@ -656,7 +676,7 @@ def lazy_two_time(labels, images, num_frames, num_bufs, num_levels=1, two_time_i
         yield s
 
 
-def two_time_state_to_results(state):
+def two_time_state_to_results(state: _two_time_internal_state) -> results:
     """Convert the internal state of the two time generator into usable results
 
     Parameters
@@ -677,17 +697,17 @@ def two_time_state_to_results(state):
 
 
 def _two_time_process(
-    buf,
-    g2,
-    label_array,
-    num_bufs,
-    num_pixels,
-    img_per_level,
-    lag_steps,
-    current_img_time,
-    level,
-    buf_no,
-):
+    buf: np.ndarray,
+    g2: np.ndarray,
+    label_array: np.ndarray,
+    num_bufs: int,
+    num_pixels: np.ndarray,
+    img_per_level: np.ndarray,
+    lag_steps: np.ndarray,
+    current_img_time: Union[int, float],
+    level: int,
+    buf_no: int,
+) -> None:
     """
     Parameters
     ----------
@@ -754,7 +774,7 @@ def _two_time_process(
             g2[:, int(tind1), int(tind2)] = tmp_binned / (pi_binned * fi_binned) * num_pixels
 
 
-def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
+def _init_state_two_time(num_levels: int, num_bufs: int, labels: np.ndarray, num_frames: int) -> _two_time_internal_state:
     """Initialize a stateful namedtuple for two time correlation
 
     Parameters
@@ -794,7 +814,7 @@ def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
     current_img_time = 0
 
     # generate a time frame for each level
-    time_ind = {key: [] for key in range(num_levels)}
+    time_ind: Dict[int, List[int]] = {key: [] for key in range(num_levels)}
 
     # two time correlation results (array)
     g2 = np.zeros((num_rois, num_frames, num_frames), dtype=np.float64)
@@ -817,7 +837,7 @@ def _init_state_two_time(num_levels, num_bufs, labels, num_frames):
     )
 
 
-def _validate_and_transform_inputs(num_bufs, num_levels, labels):
+def _validate_and_transform_inputs(num_bufs: int, num_levels: int, labels: np.ndarray) -> Tuple[np.ndarray, np.ndarray, int, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict, np.ndarray]:
     """
     This is a helper function to validate inputs and create initial state
     inputs for both one time and two time correlation
@@ -906,7 +926,9 @@ def _validate_and_transform_inputs(num_bufs, num_levels, labels):
     )
 
 
-def one_time_from_two_time(two_time_corr, calc_errors=False):
+def one_time_from_two_time(
+    two_time_corr: np.ndarray, calc_errors: bool = False
+) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
     """
     This will provide the one-time correlation data from two-time
     correlation data. An estimator for errors can be calculated
@@ -981,7 +1003,7 @@ class CrossCorrelator:
 
     """
 
-    def __init__(self, shape, mask=None, normalization=None):
+    def __init__(self, shape: Tuple[int, ...], mask: Optional[np.ndarray] = None, normalization: Optional[Union[str, List[str]]] = None):
         """
         Prepare the spatial correlator for various regions specified by the
         id's in the image.
@@ -1046,9 +1068,8 @@ class CrossCorrelator:
         pj = pj[order]
 
         # make array of pointers into these subregions
-        idpos = 0
         inds_tmp = 1 + np.where(np.not_equal(bind[1:], bind[:-1]))[0]
-        idpos = np.append(idpos, inds_tmp)
+        idpos = np.append(0, inds_tmp)
         idpos = np.append(idpos, len(bind)).astype(np.uint32)
         self.idpos = idpos
 
@@ -1091,9 +1112,9 @@ class CrossCorrelator:
         # Making a list of arrays holding the masks for each id. Ideally, mask
         # is binary so this is one element to quickly index original images
         self.submasks = list()
-        self.centers = list()
+        self.centers: Union[List[np.ndarray], np.ndarray] = list()
         # the positions of each axes of each correlation
-        self.positions = list()
+        self.positions: Union[List[Any], np.ndarray] = list()
         self.maskcorrs = list()
         # regions where the correlations are not zero
         self.pxlst_maskcorrs = list()
@@ -1118,7 +1139,7 @@ class CrossCorrelator:
             self.maskcorrs.append(maskcorr)
             # centers are shape//2 as performed by fftshift
             center = np.array(maskcorr.shape) // 2
-            self.centers.append(np.array(maskcorr.shape) // 2)
+            self.centers.append(center)
             if self.ndim == 1:
                 self.positions.append(np.arange(maskcorr.shape[1]) - center[1])
             elif self.ndim == 2:
@@ -1133,7 +1154,7 @@ class CrossCorrelator:
             self.positions = self.positions[0]
             self.centers = self.centers[0]
 
-    def __call__(self, img1, img2=None, normalization=None):
+    def __call__(self, img1: np.ndarray, img2: Optional[np.ndarray] = None, normalization: Optional[Union[str, List[str]]] = None) -> Union[List[np.ndarray], np.ndarray]:
         """Run the cross correlation on an image/curve or against two
             images/curves
 
@@ -1169,10 +1190,7 @@ class CrossCorrelator:
         if self.ndim == 1:
             img1 = img1.reshape((1, self.shape[0]))
 
-        if img2 is None:
-            self_correlation = True
-        else:
-            self_correlation = False
+        if img2 is not None:
             if img2.shape != self.shape:
                 raise ValueError(
                     "Second image not expected shape. "
@@ -1195,14 +1213,12 @@ class CrossCorrelator:
             tmpimg = np.zeros(self.shapes[i, :])
             tmpimg[ppiis, ppjjs] = img1[pis, pjs]
 
-            if not self_correlation:
+            if img2 is None:
+                ccorr = _cross_corr(tmpimg)
+            else:
                 tmpimg2 = np.zeros_like(tmpimg)
                 tmpimg2[ppiis, ppjjs] = img2[pis, pjs]
                 tmpimg2[ppiis, ppjjs] = img2[pis, pjs]
-
-            if self_correlation:
-                ccorr = _cross_corr(tmpimg)
-            else:
                 ccorr = _cross_corr(tmpimg, tmpimg2)
 
             # Note, in this code, non-overlapping regions will now get np.nan
@@ -1211,14 +1227,14 @@ class CrossCorrelator:
             if "symavg" in normalization:
                 # do symmetric averaging
                 Icorr = _cross_corr(tmpimg * self.submasks[i], self.submasks[i])
-                if self_correlation:
+                if img2 is None:
                     Icorr2 = _cross_corr(self.submasks[i], tmpimg * self.submasks[i])
                 else:
                     Icorr2 = _cross_corr(self.submasks[i], tmpimg2 * self.submasks[i])
                 ccorr *= self.maskcorrs[i] / Icorr / Icorr2
 
             if "regular" in normalization:
-                if self_correlation:
+                if img2 is None:
                     ccorr /= self.maskcorrs[i] * np.average(tmpimg[ppiis, ppjjs]) ** 2
                 else:
                     ccorr /= (
@@ -1229,12 +1245,12 @@ class CrossCorrelator:
             ccorrs.append(ccorr)
 
         if len(ccorrs) == 1:
-            ccorrs = ccorrs[0]
+            return ccorrs[0]
 
         return ccorrs
 
 
-def _cross_corr(img1, img2=None):
+def _cross_corr(img1: np.ndarray, img2: Optional[np.ndarray] = None) -> np.ndarray:
     """Compute the cross correlation of one (or two) images.
 
     Parameters

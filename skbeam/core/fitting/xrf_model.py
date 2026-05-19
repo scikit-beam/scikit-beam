@@ -1647,7 +1647,7 @@ def get_relative_cs_ratio(elemental_line: str, energy: float) -> float:
     e = Element(name)
     transition_lines = TRANSITIONS_LOOKUP[line.upper()]
 
-    sum_v = 0
+    sum_v: float = 0.0
     for v in transition_lines:
         sum_v += e.cs(energy)[v]
     return e.cs(energy)[transition_lines[0]] / sum_v
