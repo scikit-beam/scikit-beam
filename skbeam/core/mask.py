@@ -83,7 +83,7 @@ def bad_to_nan_gen(images: Iterable[np.ndarray], bad: List[int]) -> Generator[np
             yield im
 
 
-def threshold(images: Iterable[np.ndarray], threshold: float, mask: Optional[np.ndarray] = None) -> Generator[np.ndarray, None, None]:
+def threshold(images: List[np.ndarray], threshold: float, mask: Optional[np.ndarray] = None) -> Generator[np.ndarray, None, None]:
     """
     This generator sets all pixels whose value is greater than `threshold`
     to 0 and yields the thresholded images out
