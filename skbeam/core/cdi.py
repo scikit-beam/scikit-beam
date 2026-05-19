@@ -39,8 +39,10 @@
 ########################################################################
 from __future__ import absolute_import, division, print_function
 
+from enum import Enum
 import logging
 import time
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from scipy.ndimage import gaussian_filter
@@ -48,7 +50,7 @@ from scipy.ndimage import gaussian_filter
 logger = logging.getLogger(__name__)
 
 
-def _dist(dims):
+def _dist(dims: Union[List[int], Tuple[int, ...]]) -> np.ndarray:
     """
     Create array with pixel value equals to the distance from array center.
 
@@ -63,9 +65,7 @@ def _dist(dims):
         ND array whose pixels are equal to the distance from the center
         of the array of shape `dims`
     """
-    dist_sum = []
-
-    dist_sum = np.zeros(dims, dtype=np.float64)
+    dist_sum: np.ndarray = np.zeros(dims, dtype=np.float64)
     for idx, d in enumerate(dims):
         shape = np.ones(len(dims), dtype=np.int64)
         shape[idx] = d
@@ -76,7 +76,7 @@ def _dist(dims):
     return np.sqrt(dist_sum)
 
 
-def gauss(dims, sigma):
+def gauss(dims: Union[List[int], Tuple[int, ...]], sigma: float) -> np.ndarray:
     """
     Generate Gaussian function in 2D or 3D.
 
@@ -97,7 +97,7 @@ def gauss(dims, sigma):
     return y / np.sum(y)
 
 
-def pi_modulus(recon_pattern, diffracted_pattern, offset_v=1e-12):
+def pi_modulus(recon_pattern: np.ndarray, diffracted_pattern: np.ndarray, offset_v: float = 1e-12) -> np.ndarray:
     """
     Transfer sample from real space to q space.
     Use constraint based on diffraction pattern from experiments.
@@ -122,7 +122,7 @@ def pi_modulus(recon_pattern, diffracted_pattern, offset_v=1e-12):
     return np.fft.ifftn(diff_tmp) * np.sqrt(np.size(diffracted_pattern))
 
 
-def find_support(sample_obj, sw_sigma, sw_threshold):
+def find_support(sample_obj: np.ndarray, sw_sigma: float, sw_threshold: float) -> np.ndarray:
     """
     Update sample area based on thresholds.
 
@@ -146,7 +146,7 @@ def find_support(sample_obj, sw_sigma, sw_threshold):
     return conv_fun >= (sw_threshold * conv_max)
 
 
-def cal_diff_error(sample_obj, diffracted_pattern):
+def cal_diff_error(sample_obj: np.ndarray, diffracted_pattern: np.ndarray) -> float:
     """
     Calculate the error in q space.
 
@@ -163,10 +163,10 @@ def cal_diff_error(sample_obj, diffracted_pattern):
         relative error in q space
     """
     new_diff = np.abs(np.fft.fftn(sample_obj)) / np.sqrt(np.size(sample_obj))
-    return np.linalg.norm(new_diff - diffracted_pattern) / np.linalg.norm(diffracted_pattern)
+    return float(np.linalg.norm(new_diff - diffracted_pattern) / np.linalg.norm(diffracted_pattern))
 
 
-def generate_random_phase_field(diffracted_pattern):
+def generate_random_phase_field(diffracted_pattern: np.ndarray) -> np.ndarray:
     """
     Initiate random phase.
 
@@ -185,7 +185,7 @@ def generate_random_phase_field(diffracted_pattern):
     return sample_obj
 
 
-def generate_box_support(sup_radius, shape_v):
+def generate_box_support(sup_radius: float, shape_v: List[int]) -> np.ndarray:
     """
     Generate support area as a box for either 2D or 3D cases.
 
@@ -207,7 +207,7 @@ def generate_box_support(sup_radius, shape_v):
     return sup
 
 
-def generate_disk_support(sup_radius, shape_v):
+def generate_disk_support(sup_radius: float, shape_v: List[int]) -> np.ndarray:
     """
     Generate support area as a disk for either 2D or 3D cases.
 
@@ -228,24 +228,28 @@ def generate_disk_support(sup_radius, shape_v):
     sup[dummy < sup_radius] = 1
     return sup
 
+class PiModulusFlag(str, Enum):
+    Complex = "complex"
+    Real = "real"
+
 
 def cdi_recon(
-    diffracted_pattern,
-    sample_obj,
-    sup,
-    beta=1.15,
-    start_avg=0.8,
-    pi_modulus_flag="Complex",
-    sw_flag=True,
-    sw_sigma=0.5,
-    sw_threshold=0.1,
-    sw_start=0.2,
-    sw_end=0.8,
-    sw_step=10,
-    n_iterations=1000,
-    cb_function=None,
-    cb_step=10,
-):
+    diffracted_pattern: np.ndarray,
+    sample_obj: np.ndarray,
+    sup: np.ndarray,
+    beta: float = 1.15,
+    start_avg: float = 0.8,
+    pi_modulus_flag: Union[str, PiModulusFlag] = PiModulusFlag.Complex,
+    sw_flag: bool = True,
+    sw_sigma: float = 0.5,
+    sw_threshold: float = 0.1,
+    sw_start: float = 0.2,
+    sw_end: float = 0.8,
+    sw_step: int = 10,
+    n_iterations: int = 1000,
+    cb_function: Optional[Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], None]] = None,
+    cb_step: int = 10,
+) -> Tuple[np.ndarray, Dict[str, np.ndarray]]:
     """
     Run reconstruction with difference map algorithm.
 
@@ -319,14 +323,12 @@ def cdi_recon(
     diffracted_pattern = np.array(diffracted_pattern)  # diffraction data
     diffracted_pattern = np.fft.fftshift(diffracted_pattern)
 
-    pi_modulus_flag = pi_modulus_flag.lower()
-    real_operation = False
-    if pi_modulus_flag == "real":
-        real_operation = True
-    elif pi_modulus_flag == "complex":
-        real_operation = False
-    else:
-        raise ValueError('py_modulus_flag must be one of ("complex","real") not ' "{!r}".format(pi_modulus_flag))
+    if isinstance(pi_modulus_flag, str):
+        if pi_modulus_flag.lower() not in PiModulusFlag._value2member_map_:
+            raise ValueError('pi_modulus_flag must be one of ("complex","real") not ' "{!r}".format(pi_modulus_flag))
+        pi_modulus_flag = PiModulusFlag(pi_modulus_flag.lower())
+
+    real_operation = pi_modulus_flag == PiModulusFlag.Real
 
     gamma_1 = -1 / beta
     gamma_2 = 1 / beta
