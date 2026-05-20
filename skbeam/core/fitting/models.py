@@ -106,8 +106,8 @@ def _gen_class_docs(func: Callable) -> str:
     str :
         documentation of the function
     """
-    return (
-        "    Wrap the {} function for fitting within lmfit " "framework\n    ".format(func.__name__) + (func.__doc__ or "")
+    return "    Wrap the {} function for fitting within lmfit " "framework\n    ".format(func.__name__) + (
+        func.__doc__ or ""
     )
 
 

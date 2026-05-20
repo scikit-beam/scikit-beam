@@ -40,6 +40,7 @@
 """
 Module for xray scattering
 """
+
 from __future__ import absolute_import, division, print_function
 
 import logging
@@ -165,7 +166,13 @@ class PowderStandard(object):
         return q_to_twotheta(q, wavelength)
 
     @classmethod
-    def from_lambda_2theta_hkl(cls, name: str, wavelength: float, two_theta: np.ndarray, hkl: Optional[Sequence[Tuple[int, int, int]]] = None) -> "PowderStandard":
+    def from_lambda_2theta_hkl(
+        cls,
+        name: str,
+        wavelength: float,
+        two_theta: np.ndarray,
+        hkl: Optional[Sequence[Tuple[int, int, int]]] = None,
+    ) -> "PowderStandard":
         """
         Method to construct a PowderStandard object from calibrated
         :math:`2\\theata` values.
@@ -199,7 +206,9 @@ class PowderStandard(object):
         return cls(name, zip(d, hkl, q))
 
     @classmethod
-    def from_d(cls, name: str, d: Sequence[float], hkl: Optional[Sequence[Tuple[int, int, int]]] = None) -> "PowderStandard":
+    def from_d(
+        cls, name: str, d: Sequence[float], hkl: Optional[Sequence[Tuple[int, int, int]]] = None
+    ) -> "PowderStandard":
         """
         Method to construct a PowderStandard object from known
         :math:`d` values.

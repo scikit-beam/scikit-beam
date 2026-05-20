@@ -1,9 +1,10 @@
 from __future__ import division, print_function
+
 from typing import Optional
 
 import fabio
-from fabio.fit2dmaskimage import Fit2dMaskImage
 import numpy as np
+from fabio.fit2dmaskimage import Fit2dMaskImage
 
 from skbeam.io.save_powder_output import _create_file_path
 

@@ -42,6 +42,7 @@
 This module is for functions specific to time correlation
 
 """
+
 from __future__ import absolute_import, division, print_function
 
 from collections import namedtuple
@@ -774,7 +775,9 @@ def _two_time_process(
             g2[:, int(tind1), int(tind2)] = tmp_binned / (pi_binned * fi_binned) * num_pixels
 
 
-def _init_state_two_time(num_levels: int, num_bufs: int, labels: np.ndarray, num_frames: int) -> _two_time_internal_state:
+def _init_state_two_time(
+    num_levels: int, num_bufs: int, labels: np.ndarray, num_frames: int
+) -> _two_time_internal_state:
     """Initialize a stateful namedtuple for two time correlation
 
     Parameters
@@ -837,7 +840,19 @@ def _init_state_two_time(num_levels: int, num_bufs: int, labels: np.ndarray, num
     )
 
 
-def _validate_and_transform_inputs(num_bufs: int, num_levels: int, labels: np.ndarray) -> Tuple[np.ndarray, np.ndarray, int, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict, np.ndarray]:
+def _validate_and_transform_inputs(num_bufs: int, num_levels: int, labels: np.ndarray) -> Tuple[
+    np.ndarray,
+    np.ndarray,
+    int,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    dict,
+    np.ndarray,
+]:
     """
     This is a helper function to validate inputs and create initial state
     inputs for both one time and two time correlation
@@ -1003,7 +1018,12 @@ class CrossCorrelator:
 
     """
 
-    def __init__(self, shape: Tuple[int, ...], mask: Optional[np.ndarray] = None, normalization: Optional[Union[str, List[str]]] = None):
+    def __init__(
+        self,
+        shape: Tuple[int, ...],
+        mask: Optional[np.ndarray] = None,
+        normalization: Optional[Union[str, List[str]]] = None,
+    ):
         """
         Prepare the spatial correlator for various regions specified by the
         id's in the image.
@@ -1154,7 +1174,12 @@ class CrossCorrelator:
             self.positions = self.positions[0]
             self.centers = self.centers[0]
 
-    def __call__(self, img1: np.ndarray, img2: Optional[np.ndarray] = None, normalization: Optional[Union[str, List[str]]] = None) -> Union[List[np.ndarray], np.ndarray]:
+    def __call__(
+        self,
+        img1: np.ndarray,
+        img2: Optional[np.ndarray] = None,
+        normalization: Optional[Union[str, List[str]]] = None,
+    ) -> Union[List[np.ndarray], np.ndarray]:
         """Run the cross correlation on an image/curve or against two
             images/curves
 

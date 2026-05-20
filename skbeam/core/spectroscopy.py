@@ -35,6 +35,7 @@
 """
 This module is for spectroscopy specific tools (spectrum fitting etc).
 """
+
 from __future__ import absolute_import, division, print_function
 
 import logging
@@ -93,9 +94,7 @@ def align_and_scale(
     return out_e, out_c
 
 
-def find_largest_peak(
-    x: np.ndarray, y: np.ndarray, window: Optional[int] = None
-) -> Tuple[float, float, float]:
+def find_largest_peak(x: np.ndarray, y: np.ndarray, window: Optional[int] = None) -> Tuple[float, float, float]:
     """
     Finds and estimates the location, width, and height of
     the largest peak. Assumes the top of the peak can be

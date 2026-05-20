@@ -384,7 +384,11 @@ def compton(
     counts += tail_value
 
     # compton peak, tail on the high side
-    hi_tail_value = factor * compton_hi_f_tail * gaussian_tail(-1 * x, compton_amplitude, -1 * compton_e, sigma, compton_hi_gamma)
+    hi_tail_value = (
+        factor
+        * compton_hi_f_tail
+        * gaussian_tail(-1 * x, compton_amplitude, -1 * compton_e, sigma, compton_hi_gamma)
+    )
     counts += hi_tail_value
 
     return counts

@@ -36,6 +36,7 @@
 """
 This module is for the 'core' data types.
 """
+
 from __future__ import absolute_import, division, print_function
 
 import logging
@@ -44,7 +45,7 @@ import time
 from collections import defaultdict, deque, namedtuple
 from collections.abc import MutableMapping
 from itertools import tee
-from typing import Any, Callable, Dict, Iterator, List, NoReturn, Optional, Sequence, Tuple, Union, Generator
+from typing import Any, Callable, Dict, Generator, Iterator, List, Optional, Tuple, Union
 
 import numpy as np
 import scipy.stats as sts
@@ -782,7 +783,7 @@ def bin_edges(
         raise ValueError("Exactly three of the arguments must be non-None " "not {}.".format(num_valid_args))
 
     if range_min is not None and range_max is not None and range_max <= range_min:
-            raise ValueError("The minimum must be less than the maximum")
+        raise ValueError("The minimum must be less than the maximum")
 
     if nbins is not None and nbins <= 0:
         raise ValueError("The number of bins must be positive")
@@ -1146,9 +1147,7 @@ def twotheta_to_q(two_theta: np.ndarray, wavelength: float) -> np.ndarray:
     return pre_factor * np.sin(two_theta / 2)
 
 
-def multi_tau_lags(
-    multitau_levels: int, multitau_channels: int
-) -> Tuple[int, np.ndarray, Dict[int, Any]]:
+def multi_tau_lags(multitau_levels: int, multitau_channels: int) -> Tuple[int, np.ndarray, Dict[int, Any]]:
     """
     Standard multiple-tau algorithm for finding the lag times (delay
     times).

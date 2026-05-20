@@ -38,9 +38,9 @@
 This module contain convenience methods to generate ROI labeled arrays for
 simple shapes such as rectangles and concentric circles.
 """
+
 from __future__ import absolute_import, division, print_function
 
-import collections
 import logging
 from typing import Iterable, List, Optional, Tuple, Union
 
@@ -97,7 +97,9 @@ def rectangles(coords: Iterable[Tuple[int, int, int, int]], shape: Tuple[int, in
     return labels_grid
 
 
-def rings(edges: Union[List[Tuple[float, float]], np.ndarray], center: Tuple[float, float], shape: Tuple[int, int]) -> np.ndarray:
+def rings(
+    edges: Union[List[Tuple[float, float]], np.ndarray], center: Tuple[float, float], shape: Tuple[int, int]
+) -> np.ndarray:
     """
     Draw annual (ring-shaped) shaped regions of interest.
 
@@ -197,9 +199,7 @@ def ring_edges(
             num_rings = len(spacing) + 1
         else:
             raise ValueError(
-                "Since width and spacing are constant, "
-                "num_rings cannot be inferred and must be "
-                "specified."
+                "Since width and spacing are constant, " "num_rings cannot be inferred and must be " "specified."
             )
     else:
         if isinstance(width, list) and len(width) != num_rings:

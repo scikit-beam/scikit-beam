@@ -36,13 +36,14 @@
 This module is for Differential Phase Contrast (DPC) imaging based on
 Fourier shift fitting
 """
+
 from __future__ import absolute_import, division, print_function
 
 import logging
 import warnings
 from collections import namedtuple
-from typing import Callable, Generator, Iterable, List, Optional, Tuple, Union
 from enum import Enum
+from typing import Callable, Generator, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 from scipy.optimize import minimize
@@ -438,7 +439,13 @@ def lazy_dpc(
 
     """
 
-    def initialize_state(scan_rows: int, scan_cols: int, ref: np.ndarray, roi: Optional[np.ndarray], bad_pixels: Optional[List[Tuple[int, int]]]) -> dpc_internal_state:
+    def initialize_state(
+        scan_rows: int,
+        scan_cols: int,
+        ref: np.ndarray,
+        roi: Optional[np.ndarray],
+        bad_pixels: Optional[List[Tuple[int, int]]],
+    ) -> dpc_internal_state:
         # Initialize ax, ay, gx, and gy
         ax = np.zeros((scan_rows, scan_cols), dtype="d")
         ay = np.zeros((scan_rows, scan_cols), dtype="d")

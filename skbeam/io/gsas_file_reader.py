@@ -44,12 +44,14 @@
 This is the module for reading files created in GSAS file formats
 https://subversion.xor.aps.anl.gov/trac/pyGSAS
 """
+
 from __future__ import absolute_import, division, print_function
 
 import os
 from typing import List, Tuple
 
 import numpy as np
+
 
 def gsas_reader(file: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """

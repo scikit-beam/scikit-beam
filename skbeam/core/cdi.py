@@ -39,9 +39,9 @@
 ########################################################################
 from __future__ import absolute_import, division, print_function
 
-from enum import Enum
 import logging
 import time
+from enum import Enum
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -228,6 +228,7 @@ def generate_disk_support(sup_radius: float, shape_v: List[int]) -> np.ndarray:
     sup[dummy < sup_radius] = 1
     return sup
 
+
 class PiModulusFlag(str, Enum):
     Complex = "complex"
     Real = "real"
@@ -325,7 +326,9 @@ def cdi_recon(
 
     if isinstance(pi_modulus_flag, str):
         if pi_modulus_flag.lower() not in PiModulusFlag._value2member_map_:
-            raise ValueError('pi_modulus_flag must be one of ("complex","real") not ' "{!r}".format(pi_modulus_flag))
+            raise ValueError(
+                'pi_modulus_flag must be one of ("complex","real") not ' "{!r}".format(pi_modulus_flag)
+            )
         pi_modulus_flag = PiModulusFlag(pi_modulus_flag.lower())
 
     real_operation = pi_modulus_flag == PiModulusFlag.Real

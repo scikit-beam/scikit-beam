@@ -1,8 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
-from typing import Any, Dict, Tuple, List
 import logging
 import os
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 
@@ -93,7 +93,9 @@ def _amira_data_to_numpy(am_data: str, header_dict: dict, flip_z: bool = True) -
     if header_dict["data_format"] == "BINARY-LITTLE-ENDIAN":
         data_strip = am_data.strip("\n")
         flt_values = np.fromstring(
-            data_strip, dtype=np.dtype(am_format_dict[header_dict["data_format"]] + am_dtype_dict[header_dict["data_type"]]), sep=""
+            data_strip,
+            dtype=np.dtype(am_format_dict[header_dict["data_format"]] + am_dtype_dict[header_dict["data_type"]]),
+            sep="",
         )
     if header_dict["data_format"] == "ASCII":
         data_strip = am_data.replace("\n", "")

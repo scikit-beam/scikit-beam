@@ -40,7 +40,7 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 from collections.abc import Mapping
-from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import six
@@ -412,8 +412,7 @@ doc_attrs += """    emission_line : `XrayLibWrap`
     jump_factor : `XrayLibWrap`
     fluor_yield : `XrayLibWrap`
     """
-doc_ex += (
-    """
+doc_ex += """
     >>> from skbeam.core.constants.xrf import XrfElement as Element
     >>> e = Element('Zn')
     >>> # Get the emission energy for the Kα1 line.
@@ -484,9 +483,7 @@ doc_ex += (
      ('ma2', 0.0),
      ('mb', 0.0),
      ('mg', 0.0)]
-    """
-    ""
-)
+    """ ""
 
 
 class XrfElement(BasicElement):
@@ -497,9 +494,7 @@ class XrfElement(BasicElement):
 
     Examples
     --------{}
-    """.format(
-        doc_title, doc_params, doc_ex
-    )
+    """.format(doc_title, doc_params, doc_ex)
 
     def __init__(self, element: Union[str, int]) -> None:
         if xraylib is None:
@@ -623,7 +618,9 @@ class XrfElement(BasicElement):
         return out_dict
 
 
-def emission_line_search(line_e: float, delta_e: float, incident_energy: float, element_list: Optional[List[Union[str, int]]] = None) -> Dict[str, Dict[str, float]]:
+def emission_line_search(
+    line_e: float, delta_e: float, incident_energy: float, element_list: Optional[List[Union[str, int]]] = None
+) -> Dict[str, Dict[str, float]]:
     """Find elements which have an emission line near an energy
 
     This function returns a dict keyed on element type of all

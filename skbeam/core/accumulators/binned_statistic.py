@@ -37,13 +37,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from __future__ import absolute_import, division, print_function
 
 import warnings
-from typing import Callable, List, Optional, Sequence, Tuple, Union
+from enum import Enum
+from typing import Callable, Optional, Sequence, Tuple, Union
 
 import numpy as np
 
 from ..utils import angle_grid, bin_edges_to_centers, radial_grid
 
-from enum import Enum
 
 class DefaultStatistic(Enum):
     MEAN = "mean"
@@ -272,7 +272,9 @@ class BinnedStatisticDD(object):
                 new_statistic = DefaultStatistic(new_statistic)
             self._statistic = new_statistic
 
-    def __call__(self, values: np.ndarray, statistic: Optional[Union[str, DefaultStatistic, Callable]] = None) -> np.ndarray:
+    def __call__(
+        self, values: np.ndarray, statistic: Optional[Union[str, DefaultStatistic, Callable]] = None
+    ) -> np.ndarray:
         """
         Parameters
         ----------
@@ -450,7 +452,9 @@ class BinnedStatistic1D(BinnedStatisticDD):
             if len(range) == 2:
                 range = [range]
 
-        super(BinnedStatistic1D, self).__init__([x], statistic=statistic, bins=bins, range=range, mask=mask)  # type: ignore[arg-type]
+        super(BinnedStatistic1D, self).__init__(  # type: ignore[arg-type]
+            [x], statistic=statistic, bins=bins, range=range, mask=mask
+        )
 
     @property
     def bin_edges(self) -> np.ndarray:
@@ -544,7 +548,9 @@ class BinnedStatistic2D(BinnedStatisticDD):
             xedges = yedges = np.asarray(bins, float)
             bins = [xedges, yedges]
 
-        super(BinnedStatistic2D, self).__init__([x, y], statistic=statistic, bins=bins, range=range, mask=mask)  # type: ignore[arg-type]
+        super(BinnedStatistic2D, self).__init__(  # type: ignore[arg-type]
+            [x, y], statistic=statistic, bins=bins, range=range, mask=mask
+        )
 
     def __call__(self, values, statistic=None):
         """

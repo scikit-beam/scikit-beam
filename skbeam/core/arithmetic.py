@@ -36,7 +36,9 @@
 The included functions supplement the logical operations currently provided
 in numpy in order to provide a complete set of logical operations.
 """
+
 from __future__ import absolute_import, division, print_function
+
 from typing import Optional
 
 import numpy as np

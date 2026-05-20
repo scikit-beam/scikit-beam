@@ -155,9 +155,7 @@ class BasicElement(object):
 
     Examples
     --------{}
-    """.format(
-        doc_title, doc_params, doc_attrs, doc_ex
-    )
+    """.format(doc_title, doc_params, doc_attrs, doc_ex)
 
     def __init__(self, Z: Union[str, int], *args: Any, **kwargs: Any) -> None:
         # init the parent object

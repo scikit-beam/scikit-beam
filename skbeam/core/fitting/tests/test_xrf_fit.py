@@ -27,7 +27,11 @@ from skbeam.core.fitting.xrf_model import (
     update_parameter_dict,
 )
 
-logging.basicConfig(format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO, filemode="w")  # type: ignore[call-overload]
+logging.basicConfig(  # type: ignore[call-overload]
+    format="%(asctime)s : %(levelname)s : %(message)s",
+    level=logging.INFO,
+    filemode="w",
+)
 
 
 def synthetic_spectrum():

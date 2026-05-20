@@ -39,6 +39,7 @@ intensities into  different file formats.
 (Output into different file formats, .chi, .dat and .xye)
 
 """
+
 from __future__ import absolute_import, division, print_function
 
 import logging
@@ -50,7 +51,15 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-def save_output(tth: np.ndarray, intensity: np.ndarray, output_name: str, q_or_2theta: str, ext: str = ".chi", err: Optional[np.ndarray] = None, dir_path: Optional[str] = None):
+def save_output(
+    tth: np.ndarray,
+    intensity: np.ndarray,
+    output_name: str,
+    q_or_2theta: str,
+    ext: str = ".chi",
+    err: Optional[np.ndarray] = None,
+    dir_path: Optional[str] = None,
+):
     """
     Save output diffraction intensities into .chi, .dat or .xye file formats.
     If the extension(ext) of the output file is not selected it will be
@@ -135,7 +144,14 @@ def _encoding_writer(f, _HEADER: str):
     f.write(_HEADER.encode("utf-8"))
 
 
-def gsas_writer(tth: np.ndarray, intensity: np.ndarray, output_name: str, mode: Optional[str] = None, err: Optional[np.ndarray] = None, dir_path: Optional[str] = None):
+def gsas_writer(
+    tth: np.ndarray,
+    intensity: np.ndarray,
+    output_name: str,
+    mode: Optional[str] = None,
+    err: Optional[np.ndarray] = None,
+    dir_path: Optional[str] = None,
+):
     """
     Save diffraction intensities into .gsas file format
 

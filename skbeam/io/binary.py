@@ -42,7 +42,9 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-def read_binary(filename: str, nx: int, ny: int, nz: int, dtype_str: str, headersize: int) -> Tuple[np.ndarray, bytes]:
+def read_binary(
+    filename: str, nx: int, ny: int, nz: int, dtype_str: str, headersize: int
+) -> Tuple[np.ndarray, bytes]:
     """
     docstring, woo!
 

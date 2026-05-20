@@ -1,7 +1,9 @@
 from __future__ import absolute_import, division, print_function
+
 from typing import Tuple
 
 import numpy as np
+
 
 def fit_quad_to_peak(x: np.ndarray, y: np.ndarray) -> Tuple[Tuple[float, float, float], float]:
     """

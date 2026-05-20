@@ -35,24 +35,25 @@
 """
 This module contains code for extracting features from data
 """
+
 from __future__ import absolute_import, division, print_function
 
 import logging
+import sys
 from collections import deque
-from typing import Callable, Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 from six.moves import zip
 
 from .fitting import fit_quad_to_peak
-import sys
 
 # Safely import Protocol depending on the Python version
 if sys.version_info >= (3, 8):
     from typing import Protocol
 else:
     # Requires `pip install typing_extensions`
-    from typing_extensions import Protocol 
+    from typing_extensions import Protocol
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +67,7 @@ class PeakRejection(Exception):
     """
 
     pass
+
 
 class PeakRefinementFunc(Protocol):
 

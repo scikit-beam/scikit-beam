@@ -65,35 +65,44 @@ logger = logging.getLogger(__name__)
 
 # fmt: off
 # emission line energy between (0, 30) keV
-K_LINE: List[str] = ['Li_K', 'Be_K', 'B_K', 'C_K', 'N_K', 'O_K', 'F_K', 'Ne_K',
-          'Na_K', 'Mg_K', 'Al_K', 'Si_K', 'P_K', 'S_K', 'Cl_K', 'Ar_K', 'K_K',
-          'Ca_K', 'Sc_K', 'Ti_K', 'V_K', 'Cr_K', 'Mn_K', 'Fe_K', 'Co_K',
-          'Ni_K', 'Cu_K', 'Zn_K', 'Ga_K', 'Ge_K', 'As_K', 'Se_K', 'Br_K',
-          'Kr_K', 'Rb_K', 'Sr_K', 'Y_K', 'Zr_K', 'Nb_K', 'Mo_K', 'Tc_K',
-          'Ru_K', 'Rh_K', 'Pd_K', 'Ag_K', 'Cd_K', 'In_K', 'Sn_K', 'Sb_K',
-          'Te_K', 'I_K']
+K_LINE: List[str] = [
+    'Li_K', 'Be_K', 'B_K', 'C_K', 'N_K', 'O_K', 'F_K', 'Ne_K',
+    'Na_K', 'Mg_K', 'Al_K', 'Si_K', 'P_K', 'S_K', 'Cl_K', 'Ar_K', 'K_K',
+    'Ca_K', 'Sc_K', 'Ti_K', 'V_K', 'Cr_K', 'Mn_K', 'Fe_K', 'Co_K',
+    'Ni_K', 'Cu_K', 'Zn_K', 'Ga_K', 'Ge_K', 'As_K', 'Se_K', 'Br_K',
+    'Kr_K', 'Rb_K', 'Sr_K', 'Y_K', 'Zr_K', 'Nb_K', 'Mo_K', 'Tc_K',
+    'Ru_K', 'Rh_K', 'Pd_K', 'Ag_K', 'Cd_K', 'In_K', 'Sn_K', 'Sb_K',
+    'Te_K', 'I_K',
+]
 
-L_LINE: List[str] = ['Ga_L', 'Ge_L', 'As_L', 'Se_L', 'Br_L', 'Kr_L', 'Rb_L', 'Sr_L',
-          'Y_L', 'Zr_L', 'Nb_L', 'Mo_L', 'Tc_L', 'Ru_L', 'Rh_L', 'Pd_L',
-          'Ag_L', 'Cd_L', 'In_L', 'Sn_L', 'Sb_L', 'Te_L', 'I_L', 'Xe_L',
-          'Cs_L', 'Ba_L', 'La_L', 'Ce_L', 'Pr_L', 'Nd_L', 'Pm_L', 'Sm_L',
-          'Eu_L', 'Gd_L', 'Tb_L', 'Dy_L', 'Ho_L', 'Er_L', 'Tm_L', 'Yb_L',
-          'Lu_L', 'Hf_L', 'Ta_L', 'W_L', 'Re_L', 'Os_L', 'Ir_L', 'Pt_L',
-          'Au_L', 'Hg_L', 'Tl_L', 'Pb_L', 'Bi_L', 'Po_L', 'At_L', 'Rn_L',
-          'Fr_L', 'Ac_L', 'Th_L', 'Pa_L', 'U_L', 'Np_L', 'Pu_L', 'Am_L']
+L_LINE: List[str] = [
+    'Ga_L', 'Ge_L', 'As_L', 'Se_L', 'Br_L', 'Kr_L', 'Rb_L', 'Sr_L',
+    'Y_L', 'Zr_L', 'Nb_L', 'Mo_L', 'Tc_L', 'Ru_L', 'Rh_L', 'Pd_L',
+    'Ag_L', 'Cd_L', 'In_L', 'Sn_L', 'Sb_L', 'Te_L', 'I_L', 'Xe_L',
+    'Cs_L', 'Ba_L', 'La_L', 'Ce_L', 'Pr_L', 'Nd_L', 'Pm_L', 'Sm_L',
+    'Eu_L', 'Gd_L', 'Tb_L', 'Dy_L', 'Ho_L', 'Er_L', 'Tm_L', 'Yb_L',
+    'Lu_L', 'Hf_L', 'Ta_L', 'W_L', 'Re_L', 'Os_L', 'Ir_L', 'Pt_L',
+    'Au_L', 'Hg_L', 'Tl_L', 'Pb_L', 'Bi_L', 'Po_L', 'At_L', 'Rn_L',
+    'Fr_L', 'Ac_L', 'Th_L', 'Pa_L', 'U_L', 'Np_L', 'Pu_L', 'Am_L',
+]
 
-M_LINE: List[str] = ['Hf_M', 'Ta_M', 'W_M', 'Re_M', 'Os_M', 'Ir_M', 'Pt_M', 'Au_M',
-          'Hg_M', 'Tl_M', 'Pb_M', 'Bi_M', 'Sm_M', 'Eu_M', 'Gd_M', 'Tb_M',
-          'Dy_M', 'Ho_M', 'Er_M', 'Tm_M', 'Yb_M', 'Lu_M', 'Th_M', 'Pa_M',
-          'U_M']
+M_LINE: List[str] = [
+    'Hf_M', 'Ta_M', 'W_M', 'Re_M', 'Os_M', 'Ir_M', 'Pt_M', 'Au_M',
+    'Hg_M', 'Tl_M', 'Pb_M', 'Bi_M', 'Sm_M', 'Eu_M', 'Gd_M', 'Tb_M',
+    'Dy_M', 'Ho_M', 'Er_M', 'Tm_M', 'Yb_M', 'Lu_M', 'Th_M', 'Pa_M',
+    'U_M',
+]
 
 K_TRANSITIONS: List[str] = ['ka1', 'ka2', 'ka3', 'kb1', 'kb2', 'kb3', 'kb4', 'kb5']
-L_TRANSITIONS: List[str] = ['la1', 'la2', 'lb1', 'lb2', 'lb3', 'lb4', 'lb5',
-                 'lg1', 'lg2', 'lg3', 'lg4', 'll', 'ln']
+L_TRANSITIONS: List[str] = [
+    'la1', 'la2', 'lb1', 'lb2', 'lb3', 'lb4', 'lb5',
+    'lg1', 'lg2', 'lg3', 'lg4', 'll', 'ln',
+]
 M_TRANSITIONS: List[str] = ['ma1', 'ma2', 'mb', 'mg']
 
-TRANSITIONS_LOOKUP: Dict[str, List[str]] = {'K': K_TRANSITIONS, 'L': L_TRANSITIONS,
-                      'M': M_TRANSITIONS}
+TRANSITIONS_LOOKUP: Dict[str, List[str]] = {
+    'K': K_TRANSITIONS, 'L': L_TRANSITIONS, 'M': M_TRANSITIONS,
+}
 # fmt: on
 
 
@@ -271,7 +280,13 @@ def _copy_model_param_hints(target: Model, source: Model, params: List[str]):
         target.set_param_hint(label, value=source[label].value, expr=None)  # Originally was expr=label
 
 
-def _copy_model_param_hints_EXPR(target: Model, source: Model, *, param_hints_elements: Optional[List[str]] = None, param_hints_elastic: Optional[List[str]] = None):
+def _copy_model_param_hints_EXPR(
+    target: Model,
+    source: Model,
+    *,
+    param_hints_elements: Optional[List[str]] = None,
+    param_hints_elastic: Optional[List[str]] = None,
+):
     """
     Copy parameters (set hints) from Parameters object (source) to a model (target)
     ( Sets the attribute 'expr' in the model hint to the copied parameter name,
@@ -380,7 +395,9 @@ def register_strategy(key: str, strategy: Dict[str, str], overwrite: bool = True
     _STRATEGY_REGISTRY[key] = strategy
 
 
-def set_parameter_bound(param: Dict[str, Any], bound_option: str, extra_config: Optional[Dict[str, str]] = None) -> None:
+def set_parameter_bound(
+    param: Dict[str, Any], bound_option: str, extra_config: Optional[Dict[str, str]] = None
+) -> None:
     """
     Update the default value of bounds.
 
@@ -1080,7 +1097,14 @@ class ModelSpectrum(object):
             param_hints_elastic=param_hints_elastic,
         )
 
-    def model_fit(self, channel_number: np.ndarray, spectrum: np.ndarray, weights: Optional[np.ndarray] = None, method: str = "leastsq", **kwargs: Any) -> ModelResult:
+    def model_fit(
+        self,
+        channel_number: np.ndarray,
+        spectrum: np.ndarray,
+        weights: Optional[np.ndarray] = None,
+        method: str = "leastsq",
+        **kwargs: Any,
+    ) -> ModelResult:
         """
         Parameters
         ----------
@@ -1217,7 +1241,9 @@ def extract_strategy(param: Dict[str, Any], name: str) -> Dict[str, Any]:
     return {k: v[name] for k, v in six.iteritems(param_new) if k != "non_fitting_values"}
 
 
-def compute_escape_peak(spectrum: np.ndarray, ratio: float, params: Dict[str, Any], escape_e: float = 1.73998) -> Tuple[np.ndarray, np.ndarray]:
+def compute_escape_peak(
+    spectrum: np.ndarray, ratio: float, params: Dict[str, Any], escape_e: float = 1.73998
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Calculate the escape peak for given detector.
 
@@ -1247,7 +1273,9 @@ def compute_escape_peak(spectrum: np.ndarray, ratio: float, params: Dict[str, An
     return result
 
 
-def construct_linear_model(channel_number: np.ndarray, params: Dict[str, Any], elemental_lines: List[str], default_area: float = 100) -> Tuple[List[str], np.ndarray, Dict[str, float]]:
+def construct_linear_model(
+    channel_number: np.ndarray, params: Dict[str, Any], elemental_lines: List[str], default_area: float = 100
+) -> Tuple[List[str], np.ndarray, Dict[str, float]]:
     """
     Create spectrum with parameters given from params.
 
@@ -1308,7 +1336,9 @@ def construct_linear_model(channel_number: np.ndarray, params: Dict[str, Any], e
     return selected_elements, matv_arr, element_area
 
 
-def nnls_fit(spectrum: np.ndarray, expected_matrix: np.ndarray, weights: Optional[np.ndarray] = None) -> Tuple[np.ndarray, float]:
+def nnls_fit(
+    spectrum: np.ndarray, expected_matrix: np.ndarray, weights: Optional[np.ndarray] = None
+) -> Tuple[np.ndarray, float]:
     """
     Non-negative least squares fitting.
 
@@ -1337,7 +1367,13 @@ def nnls_fit(spectrum: np.ndarray, expected_matrix: np.ndarray, weights: Optiona
     return nnls(expected_matrix, spectrum)
 
 
-def linear_spectrum_fitting(x: np.ndarray, y: np.ndarray, params: Dict[str, Any], elemental_lines: Optional[List[str]] = None, weights: Optional[np.ndarray] = None) -> Tuple[np.ndarray, "OrderedDict[str, np.ndarray]", "OrderedDict[str, float]"]:
+def linear_spectrum_fitting(
+    x: np.ndarray,
+    y: np.ndarray,
+    params: Dict[str, Any],
+    elemental_lines: Optional[List[str]] = None,
+    weights: Optional[np.ndarray] = None,
+) -> Tuple[np.ndarray, "OrderedDict[str, np.ndarray]", "OrderedDict[str, float]"]:
     """
     Fit a spectrum to a linear model.
 
@@ -1546,7 +1582,9 @@ def _log_and_fit(row_num: int, *args: Any) -> np.ndarray:
     return fit_per_line_nnls(*args)
 
 
-def fit_pixel_multiprocess_nnls(exp_data: np.ndarray, matv: np.ndarray, param: Dict[str, Any], use_snip: bool = False) -> np.ndarray:
+def fit_pixel_multiprocess_nnls(
+    exp_data: np.ndarray, matv: np.ndarray, param: Dict[str, Any], use_snip: bool = False
+) -> np.ndarray:
     """
     Multiprocess fit of experiment data.
 
@@ -1584,7 +1622,13 @@ def fit_pixel_multiprocess_nnls(exp_data: np.ndarray, matv: np.ndarray, param: D
     return np.array(results)
 
 
-def calculate_area(e_select: List[str], matv: np.ndarray, results: np.ndarray, param: Dict[str, Any], first_peak_area: bool = False) -> Dict[str, np.ndarray]:
+def calculate_area(
+    e_select: List[str],
+    matv: np.ndarray,
+    results: np.ndarray,
+    param: Dict[str, Any],
+    first_peak_area: bool = False,
+) -> Dict[str, np.ndarray]:
     """
     Parameters
     ----------

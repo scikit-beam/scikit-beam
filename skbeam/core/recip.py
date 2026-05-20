@@ -39,16 +39,15 @@ This module is for functions and classes specific to reciprocal space
 calculations.
 
 """
+
 from __future__ import absolute_import, division, print_function
 
 import time
 from collections import namedtuple
-from typing import Dict, Optional, Tuple, Literal, Union
 from enum import Enum
+from typing import Dict, Literal, Optional, Tuple, Union
 
 import numpy as np
-
-from .utils import verbosedict
 
 try:
     from pyFAI import geometry as geo
@@ -70,6 +69,7 @@ class FrameMode(str, Enum):
     @property
     def int_value(self) -> int:
         return list(FrameMode).index(self) + 1
+
 
 def process_to_q(
     setting_angles: np.ndarray[Tuple[int, Literal[6]]],
