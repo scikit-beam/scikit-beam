@@ -37,16 +37,32 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from __future__ import absolute_import, division, print_function
 
 import warnings
+from typing import Callable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 
 from ..utils import angle_grid, bin_edges_to_centers, radial_grid
 
+from enum import Enum
+
+class DefaultStatistic(Enum):
+    MEAN = "mean"
+    MEDIAN = "median"
+    COUNT = "count"
+    SUM = "sum"
+    STD = "std"
+
 
 class BinnedStatisticDD(object):
-    std_ = ("mean", "median", "count", "sum", "std")
 
-    def __init__(self, sample, statistic="mean", bins=10, range=None, mask=None):
+    def __init__(
+        self,
+        sample: np.ndarray,
+        statistic: Union[str, DefaultStatistic, Callable] = "mean",
+        bins: Union[int, Sequence] = 10,
+        range: Optional[Sequence] = None,
+        mask: Optional[np.ndarray] = None,
+    ):
         """
         Compute a multidimensional binned statistic for a set of data.
 
@@ -114,7 +130,7 @@ class BinnedStatisticDD(object):
         dedges = self.D * [None]
 
         try:
-            M = len(bins)
+            M = len(bins)  # type: ignore[arg-type]
             if M != self.D:
                 raise AttributeError("The dimension of bins must be equal " "to the dimension of the sample x.")
         except TypeError:
@@ -129,7 +145,7 @@ class BinnedStatisticDD(object):
             smin = np.zeros(self.D)
             smax = np.zeros(self.D)
             for i in np.arange(self.D):
-                smin[i], smax[i] = range[i]
+                smin[i], smax[i] = range[int(i)]  # type: ignore[index]
 
         # Make sure the bins have a finite width.
         for i in np.arange(len(smin)):
@@ -139,14 +155,15 @@ class BinnedStatisticDD(object):
 
         # Create edge arrays
         for i in np.arange(self.D):
-            if np.isscalar(bins[i]):
-                self.nbin[i] = bins[i] + 2  # +2 for outlier bins
-                self.edges[i] = np.linspace(smin[i], smax[i], self.nbin[i] - 1)
+            ii = int(i)
+            if np.isscalar(bins[ii]):  # type: ignore[index]
+                self.nbin[i] = bins[ii] + 2  # type: ignore[index]  # +2 for outlier bins
+                self.edges[ii] = np.linspace(smin[i], smax[i], self.nbin[i] - 1)
             else:
-                self.edges[i] = np.asarray(bins[i], float)
-                self.nbin[i] = len(self.edges[i]) + 1  # +1 for outlier bins
-            self._centers[i] = bin_edges_to_centers(self.edges[i])
-            dedges[i] = np.diff(self.edges[i])
+                self.edges[ii] = np.asarray(bins[ii], dtype=float)  # type: ignore[index, type-var]
+                self.nbin[i] = len(self.edges[ii]) + 1  # +1 for outlier bins
+            self._centers[ii] = bin_edges_to_centers(self.edges[ii])
+            dedges[ii] = np.diff(self.edges[ii])
 
         self.nbin = np.asarray(self.nbin)
 
@@ -179,12 +196,12 @@ class BinnedStatisticDD(object):
         for i in np.arange(0, self.D - 1):
             self.xy += Ncount[self.ni[i]] * self.nbin[self.ni[i + 1 :]].prod()
         self.xy += Ncount[self.ni[-1]]
-        self._flatcount = None  # will be computed if needed
-        self._argsort_index = None
+        self._flatcount: Optional[np.ndarray] = None  # will be computed if needed
+        self._argsort_index: Optional[np.ndarray] = None
         self.statistic = statistic
 
     @property
-    def binmap(self):
+    def binmap(self) -> np.ndarray:
         """Return the map of the bins per dimension.
             i.e. reverse transformation of flattened to unflattened bins
 
@@ -211,7 +228,7 @@ class BinnedStatisticDD(object):
         return binmap
 
     @property
-    def flatcount(self):
+    def flatcount(self) -> np.ndarray:
         # Compute flatcount the first time it is accessed. Some statistics
         # never access it.
         if self._flatcount is None:
@@ -219,7 +236,7 @@ class BinnedStatisticDD(object):
         return self._flatcount
 
     @property
-    def argsort_index(self):
+    def argsort_index(self) -> np.ndarray:
         # Compute argsort the first time it is accessed. Some statistics
         # never access it.
         if self._argsort_index is None:
@@ -227,7 +244,7 @@ class BinnedStatisticDD(object):
         return self._argsort_index
 
     @property
-    def bin_edges(self):
+    def bin_edges(self) -> np.ndarray:
         """
         bin_edges : array of dtype float
         Return the bin edges ``(length(statistic)+1)``.
@@ -235,7 +252,7 @@ class BinnedStatisticDD(object):
         return self.edges
 
     @property
-    def bin_centers(self):
+    def bin_centers(self) -> np.ndarray:
         """
         bin_centers : array of dtype float
         Return the bin centers ``(length(statistic))``.
@@ -243,24 +260,26 @@ class BinnedStatisticDD(object):
         return self._centers
 
     @property
-    def statistic(self):
+    def statistic(self) -> Union[DefaultStatistic, Callable]:
         return self._statistic
 
     @statistic.setter
-    def statistic(self, new_statistic):
-        if not callable(new_statistic) and new_statistic not in self.std_:
+    def statistic(self, new_statistic: Union[str, DefaultStatistic, Callable]):
+        if not callable(new_statistic) and new_statistic not in DefaultStatistic:
             raise ValueError("invalid statistic %r" % (new_statistic,))
         else:
+            if isinstance(new_statistic, str):
+                new_statistic = DefaultStatistic(new_statistic)
             self._statistic = new_statistic
 
-    def __call__(self, values, statistic=None):
+    def __call__(self, values: np.ndarray, statistic: Optional[Union[str, DefaultStatistic, Callable]] = None) -> np.ndarray:
         """
         Parameters
         ----------
         values : array_like
             The values on which the statistic will be computed.  This must be
             the same shape as `sample` in the constructor.
-        statistic : string or callable, optional
+        statistic : string, DefaultStatistic, or callable, optional
             The statistic to compute (default is whatever was passed in when
             this object was instantiated).
             The following statistics are available:
@@ -286,33 +305,35 @@ class BinnedStatisticDD(object):
         """
         if statistic is None:
             statistic = self.statistic
+        elif isinstance(statistic, str):
+            statistic = DefaultStatistic(statistic)
 
         self.result = np.empty(self.nbin.prod(), float)
-        if statistic == "mean":
+        if statistic == DefaultStatistic.MEAN:
             self.result.fill(np.nan)
             flatsum = np.bincount(self.xy, values)
             a = self.flatcount.nonzero()
             self.result[a] = flatsum[a] / self.flatcount[a]
-        elif statistic == "std":
+        elif statistic == DefaultStatistic.STD:
             self.result.fill(0)
             flatsum = np.bincount(self.xy, values)
             flatsum2 = np.bincount(self.xy, values**2)
             a = self.flatcount.nonzero()
             self.result[a] = np.sqrt(flatsum2[a] / self.flatcount[a] - (flatsum[a] / self.flatcount[a]) ** 2)
-        elif statistic == "count":
+        elif statistic == DefaultStatistic.COUNT:
             self.result.fill(0)
-            a = np.arange(len(self.flatcount))
-            self.result[a] = self.flatcount
-        elif statistic == "sum":
+            idx = np.arange(len(self.flatcount))
+            self.result[idx] = self.flatcount
+        elif statistic == DefaultStatistic.SUM:
             self.result.fill(0)
             flatsum = np.bincount(self.xy, values)
-            a = np.arange(len(flatsum))
-            self.result[a] = flatsum
-        elif callable(statistic) or statistic == "median":
-            if statistic == "median":
+            idx = np.arange(len(flatsum))
+            self.result[idx] = flatsum
+        elif callable(statistic) or statistic == DefaultStatistic.MEDIAN:
+            if statistic == DefaultStatistic.MEDIAN:
                 internal_statistic = np.median
             else:
-                internal_statistic = statistic
+                internal_statistic = statistic  # type: ignore[assignment]
             with warnings.catch_warnings():
                 # Numpy generates a warnings for mean/std/... with empty list
                 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -334,10 +355,10 @@ class BinnedStatisticDD(object):
         # Shape into a proper matrix
         self.result = self.result.reshape(np.sort(self.nbin))
         ni = np.copy(self.ni)
-        for i in np.arange(self.nbin.size):
-            j = ni.argsort()[i]
-            self.result = self.result.swapaxes(i, j)
-            ni[i], ni[j] = ni[j], ni[i]
+        for dim_idx in range(int(self.nbin.size)):
+            j = int(ni.argsort()[dim_idx])
+            self.result = self.result.swapaxes(dim_idx, j)
+            ni[dim_idx], ni[j] = ni[j], ni[dim_idx]  # type: ignore[assignment]
 
         # Remove outliers (indices 0 and -1 for each dimension).
         core = self.D * [slice(1, -1)]
@@ -350,7 +371,14 @@ class BinnedStatisticDD(object):
 
 
 class BinnedStatistic1D(BinnedStatisticDD):
-    def __init__(self, x, statistic="mean", bins=10, range=None, mask=None):
+    def __init__(
+        self,
+        x: np.ndarray,
+        statistic: Union[str, DefaultStatistic, Callable] = DefaultStatistic.MEAN,
+        bins: Union[int, Sequence] = 10,
+        range: Optional[Sequence] = None,
+        mask: Optional[np.ndarray] = None,
+    ):
         """
         A refactored version of scipy.stats.binned_statistic to improve
         performance for the case where binning doesn't need to be
@@ -367,7 +395,7 @@ class BinnedStatistic1D(BinnedStatisticDD):
         ----------
         x : array_like
             A sequence of values to be binned.
-        statistic : string or callable, optional
+        statistic : string, DefaultStatistic, or callable, optional
             The statistic to compute (default is 'mean').
             The following statistics are available:
 
@@ -411,7 +439,7 @@ class BinnedStatistic1D(BinnedStatisticDD):
         is ``[3, 4]``, which *includes* 4.
         """
         try:
-            N = len(bins)
+            N = len(bins)  # type: ignore[arg-type]
         except TypeError:
             N = 1
 
@@ -422,10 +450,10 @@ class BinnedStatistic1D(BinnedStatisticDD):
             if len(range) == 2:
                 range = [range]
 
-        super(BinnedStatistic1D, self).__init__([x], statistic=statistic, bins=bins, range=range, mask=mask)
+        super(BinnedStatistic1D, self).__init__([x], statistic=statistic, bins=bins, range=range, mask=mask)  # type: ignore[arg-type]
 
     @property
-    def bin_edges(self):
+    def bin_edges(self) -> np.ndarray:
         """
         bin_edges : 1D array of dtype float
         Return the bin edges.
@@ -433,7 +461,7 @@ class BinnedStatistic1D(BinnedStatisticDD):
         return super(BinnedStatistic1D, self).bin_edges[0]
 
     @property
-    def bin_centers(self):
+    def bin_centers(self) -> np.ndarray:
         """
         bin_centers : 1D array of dtype float
         Return the bin centers.
@@ -497,10 +525,18 @@ class BinnedStatistic2D(BinnedStatisticDD):
 
     """
 
-    def __init__(self, x, y, statistic="mean", bins=10, range=None, mask=None):
+    def __init__(
+        self,
+        x: np.ndarray,
+        y: np.ndarray,
+        statistic: Union[str, DefaultStatistic, Callable] = DefaultStatistic.MEAN,
+        bins: Union[int, Sequence] = 10,
+        range: Optional[Sequence] = None,
+        mask: Optional[np.ndarray] = None,
+    ):
         # This code is based on np.histogram2d
         try:
-            N = len(bins)
+            N = len(bins)  # type: ignore[arg-type]
         except TypeError:
             N = 1
 
@@ -508,7 +544,7 @@ class BinnedStatistic2D(BinnedStatisticDD):
             xedges = yedges = np.asarray(bins, float)
             bins = [xedges, yedges]
 
-        super(BinnedStatistic2D, self).__init__([x, y], statistic=statistic, bins=bins, range=range, mask=mask)
+        super(BinnedStatistic2D, self).__init__([x, y], statistic=statistic, bins=bins, range=range, mask=mask)  # type: ignore[arg-type]
 
     def __call__(self, values, statistic=None):
         """
@@ -551,7 +587,16 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
     image in both radius and phi.
     """
 
-    def __init__(self, shape, bins=10, range=None, origin=None, mask=None, r_map=None, statistic="mean"):
+    def __init__(
+        self,
+        shape: Tuple[int, int],
+        bins: Union[int, Sequence] = 10,
+        range: Optional[Sequence] = None,
+        origin: Optional[Tuple[float, float]] = None,
+        mask: Optional[np.ndarray] = None,
+        r_map: Optional[np.ndarray] = None,
+        statistic: Union[str, DefaultStatistic, Callable] = DefaultStatistic.MEAN,
+    ):
         """
         Parameters:
         -----------
@@ -581,7 +626,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
             The map of pixel radii for each pixel. For example, r_map can be
             used to define the radius of each pixel relative to the origin in
             reciprocal space (on the Ewald sphere).
-        statistic : string or callable, optional
+        statistic : string, DefaultStatistic, or callable, optional
             The statistic to compute (default is 'mean').
             The following statistics are available:
 
@@ -620,7 +665,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
             r_map.reshape(-1), phi_map.reshape(-1), statistic, bins=bins, mask=mask, range=range
         )
 
-    def __call__(self, values, statistic=None):
+    def __call__(self, values, statistic: Optional[Union[str, DefaultStatistic, Callable]] = None):
         """
         Parameters
         ----------
@@ -628,7 +673,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
             The values on which the statistic will be computed.  This must
             match the ``shape`` that passed in when this object was
             instantiated.
-        statistic : string or callable, optional
+        statistic : string, DefaultStatistic, or callable, optional
             The statistic to compute (default is whatever was passed in when
             this object was instantiated).
             The following statistics are available:
@@ -667,7 +712,16 @@ class RadialBinnedStatistic(BinnedStatistic1D):
     image in radius.
     """
 
-    def __init__(self, shape, bins=10, range=None, origin=None, mask=None, r_map=None, statistic="mean"):
+    def __init__(
+        self,
+        shape: Tuple[int, int],
+        bins: Union[int, Sequence] = 10,
+        range: Optional[Sequence] = None,
+        origin: Optional[Tuple[float, float]] = None,
+        mask: Optional[np.ndarray] = None,
+        r_map: Optional[np.ndarray] = None,
+        statistic: Union[str, DefaultStatistic, Callable] = DefaultStatistic.MEAN,
+    ):
         """
         Parameters:
         -----------
@@ -696,7 +750,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
         r_map : the map of pixel radii for each pixel. This is useful when the
             detector has some curvature or is a more complex 2D shape embedded
             in a 3D space (for example, Ewald curvature).
-        statistic : string or callable, optional
+        statistic : string, DefaultStatistic, or callable, optional
             The statistic to compute (default is 'mean').
             The following statistics are available:
 
@@ -733,7 +787,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
             r_map.reshape(-1), statistic, bins=bins, mask=mask, range=range
         )
 
-    def __call__(self, values, statistic=None):
+    def __call__(self, values: np.ndarray, statistic: Optional[Union[str, DefaultStatistic, Callable]] = None):
         """
         Parameters
         ----------
@@ -741,7 +795,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
             The values on which the statistic will be computed.  This must
             match the ``shape`` that passed in when this object was
             instantiated.
-        statistic : string or callable, optional
+        statistic : string, DefaultStatistic, or callable, optional
             The statistic to compute (default is whatever was passed in when
             this object was instantiated).
             The following statistics are available:

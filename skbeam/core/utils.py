@@ -44,6 +44,7 @@ import time
 from collections import defaultdict, deque, namedtuple
 from collections.abc import MutableMapping
 from itertools import tee
+from typing import Any, Callable, Dict, Iterator, List, NoReturn, Optional, Sequence, Tuple, Union, Generator
 
 import numpy as np
 import scipy.stats as sts
@@ -90,7 +91,7 @@ class MD_dict(MutableMapping):
     'm'
     """
 
-    def __init__(self, md_dict=None):
+    def __init__(self, md_dict: Optional[Dict] = None) -> None:
         # TODO properly walk the input on upgrade dicts -> MD_dict
         if md_dict is None:
             md_dict = dict()
@@ -98,11 +99,11 @@ class MD_dict(MutableMapping):
         self._dict = md_dict
         self._split = "."
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self._dict.__repr__()
 
     # overload __setitem__ so dotted paths work
-    def __setitem__(self, key, val):
+    def __setitem__(self, key: str, val: Any) -> None:
         key_split = key.split(self._split)
         tmp = self._dict
         for k in key_split[:-1]:
@@ -138,7 +139,7 @@ class MD_dict(MutableMapping):
         except TypeError:
             tmp[key_split[-1]] = md_value(val, None)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         key_split = key.split(self._split)
         tmp = self._dict
         for k in key_split[:-1]:
@@ -154,7 +155,7 @@ class MD_dict(MutableMapping):
 
         return tmp.get(key_split[-1], None)
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: str) -> None:
         # pass one delete the entry
         # TODO make robust to non-keys
         key_split = key.split(self._split)
@@ -165,14 +166,14 @@ class MD_dict(MutableMapping):
         del tmp[key_split[-1]]
         # TODO pass 2 remove empty branches
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(list(iter(self)))
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[str, None, None]:
         return _iter_helper([], self._split, self._dict)
 
 
-def _iter_helper(path_list, split, md_dict):
+def _iter_helper(path_list: List[str], split: str, md_dict: Dict) -> Generator[str, None, None]:
     """
     Recursively walk the tree and return the names of the leaves
     """
@@ -190,7 +191,7 @@ class verbosedict(dict):
     a key is not found.
     """
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         try:
             v = dict.__getitem__(self, key)
         except KeyError:
@@ -229,15 +230,15 @@ class RCParamDict(MutableMapping):
 
     _delim = "."
 
-    def __init__(self):
+    def __init__(self) -> None:
         # the dict to hold the keys at this level
-        self._dict = dict()
+        self._dict: Dict[str, Any] = dict()
         # the defaultdict (defaults to just accepting it) of
         # validator functions
-        self._validators = defaultdict(lambda: lambda x: True)
+        self._validators: Dict[str, Callable[[Any], bool]] = defaultdict(lambda: lambda x: True)
 
     # overload __setitem__ so dotted paths work
-    def __setitem__(self, key, val):
+    def __setitem__(self, key: str, val: Any) -> None:
         # try to split the key
         splt_key = key.split(self._delim, 1)
         # if more than one part, recurse
@@ -253,12 +254,12 @@ class RCParamDict(MutableMapping):
 
             tmp[splt_key[1]] = val
         else:
-            if not self._validators[key]:
+            if not self._validators[key](val):
                 # TODO improve the validation error
                 raise ValueError("fails to validate, improve this")
             self._dict[key] = val
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         # try to split the key
         splt_key = key.split(self._delim, 1)
         if len(splt_key) > 1:
@@ -266,20 +267,20 @@ class RCParamDict(MutableMapping):
         else:
             return self._dict[key]
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: str) -> None:
         splt_key = key.split(self._delim, 1)
         if len(splt_key) > 1:
             self._dict[splt_key[0]].__delitem__(splt_key[1])
         else:
             del self._dict[key]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(list(iter(self)))
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[str, None, None]:
         return self._iter_helper([])
 
-    def _iter_helper(self, path_list):
+    def _iter_helper(self, path_list: List[str]) -> Generator[str, None, None]:
         """
         Recursively walk the tree and return the names of the leaves
         """
@@ -300,13 +301,13 @@ class RCParamDict(MutableMapping):
                     ]
                 )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         # recursively get the formatted list of strings
         str_list = self._repr_helper(0)
         # return as a single string
         return "\n".join(str_list)
 
-    def _repr_helper(self, tab_level):
+    def _repr_helper(self, tab_level: int) -> List[str]:
         # to accumulate the strings into
         str_list = []
         # list of the elements at this level
@@ -337,7 +338,7 @@ class RCParamDict(MutableMapping):
         return str_list
 
 
-keys_core = {
+keys_core: Dict[str, Dict[str, Union[str, type, Tuple, Dict[str, Union[str, type]]]]] = {
     "pixel_size": {
         "description": ("2 element tuple defining the (x y) dimensions of the " "pixel"),
         "type": tuple,
@@ -404,7 +405,7 @@ keys_core = {
 }
 
 
-def subtract_reference_images(imgs, is_reference):
+def subtract_reference_images(imgs: np.ndarray, is_reference: np.ndarray) -> List[np.ndarray]:
     """
     Function to subtract a series of measured images from
     background/dark current/reference images.  The nearest reference
@@ -442,7 +443,7 @@ def subtract_reference_images(imgs, is_reference):
     # grab the first image
     ref_imge = imgs[0]
     # make an array of zeros of the correct type
-    corrected_image = deque()
+    corrected_image: deque = deque()
     # zip together (lazy like this is really izip), images and flags
     for imgs, ref in zip(imgs[1:], is_reference[1:]):
         # if this is a ref image, save it and move on
@@ -456,7 +457,13 @@ def subtract_reference_images(imgs, is_reference):
     return list(corrected_image)
 
 
-def img_to_relative_xyi(img, cx, cy, pixel_size_x=None, pixel_size_y=None):
+def img_to_relative_xyi(
+    img: np.ndarray,
+    cx: float,
+    cy: float,
+    pixel_size_x: Optional[float] = None,
+    pixel_size_y: Optional[float] = None,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Convert the 2D image to a list of x y I coordinates where
     x == x_img - detector_center[0] and
@@ -517,7 +524,13 @@ def img_to_relative_xyi(img, cx, cy, pixel_size_x=None, pixel_size_y=None):
     return x.ravel(), y.ravel(), img.ravel()
 
 
-def bin_1D(x, y, nx=None, min_x=None, max_x=None):
+def bin_1D(
+    x: np.ndarray,
+    y: np.ndarray,
+    nx: Optional[int] = None,
+    min_x: Optional[float] = None,
+    max_x: Optional[float] = None,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Bin the values in y based on their x-coordinates
 
@@ -563,7 +576,11 @@ def bin_1D(x, y, nx=None, min_x=None, max_x=None):
     return bins, val, count
 
 
-def radial_grid(center, shape, pixel_size=None):
+def radial_grid(
+    center: Tuple[float, float],
+    shape: Tuple[int, int],
+    pixel_size: Optional[Tuple[float, float]] = None,
+) -> np.ndarray:
     """Convert a cartesian grid (x,y) to the radius relative to some center
 
     Parameters
@@ -596,7 +613,11 @@ def radial_grid(center, shape, pixel_size=None):
     return np.sqrt(X * X + Y * Y)
 
 
-def angle_grid(center, shape, pixel_size=None):
+def angle_grid(
+    center: Tuple[float, float],
+    shape: Tuple[int, int],
+    pixel_size: Optional[Tuple[float, float]] = None,
+) -> np.ndarray:
     """
     Make a grid of angular positions.
 
@@ -635,7 +656,7 @@ def angle_grid(center, shape, pixel_size=None):
     return np.arctan2(y, x)
 
 
-def radius_to_twotheta(dist_sample, radius):
+def radius_to_twotheta(dist_sample: float, radius: np.ndarray) -> np.ndarray:
     """
     Converts radius from the calibrated center to scattering angle
     (2:math:`2\\theta`) with known detector to sample distance.
@@ -656,7 +677,14 @@ def radius_to_twotheta(dist_sample, radius):
     return np.arctan(radius / dist_sample)
 
 
-def wedge_integration(src_data, center, theta_start, delta_theta, r_inner, delta_r):
+def wedge_integration(
+    src_data: np.ndarray,
+    center: np.ndarray,
+    theta_start: float,
+    delta_theta: float,
+    r_inner: float,
+    delta_r: float,
+) -> None:
     """
     Implementation of caking.
 
@@ -691,7 +719,12 @@ def wedge_integration(src_data, center, theta_start, delta_theta, r_inner, delta
     raise NotImplementedError()
 
 
-def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
+def bin_edges(
+    range_min: Optional[float] = None,
+    range_max: Optional[float] = None,
+    nbins: Optional[int] = None,
+    step: Optional[float] = None,
+) -> np.ndarray:
     """
     Generate bin edges.  The last value in the returned array is
     the right edge of the last bin, the rest of the values are the
@@ -748,20 +781,23 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
     if num_valid_args != 3:
         raise ValueError("Exactly three of the arguments must be non-None " "not {}.".format(num_valid_args))
 
-    if range_min is not None and range_max is not None:
-        if range_max <= range_min:
+    if range_min is not None and range_max is not None and range_max <= range_min:
             raise ValueError("The minimum must be less than the maximum")
 
-    if nbins is not None:
-        if nbins <= 0:
-            raise ValueError("The number of bins must be positive")
+    if nbins is not None and nbins <= 0:
+        raise ValueError("The number of bins must be positive")
 
     # The easy case
     if step is None:
-        return np.linspace(range_min, range_max, nbins + 1, endpoint=True)
+        if range_min is not None and range_max is not None and nbins is not None:
+            return np.linspace(range_min, range_max, nbins + 1, endpoint=True)
+        else:
+            raise ValueError("If step is not specified, range_min, range_max, and nbins must all be specified")
 
     # in this case, the user gave use min, max, and step
     if nbins is None:
+        if range_min is None or range_max is None:
+            raise ValueError("If step is specified and nbins is not, range_min and range_max must be specified")
         if step > (range_max - range_min):
             raise ValueError("The step can not be greater than the difference " "between min and max")
         nbins = int((range_max - range_min) // step)
@@ -786,27 +822,31 @@ def bin_edges(range_min=None, range_max=None, nbins=None, step=None):
 
     # in this case we got range_min, nbins, step
     if range_max is None:
+        assert range_min is not None and nbins is not None
         return range_min + np.arange(nbins + 1) * step
 
     # in this case we got range_max, nbins, step
     if range_min is None:
+        assert nbins is not None
         return range_max - np.arange(nbins + 1)[::-1] * step
+
+    raise ValueError("Unable to determine bin edges from the given parameters")
 
 
 def grid3d(
-    q,
-    img_stack,
-    nx=None,
-    ny=None,
-    nz=None,
-    xmin=None,
-    xmax=None,
-    ymin=None,
-    ymax=None,
-    zmin=None,
-    zmax=None,
-    binary_mask=None,
-):
+    q: np.ndarray,
+    img_stack: np.ndarray,
+    nx: Optional[int] = None,
+    ny: Optional[int] = None,
+    nz: Optional[int] = None,
+    xmin: Optional[float] = None,
+    xmax: Optional[float] = None,
+    ymin: Optional[float] = None,
+    ymax: Optional[float] = None,
+    zmin: Optional[float] = None,
+    zmax: Optional[float] = None,
+    binary_mask: Optional[np.ndarray] = None,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Grid irregularly spaced data points onto a regular grid via histogramming
 
     This function will process the set of reciprocal space values (q), the
@@ -861,7 +901,7 @@ def grid3d(
 
     """
     try:
-        from ..ext import ctrans
+        from ..ext import ctrans  # type: ignore[attr-defined]
     except ImportError:
         raise NotImplementedError(
             "ctrans is not available on your platform. See "
@@ -908,7 +948,7 @@ def grid3d(
     # set defaults for qmin, qmax, dq
     qmin = np.min(q, axis=0)
     qmax = np.max(q, axis=0)
-    dqn = [_defaults["nx"], _defaults["ny"], _defaults["nz"]]
+    dqn: List[Any] = [_defaults["nx"], _defaults["ny"], _defaults["nz"]]
 
     # pad the upper edge by just enough to ensure that all of the
     # points are in-bounds with the binning rules: lo <= val < hi
@@ -953,7 +993,7 @@ def grid3d(
     return mean, occupancy, std_err, bounds
 
 
-def bin_edges_to_centers(input_edges):
+def bin_edges_to_centers(input_edges: np.ndarray) -> np.ndarray:
     """
     Helper function for turning a array of bin edges into
     an array of bin centers
@@ -974,14 +1014,14 @@ def bin_edges_to_centers(input_edges):
 
 
 # https://docs.python.org/2/library/itertools.html#recipes
-def pairwise(iterable):
+def pairwise(iterable: Any) -> Iterator:
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
     a, b = tee(iterable)
     next(b, None)
     return zip(a, b)
 
 
-def q_to_d(q):
+def q_to_d(q: np.ndarray) -> np.ndarray:
     """
     Helper function to convert :math:`d` to :math:`q`.  The point
     of this function is to prevent fat-fingered typos.
@@ -1007,7 +1047,7 @@ def q_to_d(q):
     return (2 * np.pi) / np.asarray(q)
 
 
-def d_to_q(d):
+def d_to_q(d: np.ndarray) -> np.ndarray:
     """
     Helper function to convert :math:`d` to :math:`q`.
     The point of this function is to prevent fat-fingered typos.
@@ -1033,7 +1073,7 @@ def d_to_q(d):
     return (2 * np.pi) / np.asarray(d)
 
 
-def q_to_twotheta(q, wavelength):
+def q_to_twotheta(q: np.ndarray, wavelength: float) -> np.ndarray:
     r"""
     Helper function to convert q to two-theta.
 
@@ -1068,7 +1108,7 @@ def q_to_twotheta(q, wavelength):
     return 2 * np.arcsin(q * pre_factor)
 
 
-def twotheta_to_q(two_theta, wavelength):
+def twotheta_to_q(two_theta: np.ndarray, wavelength: float) -> np.ndarray:
     r"""
     Helper function to convert two-theta to q
 
@@ -1106,7 +1146,9 @@ def twotheta_to_q(two_theta, wavelength):
     return pre_factor * np.sin(two_theta / 2)
 
 
-def multi_tau_lags(multitau_levels, multitau_channels):
+def multi_tau_lags(
+    multitau_levels: int, multitau_channels: int
+) -> Tuple[int, np.ndarray, Dict[int, Any]]:
     """
     Standard multiple-tau algorithm for finding the lag times (delay
     times).
@@ -1150,7 +1192,7 @@ def multi_tau_lags(multitau_levels, multitau_channels):
     tot_channels = (multitau_levels + 1) * multitau_channels // 2
 
     lag = []
-    dict_lags = {}
+    dict_lags: Dict[int, Any] = {}
     lag_steps = np.arange(0, multitau_channels)
     dict_lags[1] = lag_steps
     for i in range(2, multitau_levels + 1):
@@ -1161,11 +1203,11 @@ def multi_tau_lags(multitau_levels, multitau_channels):
             y.append(value)
         dict_lags[i] = y
 
-    lag_steps = np.append(lag_steps, np.array(lag))
-    return tot_channels, lag_steps, dict_lags
+    lag_steps_out = np.append(lag_steps, np.array(lag))
+    return tot_channels, lag_steps_out, dict_lags
 
 
-def geometric_series(common_ratio, number_of_images, first_term=1):
+def geometric_series(common_ratio: float, number_of_images: int, first_term: float = 1) -> List[float]:
     """
     This will provide the geometric series for the integration.
     Last values of the series has to be less than or equal to number
@@ -1207,7 +1249,14 @@ def geometric_series(common_ratio, number_of_images, first_term=1):
     return geometric_series
 
 
-def bin_grid(image, r_array, pixel_sizes, statistic="mean", mask=None, bins=None):
+def bin_grid(
+    image: np.ndarray,
+    r_array: np.ndarray,
+    pixel_sizes: Tuple[float, float],
+    statistic: Union[str, Callable] = "mean",
+    mask: Optional[np.ndarray] = None,
+    bins: Optional[np.ndarray] = None,
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Bin and integrate an image, given the radial array of pixels
 
