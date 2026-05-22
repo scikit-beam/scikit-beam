@@ -43,10 +43,9 @@ This module is for functions specific to time correlation
 
 """
 
-from __future__ import absolute_import, division, print_function
-
 from collections import namedtuple
-from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
+from collections.abc import Generator, Iterable
+from typing import Any
 
 import numpy as np
 from scipy.signal import fftconvolve
@@ -79,7 +78,7 @@ def _one_time_process(
     img_per_level: np.ndarray,
     level: int,
     buf_no: int,
-    norm: Dict,
+    norm: dict,
     lev_len: np.ndarray,
 ) -> None:
     """Reference implementation of the inner loop of multi-tau one time
@@ -201,7 +200,7 @@ _two_time_internal_state = namedtuple(
 )
 
 
-def _init_state_one_time(num_levels: int, num_bufs: int, labels: np.ndarray[Tuple[int, int]]) -> _internal_state:
+def _init_state_one_time(num_levels: int, num_bufs: int, labels: np.ndarray[tuple[int, int]]) -> _internal_state:
     """Initialize a stateful namedtuple for the generator-based multi-tau
      for one time correlation
 
@@ -259,11 +258,11 @@ def _init_state_one_time(num_levels: int, num_bufs: int, labels: np.ndarray[Tupl
 
 
 def lazy_one_time(
-    image_iterable: Iterable[np.ndarray[Tuple[int, int]]],
+    image_iterable: Iterable[np.ndarray[tuple[int, int]]],
     num_levels: int,
     num_bufs: int,
-    labels: np.ndarray[Tuple[int, int]],
-    internal_state: Optional["_internal_state"] = None,
+    labels: np.ndarray[tuple[int, int]],
+    internal_state: _internal_state | None = None,
 ) -> Generator[results, None, None]:
     """Generator implementation of 1-time multi-tau correlation
 
@@ -420,7 +419,7 @@ def lazy_one_time(
 
 def multi_tau_auto_corr(
     num_levels: int, num_bufs: int, labels: np.ndarray, images: Iterable[np.ndarray]
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """Wraps generator implementation of multi-tau
 
     Original code(in Yorick) for multi tau auto correlation
@@ -519,7 +518,7 @@ def lazy_two_time(
     num_frames: int,
     num_bufs: int,
     num_levels: int = 1,
-    two_time_internal_state: Optional[_two_time_internal_state] = None,
+    two_time_internal_state: _two_time_internal_state | None = None,
 ) -> Generator[_two_time_internal_state, None, None]:
     """Generator implementation of two-time correlation
 
@@ -705,7 +704,7 @@ def _two_time_process(
     num_pixels: np.ndarray,
     img_per_level: np.ndarray,
     lag_steps: np.ndarray,
-    current_img_time: Union[int, float],
+    current_img_time: int | float,
     level: int,
     buf_no: int,
 ) -> None:
@@ -817,7 +816,7 @@ def _init_state_two_time(
     current_img_time = 0
 
     # generate a time frame for each level
-    time_ind: Dict[int, List[int]] = {key: [] for key in range(num_levels)}
+    time_ind: dict[int, list[int]] = {key: [] for key in range(num_levels)}
 
     # two time correlation results (array)
     g2 = np.zeros((num_rois, num_frames, num_frames), dtype=np.float64)
@@ -840,7 +839,7 @@ def _init_state_two_time(
     )
 
 
-def _validate_and_transform_inputs(num_bufs: int, num_levels: int, labels: np.ndarray) -> Tuple[
+def _validate_and_transform_inputs(num_bufs: int, num_levels: int, labels: np.ndarray) -> tuple[
     np.ndarray,
     np.ndarray,
     int,
@@ -943,7 +942,7 @@ def _validate_and_transform_inputs(num_bufs: int, num_levels: int, labels: np.nd
 
 def one_time_from_two_time(
     two_time_corr: np.ndarray, calc_errors: bool = False
-) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
+) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
     This will provide the one-time correlation data from two-time
     correlation data. An estimator for errors can be calculated
@@ -1020,9 +1019,9 @@ class CrossCorrelator:
 
     def __init__(
         self,
-        shape: Tuple[int, ...],
-        mask: Optional[np.ndarray] = None,
-        normalization: Optional[Union[str, List[str]]] = None,
+        shape: tuple[int, ...],
+        mask: np.ndarray | None = None,
+        normalization: str | list[str] | None = None,
     ):
         """
         Prepare the spatial correlator for various regions specified by the
@@ -1132,9 +1131,9 @@ class CrossCorrelator:
         # Making a list of arrays holding the masks for each id. Ideally, mask
         # is binary so this is one element to quickly index original images
         self.submasks = list()
-        self.centers: Union[List[np.ndarray], np.ndarray] = list()
+        self.centers: list[np.ndarray] | np.ndarray = list()
         # the positions of each axes of each correlation
-        self.positions: Union[List[Any], np.ndarray] = list()
+        self.positions: list[Any] | np.ndarray = list()
         self.maskcorrs = list()
         # regions where the correlations are not zero
         self.pxlst_maskcorrs = list()
@@ -1177,9 +1176,9 @@ class CrossCorrelator:
     def __call__(
         self,
         img1: np.ndarray,
-        img2: Optional[np.ndarray] = None,
-        normalization: Optional[Union[str, List[str]]] = None,
-    ) -> Union[List[np.ndarray], np.ndarray]:
+        img2: np.ndarray | None = None,
+        normalization: str | list[str] | None = None,
+    ) -> list[np.ndarray] | np.ndarray:
         """Run the cross correlation on an image/curve or against two
             images/curves
 
@@ -1275,7 +1274,7 @@ class CrossCorrelator:
         return ccorrs
 
 
-def _cross_corr(img1: np.ndarray, img2: Optional[np.ndarray] = None) -> np.ndarray:
+def _cross_corr(img1: np.ndarray, img2: np.ndarray | None = None) -> np.ndarray:
     """Compute the cross correlation of one (or two) images.
 
     Parameters

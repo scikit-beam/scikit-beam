@@ -1,11 +1,7 @@
-from __future__ import absolute_import, division, print_function
-
-from typing import Tuple
-
 import numpy as np
 
 
-def fit_quad_to_peak(x: np.ndarray, y: np.ndarray) -> Tuple[Tuple[float, float, float], float]:
+def fit_quad_to_peak(x: np.ndarray, y: np.ndarray) -> tuple[tuple[float, float, float], float]:
     """
     Fits a quadratic to the data points handed in
     to the from y = b[0](x-b[1])**2 + b[2] and R2

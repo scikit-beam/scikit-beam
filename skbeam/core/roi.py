@@ -39,10 +39,8 @@ This module contain convenience methods to generate ROI labeled arrays for
 simple shapes such as rectangles and concentric circles.
 """
 
-from __future__ import absolute_import, division, print_function
-
 import logging
-from typing import Iterable, List, Optional, Tuple, Union
+from collections.abc import Iterable
 
 import numpy as np
 from scipy import ndimage
@@ -55,7 +53,7 @@ from . import utils
 logger = logging.getLogger(__name__)
 
 
-def rectangles(coords: Iterable[Tuple[int, int, int, int]], shape: Tuple[int, int]) -> np.ndarray:
+def rectangles(coords: Iterable[tuple[int, int, int, int]], shape: tuple[int, int]) -> np.ndarray:
     """
     This function wil provide the indices array for rectangle region of
     interests.
@@ -98,7 +96,7 @@ def rectangles(coords: Iterable[Tuple[int, int, int, int]], shape: Tuple[int, in
 
 
 def rings(
-    edges: Union[List[Tuple[float, float]], np.ndarray], center: Tuple[float, float], shape: Tuple[int, int]
+    edges: list[tuple[float, float]] | np.ndarray, center: tuple[float, float], shape: tuple[int, int]
 ) -> np.ndarray:
     """
     Draw annual (ring-shaped) shaped regions of interest.
@@ -142,9 +140,9 @@ def rings(
 
 def ring_edges(
     inner_radius: float,
-    width: Union[float, List[float]],
-    spacing: Union[float, List[float]] = 0,
-    num_rings: Optional[int] = None,
+    width: float | list[float],
+    spacing: float | list[float] = 0,
+    num_rings: int | None = None,
 ) -> np.ndarray:
     """Calculate the inner and outer radius of a set of rings.
 
@@ -223,9 +221,9 @@ def ring_edges(
 
 def segmented_rings(
     edges: np.ndarray,
-    segments: Union[int, List[float]],
-    center: Tuple[float, float],
-    shape: Tuple[int, int],
+    segments: int | list[float],
+    center: tuple[float, float],
+    shape: tuple[int, int],
     offset_angle: float = 0,
 ) -> np.ndarray:
     """
@@ -330,8 +328,8 @@ def roi_max_counts(images_sets: np.ndarray, label_array: np.ndarray) -> int:
 
 
 def roi_pixel_values(
-    image: np.ndarray, labels: np.ndarray, index: Optional[np.ndarray] = None
-) -> Tuple[List[np.ndarray], np.ndarray]:
+    image: np.ndarray, labels: np.ndarray, index: np.ndarray | None = None
+) -> tuple[list[np.ndarray], np.ndarray]:
     """
     This will provide intensities of the ROI's of the labeled array
     according to the pixel list
@@ -370,8 +368,8 @@ def roi_pixel_values(
 
 
 def mean_intensity(
-    images: np.ndarray, labeled_array: np.ndarray, index: Optional[Union[int, List[int]]] = None
-) -> Tuple[np.ndarray, List[int]]:
+    images: np.ndarray, labeled_array: np.ndarray, index: int | list[int] | None = None
+) -> tuple[np.ndarray, list[int]]:
     """Compute the mean intensity for each ROI in the image list
 
     Parameters
@@ -421,14 +419,14 @@ def mean_intensity(
 
 def circular_average(
     image: np.ndarray,
-    calibrated_center: Tuple[float, float],
+    calibrated_center: tuple[float, float],
     threshold: int = 0,
     nx: int = 100,
-    pixel_size: Tuple[float, float] = (1, 1),
-    min_x: Optional[float] = None,
-    max_x: Optional[float] = None,
-    mask: Optional[np.ndarray] = None,
-) -> Tuple[np.ndarray, np.ndarray]:
+    pixel_size: tuple[float, float] = (1, 1),
+    min_x: float | None = None,
+    max_x: float | None = None,
+    mask: np.ndarray | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
     """Circular average of the the image data
     The circular average is also known as the radial integration
 
@@ -513,7 +511,7 @@ def kymograph(images: np.ndarray, labels: np.ndarray, num: int) -> np.ndarray:
     return np.vstack(kymo)
 
 
-def extract_label_indices(labels: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def extract_label_indices(labels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
     This will find the label's required region of interests (roi's),
     number of roi's count the number of pixels in each roi's and pixels
@@ -549,7 +547,7 @@ def extract_label_indices(labels: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     return label_mask, pixel_list
 
 
-def _make_roi(coords: np.ndarray, edges: np.ndarray, shape: Tuple[int, int]) -> np.ndarray:
+def _make_roi(coords: np.ndarray, edges: np.ndarray, shape: tuple[int, int]) -> np.ndarray:
     """Helper function to create ring rois and bar rois
 
     Parameters
@@ -579,10 +577,10 @@ def _make_roi(coords: np.ndarray, edges: np.ndarray, shape: Tuple[int, int]) -> 
 
 
 def bar(
-    edges: Union[List[Tuple[float, float]], np.ndarray],
-    shape: Tuple[int, int],
+    edges: list[tuple[float, float]] | np.ndarray,
+    shape: tuple[int, int],
     horizontal: bool = True,
-    values: Optional[np.ndarray] = None,
+    values: np.ndarray | None = None,
 ) -> np.ndarray:
     """Draw bars defined by `edges` from one edge to the other of `image_shape`
 
@@ -636,11 +634,11 @@ def bar(
 
 
 def box(
-    shape: Tuple[int, int],
-    v_edges: List[Tuple[float, float]],
-    h_edges: Optional[List[Tuple[float, float]]] = None,
-    h_values: Optional[np.ndarray] = None,
-    v_values: Optional[np.ndarray] = None,
+    shape: tuple[int, int],
+    v_edges: list[tuple[float, float]],
+    h_edges: list[tuple[float, float]] | None = None,
+    h_values: np.ndarray | None = None,
+    v_values: np.ndarray | None = None,
 ) -> np.ndarray:
     """Draw box shaped rois when the horizontal and vertical edges
      are provided.
@@ -698,7 +696,7 @@ def box(
     return rectangles(coords, v_values.shape)  # type: ignore[arg-type, union-attr]
 
 
-def lines(end_points: Iterable[Tuple[int, int, int, int]], shape: Tuple[int, int]) -> np.ndarray:
+def lines(end_points: Iterable[tuple[int, int, int, int]], shape: tuple[int, int]) -> np.ndarray:
     """
     Parameters
     ----------
@@ -744,7 +742,7 @@ def auto_find_center_rings(
     min_samples: int = 3,
     residual_threshold: float = 1,
     max_trials: int = 1000,
-) -> Tuple[Tuple[int, int], np.ndarray, List[float]]:
+) -> tuple[tuple[int, int], np.ndarray, list[float]]:
     """This will find the center of the speckle pattern and the radii of the
     most intense rings.
 

@@ -36,11 +36,8 @@
 known sample.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from collections import deque
 from string import Template
-from typing import Optional, Tuple
 
 import numpy as np
 import scipy.signal
@@ -58,7 +55,7 @@ def estimate_d_blind(
     window_size: int,
     max_peak_count: int,
     thresh: float,
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """
     Estimate the sample-detector distance
 
@@ -147,16 +144,16 @@ if estimate_d_blind.__doc__ is not None:
 
 def refine_center(
     image: np.ndarray,
-    calibrated_center: Tuple[float, float],
-    pixel_size: Tuple[float, float],
+    calibrated_center: tuple[float, float],
+    pixel_size: tuple[float, float],
     phi_steps: int,
     max_peaks: int,
     thresh: float,
     window_size: int,
-    nx: Optional[int] = None,
-    min_x: Optional[float] = None,
-    max_x: Optional[float] = None,
-) -> Tuple[float, float]:
+    nx: int | None = None,
+    min_x: float | None = None,
+    max_x: float | None = None,
+) -> tuple[float, float]:
     """
     Refines the location of the center of the beam.
 

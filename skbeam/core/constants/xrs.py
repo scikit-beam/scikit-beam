@@ -41,12 +41,10 @@
 Module for xray scattering
 """
 
-from __future__ import absolute_import, division, print_function
-
 import logging
 from collections import namedtuple
+from collections.abc import Iterable, Iterator, Sequence
 from itertools import repeat
-from typing import Iterable, Iterator, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 
@@ -72,7 +70,7 @@ class HKL(namedtuple("HKL", "h k l")):
 
     __slots__ = ()
 
-    def __new__(cls, *args: Union[int, float], **kwargs: Union[int, float]) -> "HKL":
+    def __new__(cls, *args: int | float, **kwargs: int | float) -> "HKL":
         int_args = [int(_) for _ in args]
         for k in list(kwargs):
             kwargs[k] = int(kwargs[k])
@@ -121,7 +119,7 @@ class PowderStandard(object):
         A list of (d, (h, k, l), q) values.
     """
 
-    def __init__(self, name: str, reflections: Iterable[Tuple[float, Tuple[int, int, int], float]]) -> None:
+    def __init__(self, name: str, reflections: Iterable[tuple[float, tuple[int, int, int], float]]) -> None:
         self._reflections = [Reflection(d, HKL(*hkl), q) for d, hkl, q in reflections]
         self._reflections.sort(key=lambda x: x[-1])
         self._name = name
@@ -139,7 +137,7 @@ class PowderStandard(object):
         return self._name
 
     @property
-    def reflections(self) -> List[Reflection]:
+    def reflections(self) -> list[Reflection]:
         """
         List of the known reflections
         """
@@ -171,7 +169,7 @@ class PowderStandard(object):
         name: str,
         wavelength: float,
         two_theta: np.ndarray,
-        hkl: Optional[Sequence[Tuple[int, int, int]]] = None,
+        hkl: Sequence[tuple[int, int, int]] | None = None,
     ) -> "PowderStandard":
         """
         Method to construct a PowderStandard object from calibrated
@@ -207,7 +205,7 @@ class PowderStandard(object):
 
     @classmethod
     def from_d(
-        cls, name: str, d: Sequence[float], hkl: Optional[Sequence[Tuple[int, int, int]]] = None
+        cls, name: str, d: Sequence[float], hkl: Sequence[tuple[int, int, int]] | None = None
     ) -> "PowderStandard":
         """
         Method to construct a PowderStandard object from known

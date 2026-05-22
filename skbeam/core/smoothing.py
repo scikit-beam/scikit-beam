@@ -33,7 +33,6 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 
-from typing import Optional, Tuple, Union
 
 import numpy as np
 from scipy.signal import fftconvolve
@@ -43,8 +42,8 @@ def sgolay2d(
     image: np.ndarray,
     window_size: int,
     order: int,
-    derivative: Optional[str] = None,
-) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
+    derivative: str | None = None,
+) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
     Savitzky-Golay filter for 2D image arrays.
     See: http://scipy-cookbook.readthedocs.io/items/SavitzkyGolay.html

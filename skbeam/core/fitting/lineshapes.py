@@ -42,10 +42,8 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 
-from __future__ import absolute_import, division, print_function
 
 import logging
-from typing import Optional
 
 import numpy as np
 import scipy.special
@@ -115,7 +113,7 @@ def lorentzian2(x: np.ndarray, area: float, center: float, sigma: float) -> np.n
     return (area / (1 + ((x - center) / sigma) ** 2) ** 2) / (np.pi * sigma)
 
 
-def voigt(x: np.ndarray, area: float, center: float, sigma: float, gamma: Optional[float] = None) -> np.ndarray:
+def voigt(x: np.ndarray, area: float, center: float, sigma: float, gamma: float | None = None) -> np.ndarray:
     """Convolution of gaussian and lorentzian curve.
 
     see http://en.wikipedia.org/wiki/Voigt_profile

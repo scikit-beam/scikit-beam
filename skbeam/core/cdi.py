@@ -37,12 +37,11 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-from __future__ import absolute_import, division, print_function
 
 import logging
 import time
+from collections.abc import Callable
 from enum import Enum
-from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from scipy.ndimage import gaussian_filter
@@ -50,7 +49,7 @@ from scipy.ndimage import gaussian_filter
 logger = logging.getLogger(__name__)
 
 
-def _dist(dims: Union[List[int], Tuple[int, ...]]) -> np.ndarray:
+def _dist(dims: list[int] | tuple[int, ...]) -> np.ndarray:
     """
     Create array with pixel value equals to the distance from array center.
 
@@ -76,7 +75,7 @@ def _dist(dims: Union[List[int], Tuple[int, ...]]) -> np.ndarray:
     return np.sqrt(dist_sum)
 
 
-def gauss(dims: Union[List[int], Tuple[int, ...]], sigma: float) -> np.ndarray:
+def gauss(dims: list[int] | tuple[int, ...], sigma: float) -> np.ndarray:
     """
     Generate Gaussian function in 2D or 3D.
 
@@ -185,7 +184,7 @@ def generate_random_phase_field(diffracted_pattern: np.ndarray) -> np.ndarray:
     return sample_obj
 
 
-def generate_box_support(sup_radius: float, shape_v: List[int]) -> np.ndarray:
+def generate_box_support(sup_radius: float, shape_v: list[int]) -> np.ndarray:
     """
     Generate support area as a box for either 2D or 3D cases.
 
@@ -207,7 +206,7 @@ def generate_box_support(sup_radius: float, shape_v: List[int]) -> np.ndarray:
     return sup
 
 
-def generate_disk_support(sup_radius: float, shape_v: List[int]) -> np.ndarray:
+def generate_disk_support(sup_radius: float, shape_v: list[int]) -> np.ndarray:
     """
     Generate support area as a disk for either 2D or 3D cases.
 
@@ -240,7 +239,7 @@ def cdi_recon(
     sup: np.ndarray,
     beta: float = 1.15,
     start_avg: float = 0.8,
-    pi_modulus_flag: Union[str, PiModulusFlag] = PiModulusFlag.Complex,
+    pi_modulus_flag: str | PiModulusFlag = PiModulusFlag.Complex,
     sw_flag: bool = True,
     sw_sigma: float = 0.5,
     sw_threshold: float = 0.1,
@@ -248,9 +247,9 @@ def cdi_recon(
     sw_end: float = 0.8,
     sw_step: int = 10,
     n_iterations: int = 1000,
-    cb_function: Optional[Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], None]] = None,
+    cb_function: Callable[[np.ndarray, np.ndarray, np.ndarray, np.ndarray], None] | None = None,
     cb_step: int = 10,
-) -> Tuple[np.ndarray, Dict[str, np.ndarray]]:
+) -> tuple[np.ndarray, dict[str, np.ndarray]]:
     """
     Run reconstruction with difference map algorithm.
 

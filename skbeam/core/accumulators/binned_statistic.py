@@ -34,11 +34,9 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from __future__ import absolute_import, division, print_function
-
 import warnings
+from collections.abc import Callable, Sequence
 from enum import Enum
-from typing import Callable, Optional, Sequence, Tuple, Union
 
 import numpy as np
 
@@ -58,10 +56,10 @@ class BinnedStatisticDD(object):
     def __init__(
         self,
         sample: np.ndarray,
-        statistic: Union[str, DefaultStatistic, Callable] = "mean",
-        bins: Union[int, Sequence] = 10,
-        range: Optional[Sequence] = None,
-        mask: Optional[np.ndarray] = None,
+        statistic: str | DefaultStatistic | Callable = "mean",
+        bins: int | Sequence = 10,
+        range: Sequence | None = None,
+        mask: np.ndarray | None = None,
     ):
         """
         Compute a multidimensional binned statistic for a set of data.
@@ -196,8 +194,8 @@ class BinnedStatisticDD(object):
         for i in np.arange(0, self.D - 1):
             self.xy += Ncount[self.ni[i]] * self.nbin[self.ni[i + 1 :]].prod()
         self.xy += Ncount[self.ni[-1]]
-        self._flatcount: Optional[np.ndarray] = None  # will be computed if needed
-        self._argsort_index: Optional[np.ndarray] = None
+        self._flatcount: np.ndarray | None = None  # will be computed if needed
+        self._argsort_index: np.ndarray | None = None
         self.statistic = statistic
 
     @property
@@ -260,11 +258,11 @@ class BinnedStatisticDD(object):
         return self._centers
 
     @property
-    def statistic(self) -> Union[DefaultStatistic, Callable]:
+    def statistic(self) -> DefaultStatistic | Callable:
         return self._statistic
 
     @statistic.setter
-    def statistic(self, new_statistic: Union[str, DefaultStatistic, Callable]):
+    def statistic(self, new_statistic: str | DefaultStatistic | Callable):
         if not callable(new_statistic) and new_statistic not in DefaultStatistic:
             raise ValueError("invalid statistic %r" % (new_statistic,))
         else:
@@ -273,7 +271,7 @@ class BinnedStatisticDD(object):
             self._statistic = new_statistic
 
     def __call__(
-        self, values: np.ndarray, statistic: Optional[Union[str, DefaultStatistic, Callable]] = None
+        self, values: np.ndarray, statistic: str | DefaultStatistic | Callable | None = None
     ) -> np.ndarray:
         """
         Parameters
@@ -376,10 +374,10 @@ class BinnedStatistic1D(BinnedStatisticDD):
     def __init__(
         self,
         x: np.ndarray,
-        statistic: Union[str, DefaultStatistic, Callable] = DefaultStatistic.MEAN,
-        bins: Union[int, Sequence] = 10,
-        range: Optional[Sequence] = None,
-        mask: Optional[np.ndarray] = None,
+        statistic: str | DefaultStatistic | Callable = DefaultStatistic.MEAN,
+        bins: int | Sequence = 10,
+        range: Sequence | None = None,
+        mask: np.ndarray | None = None,
     ):
         """
         A refactored version of scipy.stats.binned_statistic to improve
@@ -452,8 +450,8 @@ class BinnedStatistic1D(BinnedStatisticDD):
             if len(range) == 2:
                 range = [range]
 
-        super(BinnedStatistic1D, self).__init__(  # type: ignore[arg-type]
-            [x], statistic=statistic, bins=bins, range=range, mask=mask
+        super(BinnedStatistic1D, self).__init__(
+            [x], statistic=statistic, bins=bins, range=range, mask=mask  # type: ignore[arg-type]
         )
 
     @property
@@ -533,10 +531,10 @@ class BinnedStatistic2D(BinnedStatisticDD):
         self,
         x: np.ndarray,
         y: np.ndarray,
-        statistic: Union[str, DefaultStatistic, Callable] = DefaultStatistic.MEAN,
-        bins: Union[int, Sequence] = 10,
-        range: Optional[Sequence] = None,
-        mask: Optional[np.ndarray] = None,
+        statistic: str | DefaultStatistic | Callable = DefaultStatistic.MEAN,
+        bins: int | Sequence = 10,
+        range: Sequence | None = None,
+        mask: np.ndarray | None = None,
     ):
         # This code is based on np.histogram2d
         try:
@@ -548,8 +546,8 @@ class BinnedStatistic2D(BinnedStatisticDD):
             xedges = yedges = np.asarray(bins, float)
             bins = [xedges, yedges]
 
-        super(BinnedStatistic2D, self).__init__(  # type: ignore[arg-type]
-            [x, y], statistic=statistic, bins=bins, range=range, mask=mask
+        super(BinnedStatistic2D, self).__init__(
+            [x, y], statistic=statistic, bins=bins, range=range, mask=mask  # type: ignore[arg-type]
         )
 
     def __call__(self, values, statistic=None):
@@ -595,13 +593,13 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
 
     def __init__(
         self,
-        shape: Tuple[int, int],
-        bins: Union[int, Sequence] = 10,
-        range: Optional[Sequence] = None,
-        origin: Optional[Tuple[float, float]] = None,
-        mask: Optional[np.ndarray] = None,
-        r_map: Optional[np.ndarray] = None,
-        statistic: Union[str, DefaultStatistic, Callable] = DefaultStatistic.MEAN,
+        shape: tuple[int, int],
+        bins: int | Sequence = 10,
+        range: Sequence | None = None,
+        origin: tuple[float, float] | None = None,
+        mask: np.ndarray | None = None,
+        r_map: np.ndarray | None = None,
+        statistic: str | DefaultStatistic | Callable = DefaultStatistic.MEAN,
     ):
         """
         Parameters:
@@ -671,7 +669,7 @@ class RPhiBinnedStatistic(BinnedStatistic2D):
             r_map.reshape(-1), phi_map.reshape(-1), statistic, bins=bins, mask=mask, range=range
         )
 
-    def __call__(self, values, statistic: Optional[Union[str, DefaultStatistic, Callable]] = None):
+    def __call__(self, values, statistic: str | DefaultStatistic | Callable | None = None):
         """
         Parameters
         ----------
@@ -720,13 +718,13 @@ class RadialBinnedStatistic(BinnedStatistic1D):
 
     def __init__(
         self,
-        shape: Tuple[int, int],
-        bins: Union[int, Sequence] = 10,
-        range: Optional[Sequence] = None,
-        origin: Optional[Tuple[float, float]] = None,
-        mask: Optional[np.ndarray] = None,
-        r_map: Optional[np.ndarray] = None,
-        statistic: Union[str, DefaultStatistic, Callable] = DefaultStatistic.MEAN,
+        shape: tuple[int, int],
+        bins: int | Sequence = 10,
+        range: Sequence | None = None,
+        origin: tuple[float, float] | None = None,
+        mask: np.ndarray | None = None,
+        r_map: np.ndarray | None = None,
+        statistic: str | DefaultStatistic | Callable = DefaultStatistic.MEAN,
     ):
         """
         Parameters:
@@ -793,7 +791,7 @@ class RadialBinnedStatistic(BinnedStatistic1D):
             r_map.reshape(-1), statistic, bins=bins, mask=mask, range=range
         )
 
-    def __call__(self, values: np.ndarray, statistic: Optional[Union[str, DefaultStatistic, Callable]] = None):
+    def __call__(self, values: np.ndarray, statistic: str | DefaultStatistic | Callable | None = None):
         """
         Parameters
         ----------

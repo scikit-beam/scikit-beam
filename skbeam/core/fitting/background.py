@@ -41,14 +41,11 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-from __future__ import absolute_import, division, print_function
-
-from typing import Dict, Optional
 
 import numpy as np
 import scipy.signal
 
-_defaults: Dict[str, int] = {"con_val_no_bin": 3, "con_val_bin": 5, "iter_num_no_bin": 3, "iter_num_bin": 5}
+_defaults: dict[str, int] = {"con_val_no_bin": 3, "con_val_bin": 5, "iter_num_no_bin": 3, "iter_num_bin": 5}
 
 
 def snip_method(
@@ -61,9 +58,9 @@ def snip_method(
     epsilon: float = 2.96,
     width: float = 0.5,
     decrease_factor: float = np.sqrt(2),
-    spectral_binning: Optional[float] = None,
-    con_val: Optional[int] = None,
-    iter_num: Optional[int] = None,
+    spectral_binning: float | None = None,
+    con_val: int | None = None,
+    iter_num: int | None = None,
     width_threshold: float = 0.5,
 ):
     """
@@ -91,16 +88,16 @@ def snip_method(
         window size to adjust how much to shift background
     decrease_factor : float, optional
         gradually decrease of window size, default as sqrt(2)
-    spectral_binning : Optional[float], optional
+    spectral_binning : float | None, optional
         bin the data into different size
-    con_val : Optional[int], optional
+    con_val : int | None, optional
         size of scipy.signal.windows.boxcar to convolve the spectrum.
 
         Default value is controlled by the keys `con_val_no_bin`
         and `con_val_bin` in the defaults dictionary, depending
         on if spectral_binning is used or not
 
-    iter_num : Optional[int], optional
+    iter_num : int | None, optional
         Number of iterations.
 
         Default value is controlled by the keys `iter_num_no_bin`

@@ -1,13 +1,11 @@
-from __future__ import absolute_import, division, print_function
-
 import logging
 import os
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import numpy as np
 
 
-def _read_amira(src_file: str) -> Tuple[List[str], str]:
+def _read_amira(src_file: str) -> tuple[list[str], str]:
     """
     Reads all information contained within standard AmiraMesh data sets.
     Separate the header information from the image/volume, data.
@@ -26,7 +24,7 @@ def _read_amira(src_file: str) -> Tuple[List[str], str]:
         A compiled string containing all of the image array data, that was
         stored in the source AmiraMesh data file. Contains the raw image data
     """
-    am_header: List[str] = []
+    am_header: list[str] = []
     with open(os.path.normpath(src_file), "r") as input_file:
         while True:
             line = input_file.readline()
@@ -111,7 +109,7 @@ def _amira_data_to_numpy(am_data: str, header_dict: dict, flip_z: bool = True) -
     return output
 
 
-def _clean_amira_header(header_list: List[str]) -> List[List[str]]:
+def _clean_amira_header(header_list: list[str]) -> list[list[str]]:
     """
     Strip the string list of all "empty" characters,including new line
     characters ('\n') and empty lines. Splits each header line (which
@@ -138,7 +136,7 @@ def _clean_amira_header(header_list: List[str]) -> List[List[str]]:
     return clean_header
 
 
-def _create_md_dict(clean_header: List[List[str]]) -> dict:
+def _create_md_dict(clean_header: list[list[str]]) -> dict:
     """
     Populates the a dictionary with all information pertinent to the image
     data set that was originally stored in the AmiraMesh file.
@@ -150,7 +148,7 @@ def _create_md_dict(clean_header: List[List[str]]) -> dict:
 
     """
     # Avizo specific metadata
-    md_dict: Dict[str, Any] = {
+    md_dict: dict[str, Any] = {
         "software_src": clean_header[0][1],
         "data_format": clean_header[0][2],
         "data_format_version": clean_header[0][3],
@@ -234,7 +232,7 @@ def _create_md_dict(clean_header: List[List[str]]) -> dict:
     return md_dict
 
 
-def load_amiramesh(file_path: str) -> Tuple[dict, np.ndarray]:
+def load_amiramesh(file_path: str) -> tuple[dict, np.ndarray]:
     """
     Load and convert an AmiraMesh binary file to a numpy array.
 

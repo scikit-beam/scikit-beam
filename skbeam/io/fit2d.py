@@ -1,7 +1,3 @@
-from __future__ import division, print_function
-
-from typing import Optional
-
 import fabio
 import numpy as np
 from fabio.fit2dmaskimage import Fit2dMaskImage
@@ -9,7 +5,7 @@ from fabio.fit2dmaskimage import Fit2dMaskImage
 from skbeam.io.save_powder_output import _create_file_path
 
 
-def fit2d_save(mask: np.ndarray, filename: str, dir_path: Optional[str] = None) -> None:
+def fit2d_save(mask: np.ndarray, filename: str, dir_path: str | None = None) -> None:
     """
     Compresses and wraps the mask for Fit2D use
     Parameters

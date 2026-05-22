@@ -45,15 +45,12 @@ This is the module for reading files created in GSAS file formats
 https://subversion.xor.aps.anl.gov/trac/pyGSAS
 """
 
-from __future__ import absolute_import, division, print_function
-
 import os
-from typing import List, Tuple
 
 import numpy as np
 
 
-def gsas_reader(file: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def gsas_reader(file: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Parameters
     ----------
@@ -90,7 +87,7 @@ def gsas_reader(file: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     return tth, intensity, err
 
 
-def _get_fxye_data(file: str) -> List[np.ndarray]:
+def _get_fxye_data(file: str) -> list[np.ndarray]:
     """
     Parameters
     ----------
@@ -135,7 +132,7 @@ def _get_fxye_data(file: str) -> List[np.ndarray]:
     return [np.array(tth), np.array(intensity), np.array(err)]
 
 
-def _get_esd_data(file: str) -> List[np.ndarray]:
+def _get_esd_data(file: str) -> list[np.ndarray]:
     """
     Parameters
     ----------
@@ -186,7 +183,7 @@ def _get_esd_data(file: str) -> List[np.ndarray]:
     return [np.array(tth), np.array(intensity), np.array(err)]
 
 
-def _get_std_data(file: str) -> List[np.ndarray]:
+def _get_std_data(file: str) -> list[np.ndarray]:
     """
     Parameters
     ----------

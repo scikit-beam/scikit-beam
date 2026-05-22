@@ -37,13 +37,11 @@ This module is for Differential Phase Contrast (DPC) imaging based on
 Fourier shift fitting
 """
 
-from __future__ import absolute_import, division, print_function
-
 import logging
 import warnings
 from collections import namedtuple
+from collections.abc import Callable, Generator, Iterable
 from enum import Enum
-from typing import Callable, Generator, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 from scipy.optimize import minimize
@@ -53,9 +51,9 @@ logger = logging.getLogger(__name__)
 
 def image_reduction(
     im: np.ndarray,
-    roi: Optional[np.ndarray] = None,
-    bad_pixels: Optional[List[Tuple[int, int]]] = None,
-) -> Tuple[np.ndarray, np.ndarray]:
+    roi: np.ndarray | None = None,
+    bad_pixels: list[tuple[int, int]] | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Sum the image data over rows and columns.
 
@@ -98,7 +96,7 @@ def image_reduction(
     return xline, yline
 
 
-def _rss_factory(length: int) -> Callable[[List[float], np.ndarray, np.ndarray], float]:
+def _rss_factory(length: int) -> Callable[[list[float], np.ndarray, np.ndarray], float]:
     """
     A factory function for returning a residue function for use in dpc fitting.
     The main reason to do this is to generate a closure over beta so that
@@ -119,7 +117,7 @@ def _rss_factory(length: int) -> Callable[[List[float], np.ndarray, np.ndarray],
 
     beta = 1j * (np.linspace(-(length - 1) // 2, (length - 1) // 2, length))
 
-    def _rss(v: List[float], ref_reduction: np.ndarray, diff_reduction: np.ndarray) -> float:
+    def _rss(v: list[float], ref_reduction: np.ndarray, diff_reduction: np.ndarray) -> float:
         """
         Internal function used by fit()
         Cost function to be minimized in nonlinear fitting
@@ -168,14 +166,14 @@ class DPCFitSolver(str, Enum):
 
 
 def dpc_fit(
-    rss: Callable[[List[float], np.ndarray, np.ndarray], float],
+    rss: Callable[[list[float], np.ndarray, np.ndarray], float],
     ref_reduction: np.ndarray,
     diff_reduction: np.ndarray,
-    start_point: List[float],
-    solver: Union[str, DPCFitSolver] = DPCFitSolver.Nelder_Mead,
+    start_point: list[float],
+    solver: str | DPCFitSolver = DPCFitSolver.Nelder_Mead,
     tol: float = 1e-6,
     max_iters: int = 2000,
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """
     Nonlinear fitting for 2 points.
 
@@ -331,8 +329,8 @@ dpc_internal_state = namedtuple("dpc_internal_state", ["ax", "ay", "gx", "gy", "
 def dpc_runner(
     ref: np.ndarray,
     image_sequence: Iterable[np.ndarray],
-    start_point: List[float],
-    pixel_size: Tuple[float, ...],
+    start_point: list[float],
+    pixel_size: tuple[float, ...],
     focus_to_det: float,
     scan_rows: int,
     scan_cols: int,
@@ -341,12 +339,12 @@ def dpc_runner(
     energy: float,
     padding: int = 0,
     weighting: float = 0.5,
-    solver: Union[str, DPCFitSolver] = DPCFitSolver.Nelder_Mead,
-    roi: Optional[np.ndarray] = None,
-    bad_pixels: Optional[List[Tuple[int, int]]] = None,
+    solver: str | DPCFitSolver = DPCFitSolver.Nelder_Mead,
+    roi: np.ndarray | None = None,
+    bad_pixels: list[tuple[int, int]] | None = None,
     negate: bool = True,
     scale: bool = True,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """Wraps `lazy_dpc`
 
     See docstring for `lazy_dpc` and `reconstruct_phase_from_partial_info`
@@ -372,13 +370,13 @@ def dpc_runner(
 def lazy_dpc(
     ref: np.ndarray,
     image_sequence: Iterable[np.ndarray],
-    start_point: List[float],
+    start_point: list[float],
     scan_rows: int,
     scan_cols: int,
-    solver: Union[str, DPCFitSolver] = DPCFitSolver.Nelder_Mead,
-    roi: Optional[np.ndarray] = None,
-    bad_pixels: Optional[List[Tuple[int, int]]] = None,
-    dpc_state: Optional["dpc_internal_state"] = None,
+    solver: str | DPCFitSolver = DPCFitSolver.Nelder_Mead,
+    roi: np.ndarray | None = None,
+    bad_pixels: list[tuple[int, int]] | None = None,
+    dpc_state: dpc_internal_state | None = None,
 ) -> Generator:
     """
     Controller function to run the whole Differential Phase Contrast (DPC)
@@ -443,8 +441,8 @@ def lazy_dpc(
         scan_rows: int,
         scan_cols: int,
         ref: np.ndarray,
-        roi: Optional[np.ndarray],
-        bad_pixels: Optional[List[Tuple[int, int]]],
+        roi: np.ndarray | None,
+        bad_pixels: list[tuple[int, int]] | None,
     ) -> dpc_internal_state:
         # Initialize ax, ay, gx, and gy
         ax = np.zeros((scan_rows, scan_cols), dtype="d")
@@ -494,13 +492,13 @@ def reconstruct_phase_from_partial_info(
     energy: float,
     scan_xstep: float,
     scan_ystep: float,
-    pixel_size: Optional[float] = None,
-    focus_to_det: Optional[float] = None,
+    pixel_size: float | None = None,
+    focus_to_det: float | None = None,
     negate: bool = True,
     scale: bool = True,
     padding: int = 0,
     weighting: float = 0.5,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """Using the partial results from dpc_runner, reconstruct the phase image
 
     Parameters

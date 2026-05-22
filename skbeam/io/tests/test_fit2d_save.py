@@ -40,8 +40,6 @@ x-ray diffraction intensities into  different file formats.
 Added a test to check the GSAS file reader and file writer
 """
 
-from __future__ import absolute_import, division, print_function
-
 import numpy as np
 from numpy.testing import assert_array_equal
 

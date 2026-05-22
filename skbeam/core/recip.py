@@ -40,12 +40,10 @@ calculations.
 
 """
 
-from __future__ import absolute_import, division, print_function
-
 import time
 from collections import namedtuple
 from enum import Enum
-from typing import Dict, Literal, Optional, Tuple, Union
+from typing import Literal
 
 import numpy as np
 
@@ -72,14 +70,14 @@ class FrameMode(str, Enum):
 
 
 def process_to_q(
-    setting_angles: np.ndarray[Tuple[int, Literal[6]]],
-    detector_size: Tuple[int, int],
-    pixel_size: Tuple[float, float],
-    calibrated_center: Tuple[float, float],
+    setting_angles: np.ndarray[tuple[int, Literal[6]]],
+    detector_size: tuple[int, int],
+    pixel_size: tuple[float, float],
+    calibrated_center: tuple[float, float],
     dist_sample: float,
     wavelength: float,
-    ub: np.ndarray[Tuple[Literal[3], Literal[3]], np.dtype[np.float64]],
-    frame_mode: Optional[Union[int, str, FrameMode]] = None,
+    ub: np.ndarray[tuple[Literal[3], Literal[3]], np.dtype[np.float64]],
+    frame_mode: int | str | FrameMode | None = None,
 ) -> np.ndarray:
     """
     This will compute the hkl values for all pixels in a shape specified by
@@ -240,7 +238,7 @@ def hkl_to_q(hkl_arr: np.ndarray) -> np.ndarray:
     return np.linalg.norm(hkl_arr, axis=1)
 
 
-def calibrated_pixels_to_q(detector_size: Tuple[int, int], pyfai_kwargs: Dict) -> np.ndarray:
+def calibrated_pixels_to_q(detector_size: tuple[int, int], pyfai_kwargs: dict) -> np.ndarray:
     """
     For a given detector and pyfai calibrated geometry give back the q value
     for each pixel in the detector.
@@ -272,10 +270,10 @@ gisaxs_output = namedtuple(
 
 
 def gisaxs(
-    incident_beam: Tuple[float, float],
-    reflected_beam: Tuple[float, float],
-    pixel_size: Tuple[float, float],
-    detector_size: Tuple[int, int],
+    incident_beam: tuple[float, float],
+    reflected_beam: tuple[float, float],
+    pixel_size: tuple[float, float],
+    detector_size: tuple[int, int],
     dist_sample: float,
     wavelength: float,
     theta_i: float = 0.0,

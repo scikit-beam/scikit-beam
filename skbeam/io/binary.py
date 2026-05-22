@@ -32,10 +32,8 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-from __future__ import absolute_import, division, print_function
 
 import logging
-from typing import Tuple
 
 import numpy as np
 
@@ -44,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 def read_binary(
     filename: str, nx: int, ny: int, nz: int, dtype_str: str, headersize: int
-) -> Tuple[np.ndarray, bytes]:
+) -> tuple[np.ndarray, bytes]:
     """
     docstring, woo!
 

@@ -40,11 +40,8 @@ intensities into  different file formats.
 
 """
 
-from __future__ import absolute_import, division, print_function
-
 import logging
 import os
-from typing import Optional
 
 import numpy as np
 
@@ -57,8 +54,8 @@ def save_output(
     output_name: str,
     q_or_2theta: str,
     ext: str = ".chi",
-    err: Optional[np.ndarray] = None,
-    dir_path: Optional[str] = None,
+    err: np.ndarray | None = None,
+    dir_path: str | None = None,
 ):
     """
     Save output diffraction intensities into .chi, .dat or .xye file formats.
@@ -148,9 +145,9 @@ def gsas_writer(
     tth: np.ndarray,
     intensity: np.ndarray,
     output_name: str,
-    mode: Optional[str] = None,
-    err: Optional[np.ndarray] = None,
-    dir_path: Optional[str] = None,
+    mode: str | None = None,
+    err: np.ndarray | None = None,
+    dir_path: str | None = None,
 ):
     """
     Save diffraction intensities into .gsas file format
@@ -256,7 +253,7 @@ def gsas_writer(
         f.write(rv)
 
 
-def _validate_input(tth: np.ndarray, intensity: np.ndarray, err: Optional[np.ndarray], ext: str):
+def _validate_input(tth: np.ndarray, intensity: np.ndarray, err: np.ndarray | None, ext: str):
     """
     This function validate all the inputs
 
@@ -286,14 +283,14 @@ def _validate_input(tth: np.ndarray, intensity: np.ndarray, err: Optional[np.nda
         raise ValueError("Provide the Error value of intensity" " (for .xye file format err != None)")
 
 
-def _create_file_path(dir_path: Optional[str], output_name: str, ext: str) -> str:
+def _create_file_path(dir_path: str | None, output_name: str, ext: str) -> str:
     """
     This function create a output file path to save
     diffraction intensities.
 
     Parameters
     ----------
-    dir_path : Optional[str]
+    dir_path : str | None
         new directory path to save the output data files
         eg: /Data/experiments/data/
 

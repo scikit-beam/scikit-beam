@@ -37,15 +37,13 @@
 This module is for the 'core' data types.
 """
 
-from __future__ import absolute_import, division, print_function
-
 import logging
 import sys
 import time
 from collections import defaultdict, deque, namedtuple
-from collections.abc import MutableMapping
+from collections.abc import Callable, Generator, Iterator, MutableMapping
 from itertools import tee
-from typing import Any, Callable, Dict, Generator, Iterator, List, Optional, Tuple, Union
+from typing import Any
 
 import numpy as np
 import scipy.stats as sts
@@ -92,7 +90,7 @@ class MD_dict(MutableMapping):
     'm'
     """
 
-    def __init__(self, md_dict: Optional[Dict] = None) -> None:
+    def __init__(self, md_dict: dict | None = None) -> None:
         # TODO properly walk the input on upgrade dicts -> MD_dict
         if md_dict is None:
             md_dict = dict()
@@ -174,7 +172,7 @@ class MD_dict(MutableMapping):
         return _iter_helper([], self._split, self._dict)
 
 
-def _iter_helper(path_list: List[str], split: str, md_dict: Dict) -> Generator[str, None, None]:
+def _iter_helper(path_list: list[str], split: str, md_dict: dict) -> Generator[str, None, None]:
     """
     Recursively walk the tree and return the names of the leaves
     """
@@ -233,10 +231,10 @@ class RCParamDict(MutableMapping):
 
     def __init__(self) -> None:
         # the dict to hold the keys at this level
-        self._dict: Dict[str, Any] = dict()
+        self._dict: dict[str, Any] = dict()
         # the defaultdict (defaults to just accepting it) of
         # validator functions
-        self._validators: Dict[str, Callable[[Any], bool]] = defaultdict(lambda: lambda x: True)
+        self._validators: dict[str, Callable[[Any], bool]] = defaultdict(lambda: lambda x: True)
 
     # overload __setitem__ so dotted paths work
     def __setitem__(self, key: str, val: Any) -> None:
@@ -281,7 +279,7 @@ class RCParamDict(MutableMapping):
     def __iter__(self) -> Generator[str, None, None]:
         return self._iter_helper([])
 
-    def _iter_helper(self, path_list: List[str]) -> Generator[str, None, None]:
+    def _iter_helper(self, path_list: list[str]) -> Generator[str, None, None]:
         """
         Recursively walk the tree and return the names of the leaves
         """
@@ -308,7 +306,7 @@ class RCParamDict(MutableMapping):
         # return as a single string
         return "\n".join(str_list)
 
-    def _repr_helper(self, tab_level: int) -> List[str]:
+    def _repr_helper(self, tab_level: int) -> list[str]:
         # to accumulate the strings into
         str_list = []
         # list of the elements at this level
@@ -339,7 +337,7 @@ class RCParamDict(MutableMapping):
         return str_list
 
 
-keys_core: Dict[str, Dict[str, Union[str, type, Tuple, Dict[str, Union[str, type]]]]] = {
+keys_core: dict[str, dict[str, str | type | tuple | dict[str, str | type]]] = {
     "pixel_size": {
         "description": ("2 element tuple defining the (x y) dimensions of the " "pixel"),
         "type": tuple,
@@ -406,7 +404,7 @@ keys_core: Dict[str, Dict[str, Union[str, type, Tuple, Dict[str, Union[str, type
 }
 
 
-def subtract_reference_images(imgs: np.ndarray, is_reference: np.ndarray) -> List[np.ndarray]:
+def subtract_reference_images(imgs: np.ndarray, is_reference: np.ndarray) -> list[np.ndarray]:
     """
     Function to subtract a series of measured images from
     background/dark current/reference images.  The nearest reference
@@ -462,9 +460,9 @@ def img_to_relative_xyi(
     img: np.ndarray,
     cx: float,
     cy: float,
-    pixel_size_x: Optional[float] = None,
-    pixel_size_y: Optional[float] = None,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    pixel_size_x: float | None = None,
+    pixel_size_y: float | None = None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Convert the 2D image to a list of x y I coordinates where
     x == x_img - detector_center[0] and
@@ -528,10 +526,10 @@ def img_to_relative_xyi(
 def bin_1D(
     x: np.ndarray,
     y: np.ndarray,
-    nx: Optional[int] = None,
-    min_x: Optional[float] = None,
-    max_x: Optional[float] = None,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    nx: int | None = None,
+    min_x: float | None = None,
+    max_x: float | None = None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Bin the values in y based on their x-coordinates
 
@@ -578,9 +576,9 @@ def bin_1D(
 
 
 def radial_grid(
-    center: Tuple[float, float],
-    shape: Tuple[int, int],
-    pixel_size: Optional[Tuple[float, float]] = None,
+    center: tuple[float, float],
+    shape: tuple[int, int],
+    pixel_size: tuple[float, float] | None = None,
 ) -> np.ndarray:
     """Convert a cartesian grid (x,y) to the radius relative to some center
 
@@ -615,9 +613,9 @@ def radial_grid(
 
 
 def angle_grid(
-    center: Tuple[float, float],
-    shape: Tuple[int, int],
-    pixel_size: Optional[Tuple[float, float]] = None,
+    center: tuple[float, float],
+    shape: tuple[int, int],
+    pixel_size: tuple[float, float] | None = None,
 ) -> np.ndarray:
     """
     Make a grid of angular positions.
@@ -721,10 +719,10 @@ def wedge_integration(
 
 
 def bin_edges(
-    range_min: Optional[float] = None,
-    range_max: Optional[float] = None,
-    nbins: Optional[int] = None,
-    step: Optional[float] = None,
+    range_min: float | None = None,
+    range_max: float | None = None,
+    nbins: int | None = None,
+    step: float | None = None,
 ) -> np.ndarray:
     """
     Generate bin edges.  The last value in the returned array is
@@ -837,17 +835,17 @@ def bin_edges(
 def grid3d(
     q: np.ndarray,
     img_stack: np.ndarray,
-    nx: Optional[int] = None,
-    ny: Optional[int] = None,
-    nz: Optional[int] = None,
-    xmin: Optional[float] = None,
-    xmax: Optional[float] = None,
-    ymin: Optional[float] = None,
-    ymax: Optional[float] = None,
-    zmin: Optional[float] = None,
-    zmax: Optional[float] = None,
-    binary_mask: Optional[np.ndarray] = None,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    nx: int | None = None,
+    ny: int | None = None,
+    nz: int | None = None,
+    xmin: float | None = None,
+    xmax: float | None = None,
+    ymin: float | None = None,
+    ymax: float | None = None,
+    zmin: float | None = None,
+    zmax: float | None = None,
+    binary_mask: np.ndarray | None = None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Grid irregularly spaced data points onto a regular grid via histogramming
 
     This function will process the set of reciprocal space values (q), the
@@ -949,7 +947,7 @@ def grid3d(
     # set defaults for qmin, qmax, dq
     qmin = np.min(q, axis=0)
     qmax = np.max(q, axis=0)
-    dqn: List[Any] = [_defaults["nx"], _defaults["ny"], _defaults["nz"]]
+    dqn: list[Any] = [_defaults["nx"], _defaults["ny"], _defaults["nz"]]
 
     # pad the upper edge by just enough to ensure that all of the
     # points are in-bounds with the binning rules: lo <= val < hi
@@ -1147,7 +1145,7 @@ def twotheta_to_q(two_theta: np.ndarray, wavelength: float) -> np.ndarray:
     return pre_factor * np.sin(two_theta / 2)
 
 
-def multi_tau_lags(multitau_levels: int, multitau_channels: int) -> Tuple[int, np.ndarray, Dict[int, Any]]:
+def multi_tau_lags(multitau_levels: int, multitau_channels: int) -> tuple[int, np.ndarray, dict[int, Any]]:
     """
     Standard multiple-tau algorithm for finding the lag times (delay
     times).
@@ -1191,7 +1189,7 @@ def multi_tau_lags(multitau_levels: int, multitau_channels: int) -> Tuple[int, n
     tot_channels = (multitau_levels + 1) * multitau_channels // 2
 
     lag = []
-    dict_lags: Dict[int, Any] = {}
+    dict_lags: dict[int, Any] = {}
     lag_steps = np.arange(0, multitau_channels)
     dict_lags[1] = lag_steps
     for i in range(2, multitau_levels + 1):
@@ -1206,7 +1204,7 @@ def multi_tau_lags(multitau_levels: int, multitau_channels: int) -> Tuple[int, n
     return tot_channels, lag_steps_out, dict_lags
 
 
-def geometric_series(common_ratio: float, number_of_images: int, first_term: float = 1) -> List[float]:
+def geometric_series(common_ratio: float, number_of_images: int, first_term: float = 1) -> list[float]:
     """
     This will provide the geometric series for the integration.
     Last values of the series has to be less than or equal to number
@@ -1251,11 +1249,11 @@ def geometric_series(common_ratio: float, number_of_images: int, first_term: flo
 def bin_grid(
     image: np.ndarray,
     r_array: np.ndarray,
-    pixel_sizes: Tuple[float, float],
-    statistic: Union[str, Callable] = "mean",
-    mask: Optional[np.ndarray] = None,
-    bins: Optional[np.ndarray] = None,
-) -> Tuple[np.ndarray, np.ndarray]:
+    pixel_sizes: tuple[float, float],
+    statistic: str | Callable = "mean",
+    mask: np.ndarray | None = None,
+    bins: np.ndarray | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Bin and integrate an image, given the radial array of pixels
 

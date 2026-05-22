@@ -36,10 +36,8 @@
 This module is for spectroscopy specific tools (spectrum fitting etc).
 """
 
-from __future__ import absolute_import, division, print_function
-
 import logging
-from typing import Callable, List, Optional, Tuple, Union
+from collections.abc import Callable
 
 import numpy as np
 from scipy.integrate import simpson as simps
@@ -51,10 +49,10 @@ logger = logging.getLogger(__name__)
 
 
 def align_and_scale(
-    energy_list: List[np.ndarray],
-    counts_list: List[np.ndarray],
-    pk_find_fun: Optional[Callable[[np.ndarray, np.ndarray], Tuple[float, float, float]]] = None,
-) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+    energy_list: list[np.ndarray],
+    counts_list: list[np.ndarray],
+    pk_find_fun: Callable[[np.ndarray, np.ndarray], tuple[float, float, float]] | None = None,
+) -> tuple[list[np.ndarray], list[np.ndarray]]:
     """
 
     Parameters
@@ -94,7 +92,7 @@ def align_and_scale(
     return out_e, out_c
 
 
-def find_largest_peak(x: np.ndarray, y: np.ndarray, window: Optional[int] = None) -> Tuple[float, float, float]:
+def find_largest_peak(x: np.ndarray, y: np.ndarray, window: int | None = None) -> tuple[float, float, float]:
     """
     Finds and estimates the location, width, and height of
     the largest peak. Assumes the top of the peak can be
@@ -148,8 +146,8 @@ def find_largest_peak(x: np.ndarray, y: np.ndarray, window: Optional[int] = None
 def integrate_ROI_spectrum(
     bin_edges: np.ndarray,
     counts: np.ndarray,
-    x_min: Union[float, np.ndarray],
-    x_max: Union[float, np.ndarray],
+    x_min: float | np.ndarray,
+    x_max: float | np.ndarray,
 ) -> float:
     """Integrate region(s) of histogram.
 
@@ -238,8 +236,8 @@ def _formatter_array_regions(x: np.ndarray, centers: np.ndarray, window: int = 1
 def integrate_ROI(
     x: np.ndarray,
     y: np.ndarray,
-    x_min: Union[float, np.ndarray],
-    x_max: Union[float, np.ndarray],
+    x_min: float | np.ndarray,
+    x_max: float | np.ndarray,
 ) -> float:
     """Integrate region(s) of input data.
 

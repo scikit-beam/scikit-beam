@@ -38,10 +38,7 @@ processing tools.  These should be interesting compositions of existing
 tools, not just straight wrapping of np/scipy/scikit images.
 """
 
-from __future__ import absolute_import, division, print_function
-
 import logging
-from typing import Optional, Tuple
 
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
@@ -51,7 +48,7 @@ from . import utils
 logger = logging.getLogger(__name__)
 
 
-def find_ring_center_acorr_1D(input_image: np.ndarray) -> Tuple[float, float]:
+def find_ring_center_acorr_1D(input_image: np.ndarray) -> tuple[float, float]:
     """
     Find the pixel-resolution center of a set of concentric rings.
 
@@ -75,7 +72,7 @@ def find_ring_center_acorr_1D(input_image: np.ndarray) -> Tuple[float, float]:
     return tuple(bins[np.argmax(vals)] for vals, bins in (_corr_ax1(_im) for _im in (input_image.T, input_image)))
 
 
-def _corr_ax1(input_image: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def _corr_ax1(input_image: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
     Internal helper function that finds the best estimate for the
     location of the vertical mirror plane.  For each row the maximum
@@ -104,11 +101,11 @@ def _corr_ax1(input_image: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
 
 
 def construct_circ_avg_image(
-    radii: np.ndarray[Tuple[int]],
-    intensities: np.ndarray[Tuple[int]],
-    dims: Optional[Tuple[int, int]] = None,
-    center: Optional[Tuple[float, float]] = None,
-    pixel_size: Tuple[float, float] = (1, 1),
+    radii: np.ndarray[tuple[int]],
+    intensities: np.ndarray[tuple[int]],
+    dims: tuple[int, int] | None = None,
+    center: tuple[float, float] | None = None,
+    pixel_size: tuple[float, float] = (1, 1),
     left: float = 0,
     right: float = 0,
 ) -> np.ndarray:
@@ -185,14 +182,14 @@ def construct_circ_avg_image(
 
 
 def construct_rphi_avg_image(
-    radii: np.ndarray[Tuple[int]],
-    angles: np.ndarray[Tuple[int]],
-    image: np.ndarray[Tuple[int, int]],
-    mask: Optional[np.ndarray[Tuple[int, int]]] = None,
-    center: Optional[Tuple[float, float]] = None,
-    shape: Optional[Tuple[int, int]] = None,
-    pixel_size: Tuple[float, float] = (1, 1),
-) -> np.ndarray[Tuple[int, int]]:
+    radii: np.ndarray[tuple[int]],
+    angles: np.ndarray[tuple[int]],
+    image: np.ndarray[tuple[int, int]],
+    mask: np.ndarray[tuple[int, int]] | None = None,
+    center: tuple[float, float] | None = None,
+    shape: tuple[int, int] | None = None,
+    pixel_size: tuple[float, float] = (1, 1),
+) -> np.ndarray[tuple[int, int]]:
     """
     Construct a 2D Cartesian (x,y) image from a polar coordinate image.
 

@@ -37,10 +37,6 @@ The included functions supplement the logical operations currently provided
 in numpy in order to provide a complete set of logical operations.
 """
 
-from __future__ import absolute_import, division, print_function
-
-from typing import Optional
-
 import numpy as np
 from numpy import add, divide, logical_and, logical_not, logical_or, logical_xor, multiply, subtract
 from numpy.typing import ArrayLike, NDArray
@@ -60,7 +56,7 @@ __all__ = [
 ]
 
 
-def logical_nand(x1: ArrayLike, x2: ArrayLike, out: Optional[NDArray[np.bool_]] = None) -> NDArray[np.bool_]:
+def logical_nand(x1: ArrayLike, x2: ArrayLike, out: NDArray[np.bool_] | None = None) -> NDArray[np.bool_]:
     """Computes the truth value of NOT (x1 AND x2) element wise.
 
     This function enables the computation of the LOGICAL_NAND of two image or
@@ -98,7 +94,7 @@ def logical_nand(x1: ArrayLike, x2: ArrayLike, out: Optional[NDArray[np.bool_]] 
     return logical_not(logical_and(x1, x2, out), out)
 
 
-def logical_nor(x1: ArrayLike, x2: ArrayLike, out: Optional[NDArray[np.bool_]] = None) -> NDArray[np.bool_]:
+def logical_nor(x1: ArrayLike, x2: ArrayLike, out: NDArray[np.bool_] | None = None) -> NDArray[np.bool_]:
     """Compute truth value of NOT (x1 OR x2)) element wise.
 
     This function enables the computation of the LOGICAL_NOR of two image or
@@ -134,7 +130,7 @@ def logical_nor(x1: ArrayLike, x2: ArrayLike, out: Optional[NDArray[np.bool_]] =
     return logical_not(logical_or(x1, x2, out), out)
 
 
-def logical_sub(x1: ArrayLike, x2: ArrayLike, out: Optional[NDArray[np.bool_]] = None) -> NDArray[np.bool_]:
+def logical_sub(x1: ArrayLike, x2: ArrayLike, out: NDArray[np.bool_] | None = None) -> NDArray[np.bool_]:
     """Compute truth value of x1 AND (NOT (x1 AND x2)) element wise.
 
     This function enables LOGICAL SUBTRACTION of one binary image or volume

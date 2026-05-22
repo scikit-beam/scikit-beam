@@ -36,24 +36,14 @@
 This module contains code for extracting features from data
 """
 
-from __future__ import absolute_import, division, print_function
-
 import logging
-import sys
 from collections import deque
-from typing import Dict, Optional, Tuple
+from typing import Protocol
 
 import numpy as np
 from six.moves import zip
 
 from .fitting import fit_quad_to_peak
-
-# Safely import Protocol depending on the Python version
-if sys.version_info >= (3, 8):
-    from typing import Protocol
-else:
-    # Requires `pip install typing_extensions`
-    from typing_extensions import Protocol
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +61,7 @@ class PeakRejection(Exception):
 
 class PeakRefinementFunc(Protocol):
 
-    def __call__(self, x: np.ndarray, y: np.ndarray, Rval_thresh: Optional[float] = None) -> Tuple[float, float]:
+    def __call__(self, x: np.ndarray, y: np.ndarray, Rval_thresh: float | None = None) -> tuple[float, float]:
         """A function which takes a section of data with a peak in it and returns
         the location and height of the peak to sub-sample accuracy.  Additional
         parameters can be passed through via the refine_args kwarg.
@@ -91,8 +81,8 @@ def peak_refinement(
     cands: np.ndarray,
     window: int,
     refine_function: PeakRefinementFunc,
-    refine_args: Optional[Dict] = None,
-) -> Tuple[np.ndarray, np.ndarray]:
+    refine_args: dict | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
     """Refine candidate locations
 
     Parameters
@@ -172,7 +162,7 @@ def peak_refinement(
     return tuple([np.array(_) for _ in zip(*out_tmp)])  # type: ignore[return-value]
 
 
-def refine_quadratic(x: np.ndarray, y: np.ndarray, Rval_thresh: Optional[float] = None) -> Tuple[float, float]:
+def refine_quadratic(x: np.ndarray, y: np.ndarray, Rval_thresh: float | None = None) -> tuple[float, float]:
     """
     Attempts to refine the peaks by fitting to
     a quadratic function.
@@ -211,7 +201,7 @@ def refine_quadratic(x: np.ndarray, y: np.ndarray, Rval_thresh: Optional[float] 
     return beta[1], beta[2]
 
 
-def refine_log_quadratic(x: np.ndarray, y: np.ndarray, Rval_thresh: Optional[float] = None) -> Tuple[float, float]:
+def refine_log_quadratic(x: np.ndarray, y: np.ndarray, Rval_thresh: float | None = None) -> tuple[float, float]:
     """
     Attempts to refine the peaks by fitting a quadratic to the log of
     the y-data.  This is a linear approximation of fitting a Gaussian.

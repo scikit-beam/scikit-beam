@@ -44,12 +44,9 @@ and calculating the speckle contrast in single scattering patterns.
 This module will provide XSVS analysis tools
 """
 
-from __future__ import absolute_import, division, print_function
-
 import logging
 import time
 import warnings
-from typing import Optional, Tuple
 
 import numpy as np
 
@@ -64,8 +61,8 @@ def xsvs(
     label_array: np.ndarray,
     number_of_img: int,
     timebin_num: int = 2,
-    max_cts: Optional[int] = None,
-) -> Tuple[np.ndarray, np.ndarray]:
+    max_cts: int | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
     """
     This function will provide the probability density of detecting photons
     for different integration times.
@@ -307,7 +304,7 @@ def _process(
 
 def normalize_bin_edges(
     num_times: int, num_rois: int, mean_roi: np.ndarray, max_cts: int
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """
     This will provide the normalized bin edges and bin centers for each
     integration time.

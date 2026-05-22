@@ -36,11 +36,9 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-from __future__ import absolute_import, division, print_function
 
 import logging
-from collections.abc import Mapping
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from collections.abc import Callable, Mapping
 
 import numpy as np
 import six
@@ -267,7 +265,7 @@ class XrayLibWrap(Mapping):
     # valid options for the info_type input parameter for the init method
     opts_info_type = ["lines", "binding_e", "jump", "yield"]
 
-    def __init__(self, element: int, info_type: str, energy: Optional[float] = None) -> None:
+    def __init__(self, element: int, info_type: str, energy: float | None = None) -> None:
         if xraylib is None:
             raise XraylibNotInstalledError(self.__class__)
         self._element = element
@@ -276,7 +274,7 @@ class XrayLibWrap(Mapping):
         self._info_type = info_type
 
     @property
-    def all(self) -> List[Tuple[str, float]]:
+    def all(self) -> list[tuple[str, float]]:
         """List the physics quantity for all the lines or shells."""
         return list(six.iteritems(self))
 
@@ -496,7 +494,7 @@ class XrfElement(BasicElement):
     --------{}
     """.format(doc_title, doc_params, doc_ex)
 
-    def __init__(self, element: Union[str, int]) -> None:
+    def __init__(self, element: str | int) -> None:
         if xraylib is None:
             raise XraylibNotInstalledError(self.__class__)
 
@@ -591,7 +589,7 @@ class XrfElement(BasicElement):
         """
         return self._fluor_yield
 
-    def line_near(self, energy: float, delta_e: float, incident_energy: float) -> Dict[str, float]:
+    def line_near(self, energy: float, delta_e: float, incident_energy: float) -> dict[str, float]:
         """
         Find possible emission lines given the element.
 
@@ -619,8 +617,8 @@ class XrfElement(BasicElement):
 
 
 def emission_line_search(
-    line_e: float, delta_e: float, incident_energy: float, element_list: Optional[List[Union[str, int]]] = None
-) -> Dict[str, Dict[str, float]]:
+    line_e: float, delta_e: float, incident_energy: float, element_list: list[str | int] | None = None
+) -> dict[str, dict[str, float]]:
     """Find elements which have an emission line near an energy
 
     This function returns a dict keyed on element type of all
@@ -650,7 +648,7 @@ def emission_line_search(
     if xraylib is None:
         raise XraylibNotInstalledError(__name__)
 
-    search_list: List[XrfElement]
+    search_list: list[XrfElement]
     if element_list is None:
         search_list = [XrfElement(item) for item in range(1, 101)]
     else:
@@ -658,7 +656,7 @@ def emission_line_search(
 
     cand_lines = [e.line_near(line_e, delta_e, incident_energy) for e in search_list]
 
-    out_dict: Dict[str, Dict[str, float]] = dict()
+    out_dict: dict[str, dict[str, float]] = dict()
     for e, lines in zip(search_list, cand_lines):
         if lines:
             out_dict[e.sym] = lines

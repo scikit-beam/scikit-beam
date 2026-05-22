@@ -37,10 +37,8 @@
 This module is for statistics.
 """
 
-from __future__ import absolute_import, division, print_function
-
 import logging
-from typing import Callable, Optional, Tuple, Union
+from collections.abc import Callable
 
 import numpy as np
 import scipy.stats
@@ -53,11 +51,11 @@ logger = logging.getLogger(__name__)
 def statistics_1D(
     x: np.ndarray,
     y: np.ndarray,
-    stat: Union[str, Callable] = "mean",
-    nx: Optional[int] = None,
-    min_x: Optional[float] = None,
-    max_x: Optional[float] = None,
-) -> Tuple[np.ndarray, np.ndarray]:
+    stat: str | Callable = "mean",
+    nx: int | None = None,
+    min_x: float | None = None,
+    max_x: float | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Bin the values in y based on their x-coordinates
 
