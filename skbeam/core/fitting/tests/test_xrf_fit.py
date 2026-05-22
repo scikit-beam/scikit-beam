@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import copy
 import logging
 
@@ -27,7 +25,11 @@ from skbeam.core.fitting.xrf_model import (
     update_parameter_dict,
 )
 
-logging.basicConfig(format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO, filemode="w")
+logging.basicConfig(  # type: ignore[call-overload]
+    format="%(asctime)s : %(levelname)s : %(message)s",
+    level=logging.INFO,
+    filemode="w",
+)
 
 
 def synthetic_spectrum():

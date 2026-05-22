@@ -44,14 +44,13 @@
 This is the module for reading files created in GSAS file formats
 https://subversion.xor.aps.anl.gov/trac/pyGSAS
 """
-from __future__ import absolute_import, division, print_function
 
 import os
 
 import numpy as np
 
 
-def gsas_reader(file):
+def gsas_reader(file: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Parameters
     ----------
@@ -88,7 +87,7 @@ def gsas_reader(file):
     return tth, intensity, err
 
 
-def _get_fxye_data(file):
+def _get_fxye_data(file: str) -> list[np.ndarray]:
     """
     Parameters
     ----------
@@ -133,7 +132,7 @@ def _get_fxye_data(file):
     return [np.array(tth), np.array(intensity), np.array(err)]
 
 
-def _get_esd_data(file):
+def _get_esd_data(file: str) -> list[np.ndarray]:
     """
     Parameters
     ----------
@@ -184,7 +183,7 @@ def _get_esd_data(file):
     return [np.array(tth), np.array(intensity), np.array(err)]
 
 
-def _get_std_data(file):
+def _get_std_data(file: str) -> list[np.ndarray]:
     """
     Parameters
     ----------
@@ -245,7 +244,7 @@ def _get_std_data(file):
 _func_look_up = {"STD": _get_std_data, "ESD": _get_esd_data, "FXYE": _get_fxye_data}
 
 
-def _sfloat(S):
+def _sfloat(S: str) -> float:
     """
     convert a string to a float, treating an all-blank string as zero
     Parameter
@@ -264,7 +263,7 @@ def _sfloat(S):
         return 0.0
 
 
-def _sint(S):
+def _sint(S: str) -> int:
     """
     convert a string to an integer, treating an all-blank string as zero
     Parameter

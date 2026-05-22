@@ -33,11 +33,17 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 
+
 import numpy as np
 from scipy.signal import fftconvolve
 
 
-def sgolay2d(image, window_size, order, derivative=None):
+def sgolay2d(
+    image: np.ndarray,
+    window_size: int,
+    order: int,
+    derivative: str | None = None,
+) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
     Savitzky-Golay filter for 2D image arrays.
     See: http://scipy-cookbook.readthedocs.io/items/SavitzkyGolay.html
@@ -51,8 +57,8 @@ def sgolay2d(image, window_size, order, derivative=None):
     order : int
         the order of the polynomial used in the filtering.
         Must be less then `window_size` - 1.
-    deriv: int
-        the order of the derivative to compute (default = 0 means only smoothing)
+    derivative: str, optional
+        the order of the derivative to compute (default = None means only smoothing)
     Returns
     -------
     smooth_image : ndarray, shape (N,M)
@@ -147,3 +153,5 @@ def sgolay2d(image, window_size, order, derivative=None):
         c = np.linalg.pinv(A)[1].reshape((window_size, -1))
         r = np.linalg.pinv(A)[2].reshape((window_size, -1))
         return fftconvolve(smooth_image, -r, mode="valid"), fftconvolve(smooth_image, -c, mode="valid")
+    else:
+        raise ValueError(f"Invalid derivative value: {derivative!r}")

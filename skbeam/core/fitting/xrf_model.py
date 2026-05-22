@@ -41,16 +41,17 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-from __future__ import absolute_import, division, print_function
 
 import copy
 import logging
 import multiprocessing
 from collections import OrderedDict
+from typing import Any
 
 import numpy as np
 import six
 from lmfit import Model
+from lmfit.model import ModelResult
 from scipy.optimize import nnls
 
 from ..constants import XrfElement as Element
@@ -63,53 +64,62 @@ logger = logging.getLogger(__name__)
 
 # fmt: off
 # emission line energy between (0, 30) keV
-K_LINE = ['Li_K', 'Be_K', 'B_K', 'C_K', 'N_K', 'O_K', 'F_K', 'Ne_K',
-          'Na_K', 'Mg_K', 'Al_K', 'Si_K', 'P_K', 'S_K', 'Cl_K', 'Ar_K', 'K_K',
-          'Ca_K', 'Sc_K', 'Ti_K', 'V_K', 'Cr_K', 'Mn_K', 'Fe_K', 'Co_K',
-          'Ni_K', 'Cu_K', 'Zn_K', 'Ga_K', 'Ge_K', 'As_K', 'Se_K', 'Br_K',
-          'Kr_K', 'Rb_K', 'Sr_K', 'Y_K', 'Zr_K', 'Nb_K', 'Mo_K', 'Tc_K',
-          'Ru_K', 'Rh_K', 'Pd_K', 'Ag_K', 'Cd_K', 'In_K', 'Sn_K', 'Sb_K',
-          'Te_K', 'I_K']
+K_LINE: list[str] = [
+    'Li_K', 'Be_K', 'B_K', 'C_K', 'N_K', 'O_K', 'F_K', 'Ne_K',
+    'Na_K', 'Mg_K', 'Al_K', 'Si_K', 'P_K', 'S_K', 'Cl_K', 'Ar_K', 'K_K',
+    'Ca_K', 'Sc_K', 'Ti_K', 'V_K', 'Cr_K', 'Mn_K', 'Fe_K', 'Co_K',
+    'Ni_K', 'Cu_K', 'Zn_K', 'Ga_K', 'Ge_K', 'As_K', 'Se_K', 'Br_K',
+    'Kr_K', 'Rb_K', 'Sr_K', 'Y_K', 'Zr_K', 'Nb_K', 'Mo_K', 'Tc_K',
+    'Ru_K', 'Rh_K', 'Pd_K', 'Ag_K', 'Cd_K', 'In_K', 'Sn_K', 'Sb_K',
+    'Te_K', 'I_K',
+]
 
-L_LINE = ['Ga_L', 'Ge_L', 'As_L', 'Se_L', 'Br_L', 'Kr_L', 'Rb_L', 'Sr_L',
-          'Y_L', 'Zr_L', 'Nb_L', 'Mo_L', 'Tc_L', 'Ru_L', 'Rh_L', 'Pd_L',
-          'Ag_L', 'Cd_L', 'In_L', 'Sn_L', 'Sb_L', 'Te_L', 'I_L', 'Xe_L',
-          'Cs_L', 'Ba_L', 'La_L', 'Ce_L', 'Pr_L', 'Nd_L', 'Pm_L', 'Sm_L',
-          'Eu_L', 'Gd_L', 'Tb_L', 'Dy_L', 'Ho_L', 'Er_L', 'Tm_L', 'Yb_L',
-          'Lu_L', 'Hf_L', 'Ta_L', 'W_L', 'Re_L', 'Os_L', 'Ir_L', 'Pt_L',
-          'Au_L', 'Hg_L', 'Tl_L', 'Pb_L', 'Bi_L', 'Po_L', 'At_L', 'Rn_L',
-          'Fr_L', 'Ac_L', 'Th_L', 'Pa_L', 'U_L', 'Np_L', 'Pu_L', 'Am_L']
+L_LINE: list[str] = [
+    'Ga_L', 'Ge_L', 'As_L', 'Se_L', 'Br_L', 'Kr_L', 'Rb_L', 'Sr_L',
+    'Y_L', 'Zr_L', 'Nb_L', 'Mo_L', 'Tc_L', 'Ru_L', 'Rh_L', 'Pd_L',
+    'Ag_L', 'Cd_L', 'In_L', 'Sn_L', 'Sb_L', 'Te_L', 'I_L', 'Xe_L',
+    'Cs_L', 'Ba_L', 'La_L', 'Ce_L', 'Pr_L', 'Nd_L', 'Pm_L', 'Sm_L',
+    'Eu_L', 'Gd_L', 'Tb_L', 'Dy_L', 'Ho_L', 'Er_L', 'Tm_L', 'Yb_L',
+    'Lu_L', 'Hf_L', 'Ta_L', 'W_L', 'Re_L', 'Os_L', 'Ir_L', 'Pt_L',
+    'Au_L', 'Hg_L', 'Tl_L', 'Pb_L', 'Bi_L', 'Po_L', 'At_L', 'Rn_L',
+    'Fr_L', 'Ac_L', 'Th_L', 'Pa_L', 'U_L', 'Np_L', 'Pu_L', 'Am_L',
+]
 
-M_LINE = ['Hf_M', 'Ta_M', 'W_M', 'Re_M', 'Os_M', 'Ir_M', 'Pt_M', 'Au_M',
-          'Hg_M', 'Tl_M', 'Pb_M', 'Bi_M', 'Sm_M', 'Eu_M', 'Gd_M', 'Tb_M',
-          'Dy_M', 'Ho_M', 'Er_M', 'Tm_M', 'Yb_M', 'Lu_M', 'Th_M', 'Pa_M',
-          'U_M']
+M_LINE: list[str] = [
+    'Hf_M', 'Ta_M', 'W_M', 'Re_M', 'Os_M', 'Ir_M', 'Pt_M', 'Au_M',
+    'Hg_M', 'Tl_M', 'Pb_M', 'Bi_M', 'Sm_M', 'Eu_M', 'Gd_M', 'Tb_M',
+    'Dy_M', 'Ho_M', 'Er_M', 'Tm_M', 'Yb_M', 'Lu_M', 'Th_M', 'Pa_M',
+    'U_M',
+]
 
-K_TRANSITIONS = ['ka1', 'ka2', 'ka3', 'kb1', 'kb2', 'kb3', 'kb4', 'kb5']
-L_TRANSITIONS = ['la1', 'la2', 'lb1', 'lb2', 'lb3', 'lb4', 'lb5',
-                 'lg1', 'lg2', 'lg3', 'lg4', 'll', 'ln']
-M_TRANSITIONS = ['ma1', 'ma2', 'mb', 'mg']
+K_TRANSITIONS: list[str] = ['ka1', 'ka2', 'ka3', 'kb1', 'kb2', 'kb3', 'kb4', 'kb5']
+L_TRANSITIONS: list[str] = [
+    'la1', 'la2', 'lb1', 'lb2', 'lb3', 'lb4', 'lb5',
+    'lg1', 'lg2', 'lg3', 'lg4', 'll', 'ln',
+]
+M_TRANSITIONS: list[str] = ['ma1', 'ma2', 'mb', 'mg']
 
-TRANSITIONS_LOOKUP = {'K': K_TRANSITIONS, 'L': L_TRANSITIONS,
-                      'M': M_TRANSITIONS}
+TRANSITIONS_LOOKUP: dict[str, list[str]] = {
+    'K': K_TRANSITIONS, 'L': L_TRANSITIONS, 'M': M_TRANSITIONS,
+}
 # fmt: on
 
 
 def element_peak_xrf(
-    x,
-    area,
-    center,
-    delta_center,
-    delta_sigma,
-    ratio,
-    ratio_adjust,
-    fwhm_offset,
-    fwhm_fanoprime,
-    e_offset,
-    e_linear,
-    e_quadratic,
-    epsilon=2.96,
-):
+    x: np.ndarray,
+    area: float,
+    center: float,
+    delta_center: float,
+    delta_sigma: float,
+    ratio: float,
+    ratio_adjust: float,
+    fwhm_offset: float,
+    fwhm_fanoprime: float,
+    e_offset: float,
+    e_linear: float,
+    e_quadratic: float,
+    epsilon: float = 2.96,
+) -> np.ndarray:
     """
     This is a function to construct xrf element peak, which is based on
     gauss profile, but more specific requirements need to be
@@ -119,7 +129,7 @@ def element_peak_xrf(
 
     Parameters
     ----------
-    x : array
+    x : np.ndarray
         independent variable, channel number instead of energy
     area : float
         area of gaussian function
@@ -171,7 +181,7 @@ class ElementModel(Model):
         self.set_param_hint("epsilon", value=2.96, vary=False)
 
 
-def _set_parameter_hint(param_name, input_dict, input_model):
+def _set_parameter_hint(param_name: str, input_dict: dict[str, str | float], input_model: Model):
     """
     Set parameter hint information to lmfit model from input dict.
 
@@ -181,9 +191,9 @@ def _set_parameter_hint(param_name, input_dict, input_model):
     ----------
     param_name : str
         one of the fitting parameter name
-    input_dict : dict
+    input_dict : dict[str, str | float]
         all the initial values and constraints for given parameters
-    input_model : object
+    input_model : Model
         model object used in lmfit
     """
     value = input_dict["value"]
@@ -211,7 +221,7 @@ def _set_parameter_hint(param_name, input_dict, input_model):
     )
 
 
-def _copy_model_param_hints(target, source, params):
+def _copy_model_param_hints(target: Model, source: Model, params: list[str]):
     """
     Copy parameters (set hints) from Parameters object (source) to a model (target)
     ( Sets the attribute 'expr' in the model hint to to None -
@@ -269,7 +279,13 @@ def _copy_model_param_hints(target, source, params):
         target.set_param_hint(label, value=source[label].value, expr=None)  # Originally was expr=label
 
 
-def _copy_model_param_hints_EXPR(target, source, *, param_hints_elements=None, param_hints_elastic=None):
+def _copy_model_param_hints_EXPR(
+    target: Model,
+    source: Model,
+    *,
+    param_hints_elements: list[str] | None = None,
+    param_hints_elastic: list[str] | None = None,
+):
     """
     Copy parameters (set hints) from Parameters object (source) to a model (target)
     ( Sets the attribute 'expr' in the model hint to the copied parameter name,
@@ -285,9 +301,9 @@ def _copy_model_param_hints_EXPR(target, source, *, param_hints_elements=None, p
         The model to be updated
     source : lmfit.Parameters
         The model to copy from
-    params_hints_elements : list
+    params_hints_elements : list[str]
        The names of the parameters to copy for element models
-    params_hints_ellastic : list
+    params_hints_elastic : list[str]
        The names of the parameters to copy for elastic scattering model
 
 
@@ -323,7 +339,7 @@ def _copy_model_param_hints_EXPR(target, source, *, param_hints_elements=None, p
                 hint_values["expr"] = label
 
 
-def update_parameter_dict(param, fit_results):
+def update_parameter_dict(param: dict[str, dict[str, str | float]], fit_results: ModelResult) -> None:
     """
     Update fitting parameters dictionary according to given fitting results,
     usually obtained from previous run.
@@ -351,7 +367,7 @@ def update_parameter_dict(param, fit_results):
             logger.warning("values not updated: {}".format(k))
 
 
-_STRATEGY_REGISTRY = {
+_STRATEGY_REGISTRY: dict[str, dict[str, str]] = {
     "linear": sfb_pd.linear,
     "adjust_element": sfb_pd.adjust_element,
     "e_calibration": sfb_pd.e_calibration,
@@ -360,7 +376,7 @@ _STRATEGY_REGISTRY = {
 }
 
 
-def register_strategy(key, strategy, overwrite=True):
+def register_strategy(key: str, strategy: dict[str, str], overwrite: bool = True) -> None:
     """
     Register new strategy.
 
@@ -378,7 +394,9 @@ def register_strategy(key, strategy, overwrite=True):
     _STRATEGY_REGISTRY[key] = strategy
 
 
-def set_parameter_bound(param, bound_option, extra_config=None):
+def set_parameter_bound(
+    param: dict[str, Any], bound_option: str, extra_config: dict[str, str] | None = None
+) -> None:
     """
     Update the default value of bounds.
 
@@ -422,7 +440,7 @@ class ParamController(object):
     This is an important step in dynamical fitting.
     """
 
-    def __init__(self, params, elemental_lines):
+    def __init__(self, params: dict[str, Any], elemental_lines: list[str]) -> None:
         """
         Parameters
         ----------
@@ -440,10 +458,10 @@ class ParamController(object):
         self.element_linenames = get_activated_lines(
             self.params["coherent_sct_energy"]["value"], self.element_list
         )
-        self._element_strategy = dict()
+        self._element_strategy: dict[str, Any] = dict()
         self._initialize_params()
 
-    def _initialize_params(self):
+    def _initialize_params(self) -> None:
         """
         Add all element information, such as pos, width, ratio into
         parameter dict.
@@ -452,7 +470,7 @@ class ParamController(object):
             for kind in ["pos", "width", "area", "ratio"]:
                 self.add_param(kind, element)
 
-    def set_strategy(self, strategy_name):
+    def set_strategy(self, strategy_name: str) -> None:
         """
         Update the default value of bounds.
 
@@ -463,7 +481,7 @@ class ParamController(object):
         """
         set_parameter_bound(self.params, strategy_name, self._element_strategy)
 
-    def update_element_prop(self, element_list, **kwargs):
+    def update_element_prop(self, element_list: list[str], **kwargs: str) -> None:
         """
         Update element properties, such as pos, width, area and ratio.
 
@@ -482,7 +500,7 @@ class ParamController(object):
             for kind, constraint in six.iteritems(kwargs):
                 self.add_param(kind, element, constraint)
 
-    def add_param(self, kind, element, constraint=None):
+    def add_param(self, kind: str, element: str, constraint: str | None = None) -> None:
         """
         Create a Parameter controlling peak position, width,
         branching ratio, or area.
@@ -542,7 +560,7 @@ class ParamController(object):
             # update parameter in place
             self.params.update({param_name: new_pos})
 
-    def _add_area_param(self, element, constraint=None):
+    def _add_area_param(self, element: str, constraint: str | None = None) -> None:
         """
         Special case for adding an area Parameter because
         we only ever fit the first peak area.
@@ -574,7 +592,7 @@ class ParamController(object):
         self.params.update({param_name: new_area})
 
 
-def sum_area(elemental_line, result_val):
+def sum_area(elemental_line: str, result_val: ModelResult) -> float:
     """
     Return the total area for given element.
 
@@ -612,7 +630,7 @@ class ModelSpectrum(object):
     compton and element peaks.
     """
 
-    def __init__(self, params, elemental_lines):
+    def __init__(self, params: dict[str, Any], elemental_lines: list[str]) -> None:
         """
         Parameters
         ----------
@@ -649,7 +667,7 @@ class ModelSpectrum(object):
         self.setup_compton_model()
         self.setup_elastic_model()
 
-    def setup_compton_model(self):
+    def setup_compton_model(self) -> None:
         """
         setup parameters related to Compton model
         """
@@ -682,7 +700,7 @@ class ModelSpectrum(object):
         self.compton_param = compton.make_params()
         self.compton = compton
 
-    def setup_elastic_model(self):
+    def setup_elastic_model(self) -> None:
         """
         setup parameters related to Elastic model
         """
@@ -707,7 +725,7 @@ class ModelSpectrum(object):
         logger.debug(" Finished setting up parameters for elastic model.")
         self.elastic = elastic
 
-    def setup_element_model(self, elemental_line, default_area=1e5):
+    def setup_element_model(self, elemental_line: str, default_area: float = 1e5) -> Model | None:
         """
         Construct element model. Elemental line that can be add include elemental
         peak, pileup peak and user peak. User peak is a fake peak, but can be used
@@ -738,7 +756,7 @@ class ModelSpectrum(object):
             e = Element(element)
             if e.cs(incident_energy)["ka1"] == 0:
                 logger.debug("%s Ka emission line is not activated " "at this energy %f", element, incident_energy)
-                return
+                return None
 
             logger.debug(" --- Started building %s peak. ---", element)
 
@@ -825,7 +843,7 @@ class ModelSpectrum(object):
                 logger.debug(
                     "{0} La1 emission line is not activated " "at this energy {1}".format(element, incident_energy)
                 )
-                return
+                return None
 
             for num, item in enumerate(e.emission_line.all):
                 line_name = item[0]
@@ -895,7 +913,7 @@ class ModelSpectrum(object):
                 logger.debug(
                     "{0} ma1 emission line is not activated " "at this energy {1}".format(element, incident_energy)
                 )
-                return
+                return None
 
             for num, item in enumerate(e.emission_line.all):
                 line_name = item[0]
@@ -1058,7 +1076,7 @@ class ModelSpectrum(object):
             all_element_mod = element_mod
         return all_element_mod
 
-    def assemble_models(self):
+    def assemble_models(self) -> None:
         """
         Put all models together to form a spectrum.
         """
@@ -1078,7 +1096,14 @@ class ModelSpectrum(object):
             param_hints_elastic=param_hints_elastic,
         )
 
-    def model_fit(self, channel_number, spectrum, weights=None, method="leastsq", **kwargs):
+    def model_fit(
+        self,
+        channel_number: np.ndarray,
+        spectrum: np.ndarray,
+        weights: np.ndarray | None = None,
+        method: str = "leastsq",
+        **kwargs: Any,
+    ) -> ModelResult:
         """
         Parameters
         ----------
@@ -1104,7 +1129,7 @@ class ModelSpectrum(object):
         return result
 
 
-def get_line_energy(elemental_line):
+def get_line_energy(elemental_line: str) -> float:
     """Return the energy of the emission line.
 
     Parameters
@@ -1137,7 +1162,7 @@ def get_line_energy(elemental_line):
     return e_cen
 
 
-def trim(x, y, low, high):
+def trim(x: np.ndarray, y: np.ndarray, low: float, high: float) -> tuple[np.ndarray, np.ndarray]:
     """
     Mask two arrays applying bounds to the first array.
 
@@ -1163,7 +1188,7 @@ def trim(x, y, low, high):
     return x[mask], y[mask]
 
 
-def define_range(data, low, high, a0, a1):
+def define_range(data: np.ndarray, low: float, high: float, a0: float, a1: float) -> tuple[np.ndarray, np.ndarray]:
     """
     Cut x range based on offset and linear term of a linear function.
     a0 and a1 should be defined in param_dict.
@@ -1195,7 +1220,7 @@ def define_range(data, low, high, a0, a1):
     return x0, y0
 
 
-def extract_strategy(param, name):
+def extract_strategy(param: dict[str, Any], name: str) -> dict[str, Any]:
     """
     Extract given strategy from param dict.
 
@@ -1215,7 +1240,9 @@ def extract_strategy(param, name):
     return {k: v[name] for k, v in six.iteritems(param_new) if k != "non_fitting_values"}
 
 
-def compute_escape_peak(spectrum, ratio, params, escape_e=1.73998):
+def compute_escape_peak(
+    spectrum: np.ndarray, ratio: float, params: dict[str, Any], escape_e: float = 1.73998
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Calculate the escape peak for given detector.
 
@@ -1245,7 +1272,9 @@ def compute_escape_peak(spectrum, ratio, params, escape_e=1.73998):
     return result
 
 
-def construct_linear_model(channel_number, params, elemental_lines, default_area=100):
+def construct_linear_model(
+    channel_number: np.ndarray, params: dict[str, Any], elemental_lines: list[str], default_area: float = 100
+) -> tuple[list[str], np.ndarray, dict[str, float]]:
     """
     Create spectrum with parameters given from params.
 
@@ -1301,12 +1330,14 @@ def construct_linear_model(channel_number, params, elemental_lines, default_area
     element_area.update({"elastic": p["elastic_coherent_sct_amplitude"].value})
     selected_elements.append("elastic")
 
-    matv = np.array(matv)
-    matv = matv.transpose()
-    return selected_elements, matv, element_area
+    matv_arr = np.array(matv)
+    matv_arr = matv_arr.transpose()
+    return selected_elements, matv_arr, element_area
 
 
-def nnls_fit(spectrum, expected_matrix, weights=None):
+def nnls_fit(
+    spectrum: np.ndarray, expected_matrix: np.ndarray, weights: np.ndarray | None = None
+) -> tuple[np.ndarray, float]:
     """
     Non-negative least squares fitting.
 
@@ -1335,7 +1366,13 @@ def nnls_fit(spectrum, expected_matrix, weights=None):
     return nnls(expected_matrix, spectrum)
 
 
-def linear_spectrum_fitting(x, y, params, elemental_lines=None, weights=None):
+def linear_spectrum_fitting(
+    x: np.ndarray,
+    y: np.ndarray,
+    params: dict[str, Any],
+    elemental_lines: list[str] | None = None,
+    weights: np.ndarray | None = None,
+) -> tuple[np.ndarray, "OrderedDict[str, np.ndarray]", "OrderedDict[str, float]"]:
     """
     Fit a spectrum to a linear model.
 
@@ -1409,7 +1446,7 @@ def linear_spectrum_fitting(x, y, params, elemental_lines=None, weights=None):
     return x_energy, result_dict, area_dict
 
 
-def get_activated_lines(incident_energy, elemental_lines):
+def get_activated_lines(incident_energy: float, elemental_lines: list[str]) -> list[str]:
     """
     Parameters
     ----------
@@ -1431,7 +1468,7 @@ def get_activated_lines(incident_energy, elemental_lines):
     return lines
 
 
-def _get_activated_line(incident_energy, elemental_line):
+def _get_activated_line(incident_energy: float, elemental_line: str) -> list[str] | None:
     """
     Collect all the activated lines for given element.
 
@@ -1452,7 +1489,7 @@ def _get_activated_line(incident_energy, elemental_line):
         element = elemental_line.split("_")[0]
         e = Element(element)
         if e.cs(incident_energy)["ka1"] == 0:
-            return
+            return None
         for num, item in enumerate(e.emission_line.all[:4]):
             line_name = item[0]
             if e.cs(incident_energy)[line_name] == 0:
@@ -1464,7 +1501,7 @@ def _get_activated_line(incident_energy, elemental_line):
         element = elemental_line.split("_")[0]
         e = Element(element)
         if e.cs(incident_energy)["la1"] == 0:
-            return
+            return None
         for num, item in enumerate(e.emission_line.all[4:-4]):
             line_name = item[0]
             if e.cs(incident_energy)[line_name] == 0:
@@ -1476,7 +1513,7 @@ def _get_activated_line(incident_energy, elemental_line):
         element = elemental_line.split("_")[0]
         e = Element(element)
         if e.cs(incident_energy)["ma1"] == 0:
-            return
+            return None
         for num, item in enumerate(e.emission_line.all[-4:]):
             line_name = item[0]
             if e.cs(incident_energy)[line_name] == 0:
@@ -1484,8 +1521,10 @@ def _get_activated_line(incident_energy, elemental_line):
             line_list.append(str(element) + "_" + str(line_name))
         return line_list
 
+    return None
 
-def fit_per_line_nnls(data, matv, param, use_snip):
+
+def fit_per_line_nnls(data: np.ndarray, matv: np.ndarray, param: dict[str, Any], use_snip: bool) -> np.ndarray:
     """Fit experiment data for a given row using nnls algorithm.
 
     Parameters
@@ -1523,12 +1562,12 @@ def fit_per_line_nnls(data, matv, param, use_snip):
 
         sst = np.sum((y - np.mean(y)) ** 2)
         r2 = 1 - res / sst
-        result = list(result) + [bg_sum, r2]
-        out.append(result)
+        result_list = list(result) + [bg_sum, r2]
+        out.append(result_list)
     return np.array(out)
 
 
-def _log_and_fit(row_num, *args):
+def _log_and_fit(row_num: int, *args: Any) -> np.ndarray:
     """Wrapper around fit_per_line_nnls to log the row num that is being used
 
     Parameters
@@ -1542,7 +1581,9 @@ def _log_and_fit(row_num, *args):
     return fit_per_line_nnls(*args)
 
 
-def fit_pixel_multiprocess_nnls(exp_data, matv, param, use_snip=False):
+def fit_pixel_multiprocess_nnls(
+    exp_data: np.ndarray, matv: np.ndarray, param: dict[str, Any], use_snip: bool = False
+) -> np.ndarray:
     """
     Multiprocess fit of experiment data.
 
@@ -1580,7 +1621,13 @@ def fit_pixel_multiprocess_nnls(exp_data, matv, param, use_snip=False):
     return np.array(results)
 
 
-def calculate_area(e_select, matv, results, param, first_peak_area=False):
+def calculate_area(
+    e_select: list[str],
+    matv: np.ndarray,
+    results: np.ndarray,
+    param: dict[str, Any],
+    first_peak_area: bool = False,
+) -> dict[str, np.ndarray]:
     """
     Parameters
     ----------
@@ -1609,7 +1656,7 @@ def calculate_area(e_select, matv, results, param, first_peak_area=False):
             result_map.update({total_list[i]: results[:, :, i] * mat_sum[i]})
         else:
             if total_list[i] not in K_LINE + L_LINE + M_LINE:
-                ratio_v = 1
+                ratio_v: float = 1.0
             else:
                 ratio_v = get_relative_cs_ratio(total_list[i], param["coherent_sct_energy"]["value"])
             result_map.update({total_list[i]: results[:, :, i] * mat_sum[i] * ratio_v})
@@ -1621,7 +1668,7 @@ def calculate_area(e_select, matv, results, param, first_peak_area=False):
     return result_map
 
 
-def get_relative_cs_ratio(elemental_line, energy):
+def get_relative_cs_ratio(elemental_line: str, energy: float) -> float:
     """
     At given energy, multiple elemental lines may be activated. This function is
     used to calculate the ratio of the first line's cross section (cs) to
@@ -1643,7 +1690,7 @@ def get_relative_cs_ratio(elemental_line, energy):
     e = Element(name)
     transition_lines = TRANSITIONS_LOOKUP[line.upper()]
 
-    sum_v = 0
+    sum_v: float = 0.0
     for v in transition_lines:
         sum_v += e.cs(energy)[v]
     return e.cs(energy)[transition_lines[0]] / sum_v

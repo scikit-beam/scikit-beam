@@ -32,7 +32,6 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-from __future__ import absolute_import, division, print_function
 
 import logging
 import os
@@ -196,7 +195,7 @@ def test_grid3d():
     # make input data (Nx3
     data = np.array([np.ravel(X), np.ravel(Y), np.ravel(Z)]).T
 
-    (mean, occupancy, std_err, bounds) = core.grid3d(data, II, **param_dict)
+    mean, occupancy, std_err, bounds = core.grid3d(data, II, **param_dict)
 
     # check the values are as expected
     npt.assert_array_equal(mean.ravel(), II)
@@ -237,7 +236,7 @@ def test_process_grid_std_err():
 
     # make input data (N*5x3)
     data = np.vstack([np.tile(_, 100) for _ in (np.ravel(X), np.ravel(Y), np.ravel(Z))]).T
-    (mean, occupancy, std_err, bounds) = core.grid3d(data, I, **param_dict)
+    mean, occupancy, std_err, bounds = core.grid3d(data, I, **param_dict)
 
     # check the values are as expected
     npt.assert_array_equal(mean, np.ones_like(X) * np.mean(np.arange(1, 101)))

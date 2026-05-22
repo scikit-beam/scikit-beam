@@ -37,7 +37,6 @@ This is the module for putting advanced/x-ray specific image
 processing tools.  These should be interesting compositions of existing
 tools, not just straight wrapping of np/scipy/scikit images.
 """
-from __future__ import absolute_import, division, print_function
 
 import logging
 
@@ -49,7 +48,7 @@ from . import utils
 logger = logging.getLogger(__name__)
 
 
-def find_ring_center_acorr_1D(input_image):
+def find_ring_center_acorr_1D(input_image: np.ndarray) -> tuple[float, float]:
     """
     Find the pixel-resolution center of a set of concentric rings.
 
@@ -73,7 +72,7 @@ def find_ring_center_acorr_1D(input_image):
     return tuple(bins[np.argmax(vals)] for vals, bins in (_corr_ax1(_im) for _im in (input_image.T, input_image)))
 
 
-def _corr_ax1(input_image):
+def _corr_ax1(input_image: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
     Internal helper function that finds the best estimate for the
     location of the vertical mirror plane.  For each row the maximum
@@ -101,7 +100,15 @@ def _corr_ax1(input_image):
     return np.histogram(est_by_row, bins=np.arange(0, dim + 1))
 
 
-def construct_circ_avg_image(radii, intensities, dims=None, center=None, pixel_size=(1, 1), left=0, right=0):
+def construct_circ_avg_image(
+    radii: np.ndarray[tuple[int]],
+    intensities: np.ndarray[tuple[int]],
+    dims: tuple[int, int] | None = None,
+    center: tuple[float, float] | None = None,
+    pixel_size: tuple[float, float] = (1, 1),
+    left: float = 0,
+    right: float = 0,
+) -> np.ndarray:
     """
     Constructs a 2D image from circular averaged data
     where radii are given in units of pixels.
@@ -174,7 +181,15 @@ def construct_circ_avg_image(radii, intensities, dims=None, center=None, pixel_s
     return CIMG
 
 
-def construct_rphi_avg_image(radii, angles, image, mask=None, center=None, shape=None, pixel_size=(1, 1)):
+def construct_rphi_avg_image(
+    radii: np.ndarray[tuple[int]],
+    angles: np.ndarray[tuple[int]],
+    image: np.ndarray[tuple[int, int]],
+    mask: np.ndarray[tuple[int, int]] | None = None,
+    center: tuple[float, float] | None = None,
+    shape: tuple[int, int] | None = None,
+    pixel_size: tuple[float, float] = (1, 1),
+) -> np.ndarray[tuple[int, int]]:
     """
     Construct a 2D Cartesian (x,y) image from a polar coordinate image.
 
@@ -229,7 +244,7 @@ def construct_rphi_avg_image(radii, angles, image, mask=None, center=None, shape
                 raise ValueError(
                     "Mask shape ({}, {}) ".format(*mask.shape)
                     + "does not match expected"
-                    + " shape of ({},{})".format(*shape)
+                    + " shape of ({},{})".format(*(shape or ()))
                 )
             else:
                 raise ValueError("Mask not right dimensions." "Expected 2 got {}".format(mask.ndim))

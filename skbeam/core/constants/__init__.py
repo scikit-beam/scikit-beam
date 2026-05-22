@@ -37,6 +37,7 @@
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
 """Constants"""
+
 import logging
 
 from .basic import BasicElement  # noqa: F401

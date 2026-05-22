@@ -39,14 +39,13 @@ This module is for functions and classes specific to reciprocal space
 calculations.
 
 """
-from __future__ import absolute_import, division, print_function
 
 import time
 from collections import namedtuple
+from enum import Enum
+from typing import Literal
 
 import numpy as np
-
-from .utils import verbosedict
 
 try:
     from pyFAI import geometry as geo
@@ -59,9 +58,27 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+class FrameMode(str, Enum):
+    THETA = "theta"
+    PHI = "phi"
+    CART = "cart"
+    HKL = "hkl"
+
+    @property
+    def int_value(self) -> int:
+        return list(FrameMode).index(self) + 1
+
+
 def process_to_q(
-    setting_angles, detector_size, pixel_size, calibrated_center, dist_sample, wavelength, ub, frame_mode=None
-):
+    setting_angles: np.ndarray[tuple[int, Literal[6]]],
+    detector_size: tuple[int, int],
+    pixel_size: tuple[float, float],
+    calibrated_center: tuple[float, float],
+    dist_sample: float,
+    wavelength: float,
+    ub: np.ndarray[tuple[Literal[3], Literal[3]], np.dtype[np.float64]],
+    frame_mode: int | str | FrameMode | None = None,
+) -> np.ndarray:
     """
     This will compute the hkl values for all pixels in a shape specified by
     detector_size.
@@ -96,7 +113,7 @@ def process_to_q(
     ub : ndarray
         UB matrix (orientation matrix) 3x3 matrix
 
-    frame_mode : str, optional
+    frame_mode : int, str or FrameMode, optional
         Frame mode defines the data collection mode and thus the desired
         output from this function. Defaults to hkl mode (frame_mode=4)
         'theta'    : Theta axis frame.
@@ -129,7 +146,7 @@ def process_to_q(
 
     """
     try:
-        from ..ext import ctrans
+        from ..ext import ctrans  # type: ignore[attr-defined]
     except ImportError:
         raise NotImplementedError(
             "ctrans is not available on your platform. See"
@@ -137,14 +154,23 @@ def process_to_q(
             "to follow updates to this problem."
         )
 
-    # Set default threads
-
     # set default frame_mode
     if frame_mode is None:
-        frame_mode = 4
-    else:
-        str_to_int = verbosedict((k, j + 1) for j, k in enumerate(process_to_q.frame_mode))
-        frame_mode = str_to_int[frame_mode]
+        frame_mode = FrameMode.HKL
+    elif isinstance(frame_mode, str):
+        if frame_mode not in FrameMode._value2member_map_:
+            raise ValueError(
+                "Invalid frame_mode provided. Valid options are: {0}"
+                "".format(list(FrameMode._value2member_map_.keys()))
+            )
+        frame_mode = FrameMode(frame_mode)
+    elif isinstance(frame_mode, int):
+        if frame_mode < 1 or frame_mode > len(FrameMode):
+            raise ValueError(
+                "Invalid frame_mode provided. Valid options are integers from 1 to {0}".format(len(FrameMode))
+            )
+        frame_mode = FrameMode(list(FrameMode)[frame_mode - 1])
+
     # ensure the ub matrix is an array
     ub = np.asarray(ub)
     # ensure setting angles is a 2-D
@@ -170,7 +196,7 @@ def process_to_q(
     # ctrans - c routines for fast data analysis
     hkl = ctrans.ccdToQ(
         angles=setting_angles * np.pi / 180.0,
-        mode=frame_mode,
+        mode=frame_mode.int_value,
         ccd_size=(detector_size),
         ccd_pixsize=(pixel_size),
         ccd_cen=(calibrated_center),
@@ -188,12 +214,10 @@ def process_to_q(
     return hkl
 
 
-# Assign frame_mode as an attribute to the process_to_q function so that the
-# autowrapping knows what the valid options are
-process_to_q.frame_mode = ["theta", "phi", "cart", "hkl"]
+process_to_q.frame_mode = [1, 2, 3, 4]  # type: ignore[attr-defined]
 
 
-def hkl_to_q(hkl_arr):
+def hkl_to_q(hkl_arr: np.ndarray) -> np.ndarray:
     """
     This module compute the reciprocal space (q) values from known HKL array
     for each pixel of the detector for all the images
@@ -214,7 +238,7 @@ def hkl_to_q(hkl_arr):
     return np.linalg.norm(hkl_arr, axis=1)
 
 
-def calibrated_pixels_to_q(detector_size, pyfai_kwargs):
+def calibrated_pixels_to_q(detector_size: tuple[int, int], pyfai_kwargs: dict) -> np.ndarray:
     """
     For a given detector and pyfai calibrated geometry give back the q value
     for each pixel in the detector.
@@ -245,7 +269,15 @@ gisaxs_output = namedtuple(
 )
 
 
-def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size, dist_sample, wavelength, theta_i=0.0):
+def gisaxs(
+    incident_beam: tuple[float, float],
+    reflected_beam: tuple[float, float],
+    pixel_size: tuple[float, float],
+    detector_size: tuple[int, int],
+    dist_sample: float,
+    wavelength: float,
+    theta_i: float = 0.0,
+) -> gisaxs_output:
     """
     This function will provide scattering wave vector(q) components(x, y, z),
     q parallel and incident and reflected angles for grazing-incidence small
@@ -312,18 +344,18 @@ def gisaxs(incident_beam, reflected_beam, pixel_size, detector_size, dist_sample
     refl_x, refl_y = reflected_beam
 
     # convert pixel_size to meters
-    pixel_size = np.asarray(pixel_size) * 10 ** (-6)
+    pixel_size_m = np.asarray(pixel_size) * 10 ** (-6)
 
     # tilt angle
-    tilt_angle = np.arctan2((refl_x - inc_x) * pixel_size[0], (refl_y - inc_y) * pixel_size[1])
+    tilt_angle = np.arctan2((refl_x - inc_x) * pixel_size_m[0], (refl_y - inc_y) * pixel_size_m[1])
     # incident angle
-    alpha_i = np.arctan2((refl_y - inc_y) * pixel_size[1], dist_sample) / 2.0
+    alpha_i = np.arctan2((refl_y - inc_y) * pixel_size_m[1], dist_sample) / 2.0
 
     y, x = np.indices(detector_size)
     # exit angle
-    alpha_f = np.arctan2((y - inc_y) * pixel_size[1], dist_sample) - alpha_i
+    alpha_f = np.arctan2((y - inc_y) * pixel_size_m[1], dist_sample) - alpha_i
     # out of plane angle
-    two_theta = np.arctan2((x - inc_x) * pixel_size[0], dist_sample)
+    two_theta = np.arctan2((x - inc_x) * pixel_size_m[0], dist_sample)
     theta_f = two_theta / 2 - theta_i
     # wave number
     wave_number = 2 * np.pi / wavelength

@@ -32,7 +32,6 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-from __future__ import absolute_import, division, print_function
 
 from .avizo_io import load_amiramesh
 from .binary import read_binary
@@ -43,7 +42,7 @@ try:
     from .net_cdf_io import load_netCDF
 except ImportError:
 
-    def load_netCDF(*args, **kwargs):
+    def load_netCDF(*args, **kwargs):  # type: ignore[misc]
         # Die at call time so as not to ruin entire io package.
         raise ImportError("This function requires netCDF4.")
 

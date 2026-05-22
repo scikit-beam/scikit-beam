@@ -36,8 +36,6 @@
 known sample.
 """
 
-from __future__ import absolute_import, division, print_function
-
 from collections import deque
 from string import Template
 
@@ -49,7 +47,15 @@ from .feature import filter_peak_height, peak_refinement, refine_log_quadratic
 from .utils import angle_grid, bin_1D, bin_edges_to_centers, pairwise, radial_grid
 
 
-def estimate_d_blind(name, wavelength, bin_centers, ring_average, window_size, max_peak_count, thresh):
+def estimate_d_blind(
+    name: str,
+    wavelength: float,
+    bin_centers: np.ndarray,
+    ring_average: np.ndarray,
+    window_size: int,
+    max_peak_count: int,
+    thresh: float,
+) -> tuple[float, float]:
     """
     Estimate the sample-detector distance
 
@@ -117,7 +123,7 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average, window_size, m
     # TODO insert peak identification validation.  This might be better than
     # improving the threshold value.
     # refine the locations of the peaks
-    peaks_x, peaks_y = peak_refinement(bin_centers, ring_average, cands, window_size, refine_log_quadratic)
+    peaks_x, _ = peak_refinement(bin_centers, ring_average, cands, window_size, refine_log_quadratic)
     # compute tan(2theta) for the expected peaks
     tan2theta = np.tan(cal.convert_2theta(wavelength))
     # figure out how many peaks we can look at
@@ -129,25 +135,25 @@ def estimate_d_blind(name, wavelength, bin_centers, ring_average, window_size, m
 
 # Set an attribute for the calibration names that are valid options.  This
 # attribute also aids in autowrapping into VisTrails
-estimate_d_blind.name = list(calibration_standards)
+estimate_d_blind.name = list(calibration_standards)  # type: ignore[attr-defined]
 if estimate_d_blind.__doc__ is not None:
     estimate_d_blind.__doc__ = Template(estimate_d_blind.__doc__).substitute(
-        name_ops=repr(sorted(estimate_d_blind.name))
+        name_ops=repr(sorted(estimate_d_blind.name))  # type: ignore[attr-defined]
     )
 
 
 def refine_center(
-    image,
-    calibrated_center,
-    pixel_size,
-    phi_steps,
-    max_peaks,
-    thresh,
-    window_size,
-    nx=None,
-    min_x=None,
-    max_x=None,
-):
+    image: np.ndarray,
+    calibrated_center: tuple[float, float],
+    pixel_size: tuple[float, float],
+    phi_steps: int,
+    max_peaks: int,
+    thresh: float,
+    window_size: int,
+    nx: int | None = None,
+    min_x: float | None = None,
+    max_x: float | None = None,
+) -> tuple[float, float]:
     """
     Refines the location of the center of the beam.
 
@@ -197,15 +203,15 @@ def refine_center(
     r = radial_grid(calibrated_center, image.shape, pixel_size).ravel()
     II = image.ravel()
 
-    phi_steps = np.linspace(-np.pi, np.pi, phi_steps, endpoint=True)
-    out = deque()
-    for phi_start, phi_end in pairwise(phi_steps):
+    phi_steps_arr = np.linspace(-np.pi, np.pi, phi_steps, endpoint=True)
+    out: deque = deque()
+    for phi_start, phi_end in pairwise(phi_steps_arr):
         mask = (phi <= phi_end) * (phi > phi_start)
         out.append(bin_1D(r[mask], II[mask], nx=nx, min_x=min_x, max_x=max_x))
-    out = list(out)
+    out_list = list(out)
 
     ring_trace = []
-    for bins, b_sum, b_count in out:
+    for bins, b_sum, b_count in out_list:
         mask = b_sum > 10
         avg = b_sum[mask] / b_count[mask]
         bin_centers = bin_edges_to_centers(bins)[mask]
@@ -217,11 +223,11 @@ def refine_center(
 
     tr_len = [len(rt) for rt in ring_trace]
     mm = np.min(tr_len)
-    ring_trace = np.vstack([rt[:mm] for rt in ring_trace]).T
+    ring_trace_arr = np.vstack([rt[:mm] for rt in ring_trace]).T
 
-    mean_dr = np.mean(ring_trace - np.mean(ring_trace, axis=1, keepdims=True), axis=0)
+    mean_dr = np.mean(ring_trace_arr - np.mean(ring_trace_arr, axis=1, keepdims=True), axis=0)
 
-    phi_centers = bin_edges_to_centers(phi_steps)
+    phi_centers = bin_edges_to_centers(phi_steps_arr)
 
     delta = np.mean(np.diff(phi_centers))
     # this is doing just one term of a Fourier series

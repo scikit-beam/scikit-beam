@@ -36,6 +36,7 @@
 """
 This module creates a namespace for X-Ray Diffraction
 """
+
 import logging
 
 # import calibration functions

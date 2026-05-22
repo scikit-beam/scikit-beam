@@ -3,6 +3,7 @@
 Convert empty IPython notebook to a sphinx doc page.
 
 """
+
 import os
 import sys
 

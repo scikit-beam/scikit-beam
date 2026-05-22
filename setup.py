@@ -3,7 +3,6 @@
 isort:skip_file
 """
 
-
 import os
 import sys
 
@@ -68,12 +67,15 @@ setup(
     classifiers=[
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: BSD License",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Topic :: Scientific/Engineering :: Physics",
         "Topic :: Scientific/Engineering :: Chemistry",
         "Topic :: Software Development :: Libraries",
         "Intended Audience :: Science/Research",
         "Intended Audience :: Developers",
     ],
+    python_requires=">=3.10",
 )

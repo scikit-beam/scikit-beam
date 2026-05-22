@@ -36,12 +36,12 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE   #
 # POSSIBILITY OF SUCH DAMAGE.                                          #
 ########################################################################
-from __future__ import absolute_import, division, print_function
 
 import functools
 import logging
 import os
 from collections import namedtuple
+from typing import Any
 
 import six
 
@@ -73,7 +73,7 @@ element = namedtuple(
 )
 
 
-def read_atomic_constants():
+def read_atomic_constants() -> tuple[dict[str | int, Any], list[str]]:
     """Returns a dictionary of atomic constants
 
     Returns
@@ -84,8 +84,8 @@ def read_atomic_constants():
                'coherent_scattering_length', 'incoherent_crosssection',
                'absorption', 'debye_temp', 'thermal_conductivity']
     """
-    basic = {}
-    field_desc = []
+    basic: dict[str | int, Any] = {}
+    field_desc: list[str] = []
     with open(os.path.join(data_dir, "AtomicConstants.dat"), "r") as infile:
         for line in infile:
             if line.split()[0] == "#S":
@@ -106,7 +106,7 @@ def read_atomic_constants():
             elif line[0] == "#":
                 continue
             else:
-                data = [float(item) for item in line.split()]
+                data: list[Any] = [float(item) for item in line.split()]
                 data = [Z, abbrev, elem_name] + data
                 elem = element(*data)
                 basic[abbrev.lower()] = elem
@@ -154,11 +154,9 @@ class BasicElement(object):
 
     Examples
     --------{}
-    """.format(
-        doc_title, doc_params, doc_attrs, doc_ex
-    )
+    """.format(doc_title, doc_params, doc_attrs, doc_ex)
 
-    def __init__(self, Z, *args, **kwargs):
+    def __init__(self, Z: str | int, *args: Any, **kwargs: Any) -> None:
         # init the parent object
         super(BasicElement, self).__init__(*args, **kwargs)
         # bash the element abbreviation down to lowercase
@@ -167,18 +165,21 @@ class BasicElement(object):
         # stash the element tuple
         self._element = basic[Z]
         # set the class attributes
+        self.Z: int = basic[Z].Z
+        self.sym: str = basic[Z].sym
+        self.name: str = basic[Z].name
         for e in element._fields:
             setattr(self, e, getattr(basic[Z], e))
 
     # allow the Element to work as a dictionary as well
-    def __getitem__(self, item):
+    def __getitem__(self, item: str) -> Any:
         return getattr(self, item)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return six.text_type("BasicElement({})".format(self.Z))
 
     # pretty print the element
-    def __str__(self):
+    def __str__(self) -> str:
         desc = self.name + "\n" + "=" * len(self.name)
         for d in dir(self):
             if d.startswith("_"):
@@ -187,8 +188,10 @@ class BasicElement(object):
 
         return desc
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, BasicElement):
+            return NotImplemented
         return self.Z == other.Z
 
-    def __lt__(self, other):
+    def __lt__(self, other: "BasicElement") -> bool:
         return self.Z < other.Z

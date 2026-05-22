@@ -40,10 +40,10 @@
 """
 Module for xray scattering
 """
-from __future__ import absolute_import, division, print_function
 
 import logging
 from collections import namedtuple
+from collections.abc import Iterable, Iterator, Sequence
 from itertools import repeat
 
 import numpy as np
@@ -70,19 +70,19 @@ class HKL(namedtuple("HKL", "h k l")):
 
     __slots__ = ()
 
-    def __new__(cls, *args, **kwargs):
-        args = [int(_) for _ in args]
+    def __new__(cls, *args: int | float, **kwargs: int | float) -> "HKL":
+        int_args = [int(_) for _ in args]
         for k in list(kwargs):
             kwargs[k] = int(kwargs[k])
 
-        return super(HKL, cls).__new__(cls, *args, **kwargs)
+        return super(HKL, cls).__new__(cls, *int_args, **kwargs)
 
     @property
-    def length(self):
+    def length(self) -> float:
         """
         The L2 norm (length) of the hkl vector.
         """
-        return np.linalg.norm(self)
+        return float(np.linalg.norm(self))
 
 
 class Reflection(namedtuple("Reflection", ("d", "hkl", "q"))):
@@ -119,34 +119,34 @@ class PowderStandard(object):
         A list of (d, (h, k, l), q) values.
     """
 
-    def __init__(self, name, reflections):
+    def __init__(self, name: str, reflections: Iterable[tuple[float, tuple[int, int, int], float]]) -> None:
         self._reflections = [Reflection(d, HKL(*hkl), q) for d, hkl, q in reflections]
         self._reflections.sort(key=lambda x: x[-1])
         self._name = name
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "Calibration standard: {}".format(self.name)
 
     __repr__ = __str__
 
     @property
-    def name(self):
+    def name(self) -> str:
         """
         Name of the calibration standard
         """
         return self._name
 
     @property
-    def reflections(self):
+    def reflections(self) -> list[Reflection]:
         """
         List of the known reflections
         """
         return self._reflections
 
-    def __iter__(self):
+    def __iter__(self) -> "Iterator[Reflection]":
         return iter(self._reflections)
 
-    def convert_2theta(self, wavelength):
+    def convert_2theta(self, wavelength: float) -> np.ndarray:
         """
         Convert the measured $2theta$ values to a different wavelength
 
@@ -164,7 +164,13 @@ class PowderStandard(object):
         return q_to_twotheta(q, wavelength)
 
     @classmethod
-    def from_lambda_2theta_hkl(cls, name, wavelength, two_theta, hkl=None):
+    def from_lambda_2theta_hkl(
+        cls,
+        name: str,
+        wavelength: float,
+        two_theta: np.ndarray,
+        hkl: Sequence[tuple[int, int, int]] | None = None,
+    ) -> "PowderStandard":
         """
         Method to construct a PowderStandard object from calibrated
         :math:`2\\theata` values.
@@ -194,11 +200,13 @@ class PowderStandard(object):
         d = q_to_d(q)
         if hkl is None:
             # todo write test that hits this line
-            hkl = repeat((0, 0, 0))
+            hkl = list(repeat((0, 0, 0), len(d)))
         return cls(name, zip(d, hkl, q))
 
     @classmethod
-    def from_d(cls, name, d, hkl=None):
+    def from_d(
+        cls, name: str, d: Sequence[float], hkl: Sequence[tuple[int, int, int]] | None = None
+    ) -> "PowderStandard":
         """
         Method to construct a PowderStandard object from known
         :math:`d` values.
@@ -221,12 +229,13 @@ class PowderStandard(object):
         standard : PowderStandard
             The standard object
         """
-        q = d_to_q(d)
+        d_arr = np.asarray(d)
+        q = d_to_q(d_arr)
         if hkl is None:
-            hkl = repeat((0, 0, 0))
-        return cls(name, zip(d, hkl, q))
+            hkl = list(repeat((0, 0, 0), len(d_arr)))
+        return cls(name, zip(d_arr, hkl, q))
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._reflections)
 
 

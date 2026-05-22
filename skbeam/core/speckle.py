@@ -44,8 +44,6 @@ and calculating the speckle contrast in single scattering patterns.
 This module will provide XSVS analysis tools
 """
 
-from __future__ import absolute_import, division, print_function
-
 import logging
 import time
 import warnings
@@ -58,7 +56,13 @@ from .utils import bin_edges_to_centers, geometric_series
 logger = logging.getLogger(__name__)
 
 
-def xsvs(image_sets, label_array, number_of_img, timebin_num=2, max_cts=None):
+def xsvs(
+    image_sets: np.ndarray,
+    label_array: np.ndarray,
+    number_of_img: int,
+    timebin_num: int = 2,
+    max_cts: int | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
     """
     This function will provide the probability density of detecting photons
     for different integration times.
@@ -229,8 +233,18 @@ def xsvs(image_sets, label_array, number_of_img, timebin_num=2, max_cts=None):
 
 
 def _process(
-    num_roi, level, buf_no, buf, img_per_level, labels, max_cts, bin_edges, prob_k, prob_k_pow, track_bad
-):
+    num_roi: int,
+    level: int,
+    buf_no: int,
+    buf: np.ndarray,
+    img_per_level: np.ndarray,
+    labels: np.ndarray,
+    max_cts: int,
+    bin_edges: np.ndarray,
+    prob_k: np.ndarray,
+    prob_k_pow: np.ndarray,
+    track_bad: np.ndarray,
+) -> None:
     """
     Internal helper function. This modifies inputs in place.
 
@@ -288,7 +302,9 @@ def _process(
         )
 
 
-def normalize_bin_edges(num_times, num_rois, mean_roi, max_cts):
+def normalize_bin_edges(
+    num_times: int, num_rois: int, mean_roi: np.ndarray, max_cts: int
+) -> tuple[np.ndarray, np.ndarray]:
     """
     This will provide the normalized bin edges and bin centers for each
     integration time.

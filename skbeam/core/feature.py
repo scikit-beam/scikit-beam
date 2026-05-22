@@ -35,10 +35,10 @@
 """
 This module contains code for extracting features from data
 """
-from __future__ import absolute_import, division, print_function
 
 import logging
 from collections import deque
+from typing import Protocol
 
 import numpy as np
 from six.moves import zip
@@ -59,7 +59,30 @@ class PeakRejection(Exception):
     pass
 
 
-def peak_refinement(x, y, cands, window, refine_function, refine_args=None):
+class PeakRefinementFunc(Protocol):
+
+    def __call__(self, x: np.ndarray, y: np.ndarray, Rval_thresh: float | None = None) -> tuple[float, float]:
+        """A function which takes a section of data with a peak in it and returns
+        the location and height of the peak to sub-sample accuracy.  Additional
+        parameters can be passed through via the refine_args kwarg.
+        The function signature must be::
+
+            center, height = refine_func(x, y, **kwargs)
+
+        This function may raise `PeakRejection` to indicate no suitable
+        peak was found
+        """
+        ...
+
+
+def peak_refinement(
+    x: np.ndarray,
+    y: np.ndarray,
+    cands: np.ndarray,
+    window: int,
+    refine_function: PeakRefinementFunc,
+    refine_args: dict | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
     """Refine candidate locations
 
     Parameters
@@ -122,7 +145,7 @@ def peak_refinement(x, y, cands, window, refine_function, refine_args=None):
     if refine_args is None:
         refine_args = dict()
     # local working variables
-    out_tmp = deque()
+    out_tmp: deque = deque()
     max_ind = len(x)
 
     for ind in cands:
@@ -136,10 +159,10 @@ def peak_refinement(x, y, cands, window, refine_function, refine_args=None):
         else:
             out_tmp.append(ret)
 
-    return tuple([np.array(_) for _ in zip(*out_tmp)])
+    return tuple([np.array(_) for _ in zip(*out_tmp)])  # type: ignore[return-value]
 
 
-def refine_quadratic(x, y, Rval_thresh=None):
+def refine_quadratic(x: np.ndarray, y: np.ndarray, Rval_thresh: float | None = None) -> tuple[float, float]:
     """
     Attempts to refine the peaks by fitting to
     a quadratic function.
@@ -178,7 +201,7 @@ def refine_quadratic(x, y, Rval_thresh=None):
     return beta[1], beta[2]
 
 
-def refine_log_quadratic(x, y, Rval_thresh=None):
+def refine_log_quadratic(x: np.ndarray, y: np.ndarray, Rval_thresh: float | None = None) -> tuple[float, float]:
     """
     Attempts to refine the peaks by fitting a quadratic to the log of
     the y-data.  This is a linear approximation of fitting a Gaussian.
@@ -217,7 +240,7 @@ def refine_log_quadratic(x, y, Rval_thresh=None):
     return beta[1], np.exp(beta[2])
 
 
-def filter_n_largest(y, cands, N):
+def filter_n_largest(y: np.ndarray, cands: np.ndarray, N: int) -> np.ndarray:
     """Filters the N largest candidate peaks
 
     Return a maximum of N largest candidates.  If N > len(cands) then
@@ -254,7 +277,7 @@ def filter_n_largest(y, cands, N):
     return cands[sorted_args[-N:]][::-1]
 
 
-def filter_peak_height(y, cands, thresh, window=5):
+def filter_peak_height(y: np.ndarray, cands: np.ndarray, thresh: float, window: int = 5) -> np.ndarray:
     """
     Filter to remove candidate that are too small.  This
     is implemented by looking at the relative height (max - min)
@@ -282,7 +305,7 @@ def filter_peak_height(y, cands, thresh, window=5):
 
     """
     y = np.asarray(y)
-    out_tmp = deque()
+    out_tmp: deque = deque()
     max_ind = len(y)
     for ind in cands:
         slc = slice(np.max([0, ind - window]), np.min([max_ind, ind + window + 1]))
@@ -295,4 +318,4 @@ def filter_peak_height(y, cands, thresh, window=5):
 
 # add our refinement functions as an attribute on peak_refinement
 # ta make auto-wrapping for vistrials easier.
-peak_refinement.refine_function = [refine_log_quadratic, refine_quadratic]
+peak_refinement.refine_function = [refine_log_quadratic, refine_quadratic]  # type: ignore[attr-defined]

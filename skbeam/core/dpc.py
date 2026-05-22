@@ -36,11 +36,12 @@
 This module is for Differential Phase Contrast (DPC) imaging based on
 Fourier shift fitting
 """
-from __future__ import absolute_import, division, print_function
 
 import logging
 import warnings
 from collections import namedtuple
+from collections.abc import Callable, Generator, Iterable
+from enum import Enum
 
 import numpy as np
 from scipy.optimize import minimize
@@ -48,7 +49,11 @@ from scipy.optimize import minimize
 logger = logging.getLogger(__name__)
 
 
-def image_reduction(im, roi=None, bad_pixels=None):
+def image_reduction(
+    im: np.ndarray,
+    roi: np.ndarray | None = None,
+    bad_pixels: list[tuple[int, int]] | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Sum the image data over rows and columns.
 
@@ -91,7 +96,7 @@ def image_reduction(im, roi=None, bad_pixels=None):
     return xline, yline
 
 
-def _rss_factory(length):
+def _rss_factory(length: int) -> Callable[[list[float], np.ndarray, np.ndarray], float]:
     """
     A factory function for returning a residue function for use in dpc fitting.
     The main reason to do this is to generate a closure over beta so that
@@ -112,7 +117,7 @@ def _rss_factory(length):
 
     beta = 1j * (np.linspace(-(length - 1) // 2, (length - 1) // 2, length))
 
-    def _rss(v, ref_reduction, diff_reduction):
+    def _rss(v: list[float], ref_reduction: np.ndarray, diff_reduction: np.ndarray) -> float:
         """
         Internal function used by fit()
         Cost function to be minimized in nonlinear fitting
@@ -130,7 +135,7 @@ def _rss_factory(length):
             Extra argument passed to the objective function. In DPC, it's the
             sum of the reference image data along x or y direction.
 
-        diff_refuction : ndarray
+        diff_reduction : ndarray
             Extra argument passed to the objective function. In DPC, it's the
             sum of one captured diffraction pattern along x or y direction.
 
@@ -148,7 +153,27 @@ def _rss_factory(length):
     return _rss
 
 
-def dpc_fit(rss, ref_reduction, diff_reduction, start_point, solver="Nelder-Mead", tol=1e-6, max_iters=2000):
+class DPCFitSolver(str, Enum):
+    Nelder_Mead = "Nelder-Mead"
+    Powell = "Powell"
+    CG = "CG"
+    BFGS = "BFGS"
+    Anneal = "Anneal"
+    L_BFGS_B = "L-BFGS-B"
+    TNC = "TNC"
+    COBYLA = "COBYLA"
+    SLSQP = "SLSQP"
+
+
+def dpc_fit(
+    rss: Callable[[list[float], np.ndarray, np.ndarray], float],
+    ref_reduction: np.ndarray,
+    diff_reduction: np.ndarray,
+    start_point: list[float],
+    solver: str | DPCFitSolver = DPCFitSolver.Nelder_Mead,
+    tol: float = 1e-6,
+    max_iters: int = 2000,
+) -> tuple[float, float]:
     """
     Nonlinear fitting for 2 points.
 
@@ -172,7 +197,7 @@ def dpc_fit(rss, ref_reduction, diff_reduction, start_point, solver="Nelder-Mead
         or y direction) of the sample transmission function at one scanning
         point.
 
-    solver : str, optional
+    solver : str or DPCFitSolver, optional
         Type of solver, one of the following (default 'Nelder-Mead'):
         * 'Nelder-Mead'
         * 'Powell'
@@ -201,17 +226,20 @@ def dpc_fit(rss, ref_reduction, diff_reduction, start_point, solver="Nelder-Mead
         rss,
         start_point,
         args=(ref_reduction, diff_reduction),
-        method=solver,
+        method=solver if isinstance(solver, str) else solver.value,
         tol=tol,
         options=dict(maxiter=max_iters),
     ).x
 
 
-# attributes
-dpc_fit.solver = ["Nelder-Mead", "Powell", "CG", "BFGS", "Anneal", "L-BFGS-B", "TNC", "COBYLA", "SLSQP"]
-
-
-def recon(gx, gy, scan_xstep, scan_ystep, padding=0, weighting=0.5):
+def recon(
+    gx: np.ndarray,
+    gy: np.ndarray,
+    scan_xstep: float,
+    scan_ystep: float,
+    padding: int = 0,
+    weighting: float = 0.5,
+) -> np.ndarray:
     """Reconstruct the final phase image.
 
     Parameters
@@ -299,24 +327,24 @@ dpc_internal_state = namedtuple("dpc_internal_state", ["ax", "ay", "gx", "gy", "
 
 
 def dpc_runner(
-    ref,
-    image_sequence,
-    start_point,
-    pixel_size,
-    focus_to_det,
-    scan_rows,
-    scan_cols,
-    scan_xstep,
-    scan_ystep,
-    energy,
-    padding=0,
-    weighting=0.5,
-    solver="Nelder-Mead",
-    roi=None,
-    bad_pixels=None,
-    negate=True,
-    scale=True,
-):
+    ref: np.ndarray,
+    image_sequence: Iterable[np.ndarray],
+    start_point: list[float],
+    pixel_size: tuple[float, ...],
+    focus_to_det: float,
+    scan_rows: int,
+    scan_cols: int,
+    scan_xstep: float,
+    scan_ystep: float,
+    energy: float,
+    padding: int = 0,
+    weighting: float = 0.5,
+    solver: str | DPCFitSolver = DPCFitSolver.Nelder_Mead,
+    roi: np.ndarray | None = None,
+    bad_pixels: list[tuple[int, int]] | None = None,
+    negate: bool = True,
+    scale: bool = True,
+) -> tuple[np.ndarray, np.ndarray]:
     """Wraps `lazy_dpc`
 
     See docstring for `lazy_dpc` and `reconstruct_phase_from_partial_info`
@@ -340,16 +368,16 @@ def dpc_runner(
 
 
 def lazy_dpc(
-    ref,
-    image_sequence,
-    start_point,
-    scan_rows,
-    scan_cols,
-    solver="Nelder-Mead",
-    roi=None,
-    bad_pixels=None,
-    dpc_state=None,
-):
+    ref: np.ndarray,
+    image_sequence: Iterable[np.ndarray],
+    start_point: list[float],
+    scan_rows: int,
+    scan_cols: int,
+    solver: str | DPCFitSolver = DPCFitSolver.Nelder_Mead,
+    roi: np.ndarray | None = None,
+    bad_pixels: list[tuple[int, int]] | None = None,
+    dpc_state: dpc_internal_state | None = None,
+) -> Generator:
     """
     Controller function to run the whole Differential Phase Contrast (DPC)
     imaging calculation.
@@ -375,7 +403,7 @@ def lazy_dpc(
     scan_cols : int
         Number of scanned columns.
 
-    solver : str, optional
+    solver : str or DPCFitSolver, optional
         Type of solver, one of the following (default 'Nelder-Mead'):
         * 'Nelder-Mead'
         * 'Powell'
@@ -409,7 +437,13 @@ def lazy_dpc(
 
     """
 
-    def initialize_state(scan_rows, scan_cols, ref, roi, bad_pixels):
+    def initialize_state(
+        scan_rows: int,
+        scan_cols: int,
+        ref: np.ndarray,
+        roi: np.ndarray | None,
+        bad_pixels: list[tuple[int, int]] | None,
+    ) -> dpc_internal_state:
         # Initialize ax, ay, gx, and gy
         ax = np.zeros((scan_rows, scan_cols), dtype="d")
         ay = np.zeros((scan_rows, scan_cols), dtype="d")
@@ -454,17 +488,17 @@ def lazy_dpc(
 
 
 def reconstruct_phase_from_partial_info(
-    dpc_state,
-    energy,
-    scan_xstep,
-    scan_ystep,
-    pixel_size=None,
-    focus_to_det=None,
-    negate=True,
-    scale=True,
-    padding=0,
-    weighting=0.5,
-):
+    dpc_state: dpc_internal_state,
+    energy: float,
+    scan_xstep: float,
+    scan_ystep: float,
+    pixel_size: float | None = None,
+    focus_to_det: float | None = None,
+    negate: bool = True,
+    scale: bool = True,
+    padding: int = 0,
+    weighting: float = 0.5,
+) -> tuple[np.ndarray, np.ndarray]:
     """Using the partial results from dpc_runner, reconstruct the phase image
 
     Parameters
@@ -525,19 +559,17 @@ def reconstruct_phase_from_partial_info(
         # Convert to wavelength
         lambda_ = 12.4e-4 / energy
         # pre-compute the scaling factor
-        scale = pixel_size / (lambda_ * focus_to_det)
-        gx = dpc_state.gx * len(dpc_state.ref_fx) * scale
-        gy = dpc_state.gy * len(dpc_state.ref_fy) * scale
+        scale_factor = pixel_size / (lambda_ * focus_to_det)
+        gx = dpc_state.gx * len(dpc_state.ref_fx) * scale_factor
+        gy = dpc_state.gy * len(dpc_state.ref_fy) * scale_factor
     if negate:
         if gx is not None:
             gx *= -1
         else:
             gx = dpc_state.gx * -1
+    if gx is None:
+        gx = dpc_state.gx
     # Reconstruct the final phase image
     phase = recon(gx, gy, scan_xstep, scan_ystep, padding, weighting)
 
     return phase, (dpc_state.ax + dpc_state.ay) / 2
-
-
-# attributes
-dpc_runner.solver = ["Nelder-Mead", "Powell", "CG", "BFGS", "Anneal", "L-BFGS-B", "TNC", "COBYLA", "SLSQP"]
